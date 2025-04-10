@@ -1,0 +1,105 @@
+@use "sass:color";
+
+.header {
+  height: 60px;
+  background: white;
+  border-bottom: 1px solid #eaeaea;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .menu-toggle {
+      display: none;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 8px;
+
+      @media (max-width: 1023px) {
+        display: block;
+      }
+
+      .material-icons {
+        font-size: 24px;
+        color: #333;
+      }
+    }
+
+    .logo {
+      img {
+        height: 32px;
+      }
+    }
+  }
+
+  .header-center {
+    flex: 1;
+    max-width: 600px;
+    margin: 0 20px;
+
+    .search-bar {
+      input {
+        width: 100%;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background-color: #f5f5f5;
+        font-size: 14px;
+
+        &::placeholder {
+          color: #999;
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #007AFF;
+          background-color: white;
+        }
+      }
+    }
+  }
+
+  .header-right {
+    display: flex;
+    gap: 12px;
+
+    button {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .login-button {
+      background-color: transparent;
+      border: 1px solid #ddd;
+      color: #666;
+
+      &:hover {
+        background-color: #f5f5f5;
+      }
+    }
+
+    .register-button {
+      background-color: #007AFF;
+      border: none;
+      color: white;
+
+      &:hover {
+        background-color: color.adjust(#007AFF, $lightness: -5%);
+      }
+    }
+  }
+} 
