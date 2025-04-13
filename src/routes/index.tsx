@@ -16,4 +16,6 @@ export const router = createBrowserRouter([
       // 추가 라우트는 여기에 설정
     ],
   },
-]); 
+], {
+  basename: process.env.PUBLIC_URL
+}); 

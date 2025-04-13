@@ -1,32 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Header.scss';
 
-interface HeaderProps {
-  onMenuToggle: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
+const Header: React.FC = () => {
   return (
     <header className="header">
-      <div className="header-left">
-        <button className="menu-toggle" onClick={onMenuToggle}>
-          <span className="material-icons">menu</span>
-        </button>
-        <div className="logo">
-          <img src="/header-logo.png" alt="header-logo" />
-        </div>
+      <div className="logo">
+        <Link to="/">Seobway23</Link>
       </div>
-      
-      <div className="header-center">
-        <div className="search-bar">
-          <input type="text" placeholder="무엇이든 검색해보세요 👀" />
-        </div>
-      </div>
-
-      <div className="header-right">
-        <button className="login-button">버튼1</button>
-        <button className="register-button">버튼2</button>
-      </div>
+      <nav className="nav-links">
+        <Link to="/">홈</Link>
+        <Link to="/about">소개</Link>
+        <Link to="/projects">프로젝트</Link>
+        <Link to="/contact">연락하기</Link>
+      </nav>
     </header>
   );
 };
