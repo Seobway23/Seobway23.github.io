@@ -116,91 +116,93 @@ export default function Post() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <main className="lg:col-span-3">
-          {/* Back Button */}
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate("/")}
-            className="mb-6 hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            목록으로 돌아가기
-          </Button>
+      <div className="flex justify-center">
+        <div className="w-full max-w-4xl lg:max-w-none lg:grid lg:grid-cols-4 lg:gap-8">
+          <main className="lg:col-span-3 mx-auto max-w-4xl">
+            {/* Back Button */}
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate("/")}
+              className="mb-6 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              목록으로 돌아가기
+            </Button>
 
-          {/* Post Content */}
-          <article className="toss-card" id="post-content">
-            <CardContent className="p-8">
-              {/* Post Header */}
-              <header className="mb-8">
-                <div className="mb-4">
-                  <Badge className="bg-blue-600 text-white hover:bg-blue-700">
-                    {categoryLabel}
-                  </Badge>
-                  {post.featured && (
-                    <Badge variant="destructive" className="ml-2">
-                      인기
+            {/* Post Content */}
+            <article className="toss-card" id="post-content">
+              <CardContent className="p-8">
+                {/* Post Header */}
+                <header className="mb-8">
+                  <div className="mb-4">
+                    <Badge className="bg-blue-600 text-white hover:bg-blue-700">
+                      {categoryLabel}
                     </Badge>
-                  )}
-                </div>
-                
-                <h1 className="text-4xl font-bold mb-6 leading-tight">{post.title}</h1>
-                
-                <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400 mb-6">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-medium">{post.author[0]}</span>
+                    {post.featured && (
+                      <Badge variant="destructive" className="ml-2">
+                        인기
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <h1 className="text-4xl font-bold mb-6 leading-tight">{post.title}</h1>
+                  
+                  <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400 mb-6">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-medium">{post.author[0]}</span>
+                      </div>
+                      <span className="font-medium">{post.author}</span>
                     </div>
-                    <span className="font-medium">{post.author}</span>
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{post.readTime}분 읽기</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Eye className="w-4 h-4" />
+                      <span>{post.views.toLocaleString()}회</span>
+                    </div>
+                    <span>{new Date(post.createdAt).toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{post.readTime}분 읽기</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Eye className="w-4 h-4" />
-                    <span>{post.views.toLocaleString()}회</span>
-                  </div>
-                  <span>{new Date(post.createdAt).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}</span>
-                </div>
 
-                <img 
-                  src={imageUrl}
-                  alt={post.title}
-                  className="w-full h-64 object-cover rounded-xl mb-8"
+                  <img 
+                    src={imageUrl}
+                    alt={post.title}
+                    className="w-full h-64 object-cover rounded-xl mb-8"
+                  />
+                </header>
+
+                {/* Post Body */}
+                <div 
+                  className="prose prose-lg max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
                 />
-              </header>
 
-              {/* Post Body */}
-              <div 
-                className="prose prose-lg max-w-none dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: formatContent(post.content) }}
-              />
-
-              {/* Tags */}
-              <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold mb-3">태그</h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
+                {/* Tags */}
+                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="font-semibold mb-3">태그</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </article>
+              </CardContent>
+            </article>
 
-          {/* Comments */}
-          <CommentsSection postSlug={post.slug} />
-        </main>
+            {/* Comments */}
+            <CommentsSection postSlug={post.slug} />
+          </main>
 
-        {/* Right Sidebar */}
-        <RightSidebar post={post} readingProgress={readingProgress} />
+          {/* Right Sidebar */}
+          <RightSidebar post={post} readingProgress={readingProgress} />
+        </div>
       </div>
     </div>
   );

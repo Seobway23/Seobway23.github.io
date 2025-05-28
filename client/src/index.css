@@ -64,6 +64,23 @@
     min-height: 100vh;
   }
 
+  /* Dark mode gradient overlay */
+  .dark body {
+    position: relative;
+  }
+
+  .dark body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.7); /* slate-900 with opacity */
+    z-index: -1;
+    pointer-events: none;
+  }
+
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground)) transparent;

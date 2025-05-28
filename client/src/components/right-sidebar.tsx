@@ -41,6 +41,30 @@ export default function RightSidebar({ post, readingProgress = 0 }: RightSidebar
   return (
     <aside className="w-64 flex-shrink-0 hidden lg:block">
       <div className="sticky top-24 space-y-6">
+        {/* Table of Contents */}
+        {tableOfContents.length > 0 && (
+          <Card className="toss-card">
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+                목차
+              </h3>
+              <nav className="space-y-2 text-sm">
+                {tableOfContents.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToHeading(item.id)}
+                    className={`block text-left hover:text-blue-600 transition-colors ${
+                      item.level === 1 ? '' : item.level === 2 ? 'ml-4' : 'ml-8'
+                    }`}
+                  >
+                    {item.text}
+                  </button>
+                ))}
+              </nav>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Post Meta */}
         <Card className="toss-card">
           <CardContent className="p-6">
@@ -91,30 +115,6 @@ export default function RightSidebar({ post, readingProgress = 0 }: RightSidebar
             </div>
           </CardContent>
         </Card>
-
-        {/* Table of Contents */}
-        {tableOfContents.length > 0 && (
-          <Card className="toss-card">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
-                목차
-              </h3>
-              <nav className="space-y-2 text-sm">
-                {tableOfContents.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToHeading(item.id)}
-                    className={`block text-left hover:text-blue-600 transition-colors ${
-                      item.level === 1 ? '' : item.level === 2 ? 'ml-4' : 'ml-8'
-                    }`}
-                  >
-                    {item.text}
-                  </button>
-                ))}
-              </nav>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Author Info */}
         <Card className="toss-card bg-gradient-to-br from-blue-600 to-purple-600 text-white">
