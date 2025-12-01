@@ -13,7 +13,10 @@ interface LeftSidebarProps {
   onCategoryChange?: (category: string) => void;
 }
 
-export default function LeftSidebar({ selectedCategory = "all", onCategoryChange }: LeftSidebarProps) {
+export default function LeftSidebar({
+  selectedCategory = "all",
+  onCategoryChange,
+}: LeftSidebarProps) {
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
@@ -23,8 +26,12 @@ export default function LeftSidebar({ selectedCategory = "all", onCategoryChange
   });
 
   const allCategories = [
-    { name: "all", label: "전체", count: categories.reduce((sum, cat) => sum + cat.count, 0) },
-    ...categories
+    {
+      name: "all",
+      label: "전체",
+      count: categories.reduce((sum, cat) => sum + cat.count, 0),
+    },
+    ...categories,
   ];
 
   return (
@@ -43,9 +50,17 @@ export default function LeftSidebar({ selectedCategory = "all", onCategoryChange
                   onClick={() => onCategoryChange?.(category.name)}
                   className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-colors ${
                     selectedCategory === category.name
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      ? "text-white"
+                      : "text-gray-700 dark:text-gray-300 hover-gradient-bg"
                   }`}
+                  style={
+                    selectedCategory === category.name
+                      ? {
+                          background:
+                            "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
+                        }
+                      : {}
+                  }
                 >
                   <span>{category.label}</span>
                   <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
@@ -70,10 +85,12 @@ export default function LeftSidebar({ selectedCategory = "all", onCategoryChange
                   href={`/post/${post.slug}`}
                   className="block group"
                 >
-                  <p className="text-sm font-medium group-hover:text-blue-600 transition-colors line-clamp-2">
+                  <p className="text-sm font-medium hover-gradient-text transition-colors line-clamp-2">
                     {post.title}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">조회수 {post.views.toLocaleString()}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    조회수 {post.views.toLocaleString()}
+                  </p>
                 </Link>
               ))}
             </div>

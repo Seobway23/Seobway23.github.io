@@ -25,11 +25,16 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <Link
+              href="/"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center logo-gradient">
                 <span className="text-white font-bold text-sm">TB</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Tech Blog</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                Tech Blog
+              </span>
             </Link>
 
             {/* Search */}
@@ -49,19 +54,31 @@ export default function Header() {
             {/* Navigation & Controls */}
             <div className="flex items-center space-x-4">
               <nav className="hidden md:flex items-center space-x-6">
-                <Link 
-                  href="/" 
-                  className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-                    location === "/" ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
+                <Link
+                  href="/"
+                  className={`text-sm font-medium hover-gradient-text ${
+                    location === "/"
+                      ? "hover-gradient-text"
+                      : "text-gray-700 dark:text-gray-300"
                   }`}
+                  style={
+                    location === "/" ? { color: "var(--gradient-start)" } : {}
+                  }
                 >
                   홈
                 </Link>
-                <Link 
-                  href="/contact" 
-                  className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-                    location === "/contact" ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
+                <Link
+                  href="/contact"
+                  className={`text-sm font-medium hover-gradient-text ${
+                    location === "/contact"
+                      ? "hover-gradient-text"
+                      : "text-gray-700 dark:text-gray-300"
                   }`}
+                  style={
+                    location === "/contact"
+                      ? { color: "var(--gradient-start)" }
+                      : {}
+                  }
                 >
                   연락처
                 </Link>
@@ -97,7 +114,10 @@ export default function Header() {
         </div>
       </header>
 
-      <BackgroundCustomizer open={showCustomizer} onOpenChange={setShowCustomizer} />
+      <BackgroundCustomizer
+        open={showCustomizer}
+        onOpenChange={setShowCustomizer}
+      />
     </>
   );
 }

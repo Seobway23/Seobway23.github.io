@@ -1,0 +1,560 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 250 250% 100%; /* #FFFFFF */
+  --foreground: 224 71.4% 4.1%; /* #0F172A */
+  --muted: 220 14.3% 95.9%; /* #F1F5F9 */
+  --muted-foreground: 220 8.9% 46.1%; /* #64748B */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 224 71.4% 4.1%; /* #0F172A */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 224 71.4% 4.1%; /* #0F172A */
+  --border: 220 13% 91%; /* #E2E8F0 */
+  --input: 220 13% 91%; /* #E2E8F0 */
+  --primary: 221.2 83.2% 53.3%; /* #3B82F6 */
+  --primary-foreground: 210 40% 98%; /* #F8FAFC */
+  --secondary: 210 40% 96%; /* #F1F5F9 */
+  --secondary-foreground: 222.2 84% 4.9%; /* #0F172A */
+  --accent: 210 40% 96%; /* #F1F5F9 */
+  --accent-foreground: 222.2 84% 4.9%; /* #0F172A */
+  --destructive: 0 84.2% 60.2%; /* #EF4444 */
+  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
+  --ring: 221.2 83.2% 53.3%; /* #3B82F6 */
+  --radius: 0.5rem;
+
+  /* Custom CSS Variables */
+  --toss-blue: 221.2 83.2% 53.3%; /* #3B82F6 */
+  --toss-purple: 262.1 83.3% 57.8%; /* #8B5CF6 */
+  --custom-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-start: #667eea;
+  --gradient-end: #764ba2;
+  --gradient-text: #ffffff; /* 그라디언트 배경의 텍스트 색상 (자동 계산됨) */
+}
+
+.dark {
+  --background: 222.2 84% 4.9%; /* #0F172A */
+  --foreground: 210 40% 98%; /* #F8FAFC */
+  --muted: 217.2 32.6% 17.5%; /* #1E293B */
+  --muted-foreground: 215 20.2% 65.1%; /* #94A3B8 */
+  --popover: 222.2 84% 4.9%; /* #0F172A */
+  --popover-foreground: 210 40% 98%; /* #F8FAFC */
+  --card: 222.2 84% 4.9%; /* #0F172A */
+  --card-foreground: 210 40% 98%; /* #F8FAFC */
+  --border: 217.2 32.6% 17.5%; /* #1E293B */
+  --input: 217.2 32.6% 17.5%; /* #1E293B */
+  --primary: 221.2 83.2% 53.3%; /* #3B82F6 */
+  --primary-foreground: 210 40% 98%; /* #F8FAFC */
+  --secondary: 217.2 32.6% 17.5%; /* #1E293B */
+  --secondary-foreground: 210 40% 98%; /* #F8FAFC */
+  --accent: 217.2 32.6% 17.5%; /* #1E293B */
+  --accent-foreground: 210 40% 98%; /* #F8FAFC */
+  --destructive: 0 62.8% 30.6%; /* #DC2626 */
+  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
+  --ring: 221.2 83.2% 53.3%; /* #3B82F6 */
+
+  /* 다크모드용 그라디언트 색상 (더 밝게 조정) */
+  --gradient-start-dark: #8b9ef5;
+  --gradient-end-dark: #9b7dd4;
+  --gradient-text-dark: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
+      sans-serif;
+    background: var(--custom-gradient);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+    min-height: 100vh;
+  }
+
+  /* 전역 텍스트 색상 설정 - 화이트 모드: 검은색, 다크 모드: 흰색 */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  div,
+  li,
+  a,
+  label,
+  input,
+  textarea,
+  select,
+  button,
+  td,
+  th {
+    @apply text-foreground;
+  }
+
+  /* Dark mode gradient overlay */
+  .dark body {
+    position: relative;
+  }
+
+  .dark body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.7); /* slate-900 with opacity */
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* 세로 스크롤바 - 헤더 배경색과 동일한 track, 커스텀 그라디언트 thumb */
+  *::-webkit-scrollbar {
+    width: 5.3px; /* 8px의 2/3 */
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+  }
+
+  .dark *::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+    border-radius: 3px;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-end),
+      var(--gradient-start)
+    );
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-end-dark),
+      var(--gradient-start-dark)
+    );
+  }
+
+  /* 가로 스크롤바 - 세로와 동일한 스타일 */
+  *::-webkit-scrollbar:horizontal {
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track:horizontal {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+  }
+
+  .dark *::-webkit-scrollbar-track:horizontal {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+  }
+
+  *::-webkit-scrollbar-thumb:horizontal {
+    background: linear-gradient(
+      90deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+    border-radius: 3px;
+  }
+
+  .dark *::-webkit-scrollbar-thumb:horizontal {
+    background: linear-gradient(
+      90deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+  }
+
+  *::-webkit-scrollbar-thumb:horizontal:hover {
+    background: linear-gradient(
+      90deg,
+      var(--gradient-end),
+      var(--gradient-start)
+    );
+  }
+
+  .dark *::-webkit-scrollbar-thumb:horizontal:hover {
+    background: linear-gradient(
+      90deg,
+      var(--gradient-end-dark),
+      var(--gradient-start-dark)
+    );
+  }
+
+  /* 커스텀 스크롤바 클래스도 동일하게 적용 */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--gradient-start) rgba(255, 255, 255, 0.8);
+  }
+
+  .dark .custom-scrollbar {
+    scrollbar-color: var(--gradient-start) rgba(15, 23, 42, 0.8);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5.3px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+    border-radius: 3px;
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-end),
+      var(--gradient-start)
+    );
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-end-dark),
+      var(--gradient-start-dark)
+    );
+  }
+}
+
+@layer components {
+  .toss-card {
+    @apply backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .dark .toss-card {
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  .toss-button {
+    @apply px-6 py-3 rounded-xl font-medium transition-colors duration-200;
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+    color: var(--gradient-text);
+  }
+
+  .toss-button:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-end),
+      var(--gradient-start)
+    );
+  }
+
+  /* 다크모드에서 버튼 색상 */
+  .dark .toss-button {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+    color: var(--gradient-text-dark);
+  }
+
+  .dark .toss-button:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-end-dark),
+      var(--gradient-start-dark)
+    );
+  }
+
+  /* 헤더 로고 배경 - 다크모드 대응 */
+  .logo-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+  }
+
+  .dark .logo-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+  }
+
+  /* 진행률 바 - 다크모드 대응 */
+  .progress-bar-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+  }
+
+  .dark .progress-bar-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+  }
+
+  /* 상단 진행률 바 (가로) - 다크모드 대응 */
+  .progress-bar-gradient-horizontal {
+    background: linear-gradient(
+      90deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+  }
+
+  .dark .progress-bar-gradient-horizontal {
+    background: linear-gradient(
+      90deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+  }
+
+  /* 작성자 카드 - 다크모드 대응 */
+  .author-card-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start),
+      var(--gradient-end)
+    );
+  }
+
+  .dark .author-card-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start-dark),
+      var(--gradient-end-dark)
+    );
+  }
+
+  .reading-progress {
+    background: linear-gradient(
+      to right,
+      hsl(var(--primary)) var(--progress, 0%),
+      transparent var(--progress, 0%)
+    );
+  }
+
+  /* 기본 호버 스타일 - 그라디언트 색상 사용 */
+  .hover-gradient-bg {
+    transition: background-color 0.2s ease;
+  }
+
+  .hover-gradient-bg:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start) 15,
+      var(--gradient-end) 15
+    );
+  }
+
+  .dark .hover-gradient-bg:hover {
+    background: linear-gradient(
+      135deg,
+      var(--gradient-start-dark) 15,
+      var(--gradient-end-dark) 15
+    );
+  }
+
+  .hover-gradient-text {
+    transition: color 0.2s ease;
+  }
+
+  .hover-gradient-text:hover {
+    color: var(--gradient-start);
+  }
+
+  /* 다크모드에서 호버 텍스트 색상 */
+  .dark .hover-gradient-text:hover {
+    color: var(--gradient-start-dark);
+  }
+
+  .hover-gradient-border {
+    transition: border-color 0.2s ease;
+  }
+
+  .hover-gradient-border:hover {
+    border-color: var(--gradient-start);
+  }
+}
+
+/* Code syntax highlighting theme switcher */
+.dark .light-syntax {
+  display: none !important;
+}
+
+.dark .dark-syntax {
+  display: block !important;
+}
+
+:not(.dark) .dark-syntax {
+  display: none !important;
+}
+
+/* Pretendard font weight optimization */
+.font-pretendard-light {
+  font-weight: 300;
+}
+.font-pretendard-normal {
+  font-weight: 400;
+}
+.font-pretendard-medium {
+  font-weight: 500;
+}
+.font-pretendard-semibold {
+  font-weight: 600;
+}
+.font-pretendard-bold {
+  font-weight: 700;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 그라디언트 움직임 애니메이션 */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* HTML content styling */
+.prose {
+  @apply text-foreground;
+}
+
+.prose h1 {
+  @apply text-3xl font-bold mt-8 mb-4 text-foreground;
+}
+
+.prose h2 {
+  @apply text-2xl font-bold mt-6 mb-3 text-foreground;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mt-4 mb-2 text-foreground;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply mb-4 ml-6 list-disc;
+}
+
+.prose li {
+  @apply mb-1;
+}
+
+.prose pre {
+  @apply bg-slate-900 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto my-6;
+}
+
+.prose code {
+  @apply bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.prose pre code {
+  @apply bg-transparent px-0 py-0;
+}
+
+.prose strong {
+  @apply font-bold;
+}
+
+.prose mark {
+  @apply rounded px-1;
+}
+
+/* 인라인 색상 스타일은 그대로 유지됨 */

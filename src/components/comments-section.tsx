@@ -28,7 +28,9 @@ export default function CommentsSection({ postSlug }: CommentsSectionProps) {
     mutationFn: (data: { name: string; email: string; content: string }) =>
       apiRequest("POST", `/api/posts/${postSlug}/comments`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/posts/${postSlug}/comments`] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/posts/${postSlug}/comments`],
+      });
       setName("");
       setEmail("");
       setContent("");
@@ -56,7 +58,11 @@ export default function CommentsSection({ postSlug }: CommentsSectionProps) {
       return;
     }
 
-    createCommentMutation.mutate({ name: name.trim(), email: email.trim(), content: content.trim() });
+    createCommentMutation.mutate({
+      name: name.trim(),
+      email: email.trim(),
+      content: content.trim(),
+    });
   };
 
   return (
@@ -67,7 +73,7 @@ export default function CommentsSection({ postSlug }: CommentsSectionProps) {
           <span>댓글 ({comments.length})</span>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Comment Form */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
@@ -95,8 +101,8 @@ export default function CommentsSection({ postSlug }: CommentsSectionProps) {
               required
             />
             <div className="flex justify-end">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={createCommentMutation.isPending}
                 className="toss-button"
               >
@@ -115,7 +121,10 @@ export default function CommentsSection({ postSlug }: CommentsSectionProps) {
             </div>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
+              <div
+                key={comment.id}
+                className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0"
+              >
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-medium">
@@ -125,12 +134,12 @@ export default function CommentsSection({ postSlug }: CommentsSectionProps) {
                   <div>
                     <p className="font-medium text-sm">{comment.name}</p>
                     <p className="text-xs text-gray-500">
-                      {new Date(comment.createdAt).toLocaleDateString('ko-KR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
+                      {new Date(comment.createdAt).toLocaleDateString("ko-KR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </p>
                   </div>

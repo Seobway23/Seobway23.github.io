@@ -8,20 +8,27 @@ interface RightSidebarProps {
   readingProgress?: number;
 }
 
-export default function RightSidebar({ post, readingProgress = 0 }: RightSidebarProps) {
-  const [tableOfContents, setTableOfContents] = useState<Array<{ id: string; text: string; level: number }>>([]);
+export default function RightSidebar({
+  post,
+  readingProgress = 0,
+}: RightSidebarProps) {
+  const [tableOfContents, setTableOfContents] = useState<
+    Array<{ id: string; text: string; level: number }>
+  >([]);
 
   useEffect(() => {
     // Generate table of contents from the post content
     const generateTOC = () => {
-      const headings = document.querySelectorAll('#post-content h1, #post-content h2, #post-content h3');
+      const headings = document.querySelectorAll(
+        "#post-content h1, #post-content h2, #post-content h3"
+      );
       const toc = Array.from(headings).map((heading, index) => {
         const id = `heading-${index}`;
         heading.id = id;
         return {
           id,
-          text: heading.textContent || '',
-          level: parseInt(heading.tagName.charAt(1))
+          text: heading.textContent || "",
+          level: parseInt(heading.tagName.charAt(1)),
         };
       });
       setTableOfContents(toc);
@@ -34,7 +41,7 @@ export default function RightSidebar({ post, readingProgress = 0 }: RightSidebar
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -53,8 +60,8 @@ export default function RightSidebar({ post, readingProgress = 0 }: RightSidebar
                   <button
                     key={item.id}
                     onClick={() => scrollToHeading(item.id)}
-                    className={`block text-left hover:text-blue-600 transition-colors ${
-                      item.level === 1 ? '' : item.level === 2 ? 'ml-4' : 'ml-8'
+                    className={`block text-left hover-gradient-text transition-colors ${
+                      item.level === 1 ? "" : item.level === 2 ? "ml-4" : "ml-8"
                     }`}
                   >
                     {item.text}
@@ -73,28 +80,38 @@ export default function RightSidebar({ post, readingProgress = 0 }: RightSidebar
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">읽기 시간</span>
-                <span className="font-medium">{post.readTime}분</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">진행률</span>
-                <span className="font-medium">{Math.round(readingProgress)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${readingProgress}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">작성일</span>
-                <span className="font-medium">
-                  {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+                <span className="text-gray-600 dark:text-gray-400">
+                  읽기 시간
+                </span>
+                <span className="font-medium text-foreground">
+                  {post.readTime}분
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">조회수</span>
-                <span className="font-medium">{post.views.toLocaleString()}</span>
+                <span className="text-gray-600 dark:text-gray-400">진행률</span>
+                <span className="font-medium text-foreground">
+                  {Math.round(readingProgress)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
+                <div
+                  className="h-2 rounded-full transition-all duration-300 progress-bar-gradient"
+                  style={{
+                    width: `${readingProgress}%`,
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">작성일</span>
+                <span className="font-medium text-foreground">
+                  {new Date(post.createdAt).toLocaleDateString("ko-KR")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">조회수</span>
+                <span className="font-medium text-foreground">
+                  {post.views.toLocaleString()}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -117,7 +134,7 @@ export default function RightSidebar({ post, readingProgress = 0 }: RightSidebar
         </Card>
 
         {/* Author Info */}
-        <Card className="toss-card bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+        <Card className="toss-card text-white author-card-gradient">
           <CardContent className="p-6">
             <h3 className="font-semibold mb-3">작성자</h3>
             <div className="flex items-center space-x-3 mb-4">
