@@ -6,10 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RightSidebar from "../components/right-sidebar";
-import CommentsSection from "../components/comments-section";
+import UtterancesComments from "../components/utterances-comments";
 import { useReadingProgress } from "../hooks/use-reading-progress";
 import { apiRequest } from "@/lib/queryClient";
-import type { Post } from "@shared/schema";
+import type { Post } from "../../shared/schema";
 
 const categoryLabels: Record<string, string> = {
   react: "React",
@@ -196,7 +196,7 @@ export default function Post() {
                 <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                   <h3 className="font-semibold mb-3">태그</h3>
                   <div className="flex flex-wrap gap-2">
-                    {post.tags.map((tag) => (
+                    {post.tags.map((tag: string) => (
                       <Badge key={tag} variant="secondary">
                         {tag}
                       </Badge>
@@ -206,8 +206,15 @@ export default function Post() {
               </CardContent>
             </article>
 
-            {/* Comments */}
-            <CommentsSection postSlug={post.slug} />
+            {/* Comments - Utterances를 사용한 GitHub 기반 댓글 시스템 */}
+            <UtterancesComments
+              repo="seobway23/Laptop"
+              issueTerm="pathname" // URL 경로 기반으로 댓글 매핑 (예: /post/my-post)
+              // theme prop 제거 - 자동으로 라이트/다크 모드 감지
+              useCard={true} // Card 스타일 적용
+              maxWidth="100%" // 최대 너비 설정
+              className="w-full" // 추가 클래스
+            />
           </main>
 
           {/* Right Sidebar */}

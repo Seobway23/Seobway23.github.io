@@ -558,3 +558,19 @@
 }
 
 /* 인라인 색상 스타일은 그대로 유지됨 */
+
+/* Utterances 댓글 시스템 스타일링 */
+.utterances-container {
+  width: 100%;
+}
+
+/* Utterances iframe 스타일링 */
+.utterances-container iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Utterances 컨테이너 내부 요소 스타일링 */
+.utterances-container .utterances {
+  max-width: 100% !important;
+}
