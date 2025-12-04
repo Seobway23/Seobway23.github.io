@@ -89,7 +89,7 @@ export default function Header() {
                   variant="ghost"
                   size="icon"
                   onClick={toggleTheme}
-                  className="w-9 h-9"
+                  className="w-9 h-9 text-white"
                 >
                   {theme === "dark" ? (
                     <Sun className="w-4 h-4" />
@@ -103,7 +103,7 @@ export default function Header() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowCustomizer(true)}
-                  className="w-9 h-9"
+                  className="w-9 h-9 text-white"
                 >
                   <Palette className="w-4 h-4" />
                   <span className="sr-only">배경 커스터마이징</span>

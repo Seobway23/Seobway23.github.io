@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { ArrowLeft, Eye, Clock, User } from "lucide-react";
@@ -9,7 +9,21 @@ import RightSidebar from "../components/right-sidebar";
 import UtterancesComments from "../components/utterances-comments";
 import { useReadingProgress } from "../hooks/use-reading-progress";
 import { apiRequest } from "@/lib/queryClient";
+import { trackPostView } from "@/lib/analytics";
 import type { Post } from "../../shared/schema";
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import typescript from "highlight.js/lib/languages/typescript";
+import css from "highlight.js/lib/languages/css";
+import html from "highlight.js/lib/languages/xml";
+import bash from "highlight.js/lib/languages/bash";
+
+// Register languages
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("typescript", typescript);
+hljs.registerLanguage("css", css);
+hljs.registerLanguage("html", html);
+hljs.registerLanguage("bash", bash);
 
 const categoryLabels: Record<string, string> = {
   react: "React",
@@ -46,6 +60,44 @@ export default function Post() {
   } = useQuery<Post>({
     queryKey: [`/api/posts/${slug}`],
     enabled: !!slug,
+    queryFn: async () => {
+      // 서버가 있으면 API 호출
+      if (
+        typeof window !== "undefined" &&
+        window.location.hostname !== "localhost"
+      ) {
+        try {
+          const response = await fetch(`/api/posts/${slug}`);
+          if (response.ok) {
+            const data = await response.json();
+            // views.json의 조회수와 병합
+            const { getViewsData } = await import("../lib/views");
+            const viewsData = await getViewsData();
+            return {
+              ...data,
+              views: viewsData[data.slug] ?? data.views,
+            };
+          }
+        } catch (e) {
+          // API 실패 시 직접 처리
+        }
+      }
+
+      // 프론트엔드에서 직접 처리
+      const { getPostBySlug } = await import("../lib/posts");
+      const { getViewsData } = await import("../lib/views");
+      const post = getPostBySlug(slug || "");
+      if (!post) {
+        throw new Error("Post not found");
+      }
+
+      // views.json의 조회수와 병합
+      const viewsData = await getViewsData();
+      return {
+        ...post,
+        views: viewsData[post.slug] ?? post.views,
+      };
+    },
   });
 
   // Track view mutation
@@ -58,8 +110,11 @@ export default function Post() {
 
   useEffect(() => {
     if (post && !trackViewMutation.isPending) {
-      // Track view after 3 seconds
+      // Google Analytics로 조회수 추적 (3초 후)
       const timer = setTimeout(() => {
+        // GA 이벤트 추적
+        trackPostView(post.slug, post.title);
+        // 기존 조회수 증가 (localStorage용)
         trackViewMutation.mutate();
       }, 3000);
 
@@ -71,6 +126,26 @@ export default function Post() {
   const formatContent = (content: string) => {
     return content;
   };
+
+  // 코드 하이라이팅을 위한 ref
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // 콘텐츠가 렌더링된 후 코드 하이라이팅 적용
+  useEffect(() => {
+    if (post && contentRef.current) {
+      // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 실행
+      const timer = setTimeout(() => {
+        const codeBlocks = contentRef.current?.querySelectorAll("pre code");
+        if (codeBlocks) {
+          codeBlocks.forEach((block) => {
+            hljs.highlightElement(block as HTMLElement);
+          });
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [post]);
 
   if (isLoading) {
     return (
@@ -186,6 +261,7 @@ export default function Post() {
 
                 {/* Post Body */}
                 <div
+                  ref={contentRef}
                   className="prose prose-lg max-w-none dark:prose-invert"
                   dangerouslySetInnerHTML={{
                     __html: formatContent(post.content),
@@ -197,7 +273,14 @@ export default function Post() {
                   <h3 className="font-semibold mb-3">태그</h3>
                   <div className="flex flex-wrap gap-2">
                     {post.tags.map((tag: string) => (
-                      <Badge key={tag} variant="secondary">
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() =>
+                          navigate(`/?tag=${encodeURIComponent(tag)}`)
+                        }
+                      >
                         {tag}
                       </Badge>
                     ))}

@@ -78,6 +78,12 @@ export const getQueryFn: <T>(options: {
         return getFeaturedPosts() as T;
       }
 
+      if (url === "/api/posts/popular") {
+        // 조회수 기반 인기 게시글
+        const { getPopularPosts } = await import("./posts");
+        return (await getPopularPosts(10)) as T;
+      }
+
       if (url.startsWith("/api/posts/") && !url.includes("?")) {
         const slug = url.split("/").pop();
         if (slug) {
@@ -115,6 +121,12 @@ export const getQueryFn: <T>(options: {
       }
 
       return posts as T;
+    }
+
+    // 카테고리 목록 가져오기
+    if (url === "/api/categories") {
+      const { getCategories } = await import("./posts");
+      return getCategories() as T;
     }
 
     // 서버가 있는 경우에만 fetch 사용

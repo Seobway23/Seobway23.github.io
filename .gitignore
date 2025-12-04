@@ -4,3 +4,18 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# 환경 변수
+.env
+.env.local
+.env.*.local
+
+# Google Analytics 서비스 계정 키
+ga-service-account-key.json
+*-service-account-key.json
+*.json
+!package.json
+!tsconfig.json
+!package-lock.json
+!yarn.lock
+!pnpm-lock.yaml

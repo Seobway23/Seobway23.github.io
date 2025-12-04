@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Post } from "@shared/schema";
@@ -12,6 +13,7 @@ export default function RightSidebar({
   post,
   readingProgress = 0,
 }: RightSidebarProps) {
+  const [, navigate] = useLocation();
   const [tableOfContents, setTableOfContents] = useState<
     Array<{ id: string; text: string; level: number }>
   >([]);
@@ -41,7 +43,15 @@ export default function RightSidebar({
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      // 헤더 높이 (h-16 = 64px) + 약간의 여백 (16px)
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -125,7 +135,12 @@ export default function RightSidebar({
             </h3>
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => navigate(`/?tag=${encodeURIComponent(tag)}`)}
+                >
                   {tag}
                 </Badge>
               ))}

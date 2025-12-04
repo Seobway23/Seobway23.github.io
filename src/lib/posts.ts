@@ -88,7 +88,7 @@ function App() {
     tags: ["React", "JavaScript", "Performance", "Frontend"],
     author: "김개발자",
     readTime: 8,
-    views: 1234,
+    views: 0,
     featured: true,
     createdAt: new Date("2024-01-15"),
     updatedAt: new Date("2024-01-15"),
@@ -141,10 +141,37 @@ export function getPostsByCategory(category: string): Post[] {
   return posts.filter((post) => post.category === category);
 }
 
-// 인기 게시글 가져오기
+// 인기 게시글 가져오기 (featured 플래그 기반)
 export function getFeaturedPosts(): Post[] {
   const posts = getAllPosts();
   return posts.filter((post) => post.featured);
+}
+
+// 조회수 기반 인기 게시글 가져오기
+export async function getPopularPosts(limit: number = 10): Promise<Post[]> {
+  const posts = getAllPosts();
+  
+  // views.json에서 조회수 데이터 가져오기
+  try {
+    const { getViewsData } = await import('./views');
+    const viewsData = await getViewsData();
+    
+    // 조회수 데이터와 병합
+    const postsWithViews = posts.map(post => ({
+      ...post,
+      views: viewsData[post.slug] ?? post.views, // views.json의 조회수 우선 사용
+    }));
+    
+    // 조회수 내림차순 정렬
+    return postsWithViews
+      .sort((a, b) => b.views - a.views)
+      .slice(0, limit);
+  } catch (error) {
+    // views.json을 가져올 수 없으면 기존 views 사용
+    return posts
+      .sort((a, b) => b.views - a.views)
+      .slice(0, limit);
+  }
 }
 
 // 게시글 검색
@@ -158,6 +185,39 @@ export function searchPosts(query: string): Post[] {
       post.content.toLowerCase().includes(lowerQuery) ||
       post.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
   );
+}
+
+// 태그로 게시글 가져오기
+export function getPostsByTag(tag: string): Post[] {
+  const posts = getAllPosts();
+  return posts.filter((post) =>
+    post.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
+  );
+}
+
+// 카테고리 목록 가져오기 (게시글 수 포함)
+export function getCategories(): Array<{ name: string; label: string; count: number }> {
+  const posts = getAllPosts();
+  const categoryMap = new Map<string, number>();
+  
+  posts.forEach((post) => {
+    const count = categoryMap.get(post.category) || 0;
+    categoryMap.set(post.category, count + 1);
+  });
+  
+  const categoryLabels: Record<string, string> = {
+    react: "React",
+    typescript: "TypeScript",
+    css: "CSS",
+    performance: "Performance",
+    nextjs: "Next.js",
+  };
+  
+  return Array.from(categoryMap.entries()).map(([name, count]) => ({
+    name,
+    label: categoryLabels[name] || name,
+    count,
+  }));
 }
 
 // 조회수 증가

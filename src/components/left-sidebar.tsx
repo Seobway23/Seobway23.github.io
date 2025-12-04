@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { getPopularPosts } from "@/lib/posts";
+import type { Post } from "../../shared/schema";
 
 interface Category {
   name: string;
@@ -21,8 +23,21 @@ export default function LeftSidebar({
     queryKey: ["/api/categories"],
   });
 
-  const { data: featuredPosts = [] } = useQuery({
-    queryKey: ["/api/posts/featured"],
+  // 조회수 기반 인기 게시글 가져오기
+  const { data: popularPosts = [] } = useQuery<Post[]>({
+    queryKey: ["/api/posts/popular"],
+    queryFn: async () => {
+      // 서버가 있으면 API 호출, 없으면 직접 함수 호출
+      try {
+        const response = await fetch("/api/posts/popular");
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (e) {
+        // API가 없으면 직접 함수 호출
+      }
+      return await getPopularPosts(3);
+    },
   });
 
   const allCategories = [
@@ -40,7 +55,7 @@ export default function LeftSidebar({
         {/* Categories */}
         <Card className="toss-card">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+            <h3 className="font-semibold text-sm text-black-700 dark:text-gray-400 uppercase tracking-wide mb-4">
               카테고리
             </h3>
             <nav className="space-y-2">
@@ -63,7 +78,7 @@ export default function LeftSidebar({
                   }
                 >
                   <span>{category.label}</span>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
                     {category.count}
                   </span>
                 </button>
@@ -72,27 +87,33 @@ export default function LeftSidebar({
           </CardContent>
         </Card>
 
-        {/* Featured Posts */}
+        {/* Popular Posts - 조회수 기반 */}
         <Card className="toss-card">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+            <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
               인기 글
             </h3>
             <div className="space-y-3">
-              {featuredPosts.slice(0, 3).map((post: any) => (
-                <Link
-                  key={post.id}
-                  href={`/post/${post.slug}`}
-                  className="block group"
-                >
-                  <p className="text-sm font-medium hover-gradient-text transition-colors line-clamp-2">
-                    {post.title}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    조회수 {post.views.toLocaleString()}
-                  </p>
-                </Link>
-              ))}
+              {popularPosts.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  인기 글이 없습니다.
+                </p>
+              ) : (
+                popularPosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/post/${post.slug}`}
+                    className="block group"
+                  >
+                    <p className="text-sm font-medium hover-gradient-text transition-colors line-clamp-2">
+                      {post.title}
+                    </p>
+                    <p className="text-xs text-gray-700 dark:text-gray-400 mt-1">
+                      조회수 {post.views.toLocaleString()}
+                    </p>
+                  </Link>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -100,7 +121,7 @@ export default function LeftSidebar({
         {/* Recent Comments Preview */}
         <Card className="toss-card">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+            <h3 className="font-semibold text-sm text-black-700 dark:text-white-400 uppercase tracking-wide mb-4">
               최신 댓글
             </h3>
             <div className="space-y-4">

@@ -42,6 +42,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get popular posts (조회수 기반)
+  app.get("/api/posts/popular", async (req, res) => {
+    try {
+      const posts = await storage.getAllPosts();
+      // 조회수 내림차순 정렬
+      const sortedPosts = posts.sort((a, b) => b.views - a.views);
+      const limit = parseInt(req.query.limit as string) || 10;
+      res.json(sortedPosts.slice(0, limit));
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch popular posts" });
+    }
+  });
+
   // Get single post by slug
   app.get("/api/posts/:slug", async (req, res) => {
     try {
