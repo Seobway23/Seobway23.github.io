@@ -1,29 +1,27 @@
 /**
- * GitHub API를 사용하여 Utterances 댓글 개수를 가져와서 JSON 파일로 저장하는 스크립트
- * 
+ * GitHub Issues API를 사용하여 Utterances 댓글 개수를 가져오는 스크립트
+ *
  * 사용 전 설정:
- * 1. GitHub Personal Access Token 생성
- *    - GitHub Settings > Developer settings > Personal access tokens > Tokens (classic)
- *    - 권한: repo (public_repo만으로도 충분)
- * 2. 환경 변수에 GITHUB_TOKEN 설정
- *    - 개발 모드: .env 파일에 GITHUB_TOKEN=your_token 추가
- *    - GitHub Actions: Secrets에 GITHUB_TOKEN 추가
- * 
- * 개발 모드에서 실행:
- * node scripts/fetch-github-comments.js
+ * 1. GitHub Personal Access Token 생성 (권한: public_repo)
+ * 2. 환경 변수에 GITHUB_TOKEN, GITHUB_REPO 설정
+ *
+ * 개발 모드: .env 파일에 설정
+ * 프로덕션: GitHub Secrets에 설정
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+// .env 파일 로드 (개발 모드용)
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 설정
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const GITHUB_REPO = process.env.GITHUB_REPO || 'seobway23/Laptop'; // 기본값, .env에서 변경 가능
-const publicDir = path.join(__dirname, '../public');
+const publicDir = path.join(__dirname, "../public");
+const postsDataPath = path.join(publicDir, "posts-data.json");
 
 // public 디렉토리가 없으면 생성
 if (!fs.existsSync(publicDir)) {
@@ -35,184 +33,209 @@ if (!fs.existsSync(publicDir)) {
  */
 function getPostSlugs() {
   try {
-    // posts.ts 파일을 읽어서 slug 추출
-    const postsPath = path.join(__dirname, '../src/lib/posts.ts');
-    const postsContent = fs.readFileSync(postsPath, 'utf-8');
-    
-    // slug 패턴 찾기: slug: "react-18-concurrent-features"
-    const slugMatches = postsContent.matchAll(/slug:\s*["']([^"']+)["']/g);
-    const slugs = Array.from(slugMatches, match => match[1]);
-    
-    if (slugs.length > 0) {
-      return slugs.map(slug => ({
-        slug,
-        path: `/post/${slug}`,
+    if (fs.existsSync(postsDataPath)) {
+      const postsData = JSON.parse(fs.readFileSync(postsDataPath, "utf-8"));
+      return postsData.map((post) => ({
+        slug: post.slug,
+        path: post.path || `/post/${post.slug}`,
       }));
     }
   } catch (error) {
-    console.warn('posts.ts에서 slug를 추출할 수 없습니다:', error.message);
+    console.warn(
+      "⚠️ posts-data.json을 찾을 수 없습니다. generate-posts-data.js를 먼저 실행하세요."
+    );
   }
-  
-  // 기본값 반환
-  return [
-    { slug: 'react-18-concurrent-features', path: '/post/react-18-concurrent-features' },
-  ];
+
+  return [];
 }
 
 /**
  * GitHub API로 Issues 가져오기
  */
-async function fetchIssuesFromGitHub() {
-  if (!GITHUB_TOKEN) {
-    console.warn('⚠️  GITHUB_TOKEN이 설정되지 않았습니다.');
-    console.warn('   개발 모드에서 사용하려면 .env 파일에 GITHUB_TOKEN을 추가하세요.');
-    console.warn('   예: GITHUB_TOKEN=ghp_xxxxxxxxxxxx');
-    return [];
+async function fetchIssuesFromGitHub(repo, token) {
+  const issues = [];
+  let page = 1;
+  const perPage = 100;
+
+  while (true) {
+    try {
+      const url = `https://api.github.com/repos/${repo}/issues?state=all&per_page=${perPage}&page=${page}&sort=created&direction=desc`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: "application/vnd.github.v3+json",
+          "User-Agent": "ModernDevBlog",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("GitHub 인증 실패. GITHUB_TOKEN을 확인하세요.");
+        }
+        if (response.status === 404) {
+          throw new Error(`저장소를 찾을 수 없습니다: ${repo}`);
+        }
+        throw new Error(
+          `GitHub API 오류: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+
+      // Issues만 필터링 (Pull Request 제외)
+      const pageIssues = data.filter((issue) => !issue.pull_request);
+
+      if (pageIssues.length === 0) {
+        break;
+      }
+
+      issues.push(...pageIssues);
+
+      // 마지막 페이지인 경우
+      if (data.length < perPage) {
+        break;
+      }
+
+      page++;
+    } catch (error) {
+      if (error.message.includes("fetch")) {
+        throw new Error(
+          "네트워크 오류가 발생했습니다. 인터넷 연결을 확인하세요."
+        );
+      }
+      throw error;
+    }
   }
 
-  const [owner, repo] = GITHUB_REPO.split('/');
-  const url = `https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=100`;
-  
+  return issues;
+}
+
+/**
+ * Issue에서 댓글 개수 가져오기
+ */
+async function fetchCommentsCount(issueUrl, token) {
   try {
-    const response = await fetch(url, {
+    const response = await fetch(issueUrl, {
       headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'ModernDevBlog-FetchComments',
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "ModernDevBlog",
       },
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('GitHub 인증 실패. GITHUB_TOKEN을 확인하세요.');
-      }
-      if (response.status === 404) {
-        throw new Error(`저장소를 찾을 수 없습니다: ${GITHUB_REPO}`);
-      }
-      throw new Error(`GitHub API 오류: ${response.status} ${response.statusText}`);
+      return 0;
     }
 
-    const issues = await response.json();
-    // Pull requests는 제외 (issues만)
-    return issues.filter(issue => !issue.pull_request);
+    const issue = await response.json();
+    // body는 댓글이 아니므로 comments만 카운트
+    return issue.comments || 0;
   } catch (error) {
-    console.error('GitHub API 호출 실패:', error.message);
-    return [];
+    console.warn(`댓글 개수 가져오기 실패: ${issueUrl}`, error.message);
+    return 0;
   }
 }
 
 /**
- * Issue에서 경로 추출 (Utterances는 pathname을 사용)
- * Utterances는 issue title이나 body에 경로 정보를 포함할 수 있음
+ * Issue를 게시글 slug와 매칭
  */
-function extractPathFromIssue(issue) {
-  // Issue title에서 경로 찾기
-  const titleMatch = issue.title.match(/\/post\/([a-z0-9-]+)/i);
-  if (titleMatch) {
-    return `/post/${titleMatch[1]}`;
-  }
-  
-  // Issue body에서 경로 찾기
-  const bodyMatch = issue.body?.match(/\/post\/([a-z0-9-]+)/i);
-  if (bodyMatch) {
-    return `/post/${bodyMatch[1]}`;
-  }
-  
-  // Utterances는 보통 title에 경로를 포함하므로, title 전체를 경로로 사용
-  // 또는 issue number를 기반으로 매핑할 수도 있음
-  return null;
-}
+function matchIssueToPost(issue, postSlugs) {
+  const issueTitle = issue.title || "";
+  const issueBody = issue.body || "";
 
-/**
- * 게시글 경로를 slug로 변환
- */
-function pathToSlug(path) {
-  const match = path.match(/\/post\/([^/]+)/);
-  return match ? match[1] : null;
-}
+  // Utterances는 issueTerm="pathname"일 때 경로를 title에 포함
+  for (const post of postSlugs) {
+    const postPath = post.path;
+    const slug = post.slug;
 
-/**
- * GitHub Issues에서 댓글 개수 가져오기
- */
-async function fetchCommentsFromGitHub() {
-  console.log('📡 GitHub API에서 Issues 가져오는 중...');
-  
-  const issues = await fetchIssuesFromGitHub();
-  
-  if (issues.length === 0) {
-    console.warn('⚠️  Issues를 찾을 수 없습니다. 기본값을 사용합니다.');
-    return generateDefaultComments();
-  }
-
-  console.log(`✅ ${issues.length}개의 Issue 발견`);
-
-  const postSlugs = getPostSlugs();
-  const comments = {};
-
-  // 각 게시글에 대해 Issue 찾기
-  postSlugs.forEach(({ slug, path: postPath }) => {
-    // Issue에서 해당 경로를 가진 것 찾기
-    const issue = issues.find(issue => {
-      const issuePath = extractPathFromIssue(issue);
-      return issuePath === postPath || 
-             issue.title.includes(slug) ||
-             issue.body?.includes(slug);
-    });
-
-    if (issue) {
-      // comments_count는 issue 자체의 댓글 수 (첫 댓글 제외)
-      // GitHub API는 comments 필드에 댓글 수를 제공
-      comments[slug] = issue.comments || 0;
-      console.log(`  ✓ ${slug}: ${comments[slug]}개 댓글`);
-    } else {
-      comments[slug] = 0;
-      console.log(`  - ${slug}: Issue 없음 (0개 댓글)`);
+    // Issue title에 경로가 포함되어 있는지 확인
+    if (issueTitle.includes(postPath) || issueTitle.includes(slug)) {
+      return slug;
     }
-  });
 
-  return comments;
-}
+    // Issue body에 slug가 포함되어 있는지 확인
+    if (issueBody.includes(slug) || issueBody.includes(postPath)) {
+      return slug;
+    }
+  }
 
-/**
- * 기본 댓글 수 생성 (GitHub API를 사용할 수 없을 때)
- */
-function generateDefaultComments() {
-  const postSlugs = getPostSlugs();
-  const comments = {};
-  postSlugs.forEach(({ slug }) => {
-    comments[slug] = 0;
-  });
-  return comments;
+  return null;
 }
 
 /**
  * 메인 함수
  */
 async function main() {
-  console.log('💬 댓글 개수 데이터 가져오기 시작...');
-  console.log(`📦 저장소: ${GITHUB_REPO}`);
-  
+  console.log("💬 댓글 개수 데이터 가져오기 시작...");
+
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  const GITHUB_REPO = process.env.GITHUB_REPO;
+
   if (!GITHUB_TOKEN) {
-    console.log('\n⚠️  개발 모드 사용법:');
-    console.log('1. .env 파일 생성 (프로젝트 루트에)');
-    console.log('2. 다음 내용 추가:');
-    console.log('   GITHUB_TOKEN=your_github_token_here');
-    console.log('   GITHUB_REPO=your-username/your-repo');
-    console.log('3. GitHub Personal Access Token 생성:');
-    console.log('   https://github.com/settings/tokens');
-    console.log('   권한: public_repo (또는 repo)');
-    console.log('\n현재는 기본값(0)을 사용합니다.\n');
+    console.error("❌ GITHUB_TOKEN이 설정되지 않았습니다.");
+    console.error(
+      "   .env 파일에 GITHUB_TOKEN을 추가하거나 환경 변수를 설정하세요."
+    );
+    process.exit(1);
   }
-  
-  const comments = await fetchCommentsFromGitHub();
-  
-  // comments.json 파일로 저장
-  const commentsPath = path.join(publicDir, 'comments.json');
-  fs.writeFileSync(commentsPath, JSON.stringify(comments, null, 2), 'utf-8');
-  
-  console.log(`\n✅ 댓글 데이터를 ${commentsPath}에 저장했습니다.`);
-  console.log('📊 댓글 데이터:', comments);
+
+  if (!GITHUB_REPO) {
+    console.error("❌ GITHUB_REPO가 설정되지 않았습니다.");
+    console.error(
+      "   .env 파일에 GITHUB_REPO를 추가하거나 환경 변수를 설정하세요."
+    );
+    console.error("   형식: username/repo-name");
+    process.exit(1);
+  }
+
+  console.log(`📦 저장소: ${GITHUB_REPO}`);
+
+  // 게시글 slug 목록 가져오기
+  const postSlugs = getPostSlugs();
+  console.log(`📝 ${postSlugs.length}개의 게시글 발견`);
+
+  // 댓글 개수 초기화
+  const comments = {};
+  postSlugs.forEach(({ slug }) => {
+    comments[slug] = 0;
+  });
+
+  try {
+    // GitHub API에서 Issues 가져오기
+    console.log("📡 GitHub API에서 Issues 가져오는 중...");
+    const issues = await fetchIssuesFromGitHub(GITHUB_REPO, GITHUB_TOKEN);
+    console.log(`✅ ${issues.length}개의 Issue 발견`);
+
+    // 각 Issue를 게시글과 매칭하고 댓글 개수 가져오기
+    for (const issue of issues) {
+      const matchedSlug = matchIssueToPost(issue, postSlugs);
+
+      if (matchedSlug) {
+        const commentCount = await fetchCommentsCount(issue.url, GITHUB_TOKEN);
+        comments[matchedSlug] = commentCount;
+        console.log(`  ✓ ${matchedSlug}: ${commentCount}개 댓글`);
+      }
+    }
+
+    // 매칭되지 않은 게시글 표시
+    const unmatchedPosts = postSlugs.filter(({ slug }) => comments[slug] === 0);
+    if (unmatchedPosts.length > 0) {
+      console.log(`\n⚠️ Issue가 없는 게시글 (0개 댓글):`);
+      unmatchedPosts.forEach(({ slug }) => {
+        console.log(`  - ${slug}`);
+      });
+    }
+
+    // comments.json 파일로 저장
+    const commentsPath = path.join(publicDir, "comments.json");
+    fs.writeFileSync(commentsPath, JSON.stringify(comments, null, 2), "utf-8");
+
+    console.log(`\n✅ 댓글 데이터를 ${commentsPath}에 저장했습니다.`);
+    console.log("📊 댓글 데이터:", comments);
+  } catch (error) {
+    console.error("❌ 오류 발생:", error.message);
+    process.exit(1);
+  }
 }
 
 main().catch(console.error);
-

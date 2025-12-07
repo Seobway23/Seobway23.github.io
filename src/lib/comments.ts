@@ -19,14 +19,17 @@ export async function getCommentsData(): Promise<CommentsData> {
   }
 
   try {
-    const response = await fetch('/comments.json');
+    const response = await fetch("/comments.json");
     if (!response.ok) {
-      throw new Error('Failed to fetch comments data');
+      throw new Error("Failed to fetch comments data");
     }
     commentsCache = await response.json();
     return commentsCache || {};
   } catch (error) {
-    console.warn('댓글 데이터를 가져올 수 없습니다. 기본값을 사용합니다.', error);
+    console.warn(
+      "댓글 개수 데이터를 가져올 수 없습니다. 기본값을 사용합니다.",
+      error
+    );
     return {};
   }
 }
@@ -40,9 +43,8 @@ export async function getPostComments(slug: string): Promise<number> {
 }
 
 /**
- * 댓글 데이터 초기화 (캐시 클리어)
+ * 댓글 개수 데이터 초기화 (캐시 클리어)
  */
 export function clearCommentsCache(): void {
   commentsCache = null;
 }
-

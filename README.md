@@ -24,27 +24,19 @@
 npm install
 ```
 
-### 빠른 시작
-
-개발 모드에서 조회수와 댓글 개수를 가져오려면 [빠른 시작 가이드](./docs/QUICK_START.md)를 참고하세요.
-
 ### 환경 변수 설정
 
 프로젝트 루트에 `.env` 파일을 생성하고 다음 환경 변수를 설정하세요:
 
 ```env
 # Google Analytics Measurement ID (프론트엔드 추적용)
-# Google Analytics 대시보드에서 발급받은 Measurement ID를 입력하세요
-# 예: G-XXXXXXXXXX
 VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
-# Google Analytics Data API (조회수 가져오기용)
-# 자세한 설정은 docs/GA_SETUP.md 참고
+# Google Analytics Data API (조회수 가져오기용, 선택사항)
 GA_PROPERTY_ID=123456789
 GA_SERVICE_ACCOUNT_KEY=./ga-service-account-key.json
 
-# GitHub API (댓글 개수 가져오기용)
-# 자세한 설정은 docs/GITHUB_COMMENTS_SETUP.md 참고
+# GitHub (댓글 개수 가져오기용, 선택사항)
 GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 GITHUB_REPO=your-username/your-repo
 ```
@@ -55,8 +47,6 @@ GITHUB_REPO=your-username/your-repo
 2. 계정 및 속성 생성
 3. 속성 설정에서 **Measurement ID** 확인 (형식: `G-XXXXXXXXXX`)
 4. `.env` 파일에 `VITE_GA_MEASUREMENT_ID`로 설정
-
-**참고:** 조회수 데이터를 가져오려면 추가 설정이 필요합니다. [GA 설정 가이드](./docs/GA_SETUP.md)를 참고하세요.
 
 ### 개발 서버 실행
 
@@ -112,14 +102,9 @@ ModernDevBlog/
 
 Google Analytics를 통해 게시글 조회수를 추적합니다. 조회수 데이터는 빌드 타임에 `public/views.json`으로 생성됩니다.
 
-**설정 방법:**
-
-자세한 설정 가이드는 [docs/GA_SETUP.md](./docs/GA_SETUP.md)를 참고하세요.
-
-**개발 모드에서 테스트:**
+**개발 모드:**
 
 ```bash
-# 조회수 데이터 가져오기
 npm run fetch:views
 ```
 
@@ -128,29 +113,28 @@ npm run fetch:views
 1. GitHub 저장소의 Settings > Secrets에서 다음 시크릿 추가:
 
    - `GA_PROPERTY_ID`: Google Analytics 속성 ID
-   - `GA_SERVICE_ACCOUNT_KEY`: 서비스 계정 JSON 키 파일 내용
-   - `GITHUB_TOKEN`: GitHub Personal Access Token
-   - `GITHUB_REPO`: GitHub 저장소 경로 (예: `username/repo-name`)
+   - `GA_SERVICE_ACCOUNT_KEY`: 서비스 계정 JSON 키 전체 내용
 
-2. `.github/workflows/build.yml`이 자동으로 조회수와 댓글 데이터를 가져와 빌드에 포함합니다.
+2. `.github/workflows/build.yml`이 자동으로 조회수 데이터를 가져와 빌드에 포함합니다.
 
-### 댓글 개수 추적
+### 댓글 개수 표시
 
-GitHub API를 통해 Utterances 댓글 개수를 가져옵니다. 댓글 데이터는 빌드 타임에 `public/comments.json`으로 생성됩니다.
+GitHub Issues API를 통해 Utterances 댓글 개수를 가져옵니다. 댓글 개수 데이터는 빌드 타임에 `public/comments.json`으로 생성됩니다.
 
-**설정 방법:**
-
-자세한 설정 가이드는 [docs/GITHUB_COMMENTS_SETUP.md](./docs/GITHUB_COMMENTS_SETUP.md)를 참고하세요.
-
-**개발 모드에서 테스트:**
+**개발 모드:**
 
 ```bash
-# 댓글 개수 데이터 가져오기
 npm run fetch:comments
-
-# 조회수와 댓글 모두 가져오기
-npm run fetch:all
 ```
+
+**GitHub Actions 설정:**
+
+1. GitHub 저장소의 Settings > Secrets에서 다음 시크릿 추가:
+
+   - `GITHUB_TOKEN`: Personal Access Token (권한: `public_repo`)
+   - `GITHUB_REPO`: 저장소 경로 (예: `username/repo-name`)
+
+2. `.github/workflows/build.yml`이 자동으로 댓글 개수 데이터를 가져와 빌드에 포함합니다.
 
 ### 테마 커스터마이징
 

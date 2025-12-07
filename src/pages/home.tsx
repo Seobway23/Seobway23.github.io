@@ -48,7 +48,8 @@ export default function Home() {
   } else {
     if (selectedCategory !== "all")
       queryParams.append("category", selectedCategory);
-    if (searchQuery && !searchQuery.startsWith("tag:")) queryParams.append("search", searchQuery);
+    if (searchQuery && !searchQuery.startsWith("tag:"))
+      queryParams.append("search", searchQuery);
   }
   if (sortBy !== "latest") queryParams.append("sort", sortBy);
 
@@ -56,7 +57,10 @@ export default function Home() {
     queryKey: ["/api/posts", queryParams.toString()],
     queryFn: async () => {
       // 서버가 있으면 API 호출
-      if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
+      if (
+        typeof window !== "undefined" &&
+        window.location.hostname !== "localhost"
+      ) {
         try {
           const response = await fetch(`/api/posts?${queryParams}`);
           if (response.ok) {
@@ -70,21 +74,22 @@ export default function Home() {
       }
 
       // 프론트엔드에서 직접 처리
-      const { getAllPosts, getPostsByCategory, searchPosts, getPostsByTag } = await import("../lib/posts");
+      const { getAllPosts, getPostsByCategory, searchPosts, getPostsByTag } =
+        await import("../lib/posts");
       const { getViewsData } = await import("../lib/views");
-      
+
       let posts;
       // URL 파라미터에서 tag 확인
       const tagParam = new URLSearchParams(window.location.search).get("tag");
-      
+
       if (tagParam) {
-        posts = getPostsByTag(tagParam);
+        posts = await getPostsByTag(tagParam);
       } else if (searchQuery && !searchQuery.startsWith("tag:")) {
-        posts = searchPosts(searchQuery);
+        posts = await searchPosts(searchQuery);
       } else if (selectedCategory !== "all") {
-        posts = getPostsByCategory(selectedCategory);
+        posts = await getPostsByCategory(selectedCategory);
       } else {
-        posts = getAllPosts();
+        posts = await getAllPosts();
       }
 
       // 정렬
@@ -104,29 +109,16 @@ export default function Home() {
       }
 
       // views.json의 조회수와 병합
-      const postsWithViews = await mergeViewsData(posts);
-      
-      // comments.json의 댓글 개수와 병합
-      try {
-        const { getCommentsData } = await import("../lib/comments");
-        const commentsData = await getCommentsData();
-        return postsWithViews.map((post) => ({
-          ...post,
-          comments: commentsData[post.slug] ?? 0,
-        }));
-      } catch (e) {
-        return postsWithViews.map((post) => ({
-          ...post,
-          comments: 0,
-        }));
-      }
+      return await mergeViewsData(posts);
     },
   });
 
   // views.json의 조회수와 병합하는 함수
   const mergeViewsData = async (posts: Post[]): Promise<Post[]> => {
     try {
-      const viewsData = await import("../lib/views").then(m => m.getViewsData());
+      const viewsData = await import("../lib/views").then((m) =>
+        m.getViewsData()
+      );
       return posts.map((post) => ({
         ...post,
         views: viewsData[post.slug] ?? post.views,
@@ -140,19 +132,11 @@ export default function Home() {
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     updateURL({ category, sort: sortBy, search: searchQuery });
-    // 카테고리 변경 시 스크롤을 맨 위로 이동 (레이아웃 변경으로 인한 스크롤 문제 방지)
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
   };
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort);
     updateURL({ category: selectedCategory, sort, search: searchQuery });
-    // 정렬 변경 시 스크롤을 맨 위로 이동
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
   };
 
   const updateURL = ({
@@ -203,12 +187,12 @@ export default function Home() {
                   <div className="absolute inset-0 flex items-center">
                     <CardContent className="p-8 text-white">
                       <h1 className="text-4xl font-bold mb-4">
-                        최신 웹 개발 트렌드와 기술
+                        코드로 만드는 더 나은 일상
                       </h1>
                       <p className="text-xl mb-6 opacity-90">
-                        프론트엔드 개발자를 위한 실무 중심의 기술 블로그입니다.
-                        React, TypeScript, 성능 최적화 등 다양한 주제를
-                        다룹니다.
+                        웹 개발, AI 에이전트, 역학 시뮬레이션, 알고리즘까지.
+                        다양한 분야의 기술을 활용해 재미있고 유용한 프로젝트를
+                        만들고, 일상의 문제를 해결하는 과정을 공유합니다.
                       </p>
                       <Button
                         onClick={() => navigate("/contact")}
@@ -229,7 +213,9 @@ export default function Home() {
               <div>
                 <h2 className="text-3xl font-bold">
                   {(() => {
-                    const tagParam = new URLSearchParams(window.location.search).get("tag");
+                    const tagParam = new URLSearchParams(
+                      window.location.search
+                    ).get("tag");
                     if (tagParam) {
                       return `"${tagParam}" 태그 글`;
                     }
@@ -247,7 +233,9 @@ export default function Home() {
                       performance: "Performance",
                       nextjs: "Next.js",
                     };
-                    return `${categoryLabels[selectedCategory] || selectedCategory} 글`;
+                    return `${
+                      categoryLabels[selectedCategory] || selectedCategory
+                    } 글`;
                   })()}
                 </h2>
                 <p className="text-gray-700 dark:text-gray-400 mt-1">

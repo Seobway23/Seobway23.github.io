@@ -86,7 +86,7 @@ export default function Post() {
       // 프론트엔드에서 직접 처리
       const { getPostBySlug } = await import("../lib/posts");
       const { getViewsData } = await import("../lib/views");
-      const post = getPostBySlug(slug || "");
+      const post = await getPostBySlug(slug || "");
       if (!post) {
         throw new Error("Post not found");
       }

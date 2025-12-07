@@ -1,10 +1,10 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Eye, MessageCircle, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
-import { getPostComments } from "@/lib/comments";
 import type { Post } from "@shared/schema";
+import { getPostComments } from "@/lib/comments";
 
 interface PostCardProps {
   post: Post;
@@ -34,12 +34,16 @@ const categoryImages: Record<string, string> = {
 export default function PostCard({ post }: PostCardProps) {
   const categoryLabel = categoryLabels[post.category] || post.category;
   const imageUrl = categoryImages[post.category] || categoryImages.react;
+  const [commentCount, setCommentCount] = useState<number>(0);
 
   // 댓글 개수 가져오기
-  const { data: commentsCount = 0 } = useQuery({
-    queryKey: [`/comments/${post.slug}`],
-    queryFn: () => getPostComments(post.slug),
-  });
+  useEffect(() => {
+    getPostComments(post.slug)
+      .then(setCommentCount)
+      .catch(() => {
+        // 실패 시 0으로 유지
+      });
+  }, [post.slug]);
 
   return (
     <Card className="toss-card overflow-hidden hover:shadow-lg transition-all duration-300 group">
@@ -71,7 +75,7 @@ export default function PostCard({ post }: PostCardProps) {
 
       <CardContent className="p-6">
         <Link href={`/post/${post.slug}`}>
-          <h3 className="text-xl font-bold mb-3 hover-gradient-text transition-colors line-clamp-2">
+          <h3 className="text-xl font-bold mb-3 hover-gradient-text transition-colors line-clamp-2 min-h-[3.5rem] overflow-hidden">
             {post.title}
           </h3>
         </Link>
@@ -97,7 +101,7 @@ export default function PostCard({ post }: PostCardProps) {
             </span>
             <span className="flex items-center space-x-1">
               <MessageCircle className="w-4 h-4" />
-              <span>{commentsCount}</span>
+              <span>{commentCount.toLocaleString()}</span>
             </span>
           </div>
         </div>

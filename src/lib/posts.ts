@@ -3,208 +3,176 @@ import type { Post } from "@shared/schema";
 // 프론트엔드에서 게시글을 관리하는 스토리지
 const STORAGE_KEY = "blog-posts";
 
-// 샘플 게시글 데이터 (React 18 게시글만)
-const samplePosts: Post[] = [
-  {
-    id: 1,
-    title: "React 18의 새로운 Concurrent Features 완벽 정리",
-    slug: "react-18-concurrent-features",
-    excerpt:
-      "React 18에서 도입된 Concurrent Features와 Suspense, useTransition 등의 새로운 기능들을 실제 예제와 함께 자세히 알아보겠습니다.",
-    content: `<h1>React 18의 주요 변화점</h1>
+// 게시글 캐시
+let postsCache: Post[] | null = null;
 
-<p>React 18은 React의 새로운 <strong style="color: #667eea;">메이저 버전</strong>으로, <mark style="background-color: #fef08a; padding: 2px 4px; border-radius: 3px;">Concurrent Features</mark>를 중심으로 많은 변화를 가져왔습니다. 이번 글에서는 React 18의 주요 기능들을 실제 코드 예제와 함께 살펴보겠습니다.</p>
-
-<h2>1. Automatic Batching</h2>
-
-<p>React 18에서는 모든 업데이트가 <strong>자동으로 배치</strong>됩니다. 이는 <span style="color: #10b981; font-weight: 600;">성능 향상</span>에 크게 기여합니다.</p>
-
-<pre><code class="language-javascript">// React 17에서는 배치되지 않았던 경우
-setTimeout(() => {
-  setCount(c => c + 1);
-  setFlag(f => !f);
-  // React 18에서는 이제 배치됩니다!
-}, 1000);
-
-// Promise, setTimeout, 네이티브 이벤트 핸들러에서도 배치됩니다
-fetch('/someapi').then(() => {
-  setLoading(false);
-  setError(null);
-  // 배치됨!
-});</code></pre>
-
-<h2>2. useTransition과 startTransition</h2>
-
-<p>사용자 입력과 같은 <span style="color: #ef4444; font-weight: 600;">긴급한 업데이트</span>와 결과 렌더링과 같은 <span style="color: #3b82f6; font-weight: 600;">비긴급 업데이트</span>를 구분할 수 있습니다.</p>
-
-<pre><code class="language-javascript">import { useTransition, useState } from 'react';
-
-function SearchBox() {
-  const [isPending, startTransition] = useTransition();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState([]);
-
-  const handleSearch = (term) => {
-    // 긴급 업데이트
-    setSearchTerm(term);
-    
-    // 비긴급 업데이트
-    startTransition(() => {
-      setResults(expensiveSearch(term));
-    });
-  };
-
-  return (
-    <div>
-      <input
-        value={searchTerm}
-        onChange={(e) => handleSearch(e.target.value)}
-        placeholder="검색어를 입력하세요"
-      />
-      {isPending && <div>검색 중...</div>}
-      <SearchResults results={results} />
-    </div>
-  );
-}</code></pre>
-
-<h2>3. Suspense 개선</h2>
-
-<p>React 18에서는 <mark style="background-color: #dbeafe; padding: 2px 4px; border-radius: 3px;">Suspense</mark>가 더 많은 경우에 사용할 수 있게 되었습니다.</p>
-
-<pre><code class="language-javascript">import { Suspense } from 'react';
-
-function App() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <ProfilePage />
-    </Suspense>
-  );
-}</code></pre>
-
-<h2>마무리</h2>
-
-<p>React 18의 <strong style="color: #8b5cf6;">Concurrent Features</strong>는 사용자 경험을 크게 개선시킵니다. 특히 <span style="color: #f59e0b; font-weight: 600;">큰 애플리케이션</span>에서 성능 향상을 체감할 수 있을 것입니다.</p>`,
-    category: "react",
-    tags: ["React", "JavaScript", "Performance", "Frontend"],
-    author: "김개발자",
-    readTime: 8,
-    views: 0,
-    featured: true,
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-01-15"),
-  },
-];
-
-// 게시글 저장소 초기화
-export function initializePosts(): void {
-  if (typeof window === "undefined") return;
-
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(samplePosts));
-  }
-}
-
-// 모든 게시글 가져오기
-export function getAllPosts(): Post[] {
-  if (typeof window === "undefined") return [];
-
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    initializePosts();
-    return samplePosts;
+/**
+ * posts.json 파일에서 게시글 데이터 가져오기
+ */
+async function loadPostsFromJSON(): Promise<Post[]> {
+  if (postsCache) {
+    return postsCache;
   }
 
   try {
-    const posts = JSON.parse(stored);
+    const response = await fetch("/posts.json");
+    if (!response.ok) {
+      throw new Error("Failed to fetch posts data");
+    }
+    const posts = await response.json();
+
     // Date 객체 복원
-    return posts.map((post: any) => ({
+    postsCache = posts.map((post: any) => ({
       ...post,
       createdAt: new Date(post.createdAt),
       updatedAt: new Date(post.updatedAt),
     }));
-  } catch {
-    return samplePosts;
+
+    return postsCache;
+  } catch (error) {
+    console.warn(
+      "posts.json을 가져올 수 없습니다. 기본값을 사용합니다.",
+      error
+    );
+    return [];
   }
 }
 
-// slug로 게시글 가져오기
-export function getPostBySlug(slug: string): Post | undefined {
-  const posts = getAllPosts();
+/**
+ * 게시글 저장소 초기화 (localStorage에 캐시)
+ */
+export async function initializePosts(): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  const posts = await loadPostsFromJSON();
+  if (posts.length > 0) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  }
+}
+
+/**
+ * 모든 게시글 가져오기
+ */
+export async function getAllPosts(): Promise<Post[]> {
+  if (typeof window === "undefined") return [];
+
+  // 먼저 posts.json에서 로드 시도
+  try {
+    const posts = await loadPostsFromJSON();
+    if (posts.length > 0) {
+      return posts;
+    }
+  } catch (error) {
+    // posts.json 로드 실패 시 localStorage 확인
+  }
+
+  // localStorage에서 가져오기 (fallback)
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      const posts = JSON.parse(stored);
+      return posts.map((post: any) => ({
+        ...post,
+        createdAt: new Date(post.createdAt),
+        updatedAt: new Date(post.updatedAt),
+      }));
+    } catch {
+      // 파싱 실패
+    }
+  }
+
+  return [];
+}
+
+/**
+ * slug로 게시글 가져오기
+ */
+export async function getPostBySlug(slug: string): Promise<Post | undefined> {
+  const posts = await getAllPosts();
   return posts.find((post) => post.slug === slug);
 }
 
-// 카테고리로 게시글 가져오기
-export function getPostsByCategory(category: string): Post[] {
-  const posts = getAllPosts();
+/**
+ * 카테고리로 게시글 가져오기
+ */
+export async function getPostsByCategory(category: string): Promise<Post[]> {
+  const posts = await getAllPosts();
   if (category === "all") return posts;
   return posts.filter((post) => post.category === category);
 }
 
-// 인기 게시글 가져오기 (featured 플래그 기반)
-export function getFeaturedPosts(): Post[] {
-  const posts = getAllPosts();
+/**
+ * 인기 게시글 가져오기 (featured 플래그 기반)
+ */
+export async function getFeaturedPosts(): Promise<Post[]> {
+  const posts = await getAllPosts();
   return posts.filter((post) => post.featured);
 }
 
-// 조회수 기반 인기 게시글 가져오기
+/**
+ * 조회수 기반 인기 게시글 가져오기
+ */
 export async function getPopularPosts(limit: number = 10): Promise<Post[]> {
-  const posts = getAllPosts();
-  
+  const posts = await getAllPosts();
+
   // views.json에서 조회수 데이터 가져오기
   try {
-    const { getViewsData } = await import('./views');
+    const { getViewsData } = await import("./views");
     const viewsData = await getViewsData();
-    
+
     // 조회수 데이터와 병합
-    const postsWithViews = posts.map(post => ({
+    const postsWithViews = posts.map((post) => ({
       ...post,
       views: viewsData[post.slug] ?? post.views, // views.json의 조회수 우선 사용
     }));
-    
+
     // 조회수 내림차순 정렬
-    return postsWithViews
-      .sort((a, b) => b.views - a.views)
-      .slice(0, limit);
+    return postsWithViews.sort((a, b) => b.views - a.views).slice(0, limit);
   } catch (error) {
     // views.json을 가져올 수 없으면 기존 views 사용
-    return posts
-      .sort((a, b) => b.views - a.views)
-      .slice(0, limit);
+    return posts.sort((a, b) => b.views - a.views).slice(0, limit);
   }
 }
 
-// 게시글 검색
-export function searchPosts(query: string): Post[] {
-  const posts = getAllPosts();
+/**
+ * 게시글 검색
+ */
+export async function searchPosts(query: string): Promise<Post[]> {
+  const posts = await getAllPosts();
   const lowerQuery = query.toLowerCase();
   return posts.filter(
     (post) =>
       post.title.toLowerCase().includes(lowerQuery) ||
       post.excerpt.toLowerCase().includes(lowerQuery) ||
       post.content.toLowerCase().includes(lowerQuery) ||
-      post.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
+      post.tags.some((tag: string) => tag.toLowerCase().includes(lowerQuery))
   );
 }
 
-// 태그로 게시글 가져오기
-export function getPostsByTag(tag: string): Post[] {
-  const posts = getAllPosts();
+/**
+ * 태그로 게시글 가져오기
+ */
+export async function getPostsByTag(tag: string): Promise<Post[]> {
+  const posts = await getAllPosts();
   return posts.filter((post) =>
-    post.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
+    post.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase())
   );
 }
 
-// 카테고리 목록 가져오기 (게시글 수 포함)
-export function getCategories(): Array<{ name: string; label: string; count: number }> {
-  const posts = getAllPosts();
+/**
+ * 카테고리 목록 가져오기 (게시글 수 포함)
+ */
+export async function getCategories(): Promise<
+  Array<{ name: string; label: string; count: number }>
+> {
+  const posts = await getAllPosts();
   const categoryMap = new Map<string, number>();
-  
+
   posts.forEach((post) => {
     const count = categoryMap.get(post.category) || 0;
     categoryMap.set(post.category, count + 1);
   });
-  
+
   const categoryLabels: Record<string, string> = {
     react: "React",
     typescript: "TypeScript",
@@ -212,7 +180,7 @@ export function getCategories(): Array<{ name: string; label: string; count: num
     performance: "Performance",
     nextjs: "Next.js",
   };
-  
+
   return Array.from(categoryMap.entries()).map(([name, count]) => ({
     name,
     label: categoryLabels[name] || name,
@@ -220,21 +188,32 @@ export function getCategories(): Array<{ name: string; label: string; count: num
   }));
 }
 
-// 조회수 증가
-export function incrementPostViews(slug: string): void {
-  const posts = getAllPosts();
+/**
+ * 조회수 증가 (localStorage용)
+ */
+export async function incrementPostViews(slug: string): Promise<void> {
+  const posts = await getAllPosts();
   const post = posts.find((p) => p.slug === slug);
   if (post) {
     post.views += 1;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+    // 캐시도 업데이트
+    if (postsCache) {
+      const cachedPost = postsCache.find((p) => p.slug === slug);
+      if (cachedPost) {
+        cachedPost.views += 1;
+      }
+    }
   }
 }
 
-// 새 게시글 추가
-export function addPost(
+/**
+ * 새 게시글 추가 (개발용 - 마크다운 파일 추가 후 generate-posts-data.js 실행 권장)
+ */
+export async function addPost(
   post: Omit<Post, "id" | "views" | "createdAt" | "updatedAt">
-): Post {
-  const posts = getAllPosts();
+): Promise<Post> {
+  const posts = await getAllPosts();
   const newPost: Post = {
     ...post,
     id: Math.max(...posts.map((p) => p.id), 0) + 1,
