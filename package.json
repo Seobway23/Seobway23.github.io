@@ -12,7 +12,8 @@
     "fetch:views:prod": "node scripts/fetch-ga-views.js",
     "fetch:comments": "node scripts/fetch-github-comments.js",
     "fetch:all": "npm run generate:posts && npm run fetch:views && npm run fetch:comments",
-    "fetch:all:prod": "npm run generate:posts && npm run fetch:views:prod && npm run fetch:comments"
+    "fetch:all:prod": "npm run generate:posts && npm run fetch:views:prod && npm run fetch:comments",
+    "test:ga-paths": "node scripts/test-ga-paths.js"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.1",

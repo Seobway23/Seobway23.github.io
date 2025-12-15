@@ -31,10 +31,15 @@ function getPostSlugs() {
   try {
     if (fs.existsSync(postsDataPath)) {
       const postsData = JSON.parse(fs.readFileSync(postsDataPath, "utf-8"));
-      return postsData.map((post) => ({
-        slug: post.slug,
-        path: post.path || `/post/${post.slug}`,
-      }));
+      return postsData.map((post) => {
+        // 실제 라우팅 경로 사용: /post/:slug 형식
+        // 프론트에서 trackPageView(`/post/${postSlug}`)로 보내므로 동일한 형식으로 조회
+        const actualPath = `/post/${post.slug}`;
+        return {
+          slug: post.slug,
+          path: actualPath, // 실제 라우팅 경로 사용
+        };
+      });
     }
   } catch (error) {
     console.warn(

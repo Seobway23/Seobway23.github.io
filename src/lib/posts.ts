@@ -94,11 +94,17 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
 
 /**
  * 카테고리로 게시글 가져오기
+ * 계층 구조 지원: frontend 선택 시 frontend/css, frontend/react 등 모든 하위 카테고리 포함
  */
 export async function getPostsByCategory(category: string): Promise<Post[]> {
   const posts = await getAllPosts();
   if (category === "all") return posts;
-  return posts.filter((post) => post.category === category);
+
+  // 정확히 일치하거나, 선택한 카테고리로 시작하는 모든 하위 카테고리 포함
+  return posts.filter((post) => {
+    const postCategory = post.category || "";
+    return postCategory === category || postCategory.startsWith(`${category}/`);
+  });
 }
 
 /**

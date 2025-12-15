@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTheme } from "@/hooks/use-theme";
+import { useLayout } from "@/components/layout";
 import LeftSidebar from "../components/left-sidebar";
 import PostCard from "../components/post-card";
 import type { Post } from "@shared/schema";
@@ -22,6 +23,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
   const [searchQuery, setSearchQuery] = useState("");
+  const { mobileMenuOpen, setMobileMenuOpen } = useLayout();
 
   // Get search params from URL
   useEffect(() => {
@@ -163,6 +165,8 @@ export default function Home() {
         <LeftSidebar
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
+          mobileOpen={mobileMenuOpen}
+          onMobileOpenChange={setMobileMenuOpen}
         />
 
         <main className="lg:col-span-3">
@@ -185,20 +189,20 @@ export default function Home() {
                     }`}
                   />
                   <div className="absolute inset-0 flex items-center">
-                    <CardContent className="p-8 text-white">
-                      <h1 className="text-4xl font-bold mb-4">
+                    <CardContent className="p-4 sm:p-6 md:p-8 text-white">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                         코드로 만드는 더 나은 일상
                       </h1>
-                      <p className="text-xl mb-6 opacity-90">
+                      <p className="text-sm sm:text-base md:text-xl mb-4 sm:mb-6 opacity-90">
                         웹 개발, AI 에이전트, 역학 시뮬레이션, 알고리즘까지.
                         다양한 분야의 기술을 활용해 재미있고 유용한 프로젝트를
                         만들고, 일상의 문제를 해결하는 과정을 공유합니다.
                       </p>
                       <Button
-                        onClick={() => navigate("/contact")}
-                        className="toss-button text-white"
+                        onClick={() => navigate("/about")}
+                        className="toss-button text-white text-sm sm:text-base"
                       >
-                        연락하기 <ArrowRight className="w-4 h-4 ml-2" />
+                        소개 보기 <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </CardContent>
                   </div>

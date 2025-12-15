@@ -19,14 +19,16 @@ export async function getViewsData(): Promise<ViewsData> {
   }
 
   try {
-    const response = await fetch('/views.json');
+    const response = await fetch("/views.json");
+
     if (!response.ok) {
-      throw new Error('Failed to fetch views data');
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    viewsCache = await response.json();
+
+    const data = await response.json();
+    viewsCache = data;
     return viewsCache || {};
   } catch (error) {
-    console.warn('조회수 데이터를 가져올 수 없습니다. 기본값을 사용합니다.', error);
     return {};
   }
 }
@@ -45,4 +47,3 @@ export async function getPostViews(slug: string): Promise<number> {
 export function clearViewsCache(): void {
   viewsCache = null;
 }
-

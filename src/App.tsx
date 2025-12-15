@@ -9,7 +9,7 @@ import { initGA, trackPageView } from "./lib/analytics";
 import Layout from "./components/layout";
 import Home from "./pages/home";
 import Post from "./pages/post";
-import Contact from "./pages/contact";
+import About from "./pages/about";
 import NotFound from "./pages/not-found";
 
 function Router() {
@@ -29,7 +29,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/post/:slug" component={Post} />
-      <Route path="/contact" component={Contact} />
+      <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
   );

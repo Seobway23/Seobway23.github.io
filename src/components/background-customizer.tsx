@@ -46,28 +46,46 @@ export default function BackgroundCustomizer({
         const startColor = colorMatches[0];
         const endColor = colorMatches[1];
         
-        document.documentElement.style.setProperty("--gradient-start", startColor);
+        document.documentElement.style.setProperty(
+          "--gradient-start",
+          startColor
+        );
         document.documentElement.style.setProperty("--gradient-end", endColor);
         
         // 텍스트 색상 자동 계산
         const textColor = getGradientTextColor(startColor, endColor);
-        document.documentElement.style.setProperty("--gradient-text", textColor);
+        document.documentElement.style.setProperty(
+          "--gradient-text",
+          textColor
+        );
         
         // 다크모드용 밝은 색상 생성
         const startDark = lightenColor(startColor, 0.3);
         const endDark = lightenColor(endColor, 0.3);
-        document.documentElement.style.setProperty("--gradient-start-dark", startDark);
-        document.documentElement.style.setProperty("--gradient-end-dark", endDark);
+        document.documentElement.style.setProperty(
+          "--gradient-start-dark",
+          startDark
+        );
+        document.documentElement.style.setProperty(
+          "--gradient-end-dark",
+          endDark
+        );
         
         const textColorDark = getGradientTextColor(startDark, endDark);
-        document.documentElement.style.setProperty("--gradient-text-dark", textColorDark);
+        document.documentElement.style.setProperty(
+          "--gradient-text-dark",
+          textColorDark
+        );
       }
     } else {
       // 기본값 설정
       const defaultStart = "#667eea";
       const defaultEnd = "#764ba2";
       
-      document.documentElement.style.setProperty("--gradient-start", defaultStart);
+      document.documentElement.style.setProperty(
+        "--gradient-start",
+        defaultStart
+      );
       document.documentElement.style.setProperty("--gradient-end", defaultEnd);
       
       const textColor = getGradientTextColor(defaultStart, defaultEnd);
@@ -75,11 +93,20 @@ export default function BackgroundCustomizer({
       
       const startDark = lightenColor(defaultStart, 0.3);
       const endDark = lightenColor(defaultEnd, 0.3);
-      document.documentElement.style.setProperty("--gradient-start-dark", startDark);
-      document.documentElement.style.setProperty("--gradient-end-dark", endDark);
+      document.documentElement.style.setProperty(
+        "--gradient-start-dark",
+        startDark
+      );
+      document.documentElement.style.setProperty(
+        "--gradient-end-dark",
+        endDark
+      );
       
       const textColorDark = getGradientTextColor(startDark, endDark);
-      document.documentElement.style.setProperty("--gradient-text-dark", textColorDark);
+      document.documentElement.style.setProperty(
+        "--gradient-text-dark",
+        textColorDark
+      );
     }
   }, []);
 
@@ -93,7 +120,10 @@ export default function BackgroundCustomizer({
       const startColor = colorMatches[0];
       const endColor = colorMatches[1];
       
-      document.documentElement.style.setProperty("--gradient-start", startColor);
+      document.documentElement.style.setProperty(
+        "--gradient-start",
+        startColor
+      );
       document.documentElement.style.setProperty("--gradient-end", endColor);
       
       // 텍스트 색상 자동 계산
@@ -103,11 +133,20 @@ export default function BackgroundCustomizer({
       // 다크모드용 밝은 색상 생성
       const startDark = lightenColor(startColor, 0.3);
       const endDark = lightenColor(endColor, 0.3);
-      document.documentElement.style.setProperty("--gradient-start-dark", startDark);
-      document.documentElement.style.setProperty("--gradient-end-dark", endDark);
+      document.documentElement.style.setProperty(
+        "--gradient-start-dark",
+        startDark
+      );
+      document.documentElement.style.setProperty(
+        "--gradient-end-dark",
+        endDark
+      );
       
       const textColorDark = getGradientTextColor(startDark, endDark);
-      document.documentElement.style.setProperty("--gradient-text-dark", textColorDark);
+      document.documentElement.style.setProperty(
+        "--gradient-text-dark",
+        textColorDark
+      );
     }
   };
 
@@ -127,23 +166,28 @@ export default function BackgroundCustomizer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>배경 커스터마이징</DialogTitle>
+      <DialogContent className="max-w-md w-[calc(100%-1rem)] sm:w-full mx-2 sm:mx-auto max-h-[95vh] sm:max-h-[90vh]">
+        <DialogHeader className="mb-2 sm:mb-4">
+          <DialogTitle className="text-base sm:text-lg md:text-xl">
+            배경 커스터마이징
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Preset Gradients */}
           <div>
-            <Label className="text-sm font-medium mb-3 block">
+            <Label className="text-xs sm:text-sm font-medium mb-2 sm:mb-3 block">
               프리셋 그라데이션
             </Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {presetGradients.map((gradient, index) => (
                 <button
                   key={index}
-                  onClick={() => applyGradient(gradient)}
-                  className="w-full h-12 rounded-lg border-2 border-transparent hover-gradient-border transition-all"
+                  onClick={() => {
+                    applyGradient(gradient);
+                    onOpenChange(false);
+                  }}
+                  className="w-full h-12 sm:h-14 md:h-16 rounded-lg border-2 border-transparent hover:border-gray-400 dark:hover:border-gray-500 active:scale-95 transition-all touch-manipulation"
                   style={{ background: gradient }}
                   title={`그라데이션 ${index + 1}`}
                 />
@@ -152,44 +196,58 @@ export default function BackgroundCustomizer({
           </div>
 
           {/* Custom Colors */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
               <Label
                 htmlFor="start-color"
-                className="text-sm font-medium mb-2 block"
+                className="text-xs sm:text-sm font-medium mb-2 block"
               >
                 시작 색상
               </Label>
+              <label
+                htmlFor="start-color"
+                className="block w-full h-12 sm:h-14 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer overflow-hidden touch-manipulation active:scale-95 transition-transform"
+                style={{ background: startColor }}
+              >
               <input
                 id="start-color"
                 type="color"
                 value={startColor}
                 onChange={(e) => setStartColor(e.target.value)}
-                className="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+                  className="w-full h-full opacity-0 cursor-pointer"
               />
+              </label>
             </div>
 
             <div>
               <Label
                 htmlFor="end-color"
-                className="text-sm font-medium mb-2 block"
+                className="text-xs sm:text-sm font-medium mb-2 block"
               >
                 끝 색상
               </Label>
+              <label
+                htmlFor="end-color"
+                className="block w-full h-12 sm:h-14 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer overflow-hidden touch-manipulation active:scale-95 transition-transform"
+                style={{ background: endColor }}
+              >
               <input
                 id="end-color"
                 type="color"
                 value={endColor}
                 onChange={(e) => setEndColor(e.target.value)}
-                className="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+                  className="w-full h-full opacity-0 cursor-pointer"
               />
+              </label>
             </div>
 
             {/* Preview */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">미리보기</Label>
+              <Label className="text-xs sm:text-sm font-medium mb-2 block">
+                미리보기
+              </Label>
               <div
-                className="w-full h-12 rounded-lg border border-gray-300 dark:border-gray-600"
+                className="w-full h-12 sm:h-14 rounded-lg border-2 border-gray-300 dark:border-gray-600"
                 style={{
                   background: `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`,
                 }}
@@ -198,17 +256,17 @@ export default function BackgroundCustomizer({
           </div>
 
           {/* Actions */}
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
             <Button
               onClick={applyCustomGradient}
-              className="flex-1 toss-button"
+              className="flex-1 toss-button text-sm sm:text-base h-11 sm:h-10 touch-manipulation"
             >
               적용
             </Button>
             <Button
               onClick={resetBackground}
               variant="outline"
-              className="flex-1"
+              className="flex-1 text-sm sm:text-base h-11 sm:h-10 touch-manipulation"
             >
               기본값으로 리셋
             </Button>

@@ -23,10 +23,16 @@ if (!fs.existsSync(publicDir)) {
 /**
  * 마크다운 파일에서 게시글 데이터 추출
  */
-function parseMarkdownFile(filePath, category) {
+function parseMarkdownFile(filePath, categoryFromPath) {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
     const { data, content } = matter(fileContent);
+
+    // 경로 기반 카테고리 (슬래시 통일)
+    const normalizedCategory =
+      categoryFromPath && categoryFromPath !== "."
+        ? categoryFromPath.replace(/\\/g, "/")
+        : "";
 
     // 파일명에서 slug 추출 (확장자 제거)
     const fileName = path.basename(filePath, ".md");
@@ -63,7 +69,8 @@ function parseMarkdownFile(filePath, category) {
       slug: slug,
       excerpt: excerpt,
       content: htmlContent,
-      category: data.category || category,
+      // 폴더 경로를 우선 카테고리로 사용 (frontmatter category는 덮어쓰지 않음)
+      category: normalizedCategory || data.category || "",
       tags: data.tags || [],
       author: data.author || "작성자",
       readTime: data.readTime || 5,
@@ -125,6 +132,9 @@ function generatePostsData() {
     // 카테고리 추출 (posts/category/file.md)
     const relativePath = path.relative(postsDir, filePath);
     const category = path.dirname(relativePath);
+    // 포스트 경로 (/post/frontend/react/foo)
+    const withoutExt = relativePath.replace(/\.md$/i, "");
+    const postPath = `/post/${withoutExt.replace(/\\/g, "/")}`;
 
     const post = parseMarkdownFile(filePath, category);
     if (post) {
@@ -132,7 +142,7 @@ function generatePostsData() {
       postsData.push({
         slug: post.slug,
         title: post.title,
-        path: `/post/${post.slug}`,
+        path: postPath,
       });
     }
   });

@@ -93,9 +93,11 @@ export default function Post() {
 
       // views.json의 조회수와 병합
       const viewsData = await getViewsData();
+      const gaViews = viewsData[post.slug];
+      const finalViews = gaViews ?? post.views;
       return {
         ...post,
-        views: viewsData[post.slug] ?? post.views,
+        views: finalViews,
       };
     },
   });
@@ -138,6 +140,13 @@ export default function Post() {
         const codeBlocks = contentRef.current?.querySelectorAll("pre code");
         if (codeBlocks) {
           codeBlocks.forEach((block) => {
+            // 이전 하이라이트 흔적 제거 (중복 하이라이트 경고 방지)
+            if ((block as HTMLElement).dataset.highlighted) {
+              (block as HTMLElement).removeAttribute("data-highlighted");
+            }
+            if (block.classList.contains("hljs")) {
+              block.classList.remove("hljs");
+            }
             hljs.highlightElement(block as HTMLElement);
           });
         }
@@ -202,7 +211,7 @@ export default function Post() {
 
             {/* Post Content */}
             <article className="toss-card" id="post-content">
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 {/* Post Header */}
                 <header className="mb-8">
                   <div className="mb-4">
@@ -222,7 +231,7 @@ export default function Post() {
                     )}
                   </div>
 
-                  <h1 className="text-4xl font-bold mb-6 leading-tight">
+                  <h1 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight">
                     {post.title}
                   </h1>
 
@@ -262,7 +271,7 @@ export default function Post() {
                 {/* Post Body */}
                 <div
                   ref={contentRef}
-                  className="prose prose-lg max-w-none dark:prose-invert"
+                  className="prose max-w-none dark:prose-invert md:prose-lg"
                   dangerouslySetInnerHTML={{
                     __html: formatContent(post.content),
                   }}
