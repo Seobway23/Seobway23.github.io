@@ -1,0 +1,93 @@
+---
+description: TypeScript/React 코딩 컨벤션 및 패턴
+globs: **/*.tsx,**/*.ts
+alwaysApply: false
+---
+
+# TypeScript & React 패턴
+
+## 컴포넌트 작성 규칙
+
+### 함수형 컴포넌트 + 명시적 타입
+```typescript
+// ✅ GOOD
+interface PostCardProps {
+  post: Post;
+  searchQuery?: string;
+}
+
+export function PostCard({ post, searchQuery }: PostCardProps) {
+  return <div>...</div>;
+}
+
+// ❌ BAD - default export, any 타입
+export default function PostCard(props: any) {}
+```
+
+### 커스텀 훅 분리
+반복되는 로직은 `src/hooks/use-*.tsx`로 분리
+```typescript
+// ✅ src/hooks/use-reading-progress.tsx
+export function useReadingProgress() {
+  const [progress, setProgress] = useState(0);
+  // ...
+  return progress;
+}
+```
+
+## 상태 관리
+
+### TanStack Query 사용 패턴
+```typescript
+// ✅ 데이터 패칭은 항상 React Query 사용
+const { data: posts, isLoading } = useQuery({
+  queryKey: ['posts'],
+  queryFn: getAllPosts,
+  staleTime: 5 * 60 * 1000, // 5분 캐시
+});
+```
+
+### Context vs Query
+- 전역 UI 상태 (테마, 모바일 메뉴): `useContext`
+- 서버/비동기 데이터: TanStack Query
+
+## 임포트 순서
+```typescript
+// 1. React
+import { useState, useEffect } from "react";
+// 2. 외부 라이브러리
+import { useQuery } from "@tanstack/react-query";
+// 3. 내부 컴포넌트 (@/components)
+import { PostCard } from "@/components/post-card";
+// 4. 훅/유틸 (@/hooks, @/lib)
+import { getAllPosts } from "@/lib/posts";
+// 5. 타입
+import type { Post } from "@shared/schema";
+```
+
+## Tailwind CSS 규칙
+- shadcn/ui 컴포넌트 우선 사용 (`src/components/ui/`)
+- `cn()` 유틸로 조건부 클래스 병합
+- 다크모드: `dark:` prefix 사용 (`darkMode: ["class"]`)
+- CSS 변수 색상 시스템 준수 (`hsl(var(--background))`)
+
+## 에러 처리
+```typescript
+// ✅ GOOD
+try {
+  const posts = await fetchPosts();
+} catch (error) {
+  console.error('포스트 로딩 실패:', error);
+  return [];
+}
+
+// ❌ BAD
+try {
+  const posts = await fetchPosts();
+} catch (e) {}
+```
+
+## 타입 정의 위치
+- 공유 타입: `shared/schema.ts` (Zod + Drizzle)
+- 컴포넌트 전용 타입: 파일 상단에 `interface`로 정의
+- 전역 유틸 타입: `src/lib/` 해당 파일 내

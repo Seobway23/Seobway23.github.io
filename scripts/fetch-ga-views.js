@@ -32,12 +32,15 @@ function getPostSlugs() {
     if (fs.existsSync(postsDataPath)) {
       const postsData = JSON.parse(fs.readFileSync(postsDataPath, "utf-8"));
       return postsData.map((post) => {
-        // 실제 라우팅 경로 사용: /post/:slug 형식
-        // 프론트에서 trackPageView(`/post/${postSlug}`)로 보내므로 동일한 형식으로 조회
-        const actualPath = `/post/${post.slug}`;
+        // posts-data.json의 path 필드를 우선 사용
+        // 만약 path가 없으면 /post/${slug} 형식 사용
+        const originalPath = post.path || `/post/${post.slug}`;
+        // trackPostView에서도 /post/${slug} 형식으로 보내므로 두 경로 모두 시도
+        const slugPath = `/post/${post.slug}`;
         return {
           slug: post.slug,
-          path: actualPath, // 실제 라우팅 경로 사용
+          path: originalPath, // posts-data.json의 원본 path 필드 사용
+          slugPath: slugPath, // 추가로 slug 기반 경로도 저장
         };
       });
     }
@@ -94,28 +97,47 @@ async function fetchViewsFromGA(postSlugs) {
 
     for (const post of postSlugs) {
       try {
-        const [response] = await analyticsDataClient.runReport({
-          property: `properties/${GA_PROPERTY_ID}`,
-          dateRanges: [{ startDate: "2020-01-01", endDate: "today" }],
-          dimensions: [{ name: "pagePath" }],
-          metrics: [{ name: "screenPageViews" }],
-          dimensionFilter: {
-            filter: {
-              fieldName: "pagePath",
-              stringFilter: {
-                matchType: "EXACT",
-                value: post.path,
-              },
-            },
-          },
-        });
+        // 두 경로 모두 시도: 원본 경로와 slug 기반 경로
+        const pathsToTry = [
+          post.path, // posts-data.json의 원본 경로
+          post.slugPath || `/post/${post.slug}`, // slug 기반 경로
+        ].filter(Boolean); // undefined 제거
 
         let totalViews = 0;
-        if (response.rows && response.rows.length > 0) {
-          totalViews = parseInt(
-            response.rows[0].metricValues[0].value || "0",
-            10
-          );
+
+        // 각 경로를 시도하여 조회수 합산
+        for (const queryPath of pathsToTry) {
+          try {
+            const [response] = await analyticsDataClient.runReport({
+              property: `properties/${GA_PROPERTY_ID}`,
+              dateRanges: [{ startDate: "2020-01-01", endDate: "today" }],
+              dimensions: [{ name: "pagePath" }],
+              metrics: [{ name: "screenPageViews" }],
+              dimensionFilter: {
+                filter: {
+                  fieldName: "pagePath",
+                  stringFilter: {
+                    matchType: "EXACT",
+                    value: queryPath,
+                  },
+                },
+              },
+            });
+
+            if (response.rows && response.rows.length > 0) {
+              const viewsForPath = parseInt(
+                response.rows[0].metricValues[0].value || "0",
+                10
+              );
+              totalViews += viewsForPath;
+            }
+          } catch (error) {
+            // 개별 경로 조회 실패는 무시하고 계속 진행
+            console.warn(
+              `  ⚠️ ${post.slug} (${queryPath}) 조회 실패:`,
+              error.message
+            );
+          }
         }
 
         views[post.slug] = totalViews;

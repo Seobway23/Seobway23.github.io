@@ -108,51 +108,91 @@ export async function getPostsByCategory(category: string): Promise<Post[]> {
 }
 
 /**
- * 인기 게시글 가져오기 (featured 플래그 기반)
- */
-export async function getFeaturedPosts(): Promise<Post[]> {
-  const posts = await getAllPosts();
-  return posts.filter((post) => post.featured);
-}
-
-/**
  * 조회수 기반 인기 게시글 가져오기
+ *
+ * 정책:
+ * 1. views.json(GA 빌드타임 수집) 조회수를 우선 사용
+ * 2. views.json이 없으면 posts.json의 views 필드 사용
+ * 3. 조회수 내림차순 정렬 → 상위 limit개 반환
+ * 4. featured 하드코딩 무관 - 순수 조회수로만 결정
  */
-export async function getPopularPosts(limit: number = 10): Promise<Post[]> {
+export async function getPopularPosts(limit: number = 5): Promise<Post[]> {
   const posts = await getAllPosts();
 
-  // views.json에서 조회수 데이터 가져오기
   try {
     const { getViewsData } = await import("./views");
     const viewsData = await getViewsData();
 
-    // 조회수 데이터와 병합
     const postsWithViews = posts.map((post) => ({
       ...post,
-      views: viewsData[post.slug] ?? post.views, // views.json의 조회수 우선 사용
+      views: viewsData[post.slug] ?? post.views,
     }));
 
-    // 조회수 내림차순 정렬
-    return postsWithViews.sort((a, b) => b.views - a.views).slice(0, limit);
-  } catch (error) {
-    // views.json을 가져올 수 없으면 기존 views 사용
+    return postsWithViews
+      .sort((a, b) => b.views - a.views)
+      .slice(0, limit);
+  } catch {
     return posts.sort((a, b) => b.views - a.views).slice(0, limit);
   }
 }
 
 /**
- * 게시글 검색
+ * 게시글 검색 (한글 검색 최적화 지원)
  */
 export async function searchPosts(query: string): Promise<Post[]> {
   const posts = await getAllPosts();
-  const lowerQuery = query.toLowerCase();
-  return posts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(lowerQuery) ||
-      post.excerpt.toLowerCase().includes(lowerQuery) ||
-      post.content.toLowerCase().includes(lowerQuery) ||
-      post.tags.some((tag: string) => tag.toLowerCase().includes(lowerQuery))
+
+  // 태그 검색 처리 (tag:태그명 형식)
+  if (query.startsWith("tag:")) {
+    const tag = query.slice(4).trim();
+    return getPostsByTag(tag);
+  }
+
+  // 한글 검색 최적화 사용
+  const { matchesKoreanSearch, calculateSearchScore } = await import(
+    "./korean-search"
   );
+
+  const results = posts
+    .map((post) => {
+      let score = 0;
+      let matched = false;
+
+      // 제목 검색 (가장 높은 가중치)
+      if (matchesKoreanSearch(post.title, query)) {
+        score += calculateSearchScore(post.title, query) * 3;
+        matched = true;
+      }
+
+      // 요약 검색
+      if (matchesKoreanSearch(post.excerpt, query)) {
+        score += calculateSearchScore(post.excerpt, query) * 2;
+        matched = true;
+      }
+
+      // 내용 검색
+      if (matchesKoreanSearch(post.content, query)) {
+        score += calculateSearchScore(post.content, query);
+        matched = true;
+      }
+
+      // 태그 검색
+      const tagMatch = post.tags.some((tag: string) => {
+        if (matchesKoreanSearch(tag, query)) {
+          score += calculateSearchScore(tag, query) * 2.5;
+          return true;
+        }
+        return false;
+      });
+      if (tagMatch) matched = true;
+
+      return { post, score, matched };
+    })
+    .filter((item) => item.matched)
+    .sort((a, b) => b.score - a.score)
+    .map((item) => item.post);
+
+  return results;
 }
 
 /**

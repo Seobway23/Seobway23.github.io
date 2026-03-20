@@ -42,21 +42,11 @@ export default function LeftSidebar({
     queryFn: () => getAllPosts(),
   });
 
-  // 조회수 기반 인기 게시글 가져오기
+  // 조회수 기반 인기 게시글 (views.json GA 데이터 병합)
   const { data: popularPosts = [] } = useQuery<Post[]>({
-    queryKey: ["/api/posts/popular"],
-    queryFn: async () => {
-      // 서버가 있으면 API 호출, 없으면 직접 함수 호출
-      try {
-        const response = await fetch("/api/posts/popular");
-        if (response.ok) {
-          return await response.json();
-        }
-      } catch (e) {
-        // API가 없으면 직접 함수 호출
-      }
-      return await getPopularPosts(3);
-    },
+    queryKey: ["/posts/popular"],
+    queryFn: () => getPopularPosts(5),
+    staleTime: 5 * 60 * 1000,
   });
 
   type TreeNode = {
@@ -151,7 +141,7 @@ export default function LeftSidebar({
             }}
           >
             <span>{node.label}</span>
-            <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+            <span className="text-xs bg-gray-700 dark:bg-gray-700 text-white dark:text-gray-300 px-2 py-1 rounded-full">
               {node.count}
             </span>
           </button>
@@ -193,7 +183,7 @@ export default function LeftSidebar({
               }
             >
               <span>전체</span>
-              <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+              <span className="text-xs bg-gray-700 dark:bg-gray-700 text-white dark:text-gray-300 px-2 py-1 rounded-full">
                 {allCount}
               </span>
             </button>

@@ -3,7 +3,6 @@ import {
   getAllPosts,
   getPostBySlug,
   getPostsByCategory,
-  getFeaturedPosts,
   searchPosts,
   incrementPostViews,
   initializePosts,
@@ -74,14 +73,9 @@ export const getQueryFn: <T>(options: {
       const search = params.get("search");
       const sort = params.get("sort");
 
-      if (url === "/api/posts/featured") {
-        return getFeaturedPosts() as T;
-      }
-
       if (url === "/api/posts/popular") {
-        // 조회수 기반 인기 게시글
         const { getPopularPosts } = await import("./posts");
-        return (await getPopularPosts(10)) as T;
+        return (await getPopularPosts(5)) as T;
       }
 
       if (url.startsWith("/api/posts/") && !url.includes("?")) {
@@ -97,11 +91,11 @@ export const getQueryFn: <T>(options: {
 
       let posts;
       if (search) {
-        posts = searchPosts(search);
+        posts = await searchPosts(search);
       } else if (category && category !== "all") {
-        posts = getPostsByCategory(category);
+        posts = await getPostsByCategory(category);
       } else {
-        posts = getAllPosts();
+        posts = await getAllPosts();
       }
 
       // 정렬

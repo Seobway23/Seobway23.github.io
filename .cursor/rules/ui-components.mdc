@@ -1,0 +1,83 @@
+---
+description: shadcn/ui 컴포넌트 사용 규칙 및 테마/스타일 컨벤션
+globs: src/components/**/*.tsx,src/components/ui/**/*.tsx
+alwaysApply: false
+---
+
+# UI 컴포넌트 규칙
+
+## 컴포넌트 우선순위
+1. `src/components/ui/` (shadcn/ui) → 기존 컴포넌트 우선 재사용
+2. 새 shadcn/ui 컴포넌트 추가: `npx shadcn@latest add [component]`
+3. 커스텀 컴포넌트: `src/components/`에 작성
+
+## 반응형 패턴
+
+### 모바일/데스크톱 분기
+```tsx
+// Sheet (모바일 사이드바) vs aside (데스크톱)
+const { isMobile } = useMobile(); // src/hooks/use-mobile.tsx
+
+return isMobile ? (
+  <Sheet>...</Sheet>
+) : (
+  <aside>...</aside>
+);
+```
+
+### 반응형 클래스 순서
+```tsx
+// mobile-first: 기본 → sm: → md: → lg:
+<div className="w-full md:w-80 lg:w-96">
+```
+
+## 테마 시스템
+
+### 다크/라이트 모드
+```tsx
+// useTheme hook 사용 (src/hooks/use-theme.tsx)
+const { theme, setTheme } = useTheme();
+// HTML class="dark" 토글 방식
+```
+
+### CSS 변수 색상 (변경 금지)
+```css
+/* 절대 하드코딩 금지 */
+/* ❌ color: #1a1a1a */
+/* ✅ */ color: hsl(var(--foreground));
+```
+
+### 그라디언트 배경
+```css
+/* BackgroundCustomizer가 관리하는 CSS 변수 */
+--gradient-start: #color1;
+--gradient-end: #color2;
+```
+
+## Framer Motion 사용
+```tsx
+// 헤더/사이드바 애니메이션 패턴
+import { motion, AnimatePresence } from "framer-motion";
+
+<motion.div
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.2 }}
+>
+```
+
+## 아이콘 사용
+- UI 아이콘: `lucide-react` 우선
+- 브랜드/기술 아이콘: `react-icons` (Si prefix: `SiReact`, `SiTypescript`)
+
+## cn() 유틸 필수 사용
+```tsx
+import { cn } from "@/lib/utils";
+
+// ✅ 조건부 클래스
+<div className={cn(
+  "base-class",
+  isActive && "active-class",
+  className // props로 받은 className 항상 마지막
+)}>
+```

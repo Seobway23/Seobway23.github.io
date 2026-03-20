@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { ArrowLeft, Eye, Clock, User } from "lucide-react";
@@ -52,6 +52,22 @@ export default function Post() {
   const queryClient = useQueryClient();
 
   const slug = params?.slug;
+  const [mermaidModal, setMermaidModal] = useState<string | null>(null);
+  const [mermaidZoom, setMermaidZoom] = useState(1);
+
+  const closeMermaidModal = () => {
+    setMermaidModal(null);
+    setMermaidZoom(1);
+  };
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMermaidModal();
+    };
+    if (mermaidModal) window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [mermaidModal]);
 
   const {
     data: post,
@@ -112,17 +128,14 @@ export default function Post() {
 
   useEffect(() => {
     if (post && !trackViewMutation.isPending) {
-      // Google Analytics로 조회수 추적 (3초 후)
       const timer = setTimeout(() => {
-        // GA 이벤트 추적
         trackPostView(post.slug, post.title);
-        // 기존 조회수 증가 (localStorage용)
         trackViewMutation.mutate();
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [post, trackViewMutation]);
+  }, [post]);
 
   // HTML 콘텐츠 그대로 표시
   const formatContent = (content: string) => {
@@ -132,15 +145,15 @@ export default function Post() {
   // 코드 하이라이팅을 위한 ref
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // 콘텐츠가 렌더링된 후 코드 하이라이팅 적용
+  // 콘텐츠가 렌더링된 후 코드 하이라이팅 + 머메이드 다이어그램 처리
   useEffect(() => {
     if (post && contentRef.current) {
-      // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 실행
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
+        // 1) hljs: mermaid 블록 제외하고 하이라이팅
         const codeBlocks = contentRef.current?.querySelectorAll("pre code");
         if (codeBlocks) {
           codeBlocks.forEach((block) => {
-            // 이전 하이라이트 흔적 제거 (중복 하이라이트 경고 방지)
+            if (block.classList.contains("language-mermaid")) return;
             if ((block as HTMLElement).dataset.highlighted) {
               (block as HTMLElement).removeAttribute("data-highlighted");
             }
@@ -149,6 +162,71 @@ export default function Post() {
             }
             hljs.highlightElement(block as HTMLElement);
           });
+        }
+
+        // 2) Mermaid 다이어그램 렌더링
+        const mermaidBlocks = contentRef.current?.querySelectorAll(
+          "code.language-mermaid"
+        );
+        if (mermaidBlocks && mermaidBlocks.length > 0) {
+          const { default: mermaid } = await import("mermaid");
+          const isDark = document.documentElement.classList.contains("dark");
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: isDark ? "dark" : "base",
+            securityLevel: "loose",
+            flowchart: { useMaxWidth: false, htmlLabels: true },
+            sequence: { useMaxWidth: false },
+          });
+
+          for (let i = 0; i < mermaidBlocks.length; i++) {
+            const block = mermaidBlocks[i];
+            const pre = block.parentElement;
+            if (!pre || (pre as HTMLElement).dataset.mermaidRendered) continue;
+
+            const code = block.textContent || "";
+            const id = `mermaid-${Date.now()}-${i}`;
+            try {
+              const { svg } = await mermaid.render(id, code);
+
+              const wrapper = document.createElement("div");
+              wrapper.className = "mermaid-wrapper my-6";
+              wrapper.style.overflowX = "auto";
+              wrapper.style.overflowY = "auto";
+              wrapper.style.maxHeight = "480px";
+
+              const inner = document.createElement("div");
+              inner.className =
+                "mermaid-inner group relative cursor-zoom-in rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow duration-200 inline-block min-w-full";
+              inner.innerHTML = svg;
+
+              // zoom-in hint badge
+              const hint = document.createElement("span");
+              hint.className =
+                "absolute top-2 right-2 text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10";
+              hint.textContent = "🔍 클릭하여 확대";
+              inner.appendChild(hint);
+
+              wrapper.appendChild(inner);
+
+              // SVG 크기 조정 — 자연 크기 유지, 최소 너비 보장
+              const svgEl = inner.querySelector("svg");
+              if (svgEl) {
+                svgEl.style.maxWidth = "none";
+                svgEl.style.height = "auto";
+                svgEl.style.display = "block";
+              }
+
+              inner.addEventListener("click", () => {
+                setMermaidModal(svg);
+              });
+
+              (pre as HTMLElement).dataset.mermaidRendered = "true";
+              pre.replaceWith(wrapper);
+            } catch (e) {
+              console.error("Mermaid render error:", e);
+            }
+          }
         }
       }, 100);
 
@@ -195,6 +273,63 @@ export default function Post() {
   const imageUrl = categoryImages[post.category] || categoryImages.react;
 
   return (
+    <>
+    {/* Mermaid 다이어그램 확대 모달 */}
+    {mermaidModal && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        onClick={closeMermaidModal}
+      >
+        <div
+          className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl flex flex-col"
+          style={{ width: "95vw", height: "95vh" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* 상단 컨트롤 바 */}
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 gap-4">
+            {/* 줌 컨트롤 */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMermaidZoom(z => Math.max(0.2, +(z - 0.25).toFixed(2)))}
+                className="w-7 h-7 flex items-center justify-center text-lg font-bold rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+              >−</button>
+              <span className="text-xs font-mono w-12 text-center text-gray-500 dark:text-gray-400">
+                {Math.round(mermaidZoom * 100)}%
+              </span>
+              <button
+                onClick={() => setMermaidZoom(z => Math.min(4, +(z + 0.25).toFixed(2)))}
+                className="w-7 h-7 flex items-center justify-center text-lg font-bold rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+              >+</button>
+              <button
+                onClick={() => setMermaidZoom(1)}
+                className="text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
+              >초기화</button>
+            </div>
+            <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">
+              ESC 또는 배경 클릭으로 닫기
+            </span>
+            <button
+              onClick={closeMermaidModal}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+            >
+              ✕ 닫기
+            </button>
+          </div>
+          {/* SVG 영역 — 줌 적용 */}
+          <div className="flex-1 overflow-auto p-6">
+            <div
+              style={{
+                transform: `scale(${mermaidZoom})`,
+                transformOrigin: "top left",
+                transition: "transform 0.15s ease",
+                display: "inline-block",
+              }}
+              dangerouslySetInnerHTML={{ __html: mermaidModal }}
+            />
+          </div>
+        </div>
+      </div>
+    )}
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-center">
         <div className="w-full max-w-4xl lg:max-w-none lg:grid lg:grid-cols-4 lg:gap-8">
@@ -314,5 +449,6 @@ export default function Post() {
         </div>
       </div>
     </div>
+    </>
   );
 }

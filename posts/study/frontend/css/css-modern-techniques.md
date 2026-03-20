@@ -3,7 +3,7 @@ title: CSS 모던 기법 완벽 정리
 slug: css-modern-techniques
 category: css
 tags: [CSS, Frontend, Design]
-author: 김개발자
+author: seobway
 readTime: 6
 featured: false
 createdAt: 2024-01-25

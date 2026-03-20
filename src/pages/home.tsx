@@ -16,16 +16,17 @@ import { useLayout } from "@/components/layout";
 import LeftSidebar from "../components/left-sidebar";
 import PostCard from "../components/post-card";
 import type { Post } from "@shared/schema";
+import { addToSearchHistory } from "@/lib/search-history";
 
 export default function Home() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { theme } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
   const [searchQuery, setSearchQuery] = useState("");
   const { mobileMenuOpen, setMobileMenuOpen } = useLayout();
 
-  // Get search params from URL
+  // Get search params from URL - URL이 변경될 때마다 실행
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const search = params.get("search");
@@ -33,30 +34,35 @@ export default function Home() {
     const sort = params.get("sort");
     const tag = params.get("tag");
 
-    if (search && !search.startsWith("tag:")) setSearchQuery(search);
-    if (category) setSelectedCategory(category);
-    if (sort) setSortBy(sort);
-    // 태그가 있으면 검색 쿼리로도 설정 (검색 결과 표시용)
+    // 상태 초기화
     if (tag) {
+      // 태그가 있으면 태그 모드
       setSearchQuery(`tag:${tag}`);
+      setSelectedCategory("all");
+    } else if (search) {
+      // 검색어가 있으면 검색 모드
+      if (!search.startsWith("tag:")) {
+        setSearchQuery(search);
+      }
+      setSelectedCategory("all");
+    } else if (category) {
+      // 카테고리가 있으면 카테고리 모드
+      setSelectedCategory(category);
+      setSearchQuery("");
+    } else {
+      // 모두 없으면 초기화
+      setSelectedCategory("all");
+      setSearchQuery("");
     }
-  }, []);
 
-  // Build query parameters
-  const queryParams = new URLSearchParams();
-  const tagParam = new URLSearchParams(window.location.search).get("tag");
-  if (tagParam) {
-    queryParams.append("tag", tagParam);
-  } else {
-    if (selectedCategory !== "all")
-      queryParams.append("category", selectedCategory);
-    if (searchQuery && !searchQuery.startsWith("tag:"))
-      queryParams.append("search", searchQuery);
-  }
-  if (sortBy !== "latest") queryParams.append("sort", sortBy);
+    if (sort) setSortBy(sort);
+  }, [location]); // location이 변경될 때마다 실행
+
+  // Build query parameters - URL에서 직접 가져오기
+  const queryParams = new URLSearchParams(window.location.search);
 
   const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", queryParams.toString()],
+    queryKey: ["/api/posts", location], // location을 queryKey에 포함하여 URL 변경 시 자동으로 재요청
     queryFn: async () => {
       // 서버가 있으면 API 호출
       if (
@@ -68,7 +74,14 @@ export default function Home() {
           if (response.ok) {
             const data = await response.json();
             // views.json의 조회수와 병합
-            return await mergeViewsData(data);
+            const mergedPosts = await mergeViewsData(data);
+
+            // 검색 히스토리에 추가
+            if (searchQuery && !searchQuery.startsWith("tag:")) {
+              addToSearchHistory(searchQuery, mergedPosts.length);
+            }
+
+            return mergedPosts;
           }
         } catch (e) {
           // API 실패 시 직접 처리
@@ -81,23 +94,31 @@ export default function Home() {
       const { getViewsData } = await import("../lib/views");
 
       let posts;
-      // URL 파라미터에서 tag 확인
-      const tagParam = new URLSearchParams(window.location.search).get("tag");
+      // URL 파라미터에서 직접 확인 (최신 상태 보장)
+      const currentParams = new URLSearchParams(window.location.search);
+      const tagParam = currentParams.get("tag");
+      const categoryParam = currentParams.get("category");
+      const searchParam = currentParams.get("search");
 
       if (tagParam) {
+        // 태그 필터
         posts = await getPostsByTag(tagParam);
-      } else if (searchQuery && !searchQuery.startsWith("tag:")) {
-        posts = await searchPosts(searchQuery);
-      } else if (selectedCategory !== "all") {
-        posts = await getPostsByCategory(selectedCategory);
+      } else if (searchParam) {
+        // 검색 필터
+        posts = await searchPosts(searchParam);
+      } else if (categoryParam && categoryParam !== "all") {
+        // 카테고리 필터
+        posts = await getPostsByCategory(categoryParam);
       } else {
+        // 전체 게시글
         posts = await getAllPosts();
       }
 
-      // 정렬
-      if (sortBy === "popular") {
+      // 정렬 - URL 파라미터에서 직접 가져오기
+      const sortParam = currentParams.get("sort") || "latest";
+      if (sortParam === "popular") {
         posts.sort((a, b) => b.views - a.views);
-      } else if (sortBy === "oldest") {
+      } else if (sortParam === "oldest") {
         posts.sort(
           (a, b) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -111,7 +132,14 @@ export default function Home() {
       }
 
       // views.json의 조회수와 병합
-      return await mergeViewsData(posts);
+      const mergedPosts = await mergeViewsData(posts);
+
+      // 검색 히스토리에 추가 (검색어가 있을 때만)
+      if (searchParam && !searchParam.startsWith("tag:")) {
+        addToSearchHistory(searchParam, mergedPosts.length);
+      }
+
+      return mergedPosts;
     },
   });
 
@@ -171,7 +199,14 @@ export default function Home() {
 
         <main className="lg:col-span-3">
           {/* Hero Section */}
-          {!searchQuery && selectedCategory === "all" && (
+          {(() => {
+            const currentParams = new URLSearchParams(window.location.search);
+            const hasFilter =
+              currentParams.has("tag") ||
+              currentParams.has("category") ||
+              currentParams.has("search");
+            return !hasFilter;
+          })() && (
             <section className="mb-12">
               <Card className="toss-card overflow-hidden">
                 <div className="relative">
@@ -217,29 +252,37 @@ export default function Home() {
               <div>
                 <h2 className="text-3xl font-bold">
                   {(() => {
-                    const tagParam = new URLSearchParams(
+                    const currentParams = new URLSearchParams(
                       window.location.search
-                    ).get("tag");
+                    );
+                    const tagParam = currentParams.get("tag");
+                    const searchParam = currentParams.get("search");
+                    const categoryParam = currentParams.get("category");
+
                     if (tagParam) {
                       return `"${tagParam}" 태그 글`;
                     }
-                    if (searchQuery && !searchQuery.startsWith("tag:")) {
-                      return `"${searchQuery}" 검색 결과`;
+                    if (searchParam) {
+                      return `"${searchParam}" 검색 결과`;
                     }
-                    if (selectedCategory === "all") {
-                      return "최신 글";
+                    if (categoryParam && categoryParam !== "all") {
+                      // 카테고리 라벨 매핑
+                      const categoryLabels: Record<string, string> = {
+                        react: "React",
+                        typescript: "TypeScript",
+                        css: "CSS",
+                        performance: "Performance",
+                        nextjs: "Next.js",
+                        frontend: "Frontend",
+                      };
+                      // 카테고리 경로에서 마지막 부분 추출
+                      const categoryName =
+                        categoryParam.split("/").pop() || categoryParam;
+                      return `${
+                        categoryLabels[categoryName] || categoryName
+                      } 글`;
                     }
-                    // 카테고리 라벨 매핑
-                    const categoryLabels: Record<string, string> = {
-                      react: "React",
-                      typescript: "TypeScript",
-                      css: "CSS",
-                      performance: "Performance",
-                      nextjs: "Next.js",
-                    };
-                    return `${
-                      categoryLabels[selectedCategory] || selectedCategory
-                    } 글`;
+                    return "최신 글";
                   })()}
                 </h2>
                 <p className="text-gray-700 dark:text-gray-400 mt-1">
@@ -276,22 +319,46 @@ export default function Home() {
               <Card className="toss-card text-center py-12">
                 <CardContent>
                   <p className="text-gray-500 text-lg">
-                    {searchQuery
-                      ? "검색 결과가 없습니다."
-                      : "아직 글이 없습니다."}
+                    {(() => {
+                      const currentParams = new URLSearchParams(
+                        window.location.search
+                      );
+                      return currentParams.has("tag") ||
+                        currentParams.has("category") ||
+                        currentParams.has("search")
+                        ? "검색 결과가 없습니다."
+                        : "아직 글이 없습니다.";
+                    })()}
                   </p>
                   <p className="text-gray-400 mt-2">
-                    {searchQuery
-                      ? "다른 키워드로 검색해보세요."
-                      : "곧 새로운 글을 업로드할 예정입니다."}
+                    {(() => {
+                      const currentParams = new URLSearchParams(
+                        window.location.search
+                      );
+                      return currentParams.has("tag") ||
+                        currentParams.has("category") ||
+                        currentParams.has("search")
+                        ? "다른 키워드로 검색해보세요."
+                        : "곧 새로운 글을 업로드할 예정입니다.";
+                    })()}
                   </p>
                 </CardContent>
               </Card>
             ) : (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                {posts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
+                {posts.map((post) => {
+                  const currentParams = new URLSearchParams(
+                    window.location.search
+                  );
+                  const searchParam = currentParams.get("search");
+                  return (
+                    <PostCard
+                      key={post.id}
+                      post={post}
+                      searchQuery={searchParam || undefined}
+                    />
+                  );
+                })}
               </div>
             )}
           </section>

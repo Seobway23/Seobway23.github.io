@@ -3,7 +3,7 @@ title: TypeScript 고급 패턴 완벽 가이드
 slug: typescript-advanced-patterns
 category: typescript
 tags: [TypeScript, JavaScript, Programming]
-author: 김개발자
+author: seobway
 readTime: 10
 featured: false
 createdAt: 2024-01-20

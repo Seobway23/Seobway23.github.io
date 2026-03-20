@@ -1,0 +1,69 @@
+---
+description: Google Analytics 4 연동 패턴 - 클라이언트 추적 및 빌드타임 데이터 수집
+globs: scripts/fetch-ga-views*.js,src/lib/analytics.ts
+alwaysApply: false
+---
+
+# Google Analytics 4 연동 규칙
+
+## GA 연동 구조 (2-레이어)
+
+### 레이어 1: 클라이언트 사이드 (실시간 추적)
+`src/lib/analytics.ts` 수정 시 규칙:
+
+```typescript
+// 이벤트 추적 패턴
+export function trackEvent(action: string, category: string, label: string) {
+  if (typeof window.gtag === 'undefined') return; // 항상 guard 필요
+  window.gtag('event', action, {
+    event_category: category,
+    event_label: label,
+  });
+}
+
+// 포스트 조회 추적 (3초 지연 - 실제 읽기 의도 확인)
+setTimeout(() => trackPostView(slug, title), 3000);
+```
+
+### 레이어 2: 빌드타임 데이터 수집
+`scripts/fetch-ga-views.js` / `fetch-ga-views-dev.js` 수정 시 규칙:
+
+- GA4 Data API 사용: `@google-analytics/data` 패키지
+- **경로 2개 항상 체크**: 원본 경로 + slug 단축 경로
+- 결과를 `public/views.json`에 저장
+
+```javascript
+// 조회수 병합 패턴 (두 경로 합산)
+const fullPathViews = await fetchViews(`/post/${category}/${slug}`);
+const shortPathViews = await fetchViews(`/post/${slug}`);
+views[slug] = (fullPathViews || 0) + (shortPathViews || 0);
+```
+
+## 환경 변수 설정
+
+개발 환경 (`.env`):
+```
+VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+GA_PROPERTY_ID=123456789
+GA_SERVICE_ACCOUNT_KEY=./path/to/service-account.json
+```
+
+GitHub Actions (Secrets):
+```
+GA_PROPERTY_ID
+GA_SERVICE_ACCOUNT_KEY  # JSON 문자열로 저장
+```
+
+## 조회수 표시 흐름
+```
+posts.json (views: 0) ← 기본값
+     +
+views.json (GA 실제값) ← 빌드타임 수집
+     ↓
+viewsData[post.slug] ?? post.views  ← 런타임 병합
+```
+
+## 새로운 이벤트 추가 시
+1. `src/lib/analytics.ts`에 함수 추가
+2. GA4 콘솔에서 커스텀 이벤트 확인
+3. 이벤트 파라미터는 snake_case 사용 (`post_slug`, `post_title`)

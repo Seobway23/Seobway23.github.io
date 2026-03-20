@@ -146,7 +146,7 @@ export default function About() {
                 className="w-32 h-32 rounded-full object-cover mx-auto mb-6 shadow-lg"
               />
 
-              <h2 className="text-2xl font-bold mb-2">김개발자</h2>
+              <h2 className="text-2xl font-bold mb-2">seobway</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Frontend Developer
               </p>

@@ -103,7 +103,7 @@ React 18의 Concurrent Features는 사용자 경험을 크게 개선시킵니다
         `,
         category: "react",
         tags: ["React", "JavaScript", "Performance", "Frontend"],
-        author: "김개발자",
+        author: "seobway",
         readTime: 8,
         views: 1234,
         featured: true,

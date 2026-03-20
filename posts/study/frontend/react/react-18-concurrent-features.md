@@ -3,7 +3,7 @@ title: React 18의 새로운 Concurrent Features 완벽 정리
 slug: react-18-concurrent-features
 category: react
 tags: [React, JavaScript, Performance, Frontend]
-author: 김개발자
+author: seobway
 readTime: 8
 featured: true
 createdAt: 2024-01-15

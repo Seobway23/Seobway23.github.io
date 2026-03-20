@@ -1,0 +1,66 @@
+---
+description: 빌드 스크립트 및 Node.js 데이터 수집 스크립트 작성 규칙
+globs: scripts/**/*.js
+alwaysApply: false
+---
+
+# 빌드 스크립트 규칙
+
+## 스크립트 목적별 분류
+
+| 파일 | 역할 | 출력 |
+|------|------|------|
+| `generate-posts-data.js` | 마크다운 → JSON | `public/posts.json`, `public/posts-data.json` |
+| `fetch-ga-views.js` | GA API (프로덕션) | `public/views.json` |
+| `fetch-ga-views-dev.js` | GA API (개발) | `public/views.json` |
+| `fetch-github-comments.js` | GitHub API | `public/comments.json`, `public/recent-comments.json` |
+
+## 스크립트 작성 패턴
+
+### 에러 핸들링 (API 실패 시 기존 파일 유지)
+```javascript
+try {
+  const data = await fetchFromAPI();
+  fs.writeFileSync('./public/output.json', JSON.stringify(data, null, 2));
+  console.log('✅ 완료:', Object.keys(data).length, '개 항목');
+} catch (error) {
+  console.error('❌ 실패:', error.message);
+  // 기존 파일 덮어쓰지 않음 - 빌드 계속 진행 가능
+  process.exit(0); // 실패해도 빌드 중단 안 함
+}
+```
+
+### GA Data API 패턴
+```javascript
+const { BetaAnalyticsDataClient } = require('@google-analytics/data');
+
+// 서비스 계정 키: 파일 경로 또는 JSON 문자열 모두 지원
+const credentials = process.env.GA_SERVICE_ACCOUNT_KEY;
+const analyticsClient = credentials.startsWith('{')
+  ? new BetaAnalyticsDataClient({ credentials: JSON.parse(credentials) })
+  : new BetaAnalyticsDataClient({ keyFilename: credentials });
+```
+
+### posts-data.json 활용
+```javascript
+// GA/댓글 스크립트는 모두 posts-data.json을 기준으로 처리
+const postsData = JSON.parse(fs.readFileSync('./public/posts-data.json'));
+for (const post of postsData) {
+  // post.slug, post.title, post.path 사용
+}
+```
+
+## GitHub Actions 연동 규칙
+
+`.github/workflows/build.yml` 수정 시:
+- `fetch:all:prod` → `fetch:views:prod` + `fetch:comments` 순서 유지
+- GA 서비스 계정 키는 `${{ secrets.GA_SERVICE_ACCOUNT_KEY }}`로 주입
+- 스크립트 실패 시 `continue-on-error: true` 권장 (조회수 없어도 빌드 가능)
+
+## 새 데이터 소스 추가 시 체크리스트
+- [ ] `scripts/fetch-새기능.js` 파일 생성
+- [ ] `public/` 출력 파일명 결정
+- [ ] `package.json` scripts에 추가
+- [ ] `fetch:all` 및 `fetch:all:prod` 커맨드에 포함
+- [ ] GitHub Actions workflow에 시크릿 추가
+- [ ] `src/lib/` 에 런타임 읽기 유틸 추가

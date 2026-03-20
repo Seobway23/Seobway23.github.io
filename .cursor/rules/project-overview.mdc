@@ -1,0 +1,45 @@
+---
+description: ModernDevBlog 프로젝트 개요 및 아키텍처 - 항상 적용되는 핵심 컨텍스트
+alwaysApply: true
+---
+
+# ModernDevBlog 프로젝트 개요
+
+## 아키텍처 패턴
+- **정적 SPA 블로그**: 빌드 타임에 JSON 생성, 런타임 API 없음
+- **GitHub Pages 배포**: GitHub Actions로 push 시 자동 빌드/배포
+- **데이터 흐름**: `posts/*.md` → 빌드 스크립트 → `public/*.json` → React 런타임
+
+## 기술 스택
+- **React 18** + **TypeScript 5.6** + **Vite 5**
+- **라우팅**: wouter (`/`, `/post/:slug`, `/about`)
+- **상태관리**: TanStack React Query v5 (서버 상태)
+- **UI**: shadcn/ui + Radix UI + Tailwind CSS 3.4
+- **애니메이션**: Framer Motion 11
+- **아이콘**: lucide-react + react-icons
+
+## 빌드 파이프라인 순서
+```
+npm run generate:posts   # posts/*.md → public/posts.json
+npm run fetch:views      # GA Data API → public/views.json
+npm run fetch:comments   # GitHub API → public/comments.json
+npm run build            # Vite 프로덕션 빌드
+```
+
+## 경로 alias
+- `@/` → `src/`
+- `@shared/` → `shared/`
+
+## 환경 변수
+| 변수 | 용도 |
+|------|------|
+| `VITE_GA_MEASUREMENT_ID` | GA4 클라이언트 측정 ID |
+| `GA_PROPERTY_ID` | GA4 서버 Property ID |
+| `GA_SERVICE_ACCOUNT_KEY` | GA 서비스 계정 JSON |
+| `GITHUB_TOKEN` | GitHub PAT (댓글 수 수집) |
+| `GITHUB_REPO` | 댓글용 저장소 (`user/repo`) |
+
+## 중요 규칙
+- `server/` 폴더는 존재하지만 실제로는 정적 SPA로 동작
+- 조회수/댓글 수는 빌드 타임에 수집되어 정적 파일에 포함됨
+- 마크다운 폴더 구조(`posts/frontend/css/`) = 카테고리 계층 구조

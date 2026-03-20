@@ -118,15 +118,22 @@ export default function UtterancesComments({
 
       try {
         // Utterances iframe에 테마 변경 메시지 전송
-        iframe.contentWindow.postMessage(
-          {
-            type: "set-theme",
-            theme: newTheme,
-          },
-          "https://utteranc.es"
-        );
+        // localhost에서는 origin 불일치로 인한 경고가 발생할 수 있지만,
+        // postMessage는 비동기적으로 작동하므로 try-catch로 잡을 수 없음
+        // 프로덕션 환경에서는 정상 작동함
+        if (iframe.contentWindow) {
+          // 개발 환경에서는 origin 불일치 경고가 발생할 수 있지만 무시
+          iframe.contentWindow.postMessage(
+            {
+              type: "set-theme",
+              theme: newTheme,
+            },
+            "https://utteranc.es"
+          );
+        }
         return true; // 성공
       } catch (e) {
+        // postMessage는 동기적으로 오류를 던지지 않지만, 안전을 위해 catch 추가
         console.warn("Utterances 테마 변경 실패:", e);
         return false;
       }

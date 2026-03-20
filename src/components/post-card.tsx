@@ -5,9 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Post } from "@shared/schema";
 import { getPostComments } from "@/lib/comments";
+import { highlightSearchMatch } from "@/lib/korean-search";
 
 interface PostCardProps {
   post: Post;
+  searchQuery?: string;
 }
 
 const categoryLabels: Record<string, string> = {
@@ -31,19 +33,24 @@ const categoryImages: Record<string, string> = {
     "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
 };
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({ post, searchQuery }: PostCardProps) {
   const categoryLabel = categoryLabels[post.category] || post.category;
   const imageUrl = categoryImages[post.category] || categoryImages.react;
   const [commentCount, setCommentCount] = useState<number>(0);
 
-  // 댓글 개수 가져오기
   useEffect(() => {
     getPostComments(post.slug)
       .then(setCommentCount)
-      .catch(() => {
-        // 실패 시 0으로 유지
-      });
+      .catch(() => {});
   }, [post.slug]);
+
+  // 검색어 하이라이팅
+  const highlightedTitle = searchQuery
+    ? highlightSearchMatch(post.title, searchQuery)
+    : [{ text: post.title, match: false }];
+  const highlightedExcerpt = searchQuery
+    ? highlightSearchMatch(post.excerpt, searchQuery)
+    : [{ text: post.excerpt, match: false }];
 
   return (
     <Card className="toss-card overflow-hidden hover:shadow-lg transition-all duration-300 group">
@@ -76,12 +83,34 @@ export default function PostCard({ post }: PostCardProps) {
       <CardContent className="p-6">
         <Link href={`/post/${post.slug}`}>
           <h3 className="text-xl font-bold mb-3 hover-gradient-text transition-colors line-clamp-2 min-h-[3.5rem] overflow-hidden">
-            {post.title}
+            {highlightedTitle.map((part, i) => (
+              <span
+                key={i}
+                className={
+                  part.match
+                    ? "bg-yellow-200 dark:bg-yellow-900/50 px-1 rounded"
+                    : ""
+                }
+              >
+                {part.text}
+              </span>
+            ))}
           </h3>
         </Link>
 
         <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-          {post.excerpt}
+          {highlightedExcerpt.map((part, i) => (
+            <span
+              key={i}
+              className={
+                part.match
+                  ? "bg-yellow-200 dark:bg-yellow-900/50 px-1 rounded"
+                  : ""
+              }
+            >
+              {part.text}
+            </span>
+          ))}
         </p>
 
         <div className="flex items-center justify-between text-sm text-gray-500">

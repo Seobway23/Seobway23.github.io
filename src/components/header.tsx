@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Search, Sun, Moon, Palette, Menu, X } from "lucide-react";
 import { useTheme } from "../hooks/use-theme";
@@ -8,19 +8,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import BackgroundCustomizer from "./background-customizer";
+import { SearchDialog } from "./search-dialog";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const [location, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCustomizer, setShowCustomizer] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
   const isMobile = useIsMobile();
   const { mobileMenuOpen, setMobileMenuOpen } = useLayout();
+
+  // Cmd+K / Ctrl+K 단축키로 검색 다이얼로그 열기
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowSearchDialog(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
     }
   };
 
@@ -79,18 +95,52 @@ export default function Header() {
               </Link>
             )}
 
-            {/* Search */}
-            <div className="hidden md:block flex-1 max-w-md mx-8">
-              <form onSubmit={handleSearch} className="relative">
-                <Input
-                  type="text"
-                  placeholder="검색어를 입력하세요..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </form>
+            {/* Search - 데스크톱: 검색 입력창, 모바일: 검색 버튼 */}
+            <div className="flex-1 max-w-md mx-4 md:mx-8">
+              {isMobile ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSearchDialog(true)}
+                  className="w-full justify-start text-left text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  <span className="text-sm">검색...</span>
+                  <kbd className="ml-auto pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                    {navigator.platform.toLowerCase().includes("mac") ? (
+                      <span className="text-xs">⌘</span>
+                    ) : (
+                      <span className="text-xs">Ctrl</span>
+                    )}
+                    <span>K</span>
+                  </kbd>
+                </Button>
+              ) : (
+                <button
+                  onClick={() => setShowSearchDialog(true)}
+                  className="w-full relative"
+                >
+                  <Input
+                    type="text"
+                    placeholder={`검색어를 입력하세요... (${
+                      navigator.platform.toLowerCase().includes("mac")
+                        ? "⌘"
+                        : "Ctrl"
+                    } K)`}
+                    readOnly
+                    className="pl-10 pr-20 bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <kbd className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                    {navigator.platform.toLowerCase().includes("mac") ? (
+                      <span className="text-xs">⌘</span>
+                    ) : (
+                      <span className="text-xs">Ctrl</span>
+                    )}
+                    <span>K</span>
+                  </kbd>
+                </button>
+              )}
             </div>
 
             {/* Navigation & Controls */}
@@ -161,6 +211,11 @@ export default function Header() {
       <BackgroundCustomizer
         open={showCustomizer}
         onOpenChange={setShowCustomizer}
+      />
+
+      <SearchDialog
+        open={showSearchDialog}
+        onOpenChange={setShowSearchDialog}
       />
     </>
   );

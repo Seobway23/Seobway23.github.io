@@ -36,15 +36,21 @@ function getPostSlugs() {
     if (fs.existsSync(postsDataPath)) {
       const postsData = JSON.parse(fs.readFileSync(postsDataPath, "utf-8"));
       return postsData.map((post) => {
-        // 실제 라우팅 경로 사용: /post/:slug 형식
-        // 프론트에서 trackPageView(`/post/${postSlug}`)로 보내므로 동일한 형식으로 조회
-        const actualPath = `/post/${post.slug}`;
-        console.log(
-          `[GA 조회수] 게시글 경로 매핑: ${post.slug} -> ${actualPath}`
-        );
+        // posts-data.json의 path 필드를 우선 사용
+        // 예: /post/frontend/css/css-modern-techniques
+        const originalPath = post.path || `/post/${post.slug}`;
+        // trackPostView에서도 /post/${slug} 형식으로 보내므로 두 경로 모두 시도
+        // 예: /post/css-modern-techniques
+        const slugPath = `/post/${post.slug}`;
+
+        console.log(`[GA 조회수] 게시글 경로 매핑: ${post.slug}`);
+        console.log(`  📍 원본 경로 (posts-data.json): ${originalPath}`);
+        console.log(`  📍 Slug 경로 (trackPostView): ${slugPath}`);
+        console.log(`  ✅ 두 경로 모두 GA에서 조회합니다\n`);
         return {
           slug: post.slug,
-          path: actualPath, // 실제 라우팅 경로 사용
+          path: originalPath, // posts-data.json의 원본 path 필드 사용 (/post/frontend/css/css-modern-techniques)
+          slugPath: slugPath, // 추가로 slug 기반 경로도 저장 (/post/css-modern-techniques)
         };
       });
     }
@@ -129,39 +135,63 @@ async function fetchViewsFromGA(postSlugs) {
 
     for (const post of postSlugs) {
       try {
-        console.log(
-          `[GA 조회수] ${post.slug} 조회수 요청 중... (경로: ${post.path})`
-        );
-        const [response] = await analyticsDataClient.runReport({
-          property: `properties/${GA_PROPERTY_ID}`,
-          dateRanges: [{ startDate: "2020-01-01", endDate: "today" }],
-          dimensions: [{ name: "pagePath" }],
-          metrics: [{ name: "screenPageViews" }],
-          dimensionFilter: {
-            filter: {
-              fieldName: "pagePath",
-              stringFilter: {
-                matchType: "EXACT",
-                value: post.path,
-              },
-            },
-          },
-        });
+        // 두 경로 모두 시도: 원본 경로와 slug 기반 경로
+        const pathsToTry = [
+          post.path, // posts-data.json의 원본 경로
+          post.slugPath || `/post/${post.slug}`, // slug 기반 경로
+        ].filter(Boolean); // undefined 제거
 
-        console.log(`[GA 조회수] ${post.slug} API 응답:`, {
-          rowsCount: response.rows?.length || 0,
-          hasData: !!(response.rows && response.rows.length > 0),
+        console.log(
+          `\n[GA 조회수] ${post.slug} - ${pathsToTry.length}개 경로 시도:`
+        );
+        pathsToTry.forEach((p, idx) => {
+          console.log(`  ${idx + 1}. ${p}`);
         });
 
         let totalViews = 0;
-        if (response.rows && response.rows.length > 0) {
-          const rawValue = response.rows[0].metricValues[0].value || "0";
-          totalViews = parseInt(rawValue, 10);
-          console.log(
-            `[GA 조회수] ${post.slug} 원본 값: ${rawValue} → 파싱: ${totalViews}`
-          );
-        } else {
-          console.log(`[GA 조회수] ${post.slug} 데이터 없음 (0으로 설정)`);
+        let foundPath = null;
+
+        // 각 경로를 시도하여 조회수 합산
+        for (const queryPath of pathsToTry) {
+          try {
+            console.log(
+              `[GA 조회수] ${post.slug} 조회수 요청 중... (경로: ${queryPath})`
+            );
+            const [response] = await analyticsDataClient.runReport({
+              property: `properties/${GA_PROPERTY_ID}`,
+              dateRanges: [{ startDate: "2020-01-01", endDate: "today" }],
+              dimensions: [{ name: "pagePath" }],
+              metrics: [{ name: "screenPageViews" }],
+              dimensionFilter: {
+                filter: {
+                  fieldName: "pagePath",
+                  stringFilter: {
+                    matchType: "EXACT",
+                    value: queryPath,
+                  },
+                },
+              },
+            });
+
+            if (response.rows && response.rows.length > 0) {
+              const rawValue = response.rows[0].metricValues[0].value || "0";
+              const viewsForPath = parseInt(rawValue, 10);
+              totalViews += viewsForPath;
+              foundPath = queryPath;
+              console.log(
+                `[GA 조회수] ${post.slug} (${queryPath}): ${rawValue} → ${viewsForPath}회 (누적: ${totalViews}회)`
+              );
+            } else {
+              console.log(
+                `[GA 조회수] ${post.slug} (${queryPath}): 데이터 없음`
+              );
+            }
+          } catch (error) {
+            console.warn(
+              `[GA 조회수] ${post.slug} (${queryPath}) 조회 실패:`,
+              error.message
+            );
+          }
         }
 
         views[post.slug] = totalViews;
@@ -222,7 +252,8 @@ async function main() {
   // views.json 파일로 저장
   const viewsPath = path.join(publicDir, "views.json");
   console.log(`\n[메인] views.json 파일 저장 중: ${viewsPath}`);
-  fs.writeFileSync(viewsPath, JSON.stringify(views, null, 2), "utf-8");
+  const viewsJsonString = JSON.stringify(views, null, 2);
+  fs.writeFileSync(viewsPath, viewsJsonString, "utf-8");
 
   console.log(`\n✅ 조회수 데이터를 ${viewsPath}에 저장했습니다.`);
   console.log("\n📊 최종 조회수 데이터:");
