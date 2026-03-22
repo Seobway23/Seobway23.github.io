@@ -63,12 +63,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Post not found" });
       }
       
-      // Increment views
-      await storage.incrementPostViews(post.id);
-      
-      res.json({ ...post, views: post.views + 1 });
+      res.json(post);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch post" });
+    }
+  });
+
+  // Increment post views (호출 1회 = 조회수 +1)
+  app.post("/api/posts/:slug/view", async (req, res) => {
+    try {
+      const post = await storage.getPostBySlug(req.params.slug);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      await storage.incrementPostViews(post.id);
+      res.json({ views: post.views + 1 });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to increment views" });
     }
   });
 

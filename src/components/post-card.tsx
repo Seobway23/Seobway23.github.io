@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Post } from "@shared/schema";
 import { getPostComments } from "@/lib/comments";
 import { highlightSearchMatch } from "@/lib/korean-search";
+import { getPostCoverImageUrl } from "@/lib/post-cover";
 
 interface PostCardProps {
   post: Post;
@@ -20,22 +21,9 @@ const categoryLabels: Record<string, string> = {
   nextjs: "Next.js",
 };
 
-// Stock photo mappings for categories
-const categoryImages: Record<string, string> = {
-  react:
-    "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  typescript:
-    "https://images.unsplash.com/photo-1516116216624-53e697fedbea?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  css: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  performance:
-    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  nextjs:
-    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-};
-
 export default function PostCard({ post, searchQuery }: PostCardProps) {
   const categoryLabel = categoryLabels[post.category] || post.category;
-  const imageUrl = categoryImages[post.category] || categoryImages.react;
+  const imageUrl = getPostCoverImageUrl(post);
   const [commentCount, setCommentCount] = useState<number>(0);
 
   useEffect(() => {

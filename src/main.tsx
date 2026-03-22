@@ -5,10 +5,7 @@ import "./index.css";
 // Initialize theme on app start
 const initializeTheme = () => {
   const savedTheme = localStorage.getItem("theme");
-  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-  const theme = savedTheme || systemTheme;
+  const theme = savedTheme || "dark";
 
   document.documentElement.classList.toggle("dark", theme === "dark");
 };

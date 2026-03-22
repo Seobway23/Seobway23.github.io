@@ -14,6 +14,8 @@ export const posts = pgTable("posts", {
   readTime: integer("read_time").notNull(),
   views: integer("views").notNull().default(0),
   featured: boolean("featured").notNull().default(false),
+  /** 목록/상단 히어로용. frontmatter `coverImage` 또는 본문 첫 `![](...)` 로 채움 */
+  coverImage: text("cover_image"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -1,15 +1,15 @@
 ---
-title: GitLab CI/CD 완전 정복 — .gitlab-ci.yml 구조부터 K3s 배포까지
+title: GitLab CI/CD — .gitlab-ci.yml -> K3s
 slug: gitlab-cicd-guide
 tags: [GitLab, CI/CD, DevOps, K3s, Docker, Kubernetes, 인프라]
-author: seobway
+author: Seobway
 readTime: 15
 featured: true
 createdAt: 2026-03-19
 excerpt: 실제 프로젝트에 적용한 GitLab CI/CD 파이프라인을 기반으로 yml 구조 동작 원리와 Docker 빌드 → K3s 배포 흐름을 정리합니다.
 ---
 
-# GitLab CI/CD 완전 정복 — `.gitlab-ci.yml` 구조부터 K3s 배포까지
+# GitLab CI/CD — '.gitlab-ci.yml' -> K3s
 
 > 이 글은 실제 프로젝트에 적용한 GitLab CI/CD 파이프라인을 기반으로,
 > **yml 구조가 어떻게 동작하는지**와 **Docker 빌드 → K3s 배포 흐름**을 정리합니다.
@@ -25,35 +25,30 @@ GitLab은 저장소 루트의 `.gitlab-ci.yml`을 읽어 **파이프라인(Pipel
 - **잡 간 파일 시스템은 공유되지 않습니다.** 어떤 잡에서 만든 파일은 그 잡이 끝나면 사라집니다.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7', 'secondaryColor': '#f0f4f8', 'tertiaryColor': '#e8f5e9'}}}%%
+%% desc: GitLab CI 기본 구조 — Git Push 후 Pipeline이 생성되고 Runner 컨테이너가 각 잡을 실행
 flowchart LR
     GIT[("Git Push\n/ MR")] --> PL[Pipeline 생성]
     PL --> R1[Runner\nContainer A]
     PL --> R2[Runner\nContainer B]
     PL --> R3[Runner\nContainer C]
 
-    classDef git fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef pl fill:#5b8ec7,stroke:#3d6fa5,color:#fff
-    classDef runner fill:#5a9a3a,stroke:#3d7228,color:#fff
 
-    class GIT git
-    class PL pl
-    class R1,R2,R3 runner
+
 ```
 
 ---
 
 ## 2. 기본 구성 요소 한눈에 보기
 
-| 키워드 | 역할 |
-|---|---|
-| `stages` | 파이프라인 단계 순서 정의 |
-| Job 이름 | `stages` / `variables` 외 최상위 키 = 잡 |
-| `variables` | 잡에서 참조할 환경 변수 |
-| `rules` | 잡 실행 조건 (브랜치, MR, 태그 등) |
-| `needs` | 잡 간 의존 관계 (DAG 구성) |
-| `before_script` | 준비 단계 (로그인, 설정 파일 생성 등) |
-| `script` | 실제 작업 (빌드 / 배포 / 검증 / 롤백) |
+| 키워드          | 역할                                     |
+| --------------- | ---------------------------------------- |
+| `stages`        | 파이프라인 단계 순서 정의                |
+| Job 이름        | `stages` / `variables` 외 최상위 키 = 잡 |
+| `variables`     | 잡에서 참조할 환경 변수                  |
+| `rules`         | 잡 실행 조건 (브랜치, MR, 태그 등)       |
+| `needs`         | 잡 간 의존 관계 (DAG 구성)               |
+| `before_script` | 준비 단계 (로그인, 설정 파일 생성 등)    |
+| `script`        | 실제 작업 (빌드 / 배포 / 검증 / 롤백)    |
 
 ---
 
@@ -68,7 +63,7 @@ flowchart LR
 5. 실패 시 **자동 롤백**
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: 파이프라인 전체 흐름 — build → deploy → verify, 실패 시 rollback 자동 실행
 flowchart TD
     PUSH[/"Git Push (대상 브랜치)"/] --> BUILD
 
@@ -95,21 +90,8 @@ flowchart TD
     DEPLOY -->|"실패"| ROLLBACK
     ROLLBACK --> FAIL(["❌ 파이프라인 종료"])
 
-    classDef stage_build fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef stage_deploy fill:#5a9a3a,stroke:#3d7228,color:#fff
-    classDef stage_verify fill:#c8952a,stroke:#9e7220,color:#fff
-    classDef stage_rollback fill:#b94040,stroke:#8a2e2e,color:#fff
-    classDef terminal_ok fill:#3a9e66,stroke:#2a7a4e,color:#fff
-    classDef terminal_fail fill:#a83232,stroke:#7a2424,color:#fff
-    classDef trigger fill:#7c5cbf,stroke:#5d449a,color:#fff
 
-    class BUILD stage_build
-    class DEPLOY stage_deploy
-    class VERIFY stage_verify
-    class ROLLBACK stage_rollback
-    class DONE terminal_ok
-    class FAIL terminal_fail
-    class PUSH trigger
+
 ```
 
 ---
@@ -121,11 +103,11 @@ GitLab **프로젝트 Settings → CI/CD → Variables** 에 등록하고, CI가
 
 ### 필수 변수 목록
 
-| 변수명 | 설명 | 타입 권장 |
-|---|---|---|
-| `DOCKERHUB_USERNAME` | Docker 레지스트리 로그인 사용자명 | Variable |
+| 변수명               | 설명                                      | 타입 권장         |
+| -------------------- | ----------------------------------------- | ----------------- |
+| `DOCKERHUB_USERNAME` | Docker 레지스트리 로그인 사용자명         | Variable          |
 | `DOCKERHUB_PASSWORD` | Docker 레지스트리 비밀번호 / Access Token | Variable (Masked) |
-| `DEPLOY_CONFIG` | JSON 문자열 (KUBECONFIG_DATA 포함) | Variable / File |
+| `DEPLOY_CONFIG`      | JSON 문자열 (KUBECONFIG_DATA 포함)        | Variable / File   |
 
 ### `DEPLOY_CONFIG` JSON 예시
 
@@ -138,7 +120,7 @@ GitLab **프로젝트 Settings → CI/CD → Variables** 에 등록하고, CI가
 ### 시크릿 주입 흐름
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: 시크릿 주입 흐름 — GitLab Variables에서 CI Job 컨테이너로 환경변수 주입
 flowchart LR
     subgraph GL["GitLab Project Settings"]
         V1["DOCKERHUB_USERNAME\nDOCKERHUB_PASSWORD"]
@@ -153,11 +135,8 @@ flowchart LR
     V1 -->|"환경변수 주입"| J_BUILD
     V2 -->|"환경변수 주입"| J_DEPLOY
 
-    classDef gl fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef job fill:#4a7fa5,stroke:#2d5e82,color:#fff
 
-    class V1,V2 gl
-    class J_BUILD,J_DEPLOY job
+
 ```
 
 ---
@@ -198,7 +177,7 @@ base64 -i k3s.yaml
 ### kubeconfig 준비 흐름
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: kubeconfig 준비 흐름 — K3s 설정 파일을 base64 인코딩해 GitLab Variable로 관리
 flowchart LR
     K3S[("K3s 서버\n/etc/rancher/k3s/k3s.yaml")]
     EDIT["server: 127.0.0.1\n→ server: K3S_SERVER_IP 로 수정"]
@@ -209,15 +188,8 @@ flowchart LR
 
     K3S --> EDIT --> B64 --> VAR --> JOB --> KUBECTL
 
-    classDef k3s fill:#c87941,stroke:#9e5e2e,color:#fff
-    classDef proc fill:#5b8ec7,stroke:#3d6fa5,color:#fff
-    classDef var fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef job fill:#5a9a3a,stroke:#3d7228,color:#fff
 
-    class K3S k3s
-    class EDIT,B64 proc
-    class VAR var
-    class JOB,KUBECTL job
+
 ```
 
 > **포인트:** `~/.kube/config`는 **각 잡 컨테이너 안에서만** 존재합니다.
@@ -230,19 +202,16 @@ flowchart LR
 ### (A) `build` 잡 — Docker 이미지 빌드 & 푸시
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
-flowchart TD
+%% desc: build 잡 상세 — Docker-in-Docker 환경에서 이미지 빌드 및 레지스트리 푸시
+flowchart LR
     ENV["image: docker:24.0.5\nservices: docker:24.0.5-dind"]
     LOGIN["docker login\n(DOCKERHUB_USERNAME / PASSWORD)"]
     BUILD["docker buildx build --push\n이미지:커밋SHA\n이미지:latest"]
 
     ENV --> LOGIN --> BUILD
 
-    classDef env fill:#3d5166,stroke:#2c3e50,color:#fff
-    classDef action fill:#5b8ec7,stroke:#3d6fa5,color:#fff
 
-    class ENV env
-    class LOGIN,BUILD action
+
 ```
 
 - `docker:24.0.5-dind` : Docker-in-Docker, 컨테이너 안에서 docker 명령 사용 가능하게 해줌
@@ -254,21 +223,16 @@ flowchart TD
 ### (B) `deploy` 잡 — K3s Deployment 이미지 교체
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5a9a3a', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d7228', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
-flowchart TD
+%% desc: deploy 잡 상세 — kubeconfig 복원 후 kubectl로 K3s Deployment 이미지 교체
+flowchart LR
     ENV["image: alpine/k8s:1.29.0\n(kubectl 포함)"]
     KUBE["DEPLOY_CONFIG에서 KUBECONFIG_DATA 추출\nbase64 -d → ~/.kube/config"]
     DEPLOY["kubectl set image deployment/$DEPLOYMENT_NAME\n...\n-n $NAMESPACE"]
 
     ENV --> KUBE --> DEPLOY
 
-    classDef env fill:#3d5166,stroke:#2c3e50,color:#fff
-    classDef kube fill:#c87941,stroke:#9e5e2e,color:#fff
-    classDef deploy fill:#5a9a3a,stroke:#3d7228,color:#fff
 
-    class ENV env
-    class KUBE kube
-    class DEPLOY deploy
+
 ```
 
 ---
@@ -289,8 +253,8 @@ kubectl rollout status deployment/$DEPLOYMENT_NAME \
 
 ```yaml
 rules:
-  - when: on_failure   # 이전 잡이 실패했을 때만 실행
-allow_failure: true    # 롤백 자체 실패가 파이프라인 블로킹하지 않도록
+  - when: on_failure # 이전 잡이 실패했을 때만 실행
+allow_failure: true # 롤백 자체 실패가 파이프라인 블로킹하지 않도록
 ```
 
 ```bash
@@ -302,7 +266,7 @@ kubectl rollout undo deployment/$DEPLOYMENT_NAME -n $NAMESPACE
 ## 7. "VM에 kubeconfig 파일이 없는데?" — 정상입니다
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: kubeconfig 수명 — 잡 실행 중에만 컨테이너 내 존재, 종료 후 자동 삭제
 flowchart LR
     subgraph JOB["Job 실행 중 (컨테이너 내부)"]
         CONFIG["~/.kube/config\n✅ 존재"]
@@ -320,13 +284,8 @@ flowchart LR
 
     JOB -->|"컨테이너 종료"| AFTER
 
-    classDef ok fill:#5a9a3a,stroke:#3d7228,color:#fff
-    classDef gone fill:#b94040,stroke:#8a2e2e,color:#fff
-    classDef vm fill:#3d5166,stroke:#2c3e50,color:#fff
 
-    class CONFIG,KUBECTL ok
-    class GONE,NOTHERE gone
-    class NOTHERE vm
+
 ```
 
 CI에서 kubeconfig는 **job 컨테이너 안에서만** 생성되고, 잡이 끝나면 컨테이너가 정리되며 파일도 사라집니다.
@@ -375,7 +334,7 @@ Unable to connect to the server: dial tcp ...
 ## 9. 전체 아키텍처 요약
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7', 'clusterBkg': '#f4f6f9', 'clusterBorder': '#c5d0dc'}}}%%
+%% desc: 전체 아키텍처 — 개발자 Push → GitLab → Runner → Registry → K3s 클러스터 배포 흐름
 flowchart TB
     DEV[/"👨‍💻 개발자\nGit Push"/]
 
@@ -415,30 +374,8 @@ flowchart TB
     DEPLOY_J -->|"성공"| VERIFY_J
     VERIFY_J -->|"실패"| ROLLBACK_J
 
-    classDef dev fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef gl fill:#5b8ec7,stroke:#3d6fa5,color:#fff
-    classDef ci_build fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef ci_deploy fill:#5a9a3a,stroke:#3d7228,color:#fff
-    classDef ci_verify fill:#c8952a,stroke:#9e7220,color:#fff
-    classDef ci_rollback fill:#b94040,stroke:#8a2e2e,color:#fff
-    classDef registry fill:#c87941,stroke:#9e5e2e,color:#fff
-    classDef k3s fill:#1a8a76,stroke:#12665a,color:#fff
 
-    class DEV dev
-    class REPO,VARS,PIPE gl
-    class BUILD_J ci_build
-    class DEPLOY_J ci_deploy
-    class VERIFY_J ci_verify
-    class ROLLBACK_J ci_rollback
-    class IMG registry
-    class DEP,POD1,POD2 k3s
+
 ```
 
 ---
-
-## 10. 다음 스터디 주제
-
-- `rules` 로 MR / Tag / Release 조건 분기하기
-- `environment` / `workflow:rules` 활용법
-- `artifacts` vs `cache` 차이와 실전 적용 포인트
-- **DAG 파이프라인** (`needs`) 으로 병렬 잡 구성하기

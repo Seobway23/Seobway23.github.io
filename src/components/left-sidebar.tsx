@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -116,40 +116,81 @@ export default function LeftSidebar({
     return root;
   }, [categories, allCount]);
 
+  const [openNodes, setOpenNodes] = useState<Set<string>>(new Set());
+
+  const toggleNode = (fullName: string) => {
+    setOpenNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(fullName)) next.delete(fullName);
+      else next.add(fullName);
+      return next;
+    });
+  };
+
   const renderTree = (node: TreeNode, depth: number = 0) => {
+    const hasChildren = node.children.size > 0;
+    const isOpen = openNodes.has(node.fullName);
+
     return (
       <div key={node.fullName || "root"}>
         {node.fullName && (
-          <button
-            onClick={() => {
-              onCategoryChange?.(node.fullName);
-              if (isMobile) onMobileOpenChange?.(false);
-            }}
-            className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-colors ${
-              selectedCategory === node.fullName
-                ? "text-white"
-                : "text-gray-700 dark:text-gray-300 hover-gradient-bg"
-            }`}
-            style={{
-              marginLeft: depth * 12,
-              ...(selectedCategory === node.fullName
-                ? {
-                    background:
-                      "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-                  }
-                : {}),
-            }}
+          <div
+            className="flex items-center gap-1"
+            style={{ marginLeft: depth * 12 }}
           >
-            <span>{node.label}</span>
-            <span className="text-xs bg-gray-700 dark:bg-gray-700 text-white dark:text-gray-300 px-2 py-1 rounded-full">
-              {node.count}
-            </span>
-          </button>
+            {/* 토글 버튼 (자식이 있을 때만) */}
+            {hasChildren ? (
+              <button
+                onClick={() => toggleNode(node.fullName)}
+                className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                aria-label={isOpen ? "접기" : "펼치기"}
+              >
+                <svg
+                  className={`w-3 h-3 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            ) : (
+              <span className="flex-shrink-0 w-5" />
+            )}
+            <button
+              onClick={() => {
+                onCategoryChange?.(node.fullName);
+                if (isMobile) onMobileOpenChange?.(false);
+              }}
+              className={`flex items-center justify-between flex-1 px-2 py-2 text-sm rounded-lg transition-colors ${
+                selectedCategory === node.fullName
+                  ? "text-white"
+                  : "text-gray-700 dark:text-gray-300 hover-gradient-bg"
+              }`}
+              style={
+                selectedCategory === node.fullName
+                  ? {
+                      background:
+                        "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
+                    }
+                  : undefined
+              }
+            >
+              <span>{node.label}</span>
+              <span className="text-xs bg-gray-700 dark:bg-gray-700 text-white dark:text-gray-300 px-2 py-1 rounded-full">
+                {node.count}
+              </span>
+            </button>
+          </div>
         )}
 
-        {Array.from(node.children.values()).map((child) => {
-          return renderTree(child, node.fullName ? depth + 1 : depth);
-        })}
+        {(hasChildren && (isOpen || !node.fullName)) && (
+          <div>
+            {Array.from(node.children.values()).map((child) =>
+              renderTree(child, node.fullName ? depth + 1 : depth)
+            )}
+          </div>
+        )}
       </div>
     );
   };

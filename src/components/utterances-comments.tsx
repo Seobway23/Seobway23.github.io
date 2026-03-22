@@ -42,7 +42,6 @@ export default function UtterancesComments({
 }: UtterancesCommentsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const utterancesRef = useRef<HTMLScriptElement | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const { theme: currentTheme } = useTheme(); // 현재 테마 가져오기
 
   // 초기 테마 결정: autoTheme이 true이고 theme prop이 없으면 현재 테마에 맞게 설정
@@ -93,80 +92,65 @@ export default function UtterancesComments({
     };
   }, [repo, issueTerm, label]); // 스크립트는 한 번만 로드
 
-  // 테마 변경 시 Utterances iframe에 테마 변경 메시지 전송
+  // 테마 변경 시 Utterances iframe에 메시지 전송
+  // 주의: iframe이 about:blank 이거나 아직 utteranc.es로 로드 전이면
+  // contentWindow 출처가 부모(localhost)와 같아져 postMessage(..., 'https://utteranc.es')가 예외를 던짐.
   useEffect(() => {
-    if (!autoTheme || theme) return; // 수동 테마 지정 시 스킵
+    if (!autoTheme || theme) return;
 
-    // Utterances iframe 찾기 (여러 선택자 시도)
-    const findIframe = () => {
-      if (!containerRef.current) return null;
-      // Utterances가 생성하는 iframe 찾기
-      const iframe = containerRef.current.querySelector(
-        'iframe[src*="utteranc.es"]'
-      ) as HTMLIFrameElement;
-      return iframe;
-    };
+    const container = containerRef.current;
+    if (!container) return;
 
-    // 테마 변경 메시지 전송
-    const updateTheme = () => {
-      const iframe = findIframe();
-      if (!iframe || !iframe.contentWindow) {
-        return false; // iframe이 아직 로드되지 않음
-      }
+    const newTheme = currentTheme === "dark" ? "github-dark" : "github-light";
 
-      const newTheme = currentTheme === "dark" ? "github-dark" : "github-light";
-
+    const postTheme = (iframe: HTMLIFrameElement) => {
+      const src = iframe.getAttribute("src") || "";
+      if (!src.includes("utteranc.es")) return;
+      if (!iframe.contentWindow) return;
+      let targetOrigin = "https://utteranc.es";
       try {
-        // Utterances iframe에 테마 변경 메시지 전송
-        // localhost에서는 origin 불일치로 인한 경고가 발생할 수 있지만,
-        // postMessage는 비동기적으로 작동하므로 try-catch로 잡을 수 없음
-        // 프로덕션 환경에서는 정상 작동함
-        if (iframe.contentWindow) {
-          // 개발 환경에서는 origin 불일치 경고가 발생할 수 있지만 무시
+        targetOrigin = new URL(src, window.location.href).origin;
+      } catch {
+        /* keep default */
+      }
+      try {
+        iframe.contentWindow.postMessage(
+          { type: "set-theme", theme: newTheme },
+          targetOrigin
+        );
+      } catch {
+        try {
           iframe.contentWindow.postMessage(
-            {
-              type: "set-theme",
-              theme: newTheme,
-            },
-            "https://utteranc.es"
+            { type: "set-theme", theme: newTheme },
+            "*"
           );
+        } catch {
+          /* ignore */
         }
-        return true; // 성공
-      } catch (e) {
-        // postMessage는 동기적으로 오류를 던지지 않지만, 안전을 위해 catch 추가
-        console.warn("Utterances 테마 변경 실패:", e);
-        return false;
       }
     };
 
-    // iframe이 로드될 때까지 대기 (최대 5초)
-    let attempts = 0;
-    const maxAttempts = 50; // 5초 (100ms * 50)
-
-    const checkIframe = setInterval(() => {
-      attempts++;
-      const iframe = findIframe();
-
-      if (iframe && iframe.contentWindow) {
-        iframeRef.current = iframe;
-        if (updateTheme()) {
-          clearInterval(checkIframe);
-        }
+    const hookIframe = (iframe: HTMLIFrameElement) => {
+      if (iframe.dataset.utterancesThemeHook !== "1") {
+        iframe.dataset.utterancesThemeHook = "1";
+        iframe.addEventListener("load", () => postTheme(iframe));
       }
-
-      // 최대 시도 횟수 초과 시 중단
-      if (attempts >= maxAttempts) {
-        clearInterval(checkIframe);
-      }
-    }, 100);
-
-    // 즉시 시도 (이미 로드된 경우)
-    updateTheme();
-
-    return () => {
-      clearInterval(checkIframe);
+      postTheme(iframe);
     };
-  }, [currentTheme, autoTheme, theme]); // currentTheme 변경 시에만 실행
+
+    const scan = () => {
+      const iframe = container.querySelector<HTMLIFrameElement>(
+        'iframe[src*="utteranc.es"]'
+      );
+      if (iframe) hookIframe(iframe);
+    };
+
+    const mo = new MutationObserver(scan);
+    mo.observe(container, { childList: true, subtree: true });
+    scan();
+
+    return () => mo.disconnect();
+  }, [currentTheme, autoTheme, theme]);
 
   // 스타일 객체 생성
   const containerStyle: React.CSSProperties = {

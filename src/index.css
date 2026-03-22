@@ -537,20 +537,49 @@
   @apply mb-1;
 }
 
+/* typography 기본값(pre: slate-800 배경 + 밝은 글자)과 color만 덮어쓰면 라이트에서 글자가 안 보임 → 배경·글자 명시 */
 .prose pre {
-  @apply bg-slate-900 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto my-6;
+  @apply rounded-lg p-4 overflow-x-auto my-6;
 }
 
-.prose code {
-  @apply bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-sm font-mono;
+html:not(.dark) .prose pre {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.dark .prose pre {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+/* 인라인 code만 (펜스 안의 code는 아래 pre code 규칙) */
+.prose :not(pre) > code {
+  @apply px-1 py-0.5 rounded text-sm font-mono;
+}
+
+html:not(.dark) .prose :not(pre) > code {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.dark .prose :not(pre) > code {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
 }
 
 .prose pre code {
   @apply bg-transparent px-0 py-0;
+  background-color: transparent !important;
+  /* 기본 글자는 pre에서 상속; hljs span.* 는 자기 color로 덮음 */
+  color: inherit;
 }
 
 .prose strong {
-  @apply font-bold;
+  color: #0f172a;
+  font-weight: 700;
+}
+.dark .prose strong {
+  color: #f1f5f9;
 }
 
 .prose mark {
@@ -558,6 +587,97 @@
 }
 
 /* 인라인 색상 스타일은 그대로 유지됨 */
+
+/* ─── Mermaid 다이어그램 (팔레트는 mermaid theme / TSX 레이아웃 클래스에 맡김) ─── */
+
+/* 엣지 레이블: base의 span text-foreground가 테마를 덮는 경우만 보정 */
+.mermaid-inner .edgeLabel p,
+.mermaid-inner .edgeLabel span,
+.mermaid-inner .edgeLabel div,
+.mermaid-svg-content .edgeLabel p,
+.mermaid-svg-content .edgeLabel span,
+.mermaid-svg-content .edgeLabel div {
+  background-color: transparent !important;
+  font-weight: 600 !important;
+}
+
+/* Mermaid 노드 border-radius (SVG rect 요소) */
+.mermaid-inner svg .node rect,
+.mermaid-inner svg .cluster rect,
+.mermaid-svg-content svg .node rect,
+.mermaid-svg-content svg .cluster rect {
+  rx: 8px !important;
+  ry: 8px !important;
+}
+
+/* resize 핸들 커서 표시 */
+.mermaid-wrapper {
+  resize: both;
+  box-sizing: border-box;
+  min-width: 200px;
+}
+
+/* SVG 렌더링 품질 */
+.mermaid-inner svg,
+.mermaid-svg-content svg {
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+}
+
+/* 모달 SVG: 자연 크기로 표시 */
+.mermaid-svg-content svg {
+  display: block;
+  max-width: none;
+  height: auto;
+}
+
+/* SVG 자체 배경 투명 처리 (테마 기본 배경색 #f5f0fa 등 제거) */
+.mermaid-inner svg > rect:first-child,
+.mermaid-inner svg > rect.background {
+  fill: transparent !important;
+}
+
+
+/* ─── Mermaid 다이어그램 캡션 ─────────────────────────────────────────── */
+.mermaid-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -12px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+
+.mermaid-caption-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dark .mermaid-caption-badge {
+  color: #8b9ef5;
+  background: rgba(139, 158, 245, 0.1);
+  border-color: rgba(139, 158, 245, 0.25);
+}
+
+.mermaid-caption-text {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.dark .mermaid-caption-text {
+  color: #94a3b8;
+}
 
 /* Utterances 댓글 시스템 스타일링 */
 .utterances-container {

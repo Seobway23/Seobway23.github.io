@@ -38,10 +38,10 @@ export default function About() {
   const totalPosts = posts.length;
   const totalViews = Object.values(viewsData).reduce(
     (sum, views) => sum + (typeof views === "number" ? views : 0),
-    0
+    0,
   );
   const categories = new Set(
-    posts.flatMap((post) => post.category?.split("/") || [])
+    posts.flatMap((post) => post.category?.split("/") || []),
   ).size;
 
   // 카테고리별 분포 계산 (최상위 카테고리 기준)
@@ -120,7 +120,7 @@ export default function About() {
   const recentPosts = [...posts]
     .sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )
     .slice(0, 5);
 
@@ -146,13 +146,13 @@ export default function About() {
                 className="w-32 h-32 rounded-full object-cover mx-auto mb-6 shadow-lg"
               />
 
-              <h2 className="text-2xl font-bold mb-2">seobway</h2>
+              <h2 className="text-2xl font-bold mb-2">Seobway</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Frontend Developer
+                SW Developer
               </p>
 
               <p className="leading-relaxed">
-                프론트엔드 개발자로 React, TypeScript, Next.js 등의 기술을 주로
+                프론트엔드 개발자로 React, TypeScript, Electron 등의 기술을 주로
                 다룹니다. 웹 성능 최적화와 사용자 경험 개선에 관심이 많으며,
                 새로운 기술을 학습하고 공유하는 것을 좋아합니다.
               </p>
@@ -362,7 +362,7 @@ export default function About() {
                     >
                       {categoryDistribution.map((item, index) => {
                         const percentage = Math.round(
-                          (item.count / totalPosts) * 100
+                          (item.count / totalPosts) * 100,
                         );
                         return (
                           <motion.div

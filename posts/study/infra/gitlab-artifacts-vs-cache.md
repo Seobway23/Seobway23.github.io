@@ -1,15 +1,15 @@
 ---
-title: GitLab CI/CD — artifacts vs cache 완전 정복
+title: GitLab CI/CD — artifacts vs cache
 slug: gitlab-artifacts-vs-cache
 tags: [GitLab, CI/CD, DevOps, artifacts, cache, 인프라]
-author: seobway
+author: Seobway
 readTime: 12
 featured: false
 createdAt: 2026-03-19
 excerpt: GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다.
 ---
 
-# GitLab CI/CD — `artifacts` vs `cache` 완전 정복
+# GitLab CI/CD — `artifacts` vs `cache`
 
 > GitLab CI에서 가장 자주 혼동되는 두 개념.
 > **잘못 쓰면 빌드가 느려지거나, 파일이 다음 잡에 전달되지 않는 문제**가 생깁니다.
@@ -23,7 +23,7 @@ GitLab CI의 각 잡은 **독립된 컨테이너**에서 실행됩니다.
 잡 A에서 만든 파일은 잡 B에서 자동으로 보이지 않습니다.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7', 'clusterBkg': '#f4f6f9', 'clusterBorder': '#c5d0dc'}}}%%
+%% desc: 잡 간 파일시스템 격리 — 컨테이너 A의 파일이 컨테이너 B에서 보이지 않는 이유
 flowchart LR
     subgraph JOB_A["build 잡 (컨테이너 A)"]
         A_FS["파일시스템\n/builds/project/..."]
@@ -39,11 +39,8 @@ flowchart LR
 
     JOB_A -.->|"기본적으로 공유 안 됨"| JOB_B
 
-    classDef job_a fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef job_b fill:#b94040,stroke:#8a2e2e,color:#fff
 
-    class A_FS,A_OUT job_a
-    class B_FS,B_NOPE job_b
+
 ```
 
 이 문제를 해결하는 두 가지 방법이 `artifacts`와 `cache`입니다.
@@ -53,13 +50,13 @@ flowchart LR
 
 ## 2. 핵심 차이 한눈에 보기
 
-| | `artifacts` | `cache` |
-|---|---|---|
-| **목적** | 잡 간 파일 전달 | 의존성 재다운로드 방지 |
-| **방향** | 같은 파이프라인 내 잡 → 잡 | 파이프라인 → 파이프라인 |
-| **저장 위치** | GitLab 서버 | Runner 캐시 스토리지 (로컬/S3) |
-| **보장** | ✅ 항상 다음 잡에 전달 | ⚠️ 캐시 미스 가능 (있으면 쓰는 것) |
-| **만료** | `expire_in` 으로 설정 | 수동 삭제 또는 `cache:key` 갱신 |
+|                 | `artifacts`                          | `cache`                             |
+| --------------- | ------------------------------------ | ----------------------------------- |
+| **목적**        | 잡 간 파일 전달                      | 의존성 재다운로드 방지              |
+| **방향**        | 같은 파이프라인 내 잡 → 잡           | 파이프라인 → 파이프라인             |
+| **저장 위치**   | GitLab 서버                          | Runner 캐시 스토리지 (로컬/S3)      |
+| **보장**        | ✅ 항상 다음 잡에 전달               | ⚠️ 캐시 미스 가능 (있으면 쓰는 것)  |
+| **만료**        | `expire_in` 으로 설정                | 수동 삭제 또는 `cache:key` 갱신     |
 | **대표 사용처** | 빌드 산출물, 테스트 리포트, 커버리지 | `node_modules`, `.gradle`, `~/.pip` |
 
 ---
@@ -74,7 +71,7 @@ build 잡에서 만든 `.jar`, `.js`, 테스트 리포트 등을 deploy/test 잡
 ### 흐름
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#4a7fa5', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2d5e82', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7', 'clusterBkg': '#f0f4f9', 'clusterBorder': '#c5d0dc'}}}%%
+%% desc: artifacts 흐름 — GitLab 서버를 통해 빌드 산출물을 test/deploy 잡에 전달
 flowchart LR
     subgraph PIPE["파이프라인 #1"]
         direction LR
@@ -106,15 +103,8 @@ flowchart LR
         GL_STORE -->|"다음 잡 시작 시\n자동 다운로드"| C1
     end
 
-    classDef build fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef gl fill:#c87941,stroke:#9e5e2e,color:#fff
-    classDef test fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef deploy fill:#5a9a3a,stroke:#3d7228,color:#fff
 
-    class A1,A2 build
-    class GL_STORE gl
-    class B1,B2 test
-    class C1,C2 deploy
+
 ```
 
 ### yml 설정
@@ -131,18 +121,18 @@ build:
     - npm run build
   artifacts:
     paths:
-      - dist/           # 이 경로를 다음 잡에 전달
-    expire_in: 1 hour   # GitLab 서버에서 1시간 후 삭제
+      - dist/ # 이 경로를 다음 잡에 전달
+    expire_in: 1 hour # GitLab 서버에서 1시간 후 삭제
 
 test:
   stage: test
-  needs: [build]        # build artifacts 자동 수신
+  needs: [build] # build artifacts 자동 수신
   script:
-    - npm test          # dist/ 파일 사용 가능
+    - npm test # dist/ 파일 사용 가능
 
 deploy:
   stage: deploy
-  needs: [build]        # build artifacts 자동 수신
+  needs: [build] # build artifacts 자동 수신
   script:
     - ./deploy.sh dist/
 ```
@@ -150,20 +140,17 @@ deploy:
 ### 알아두면 좋은 것들
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#4a7fa5', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2d5e82', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: artifacts 심화 옵션 — expire_in / when / reports / needs 설정 가이드
 flowchart TD
     ROOT["artifacts 심화"]
 
-    ROOT --> EXP["`expire_in`\n1 hour / 1 day / 1 week\n설정 안 하면 기본값 (30일)"]
-    ROOT --> WHEN["`when: always`\n실패한 잡의 산출물도 보존\n→ 실패 로그, 스크린샷 수집에 유용"]
-    ROOT --> REPORT["`artifacts: reports:`\njunit, coverage, dotenv 등\nGitLab UI에서 바로 확인 가능"]
-    ROOT --> NEEDS["`needs: []`\n빈 배열이면 artifacts 안 내려옴\n주의 필요"]
+    ROOT --> EXP["expire_in\n1 hour / 1 day / 1 week\n설정 안 하면 기본값 (30일)"]
+    ROOT --> WHEN["when: always\n실패한 잡의 산출물도 보존\n→ 실패 로그, 스크린샷 수집에 유용"]
+    ROOT --> REPORT["artifacts: reports:\njunit, coverage, dotenv 등\nGitLab UI에서 바로 확인 가능"]
+    ROOT --> NEEDS["needs: []\n빈 배열이면 artifacts 안 내려옴\n주의 필요"]
 
-    classDef root fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef detail fill:#5b8ec7,stroke:#3d6fa5,color:#fff
 
-    class ROOT root
-    class EXP,WHEN,REPORT,NEEDS detail
+
 ```
 
 **`artifacts: reports:`** 는 특히 강력합니다.
@@ -174,10 +161,10 @@ test:
     - pytest --junitxml=report.xml --cov-report=xml
   artifacts:
     reports:
-      junit: report.xml        # MR에서 테스트 결과 표시
+      junit: report.xml # MR에서 테스트 결과 표시
       coverage_report:
         coverage_format: cobertura
-        path: coverage.xml     # MR에서 커버리지 표시
+        path: coverage.xml # MR에서 커버리지 표시
 ```
 
 ---
@@ -195,7 +182,7 @@ test:
 ### 흐름
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#7c5cbf', 'primaryTextColor': '#fff', 'primaryBorderColor': '#5d449a', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7', 'clusterBkg': '#f2f0f8', 'clusterBorder': '#c5bce0'}}}%%
+%% desc: cache 파이프라인 흐름 — 첫 번째(MISS)→저장, 두 번째(HIT)→재사용
 flowchart TB
     subgraph PIPE1["파이프라인 #1 (첫 푸시)"]
         P1["build 잡"]
@@ -221,13 +208,8 @@ flowchart TB
     CACHE -->|"복원"| P2A
     P2C -->|"갱신"| CACHE
 
-    classDef pipe1 fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef pipe2 fill:#1a8a76,stroke:#12665a,color:#fff
-    classDef store fill:#c87941,stroke:#9e5e2e,color:#fff
 
-    class P1,P1A,P1B,P1C pipe1
-    class P2,P2A,P2B,P2C pipe2
-    class CACHE store
+
 ```
 
 ### yml 설정
@@ -237,7 +219,7 @@ build:
   cache:
     key:
       files:
-        - package-lock.json    # 락파일이 바뀌면 캐시 키도 바뀜 → 자동 무효화
+        - package-lock.json # 락파일이 바뀌면 캐시 키도 바뀜 → 자동 무효화
     paths:
       - node_modules/
   script:
@@ -250,7 +232,7 @@ build:
 캐시 키를 어떻게 잡느냐에 따라 캐시 효율이 크게 달라집니다.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#7c5cbf', 'primaryTextColor': '#fff', 'primaryBorderColor': '#5d449a', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: cache key 전략 — 브랜치/락파일/전역/복합 키 비교
 flowchart TD
     ROOT["cache key 전략"]
 
@@ -259,11 +241,8 @@ flowchart TD
     ROOT --> K3["key: global\n모든 브랜치 공유\n→ 저장소 절약, 충돌 주의"]
     ROOT --> K4["key: $CI_COMMIT_REF_SLUG-node\n브랜치 + 런타임 조합\n→ 다중 언어 프로젝트에 유용"]
 
-    classDef root fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef detail fill:#9575cc,stroke:#7c5cbf,color:#fff
 
-    class ROOT root
-    class K1,K2,K3,K4 detail
+
 ```
 
 **락파일 기반 키** 가 가장 실전적입니다.
@@ -272,8 +251,8 @@ flowchart TD
 cache:
   key:
     files:
-      - package-lock.json   # 이 파일의 해시가 키
-    prefix: "$CI_COMMIT_REF_SLUG"  # + 브랜치명 조합
+      - package-lock.json # 이 파일의 해시가 키
+    prefix: "$CI_COMMIT_REF_SLUG" # + 브랜치명 조합
   paths:
     - node_modules/
 ```
@@ -285,7 +264,7 @@ cache:
 `artifacts`와 `cache`는 **같이 쓰는 게 정석**입니다.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7', 'clusterBkg': '#f4f6f9', 'clusterBorder': '#c5d0dc'}}}%%
+%% desc: artifacts + cache 병용 패턴 — build 잡에서 캐시 복원 후 빌드, artifacts 업로드, 캐시 저장
 flowchart TB
     subgraph PIPE["파이프라인"]
         direction TB
@@ -324,15 +303,8 @@ flowchart TB
     B_CSAVE -->|"저장"| RS
     RS -->|"다음 파이프라인\n복원"| B_CACHE
 
-    classDef build fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef test fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef deploy fill:#5a9a3a,stroke:#3d7228,color:#fff
-    classDef store fill:#c87941,stroke:#9e5e2e,color:#fff
 
-    class B_CACHE,B_INSTALL,B_BUILD,B_ART,B_CSAVE build
-    class T_ART,T_RUN test
-    class D_ART,D_RUN deploy
-    class GL,RS store
+
 ```
 
 ### 실전 yml 예시
@@ -350,28 +322,28 @@ build:
       files:
         - package-lock.json
     paths:
-      - node_modules/         # ← cache: 파이프라인 간 재사용
+      - node_modules/ # ← cache: 파이프라인 간 재사용
   script:
     - npm ci
     - npm run build
   artifacts:
     paths:
-      - dist/                 # ← artifacts: 다음 잡에 전달
+      - dist/ # ← artifacts: 다음 잡에 전달
     expire_in: 1 hour
 
 test:
   stage: test
-  needs: [build]              # dist/ 자동 수신
+  needs: [build] # dist/ 자동 수신
   script:
     - npm test
   artifacts:
-    when: always              # 실패해도 리포트 보존
+    when: always # 실패해도 리포트 보존
     reports:
       junit: test-results.xml
 
 deploy:
   stage: deploy
-  needs: [build]              # dist/ 자동 수신
+  needs: [build] # dist/ 자동 수신
   script:
     - ./deploy.sh dist/
 ```
@@ -381,7 +353,7 @@ deploy:
 ## 6. 흐름 비교 — 한 장으로 끝내기
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: artifacts vs cache 흐름 비교 — 같은 파이프라인(artifacts) vs 파이프라인 간(cache)
 flowchart LR
     subgraph ART["artifacts — 같은 파이프라인, 잡 → 잡"]
         direction LR
@@ -395,13 +367,8 @@ flowchart LR
         CRS -->|"복원 (캐시 히트 시만) ⚠️"| C2["파이프라인 #2\n의존성 재사용"]
     end
 
-    classDef art fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef cache_c fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef store fill:#c87941,stroke:#9e5e2e,color:#fff
 
-    class A1,A2 art
-    class C1,C2 cache_c
-    class AGL,CRS store
+
 ```
 
 ---
@@ -409,7 +376,7 @@ flowchart LR
 ## 7. 실전 판단 플로차트
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#5b8ec7', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3d6fa5', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: 실전 판단 플로차트 — 상황별 artifacts/cache/병용 선택 가이드
 flowchart TD
     Q["이 파일, 어떻게 공유할까?"]
 
@@ -425,17 +392,8 @@ flowchart TD
     CAC --> SUB_CAC["캐시 미스나도 괜찮나?\n✅ 괜찮음\n처음부터 다시 설치할 뿐"]
     BOTH --> SUB_BOTH["순서?\n① cache 복원 (의존성)\n② 빌드 실행\n③ artifacts 업로드 (산출물)\n④ cache 저장 (의존성)"]
 
-    classDef q fill:#3d5166,stroke:#2c3e50,color:#fff
-    classDef art fill:#4a7fa5,stroke:#2d5e82,color:#fff
-    classDef cac fill:#7c5cbf,stroke:#5d449a,color:#fff
-    classDef both fill:#1a8a76,stroke:#12665a,color:#fff
-    classDef sub fill:#5b8ec7,stroke:#3d6fa5,color:#fff
 
-    class Q q
-    class ART art
-    class CAC cac
-    class BOTH both
-    class SUB_ART,SUB_CAC,SUB_BOTH sub
+
 ```
 
 ---
@@ -445,25 +403,26 @@ flowchart TD
 ### artifacts인데 cache 씀 (또는 반대)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#b94040', 'primaryTextColor': '#fff', 'primaryBorderColor': '#8a2e2e', 'lineColor': '#64748b', 'edgeLabelBackground': '#eef2f7'}}}%%
+%% desc: 잘못된 패턴 vs 올바른 패턴 — 잡 간 전달에 cache 대신 artifacts 사용해야 하는 이유
 flowchart LR
-    subgraph WRONG["❌ 잘못된 패턴"]
+    subgraph WRONG["❌ 잘못된 패턴 — cache 사용"]
+        direction TB
         W1["build 잡\ncache: dist/ 저장"]
-        W2["deploy 잡\n→ dist/ 없음!\n(캐시 미스 또는 다른 Runner)"]
-        W1 -.->|"캐시는 Runner마다 다를 수 있음"| W2
+        W2["deploy 잡\n→ dist/ 없음!\n캐시 미스 또는 다른 Runner"]
+        W1 -.->|"보장 안 됨 ⚠️"| W2
     end
 
-    subgraph RIGHT["✅ 올바른 패턴"]
+    subgraph RIGHT["✅ 올바른 패턴 — artifacts 사용"]
+        direction TB
         R1["build 잡\nartifacts: dist/ 저장"]
         R2["deploy 잡\n→ dist/ 항상 있음 ✅"]
         R1 -->|"artifacts 보장"| R2
     end
 
-    classDef wrong fill:#b94040,stroke:#8a2e2e,color:#fff
-    classDef right fill:#5a9a3a,stroke:#3d7228,color:#fff
+    WRONG ~~~ RIGHT
 
-    class W1,W2 wrong
-    class R1,R2 right
+
+
 ```
 
 ### `needs: []` 로 artifacts 차단
@@ -501,7 +460,7 @@ cache:
 
 ## 9. 한 줄 요약
 
-| | 한 줄 요약 |
-|---|---|
-| `artifacts` | **"이 파일, 다음 잡에 줘"** — 같은 파이프라인 내 잡 간 전달, 보장됨 |
-| `cache` | **"이 폴더, 다음 파이프라인에서 재사용"** — 설치 시간 단축, 미스 가능 |
+|             | 한 줄 요약                                                            |
+| ----------- | --------------------------------------------------------------------- |
+| `artifacts` | **"이 파일, 다음 잡에 줘"** — 같은 파이프라인 내 잡 간 전달, 보장됨   |
+| `cache`     | **"이 폴더, 다음 파이프라인에서 재사용"** — 설치 시간 단축, 미스 가능 |

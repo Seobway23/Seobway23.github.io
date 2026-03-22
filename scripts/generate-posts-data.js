@@ -20,6 +20,26 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
+/** 코드 펜스 밖에서 첫 `![](url)` / `![alt](url)` URL 추출 */
+function firstMarkdownImageOutsideFences(markdown) {
+  if (!markdown || typeof markdown !== "string") return null;
+  const parts = markdown.split(/```[\s\S]*?```/g);
+  for (const part of parts) {
+    const m = part.match(/!\[[^\]]*\]\(\s*([^)\s]+)\s*\)/);
+    if (m) return m[1].trim();
+  }
+  return null;
+}
+
+function normalizeCoverImageUrl(src) {
+  if (!src || typeof src !== "string") return null;
+  const s = src.trim();
+  if (!s) return null;
+  if (/^https?:\/\//i.test(s)) return s;
+  if (s.startsWith("/")) return s;
+  return `/${s.replace(/^\.\//, "")}`;
+}
+
 /**
  * 마크다운 파일에서 게시글 데이터 추출
  */
@@ -63,12 +83,19 @@ function parseMarkdownFile(filePath, categoryFromPath) {
         plainText.substring(0, 150) + (plainText.length > 150 ? "..." : "");
     }
 
+    const fromMatter =
+      data.coverImage || data.image || data.thumbnail || data.hero || "";
+    const fromBody = firstMarkdownImageOutsideFences(content);
+    const coverRaw = (fromMatter || fromBody || "").trim();
+    const coverImage = normalizeCoverImageUrl(coverRaw);
+
     return {
       id: data.id || slug,
       title: data.title || fileName,
       slug: slug,
       excerpt: excerpt,
       content: htmlContent,
+      coverImage: coverImage || null,
       // 폴더 경로를 우선 카테고리로 사용 (frontmatter category는 덮어쓰지 않음)
       category: normalizedCategory || data.category || "",
       tags: data.tags || [],

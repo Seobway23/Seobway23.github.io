@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,20 +9,20 @@ interface RightSidebarProps {
   readingProgress?: number;
 }
 
+type TocItem = { id: string; text: string; level: number };
+
 export default function RightSidebar({
   post,
   readingProgress = 0,
 }: RightSidebarProps) {
   const [, navigate] = useLocation();
-  const [tableOfContents, setTableOfContents] = useState<
-    Array<{ id: string; text: string; level: number }>
-  >([]);
+  const [tableOfContents, setTableOfContents] = useState<TocItem[]>([]);
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    // Generate table of contents from the post content
     const generateTOC = () => {
       const headings = document.querySelectorAll(
-        "#post-content h1, #post-content h2, #post-content h3"
+        "#post-content h1, #post-content h2, #post-content h3",
       );
       const toc = Array.from(headings).map((heading, index) => {
         const id = `heading-${index}`;
@@ -35,49 +35,91 @@ export default function RightSidebar({
       });
       setTableOfContents(toc);
     };
-
-    // Wait for content to render
     setTimeout(generateTOC, 100);
   }, [post.content]);
+
+  // H1 제외, H2를 그룹 헤더로, H3를 자식으로 분류
+  const groupedToc = useMemo(() => {
+    const groups: Array<{ h2: TocItem; children: TocItem[] }> = [];
+    let current: (typeof groups)[0] | null = null;
+    for (const item of tableOfContents) {
+      if (item.level === 1) continue; // 포스트 제목 제외
+      if (item.level === 2) {
+        current = { h2: item, children: [] };
+        groups.push(current);
+      } else if (item.level === 3 && current) {
+        current.children.push(item);
+      }
+    }
+    return groups;
+  }, [tableOfContents]);
+
+  const toggleSection = (id: string) => {
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      // 헤더 높이 (h-16 = 64px) + 약간의 여백 (16px)
       const headerOffset = 80;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
+      window.scrollTo({ top: offsetPosition, behavior: "smooth" });
     }
   };
 
   return (
     <aside className="w-64 flex-shrink-0 hidden lg:block">
-      <div className="sticky top-24 space-y-6">
-        {/* Table of Contents */}
-        {tableOfContents.length > 0 && (
+      <div className="sticky top-24 space-y-4">
+        {/* Table of Contents — H2 드롭다운, H3 자식 */}
+        {groupedToc.length > 0 && (
           <Card className="toss-card">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
-                목차
-              </h3>
-              <nav className="space-y-2 text-sm">
-                {tableOfContents.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToHeading(item.id)}
-                    className={`block text-left hover-gradient-text transition-colors ${
-                      item.level === 1 ? "" : item.level === 2 ? "ml-4" : "ml-8"
-                    }`}
-                  >
-                    {item.text}
-                  </button>
+            <CardContent className="p-4">
+              <div className="space-y-0.5">
+                {groupedToc.map(({ h2, children }) => (
+                  <div key={h2.id}>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => scrollToHeading(h2.id)}
+                        className="flex-1 text-left text-xs font-medium py-1.5 hover-gradient-text transition-colors leading-snug"
+                      >
+                        {h2.text}
+                      </button>
+                      {children.length > 0 && (
+                        <button
+                          onClick={() => toggleSection(h2.id)}
+                          className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200"
+                          style={{
+                            transform: openSections.has(h2.id)
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                          }}
+                        >
+                          ▾
+                        </button>
+                      )}
+                    </div>
+                    {openSections.has(h2.id) && children.length > 0 && (
+                      <div className="ml-2 pl-2.5 border-l border-gray-200 dark:border-gray-700 mb-1 space-y-0.5">
+                        {children.map((child) => (
+                          <button
+                            key={child.id}
+                            onClick={() => scrollToHeading(child.id)}
+                            className="block w-full text-left text-xs text-gray-500 dark:text-gray-400 hover-gradient-text transition-colors py-1 leading-snug"
+                          >
+                            {child.text}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
-              </nav>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -90,12 +132,8 @@ export default function RightSidebar({
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
-                  읽기 시간
-                </span>
-                <span className="font-medium text-foreground">
-                  {post.readTime}분
-                </span>
+                <span className="text-gray-600 dark:text-gray-400">읽기 시간</span>
+                <span className="font-medium text-foreground">{post.readTime}분</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">진행률</span>
@@ -106,9 +144,7 @@ export default function RightSidebar({
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                 <div
                   className="h-2 rounded-full transition-all duration-300 progress-bar-gradient"
-                  style={{
-                    width: `${readingProgress}%`,
-                  }}
+                  style={{ width: `${readingProgress}%` }}
                 />
               </div>
               <div className="flex items-center justify-between text-sm">
@@ -134,7 +170,7 @@ export default function RightSidebar({
               태그
             </h3>
             <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
+              {post.tags.map((tag: string) => (
                 <Badge
                   key={tag}
                   variant="secondary"
@@ -158,7 +194,7 @@ export default function RightSidebar({
               </div>
               <div>
                 <p className="font-medium">{post.author}</p>
-                <p className="text-sm opacity-90">Frontend Developer</p>
+                <p className="text-sm opacity-90">SW Developer</p>
               </div>
             </div>
             <p className="text-sm opacity-90 mb-4">

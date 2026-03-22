@@ -11,6 +11,7 @@ import { useReadingProgress } from "../hooks/use-reading-progress";
 import { apiRequest } from "@/lib/queryClient";
 import { trackPostView } from "@/lib/analytics";
 import type { Post } from "../../shared/schema";
+import { getPostCoverImageUrl } from "@/lib/post-cover";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
@@ -33,18 +34,6 @@ const categoryLabels: Record<string, string> = {
   nextjs: "Next.js",
 };
 
-const categoryImages: Record<string, string> = {
-  react:
-    "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  typescript:
-    "https://images.unsplash.com/photo-1516116216624-53e697fedbea?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  css: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  performance:
-    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-  nextjs:
-    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-};
-
 export default function Post() {
   const [, params] = useRoute("/post/:slug");
   const [, navigate] = useLocation();
@@ -54,10 +43,20 @@ export default function Post() {
   const slug = params?.slug;
   const [mermaidModal, setMermaidModal] = useState<string | null>(null);
   const [mermaidZoom, setMermaidZoom] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const modalContainerRef = useRef<HTMLDivElement>(null);
+  const panRef = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
   const closeMermaidModal = () => {
     setMermaidModal(null);
     setMermaidZoom(1);
+    setPanX(0);
+    setPanY(0);
+    panRef.current = { x: 0, y: 0 };
   };
 
   // Close modal on Escape key
@@ -118,24 +117,141 @@ export default function Post() {
     },
   });
 
-  // Track view mutation
+  // 조회수 중복 카운트 방지: 컴포넌트 마운트 후 1회만 실행
+  const hasTrackedRef = useRef(false);
+
   const trackViewMutation = useMutation({
     mutationFn: () => apiRequest("POST", `/api/posts/${slug}/view`, {}),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/posts/${slug}`] });
-    },
+    // invalidateQueries 제거 — 조회수 변경이 post 상태를 바꿔 useEffect 재실행 루프 유발
   });
 
   useEffect(() => {
-    if (post && !trackViewMutation.isPending) {
-      const timer = setTimeout(() => {
-        trackPostView(post.slug, post.title);
-        trackViewMutation.mutate();
-      }, 3000);
+    if (!post || hasTrackedRef.current) return;
+    hasTrackedRef.current = true;
+    const timer = setTimeout(() => {
+      trackPostView(post.slug, post.title);
+      trackViewMutation.mutate();
+    }, 3000);
+    return () => clearTimeout(timer);
+  // post.slug 기준 — slug가 바뀔 때만 재실행 (같은 페이지 내 post 객체 변경 무시)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post?.slug]);
 
-      return () => clearTimeout(timer);
+  // ── Mermaid Modal: SVG 자연 크기 읽기 ────────────────────────────────────────
+  const getSvgNaturalSize = (container: HTMLElement) => {
+    const svgEl = container.querySelector("svg");
+    let svgW = 900, svgH = 500;
+    if (svgEl) {
+      const vb = svgEl.getAttribute("viewBox");
+      if (vb) {
+        const parts = vb.trim().split(/[\s,]+/);
+        if (parts.length >= 4) {
+          const w = parseFloat(parts[2]);
+          const h = parseFloat(parts[3]);
+          if (w > 0 && h > 0) { svgW = w; svgH = h; }
+        }
+      } else {
+        svgW = svgEl.clientWidth || svgW;
+        svgH = svgEl.clientHeight || svgH;
+      }
     }
-  }, [post]);
+    return { svgW, svgH };
+  };
+
+  // ── Mermaid Modal: 맞춤 보기 ──────────────────────────────────────────────────
+  const fitToView = useCallback(() => {
+    const container = modalContainerRef.current;
+    if (!container) return;
+    const { svgW, svgH } = getSvgNaturalSize(container);
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const fit = Math.max(0.2, Math.min(cW * 0.88 / svgW, cH * 0.88 / svgH, 3));
+    const px = (cW - svgW * fit) / 2;
+    const py = (cH - svgH * fit) / 2;
+    setMermaidZoom(fit);
+    setPanX(px);
+    setPanY(py);
+    panRef.current = { x: px, y: py };
+  }, []);
+
+  // ── Mermaid Modal: 열릴 때 자동 맞춤 ─────────────────────────────────────────
+  useEffect(() => {
+    if (!mermaidModal) return;
+    const timer = setTimeout(() => fitToView(), 80);
+    return () => clearTimeout(timer);
+  }, [mermaidModal, fitToView]);
+
+  // ── Mermaid Modal: 휠 줌 (passive:false 필수) ─────────────────────────────────
+  useEffect(() => {
+    const container = modalContainerRef.current;
+    if (!container || !mermaidModal) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = container.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      setMermaidZoom((prev) => {
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        const newZoom = Math.max(0.2, Math.min(4, prev * factor));
+        const ratio = newZoom / prev;
+        const newPx = cx * (1 - ratio) + panRef.current.x * ratio;
+        const newPy = cy * (1 - ratio) + panRef.current.y * ratio;
+        panRef.current = { x: newPx, y: newPy };
+        setPanX(newPx);
+        setPanY(newPy);
+        return newZoom;
+      });
+    };
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, [mermaidModal]);
+
+  // ── Mermaid Modal: 드래그 패닝 ────────────────────────────────────────────────
+  const handleModalMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = {
+      x: e.clientX, y: e.clientY,
+      panX: panRef.current.x, panY: panRef.current.y,
+    };
+    e.preventDefault();
+  }, []);
+
+  const handleModalMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    const newX = dragStartRef.current.panX + dx;
+    const newY = dragStartRef.current.panY + dy;
+    panRef.current = { x: newX, y: newY };
+    setPanX(newX);
+    setPanY(newY);
+  }, []);
+
+  const handleModalMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  }, []);
+
+  // ── Mermaid Modal: 버튼 줌 (컨테이너 중심 기준) ───────────────────────────────
+  const zoomBy = useCallback((delta: number) => {
+    const container = modalContainerRef.current;
+    setMermaidZoom((prev) => {
+      const newZoom = Math.max(0.2, Math.min(4, +(prev + delta).toFixed(2)));
+      if (container) {
+        const cx = container.clientWidth / 2;
+        const cy = container.clientHeight / 2;
+        const ratio = newZoom / prev;
+        const newPx = cx * (1 - ratio) + panRef.current.x * ratio;
+        const newPy = cy * (1 - ratio) + panRef.current.y * ratio;
+        panRef.current = { x: newPx, y: newPy };
+        setPanX(newPx);
+        setPanY(newPy);
+      }
+      return newZoom;
+    });
+  }, []);
 
   // HTML 콘텐츠 그대로 표시
   const formatContent = (content: string) => {
@@ -173,7 +289,7 @@ export default function Post() {
           const isDark = document.documentElement.classList.contains("dark");
           mermaid.initialize({
             startOnLoad: false,
-            theme: isDark ? "dark" : "base",
+            theme: isDark ? "dark" : "default",
             securityLevel: "loose",
             flowchart: { useMaxWidth: false, htmlLabels: true },
             sequence: { useMaxWidth: false },
@@ -186,35 +302,71 @@ export default function Post() {
 
             const code = block.textContent || "";
             const id = `mermaid-${Date.now()}-${i}`;
+
+            // %% desc: 주석에서 설명 추출
+            const descMatch = code.match(/%%\s*desc:\s*(.+)/);
+            const diagramDesc = descMatch ? descMatch[1].trim() : "";
+
+            // 다이어그램 타입 감지 (첫 번째 비주석 줄 기준) → 최소 높이 + 라벨
+            const codeLines = code.trim().split("\n");
+            const typeDetectLine = (codeLines.find((l) => !l.trim().startsWith("%%")) || "").toLowerCase();
+            let diagramMinHeight = "220px";
+            let diagramTypeLabel = "다이어그램";
+            if (/sequencediagram/.test(typeDetectLine)) { diagramMinHeight = "440px"; diagramTypeLabel = "시퀀스 다이어그램"; }
+            else if (/classdiagram/.test(typeDetectLine)) { diagramMinHeight = "360px"; diagramTypeLabel = "클래스 다이어그램"; }
+            else if (/statediagram/.test(typeDetectLine)) { diagramMinHeight = "300px"; diagramTypeLabel = "상태 다이어그램"; }
+            else if (/gantt/.test(typeDetectLine)) { diagramMinHeight = "200px"; diagramTypeLabel = "간트 차트"; }
+            else if (/gitgraph/.test(typeDetectLine)) { diagramMinHeight = "220px"; diagramTypeLabel = "Git 그래프"; }
+            else if (/flowchart\s+lr|graph\s+lr/.test(typeDetectLine)) { diagramMinHeight = "240px"; diagramTypeLabel = "플로우차트 (좌→우)"; }
+            else if (/flowchart\s+rl|graph\s+rl/.test(typeDetectLine)) { diagramMinHeight = "240px"; diagramTypeLabel = "플로우차트 (우→좌)"; }
+            else if (/flowchart\s+(td|tb)|graph\s+(td|tb)/.test(typeDetectLine)) { diagramMinHeight = "340px"; diagramTypeLabel = "플로우차트 (상→하)"; }
             try {
               const { svg } = await mermaid.render(id, code);
 
               const wrapper = document.createElement("div");
+              // mermaid-wrapper 클래스: index.css에서 resize:both 적용
               wrapper.className = "mermaid-wrapper my-6";
-              wrapper.style.overflowX = "auto";
-              wrapper.style.overflowY = "auto";
-              wrapper.style.maxHeight = "480px";
+              wrapper.style.width = "100%";
+              wrapper.style.overflow = "hidden";
+              wrapper.style.boxSizing = "border-box";
 
               const inner = document.createElement("div");
               inner.className =
-                "mermaid-inner group relative cursor-zoom-in rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow duration-200 inline-block min-w-full";
+                "mermaid-inner group relative cursor-zoom-in rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow duration-200";
+              inner.style.width = "100%";
+              inner.style.height = "100%";
+              inner.style.boxSizing = "border-box";
+              inner.style.overflow = "hidden";
               inner.innerHTML = svg;
 
-              // zoom-in hint badge
+              // 호버 힌트 (확대 + 리사이즈 안내)
               const hint = document.createElement("span");
               hint.className =
-                "absolute top-2 right-2 text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10";
-              hint.textContent = "🔍 클릭하여 확대";
+                "absolute top-2 right-2 text-xs text-gray-400 bg-gray-100/90 dark:bg-gray-800/90 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10";
+              hint.textContent = "🔍 클릭하여 확대 · ↔ 모서리 드래그로 크기 조절";
               inner.appendChild(hint);
 
               wrapper.appendChild(inner);
 
-              // SVG 크기 조정 — 자연 크기 유지, 최소 너비 보장
+              // SVG: width 100%로 컨테이너에 맞춤 (w 기준 자동 조절)
               const svgEl = inner.querySelector("svg");
               if (svgEl) {
-                svgEl.style.maxWidth = "none";
+                svgEl.removeAttribute("width");
+                svgEl.removeAttribute("height");
+                svgEl.style.width = "100%";
                 svgEl.style.height = "auto";
                 svgEl.style.display = "block";
+                svgEl.style.minHeight = diagramMinHeight;
+              }
+              wrapper.style.minHeight = diagramMinHeight;
+
+              // ResizeObserver: wrapper 크기 변경 시 inner도 동기화
+              if (typeof ResizeObserver !== "undefined") {
+                const ro = new ResizeObserver(() => {
+                  inner.style.width = wrapper.clientWidth + "px";
+                  inner.style.height = wrapper.clientHeight + "px";
+                });
+                ro.observe(wrapper);
               }
 
               inner.addEventListener("click", () => {
@@ -223,6 +375,14 @@ export default function Post() {
 
               (pre as HTMLElement).dataset.mermaidRendered = "true";
               pre.replaceWith(wrapper);
+
+              // 다이어그램 캡션 (타입 + 설명)
+              const figcap = document.createElement("div");
+              figcap.className = "mermaid-caption";
+              figcap.innerHTML =
+                `<span class="mermaid-caption-badge">${diagramTypeLabel}</span>` +
+                (diagramDesc ? `<span class="mermaid-caption-text">${diagramDesc}</span>` : "");
+              wrapper.insertAdjacentElement("afterend", figcap);
             } catch (e) {
               console.error("Mermaid render error:", e);
             }
@@ -269,8 +429,8 @@ export default function Post() {
     );
   }
 
-  const categoryLabel = categoryLabels[post.category] || post.category;
-  const imageUrl = categoryImages[post.category] || categoryImages.react;
+  const categoryLabel = categoryLabels[post.category] || post.category.split("/").pop() || post.category;
+  const imageUrl = getPostCoverImageUrl(post);
 
   return (
     <>
@@ -286,27 +446,26 @@ export default function Post() {
           onClick={(e) => e.stopPropagation()}
         >
           {/* 상단 컨트롤 바 */}
-          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 gap-4">
-            {/* 줌 컨트롤 */}
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 gap-3">
+            <div className="flex items-center gap-1.5">
               <button
-                onClick={() => setMermaidZoom(z => Math.max(0.2, +(z - 0.25).toFixed(2)))}
+                onClick={() => zoomBy(-0.25)}
                 className="w-7 h-7 flex items-center justify-center text-lg font-bold rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
               >−</button>
               <span className="text-xs font-mono w-12 text-center text-gray-500 dark:text-gray-400">
                 {Math.round(mermaidZoom * 100)}%
               </span>
               <button
-                onClick={() => setMermaidZoom(z => Math.min(4, +(z + 0.25).toFixed(2)))}
+                onClick={() => zoomBy(0.25)}
                 className="w-7 h-7 flex items-center justify-center text-lg font-bold rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
               >+</button>
               <button
-                onClick={() => setMermaidZoom(1)}
-                className="text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
-              >초기화</button>
+                onClick={fitToView}
+                className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
+              >맞춤</button>
             </div>
             <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">
-              ESC 또는 배경 클릭으로 닫기
+              스크롤 확대 · 드래그 이동 · ESC 닫기
             </span>
             <button
               onClick={closeMermaidModal}
@@ -315,14 +474,21 @@ export default function Post() {
               ✕ 닫기
             </button>
           </div>
-          {/* SVG 영역 — 줌 적용 */}
-          <div className="flex-1 overflow-auto p-6">
+          {/* SVG 영역 — 줌 + 드래그 패닝 */}
+          <div
+            ref={modalContainerRef}
+            className={`flex-1 overflow-hidden relative select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+            onMouseDown={handleModalMouseDown}
+            onMouseMove={handleModalMouseMove}
+            onMouseUp={handleModalMouseUp}
+            onMouseLeave={handleModalMouseUp}
+          >
             <div
+              className="mermaid-svg-content absolute pointer-events-none"
               style={{
-                transform: `scale(${mermaidZoom})`,
-                transformOrigin: "top left",
-                transition: "transform 0.15s ease",
-                display: "inline-block",
+                transform: `translate(${panX}px, ${panY}px) scale(${mermaidZoom})`,
+                transformOrigin: "0 0",
+                transition: isDragging ? "none" : "transform 0.1s ease",
               }}
               dangerouslySetInnerHTML={{ __html: mermaidModal }}
             />
