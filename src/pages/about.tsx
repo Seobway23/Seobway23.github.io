@@ -141,7 +141,7 @@ export default function About() {
           <Card className="toss-card">
             <CardContent className="p-8 text-center">
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400"
+                src="https://avatars.githubusercontent.com/u/122852052?s=400&u=210f553dedd53bea5dbf3de6f8daef769f6dea86&v=4"
                 alt="Professional developer headshot for about page"
                 className="w-32 h-32 rounded-full object-cover mx-auto mb-6 shadow-lg"
               />
@@ -191,13 +191,13 @@ export default function About() {
                 <div>
                   <p className="font-medium">이메일</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    developer@example.com
+                    seobstation@naver.com
                   </p>
                 </div>
               </a>
 
               <a
-                href="https://github.com/developer"
+                href="https://github.com/Seobway23"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-3 p-3 rounded-lg hover-gradient-bg transition-colors group"
@@ -222,7 +222,7 @@ export default function About() {
                 <div>
                   <p className="font-medium">GitHub</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    github.com/developer
+                    github.com/Seobway23
                   </p>
                 </div>
               </a>
