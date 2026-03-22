@@ -3,7 +3,7 @@
  *
  * 사용 전 설정:
  * 1. GitHub Personal Access Token 생성 (권한: public_repo)
- * 2. 환경 변수에 GITHUB_TOKEN, GITHUB_REPO 설정
+ * 2. 환경 변수에 COMMENTS_GH_PAT, UTTERANCES_REPO 설정
  *
  * 개발 모드: .env 파일에 설정
  * 프로덕션: GitHub Secrets에 설정
@@ -70,7 +70,7 @@ async function fetchIssuesFromGitHub(repo, token) {
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("GitHub 인증 실패. GITHUB_TOKEN을 확인하세요.");
+          throw new Error("GitHub 인증 실패. COMMENTS_GH_PAT을 확인하세요.");
         }
         if (response.status === 404) {
           throw new Error(`저장소를 찾을 수 없습니다: ${repo}`);
@@ -223,27 +223,27 @@ function matchIssueToPost(issue, postSlugs) {
 async function main() {
   console.log("💬 댓글 개수 데이터 가져오기 시작...");
 
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-  const GITHUB_REPO = process.env.GITHUB_REPO;
+  const token = process.env.COMMENTS_GH_PAT;
+  const repo = process.env.UTTERANCES_REPO;
 
-  if (!GITHUB_TOKEN) {
-    console.error("❌ GITHUB_TOKEN이 설정되지 않았습니다.");
+  if (!token) {
+    console.error("❌ COMMENTS_GH_PAT이 설정되지 않았습니다.");
     console.error(
-      "   .env 파일에 GITHUB_TOKEN을 추가하거나 환경 변수를 설정하세요."
+      "   .env 파일에 COMMENTS_GH_PAT을 추가하거나 환경 변수를 설정하세요."
     );
     process.exit(1);
   }
 
-  if (!GITHUB_REPO) {
-    console.error("❌ GITHUB_REPO가 설정되지 않았습니다.");
+  if (!repo) {
+    console.error("❌ UTTERANCES_REPO가 설정되지 않았습니다.");
     console.error(
-      "   .env 파일에 GITHUB_REPO를 추가하거나 환경 변수를 설정하세요."
+      "   .env 파일에 UTTERANCES_REPO를 추가하거나 환경 변수를 설정하세요."
     );
     console.error("   형식: username/repo-name");
     process.exit(1);
   }
 
-  console.log(`📦 저장소: ${GITHUB_REPO}`);
+  console.log(`📦 저장소: ${repo}`);
 
   // 게시글 slug 목록 가져오기
   const postSlugs = getPostSlugs();
@@ -274,7 +274,7 @@ async function main() {
   try {
     // GitHub API에서 Issues 가져오기
     console.log("📡 GitHub API에서 Issues 가져오는 중...");
-    const issues = await fetchIssuesFromGitHub(GITHUB_REPO, GITHUB_TOKEN);
+    const issues = await fetchIssuesFromGitHub(repo, token);
     console.log(`✅ ${issues.length}개의 Issue 발견`);
 
     // 각 Issue를 게시글과 매칭하고 댓글 개수 및 내용 가져오기
@@ -282,7 +282,7 @@ async function main() {
       const matchedSlug = matchIssueToPost(issue, postSlugs);
 
       if (matchedSlug) {
-        const commentCount = await fetchCommentsCount(issue.url, GITHUB_TOKEN);
+        const commentCount = await fetchCommentsCount(issue.url, token);
         comments[matchedSlug] = commentCount;
         console.log(`  ✓ ${matchedSlug}: ${commentCount}개 댓글`);
 
@@ -290,8 +290,8 @@ async function main() {
         if (commentCount > 0 && issue.number) {
           const issueComments = await fetchIssueComments(
             issue.number,
-            GITHUB_REPO,
-            GITHUB_TOKEN
+            repo,
+            token
           );
 
           // 각 댓글을 recentComments에 추가

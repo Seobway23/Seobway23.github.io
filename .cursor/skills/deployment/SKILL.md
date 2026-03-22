@@ -34,7 +34,7 @@ npx serve dist           # 빌드 결과 로컬 확인
 
 ## GitHub Secrets 설정 목록
 
-시크릿 이름은 **`GITHUB_`로 시작하면 안 됨** (GitHub 예약). 워크플로는 아래 이름을 사용하고, 스크립트에는 `GITHUB_TOKEN` / `GITHUB_REPO` env로 매핑됨.
+시크릿 이름은 **`GITHUB_`로 시작하면 안 됨** (GitHub 예약). Actions·로컬 `.env`·`fetch-github-comments.js`는 모두 **`COMMENTS_GH_PAT`**, **`UTTERANCES_REPO`** 환경 변수 이름을 그대로 사용한다.
 
 | Secret | 설명 |
 |--------|------|

@@ -25,8 +25,8 @@ git push -u origin main
 
 **필수:**
 
-- `GITHUB_TOKEN`: Personal Access Token (권한: `public_repo`)
-- `GITHUB_REPO`: 저장소 경로 (예: `username/repo-name`)
+- `COMMENTS_GH_PAT`: Personal Access Token (권한: `public_repo`)
+- `UTTERANCES_REPO`: 저장소 경로 (예: `username/repo-name`)
 
 **선택사항 (조회수 기능 사용 시):**
 
@@ -85,7 +85,7 @@ GA_SERVICE_ACCOUNT_KEY = {"type":"service_account",...}  ← JSON 전체 내용
 
 - 사용자가 댓글 작성 시 GitHub Issue 자동 생성
 - 댓글 개수는 빌드 시점에 GitHub API로 자동 가져옴
-- `GITHUB_TOKEN`과 `GITHUB_REPO` Secrets 설정 필요
+- `COMMENTS_GH_PAT`과 `UTTERANCES_REPO` Secrets 설정 필요
 
 ---
 
@@ -124,8 +124,8 @@ GA_SERVICE_ACCOUNT_KEY = {"type":"service_account",...}  ← JSON 전체 내용
 - [ ] Utterances 앱 설치
 - [ ] `src/pages/post.tsx`에서 저장소 경로 수정
 - [ ] GitHub Secrets 설정:
-  - [ ] `GITHUB_TOKEN` (필수)
-  - [ ] `GITHUB_REPO` (필수)
+  - [ ] `COMMENTS_GH_PAT` (필수)
+  - [ ] `UTTERANCES_REPO` (필수)
   - [ ] `GA_PROPERTY_ID` (선택)
   - [ ] `GA_SERVICE_ACCOUNT_KEY` (선택)
 - [ ] 코드 푸시 및 배포 확인

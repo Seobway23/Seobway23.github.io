@@ -89,7 +89,7 @@ public/comments.json 저장 { "slug": 댓글수 }
 빌드에 포함 → PostCard에서 표시
 ```
 
-- `GITHUB_TOKEN`과 `GITHUB_REPO` 설정 필요
+- `COMMENTS_GH_PAT`과 `UTTERANCES_REPO` 설정 필요
 
 ---
 
@@ -191,8 +191,8 @@ GA_SERVICE_ACCOUNT_KEY=./ga-service-account-key.json
 
 | Secret 이름              | 값                                     | 필수 여부 |
 | ------------------------ | -------------------------------------- | --------- |
-| `GITHUB_TOKEN`           | GitHub Personal Access Token           | 필수      |
-| `GITHUB_REPO`            | `username/repo-name`                   | 필수      |
+| `COMMENTS_GH_PAT`           | GitHub Personal Access Token           | 필수      |
+| `UTTERANCES_REPO`            | `username/repo-name`                   | 필수      |
 | `GA_PROPERTY_ID`         | GA 속성 ID (숫자)                      | 선택      |
 | `GA_SERVICE_ACCOUNT_KEY` | 서비스 계정 JSON **전체 내용** (한 줄) | 선택      |
 
@@ -228,8 +228,8 @@ GA_PROPERTY_ID=123456789
 GA_SERVICE_ACCOUNT_KEY=./ga-service-account-key.json
 
 # GitHub 댓글 수 수집
-GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-GITHUB_REPO=your-username/your-repo
+COMMENTS_GH_PAT=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+UTTERANCES_REPO=your-username/your-repo
 ```
 
 ### 데이터 생성 및 개발 서버 실행
@@ -326,7 +326,7 @@ cat public/comments.json
 ### 배포 실패 시
 
 1. 저장소 **Actions 탭**에서 실패한 단계 확인
-2. `GITHUB_TOKEN`, `GITHUB_REPO` Secrets 설정 확인
+2. `COMMENTS_GH_PAT`, `UTTERANCES_REPO` Secrets 설정 확인
 3. GitHub Pages 설정 확인 (Settings > Pages > Source: "GitHub Actions")
 
 ### GA "Permission denied" 오류
@@ -347,7 +347,7 @@ cat public/comments.json
 - [ ] `src/pages/post.tsx`의 `repo` 값 수정
 - [ ] GitHub Pages 활성화 (Source: GitHub Actions)
 - [ ] Utterances 앱 설치
-- [ ] `GITHUB_TOKEN`, `GITHUB_REPO` Secrets 추가
+- [ ] `COMMENTS_GH_PAT`, `UTTERANCES_REPO` Secrets 추가
 - [ ] push → 배포 확인
 
 ### 조회수 GA 통합 (선택)

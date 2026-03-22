@@ -33,23 +33,23 @@ ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ```env
 # GitHub
-GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-GITHUB_REPO=your-username/your-repo
+COMMENTS_GH_PAT=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+UTTERANCES_REPO=your-username/your-repo
 ```
 
 **예시:**
 
 ```env
-GITHUB_TOKEN=ghp_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
-GITHUB_REPO=seobway23/Laptop
+COMMENTS_GH_PAT=ghp_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
+UTTERANCES_REPO=seobway23/Laptop
 ```
 
 ### 2.2 GitHub Actions (프로덕션)
 
 GitHub 저장소의 Settings > Secrets and variables > Actions에서 다음 시크릿 추가:
 
-1. **GITHUB_TOKEN**: Personal Access Token
-2. **GITHUB_REPO**: 저장소 경로 (예: `username/repo-name`)
+1. **COMMENTS_GH_PAT**: Personal Access Token
+2. **UTTERANCES_REPO**: 저장소 경로 (예: `username/repo-name`)
 
 ## 3. Utterances 설정 확인
 
@@ -121,7 +121,7 @@ node scripts/fetch-github-comments.js
 
 ### 5.2 "404 Not Found" 오류
 
-- `GITHUB_REPO` 환경 변수가 올바른 형식인지 확인 (예: `username/repo-name`)
+- `UTTERANCES_REPO` 환경 변수가 올바른 형식인지 확인 (예: `username/repo-name`)
 - 저장소가 존재하고 접근 가능한지 확인
 
 ### 5.3 "Issues를 찾을 수 없습니다"

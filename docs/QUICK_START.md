@@ -20,8 +20,8 @@ GA_PROPERTY_ID=123456789
 GA_SERVICE_ACCOUNT_KEY=./ga-service-account-key.json
 
 # GitHub (댓글 기능용)
-GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-GITHUB_REPO=your-username/your-repo
+COMMENTS_GH_PAT=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+UTTERANCES_REPO=your-username/your-repo
 ```
 
 ## 3. 게시글 데이터 생성
@@ -54,7 +54,7 @@ npm run fetch:comments
 **필요한 설정:**
 
 - GitHub Personal Access Token 생성 ([GITHUB_COMMENTS_SETUP.md](./GITHUB_COMMENTS_SETUP.md) 참고)
-- `.env`에 `GITHUB_TOKEN`, `GITHUB_REPO` 설정
+- `.env`에 `COMMENTS_GH_PAT`, `UTTERANCES_REPO` 설정
 
 ### 모든 데이터 가져오기
 
@@ -82,10 +82,10 @@ npm run preview
 
 ## 문제 해결
 
-### "GITHUB_TOKEN이 설정되지 않았습니다"
+### "COMMENTS_GH_PAT이 설정되지 않았습니다"
 
 - `.env` 파일 확인
-- `GITHUB_TOKEN`과 `GITHUB_REPO` 설정 확인
+- `COMMENTS_GH_PAT`과 `UTTERANCES_REPO` 설정 확인
 
 ### "Google Analytics 설정이 없습니다"
 

@@ -37,8 +37,8 @@ GA_PROPERTY_ID=123456789
 GA_SERVICE_ACCOUNT_KEY=./ga-service-account-key.json
 
 # GitHub (댓글 개수 가져오기용, 선택사항)
-GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-GITHUB_REPO=your-username/your-repo
+COMMENTS_GH_PAT=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+UTTERANCES_REPO=your-username/your-repo
 ```
 
 #### Google Analytics Measurement ID 발급 방법
@@ -249,8 +249,8 @@ npm run fetch:comments
 
 1. GitHub 저장소의 Settings > Secrets에서 다음 시크릿 추가:
 
-   - `GITHUB_TOKEN`: Personal Access Token (권한: `public_repo`)
-   - `GITHUB_REPO`: 저장소 경로 (예: `username/repo-name`)
+   - `COMMENTS_GH_PAT`: Personal Access Token (권한: `public_repo`)
+   - `UTTERANCES_REPO`: 저장소 경로 (예: `username/repo-name`)
 
 2. `.github/workflows/build.yml`이 자동으로 댓글 개수 데이터를 가져와 빌드에 포함합니다.
 

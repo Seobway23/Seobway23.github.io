@@ -99,12 +99,12 @@ VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 #### 필수 시크릿
 
-1. **GITHUB_TOKEN**
+1. **COMMENTS_GH_PAT**
 
    - 값: GitHub Personal Access Token (위에서 생성)
    - 설명: GitHub API 호출 및 Pages 배포용
 
-2. **GITHUB_REPO**
+2. **UTTERANCES_REPO**
    - 값: 저장소 경로 (예: `your-username/your-repo`)
    - 설명: 댓글 개수 가져오기용
 
@@ -130,10 +130,10 @@ VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 **예시:**
 
 ```
-Name: GITHUB_TOKEN
+Name: COMMENTS_GH_PAT
 Secret: ghp_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
 
-Name: GITHUB_REPO
+Name: UTTERANCES_REPO
 Secret: your-username/your-repo
 
 Name: GA_PROPERTY_ID
@@ -203,7 +203,7 @@ GitHub Actions는 다음 순서로 실행됩니다:
 - GitHub Secrets에 `GA_PROPERTY_ID` 추가
 - 또는 조회수 기능을 사용하지 않으려면 해당 스텝이 `continue-on-error: true`로 설정되어 있어 실패해도 계속 진행됨
 
-#### "GITHUB_TOKEN authentication failed"
+#### "COMMENTS_GH_PAT authentication failed"
 
 - GitHub Personal Access Token이 올바른지 확인
 - 토큰에 `repo` 권한이 있는지 확인
@@ -211,7 +211,7 @@ GitHub Actions는 다음 순서로 실행됩니다:
 
 #### "Repository not found"
 
-- `GITHUB_REPO` 시크릿이 올바른 형식인지 확인 (예: `username/repo-name`)
+- `UTTERANCES_REPO` 시크릿이 올바른 형식인지 확인 (예: `username/repo-name`)
 - 저장소가 존재하고 접근 가능한지 확인
 
 ### 2. 조회수가 0으로 표시되는 경우
@@ -235,7 +235,7 @@ GitHub Actions는 다음 순서로 실행됩니다:
 1. Utterances 앱이 설치되어 있는지 확인
 2. `public/comments.json` 파일이 생성되었는지 확인
 3. GitHub Issues가 생성되었는지 확인
-4. `GITHUB_REPO` 시크릿이 올바른지 확인
+4. `UTTERANCES_REPO` 시크릿이 올바른지 확인
 
 **해결 방법:**
 
@@ -311,8 +311,8 @@ npm run preview
 - [ ] (선택) GA Data API 설정
 - [ ] GitHub Personal Access Token 생성
 - [ ] GitHub Secrets 설정:
-  - [ ] `GITHUB_TOKEN`
-  - [ ] `GITHUB_REPO`
+  - [ ] `COMMENTS_GH_PAT`
+  - [ ] `UTTERANCES_REPO`
   - [ ] (선택) `GA_PROPERTY_ID`
   - [ ] (선택) `GA_SERVICE_ACCOUNT_KEY`
 - [ ] 코드 푸시 및 배포 확인

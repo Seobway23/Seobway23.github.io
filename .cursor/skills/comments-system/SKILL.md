@@ -27,9 +27,8 @@ const utterancesConfig = {
 
 ### 저장소 변경 시
 1. `utterances-comments.tsx`의 `repo` 값 수정
-2. `scripts/fetch-github-comments.js`의 저장소 설정 수정
-3. `.env`의 `GITHUB_REPO` 업데이트
-4. 해당 저장소에 [utterances GitHub App](https://utteranc.es/) 설치
+2. `.env`의 `UTTERANCES_REPO`, `COMMENTS_GH_PAT` 업데이트 (댓글 수 스크립트는 env만 사용)
+3. 해당 저장소에 [utterances GitHub App](https://utteranc.es/) 설치
 
 ## 테마 동기화
 

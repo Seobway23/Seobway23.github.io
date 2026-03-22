@@ -87,8 +87,8 @@ GA_PROPERTY_ID=123456789
 GA_SERVICE_ACCOUNT_KEY=./ga-service-account-key.json
 
 # GitHub (댓글 가져오기용)
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx
-GITHUB_REPO=your-username/your-repo
+COMMENTS_GH_PAT=ghp_xxxxxxxxxxxx
+UTTERANCES_REPO=your-username/your-repo
 ```
 
 ### 4.2 GitHub Actions (프로덕션)
@@ -97,8 +97,8 @@ GitHub 저장소의 Settings > Secrets and variables > Actions에서 다음 시�
 
 1. **GA_PROPERTY_ID**: Google Analytics 속성 ID (예: `123456789`)
 2. **GA_SERVICE_ACCOUNT_KEY**: 서비스 계정 JSON 키 파일의 전체 내용 (복사해서 붙여넣기)
-3. **GITHUB_TOKEN**: GitHub Personal Access Token
-4. **GITHUB_REPO**: GitHub 저장소 경로 (예: `username/repo-name`)
+3. **COMMENTS_GH_PAT**: GitHub Personal Access Token
+4. **UTTERANCES_REPO**: GitHub 저장소 경로 (예: `username/repo-name`)
 
 ## 5. 개발 모드에서 테스트
 
