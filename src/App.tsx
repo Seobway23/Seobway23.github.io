@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Switch, Route, useLocation } from "wouter";
+import { Router as WouterRouter, Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,7 +12,7 @@ import Post from "./pages/post";
 import About from "./pages/about";
 import NotFound from "./pages/not-found";
 
-function Router() {
+function AppRoutes() {
   const [location] = useLocation();
 
   // Google Analytics 초기화
@@ -36,16 +36,28 @@ function Router() {
 }
 
 function App() {
+  const baseUrl = import.meta.env.BASE_URL;
+  const wouterBase =
+    baseUrl.length > 1 ? baseUrl.replace(/\/$/, "") : undefined;
+
+  const tree = (
+    <ThemeProvider>
+      <TooltipProvider>
+        <Layout>
+          <AppRoutes />
+        </Layout>
+        <Toaster />
+      </TooltipProvider>
+    </ThemeProvider>
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Layout>
-            <Router />
-          </Layout>
-          <Toaster />
-        </TooltipProvider>
-      </ThemeProvider>
+      {wouterBase ? (
+        <WouterRouter base={wouterBase}>{tree}</WouterRouter>
+      ) : (
+        tree
+      )}
     </QueryClientProvider>
   );
 }

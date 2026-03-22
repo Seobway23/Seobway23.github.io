@@ -1,4 +1,5 @@
 import type { Post } from "@shared/schema";
+import { publicUrl } from "@/lib/public-path";
 
 // 프론트엔드에서 게시글을 관리하는 스토리지
 const STORAGE_KEY = "blog-posts";
@@ -15,7 +16,7 @@ async function loadPostsFromJSON(): Promise<Post[]> {
   }
 
   try {
-    const response = await fetch("/posts.json");
+    const response = await fetch(publicUrl("posts.json"));
     if (!response.ok) {
       throw new Error("Failed to fetch posts data");
     }

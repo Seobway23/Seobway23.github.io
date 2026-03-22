@@ -3,6 +3,8 @@
  * 빌드 타임에 생성된 recent-comments.json 파일에서 최신 댓글을 읽어옴
  */
 
+import { publicUrl } from "@/lib/public-path";
+
 export interface RecentComment {
   slug: string;
   postTitle: string;
@@ -20,7 +22,7 @@ async function loadValidPostSlugs(): Promise<{
   slugs: Set<string>;
 }> {
   try {
-    const res = await fetch("/posts.json");
+    const res = await fetch(publicUrl("posts.json"));
     if (!res.ok) return { ok: false, slugs: new Set() };
     const posts: { slug?: string }[] = await res.json();
     const slugs = new Set(
@@ -44,7 +46,7 @@ export async function getRecentComments(): Promise<RecentComment[]> {
   try {
     const [{ ok: postsOk, slugs: validSlugs }, recentRes] = await Promise.all([
       loadValidPostSlugs(),
-      fetch("/recent-comments.json"),
+      fetch(publicUrl("recent-comments.json")),
     ]);
 
     if (!recentRes.ok) {

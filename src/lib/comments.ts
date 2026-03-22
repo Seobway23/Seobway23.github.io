@@ -3,6 +3,8 @@
  * 빌드 타임에 생성된 comments.json 파일에서 댓글 개수를 읽어옴
  */
 
+import { publicUrl } from "@/lib/public-path";
+
 interface CommentsData {
   [slug: string]: number;
 }
@@ -19,7 +21,7 @@ export async function getCommentsData(): Promise<CommentsData> {
   }
 
   try {
-    const response = await fetch("/comments.json");
+    const response = await fetch(publicUrl("comments.json"));
     if (!response.ok) {
       throw new Error("Failed to fetch comments data");
     }

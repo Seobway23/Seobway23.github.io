@@ -5,6 +5,11 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+# [404 /src/main.tsx] GitHub 저장소 Settings → Pages → Build and deployment 에서
+# "Deploy from a branch" 를 쓰는 경우 소스 브랜치는 gh-pages, 폴더는 /(root) 여야 함.
+# main 브랜치 /(root) 로 두면 소스 index.html(개발용 /src/main.tsx)이 그대로 올라가 404가 난다.
+# Actions 가 성공한 뒤 gh-pages 에 dist 가 푸시되는지 브랜치를 확인할 것.
+
 # Pages 배포(gh-pages 푸시) — PAT 시크릿 이름은 GITHUB_ 접두사 불가 → github.token 사용
 #
 # [댓글(Utterances) 저장소 ≠ 이 블로그 레포인 경우]
@@ -43,7 +48,10 @@ jobs:
         run: npm run fetch:all:prod
         continue-on-error: true
 
+      # GitHub Pages 프로젝트 사이트: /RepoName/ — Vite base·라우터·fetch 경로에 사용
       - name: Build
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build
 
       - name: Deploy to GitHub Pages

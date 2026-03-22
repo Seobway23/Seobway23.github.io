@@ -3,6 +3,8 @@
  * 빌드 타임에 생성된 views.json 파일에서 조회수를 읽어옴
  */
 
+import { publicUrl } from "@/lib/public-path";
+
 interface ViewsData {
   [slug: string]: number;
 }
@@ -19,7 +21,7 @@ export async function getViewsData(): Promise<ViewsData> {
   }
 
   try {
-    const response = await fetch("/views.json");
+    const response = await fetch(publicUrl("views.json"));
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
