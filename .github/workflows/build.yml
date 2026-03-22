@@ -48,10 +48,12 @@ jobs:
         run: npm run fetch:all:prod
         continue-on-error: true
 
-      # GitHub Pages 프로젝트 사이트: /RepoName/ — Vite base·라우터·fetch 경로에 사용
+      # Pages URL 기준 Vite base
+      # - 사용자 사이트(저장소 이름이 *.github.io): https://user.github.io/ → base 는 /
+      # - 프로젝트 사이트: https://user.github.io/RepoName/ → base 는 /RepoName/
       - name: Build
         env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_BASE_PATH: ${{ endsWith(github.event.repository.name, '.github.io') && '/' || format('/{0}/', github.event.repository.name) }}
         run: npm run build
 
       - name: Deploy to GitHub Pages
