@@ -227,7 +227,7 @@ export default function About() {
                 </div>
               </a>
 
-              <a
+              {/* <a
                 href="https://linkedin.com/in/developer"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -256,7 +256,7 @@ export default function About() {
                     linkedin.com/in/developer
                   </p>
                 </div>
-              </a>
+              </a> */}
             </CardContent>
           </Card>
 
