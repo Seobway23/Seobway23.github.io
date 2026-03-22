@@ -41,6 +41,34 @@ function normalizeCoverImageUrl(src) {
 }
 
 /**
+ * 마크다운 본문 기준 예상 읽기 시간(분). 코드·이미지·링크 제외.
+ * 한글·한자·가나 + 영단어 혼합(기술 블로그)에 맞춰 보수적으로 추정.
+ */
+function estimateReadTimeMinutes(markdown) {
+  if (!markdown || typeof markdown !== "string") return 1;
+  let text = markdown.replace(/```[\s\S]*?```/g, " ");
+  text = text.replace(/^---[\s\S]*?---/m, " ");
+  text = text.replace(/!\[[^\]]*\]\([^)]+\)/g, " ");
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  text = text.replace(/`[^`]+`/g, " ");
+  text = text.replace(/[#>*_|]/g, " ");
+  text = text.replace(/\s+/g, " ").trim();
+  if (!text.length) return 1;
+
+  const cjkRe =
+    /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/g;
+  const cjk = (text.match(cjkRe) || []).length;
+  const latin = text.replace(cjkRe, " ");
+  const words = latin
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0).length;
+  // 분당 약 300자(한글권)·200단어(영문) — 짧은 글·코드 비중 있으면 약간 길게 느껴지도록 반올림
+  const minutes = cjk / 300 + words / 200;
+  return Math.max(1, Math.round(minutes));
+}
+
+/**
  * 마크다운 파일에서 게시글 데이터 추출
  */
 function parseMarkdownFile(filePath, categoryFromPath) {
@@ -100,7 +128,15 @@ function parseMarkdownFile(filePath, categoryFromPath) {
       category: normalizedCategory || data.category || "",
       tags: data.tags || [],
       author: data.author || "작성자",
-      readTime: data.readTime || 5,
+      readTime: (() => {
+        const n =
+          data.readTime != null && data.readTime !== ""
+            ? Number(data.readTime)
+            : NaN;
+        return Number.isFinite(n) && n > 0
+          ? Math.round(n)
+          : estimateReadTimeMinutes(content);
+      })(),
       views: 0, // views.json에서 가져올 예정
       featured: data.featured || false,
       createdAt: data.createdAt

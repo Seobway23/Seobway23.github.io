@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/ensure-static-json.mjs && vite build",
     "preview": "vite preview",
     "generate:posts": "node scripts/generate-posts-data.js",
     "fetch:views": "node scripts/fetch-ga-views-dev.js",

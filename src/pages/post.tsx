@@ -11,6 +11,7 @@ import { useReadingProgress } from "../hooks/use-reading-progress";
 import { apiRequest } from "@/lib/queryClient";
 import { trackPostView } from "@/lib/analytics";
 import type { Post } from "../../shared/schema";
+import { formatReadTimeDetail } from "@/lib/data";
 import { getPostCoverImageUrl } from "@/lib/post-cover";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
@@ -76,29 +77,7 @@ export default function Post() {
     queryKey: [`/api/posts/${slug}`],
     enabled: !!slug,
     queryFn: async () => {
-      // 서버가 있으면 API 호출
-      if (
-        typeof window !== "undefined" &&
-        window.location.hostname !== "localhost"
-      ) {
-        try {
-          const response = await fetch(`/api/posts/${slug}`);
-          if (response.ok) {
-            const data = await response.json();
-            // views.json의 조회수와 병합
-            const { getViewsData } = await import("../lib/views");
-            const viewsData = await getViewsData();
-            return {
-              ...data,
-              views: viewsData[data.slug] ?? data.views,
-            };
-          }
-        } catch (e) {
-          // API 실패 시 직접 처리
-        }
-      }
-
-      // 프론트엔드에서 직접 처리
+      // 정적 SPA: /api 서버 없음 — posts.json 기반
       const { getPostBySlug } = await import("../lib/posts");
       const { getViewsData } = await import("../lib/views");
       const post = await getPostBySlug(slug || "");
@@ -547,7 +526,7 @@ export default function Post() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4" />
-                      <span>{post.readTime}분 읽기</span>
+                      <span>{formatReadTimeDetail(post.readTime)}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Eye className="w-4 h-4" />

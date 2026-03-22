@@ -58,37 +58,10 @@ export default function Home() {
     if (sort) setSortBy(sort);
   }, [location]); // location이 변경될 때마다 실행
 
-  // Build query parameters - URL에서 직접 가져오기
-  const queryParams = new URLSearchParams(window.location.search);
-
   const { data: posts = [], isLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts", location], // location을 queryKey에 포함하여 URL 변경 시 자동으로 재요청
     queryFn: async () => {
-      // 서버가 있으면 API 호출
-      if (
-        typeof window !== "undefined" &&
-        window.location.hostname !== "localhost"
-      ) {
-        try {
-          const response = await fetch(`/api/posts?${queryParams}`);
-          if (response.ok) {
-            const data = await response.json();
-            // views.json의 조회수와 병합
-            const mergedPosts = await mergeViewsData(data);
-
-            // 검색 히스토리에 추가
-            if (searchQuery && !searchQuery.startsWith("tag:")) {
-              addToSearchHistory(searchQuery, mergedPosts.length);
-            }
-
-            return mergedPosts;
-          }
-        } catch (e) {
-          // API 실패 시 직접 처리
-        }
-      }
-
-      // 프론트엔드에서 직접 처리
+      // 정적 SPA(GitHub Pages 등): /api 서버 없음 — 항상 posts.json 기반 로직 사용
       const { getAllPosts, getPostsByCategory, searchPosts, getPostsByTag } =
         await import("../lib/posts");
       const { getViewsData } = await import("../lib/views");

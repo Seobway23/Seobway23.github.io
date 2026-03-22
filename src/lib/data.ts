@@ -9,8 +9,32 @@ export const formatDate = (date: string | Date): string => {
 };
 
 export const formatReadTime = (minutes: number): string => {
-  return `${minutes}분 읽기`;
+  return formatReadTimeDetail(minutes);
 };
+
+/** 카드·목록용 (짧게) */
+export function formatReadTimeShort(minutes: number): string {
+  const m = Math.max(1, Math.round(minutes));
+  return `약 ${m}분`;
+}
+
+/** 본문 메타·사이드바 */
+export function formatReadTimeDetail(minutes: number): string {
+  const m = Math.max(1, Math.round(minutes));
+  if (m < 60) return `약 ${m}분 읽기`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `약 ${h}시간 ${r}분 읽기` : `약 ${h}시간 읽기`;
+}
+
+/** 숫자만 (사이드바 표 등) */
+export function formatReadTimeMinutesOnly(minutes: number): string {
+  const m = Math.max(1, Math.round(minutes));
+  if (m < 60) return `${m}분`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h}시간 ${r}분` : `${h}시간`;
+}
 
 export const formatViews = (views: number): string => {
   if (views >= 1000) {

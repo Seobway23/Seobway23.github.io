@@ -1,8 +1,22 @@
 import { Link, useLocation } from "wouter";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, FolderOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -10,6 +24,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import { getPopularPosts, getAllPosts } from "@/lib/posts";
 import { getRecentComments } from "@/lib/recent-comments";
 import type { Post } from "../../shared/schema";
@@ -26,6 +41,153 @@ interface LeftSidebarProps {
   mobileOpen?: boolean;
   onMobileOpenChange?: (open: boolean) => void;
   showDesktop?: boolean;
+}
+
+type CategoryTreeNode = {
+  name: string;
+  fullName: string;
+  label: string;
+  count: number;
+  children: Map<string, CategoryTreeNode>;
+};
+
+function SidebarCategoryBranch({
+  node,
+  depth,
+  selectedCategory,
+  treeOpen,
+  setBranchOpen,
+  onCategoryChange,
+  isMobile,
+  onMobileOpenChange,
+}: {
+  node: CategoryTreeNode;
+  depth: number;
+  selectedCategory: string;
+  treeOpen: Record<string, boolean>;
+  setBranchOpen: (fullName: string, open: boolean) => void;
+  onCategoryChange?: (category: string) => void;
+  isMobile: boolean;
+  onMobileOpenChange?: (open: boolean) => void;
+}) {
+  const sortedKids = Array.from(node.children.values()).sort((a, b) =>
+    a.label.localeCompare(b.label, "ko"),
+  );
+
+  if (!node.fullName) {
+    return (
+      <div className="space-y-1">
+        {sortedKids.map((child) => (
+          <SidebarCategoryBranch
+            key={child.fullName}
+            node={child}
+            depth={0}
+            selectedCategory={selectedCategory}
+            treeOpen={treeOpen}
+            setBranchOpen={setBranchOpen}
+            onCategoryChange={onCategoryChange}
+            isMobile={isMobile}
+            onMobileOpenChange={onMobileOpenChange}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  const hasKids = sortedKids.length > 0;
+  const open = treeOpen[node.fullName] ?? false;
+
+  const pickCategory = () => {
+    onCategoryChange?.(node.fullName);
+    if (isMobile) onMobileOpenChange?.(false);
+  };
+
+  const rowButton = (
+    <button
+      type="button"
+      onClick={pickCategory}
+      className={cn(
+        "flex min-h-9 w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+        selectedCategory === node.fullName
+          ? "text-white shadow-sm"
+          : "text-gray-700 dark:text-gray-300 hover-gradient-bg",
+      )}
+      style={
+        selectedCategory === node.fullName
+          ? {
+              background:
+                "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
+            }
+          : undefined
+      }
+    >
+      <span className="truncate">{node.label}</span>
+      <span className="shrink-0 rounded-full bg-black/10 px-2 py-0.5 text-xs dark:bg-white/10">
+        {node.count}
+      </span>
+    </button>
+  );
+
+  if (!hasKids) {
+    return (
+      <div
+        key={node.fullName}
+        className="flex items-center gap-1"
+        style={{ paddingLeft: depth * 10 }}
+      >
+        <span className="h-8 w-8 shrink-0" />
+        {rowButton}
+      </div>
+    );
+  }
+
+  return (
+    <Collapsible
+      key={node.fullName}
+      open={open}
+      onOpenChange={(o) => setBranchOpen(node.fullName, o)}
+    >
+      <div
+        className="flex items-start gap-1 rounded-lg"
+        style={{ paddingLeft: depth * 10 }}
+      >
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label={open ? "하위 접기" : "하위 펼치기"}
+          >
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 transition-transform duration-200",
+                open ? "rotate-0" : "-rotate-90",
+              )}
+            />
+          </button>
+        </CollapsibleTrigger>
+        <div className="min-w-0 flex-1 space-y-1">
+          {rowButton}
+          <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+            <div className="ml-1 space-y-1 border-l border-border/60 pl-2 pt-0.5">
+              {sortedKids.map((child) => (
+                <SidebarCategoryBranch
+                  key={child.fullName}
+                  node={child}
+                  depth={depth + 1}
+                  selectedCategory={selectedCategory}
+                  treeOpen={treeOpen}
+                  setBranchOpen={setBranchOpen}
+                  onCategoryChange={onCategoryChange}
+                  isMobile={isMobile}
+                  onMobileOpenChange={onMobileOpenChange}
+                />
+              ))}
+            </div>
+          </CollapsibleContent>
+        </div>
+      </div>
+    </Collapsible>
+  );
 }
 
 export default function LeftSidebar({
@@ -49,14 +211,6 @@ export default function LeftSidebar({
     staleTime: 5 * 60 * 1000,
   });
 
-  type TreeNode = {
-    name: string;
-    fullName: string;
-    label: string;
-    count: number;
-    children: Map<string, TreeNode>;
-  };
-
   // posts에서 카테고리 집계
   const categories = useMemo<Category[]>(() => {
     const map = new Map<string, number>();
@@ -77,7 +231,7 @@ export default function LeftSidebar({
 
   // 카테고리 트리 구성 (예: frontend/react)
   const categoryTree = useMemo(() => {
-    const root: TreeNode = {
+    const root: CategoryTreeNode = {
       name: "root",
       fullName: "",
       label: "",
@@ -93,7 +247,7 @@ export default function LeftSidebar({
 
     categories.forEach((cat) => {
       const parts = cat.name.split(/[/\\]/); // 슬래시 또는 백슬래시
-      let current = root;
+      let current: CategoryTreeNode = root;
       let path = "";
 
       parts.forEach((part) => {
@@ -116,84 +270,62 @@ export default function LeftSidebar({
     return root;
   }, [categories, allCount]);
 
-  const [openNodes, setOpenNodes] = useState<Set<string>>(new Set());
+  /** Select·트리 공통: 깊이 순 정렬된 노드 목록 */
+  const flatCategoryNodes = useMemo(() => {
+    const rows: {
+      value: string;
+      label: string;
+      depth: number;
+      count: number;
+    }[] = [];
+    function walk(n: CategoryTreeNode, depth: number) {
+      if (n.fullName) {
+        rows.push({
+          value: n.fullName,
+          label: n.label,
+          depth,
+          count: n.count,
+        });
+      }
+      const kids = Array.from(n.children.values()).sort((a, b) =>
+        a.label.localeCompare(b.label, "ko"),
+      );
+      kids.forEach((c) => walk(c, n.fullName ? depth + 1 : depth));
+    }
+    walk(categoryTree, 0);
+    return rows;
+  }, [categoryTree]);
 
-  const toggleNode = (fullName: string) => {
-    setOpenNodes((prev) => {
-      const next = new Set(prev);
-      if (next.has(fullName)) next.delete(fullName);
-      else next.add(fullName);
+  const [treeOpen, setTreeOpen] = useState<Record<string, boolean>>({});
+
+  const setBranchOpen = (fullName: string, open: boolean) => {
+    setTreeOpen((prev) => ({ ...prev, [fullName]: open }));
+  };
+
+  // URL·Select에서 고른 경로의 상위 폴더는 트리에서 펼침
+  useEffect(() => {
+    if (selectedCategory === "all") return;
+    const segments = selectedCategory.split(/[/\\]/);
+    setTreeOpen((prev) => {
+      const next = { ...prev };
+      let acc = "";
+      for (const seg of segments) {
+        acc = acc ? `${acc}/${seg}` : seg;
+        next[acc] = true;
+      }
       return next;
     });
+  }, [selectedCategory]);
+
+  const onSelectCategory = (value: string) => {
+    onCategoryChange?.(value);
+    if (isMobile) onMobileOpenChange?.(false);
   };
 
-  const renderTree = (node: TreeNode, depth: number = 0) => {
-    const hasChildren = node.children.size > 0;
-    const isOpen = openNodes.has(node.fullName);
-
-    return (
-      <div key={node.fullName || "root"}>
-        {node.fullName && (
-          <div
-            className="flex items-center gap-1"
-            style={{ marginLeft: depth * 12 }}
-          >
-            {/* 토글 버튼 (자식이 있을 때만) */}
-            {hasChildren ? (
-              <button
-                onClick={() => toggleNode(node.fullName)}
-                className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                aria-label={isOpen ? "접기" : "펼치기"}
-              >
-                <svg
-                  className={`w-3 h-3 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            ) : (
-              <span className="flex-shrink-0 w-5" />
-            )}
-            <button
-              onClick={() => {
-                onCategoryChange?.(node.fullName);
-                if (isMobile) onMobileOpenChange?.(false);
-              }}
-              className={`flex items-center justify-between flex-1 px-2 py-2 text-sm rounded-lg transition-colors ${
-                selectedCategory === node.fullName
-                  ? "text-white"
-                  : "text-gray-700 dark:text-gray-300 hover-gradient-bg"
-              }`}
-              style={
-                selectedCategory === node.fullName
-                  ? {
-                      background:
-                        "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-                    }
-                  : undefined
-              }
-            >
-              <span>{node.label}</span>
-              <span className="text-xs bg-gray-700 dark:bg-gray-700 text-white dark:text-gray-300 px-2 py-1 rounded-full">
-                {node.count}
-              </span>
-            </button>
-          </div>
-        )}
-
-        {(hasChildren && (isOpen || !node.fullName)) && (
-          <div>
-            {Array.from(node.children.values()).map((child) =>
-              renderTree(child, node.fullName ? depth + 1 : depth)
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const depthPlClass = (d: number) =>
+    (["pl-2", "pl-4", "pl-6", "pl-8", "pl-10", "pl-12"] as const)[
+      Math.min(d, 5)
+    ];
 
   const sidebarContent = (
     <div className="space-y-6">
@@ -203,32 +335,63 @@ export default function LeftSidebar({
           <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
             카테고리
           </h3>
-          <nav className="space-y-2">
-            <button
-              onClick={() => {
-                onCategoryChange?.("all");
-                if (isMobile) onMobileOpenChange?.(false);
-              }}
-              className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-lg transition-colors ${
-                selectedCategory === "all"
-                  ? "text-white"
-                  : "text-gray-700 dark:text-gray-300 hover-gradient-bg"
-              }`}
-              style={
-                selectedCategory === "all"
-                  ? {
-                      background:
-                        "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-                    }
-                  : undefined
-              }
+          <nav className="space-y-4" aria-label="카테고리">
+            <Select
+              value={selectedCategory}
+              onValueChange={onSelectCategory}
             >
-              <span>전체</span>
-              <span className="text-xs bg-gray-700 dark:bg-gray-700 text-white dark:text-gray-300 px-2 py-1 rounded-full">
-                {allCount}
-              </span>
-            </button>
-            {renderTree(categoryTree)}
+              <SelectTrigger className="h-11 w-full border-input bg-background/80 text-left font-normal shadow-sm">
+                <SelectValue placeholder="카테고리 선택" />
+              </SelectTrigger>
+              <SelectContent
+                position="popper"
+                className="max-h-[min(22rem,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)]"
+              >
+                <SelectItem value="all" className="font-medium">
+                  <span className="flex w-full items-center justify-between gap-2">
+                    <span>전체</span>
+                    <span className="text-xs text-muted-foreground">
+                      {allCount}개
+                    </span>
+                  </span>
+                </SelectItem>
+                <SelectSeparator />
+                {flatCategoryNodes.map((row) => (
+                  <SelectItem
+                    key={row.value}
+                    value={row.value}
+                    textValue={`${row.label} ${row.count}`}
+                    className={cn("cursor-pointer", depthPlClass(row.depth))}
+                  >
+                    <span className="flex w-full items-center justify-between gap-2 pr-1">
+                      <span className="truncate">{row.label}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {row.count}
+                      </span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div>
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <FolderOpen className="h-3.5 w-3.5" aria-hidden />
+                트리로 탐색
+              </p>
+              <div className="rounded-lg border border-border/50 bg-muted/20 p-2">
+                <SidebarCategoryBranch
+                  node={categoryTree}
+                  depth={0}
+                  selectedCategory={selectedCategory}
+                  treeOpen={treeOpen}
+                  setBranchOpen={setBranchOpen}
+                  onCategoryChange={onCategoryChange}
+                  isMobile={isMobile}
+                  onMobileOpenChange={onMobileOpenChange}
+                />
+              </div>
+            </div>
           </nav>
         </CardContent>
       </Card>

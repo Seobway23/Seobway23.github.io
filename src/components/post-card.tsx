@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Post } from "@shared/schema";
 import { getPostComments } from "@/lib/comments";
 import { highlightSearchMatch } from "@/lib/korean-search";
+import { formatReadTimeShort } from "@/lib/data";
 import { getPostCoverImageUrl } from "@/lib/post-cover";
 
 interface PostCardProps {
@@ -110,7 +111,7 @@ export default function PostCard({ post, searchQuery }: PostCardProps) {
           <div className="flex items-center space-x-3">
             <span className="flex items-center space-x-1">
               <Clock className="w-4 h-4" />
-              <span>{post.readTime}분</span>
+              <span>{formatReadTimeShort(post.readTime)}</span>
             </span>
             <span className="flex items-center space-x-1">
               <Eye className="w-4 h-4" />

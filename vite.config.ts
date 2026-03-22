@@ -21,9 +21,23 @@ function resolveViteBase(): string {
 
 const base = resolveViteBase();
 
+/** 서브패스 배포에서도 파비콘이 항상 base 루트를 가리키도록 */
+function faviconBasePlugin(): import("vite").Plugin {
+  const faviconHref = base === "/" ? "/favicon.svg" : `${base}favicon.svg`;
+  return {
+    name: "favicon-base-href",
+    transformIndexHtml(html) {
+      return html.replace(
+        /href="\.\/favicon\.svg"/,
+        `href="${faviconHref}"`
+      );
+    },
+  };
+}
+
 export default defineConfig({
   base,
-  plugins: [react()],
+  plugins: [react(), faviconBasePlugin()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
