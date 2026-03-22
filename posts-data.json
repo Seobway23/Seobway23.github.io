@@ -1,0 +1,12 @@
+[
+  {
+    "slug": "gitlab-artifacts-vs-cache",
+    "title": "GitLab CI/CD — artifacts vs cache",
+    "path": "/post/study/infra/gitlab-artifacts-vs-cache"
+  },
+  {
+    "slug": "gitlab-cicd-guide",
+    "title": "GitLab CI/CD — .gitlab-ci.yml -> K3s",
+    "path": "/post/study/infra/gitlab-cicd-guide"
+  }
+]
