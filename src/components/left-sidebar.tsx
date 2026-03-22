@@ -5,11 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, FolderOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -76,19 +71,29 @@ function SidebarCategoryBranch({
 
   if (!node.fullName) {
     return (
-      <div className="space-y-1">
-        {sortedKids.map((child) => (
-          <SidebarCategoryBranch
+      <div className="space-y-0.5">
+        {sortedKids.map((child, idx) => (
+          <motion.div
             key={child.fullName}
-            node={child}
-            depth={0}
-            selectedCategory={selectedCategory}
-            treeOpen={treeOpen}
-            setBranchOpen={setBranchOpen}
-            onCategoryChange={onCategoryChange}
-            isMobile={isMobile}
-            onMobileOpenChange={onMobileOpenChange}
-          />
+            initial={{ opacity: 0, y: -2 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.2,
+              delay: idx * 0.025,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+          >
+            <SidebarCategoryBranch
+              node={child}
+              depth={0}
+              selectedCategory={selectedCategory}
+              treeOpen={treeOpen}
+              setBranchOpen={setBranchOpen}
+              onCategoryChange={onCategoryChange}
+              isMobile={isMobile}
+              onMobileOpenChange={onMobileOpenChange}
+            />
+          </motion.div>
         ))}
       </div>
     );
@@ -102,91 +107,121 @@ function SidebarCategoryBranch({
     if (isMobile) onMobileOpenChange?.(false);
   };
 
-  const rowButton = (
-    <button
-      type="button"
-      onClick={pickCategory}
-      className={cn(
-        "flex min-h-9 w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
-        selectedCategory === node.fullName
-          ? "text-white shadow-sm"
-          : "text-gray-700 dark:text-gray-300 hover-gradient-bg",
-      )}
-      style={
-        selectedCategory === node.fullName
-          ? {
-              background:
-                "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-            }
-          : undefined
-      }
-    >
-      <span className="truncate">{node.label}</span>
-      <span className="shrink-0 rounded-full bg-black/10 px-2 py-0.5 text-xs dark:bg-white/10">
-        {node.count}
-      </span>
-    </button>
-  );
-
-  if (!hasKids) {
-    return (
-      <div
-        key={node.fullName}
-        className="flex items-center gap-1"
-        style={{ paddingLeft: depth * 10 }}
-      >
-        <span className="h-8 w-8 shrink-0" />
-        {rowButton}
-      </div>
-    );
-  }
+  const toggleBranch = () => {
+    setBranchOpen(node.fullName, !open);
+  };
 
   return (
-    <Collapsible
+    <div
       key={node.fullName}
-      open={open}
-      onOpenChange={(o) => setBranchOpen(node.fullName, o)}
+      className="flex items-start gap-1 rounded-lg"
+      style={{ paddingLeft: depth * 10 }}
     >
-      <div
-        className="flex items-start gap-1 rounded-lg"
-        style={{ paddingLeft: depth * 10 }}
-      >
-        <CollapsibleTrigger asChild>
-          <button
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center">
+        {hasKids ? (
+          <motion.button
             type="button"
-            className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-expanded={open}
             aria-label={open ? "하위 접기" : "하위 펼치기"}
+            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={(e) => {
+              e.preventDefault();
+              toggleBranch();
+            }}
+            whileTap={{ scale: 0.92 }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 28,
+            }}
           >
-            <ChevronDown
-              className={cn(
-                "h-4 w-4 transition-transform duration-200",
-                open ? "rotate-0" : "-rotate-90",
-              )}
-            />
-          </button>
-        </CollapsibleTrigger>
-        <div className="min-w-0 flex-1 space-y-1">
-          {rowButton}
-          <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
-            <div className="ml-1 space-y-1 border-l border-border/60 pl-2 pt-0.5">
-              {sortedKids.map((child) => (
-                <SidebarCategoryBranch
-                  key={child.fullName}
-                  node={child}
-                  depth={depth + 1}
-                  selectedCategory={selectedCategory}
-                  treeOpen={treeOpen}
-                  setBranchOpen={setBranchOpen}
-                  onCategoryChange={onCategoryChange}
-                  isMobile={isMobile}
-                  onMobileOpenChange={onMobileOpenChange}
-                />
-              ))}
-            </div>
-          </CollapsibleContent>
-        </div>
+            <motion.span
+              animate={{ rotate: open ? 0 : -90 }}
+              transition={{
+                duration: 0.22,
+                ease: [0.25, 0.1, 0.25, 1],
+              }}
+              className="inline-flex"
+            >
+              <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+            </motion.span>
+          </motion.button>
+        ) : (
+          <span className="block h-7 w-7 shrink-0" aria-hidden />
+        )}
       </div>
-    </Collapsible>
+
+      <div className="min-w-0 flex-1">
+        <button
+          type="button"
+          onClick={pickCategory}
+          className={cn(
+            "flex min-h-9 w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+            selectedCategory === node.fullName
+              ? "text-white shadow-sm"
+              : "text-gray-700 dark:text-gray-300 hover-gradient-bg",
+          )}
+          style={
+            selectedCategory === node.fullName
+              ? {
+                  background:
+                    "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
+                }
+              : undefined
+          }
+        >
+          <span className="truncate">{node.label}</span>
+          <span className="shrink-0 rounded-full bg-black/10 px-2 py-0.5 text-xs dark:bg-white/10">
+            {node.count}
+          </span>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {hasKids && open && (
+            <motion.div
+              key={`${node.fullName}-sub`}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{
+                height: {
+                  duration: 0.28,
+                  ease: [0.25, 0.1, 0.25, 1],
+                },
+                opacity: { duration: 0.18 },
+              }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-0.5 border-l border-border/60 py-1 pl-2.5">
+                {sortedKids.map((child, idx) => (
+                  <motion.div
+                    key={child.fullName}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      duration: 0.18,
+                      delay: idx * 0.035,
+                      ease: [0.25, 0.1, 0.25, 1],
+                    }}
+                  >
+                    <SidebarCategoryBranch
+                      node={child}
+                      depth={depth + 1}
+                      selectedCategory={selectedCategory}
+                      treeOpen={treeOpen}
+                      setBranchOpen={setBranchOpen}
+                      onCategoryChange={onCategoryChange}
+                      isMobile={isMobile}
+                      onMobileOpenChange={onMobileOpenChange}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
@@ -332,53 +367,52 @@ export default function LeftSidebar({
       {/* Categories */}
       <Card className="toss-card">
         <CardContent className="p-6">
-          <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
-            카테고리
+          <h3 className="flex items-center gap-2 font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
+            <FolderOpen className="h-3.5 w-3.5" aria-hidden /> 카테고리
           </h3>
           <nav className="space-y-4" aria-label="카테고리">
-            <Select
-              value={selectedCategory}
-              onValueChange={onSelectCategory}
+            {/* <motion.div
+              initial={false}
+              whileHover={{ scale: 1.005 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-              <SelectTrigger className="h-11 w-full border-input bg-background/80 text-left font-normal shadow-sm">
-                <SelectValue placeholder="카테고리 선택" />
-              </SelectTrigger>
-              <SelectContent
-                position="popper"
-                className="max-h-[min(22rem,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)]"
-              >
-                <SelectItem value="all" className="font-medium">
-                  <span className="flex w-full items-center justify-between gap-2">
-                    <span>전체</span>
-                    <span className="text-xs text-muted-foreground">
-                      {allCount}개
-                    </span>
-                  </span>
-                </SelectItem>
-                <SelectSeparator />
-                {flatCategoryNodes.map((row) => (
-                  <SelectItem
-                    key={row.value}
-                    value={row.value}
-                    textValue={`${row.label} ${row.count}`}
-                    className={cn("cursor-pointer", depthPlClass(row.depth))}
-                  >
-                    <span className="flex w-full items-center justify-between gap-2 pr-1">
-                      <span className="truncate">{row.label}</span>
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {row.count}
+              <Select value={selectedCategory} onValueChange={onSelectCategory}>
+                <SelectTrigger className="h-11 w-full border-input bg-background/80 text-left font-normal shadow-sm">
+                  <SelectValue placeholder="카테고리 선택" />
+                </SelectTrigger>
+                <SelectContent
+                  position="popper"
+                  className="max-h-[min(22rem,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)]"
+                >
+                  <SelectItem value="all" className="font-medium">
+                    <span className="flex w-full items-center justify-between gap-2">
+                      <span>전체</span>
+                      <span className="text-xs text-muted-foreground">
+                        {allCount}개
                       </span>
                     </span>
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  <SelectSeparator />
+                  {flatCategoryNodes.map((row) => (
+                    <SelectItem
+                      key={row.value}
+                      value={row.value}
+                      textValue={`${row.label} ${row.count}`}
+                      className={cn("cursor-pointer", depthPlClass(row.depth))}
+                    >
+                      <span className="flex w-full items-center justify-between gap-2 pr-1">
+                        <span className="truncate">{row.label}</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {row.count}
+                        </span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </motion.div> */}
 
             <div>
-              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                <FolderOpen className="h-3.5 w-3.5" aria-hidden />
-                트리로 탐색
-              </p>
               <div className="rounded-lg border border-border/50 bg-muted/20 p-2">
                 <SidebarCategoryBranch
                   node={categoryTree}
