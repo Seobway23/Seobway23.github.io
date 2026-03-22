@@ -20,7 +20,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-22T12:40:34.011Z"
+    "updatedAt": "2026-03-22T12:48:49.002Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -44,6 +44,6 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-22T12:40:34.017Z"
+    "updatedAt": "2026-03-22T12:48:49.007Z"
   }
 ]
