@@ -14,24 +14,47 @@ export interface RecentComment {
 
 let recentCommentsCache: RecentComment[] | null = null;
 
+/** posts.json 로드 결과 — ok가 false면 필터 생략(폴백), true면 slug 집합으로 필터 */
+async function loadValidPostSlugs(): Promise<{
+  ok: boolean;
+  slugs: Set<string>;
+}> {
+  try {
+    const res = await fetch("/posts.json");
+    if (!res.ok) return { ok: false, slugs: new Set() };
+    const posts: { slug?: string }[] = await res.json();
+    const slugs = new Set(
+      posts.map((p) => p.slug).filter((s): s is string => Boolean(s))
+    );
+    return { ok: true, slugs };
+  } catch {
+    return { ok: false, slugs: new Set() };
+  }
+}
+
 /**
  * recent-comments.json 파일에서 최신 댓글 데이터 가져오기
+ * (posts.json에 없는 slug는 제외 — 글 삭제 후 fetch를 안 돌렸거나 JSON이 낡았을 때 대비)
  */
 export async function getRecentComments(): Promise<RecentComment[]> {
-  // 캐시가 있으면 반환
   if (recentCommentsCache) {
     return recentCommentsCache;
   }
 
   try {
-    const response = await fetch("/recent-comments.json");
+    const [{ ok: postsOk, slugs: validSlugs }, recentRes] = await Promise.all([
+      loadValidPostSlugs(),
+      fetch("/recent-comments.json"),
+    ]);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!recentRes.ok) {
+      throw new Error(`HTTP ${recentRes.status}: ${recentRes.statusText}`);
     }
 
-    const data = await response.json();
-    recentCommentsCache = Array.isArray(data) ? data : [];
+    const data = await recentRes.json();
+    const raw: RecentComment[] = Array.isArray(data) ? data : [];
+    recentCommentsCache =
+      postsOk ? raw.filter((c) => validSlugs.has(c.slug)) : raw;
     return recentCommentsCache;
   } catch (error) {
     console.warn(

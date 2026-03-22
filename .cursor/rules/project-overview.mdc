@@ -36,8 +36,10 @@ npm run build            # Vite 프로덕션 빌드
 | `VITE_GA_MEASUREMENT_ID` | GA4 클라이언트 측정 ID |
 | `GA_PROPERTY_ID` | GA4 서버 Property ID |
 | `GA_SERVICE_ACCOUNT_KEY` | GA 서비스 계정 JSON |
-| `GITHUB_TOKEN` | GitHub PAT (댓글 수 수집) |
-| `GITHUB_REPO` | 댓글용 저장소 (`user/repo`) |
+| `GITHUB_TOKEN` | GitHub PAT (댓글 수 수집, 로컬 `.env`) |
+| `GITHUB_REPO` | 댓글용 저장소 `user/repo` (로컬 `.env`) |
+
+GitHub Actions 시크릿 이름은 `GITHUB_` 접두사 불가 → `COMMENTS_GH_PAT`(= PAT), `UTTERANCES_REPO`(= `owner/repo`). Pages 배포는 `github.token` 사용.
 
 ## 중요 규칙
 - `server/` 폴더는 존재하지만 실제로는 정적 SPA로 동작

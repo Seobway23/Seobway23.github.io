@@ -34,12 +34,16 @@ npx serve dist           # 빌드 결과 로컬 확인
 
 ## GitHub Secrets 설정 목록
 
+시크릿 이름은 **`GITHUB_`로 시작하면 안 됨** (GitHub 예약). 워크플로는 아래 이름을 사용하고, 스크립트에는 `GITHUB_TOKEN` / `GITHUB_REPO` env로 매핑됨.
+
 | Secret | 설명 |
 |--------|------|
 | `GA_PROPERTY_ID` | GA4 속성 ID |
-| `GA_SERVICE_ACCOUNT_KEY` | GA 서비스 계정 JSON (한 줄) |
-| `GITHUB_TOKEN` | GitHub PAT (자동 제공) |
-| `GITHUB_REPO` | 댓글 저장소 (`user/repo`) |
+| `GA_SERVICE_ACCOUNT_KEY` | GA 서비스 계정 JSON (전체) |
+| `COMMENTS_GH_PAT` | 댓글 Issues 읽기용 PAT (`public_repo` 또는 `repo`) |
+| `UTTERANCES_REPO` | Utterances Issues 저장소 `owner/repo` |
+
+Pages 배포는 **`github.token`** (저장소 시크릿 불필요).
 
 ## 배포 오류 대응
 

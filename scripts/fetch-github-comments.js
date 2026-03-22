@@ -314,8 +314,13 @@ async function main() {
       return new Date(b.date) - new Date(a.date);
     });
 
-    // 최대 10개만 유지
-    const topRecentComments = recentComments.slice(0, 10);
+    const validSlugSet = new Set(postSlugs.map((p) => p.slug));
+    const onlyExistingPosts = recentComments.filter((c) =>
+      validSlugSet.has(c.slug)
+    );
+
+    // 최대 10개만 유지 (현재 posts-data.json에 있는 글만)
+    const topRecentComments = onlyExistingPosts.slice(0, 10);
 
     // 매칭되지 않은 게시글 표시
     const unmatchedPosts = postSlugs.filter(({ slug }) => comments[slug] === 0);
