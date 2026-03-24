@@ -8,5 +8,10 @@
     "slug": "gitlab-cicd-guide",
     "title": "GitLab CI/CD — .gitlab-ci.yml -> K3s",
     "path": "/post/study/infra/gitlab-cicd-guide"
+  },
+  {
+    "slug": "macro-network-view",
+    "title": "거시 네트워크",
+    "path": "/post/study/network/chapter01"
   }
 ]
