@@ -20,7 +20,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-24T16:01:16.916Z"
+    "updatedAt": "2026-03-24T23:50:31.890Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -44,7 +44,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-24T16:01:16.922Z"
+    "updatedAt": "2026-03-24T23:50:31.896Z"
   },
   {
     "id": "macro-network-view",
@@ -67,6 +67,6 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-24T16:01:16.926Z"
+    "updatedAt": "2026-03-24T23:50:31.899Z"
   }
 ]
