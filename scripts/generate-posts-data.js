@@ -41,6 +41,106 @@ function normalizeCoverImageUrl(src) {
 }
 
 /**
+ * 마크다운 각주 문법 처리
+ * - 참조: [^id]
+ * - 정의: [^id]: 설명...
+ * 결과:
+ * - 본문 참조를 sup 링크로 변환
+ * - 문서 하단에 "참고/주석" 섹션 HTML 추가
+ */
+function processMarkdownFootnotes(markdown) {
+  if (!markdown || typeof markdown !== "string") {
+    return { content: markdown || "", hasFootnotes: false };
+  }
+
+  const lines = markdown.split("\n");
+  const footnotes = [];
+  const keptLines = [];
+  const defRe = /^\[\^([^\]]+)\]:\s*(.*)$/;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].replace(/\r$/, "");
+    const m = line.match(defRe);
+    if (!m) {
+      keptLines.push(line);
+      continue;
+    }
+
+    const id = m[1].trim();
+    let text = (m[2] || "").trim();
+    let j = i + 1;
+    while (j < lines.length) {
+      const next = lines[j].replace(/\r$/, "");
+      if (/^\s{2,}\S/.test(next)) {
+        text += ` ${next.trim()}`;
+        j++;
+        continue;
+      }
+      if (next.trim() === "") {
+        j++;
+        continue;
+      }
+      break;
+    }
+    footnotes.push({ id, text });
+    i = j - 1;
+  }
+
+  if (footnotes.length === 0) {
+    return { content: markdown, hasFootnotes: false };
+  }
+
+  const toSafeId = (raw) =>
+    String(raw)
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "ref";
+
+  const orderedRefIds = [];
+  const refIndexMap = new Map();
+  const safeIdMap = new Map();
+  const contentWithRefs = keptLines.join("\n").replace(/\[\^([^\]]+)\]/g, (_m, idRaw) => {
+    const id = String(idRaw).trim();
+    if (!refIndexMap.has(id)) {
+      orderedRefIds.push(id);
+      refIndexMap.set(id, orderedRefIds.length);
+      let safeId = toSafeId(id);
+      let suffix = 2;
+      while ([...safeIdMap.values()].includes(safeId)) {
+        safeId = `${toSafeId(id)}-${suffix}`;
+        suffix++;
+      }
+      safeIdMap.set(id, safeId);
+    }
+    const n = refIndexMap.get(id);
+    const safeId = safeIdMap.get(id);
+    return `<sup id="fnref-${safeId}" style="scroll-margin-top: 96px;"><a href="#fn-${safeId}" aria-label="각주 ${n}">[${n}]</a></sup>`;
+  });
+
+  const footnoteMap = new Map(footnotes.map((f) => [f.id, f.text]));
+  const footnoteLines = orderedRefIds.map((id) => {
+    const text = footnoteMap.get(id) || "";
+    const safeId = safeIdMap.get(id);
+    return `<li id="fn-${safeId}" style="scroll-margin-top: 96px;">${text} <a href="#fnref-${safeId}" aria-label="본문으로 돌아가기">↩</a></li>`;
+  });
+
+  const footnotesBlock = [
+    "",
+    "## 참고/주석",
+    "",
+    "<ol>",
+    ...footnoteLines,
+    "</ol>",
+  ].join("\n");
+
+  return {
+    content: `${contentWithRefs}\n${footnotesBlock}\n`,
+    hasFootnotes: true,
+  };
+}
+
+/**
  * 마크다운 본문 기준 예상 읽기 시간(분). 코드·이미지·링크 제외.
  * 한글·한자·가나 + 영단어 혼합(기술 블로그)에 맞춰 보수적으로 추정.
  */
@@ -89,6 +189,8 @@ function parseMarkdownFile(filePath, categoryFromPath) {
     // 이스케이프된 백틱을 제대로 된 코드 블록으로 변환
     // \`\`\` -> ```
     let processedContent = content.replace(/\\`/g, "`");
+    // 각주 문법([^1], [^1]: ...)을 HTML 앵커 링크로 변환
+    processedContent = processMarkdownFootnotes(processedContent).content;
 
     // marked 설정
     marked.setOptions({
