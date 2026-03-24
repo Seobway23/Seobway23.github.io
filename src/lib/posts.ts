@@ -130,10 +130,11 @@ export async function getPopularPosts(limit: number = 5): Promise<Post[]> {
     }));
 
     return postsWithViews
+      .filter((post) => post.views > 0)
       .sort((a, b) => b.views - a.views)
       .slice(0, limit);
   } catch {
-    return posts.sort((a, b) => b.views - a.views).slice(0, limit);
+    return posts.filter((p) => p.views > 0).sort((a, b) => b.views - a.views).slice(0, limit);
   }
 }
 

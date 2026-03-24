@@ -430,19 +430,15 @@ export default function LeftSidebar({
         </CardContent>
       </Card>
 
-      {/* Popular Posts - 조회수 기반 */}
-      <Card className="toss-card">
-        <CardContent className="p-6">
-          <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
-            인기 글
-          </h3>
-          <div className="space-y-3">
-            {popularPosts.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                인기 글이 없습니다.
-              </p>
-            ) : (
-              popularPosts.map((post) => (
+      {/* Popular Posts - 조회수 기반 (데이터 있을 때만 표시) */}
+      {popularPosts.length > 0 && (
+        <Card className="toss-card">
+          <CardContent className="p-6">
+            <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
+              인기 글
+            </h3>
+            <div className="space-y-3">
+              {popularPosts.map((post) => (
                 <Link
                   key={post.id}
                   href={`/post/${post.slug}`}
@@ -458,11 +454,11 @@ export default function LeftSidebar({
                     조회수 {post.views.toLocaleString()}
                   </p>
                 </Link>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Comments Preview */}
       <RecentCommentsSection
