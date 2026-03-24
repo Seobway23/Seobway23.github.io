@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { ArrowLeft, Eye, Clock, User } from "lucide-react";
+import { useTheme } from "../hooks/use-theme";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ export default function Post() {
   const queryClient = useQueryClient();
 
   const slug = params?.slug;
+  const { theme } = useTheme();
   const [mermaidModal, setMermaidModal] = useState<string | null>(null);
   const [mermaidZoom, setMermaidZoom] = useState(1);
   const [panX, setPanX] = useState(0);
@@ -51,6 +53,7 @@ export default function Post() {
   const panRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const pinchRef = useRef<{ dist: number; cx: number; cy: number } | null>(null);
 
   const closeMermaidModal = () => {
     setMermaidModal(null);
@@ -213,6 +216,71 @@ export default function Post() {
     setIsDragging(false);
   }, []);
 
+  // ── Mermaid Modal: 모바일 터치 이벤트 ────────────────────────────────────────
+  const handleModalTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      isDraggingRef.current = true;
+      setIsDragging(true);
+      dragStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        panX: panRef.current.x,
+        panY: panRef.current.y,
+      };
+    } else if (e.touches.length === 2) {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = {
+        dist: Math.sqrt(dx * dx + dy * dy),
+        cx: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        cy: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+      };
+    }
+  }, []);
+
+  const handleModalTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isDraggingRef.current) {
+      const dx = e.touches[0].clientX - dragStartRef.current.x;
+      const dy = e.touches[0].clientY - dragStartRef.current.y;
+      const newX = dragStartRef.current.panX + dx;
+      const newY = dragStartRef.current.panY + dy;
+      panRef.current = { x: newX, y: newY };
+      setPanX(newX);
+      setPanY(newY);
+    } else if (e.touches.length === 2 && pinchRef.current) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const ratio = dist / pinchRef.current.dist;
+      const container = modalContainerRef.current;
+      if (container && ratio > 0) {
+        const rect = container.getBoundingClientRect();
+        const cx = pinchRef.current.cx - rect.left;
+        const cy = pinchRef.current.cy - rect.top;
+        setMermaidZoom((prev) => {
+          const newZoom = Math.max(0.2, Math.min(4, prev * ratio));
+          const r = newZoom / prev;
+          const newPx = cx * (1 - r) + panRef.current.x * r;
+          const newPy = cy * (1 - r) + panRef.current.y * r;
+          panRef.current = { x: newPx, y: newPy };
+          setPanX(newPx);
+          setPanY(newPy);
+          return newZoom;
+        });
+        pinchRef.current = { dist, cx: pinchRef.current.cx, cy: pinchRef.current.cy };
+      }
+    }
+  }, []);
+
+  const handleModalTouchEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    pinchRef.current = null;
+  }, []);
+
   // ── Mermaid Modal: 버튼 줌 (컨테이너 중심 기준) ───────────────────────────────
   const zoomBy = useCallback((delta: number) => {
     const container = modalContainerRef.current;
@@ -260,6 +328,14 @@ export default function Post() {
         }
 
         // 2) Mermaid 다이어그램 렌더링
+        // 테마 변경 or 재마운트 시: 기존 wrapper/caption 제거 후 숨겨진 pre 복원
+        contentRef.current?.querySelectorAll(".mermaid-wrapper").forEach((el) => el.remove());
+        contentRef.current?.querySelectorAll(".mermaid-caption").forEach((el) => el.remove());
+        contentRef.current?.querySelectorAll("pre[data-mermaid-rendered]").forEach((el) => {
+          (el as HTMLElement).style.display = "";
+          delete (el as HTMLElement).dataset.mermaidRendered;
+        });
+
         const mermaidBlocks = contentRef.current?.querySelectorAll(
           "code.language-mermaid"
         );
@@ -352,8 +428,10 @@ export default function Post() {
                 setMermaidModal(svg);
               });
 
+              // pre를 완전히 제거하지 않고 숨김 처리 → 테마 변경 시 복원 가능
               (pre as HTMLElement).dataset.mermaidRendered = "true";
-              pre.replaceWith(wrapper);
+              (pre as HTMLElement).style.display = "none";
+              pre.insertAdjacentElement("afterend", wrapper);
 
               // 다이어그램 캡션 (타입 + 설명)
               const figcap = document.createElement("div");
@@ -371,7 +449,8 @@ export default function Post() {
 
       return () => clearTimeout(timer);
     }
-  }, [post]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post, theme]);
 
   if (isLoading) {
     return (
@@ -461,6 +540,9 @@ export default function Post() {
             onMouseMove={handleModalMouseMove}
             onMouseUp={handleModalMouseUp}
             onMouseLeave={handleModalMouseUp}
+            onTouchStart={handleModalTouchStart}
+            onTouchMove={handleModalTouchMove}
+            onTouchEnd={handleModalTouchEnd}
           >
             <div
               className="mermaid-svg-content absolute pointer-events-none"
@@ -504,7 +586,7 @@ export default function Post() {
                     >
                       {categoryLabel}
                     </Badge>
-                    {post.featured && (
+                    {post.views > 0 && post.featured && (
                       <Badge variant="destructive" className="ml-2">
                         인기
                       </Badge>
