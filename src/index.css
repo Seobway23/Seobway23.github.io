@@ -632,7 +632,12 @@ html:not(.dark) .prose :not(pre) > code {
 }
 
 /* SVG 자체 배경 투명 처리 (테마 기본 배경색 #f5f0fa 등 제거) */
+/* rect:first-of-type 사용 — defs가 먼저 오는 SVG 구조에서 first-child가 rect를 못 잡음 */
+.mermaid-inner svg {
+  background-color: transparent !important;
+}
 .mermaid-inner svg > rect:first-child,
+.mermaid-inner svg > rect:first-of-type,
 .mermaid-inner svg > rect.background {
   fill: transparent !important;
 }
