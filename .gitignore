@@ -19,3 +19,5 @@ ga-service-account-key.json
 !package-lock.json
 !yarn.lock
 !pnpm-lock.yaml
+
+/docs/*
