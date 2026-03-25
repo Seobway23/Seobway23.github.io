@@ -21,7 +21,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.959Z"
+    "updatedAt": "2026-03-25T02:47:05.805Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -44,7 +44,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.957Z"
+    "updatedAt": "2026-03-25T02:47:05.803Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -68,7 +68,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.956Z"
+    "updatedAt": "2026-03-25T02:47:05.802Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -90,7 +90,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.955Z"
+    "updatedAt": "2026-03-25T02:47:05.801Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -113,7 +113,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.954Z"
+    "updatedAt": "2026-03-25T02:47:05.800Z"
   },
   {
     "id": "macro-network-view",
@@ -136,7 +136,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.953Z"
+    "updatedAt": "2026-03-25T02:47:05.799Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -160,7 +160,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.949Z"
+    "updatedAt": "2026-03-25T02:47:05.796Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -183,6 +183,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-25T01:31:47.944Z"
+    "updatedAt": "2026-03-25T02:47:05.791Z"
   }
 ]
