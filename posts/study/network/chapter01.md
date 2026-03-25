@@ -202,16 +202,16 @@ flowchart LR
 - [회선 교환 vs 패킷 교환](/post/circuit-vs-packet-switching): 인터넷이 전화망과 다른 이유
 - [유니캐스트와 브로드캐스트](/post/unicast-and-broadcast): 누구에게 데이터를 보낼 것인가
 
-[^computer-network]: Computer network, wikipedia — <a href="https://en.wikipedia.org/wiki/Computer_network">https://en.wikipedia.org/wiki/Computer_network</a>
-[^internet]: Internet, wikipedia — <a href="https://en.wikipedia.org/wiki/Internet">https://en.wikipedia.org/wiki/Internet</a>
-[^as]: Autonomous system (Internet), wikipedia — <a href="https://en.wikipedia.org/wiki/Autonomous_system_(Internet)">https://en.wikipedia.org/wiki/Autonomous_system_(Internet)</a>
-[^bgp]: Border Gateway Protocol, wikipedia — <a href="https://en.wikipedia.org/wiki/Border_Gateway_Protocol">https://en.wikipedia.org/wiki/Border_Gateway_Protocol</a>
-[^ixp]: Internet exchange point, wikipedia — <a href="https://en.wikipedia.org/wiki/Internet_exchange_point">https://en.wikipedia.org/wiki/Internet_exchange_point</a>
-[^isp]: Internet service provider, wikipedia — <a href="https://en.wikipedia.org/wiki/Internet_service_provider">https://en.wikipedia.org/wiki/Internet_service_provider</a>
-[^cdn]: Content delivery network, wikipedia — <a href="https://en.wikipedia.org/wiki/Content_delivery_network">https://en.wikipedia.org/wiki/Content_delivery_network</a>
-[^peering]: Peering, wikipedia — <a href="https://en.wikipedia.org/wiki/Peering">https://en.wikipedia.org/wiki/Peering</a>
-[^devices]: Network devices, wikipedia — <a href="https://en.wikipedia.org/wiki/Ethernet_hub">https://en.wikipedia.org/wiki/Ethernet_hub</a>, <a href="https://en.wikipedia.org/wiki/Network_switch">https://en.wikipedia.org/wiki/Network_switch</a>, <a href="https://en.wikipedia.org/wiki/Router_(computing)">https://en.wikipedia.org/wiki/Router_(computing)</a>, <a href="https://en.wikipedia.org/wiki/Wireless_access_point">https://en.wikipedia.org/wiki/Wireless_access_point</a>
-[^media]: Transmission media in computer network, wikipedia — <a href="https://en.wikipedia.org/wiki/Computer_network">https://en.wikipedia.org/wiki/Computer_network</a>
-[^scope]: Network scope (LAN/CAN/MAN/WAN), wikipedia — <a href="https://en.wikipedia.org/wiki/Local_area_network">https://en.wikipedia.org/wiki/Local_area_network</a>, <a href="https://en.wikipedia.org/wiki/Campus_area_network">https://en.wikipedia.org/wiki/Campus_area_network</a>, <a href="https://en.wikipedia.org/wiki/Metropolitan_area_network">https://en.wikipedia.org/wiki/Metropolitan_area_network</a>, <a href="https://en.wikipedia.org/wiki/Wide_area_network">https://en.wikipedia.org/wiki/Wide_area_network</a>
-[^packet-switching]: Packet switching, wikipedia — <a href="https://en.wikipedia.org/wiki/Packet_switching">https://en.wikipedia.org/wiki/Packet_switching</a>
-[^switching-and-delivery]: Delivery methods (Circuit switching / Packet switching / Unicast / Broadcasting), wikipedia — <a href="https://en.wikipedia.org/wiki/Circuit_switching">https://en.wikipedia.org/wiki/Circuit_switching</a>, <a href="https://en.wikipedia.org/wiki/Packet_switching">https://en.wikipedia.org/wiki/Packet_switching</a>, <a href="https://en.wikipedia.org/wiki/Unicast">https://en.wikipedia.org/wiki/Unicast</a>, <a href="https://en.wikipedia.org/wiki/Broadcasting_(networking)">https://en.wikipedia.org/wiki/Broadcasting_(networking)</a>
+[^computer-network]: Computer network, <a href="https://en.wikipedia.org/wiki/Computer_network" target="_blank">Wikipedia</a>
+[^internet]: Internet, <a href="https://en.wikipedia.org/wiki/Internet" target="_blank">Wikipedia</a>
+[^as]: Autonomous system (Internet), <a href="https://en.wikipedia.org/wiki/Autonomous_system_(Internet)" target="_blank">Wikipedia</a>
+[^bgp]: Border Gateway Protocol, <a href="https://en.wikipedia.org/wiki/Border_Gateway_Protocol" target="_blank">Wikipedia</a>
+[^ixp]: Internet exchange point, <a href="https://en.wikipedia.org/wiki/Internet_exchange_point" target="_blank">Wikipedia</a>
+[^isp]: Internet service provider, <a href="https://en.wikipedia.org/wiki/Internet_service_provider" target="_blank">Wikipedia</a>
+[^cdn]: Content delivery network, <a href="https://en.wikipedia.org/wiki/Content_delivery_network" target="_blank">Wikipedia</a>
+[^peering]: Peering, <a href="https://en.wikipedia.org/wiki/Peering" target="_blank">Wikipedia</a>
+[^devices]: Network devices — <a href="https://en.wikipedia.org/wiki/Ethernet_hub" target="_blank">Hub</a>, <a href="https://en.wikipedia.org/wiki/Network_switch" target="_blank">Switch</a>, <a href="https://en.wikipedia.org/wiki/Router_(computing)" target="_blank">Router</a>, <a href="https://en.wikipedia.org/wiki/Wireless_access_point" target="_blank">Wireless AP</a>
+[^media]: Transmission media in computer network, <a href="https://en.wikipedia.org/wiki/Computer_network" target="_blank">Wikipedia</a>
+[^scope]: Network scope (LAN/CAN/MAN/WAN) — <a href="https://en.wikipedia.org/wiki/Local_area_network" target="_blank">LAN</a>, <a href="https://en.wikipedia.org/wiki/Campus_area_network" target="_blank">CAN</a>, <a href="https://en.wikipedia.org/wiki/Metropolitan_area_network" target="_blank">MAN</a>, <a href="https://en.wikipedia.org/wiki/Wide_area_network" target="_blank">WAN</a>
+[^packet-switching]: Packet switching, <a href="https://en.wikipedia.org/wiki/Packet_switching" target="_blank">Wikipedia</a>
+[^switching-and-delivery]: Delivery methods — <a href="https://en.wikipedia.org/wiki/Circuit_switching" target="_blank">Circuit switching</a>, <a href="https://en.wikipedia.org/wiki/Packet_switching" target="_blank">Packet switching</a>, <a href="https://en.wikipedia.org/wiki/Unicast" target="_blank">Unicast</a>, <a href="https://en.wikipedia.org/wiki/Broadcasting_(networking)" target="_blank">Broadcasting</a>

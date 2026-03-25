@@ -29,7 +29,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <LayoutContext.Provider value={{ mobileMenuOpen, setMobileMenuOpen }}>
-      <div className="min-h-screen">
+      <div className="min-h-screen overflow-x-hidden">
         <ProgressBar />
         <Header />
         {location !== "/" && (

@@ -116,8 +116,8 @@ flowchart LR
 브로드캐스트는 **상대를 모를 때 쓰는 질문**이다. ARP로 MAC 주소를 찾고, DHCP로 IP 서버를 발견한다.  
 정보를 얻고 나면 이후 통신은 **유니캐스트**로 전환한다. "모를 때 브로드캐스트, 알고 나서 유니캐스트"가 실제 네트워크의 작동 패턴이다.
 
-[^unicast]: Unicast, Wikipedia — <a href="https://en.wikipedia.org/wiki/Unicast">https://en.wikipedia.org/wiki/Unicast</a>
-[^broadcast]: Broadcasting (networking), Wikipedia — <a href="https://en.wikipedia.org/wiki/Broadcasting_(networking)">https://en.wikipedia.org/wiki/Broadcasting_(networking)</a>
-[^arp]: Address Resolution Protocol, Wikipedia — <a href="https://en.wikipedia.org/wiki/Address_Resolution_Protocol">https://en.wikipedia.org/wiki/Address_Resolution_Protocol</a>
-[^dhcp]: Dynamic Host Configuration Protocol, Wikipedia — <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol">https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol</a>
-[^multicast]: Multicast, Wikipedia — <a href="https://en.wikipedia.org/wiki/Multicast">https://en.wikipedia.org/wiki/Multicast</a>
+[^unicast]: Unicast, <a href="https://en.wikipedia.org/wiki/Unicast" target="_blank">Wikipedia</a>
+[^broadcast]: Broadcasting (networking), <a href="https://en.wikipedia.org/wiki/Broadcasting_(networking)" target="_blank">Wikipedia</a>
+[^arp]: Address Resolution Protocol, <a href="https://en.wikipedia.org/wiki/Address_Resolution_Protocol" target="_blank">Wikipedia</a>
+[^dhcp]: Dynamic Host Configuration Protocol, <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol" target="_blank">Wikipedia</a>
+[^multicast]: Multicast, <a href="https://en.wikipedia.org/wiki/Multicast" target="_blank">Wikipedia</a>
