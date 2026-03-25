@@ -59,7 +59,7 @@ export default function Home() {
   }, [location]); // location이 변경될 때마다 실행
 
   const { data: posts = [], isLoading } = useQuery<Post[]>({
-    queryKey: ["/api/posts", location], // location을 queryKey에 포함하여 URL 변경 시 자동으로 재요청
+    queryKey: ["/api/posts", location, selectedCategory, sortBy], // state 변경 시 자동으로 재요청
     queryFn: async () => {
       // 정적 SPA(GitHub Pages 등): /api 서버 없음 — 항상 posts.json 기반 로직 사용
       const { getAllPosts, getPostsByCategory, searchPosts, getPostsByTag } =
@@ -258,7 +258,7 @@ export default function Home() {
                     return "최신 글";
                   })()}
                 </h2>
-                <p className="text-gray-700 dark:text-gray-400 mt-1">
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
                   총 {posts.length}개의 글
                 </p>
               </div>
