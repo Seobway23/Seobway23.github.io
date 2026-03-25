@@ -169,9 +169,46 @@ function estimateReadTimeMinutes(markdown) {
 }
 
 /**
- * 마크다운 파일에서 게시글 데이터 추출
+ * marked v12+에서 **text**한글 처럼 볼드 닫는 ** 바로 뒤에 한글/CJK가 오면
+ * closing delimiter로 인식 못 하는 문제를 코드 블록 밖에서만 전처리로 해결한다.
  */
-function parseMarkdownFile(filePath, categoryFromPath) {
+function fixBoldBeforeCJK(markdown) {
+  const CJK = /[\u1100-\u11FF\u3040-\u30FF\u4E00-\u9FFF\uAC00-\uD7A3]/;
+  // 코드 펜스를 분리해서 코드 블록 밖에서만 치환
+  const parts = markdown.split(/(```[\s\S]*?```)/g);
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 1) return part; // 코드 블록 — 건드리지 않음
+      return part
+        .replace(
+          /\*\*((?:[^*\n]|\*(?!\*))+?)\*\*(?=[^\s*\w])/g,
+          (match, inner, offset, str) => {
+            const nextChar = str[offset + match.length];
+            if (nextChar && CJK.test(nextChar)) {
+              return `<strong>${inner}</strong>`;
+            }
+            return match;
+          }
+        )
+        .replace(
+          /__([^_\n]+?)__(?=[^\s_\w])/g,
+          (match, inner, offset, str) => {
+            const nextChar = str[offset + match.length];
+            if (nextChar && CJK.test(nextChar)) {
+              return `<strong>${inner}</strong>`;
+            }
+            return match;
+          }
+        );
+    })
+    .join("");
+}
+
+/**
+ * 마크다운 파일에서 게시글 데이터 추출
+ * @param {Map<string,string>} filenameToSlug - 파일명(확장자 제외) → slug 맵
+ */
+function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map()) {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
     const { data, content } = matter(fileContent);
@@ -191,6 +228,8 @@ function parseMarkdownFile(filePath, categoryFromPath) {
     let processedContent = content.replace(/\\`/g, "`");
     // 각주 문법([^1], [^1]: ...)을 HTML 앵커 링크로 변환
     processedContent = processMarkdownFootnotes(processedContent).content;
+    // marked v12+: **text**한글 볼드 인식 실패 보정
+    processedContent = fixBoldBeforeCJK(processedContent);
 
     // marked 설정
     marked.setOptions({
@@ -198,8 +237,23 @@ function parseMarkdownFile(filePath, categoryFromPath) {
       gfm: true,
     });
 
+    // 커스텀 렌더러: ./filename 상대 링크를 /post/actual-slug 로 변환
+    const renderer = new marked.Renderer();
+    renderer.link = function (href, title, text) {
+      let finalHref = href || "";
+      if (finalHref.startsWith("./")) {
+        const raw = finalHref.slice(2).split("/")[0].replace(/\.md$/, "");
+        const mappedSlug = filenameToSlug.get(raw);
+        if (mappedSlug) {
+          finalHref = `/post/${mappedSlug}`;
+        }
+      }
+      const titleAttr = title ? ` title="${title}"` : "";
+      return `<a href="${finalHref}"${titleAttr}>${text}</a>`;
+    };
+
     // 마크다운을 HTML로 변환
-    const htmlContent = marked.parse(processedContent);
+    const htmlContent = marked.parse(processedContent, { renderer });
 
     // excerpt 생성 (frontmatter에 없으면 content에서 추출)
     let excerpt = data.excerpt || "";
@@ -290,6 +344,17 @@ function generatePostsData() {
   const markdownFiles = getAllMarkdownFiles(postsDir);
   console.log(`📄 ${markdownFiles.length}개의 마크다운 파일 발견`);
 
+  // 1차 패스: 파일명 → slug 맵 구성 (링크 변환용)
+  const filenameToSlug = new Map();
+  markdownFiles.forEach((filePath) => {
+    try {
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const { data } = matter(raw);
+      const fileName = path.basename(filePath, ".md");
+      filenameToSlug.set(fileName, data.slug || fileName);
+    } catch (_) {}
+  });
+
   const posts = [];
   const postsData = []; // posts-data.json용 (간단한 정보만)
 
@@ -301,7 +366,7 @@ function generatePostsData() {
     const withoutExt = relativePath.replace(/\.md$/i, "");
     const postPath = `/post/${withoutExt.replace(/\\/g, "/")}`;
 
-    const post = parseMarkdownFile(filePath, category);
+    const post = parseMarkdownFile(filePath, category, filenameToSlug);
     if (post) {
       posts.push(post);
       postsData.push({
