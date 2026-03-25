@@ -90,18 +90,18 @@ export default function Home() {
       // 정렬 - URL 파라미터에서 직접 가져오기
       const sortParam = currentParams.get("sort") || "latest";
       if (sortParam === "popular") {
-        posts.sort((a, b) => b.views - a.views);
+        posts.sort((a, b) => b.views - a.views || b.slug.localeCompare(a.slug));
       } else if (sortParam === "oldest") {
-        posts.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
+        posts.sort((a, b) => {
+          const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return diff !== 0 ? diff : a.slug.localeCompare(b.slug);
+        });
       } else {
-        // 최신순 (기본값)
-        posts.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+        // 최신순 (기본값) — 날짜 동점 시 slug 역순(최근 추가된 글 우선)
+        posts.sort((a, b) => {
+          const diff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return diff !== 0 ? diff : b.slug.localeCompare(a.slug);
+        });
       }
 
       // views.json의 조회수와 병합

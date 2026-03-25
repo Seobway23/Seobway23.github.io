@@ -319,6 +319,13 @@ function generatePostsData() {
     return;
   }
 
+  // 최신순(createdAt 내림차순) 정렬 후 저장 — 날짜가 같으면 파일명 역순(Z→A)
+  posts.sort((a, b) => {
+    const diff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (diff !== 0) return diff;
+    return b.slug.localeCompare(a.slug);
+  });
+
   console.log(`✅ ${posts.length}개의 게시글 파싱 완료`);
 
   // posts.json 저장 (전체 게시글 데이터)
