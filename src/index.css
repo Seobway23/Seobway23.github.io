@@ -65,6 +65,10 @@
     @apply border-border;
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
@@ -73,6 +77,7 @@
     background-size: 200% 200%;
     animation: gradientShift 15s ease infinite;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
   /* 전역 텍스트 색상 설정 - 화이트 모드: 검은색, 다크 모드: 흰색 */
