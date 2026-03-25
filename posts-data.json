@@ -13,5 +13,30 @@
     "slug": "macro-network-view",
     "title": "거시 네트워크",
     "path": "/post/study/network/chapter01"
+  },
+  {
+    "slug": "cdn-content-delivery-network",
+    "title": "CDN — 콘텐츠를 가장 빠른 경로로 전달하는 방법",
+    "path": "/post/study/network/macro/cdn"
+  },
+  {
+    "slug": "circuit-vs-packet-switching",
+    "title": "회선 교환 vs 패킷 교환 — 인터넷이 전화망과 다른 이유",
+    "path": "/post/study/network/macro/circuit-vs-packet-switching"
+  },
+  {
+    "slug": "isp-internet-service-provider",
+    "title": "ISP — 인터넷 접속을 파는 사람들",
+    "path": "/post/study/network/macro/isp"
+  },
+  {
+    "slug": "ixp-internet-exchange-point",
+    "title": "IXP — ISP들이 만나는 물리적 교차로",
+    "path": "/post/study/network/macro/ixp"
+  },
+  {
+    "slug": "unicast-and-broadcast",
+    "title": "유니캐스트와 브로드캐스트 — 누구에게 데이터를 보낼 것인가",
+    "path": "/post/study/network/macro/unicast-broadcast"
   }
 ]

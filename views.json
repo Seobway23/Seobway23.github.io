@@ -1,5 +1,10 @@
 {
   "gitlab-artifacts-vs-cache": 14,
   "gitlab-cicd-guide": 23,
-  "macro-network-view": 5
+  "macro-network-view": 5,
+  "cdn-content-delivery-network": 0,
+  "circuit-vs-packet-switching": 0,
+  "isp-internet-service-provider": 0,
+  "ixp-internet-exchange-point": 0,
+  "unicast-and-broadcast": 0
 }
