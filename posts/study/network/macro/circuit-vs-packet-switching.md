@@ -137,8 +137,8 @@ flowchart LR
 
 ---
 
-[^circuit-switching]: Circuit switching — <a href="https://en.wikipedia.org/wiki/Circuit_switching" target="_blank">https://en.wikipedia.org/wiki/Circuit_switching</a>
-[^packet-switching]: Packet switching — <a href="https://en.wikipedia.org/wiki/Packet_switching" target="_blank">https://en.wikipedia.org/wiki/Packet_switching</a>
-[^arpanet]: ARPANET — <a href="https://en.wikipedia.org/wiki/ARPANET" target="_blank">https://en.wikipedia.org/wiki/ARPANET</a>
-[^voip]: Voice over IP — <a href="https://en.wikipedia.org/wiki/Voice_over_IP" target="_blank">https://en.wikipedia.org/wiki/Voice_over_IP</a>
-[^pstn]: Public switched telephone network — <a href="https://en.wikipedia.org/wiki/Public_switched_telephone_network" target="_blank">https://en.wikipedia.org/wiki/Public_switched_telephone_network</a>
+[^circuit-switching]: Circuit switching, <a href="https://en.wikipedia.org/wiki/Circuit_switching" target="_blank">Wikipedia</a>
+[^packet-switching]: Packet switching, <a href="https://en.wikipedia.org/wiki/Packet_switching" target="_blank">Wikipedia</a>
+[^arpanet]: ARPANET, <a href="https://en.wikipedia.org/wiki/ARPANET" target="_blank">Wikipedia</a>
+[^voip]: Voice over IP, <a href="https://en.wikipedia.org/wiki/Voice_over_IP" target="_blank">Wikipedia</a>
+[^pstn]: Public switched telephone network, <a href="https://en.wikipedia.org/wiki/Public_switched_telephone_network" target="_blank">Wikipedia</a>

@@ -684,14 +684,29 @@ html:not(.dark) .prose :not(pre) > code {
   fill: transparent !important;
 }
 
-/* ─── Mermaid: 항상 다크모드 고정 — SVG 텍스트를 라이트모드에서도 밝게 유지 ─── */
+/* ─── Mermaid: 항상 다크모드 고정 — 모든 텍스트 항상 밝은 색상 유지 ─── */
+/* SVG text/tspan (시퀀스, 클래스, 상태 다이어그램 등) */
 .mermaid-inner svg text,
 .mermaid-inner svg tspan,
 .mermaid-svg-content svg text,
 .mermaid-svg-content svg tspan {
-  fill: #cbd5e1 !important;  /* slate-300 — 항상 밝은 색상 */
+  fill: #cbd5e1 !important;
 }
-/* edgeLabel HTML 텍스트 (flowchart htmlLabels) */
+/* foreignObject HTML 노드 라벨 (flowchart htmlLabels:true) — 전역 text-foreground 상속을 차단 */
+.mermaid-inner foreignObject *,
+.mermaid-svg-content foreignObject * {
+  color: #cbd5e1 !important;
+}
+/* nodeLabel, label 클래스 (mermaid 내부 구조) */
+.mermaid-inner .nodeLabel,
+.mermaid-inner .label,
+.mermaid-inner .cluster-label,
+.mermaid-svg-content .nodeLabel,
+.mermaid-svg-content .label,
+.mermaid-svg-content .cluster-label {
+  color: #cbd5e1 !important;
+}
+/* edgeLabel HTML 텍스트 (화살표 위 레이블) */
 .mermaid-inner .edgeLabel p,
 .mermaid-inner .edgeLabel span,
 .mermaid-inner .edgeLabel div,

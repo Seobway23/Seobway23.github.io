@@ -100,5 +100,5 @@ CDN은 정적 콘텐츠에 강하지만, **동적 콘텐츠**(로그인 세션, 
 
 ---
 
-[^cdn]: Content delivery network — <a href="https://en.wikipedia.org/wiki/Content_delivery_network" target="_blank">https://en.wikipedia.org/wiki/Content_delivery_network</a>
-[^latency]: Network latency — <a href="https://en.wikipedia.org/wiki/Network_delay" target="_blank">https://en.wikipedia.org/wiki/Network_delay</a>
+[^cdn]: Content delivery network, <a href="https://en.wikipedia.org/wiki/Content_delivery_network" target="_blank">Wikipedia</a>
+[^latency]: Network latency, <a href="https://en.wikipedia.org/wiki/Network_delay" target="_blank">Wikipedia</a>
