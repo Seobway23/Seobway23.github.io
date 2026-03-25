@@ -343,10 +343,9 @@ export default function Post() {
         );
         if (mermaidBlocks && mermaidBlocks.length > 0) {
           const { default: mermaid } = await import("mermaid");
-          const isDark = document.documentElement.classList.contains("dark");
           mermaid.initialize({
             startOnLoad: false,
-            theme: isDark ? "dark" : "default",
+            theme: "dark",
             themeVariables: { background: "transparent", mainBkg: "transparent" },
             securityLevel: "loose",
             flowchart: { useMaxWidth: false, htmlLabels: true },
@@ -393,8 +392,8 @@ export default function Post() {
               const inner = document.createElement("div");
               // 모바일: cursor-zoom-in 제거, group 없음
               inner.className = isMobileNow
-                ? "mermaid-inner relative rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900"
-                : "mermaid-inner group relative cursor-zoom-in rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow duration-200";
+                ? "mermaid-inner relative rounded-xl border border-gray-700 p-4 bg-gray-900"
+                : "mermaid-inner group relative cursor-zoom-in rounded-xl border border-gray-700 p-4 bg-gray-900 hover:shadow-lg transition-shadow duration-200";
               inner.style.width = "100%";
               inner.style.height = "100%";
               inner.style.boxSizing = "border-box";

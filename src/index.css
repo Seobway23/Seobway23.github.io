@@ -574,6 +574,26 @@ html:not(.dark) .prose :not(pre) > code {
   color: inherit;
 }
 
+.prose a {
+  color: #3b82f6;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(59, 130, 246, 0.4);
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+.prose a:hover {
+  color: #1d4ed8;
+  text-decoration-color: rgba(29, 78, 216, 0.6);
+}
+.dark .prose a {
+  color: #93c5fd;
+  text-decoration-color: rgba(147, 197, 253, 0.4);
+}
+.dark .prose a:hover {
+  color: #bfdbfe;
+  text-decoration-color: rgba(191, 219, 254, 0.6);
+}
+
 .prose strong {
   color: #0f172a;
   font-weight: 700;
@@ -659,20 +679,19 @@ html:not(.dark) .prose :not(pre) > code {
   fill: transparent !important;
 }
 
-/* ─── 다크모드: SVG text가 prose color 상속으로 어두워지는 문제 방지 ─── */
-/* prose의 color가 currentColor로 흘러들어오는 경우에만 보정 */
-.dark .mermaid-inner svg text,
-.dark .mermaid-inner svg tspan,
-.dark .mermaid-svg-content svg text,
-.dark .mermaid-svg-content svg tspan {
-  fill: #cbd5e1;  /* slate-300 — 이미 밝은 fill이 있으면 mermaid 자체값이 우선 */
+/* ─── Mermaid: 항상 다크모드 고정 — SVG 텍스트를 라이트모드에서도 밝게 유지 ─── */
+.mermaid-inner svg text,
+.mermaid-inner svg tspan,
+.mermaid-svg-content svg text,
+.mermaid-svg-content svg tspan {
+  fill: #cbd5e1 !important;  /* slate-300 — 항상 밝은 색상 */
 }
 /* edgeLabel HTML 텍스트 (flowchart htmlLabels) */
-.dark .mermaid-inner .edgeLabel p,
-.dark .mermaid-inner .edgeLabel span,
-.dark .mermaid-inner .edgeLabel div,
-.dark .mermaid-svg-content .edgeLabel p,
-.dark .mermaid-svg-content .edgeLabel span {
+.mermaid-inner .edgeLabel p,
+.mermaid-inner .edgeLabel span,
+.mermaid-inner .edgeLabel div,
+.mermaid-svg-content .edgeLabel p,
+.mermaid-svg-content .edgeLabel span {
   color: #e2e8f0 !important;
 }
 

@@ -367,7 +367,7 @@ export default function LeftSidebar({
       {/* Categories */}
       <Card className="toss-card">
         <CardContent className="p-6">
-          <h3 className="flex items-center gap-2 font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
+          <h3 className="flex items-center gap-2 font-semibold text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">
             <FolderOpen className="h-3.5 w-3.5" aria-hidden /> 카테고리
           </h3>
           <nav className="space-y-4" aria-label="카테고리">
@@ -434,7 +434,7 @@ export default function LeftSidebar({
       {popularPosts.length > 0 && (
         <Card className="toss-card">
           <CardContent className="p-6">
-            <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
+            <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">
               인기 글
             </h3>
             <div className="space-y-3">
@@ -447,10 +447,10 @@ export default function LeftSidebar({
                     if (isMobile) onMobileOpenChange?.(false);
                   }}
                 >
-                  <p className="text-sm font-medium hover-gradient-text transition-colors line-clamp-2">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 hover-gradient-text transition-colors line-clamp-2">
                     {post.title}
                   </p>
-                  <p className="text-xs text-gray-700 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     조회수 {post.views.toLocaleString()}
                   </p>
                 </Link>
@@ -547,7 +547,7 @@ function RecentCommentsSection({
   return (
     <Card className="toss-card">
       <CardContent className="p-6">
-        <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-400 uppercase tracking-wide mb-4">
+        <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">
           최신 댓글
         </h3>
         <div className="space-y-4">
@@ -570,7 +570,7 @@ function RecentCommentsSection({
               </div>
             ))
           ) : (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
               아직 댓글이 없습니다.
             </div>
           )}
