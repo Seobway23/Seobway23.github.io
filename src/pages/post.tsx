@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { ArrowLeft, Eye, Clock, User } from "lucide-react";
 import { useTheme } from "../hooks/use-theme";
+import { useIsMobile } from "../hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,7 @@ export default function Post() {
 
   const slug = params?.slug;
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
   const [mermaidModal, setMermaidModal] = useState<string | null>(null);
   const [mermaidZoom, setMermaidZoom] = useState(1);
   const [panX, setPanX] = useState(0);
@@ -345,6 +347,7 @@ export default function Post() {
           mermaid.initialize({
             startOnLoad: false,
             theme: isDark ? "dark" : "default",
+            themeVariables: { background: "transparent", mainBkg: "transparent" },
             securityLevel: "loose",
             flowchart: { useMaxWidth: false, htmlLabels: true },
             sequence: { useMaxWidth: false },
@@ -378,28 +381,34 @@ export default function Post() {
             try {
               const { svg } = await mermaid.render(id, code);
 
+              const isMobileNow = window.innerWidth < 768;
+
               const wrapper = document.createElement("div");
-              // mermaid-wrapper 클래스: index.css에서 resize:both 적용
-              wrapper.className = "mermaid-wrapper my-6";
+              // 모바일: resize 없이 단순 표시 / PC: resize:both 핸들 사용
+              wrapper.className = isMobileNow ? "mermaid-wrapper-mobile my-6" : "mermaid-wrapper my-6";
               wrapper.style.width = "100%";
               wrapper.style.overflow = "hidden";
               wrapper.style.boxSizing = "border-box";
 
               const inner = document.createElement("div");
-              inner.className =
-                "mermaid-inner group relative cursor-zoom-in rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow duration-200";
+              // 모바일: cursor-zoom-in 제거, group 없음
+              inner.className = isMobileNow
+                ? "mermaid-inner relative rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900"
+                : "mermaid-inner group relative cursor-zoom-in rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow duration-200";
               inner.style.width = "100%";
               inner.style.height = "100%";
               inner.style.boxSizing = "border-box";
               inner.style.overflow = "hidden";
               inner.innerHTML = svg;
 
-              // 호버 힌트 (확대 + 리사이즈 안내)
-              const hint = document.createElement("span");
-              hint.className =
-                "absolute top-2 right-2 text-xs text-gray-400 bg-gray-100/90 dark:bg-gray-800/90 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10";
-              hint.textContent = "🔍 클릭하여 확대 · ↔ 모서리 드래그로 크기 조절";
-              inner.appendChild(hint);
+              // 호버 힌트 — PC 전용
+              if (!isMobileNow) {
+                const hint = document.createElement("span");
+                hint.className =
+                  "absolute top-2 right-2 text-xs text-gray-400 bg-gray-100/90 dark:bg-gray-800/90 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10";
+                hint.textContent = "🔍 클릭하여 확대 · ↔ 모서리 드래그로 크기 조절";
+                inner.appendChild(hint);
+              }
 
               wrapper.appendChild(inner);
 
@@ -415,18 +424,21 @@ export default function Post() {
               }
               wrapper.style.minHeight = diagramMinHeight;
 
-              // ResizeObserver: wrapper 크기 변경 시 inner도 동기화
-              if (typeof ResizeObserver !== "undefined") {
+              // ResizeObserver: PC 전용 (모바일은 resize 핸들 없음)
+              if (!isMobileNow && typeof ResizeObserver !== "undefined") {
                 const ro = new ResizeObserver(() => {
-                  inner.style.width = wrapper.clientWidth + "px";
-                  inner.style.height = wrapper.clientHeight + "px";
+                  if (wrapper.clientWidth > 0) inner.style.width = wrapper.clientWidth + "px";
+                  if (wrapper.clientHeight > 0) inner.style.height = wrapper.clientHeight + "px";
                 });
                 ro.observe(wrapper);
               }
 
-              inner.addEventListener("click", () => {
-                setMermaidModal(svg);
-              });
+              // 클릭 확대 — PC 전용
+              if (!isMobileNow) {
+                inner.addEventListener("click", () => {
+                  setMermaidModal(svg);
+                });
+              }
 
               // pre를 완전히 제거하지 않고 숨김 처리 → 테마 변경 시 복원 가능
               (pre as HTMLElement).dataset.mermaidRendered = "true";
@@ -586,11 +598,6 @@ export default function Post() {
                     >
                       {categoryLabel}
                     </Badge>
-                    {post.views > 0 && post.featured && (
-                      <Badge variant="destructive" className="ml-2">
-                        인기
-                      </Badge>
-                    )}
                   </div>
 
                   <h1 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight">

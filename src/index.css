@@ -610,11 +610,25 @@ html:not(.dark) .prose :not(pre) > code {
   ry: 8px !important;
 }
 
-/* resize 핸들 커서 표시 */
+/* resize 핸들 커서 표시 — PC 전용 */
 .mermaid-wrapper {
   resize: both;
   box-sizing: border-box;
   min-width: 200px;
+}
+/* 모바일: resize 없이 단순 블록 */
+.mermaid-wrapper-mobile {
+  box-sizing: border-box;
+  width: 100% !important;
+}
+
+/* ─── prose 내 table overflow (이미지 4개짜리 table 등 PC에서 깨짐 방지) ─── */
+.prose table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* SVG 렌더링 품질 */
@@ -631,15 +645,35 @@ html:not(.dark) .prose :not(pre) > code {
   height: auto;
 }
 
-/* SVG 자체 배경 투명 처리 (테마 기본 배경색 #f5f0fa 등 제거) */
-/* rect:first-of-type 사용 — defs가 먼저 오는 SVG 구조에서 first-child가 rect를 못 잡음 */
-.mermaid-inner svg {
+/* SVG 자체 배경 투명 처리 */
+.mermaid-inner svg,
+.mermaid-svg-content svg {
   background-color: transparent !important;
 }
-.mermaid-inner svg > rect:first-child,
-.mermaid-inner svg > rect:first-of-type,
-.mermaid-inner svg > rect.background {
+/* background rect: 직계·비직계 자식 모두 대응 */
+.mermaid-inner svg rect.background,
+.mermaid-svg-content svg rect.background {
   fill: transparent !important;
+}
+.mermaid-inner svg > rect:first-of-type {
+  fill: transparent !important;
+}
+
+/* ─── 다크모드: SVG text가 prose color 상속으로 어두워지는 문제 방지 ─── */
+/* prose의 color가 currentColor로 흘러들어오는 경우에만 보정 */
+.dark .mermaid-inner svg text,
+.dark .mermaid-inner svg tspan,
+.dark .mermaid-svg-content svg text,
+.dark .mermaid-svg-content svg tspan {
+  fill: #cbd5e1;  /* slate-300 — 이미 밝은 fill이 있으면 mermaid 자체값이 우선 */
+}
+/* edgeLabel HTML 텍스트 (flowchart htmlLabels) */
+.dark .mermaid-inner .edgeLabel p,
+.dark .mermaid-inner .edgeLabel span,
+.dark .mermaid-inner .edgeLabel div,
+.dark .mermaid-svg-content .edgeLabel p,
+.dark .mermaid-svg-content .edgeLabel span {
+  color: #e2e8f0 !important;
 }
 
 
