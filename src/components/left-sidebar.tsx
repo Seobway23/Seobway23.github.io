@@ -115,7 +115,7 @@ function SidebarCategoryBranch({
     <div
       key={node.fullName}
       className="flex items-start gap-1 rounded-lg"
-      style={{ paddingLeft: depth * 10 }}
+      style={{ paddingLeft: 0 }}
     >
       <div className="flex h-7 w-7 shrink-0 items-center justify-center">
         {hasKids ? (
@@ -147,7 +147,7 @@ function SidebarCategoryBranch({
             </motion.span>
           </motion.button>
         ) : (
-          <span className="block h-7 w-7 shrink-0" aria-hidden />
+          <span className={cn("block h-7 shrink-0", depth >= 2 ? "w-3" : "w-7")} aria-hidden />
         )}
       </div>
 
