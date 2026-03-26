@@ -1,5 +1,25 @@
 [
   {
+    "slug": "celery-beat",
+    "title": "Celery Beat — 주기적 태스크 스케줄링",
+    "path": "/post/study/infra/celery/celery-beat"
+  },
+  {
+    "slug": "celery-broker",
+    "title": "Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초",
+    "path": "/post/study/infra/celery/celery-broker"
+  },
+  {
+    "slug": "celery-worker",
+    "title": "Celery Worker — 내부 구조와 동시성 모델",
+    "path": "/post/study/infra/celery/celery-worker"
+  },
+  {
+    "slug": "celery-django",
+    "title": "Django + Celery — 비동기 작업과 스케줄링의 기초",
+    "path": "/post/study/infra/celery-django"
+  },
+  {
     "slug": "gitlab-artifacts-vs-cache",
     "title": "GitLab CI/CD — artifacts vs cache",
     "path": "/post/study/infra/gitlab-artifacts-vs-cache"

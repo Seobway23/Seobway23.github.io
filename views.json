@@ -1,4 +1,8 @@
 {
+  "celery-beat": 0,
+  "celery-broker": 0,
+  "celery-worker": 0,
+  "celery-django": 0,
   "gitlab-artifacts-vs-cache": 14,
   "gitlab-cicd-guide": 23,
   "macro-network-view": 5,
