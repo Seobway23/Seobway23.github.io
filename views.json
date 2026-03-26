@@ -2,9 +2,18 @@
   "gitlab-artifacts-vs-cache": 14,
   "gitlab-cicd-guide": 23,
   "macro-network-view": 5,
+  "micro-network-view": 0,
   "cdn-content-delivery-network": 0,
   "circuit-vs-packet-switching": 0,
   "isp-internet-service-provider": 0,
   "ixp-internet-exchange-point": 0,
-  "unicast-and-broadcast": 0
+  "unicast-and-broadcast": 0,
+  "micro-encapsulation": 0,
+  "micro-http-https": 0,
+  "micro-ip-arp": 0,
+  "micro-network-traffic": 0,
+  "micro-osi-7layer": 0,
+  "micro-protocol": 0,
+  "micro-tcp-ip-model": 0,
+  "micro-tcp-udp": 0
 }

@@ -15,6 +15,11 @@
     "path": "/post/study/network/chapter01"
   },
   {
+    "slug": "micro-network-view",
+    "title": "미시 네트워크",
+    "path": "/post/study/network/chapter02"
+  },
+  {
     "slug": "cdn-content-delivery-network",
     "title": "CDN — 콘텐츠를 가장 빠른 경로로 전달하는 방법",
     "path": "/post/study/network/macro/cdn"
@@ -38,5 +43,45 @@
     "slug": "unicast-and-broadcast",
     "title": "유니캐스트와 브로드캐스트 — 누구에게 데이터를 보낼 것인가",
     "path": "/post/study/network/macro/unicast-broadcast"
+  },
+  {
+    "slug": "micro-encapsulation",
+    "title": "캡슐화와 역캡슐화 — PDU의 여정",
+    "path": "/post/study/network/micro/encapsulation"
+  },
+  {
+    "slug": "micro-http-https",
+    "title": "HTTP와 HTTPS — 웹을 움직이는 프로토콜",
+    "path": "/post/study/network/micro/http-https"
+  },
+  {
+    "slug": "micro-ip-arp",
+    "title": "IP와 ARP — 주소와 경로의 언어",
+    "path": "/post/study/network/micro/ip-arp"
+  },
+  {
+    "slug": "micro-network-traffic",
+    "title": "트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡",
+    "path": "/post/study/network/micro/network-traffic"
+  },
+  {
+    "slug": "micro-osi-7layer",
+    "title": "OSI 7계층 모델 — 네트워크를 7개의 층으로 나누다",
+    "path": "/post/study/network/micro/osi-7layer"
+  },
+  {
+    "slug": "micro-protocol",
+    "title": "프로토콜 — 왜 패킷 교환을 쓰는가",
+    "path": "/post/study/network/micro/protocol"
+  },
+  {
+    "slug": "micro-tcp-ip-model",
+    "title": "TCP/IP 참조 모델 — 현재 인터넷의 실질적 표준",
+    "path": "/post/study/network/micro/tcp-ip-model"
+  },
+  {
+    "slug": "micro-tcp-udp",
+    "title": "TCP와 UDP — 신뢰성과 속도의 트레이드오프",
+    "path": "/post/study/network/micro/tcp-udp"
   }
 ]
