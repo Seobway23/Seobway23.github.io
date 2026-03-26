@@ -1,5 +1,152 @@
 [
   {
+    "id": "docker-compose-django",
+    "title": "Docker Compose로 Django 5개 서비스 띄우기",
+    "slug": "docker-compose-django",
+    "excerpt": "MySQL, Redis, Django(Gunicorn), Celery Worker, Celery Beat — 5개 서비스를 docker-compose.yml 하나로 올리는 실전 구성과 자주 막히는 포인트를 설명한다.",
+    "content": "<h2>구성 목표</h2>\n<p>로컬 개발 환경에서 다음 5개 서비스를 한 번에 올린다.</p>\n<table>\n<thead>\n<tr>\n<th>서비스</th>\n<th>역할</th>\n<th>이미지</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>db</code></td>\n<td>MySQL 8.0 데이터베이스</td>\n<td><code>mysql:8.0</code></td>\n</tr>\n<tr>\n<td><code>redis</code></td>\n<td>메시지 브로커 / 캐시</td>\n<td><code>redis:7-alpine</code></td>\n</tr>\n<tr>\n<td><code>web</code></td>\n<td>Django + Gunicorn</td>\n<td>로컬 Dockerfile</td>\n</tr>\n<tr>\n<td><code>worker</code></td>\n<td>Celery Worker</td>\n<td>로컬 Dockerfile</td>\n</tr>\n<tr>\n<td><code>beat</code></td>\n<td>Celery Beat 스케줄러</td>\n<td>로컬 Dockerfile</td>\n</tr>\n</tbody></table>\n<pre><code class=\"language-mermaid\">%% desc: 5개 서비스의 의존 관계 — db/redis가 먼저 healthy 상태가 돼야 나머지가 시작\nflowchart TD\n  subgraph INFRA[&quot;인프라 레이어&quot;]\n    DB[&quot;db\\n(MySQL 8.0)\\nPort: 3306&quot;]\n    REDIS[&quot;redis\\n(Redis 7)\\nPort: 6379&quot;]\n  end\n\n  subgraph APP[&quot;애플리케이션 레이어&quot;]\n    WEB[&quot;web\\n(Django + Gunicorn)\\nPort: 8000&quot;]\n    WORKER[&quot;worker\\n(Celery Worker)&quot;]\n    BEAT[&quot;beat\\n(Celery Beat)&quot;]\n  end\n\n  DB -- &quot;healthcheck 통과 후&quot; --&gt; WEB &amp; WORKER &amp; BEAT\n  REDIS -- &quot;healthcheck 통과 후&quot; --&gt; WEB &amp; WORKER &amp; BEAT\n  WEB -- &quot;태스크 발행&quot; --&gt; REDIS\n  BEAT -- &quot;스케줄 발행&quot; --&gt; REDIS\n  REDIS -- &quot;태스크 전달&quot; --&gt; WORKER\n  WEB &amp; WORKER -- &quot;DB 읽기/쓰기&quot; --&gt; DB\n</code></pre>\n<h2>파일 구조</h2>\n<pre><code>myproject/\n├── docker-compose.yml\n├── Dockerfile\n├── .env                 ← Compose 변수 치환용 (WEB_PORT 등)\n├── .env.local           ← 컨테이너 환경변수 (시크릿, DB URL 등)\n├── requirements.txt\n└── config/\n    └── settings/\n        ├── base.py\n        ├── local.py\n        └── production.py\n</code></pre>\n<h2>docker-compose.yml</h2>\n<pre><code class=\"language-yaml\">version: &quot;3.9&quot;\n\nservices:\n  db:\n    image: mysql:8.0\n    container_name: pms_v3-mysql\n    restart: unless-stopped\n    env_file:\n      - .env.local\n    volumes:\n      - mysql_data:/var/lib/mysql\n    healthcheck:\n      test: [&quot;CMD&quot;, &quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-h&quot;, &quot;localhost&quot;]\n      interval: 5s\n      timeout: 3s\n      retries: 10\n      start_period: 30s\n    networks:\n      - pms_network\n\n  redis:\n    image: redis:7-alpine\n    container_name: pms_v3-redis\n    restart: unless-stopped\n    healthcheck:\n      test: [&quot;CMD&quot;, &quot;redis-cli&quot;, &quot;ping&quot;]\n      interval: 5s\n      timeout: 3s\n      retries: 5\n    networks:\n      - pms_network\n\n  web:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    container_name: pms_v3-web\n    restart: unless-stopped\n    ports:\n      - &quot;${WEB_PORT}:${WEB_PORT}&quot;\n    env_file:\n      - .env.local\n    volumes:\n      - .:/app\n      - static_files:/app/staticfiles\n    depends_on:\n      db:\n        condition: service_healthy\n      redis:\n        condition: service_healthy\n    command: &gt;\n      gunicorn config.wsgi:application\n        --bind 0.0.0.0:${WEB_PORT}\n        --workers 2\n        --timeout 120\n    networks:\n      - pms_network\n\n  worker:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    container_name: pms_v3-worker\n    restart: unless-stopped\n    env_file:\n      - .env.local\n    volumes:\n      - .:/app\n    depends_on:\n      db:\n        condition: service_healthy\n      redis:\n        condition: service_healthy\n    command: celery -A config worker --loglevel=info -Q default\n    networks:\n      - pms_network\n\n  beat:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    container_name: pms_v3-beat\n    restart: unless-stopped\n    env_file:\n      - .env.local\n    volumes:\n      - .:/app\n    depends_on:\n      db:\n        condition: service_healthy\n      redis:\n        condition: service_healthy\n    command: &gt;\n      celery -A config beat\n        --scheduler django_celery_beat.schedulers:DatabaseScheduler\n        --loglevel=info\n    networks:\n      - pms_network\n\nvolumes:\n  mysql_data:\n  static_files:\n\nnetworks:\n  pms_network:\n    driver: bridge\n</code></pre>\n<h2>환경변수 파일 구성</h2>\n<h3>.env — Compose 변수 치환용</h3>\n<pre><code class=\"language-bash\"># .env (git에 커밋 가능, 단순 포트/이름만)\nWEB_PORT=8000\nCOMPOSE_PROJECT_NAME=pms_v3\n</code></pre>\n<h3>.env.local — 컨테이너 내부 환경변수용</h3>\n<pre><code class=\"language-bash\"># .env.local (반드시 .gitignore에 추가!)\n\n# Django\nDJANGO_SETTINGS_MODULE=config.settings.local\nDJANGO_SECRET_KEY=your-secret-key-here-change-this\nDJANGO_ALLOWED_HOSTS=localhost,127.0.0.1\n\n# MySQL (MySQL 컨테이너 초기화에도 사용)\nMYSQL_DATABASE=pms_db\nMYSQL_USER=pms_user\nMYSQL_PASSWORD=pms_password\nMYSQL_ROOT_PASSWORD=root_password\n\n# DATABASE_URL (web, worker, beat 컨테이너용)\n# 호스트명 = MySQL 서비스 이름 (pms_v3-mysql)\nDATABASE_URL=mysql://pms_user:pms_password@pms_v3-mysql:3306/pms_db\n\n# Redis\nREDIS_URL=redis://pms_v3-redis:6379/0\nCELERY_BROKER_URL=redis://pms_v3-redis:6379/0\nCELERY_RESULT_BACKEND=redis://pms_v3-redis:6379/1\n</code></pre>\n<h2>Dockerfile</h2>\n<pre><code class=\"language-dockerfile\">FROM python:3.12-slim\n\n# 시스템 패키지 (mysqlclient 빌드에 필요)\nRUN apt-get update &amp;&amp; apt-get install -y \\\n    default-libmysqlclient-dev \\\n    gcc \\\n    pkg-config \\\n    &amp;&amp; rm -rf /var/lib/apt/lists/*\n\nWORKDIR /app\n\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\nCOPY . .\n\nENV PYTHONUNBUFFERED=1\nENV PYTHONDONTWRITEBYTECODE=1\n</code></pre>\n<h2>실행 순서</h2>\n<pre><code class=\"language-bash\"># 1. 첫 실행\ndocker compose up -d\n\n# 2. 컨테이너 상태 확인 (db/redis가 healthy인지 확인)\ndocker compose ps\n\n# 3. 마이그레이션\ndocker compose exec web python manage.py migrate\n\n# 4. 정적 파일 수집\ndocker compose exec web python manage.py collectstatic --noinput\n\n# 5. 슈퍼유저 생성\ndocker compose exec web python manage.py createsuperuser\n</code></pre>\n<h2>자주 막히는 포인트</h2>\n<h3>1. DB 접속 에러 1045 (Access Denied)</h3>\n<pre><code>django.db.utils.OperationalError: (1045, &quot;Access denied for user &#39;pms_user&#39;@...&quot;)\n</code></pre>\n<p><strong>원인</strong>: 두 가지 중 하나</p>\n<pre><code class=\"language-mermaid\">%% desc: DB 1045 에러의 두 가지 원인과 해결 흐름\nflowchart TD\n  ERR[&quot;1045 Access Denied&quot;]\n\n  A[&quot;원인 1: mysql_data 볼륨이 이미 존재\\n이전 비밀번호로 초기화된 상태\\n새 MYSQL_PASSWORD가 적용 안 됨&quot;]\n  B[&quot;원인 2: DATABASE_URL의 계정 정보와\\nMYSQL_USER/MYSQL_PASSWORD 불일치&quot;]\n\n  SOL_A[&quot;해결: docker compose down -v\\n볼륨 삭제 후 재시작&quot;]\n  SOL_B[&quot;해결: .env.local에서\\nDATABASE_URL ↔ MYSQL_* 값 통일&quot;]\n\n  ERR --&gt; A &amp; B\n  A --&gt; SOL_A\n  B --&gt; SOL_B\n</code></pre>\n<pre><code class=\"language-bash\"># 볼륨 포함 완전 초기화 (로컬 환경에서만)\ndocker compose down -v\ndocker compose up -d\n</code></pre>\n<h3>2. Compose 변수 치환 에러</h3>\n<pre><code>invalid interpolated value: mandatory variable &#39;WEB_PORT&#39; is not set\n</code></pre>\n<p>프로젝트 루트에 <code>.env</code> 파일이 없어서 발생.<br><code>env_file:</code>에 지정한 파일은 치환에 쓰이지 않는다.</p>\n<pre><code class=\"language-bash\">echo &quot;WEB_PORT=8000&quot; &gt; .env\ndocker compose up -d\n</code></pre>\n<h3>3. web이 DB보다 먼저 시작돼 연결 실패</h3>\n<p><code>depends_on</code>만 설정하고 <code>healthcheck</code>가 없으면 발생한다.<br>위 <code>docker-compose.yml</code>의 healthcheck 설정을 그대로 사용하면 해결된다.</p>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/docker-basics\">Docker 기초 — Image, Container, Volume, Network</a>: 서비스 구성의 기본 개념</li>\n<li><a href=\"/post/docker-compose-basics\">Docker Compose 기초 — env_file, interpolation, depends_on</a>: .env 파일 구분과 healthcheck 상세</li>\n<li><a href=\"/post/django-settings\">Django settings 분리와 환경변수 관리</a>: DJANGO_SETTINGS_MODULE, django-environ, DATABASE_URL 설정법</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/infra",
+    "tags": [
+      "Docker",
+      "DockerCompose",
+      "Django",
+      "MySQL",
+      "Redis",
+      "Celery",
+      "Gunicorn",
+      "DevOps"
+    ],
+    "author": "Seobway",
+    "readTime": 15,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-26T00:00:00.000Z",
+    "updatedAt": "2026-03-26T22:58:24.771Z"
+  },
+  {
+    "id": "docker-compose-basics",
+    "title": "Docker Compose 기초 — env_file, 변수 치환, depends_on",
+    "slug": "docker-compose-basics",
+    "excerpt": "env_file과 환경변수 치환(interpolation)의 차이, depends_on + healthcheck로 서비스 시작 순서를 제어하는 방법을 실제 에러 케이스와 함께 설명한다.",
+    "content": "<h2>가장 흔한 Compose 에러</h2>\n<pre><code>invalid interpolated value: ports: ${WEB_PORT}: mandatory variable &#39;WEB_PORT&#39; is not set\n</code></pre>\n<p>이 에러를 처음 보면 당황스럽다.<br><code>.env.local</code>에 <code>WEB_PORT=8000</code>이 분명히 있는데 왜 못 읽을까?</p>\n<p>원인은 <code>env_file</code>과 <strong>변수 치환(interpolation)</strong>의 차이를 몰랐기 때문이다.</p>\n<h2>Docker Compose 기본 구조</h2>\n<pre><code class=\"language-yaml\"># docker-compose.yml\nversion: &quot;3.9&quot;\n\nservices:        # 실행할 서비스(컨테이너) 정의\n  web:\n    build: .     # Dockerfile로 이미지 빌드\n    ports:\n      - &quot;${WEB_PORT}:${WEB_PORT}&quot;\n    env_file:\n      - .env.local\n    depends_on:\n      db:\n        condition: service_healthy\n\n  db:\n    image: mysql:8.0\n    healthcheck:\n      test: [&quot;CMD&quot;, &quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-h&quot;, &quot;localhost&quot;]\n      interval: 5s\n      timeout: 3s\n      retries: 5\n\nvolumes:\n  mysql_data:\n</code></pre>\n<h2>env_file vs 변수 치환 — 핵심 차이</h2>\n<pre><code class=\"language-mermaid\">%% desc: env_file은 컨테이너 내부에만 주입, 변수 치환은 Compose 실행 시점에 .env 파일에서 읽음\nflowchart TD\n  subgraph COMPOSE_TIME[&quot;Compose 실행 시점 (docker compose up)&quot;]\n    DOTENV[&quot;.env 파일\\nWEB_PORT=8000&quot;]\n    SHELL[&quot;쉘 환경변수\\nexport WEB_PORT=8000&quot;]\n    INTERP[&quot;Compose 변수 치환\\n${WEB_PORT} → 8000\\nposts: - &#39;8000:8000&#39;&quot;]\n    DOTENV &amp; SHELL --&gt; INTERP\n  end\n\n  subgraph CONTAINER_TIME[&quot;컨테이너 실행 시점&quot;]\n    ENVFILE[&quot;.env.local\\nWEB_PORT=8000\\nDJANGO_SECRET_KEY=...&quot;]\n    CONTAINER[&quot;컨테이너 내부\\n환경변수로 주입&quot;]\n    ENVFILE --&gt; CONTAINER\n  end\n\n  COMPOSE_TIME --&gt; CONTAINER_TIME\n</code></pre>\n<table>\n<thead>\n<tr>\n<th></th>\n<th><code>env_file:</code></th>\n<th>변수 치환 (<code>${VAR}</code>)</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>읽는 시점</strong></td>\n<td>컨테이너 시작 시</td>\n<td><code>docker compose up</code> 명령 실행 시</td>\n</tr>\n<tr>\n<td><strong>적용 범위</strong></td>\n<td>컨테이너 내부 환경변수</td>\n<td><code>docker-compose.yml</code> 파일의 <code>${VAR}</code></td>\n</tr>\n<tr>\n<td><strong>읽는 파일</strong></td>\n<td><code>env_file:</code>에 명시한 파일</td>\n<td>프로젝트 루트의 <code>.env</code> 또는 쉘 환경변수</td>\n</tr>\n<tr>\n<td><strong>사용 예</strong></td>\n<td><code>DJANGO_SECRET_KEY</code>, <code>DATABASE_URL</code></td>\n<td><code>ports</code>, <code>image</code> 태그, <code>container_name</code></td>\n</tr>\n</tbody></table>\n<h3>해결책</h3>\n<pre><code class=\"language-bash\"># 프로젝트 루트에 Compose 치환 전용 .env 파일 생성\n# (컨테이너 내부 값이 아닌, Compose 파일 렌더링용)\ncat &gt; .env &lt;&lt; EOF\nWEB_PORT=8000\nCOMPOSE_PROJECT_NAME=myproject\nEOF\n</code></pre>\n<p><code>.env</code>는 <code>docker compose</code> 명령 실행 시 <strong>자동으로</strong> 읽힌다.<sup id=\"fnref-compose-env-file\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-compose-env-file\" aria-label=\"각주 1\">[1]</a></sup><br>별도 설정 없이 <code>${WEB_PORT}</code>가 <code>8000</code>으로 치환된다.</p>\n<pre><code>.\n├── .env              ← Compose 변수 치환용 (WEB_PORT 등)\n├── .env.local        ← 컨테이너 내부 환경변수용 (env_file:)\n└── docker-compose.yml\n</code></pre>\n<blockquote>\n<p><code>.env</code>는 보통 <code>.gitignore</code>에 포함되지 않는다(값이 단순한 포트 번호 등이므로).<br>반면 <code>.env.local</code>은 시크릿 키, DB 비밀번호를 포함하므로 반드시 <code>.gitignore</code>에 추가.</p>\n</blockquote>\n<h2>depends_on + healthcheck — 시작 순서 제어</h2>\n<p>서비스 간 의존성이 있을 때 사용한다.<br>예: Django는 MySQL이 준비된 후 시작해야 한다.</p>\n<h3>depends_on만 쓰면 부족하다</h3>\n<pre><code class=\"language-yaml\"># 이것만으로는 부족하다\ndepends_on:\n  - db\n</code></pre>\n<p><code>depends_on</code>만 사용하면 <strong>컨테이너가 시작된 시점</strong>을 기다릴 뿐,<br>MySQL이 실제로 연결을 받을 준비가 됐는지는 보장하지 않는다.</p>\n<h3>healthcheck + condition 조합</h3>\n<pre><code class=\"language-yaml\">services:\n  web:\n    depends_on:\n      db:\n        condition: service_healthy   # DB가 healthy 상태일 때만 web 시작\n      redis:\n        condition: service_healthy\n\n  db:\n    image: mysql:8.0\n    healthcheck:\n      test: [&quot;CMD&quot;, &quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-h&quot;, &quot;localhost&quot;, &quot;-u&quot;, &quot;root&quot;, &quot;-p${MYSQL_ROOT_PASSWORD}&quot;]\n      interval: 5s      # 5초마다 체크\n      timeout: 3s       # 3초 내 응답 없으면 실패\n      retries: 5        # 5번 실패하면 unhealthy\n      start_period: 10s # 처음 10초는 실패해도 카운트 안 함\n\n  redis:\n    image: redis:7-alpine\n    healthcheck:\n      test: [&quot;CMD&quot;, &quot;redis-cli&quot;, &quot;ping&quot;]\n      interval: 5s\n      timeout: 3s\n      retries: 5\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: depends_on + healthcheck 동작 흐름 — MySQL healthy 확인 후 Django 시작\nsequenceDiagram\n  participant DC as Docker Compose\n  participant MYSQL as MySQL Container\n  participant REDIS as Redis Container\n  participant WEB as Django Container\n\n  DC-&gt;&gt;MYSQL: 컨테이너 시작\n  DC-&gt;&gt;REDIS: 컨테이너 시작\n  DC-&gt;&gt;DC: web 시작 대기 (condition: service_healthy)\n\n  loop healthcheck (5초마다)\n    DC-&gt;&gt;MYSQL: mysqladmin ping\n    MYSQL--&gt;&gt;DC: 응답 없음 (초기화 중)\n  end\n\n  MYSQL--&gt;&gt;DC: pong ✅ (healthy)\n  REDIS--&gt;&gt;DC: pong ✅ (healthy)\n\n  DC-&gt;&gt;WEB: 컨테이너 시작 (둘 다 healthy 확인 후)\n</code></pre>\n<h2>자주 쓰는 Compose 키워드</h2>\n<pre><code class=\"language-yaml\">services:\n  web:\n    # 이미지 빌드\n    build:\n      context: .\n      dockerfile: Dockerfile\n\n    # 또는 기존 이미지 사용\n    image: python:3.12-slim\n\n    # 컨테이너 이름 명시\n    container_name: pms_v3-web\n\n    # 항상 재시작\n    restart: unless-stopped\n\n    # 볼륨 마운트\n    volumes:\n      - .:/app                        # Bind Mount (코드 동기화)\n      - static_files:/app/staticfiles  # Named Volume\n\n    # 환경변수 직접 정의\n    environment:\n      - DEBUG=true\n      - PYTHONUNBUFFERED=1\n\n    # 환경변수 파일 지정 (컨테이너 내부용)\n    env_file:\n      - .env.local\n\n    # 포트 매핑 (호스트:컨테이너)\n    ports:\n      - &quot;${WEB_PORT}:8000&quot;\n\n    # 실행 명령 오버라이드\n    command: python manage.py runserver 0.0.0.0:8000\n\n    # 네트워크 명시 (기본은 자동 생성)\n    networks:\n      - backend_network\n</code></pre>\n<h2>유용한 Compose 명령어</h2>\n<pre><code class=\"language-bash\"># 서비스 시작 (백그라운드)\ndocker compose up -d\n\n# 특정 서비스만 시작\ndocker compose up -d web\n\n# 이미지 강제 재빌드\ndocker compose up -d --build\n\n# 로그 확인\ndocker compose logs -f web\n\n# 컨테이너 내 명령 실행\ndocker compose exec web python manage.py migrate\n\n# 서비스 상태 확인\ndocker compose ps\n\n# 중지 (컨테이너, 네트워크 삭제 / 볼륨은 유지)\ndocker compose down\n\n# 중지 + 볼륨까지 삭제 (DB 초기화)\ndocker compose down -v\n</code></pre>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/docker-basics\">Docker 기초 — Image, Container, Volume, Network</a>: Compose 이전에 알아야 할 Docker 핵심 개념</li>\n<li><a href=\"/post/docker-compose-django\">Docker Compose로 Django 5개 서비스 띄우기</a>: env_file과 healthcheck를 실전 프로젝트에 적용</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-compose-env-file\" style=\"scroll-margin-top: 96px;\">Docker Inc., <a href=\"https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/\" target=\"_blank\">Set environment variables in Compose — Docker Docs</a> <a href=\"#fnref-compose-env-file\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/infra/docker",
+    "tags": [
+      "Docker",
+      "DockerCompose",
+      "envFile",
+      "Interpolation",
+      "DependsOn",
+      "Healthcheck",
+      "Environment"
+    ],
+    "author": "Seobway",
+    "readTime": 11,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-26T00:00:00.000Z",
+    "updatedAt": "2026-03-26T22:58:24.770Z"
+  },
+  {
+    "id": "docker-basics",
+    "title": "Docker 기초 — Image, Container, Volume, Network",
+    "slug": "docker-basics",
+    "excerpt": "Docker의 핵심 개념인 Image와 Container의 차이, Volume으로 데이터를 영속하는 방법, 컨테이너 간 통신을 가능하게 하는 Network를 설명한다.",
+    "content": "<h2>왜 Docker인가</h2>\n<p>&quot;내 컴퓨터에서는 됐는데요&quot;</p>\n<p>협업할 때 가장 많이 듣는 말이다.<br>Python 버전, 라이브러리 버전, OS 차이... 원인은 늘 <strong>환경 불일치</strong>다.</p>\n<p>Docker는 애플리케이션과 그 실행 환경을 함께 패키징한다.<br>이미지를 받으면 어느 환경에서나 동일하게 실행된다.<sup id=\"fnref-docker-overview\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-docker-overview\" aria-label=\"각주 1\">[1]</a></sup></p>\n<pre><code class=\"language-mermaid\">%% desc: Docker가 해결하는 문제 — 환경 불일치에서 환경 일관성으로\nflowchart LR\n  subgraph BEFORE[&quot;Docker 이전&quot;]\n    D1[&quot;개발자 A\\nPython 3.10\\nmysqlclient 2.1&quot;]\n    D2[&quot;개발자 B\\nPython 3.12\\nmysqlclient 2.2&quot;]\n    D3[&quot;서버\\nPython 3.9\\nmysqlclient 1.4&quot;]\n    ERR[&quot;❌ 버전 충돌\\n환경 불일치&quot;]\n    D1 &amp; D2 &amp; D3 --&gt; ERR\n  end\n\n  subgraph AFTER[&quot;Docker 이후&quot;]\n    IMG[&quot;Docker Image\\n(환경 포함)&quot;]\n    R1[&quot;개발자 A\\n✅ 동일 환경&quot;]\n    R2[&quot;개발자 B\\n✅ 동일 환경&quot;]\n    R3[&quot;서버\\n✅ 동일 환경&quot;]\n    IMG --&gt; R1 &amp; R2 &amp; R3\n  end\n</code></pre>\n<h2>Image vs Container</h2>\n<p>가장 먼저 잡아야 할 개념이다.</p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>Image</th>\n<th>Container</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>정의</strong></td>\n<td>실행 환경의 스냅샷 (read-only)</td>\n<td>Image를 실행한 인스턴스</td>\n</tr>\n<tr>\n<td><strong>상태</strong></td>\n<td>불변 (Immutable)</td>\n<td>가변 (실행 중 상태 변화)</td>\n</tr>\n<tr>\n<td><strong>비유</strong></td>\n<td>클래스 (Class)</td>\n<td>인스턴스 (Instance)</td>\n</tr>\n<tr>\n<td><strong>저장</strong></td>\n<td>Docker Hub / 레지스트리</td>\n<td>로컬 도커 데몬</td>\n</tr>\n</tbody></table>\n<pre><code class=\"language-mermaid\">%% desc: Image를 여러 Container로 실행하는 관계 — 하나의 Image에서 N개의 Container\nflowchart TD\n  IMG[&quot;🖼️ Django Image\\n(python:3.12 + requirements.txt)&quot;]\n\n  C1[&quot;Container 1\\n(web 서버, port 8000)&quot;]\n  C2[&quot;Container 2\\n(celery worker)&quot;]\n  C3[&quot;Container 3\\n(celery beat)&quot;]\n\n  IMG --&gt; C1\n  IMG --&gt; C2\n  IMG --&gt; C3\n</code></pre>\n<p>하나의 Image에서 여러 Container를 띄울 수 있다.<br>Container가 삭제돼도 Image는 남아있다.</p>\n<h3>기본 명령어</h3>\n<pre><code class=\"language-bash\"># 이미지 빌드 (Dockerfile 기반)\ndocker build -t myapp:latest .\n\n# 이미지 목록\ndocker images\n\n# 컨테이너 실행\ndocker run -d --name myapp -p 8000:8000 myapp:latest\n\n# 실행 중인 컨테이너 목록\ndocker ps\n\n# 모든 컨테이너 (중지 포함)\ndocker ps -a\n\n# 컨테이너 로그\ndocker logs myapp\ndocker logs -f myapp          # follow (실시간)\n\n# 컨테이너 내부 접속\ndocker exec -it myapp bash\n\n# 컨테이너 중지/삭제\ndocker stop myapp\ndocker rm myapp\n</code></pre>\n<h2>Volume — 데이터 영속성</h2>\n<p>컨테이너는 삭제되면 내부 데이터도 함께 사라진다.<br>DB 데이터, 업로드 파일처럼 영속해야 하는 데이터는 <strong>Volume</strong>에 저장해야 한다.<sup id=\"fnref-docker-volumes\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-docker-volumes\" aria-label=\"각주 2\">[2]</a></sup></p>\n<p>Volume의 종류:</p>\n<table>\n<thead>\n<tr>\n<th>타입</th>\n<th>형식</th>\n<th>특징</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Named Volume</strong></td>\n<td><code>mysql_data:/var/lib/mysql</code></td>\n<td>Docker가 관리. 이름으로 참조. 권장</td>\n</tr>\n<tr>\n<td><strong>Bind Mount</strong></td>\n<td><code>./src:/app/src</code></td>\n<td>호스트 경로 직접 마운트. 개발 시 코드 동기화</td>\n</tr>\n<tr>\n<td><strong>tmpfs</strong></td>\n<td><code>type=tmpfs</code></td>\n<td>메모리에만 저장. 컨테이너 종료 시 삭제</td>\n</tr>\n</tbody></table>\n<pre><code class=\"language-mermaid\">%% desc: Named Volume vs Bind Mount의 데이터 흐름 차이\nflowchart LR\n  subgraph HOST[&quot;호스트&quot;]\n    HF[&quot;./src 디렉토리&quot;]\n    DV[&quot;Docker Named Volume\\nmysql_data&quot;]\n  end\n\n  subgraph CONTAINERS[&quot;컨테이너&quot;]\n    WEB[&quot;/app/src\\n(소스코드 동기화)&quot;]\n    DB[&quot;/var/lib/mysql\\n(DB 데이터 영속)&quot;]\n  end\n\n  HF -- &quot;Bind Mount\\n코드 변경 즉시 반영&quot; --&gt; WEB\n  DV -- &quot;Named Volume\\n컨테이너 삭제 후에도 보존&quot; --&gt; DB\n</code></pre>\n<pre><code class=\"language-bash\"># Named Volume 생성\ndocker volume create mysql_data\n\n# Volume 목록\ndocker volume ls\n\n# Volume 상세 정보\ndocker volume inspect mysql_data\n\n# Volume 삭제 (데이터 삭제 주의!)\ndocker volume rm mysql_data\n\n# 컨테이너와 Volume 함께 삭제\ndocker compose down -v\n</code></pre>\n<blockquote>\n<p><code>docker compose down -v</code>는 Named Volume까지 삭제한다.<br>DB를 완전 초기화할 때 유용하지만, <strong>운영 환경에서 절대 사용 금지</strong>.</p>\n</blockquote>\n<h2>Network — 컨테이너 간 통신</h2>\n<p>컨테이너는 기본적으로 격리된 환경이다.<br>서로 통신하려면 같은 <strong>Network</strong>에 속해야 한다.<sup id=\"fnref-docker-network\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-docker-network\" aria-label=\"각주 3\">[3]</a></sup></p>\n<p>Docker Compose는 자동으로 프로젝트 단위 네트워크를 생성한다.<br>같은 Compose 파일의 서비스끼리는 <strong>서비스 이름</strong>으로 접근할 수 있다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Docker 내부 네트워크에서 서비스 이름으로 통신하는 구조\nflowchart LR\n  subgraph NETWORK[&quot;Docker Bridge Network (pms_v3_default)&quot;]\n    WEB[&quot;web\\n(Django)\\n172.18.0.2&quot;]\n    MYSQL[&quot;pms_v3-mysql\\n172.18.0.3&quot;]\n    REDIS[&quot;pms_v3-redis\\n172.18.0.4&quot;]\n    WORKER[&quot;worker\\n(Celery)\\n172.18.0.5&quot;]\n  end\n\n  WEB -- &quot;mysql://pms_v3-mysql:3306&quot; --&gt; MYSQL\n  WEB -- &quot;redis://pms_v3-redis:6379&quot; --&gt; REDIS\n  WORKER -- &quot;redis://pms_v3-redis:6379&quot; --&gt; REDIS\n\n  HOST[&quot;호스트&quot;] -- &quot;localhost:8000&quot; --&gt; WEB\n</code></pre>\n<p>컨테이너 내부에서 DB에 접속할 때 <code>localhost</code>가 아니라 <strong>서비스 이름</strong>을 써야 한다.</p>\n<pre><code class=\"language-python\"># 잘못된 예: 컨테이너 내부에서 localhost는 자기 자신을 가리킴\nDATABASE_URL = &quot;mysql://user:pass@localhost:3306/mydb&quot;  # ❌\n\n# 올바른 예: 서비스 이름으로 접근\nDATABASE_URL = &quot;mysql://user:pass@pms_v3-mysql:3306/mydb&quot;  # ✅\n</code></pre>\n<h3>포트 매핑</h3>\n<p>컨테이너의 포트를 호스트에 노출할 때 <code>ports</code>를 사용한다.</p>\n<pre><code class=\"language-yaml\">services:\n  web:\n    ports:\n      - &quot;8000:8000&quot;    # 호스트:컨테이너\n</code></pre>\n<ul>\n<li>왼쪽(8000): 호스트에서 접근하는 포트 (<code>localhost:8000</code>)</li>\n<li>오른쪽(8000): 컨테이너 내부 포트</li>\n</ul>\n<p>내부 통신에는 포트 매핑이 필요 없다. <code>pms_v3-mysql:3306</code>처럼 컨테이너 내부 포트로 바로 접근한다.</p>\n<h2>Dockerfile 기초</h2>\n<p>Image를 빌드하는 설계도다.</p>\n<pre><code class=\"language-dockerfile\"># Dockerfile\nFROM python:3.12-slim          # 베이스 이미지\n\nWORKDIR /app                   # 작업 디렉토리\n\n# 의존성 먼저 복사 (레이어 캐시 활용)\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\n# 소스 복사\nCOPY . .\n\n# 포트 노출 (문서 목적, 실제 바인딩은 ports:로)\nEXPOSE 8000\n\n# 기본 실행 명령\nCMD [&quot;gunicorn&quot;, &quot;config.wsgi:application&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8000&quot;]\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: Dockerfile 레이어 구조 — 각 명령이 레이어를 쌓고, 변경 시 해당 레이어부터 재빌드\nflowchart TD\n  L1[&quot;FROM python:3.12-slim\\n(Base Layer)&quot;]\n  L2[&quot;WORKDIR /app&quot;]\n  L3[&quot;COPY requirements.txt .&quot;]\n  L4[&quot;RUN pip install ...\\n(의존성 레이어 — 자주 캐시됨)&quot;]\n  L5[&quot;COPY . .\\n(소스 레이어 — 코드 변경 시 여기부터 재빌드)&quot;]\n  L6[&quot;CMD gunicorn ...&quot;]\n\n  L1 --&gt; L2 --&gt; L3 --&gt; L4 --&gt; L5 --&gt; L6\n</code></pre>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/docker-compose-basics\">Docker Compose 기초 — env_file, interpolation, depends_on</a>: 이 글의 개념을 바탕으로 Compose 파일 작성법</li>\n<li><a href=\"/post/docker-compose-django\">Docker Compose로 Django 5개 서비스 띄우기</a>: 실전 Django + MySQL + Redis + Celery 구성</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-docker-overview\" style=\"scroll-margin-top: 96px;\">Docker Inc., <a href=\"https://docs.docker.com/get-started/docker-overview/\" target=\"_blank\">Docker Overview</a> <a href=\"#fnref-docker-overview\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-docker-volumes\" style=\"scroll-margin-top: 96px;\">Docker Inc., <a href=\"https://docs.docker.com/engine/storage/volumes/\" target=\"_blank\">Volumes — Docker Docs</a> <a href=\"#fnref-docker-volumes\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-docker-network\" style=\"scroll-margin-top: 96px;\">Docker Inc., <a href=\"https://docs.docker.com/engine/network/\" target=\"_blank\">Networking overview — Docker Docs</a> <a href=\"#fnref-docker-network\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/infra/docker",
+    "tags": [
+      "Docker",
+      "Container",
+      "Image",
+      "Volume",
+      "Network",
+      "DockerCLI"
+    ],
+    "author": "Seobway",
+    "readTime": 12,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-26T00:00:00.000Z",
+    "updatedAt": "2026-03-26T22:58:24.769Z"
+  },
+  {
+    "id": "django-version-compatibility",
+    "title": "Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈",
+    "slug": "django-version-compatibility",
+    "excerpt": "Django 5.2에서 queries_logged 속성 setter가 막히며 /api/docs가 500 에러를 낸 실제 사례를 분석하고, 내부 API 의존의 위험성과 협업 환경에서 버전을 고정해야 하는 이유를 설명한다.",
+    "content": "<h2>사건 발단</h2>\n<pre><code>AttributeError: property &#39;queries_logged&#39; of &#39;DatabaseWrapper&#39; object has no setter\n</code></pre>\n<p>Django 5.2로 업그레이드한 직후, <code>/api/docs</code>가 500 에러를 냈다.<br><code>DEBUG=True</code> 환경에서도 동일했다.</p>\n<p>스택 트레이스를 따라가면:</p>\n<pre><code class=\"language-python\"># apps/infrastructure/logging/middleware.py\nclass QueryLoggingMiddleware:\n    def process_request(self, request):\n        connection.queries_logged = []   # ← 여기서 AttributeError\n</code></pre>\n<h2>원인 분석</h2>\n<p><code>connection.queries_logged</code>는 Django의 <code>DatabaseWrapper</code> 내부에서 사용하는 <strong>비공식 속성</strong>이다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Django 5.2에서 queries_logged를 property로 변경 — setter가 없어 대입이 막힘\nflowchart TD\n  subgraph OLD[&quot;Django 4.x 이하&quot;]\n    O1[&quot;connection.queries_logged\\n일반 인스턴스 변수\\n(읽기/쓰기 모두 가능)&quot;]\n    O2[&quot;connection.queries_logged = []\\n✅ 동작&quot;]\n    O1 --&gt; O2\n  end\n\n  subgraph NEW[&quot;Django 5.2&quot;]\n    N1[&quot;connection.queries_logged\\n@property (getter만 있음)\\n(setter 없음)&quot;]\n    N2[&quot;connection.queries_logged = []\\n❌ AttributeError:\\nproperty has no setter&quot;]\n    N1 --&gt; N2\n  end\n</code></pre>\n<p>이 속성은 Django 공식 문서에 등장하지 않는다.<br><strong>내부 구현 세부사항</strong>이기 때문이다.</p>\n<p>Django 코어 팀이 리팩토링하면서 <code>@property</code>로 바꿨고,<br>setter를 노출하지 않기로 결정했다.<br>그 결과 이전에 &quot;우연히&quot; 동작하던 코드가 갑자기 깨졌다.</p>\n<h2>해결 방법</h2>\n<p>공식 API만 사용하도록 수정한다.</p>\n<pre><code class=\"language-python\"># 수정 전 (Django 5.2에서 깨짐)\nclass QueryLoggingMiddleware:\n    def process_request(self, request):\n        connection.queries_logged = []  # 비공식 내부 속성 직접 대입\n\n# 수정 후 (공식 API 사용)\nclass QueryLoggingMiddleware:\n    def process_request(self, request):\n        # connection.queries는 공식 API (쿼리 로그 리스트)\n        if hasattr(connection, &quot;queries_log&quot;):\n            connection.queries_log.clear()  # 내부 버퍼 직접 클리어\n</code></pre>\n<p><code>connection.queries</code>는 공식 Django 문서에 명시된 공개 API다.<sup id=\"fnref-django-db-connection\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-db-connection\" aria-label=\"각주 1\">[1]</a></sup><br><code>queries_logged</code>는 내부 구현이므로 절대 대입하지 않는다.</p>\n<h2>내부 API 의존의 위험성</h2>\n<h3>Django 공식 API vs 비공식 내부 구현</h3>\n<table>\n<thead>\n<tr>\n<th>구분</th>\n<th>예시</th>\n<th>안정성</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>공식 API</strong></td>\n<td><code>connection.queries</code>, <code>connection.cursor()</code>, <code>Model.objects.all()</code></td>\n<td>버전 간 호환 보장</td>\n</tr>\n<tr>\n<td><strong>비공식 내부</strong></td>\n<td><code>connection.queries_logged</code>, <code>connection._queries</code>, <code>Model._meta.pk</code></td>\n<td>버전 업 시 깨질 수 있음</td>\n</tr>\n</tbody></table>\n<p>Django는 공식 API에 대해서만 하위 호환성을 보장한다.<sup id=\"fnref-django-api-stability\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-api-stability\" aria-label=\"각주 2\">[2]</a></sup><br>내부 속성(<code>_</code> 접두사, 문서에 없는 것)은 예고 없이 바뀔 수 있다.</p>\n<h3>자주 보이는 위험 패턴</h3>\n<pre><code class=\"language-python\"># ❌ 위험: 비공식 내부 속성 직접 접근\nconnection.queries_logged = []\nrequest._messages._queued_messages = []\nuser._password = &quot;hashed&quot;\n\n# ❌ 위험: Django 내부 모듈 직접 임포트\nfrom django.db.backends.base.base import BaseDatabaseWrapper\n\n# ✅ 안전: 공식 API 사용\nfrom django.db import connection\nconnection.queries  # 공식 문서에 있음\n\nfrom django.contrib import messages\nmessages.get_messages(request)  # 공식 API\n</code></pre>\n<h2>협업에서 버전 고정이 왜 중요한가</h2>\n<pre><code class=\"language-mermaid\">%% desc: 버전 고정 없이 각자 다른 Django 버전을 쓸 때 발생하는 &quot;내 컴퓨터에선 됨&quot; 문제\nflowchart TD\n  subgraph NO_PIN[&quot;버전 미고정 (위험)&quot;]\n    DEV_A[&quot;개발자 A\\nDjango 4.2.x\\n(로컬 pip install)&quot;]\n    DEV_B[&quot;개발자 B\\nDjango 5.2.x\\n(최신 버전 설치)&quot;]\n    CI[&quot;CI 서버\\nDjango 5.0.x\\n(캐시된 버전)&quot;]\n\n    WORKS[&quot;A 환경: ✅ 동작&quot;]\n    FAILS_B[&quot;B 환경: ❌ AttributeError&quot;]\n    FAILS_CI[&quot;CI: ❌ 다른 오류&quot;]\n\n    DEV_A --&gt; WORKS\n    DEV_B --&gt; FAILS_B\n    CI --&gt; FAILS_CI\n  end\n\n  subgraph PIN[&quot;버전 고정 (안전)&quot;]\n    REQ[&quot;requirements.txt\\nDjango==5.2.1\\nmysqlclient==2.2.4&quot;]\n    ALL[&quot;모든 환경\\nDjango 5.2.1\\n동일 버전&quot;]\n    OK[&quot;✅ 어디서나 동일하게 동작&quot;]\n    REQ --&gt; ALL --&gt; OK\n  end\n</code></pre>\n<h3>requirements.txt 관리</h3>\n<pre><code class=\"language-bash\"># requirements.txt — 버전 고정 (권장)\nDjango==5.2.1\ncelery==5.6.1\nmysqlclient==2.2.4\ndjango-environ==0.12.0\ndjangorestframework==3.16.0\n</code></pre>\n<pre><code class=\"language-bash\"># 현재 환경의 정확한 버전 고정\npip freeze &gt; requirements.txt\n</code></pre>\n<pre><code class=\"language-bash\"># requirements.in → requirements.txt 자동 관리 (pip-tools)\npip install pip-tools\necho &quot;Django&gt;=5.2,&lt;6.0&quot; &gt; requirements.in\npip-compile requirements.in    # requirements.txt 자동 생성 (하위 의존성 포함)\npip-sync requirements.txt       # 환경을 requirements.txt와 동기화\n</code></pre>\n<h2>Django LTS 버전</h2>\n<p>Django는 2년마다 LTS(Long-Term Support) 버전을 출시한다.<sup id=\"fnref-django-lts\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-lts\" aria-label=\"각주 3\">[3]</a></sup></p>\n<table>\n<thead>\n<tr>\n<th>버전</th>\n<th>출시</th>\n<th>지원 종료</th>\n<th>LTS</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>4.2</td>\n<td>2023.04</td>\n<td>2026.04</td>\n<td>✅ LTS</td>\n</tr>\n<tr>\n<td>5.0</td>\n<td>2023.12</td>\n<td>2025.04</td>\n<td>-</td>\n</tr>\n<tr>\n<td>5.1</td>\n<td>2024.08</td>\n<td>2026.04</td>\n<td>-</td>\n</tr>\n<tr>\n<td>5.2</td>\n<td>2025.04</td>\n<td>2028.04</td>\n<td>✅ LTS</td>\n</tr>\n</tbody></table>\n<p>운영 환경에서는 LTS 버전을 사용하는 것이 안전하다.<br>LTS 버전은 보안 패치와 버그 수정이 더 오래 제공된다.</p>\n<h2>버전 업그레이드 전 체크리스트</h2>\n<p>Django 버전 업그레이드 전에 반드시 확인해야 할 것들:</p>\n<pre><code class=\"language-mermaid\">%% desc: Django 버전 업그레이드 전 점검 흐름\nflowchart TD\n  START[&quot;업그레이드 계획&quot;]\n\n  A[&quot;릴리즈 노트 확인\\ndocs.djangoproject.com/releases/X.Y&quot;]\n  B[&quot;Deprecation 경고 확인\\n현재 버전에서 -Wall로 실행&quot;]\n  C[&quot;비공식 API 검색\\n_로 시작하는 속성, 문서 없는 속성&quot;]\n  D[&quot;테스트 환경에서 먼저 업그레이드&quot;]\n  E[&quot;Django Upgrade 도구 사용\\npip install django-upgrade&quot;]\n  F[&quot;운영 배포&quot;]\n\n  START --&gt; A --&gt; B --&gt; C --&gt; D --&gt; E --&gt; F\n</code></pre>\n<pre><code class=\"language-bash\"># Deprecation 경고 활성화 (업그레이드 전 실행)\npython -W error::DeprecationWarning manage.py check\n\n# django-upgrade: 코드 자동 마이그레이션 도구\npip install django-upgrade\ndjango-upgrade --target-version 5.2 **/*.py\n</code></pre>\n<h2>핵심 교훈 2가지</h2>\n<p><strong>1. 내부 API는 건드리지 않는다</strong></p>\n<p>공식 문서에 없는 속성이나 메서드는 언제든지 바뀔 수 있다.<br><code>_</code> 접두사가 붙은 것, 문서에 없는 것은 내부 구현으로 간주하고 사용하지 않는다.</p>\n<p><strong>2. 버전 고정이 협업의 기본</strong></p>\n<p><code>pip freeze &gt; requirements.txt</code>는 습관이다.<br>Docker를 쓰는 이유도 결국 환경 고정이다.<br>&quot;내 컴퓨터에선 됐는데&quot;는 <code>requirements.txt</code>로 예방할 수 있다.</p>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-migration\">Django Migration 완전 정복</a>: 버전 업그레이드 후 migration 상태 확인 방법</li>\n<li><a href=\"/post/django-settings\">Django settings 분리와 환경변수 관리</a>: 환경별로 다른 Django 설정을 안전하게 관리</li>\n<li><a href=\"/post/docker-compose-django\">Docker Compose로 Django 5개 서비스 띄우기</a>: Docker로 모든 팀원이 같은 환경을 쓰는 방법</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-db-connection\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/db/instrumentation/\" target=\"_blank\">Database instrumentation — Django Docs</a> <a href=\"#fnref-django-db-connection\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-django-api-stability\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/misc/api-stability/\" target=\"_blank\">API stability — Django Docs</a> <a href=\"#fnref-django-api-stability\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-django-lts\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/dev/internals/release-process/#long-term-support-lts-releases\" target=\"_blank\">Long-term support (LTS) releases — Django Docs</a> <a href=\"#fnref-django-lts\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "VersionCompatibility",
+      "InternalAPI",
+      "Deprecation",
+      "Django5",
+      "Middleware",
+      "Python",
+      "Collaboration"
+    ],
+    "author": "Seobway",
+    "readTime": 11,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-26T00:00:00.000Z",
+    "updatedAt": "2026-03-26T22:58:24.760Z"
+  },
+  {
+    "id": "django-settings",
+    "title": "Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL",
+    "slug": "django-settings",
+    "excerpt": "Django settings를 환경별로 분리하는 방법, django-environ으로 .env 파일을 읽는 방법, DATABASE_URL 형식이 Docker 서비스명과 어떻게 연결되는지를 설명한다.",
+    "content": "<h2>왜 settings를 분리해야 하는가</h2>\n<p>기본 <code>settings.py</code> 하나에 모든 설정을 담으면 문제가 생긴다.</p>\n<pre><code class=\"language-python\"># 이렇게 하면 안 된다\nDEBUG = True                         # 운영에서 True면 장애\nDATABASES = {\n    &quot;default&quot;: {\n        &quot;HOST&quot;: &quot;localhost&quot;,         # 운영 서버에선 다른 주소\n        &quot;PASSWORD&quot;: &quot;1234&quot;,          # 시크릿이 코드에 노출\n    }\n}\nALLOWED_HOSTS = [&quot;*&quot;]               # 운영에서 보안 취약\n</code></pre>\n<p>문제:</p>\n<ol>\n<li><strong>시크릿 유출</strong> — <code>SECRET_KEY</code>, DB 비밀번호가 Git에 올라감</li>\n<li><strong>환경 불일치</strong> — 로컬/스테이징/운영 설정이 다른데 하나의 파일로 관리 불가</li>\n<li><strong>배포 위험</strong> — <code>DEBUG=True</code>가 운영에 올라가는 실수</li>\n</ol>\n<h2>settings 분리 패턴</h2>\n<pre><code>config/\n└── settings/\n    ├── __init__.py\n    ├── base.py         ← 공통 설정 (앱 목록, 미들웨어 등)\n    ├── local.py        ← 로컬 개발용 (DEBUG=True, 느슨한 보안)\n    └── production.py   ← 운영용 (DEBUG=False, 엄격한 보안)\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: DJANGO_SETTINGS_MODULE 환경변수로 환경별 settings 파일을 선택하는 흐름\nflowchart LR\n  ENV[&quot;DJANGO_SETTINGS_MODULE\\n환경변수&quot;]\n\n  LOCAL[&quot;config.settings.local\\nDEBUG=True\\nDB=localhost&quot;]\n  PROD[&quot;config.settings.production\\nDEBUG=False\\nDB=prod-db.internal&quot;]\n\n  ENV -- &quot;=config.settings.local&quot; --&gt; LOCAL\n  ENV -- &quot;=config.settings.production&quot; --&gt; PROD\n\n  BASE[&quot;config.settings.base\\n(공통 설정)\\nINSTALLED_APPS\\nMIDDLEWARE\\n...&quot;]\n  LOCAL &amp; PROD -- &quot;from .base import *&quot; --&gt; BASE\n</code></pre>\n<pre><code class=\"language-python\"># config/settings/base.py\nfrom pathlib import Path\nimport environ\n\nenv = environ.Env()\nBASE_DIR = Path(__file__).resolve().parent.parent.parent\n\nINSTALLED_APPS = [\n    &quot;django.contrib.admin&quot;,\n    &quot;django.contrib.auth&quot;,\n    ...\n    &quot;rest_framework&quot;,\n    &quot;django_celery_beat&quot;,\n    &quot;myapp&quot;,\n]\n\nMIDDLEWARE = [...]\nROOT_URLCONF = &quot;config.urls&quot;\n</code></pre>\n<pre><code class=\"language-python\"># config/settings/local.py\nfrom .base import *\n\nDEBUG = True\nALLOWED_HOSTS = [&quot;*&quot;]\n\n# .env.local 파일 읽기\nenviron.Env.read_env(BASE_DIR / &quot;.env.local&quot;)\n\nSECRET_KEY = env(&quot;DJANGO_SECRET_KEY&quot;)\nDATABASES = {&quot;default&quot;: env.db(&quot;DATABASE_URL&quot;)}\n\nCELERY_BROKER_URL = env(&quot;CELERY_BROKER_URL&quot;)\n</code></pre>\n<pre><code class=\"language-python\"># config/settings/production.py\nfrom .base import *\n\nDEBUG = False\nALLOWED_HOSTS = env.list(&quot;DJANGO_ALLOWED_HOSTS&quot;)\n\nSECRET_KEY = env(&quot;DJANGO_SECRET_KEY&quot;)\nDATABASES = {&quot;default&quot;: env.db(&quot;DATABASE_URL&quot;)}\n\nSECURE_SSL_REDIRECT = True\nSESSION_COOKIE_SECURE = True\nCSRF_COOKIE_SECURE = True\n</code></pre>\n<h2>django-environ — 환경변수 읽기</h2>\n<p><strong>django-environ</strong>은 <code>.env</code> 파일을 읽고 타입 변환까지 해주는 라이브러리다.<sup id=\"fnref-django-environ\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-environ\" aria-label=\"각주 1\">[1]</a></sup></p>\n<pre><code class=\"language-bash\">pip install django-environ\n</code></pre>\n<pre><code class=\"language-python\">import environ\n\nenv = environ.Env(\n    # 기본값 설정 (타입 명시)\n    DEBUG=(bool, False),\n    ALLOWED_HOSTS=(list, []),\n)\n</code></pre>\n<h3>env() 동작 방식</h3>\n<pre><code class=\"language-mermaid\">%% desc: env()가 환경변수를 읽는 우선순위 — 쉘 &gt; .env 파일 &gt; 기본값\nflowchart LR\n  SHELL[&quot;쉘 환경변수\\nexport DJANGO_SECRET_KEY=...&quot;]\n  FILE[&quot;.env.local 파일\\nDJANGO_SECRET_KEY=...&quot;]\n  DEFAULT[&quot;기본값\\nenv(&#39;KEY&#39;, default=None)&quot;]\n\n  ENV[&quot;env(&#39;DJANGO_SECRET_KEY&#39;)&quot;]\n\n  SHELL -- &quot;1순위&quot; --&gt; ENV\n  FILE -- &quot;2순위 (read_env 호출 시)&quot; --&gt; ENV\n  DEFAULT -- &quot;3순위&quot; --&gt; ENV\n\n  RESULT[&quot;값 반환\\n(없으면 ImproperlyConfigured 예외)&quot;]\n  ENV --&gt; RESULT\n</code></pre>\n<pre><code class=\"language-python\"># .env.local 파일을 읽도록 등록\nenviron.Env.read_env(BASE_DIR / &quot;.env.local&quot;)\n\n# 필수값 (없으면 ImproperlyConfigured 예외 발생)\nSECRET_KEY = env(&quot;DJANGO_SECRET_KEY&quot;)\n\n# 선택값 (없으면 None 반환)\nSENTRY_DSN = env(&quot;SENTRY_DSN&quot;, default=None)\n\n# 타입 변환\nDEBUG = env.bool(&quot;DEBUG&quot;, default=False)\nPORT = env.int(&quot;PORT&quot;, default=8000)\nALLOWED_HOSTS = env.list(&quot;DJANGO_ALLOWED_HOSTS&quot;, default=[&quot;localhost&quot;])\n</code></pre>\n<h2>DATABASE_URL — 한 줄로 DB 연결 설정</h2>\n<p><code>DATABASE_URL</code>은 DB 연결 정보를 URI 형식으로 표현하는 관례다.<sup id=\"fnref-twelve-factor\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-twelve-factor\" aria-label=\"각주 2\">[2]</a></sup></p>\n<pre><code>mysql://USER:PASSWORD@HOST:PORT/DBNAME\n</code></pre>\n<p>예시:</p>\n<pre><code class=\"language-bash\"># 로컬 MySQL\nDATABASE_URL=mysql://root:1234@localhost:3306/mydb\n\n# Docker Compose 환경 (서비스 이름이 호스트)\nDATABASE_URL=mysql://pms_user:pms_password@pms_v3-mysql:3306/pms_db\n\n# PostgreSQL\nDATABASE_URL=postgres://user:pass@db-host:5432/mydb\n\n# SQLite (테스트용)\nDATABASE_URL=sqlite:///./db.sqlite3\n</code></pre>\n<p>django-environ이 이 URL을 Django <code>DATABASES</code> dict로 변환한다.</p>\n<pre><code class=\"language-python\"># settings.py\nDATABASES = {&quot;default&quot;: env.db(&quot;DATABASE_URL&quot;)}\n\n# 위 한 줄은 아래와 동일\nDATABASES = {\n    &quot;default&quot;: {\n        &quot;ENGINE&quot;: &quot;django.db.backends.mysql&quot;,\n        &quot;NAME&quot;: &quot;pms_db&quot;,\n        &quot;USER&quot;: &quot;pms_user&quot;,\n        &quot;PASSWORD&quot;: &quot;pms_password&quot;,\n        &quot;HOST&quot;: &quot;pms_v3-mysql&quot;,   # Docker Compose 서비스 이름\n        &quot;PORT&quot;: &quot;3306&quot;,\n    }\n}\n</code></pre>\n<h3>Docker Compose에서 HOST는 서비스 이름</h3>\n<pre><code class=\"language-mermaid\">%% desc: DATABASE_URL의 HOST가 Docker 서비스 이름과 매핑되는 구조\nflowchart LR\n  ENVFILE[&quot;.env.local\\nDATABASE_URL=mysql://pms_user:pass\\n@pms_v3-mysql:3306/pms_db&quot;]\n  DJANGO[&quot;Django\\nDATABASES[&#39;HOST&#39;]=&#39;pms_v3-mysql&#39;&quot;]\n  NETWORK[&quot;Docker 내부 DNS\\npms_v3-mysql → 172.18.0.3&quot;]\n  MYSQL[&quot;MySQL 컨테이너\\ncontainer_name: pms_v3-mysql&quot;]\n\n  ENVFILE --&gt; DJANGO\n  DJANGO -- &quot;TCP 연결&quot; --&gt; NETWORK\n  NETWORK --&gt; MYSQL\n</code></pre>\n<p><code>localhost</code>를 쓰면 컨테이너 자기 자신을 가리킨다.<br>반드시 <strong>Docker Compose 서비스 이름</strong> (<code>pms_v3-mysql</code>)을 사용해야 한다.</p>\n<h2>WSGI vs ASGI</h2>\n<p>Django는 두 가지 서버 인터페이스를 지원한다.</p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>WSGI</th>\n<th>ASGI</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>표준</strong></td>\n<td>PEP 3333</td>\n<td>PEP 503 (ASGI Spec)</td>\n</tr>\n<tr>\n<td><strong>동작 방식</strong></td>\n<td>동기 (요청 1개 = 스레드 1개)</td>\n<td>비동기 (이벤트 루프)</td>\n</tr>\n<tr>\n<td><strong>서버</strong></td>\n<td>Gunicorn, uWSGI</td>\n<td>Uvicorn, Daphne</td>\n</tr>\n<tr>\n<td><strong>사용 시기</strong></td>\n<td>일반 REST API</td>\n<td>WebSocket, Server-Sent Events, async views</td>\n</tr>\n</tbody></table>\n<pre><code class=\"language-python\"># config/wsgi.py (기본 Django 생성)\nimport os\nfrom django.core.wsgi import get_wsgi_application\n\nos.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, &quot;config.settings.local&quot;)\napplication = get_wsgi_application()\n</code></pre>\n<pre><code class=\"language-bash\"># Gunicorn으로 실행\ngunicorn config.wsgi:application \\\n  --bind 0.0.0.0:8000 \\\n  --workers 2 \\\n  --timeout 120\n</code></pre>\n<p>Gunicorn의 <code>--workers</code>는 보통 <code>CPU 코어 수 × 2 + 1</code>을 권장한다.<sup id=\"fnref-gunicorn-workers\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-gunicorn-workers\" aria-label=\"각주 3\">[3]</a></sup></p>\n<h2>manage.py와 DJANGO_SETTINGS_MODULE</h2>\n<pre><code class=\"language-bash\"># settings 파일 명시적으로 지정\npython manage.py migrate --settings=config.settings.local\n\n# 환경변수로 지정 (권장)\nexport DJANGO_SETTINGS_MODULE=config.settings.local\npython manage.py migrate\n\n# Docker Compose 환경에서\ndocker compose exec web python manage.py migrate\n# (DJANGO_SETTINGS_MODULE은 .env.local에서 이미 설정됨)\n</code></pre>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/docker-compose-django\">Docker Compose로 Django 5개 서비스 띄우기</a>: .env.local, DATABASE_URL을 실전 프로젝트에 적용</li>\n<li><a href=\"/post/django-migration\">Django Migration 완전 정복</a>: settings 설정 이후 migrate 실행 방법과 순서 문제</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-environ\" style=\"scroll-margin-top: 96px;\">joke2k, <a href=\"https://django-environ.readthedocs.io/en/latest/\" target=\"_blank\">django-environ 공식 문서</a> <a href=\"#fnref-django-environ\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-twelve-factor\" style=\"scroll-margin-top: 96px;\">Heroku, <a href=\"https://12factor.net/config\" target=\"_blank\">The Twelve-Factor App — III. Config</a> <a href=\"#fnref-twelve-factor\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-gunicorn-workers\" style=\"scroll-margin-top: 96px;\">Gunicorn, <a href=\"https://docs.gunicorn.org/en/stable/design.html#how-many-workers\" target=\"_blank\">How Many Workers? — Gunicorn Docs</a> <a href=\"#fnref-gunicorn-workers\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend",
+    "tags": [
+      "Django",
+      "Settings",
+      "djangoenviron",
+      "DATABASE_URL",
+      "WSGI",
+      "Gunicorn",
+      "EnvironmentVariables",
+      "Python"
+    ],
+    "author": "Seobway",
+    "readTime": 12,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-26T00:00:00.000Z",
+    "updatedAt": "2026-03-26T22:58:24.762Z"
+  },
+  {
+    "id": "django-migration",
+    "title": "Django Migration 완전 정복 — migrate, run-syncdb, FK 순서 문제",
+    "slug": "django-migration",
+    "excerpt": "makemigrations와 migrate의 차이, migration 파일이 없는 앱을 위한 run-syncdb, FK 참조 순서 때문에 발생하는 1824 에러와 올바른 마이그레이션 순서를 설명한다.",
+    "content": "<h2>마이그레이션이 뭔가</h2>\n<p>Django ORM에서 모델을 변경하면 DB 스키마도 바꿔야 한다.<br>이 변경 이력을 Python 파일로 관리하는 시스템이 <strong>Migration</strong>이다.<sup id=\"fnref-django-migration-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-migration-docs\" aria-label=\"각주 1\">[1]</a></sup></p>\n<pre><code class=\"language-mermaid\">%% desc: Django 모델 변경에서 DB 반영까지의 흐름\nflowchart LR\n  MODEL[&quot;models.py\\n모델 변경\\n(필드 추가/삭제/수정)&quot;]\n  MAKE[&quot;makemigrations\\n변경 이력 파일 생성\\n0001_initial.py&quot;]\n  MIGRATE[&quot;migrate\\nDB에 SQL 실행\\n(CREATE/ALTER TABLE)&quot;]\n  DB[&quot;데이터베이스\\n스키마 업데이트&quot;]\n\n  MODEL --&gt; MAKE --&gt; MIGRATE --&gt; DB\n</code></pre>\n<p><code>makemigrations</code>는 <strong>파일을 만드는 것</strong>이고,<br><code>migrate</code>는 <strong>DB에 실제로 적용하는 것</strong>이다.</p>\n<h2>makemigrations vs migrate</h2>\n<pre><code class=\"language-bash\"># 모델 변경사항을 감지해 migration 파일 생성\npython manage.py makemigrations\n\n# 특정 앱만\npython manage.py makemigrations myapp\n\n# 아직 적용 안 된 migration 목록 확인\npython manage.py showmigrations\n\n# DB에 migration 적용\npython manage.py migrate\n\n# 특정 앱만\npython manage.py migrate myapp\n\n# 특정 앱의 특정 migration까지만 적용\npython manage.py migrate myapp 0003\n</code></pre>\n<p>migration 파일 구조:</p>\n<pre><code class=\"language-python\"># myapp/migrations/0001_initial.py\nfrom django.db import migrations, models\n\nclass Migration(migrations.Migration):\n    initial = True\n\n    dependencies = [\n        (&quot;auth&quot;, &quot;0012_alter_user_first_name_max_length&quot;),  # FK 의존성\n    ]\n\n    operations = [\n        migrations.CreateModel(\n            name=&quot;UserProfile&quot;,\n            fields=[\n                (&quot;id&quot;, models.BigAutoField(primary_key=True)),\n                (&quot;user&quot;, models.OneToOneField(&quot;auth.User&quot;, on_delete=models.CASCADE)),\n                (&quot;bio&quot;, models.TextField(blank=True)),\n            ],\n        ),\n    ]\n</code></pre>\n<p><code>dependencies</code>에 명시된 migration이 먼저 적용돼야 이 migration이 실행될 수 있다.</p>\n<h2>run-syncdb — migration 파일 없는 앱 처리</h2>\n<p>일부 프로젝트는 migration 파일을 생성하지 않았다.<br><code>makemigrations</code>를 실행하지 않았거나, 파일이 삭제된 경우다.</p>\n<p>이때 <code>migrate</code>만 실행하면 Django 기본 앱(auth, admin 등)만 적용되고<br><strong>migration 파일 없는 앱의 테이블은 생성되지 않는다</strong>.</p>\n<p><code>--run-syncdb</code> 옵션은 migration 파일이 없는 앱을 위해 직접 <code>CREATE TABLE</code>을 실행한다.<sup id=\"fnref-run-syncdb\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-run-syncdb\" aria-label=\"각주 2\">[2]</a></sup></p>\n<pre><code class=\"language-bash\">python manage.py migrate --run-syncdb\n</code></pre>\n<h2>FK 순서 문제 — 1824 에러</h2>\n<p><code>--run-syncdb</code>를 사용할 때 가장 흔히 만나는 에러:</p>\n<pre><code>django.db.utils.OperationalError: (1824, &quot;Failed to open the referenced table &#39;auth_group&#39;&quot;)\n</code></pre>\n<p><strong>원인</strong>: 앱 A의 테이블이 <code>auth_group</code>을 FK로 참조하는데,<br>syncdb가 앱 A 테이블을 먼저 만들려 할 때 <code>auth_group</code>이 아직 없어서 실패한다.</p>\n<pre><code class=\"language-mermaid\">%% desc: FK 순서 문제 — auth_group이 없는 상태에서 참조하면 1824 에러 발생\nflowchart TD\n  subgraph WRONG[&quot;❌ 잘못된 순서&quot;]\n    W1[&quot;--run-syncdb 실행&quot;]\n    W2[&quot;myapp 테이블 생성 시도\\n(auth_group FK 참조)&quot;]\n    W3[&quot;auth_group 테이블 없음!&quot;]\n    W4[&quot;1824 에러&quot;]\n    W1 --&gt; W2 --&gt; W3 --&gt; W4\n  end\n\n  subgraph RIGHT[&quot;✅ 올바른 순서&quot;]\n    R1[&quot;migrate (auth, contenttypes 먼저)&quot;]\n    R2[&quot;auth_user, auth_group 등 생성 완료&quot;]\n    R3[&quot;migrate --run-syncdb\\n(나머지 앱 테이블 생성)&quot;]\n    R4[&quot;FK 참조 성공 ✅&quot;]\n    R1 --&gt; R2 --&gt; R3 --&gt; R4\n  end\n</code></pre>\n<h2>올바른 마이그레이션 순서</h2>\n<p>migration 파일이 없는 앱이 있는 프로젝트의 안전한 초기화 순서:</p>\n<pre><code class=\"language-bash\"># Step 0: DB 완전 초기화 (꼬인 상태 리셋)\ndocker compose down -v\ndocker compose up -d db redis\n# db가 healthy 상태가 될 때까지 대기\n\n# Step 1: Django 기본 앱 먼저 적용\n# (auth_user, auth_group 등 FK 타깃 테이블 생성)\ndocker compose exec web python manage.py migrate\n\n# Step 2: migration 없는 앱 테이블 + 나머지 migration 적용\ndocker compose exec web python manage.py migrate --run-syncdb\n</code></pre>\n<p>왜 이 순서가 동작하는가:</p>\n<pre><code class=\"language-mermaid\">%% desc: Step 1에서 auth/contenttypes 테이블이 생성되고, Step 2에서 의존하는 앱 테이블 생성\nsequenceDiagram\n  participant DEV as 개발자\n  participant DJANGO as Django\n  participant DB as MySQL\n\n  DEV-&gt;&gt;DJANGO: migrate (Step 1)\n  DJANGO-&gt;&gt;DB: CREATE TABLE auth_user\n  DJANGO-&gt;&gt;DB: CREATE TABLE auth_group\n  DJANGO-&gt;&gt;DB: CREATE TABLE auth_permission\n  DJANGO-&gt;&gt;DB: CREATE TABLE django_content_type\n  Note over DB: FK 타깃 테이블 모두 준비됨 ✅\n\n  DEV-&gt;&gt;DJANGO: migrate --run-syncdb (Step 2)\n  DJANGO-&gt;&gt;DB: CREATE TABLE myapp_userprofile\\n(FOREIGN KEY auth_group ✅)\n  DJANGO-&gt;&gt;DB: CREATE TABLE myapp_project\n  DJANGO-&gt;&gt;DB: 나머지 앱 테이블들...\n</code></pre>\n<h2>django_migrations 테이블</h2>\n<p>Django는 <code>django_migrations</code> 테이블로 적용된 migration을 추적한다.</p>\n<pre><code class=\"language-sql\">SELECT * FROM django_migrations;\n-- app | name | applied\n-- auth | 0001_initial | 2026-03-26 ...\n-- auth | 0002_... | 2026-03-26 ...\n</code></pre>\n<p>migration 상태 확인:</p>\n<pre><code class=\"language-bash\"># 전체 migration 상태 (applied/unapplied)\npython manage.py showmigrations\n\n# SQL 미리 보기 (실제 실행 X)\npython manage.py sqlmigrate myapp 0001\n</code></pre>\n<h2>migration 롤백</h2>\n<pre><code class=\"language-bash\"># 특정 migration으로 롤백\npython manage.py migrate myapp 0002\n\n# 앱의 모든 migration 취소\npython manage.py migrate myapp zero\n</code></pre>\n<h2>fake migration — 이미 적용된 스키마 처리</h2>\n<p>DB에 테이블이 이미 있는데 <code>django_migrations</code>에 기록이 없을 때 사용한다.</p>\n<pre><code class=\"language-bash\"># migration을 DB에 실제 적용하지 않고 &quot;적용됨&quot;으로 표시만\npython manage.py migrate --fake myapp 0001\n\n# 초기 상태만 fake (이미 있는 테이블에 대한 initial migration)\npython manage.py migrate --fake-initial\n</code></pre>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-settings\">Django settings 분리와 환경변수 관리</a>: migrate 실행 전 DATABASE_URL 설정법</li>\n<li><a href=\"/post/docker-compose-django\">Docker Compose로 Django 5개 서비스 띄우기</a>: Docker 환경에서의 마이그레이션 실행 순서</li>\n<li><a href=\"/post/django-version-compatibility\">Django 버전 호환성과 내부 API 위험</a>: 마이그레이션 외에 버전 업그레이드 시 주의할 점</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-migration-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/migrations/\" target=\"_blank\">Migrations — Django Docs</a> <a href=\"#fnref-django-migration-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-run-syncdb\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/ref/django-admin/#migrate\" target=\"_blank\">migrate --run-syncdb — Django Admin Docs</a> <a href=\"#fnref-run-syncdb\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "Migration",
+      "makemigrations",
+      "migrate",
+      "syncdb",
+      "ForeignKey",
+      "Database",
+      "ORM"
+    ],
+    "author": "Seobway",
+    "readTime": 13,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-26T00:00:00.000Z",
+    "updatedAt": "2026-03-26T22:58:24.757Z"
+  },
+  {
     "id": "celery-worker",
     "title": "Celery Worker — 내부 구조와 동시성 모델",
     "slug": "celery-worker",
@@ -24,7 +171,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.658Z"
+    "updatedAt": "2026-03-26T22:58:24.766Z"
   },
   {
     "id": "celery-django",
@@ -50,7 +197,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.659Z"
+    "updatedAt": "2026-03-26T22:58:24.767Z"
   },
   {
     "id": "celery-broker",
@@ -76,7 +223,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.655Z"
+    "updatedAt": "2026-03-26T22:58:24.765Z"
   },
   {
     "id": "celery-beat",
@@ -100,7 +247,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.653Z"
+    "updatedAt": "2026-03-26T22:58:24.763Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -124,7 +271,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.673Z"
+    "updatedAt": "2026-03-26T22:58:24.782Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -149,7 +296,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.687Z"
+    "updatedAt": "2026-03-26T22:58:24.799Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -172,7 +319,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.685Z"
+    "updatedAt": "2026-03-26T22:58:24.797Z"
   },
   {
     "id": "micro-protocol",
@@ -195,7 +342,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.684Z"
+    "updatedAt": "2026-03-26T22:58:24.796Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -223,7 +370,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.682Z"
+    "updatedAt": "2026-03-26T22:58:24.794Z"
   },
   {
     "id": "micro-network-view",
@@ -248,7 +395,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.667Z"
+    "updatedAt": "2026-03-26T22:58:24.776Z"
   },
   {
     "id": "micro-network-traffic",
@@ -273,7 +420,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.680Z"
+    "updatedAt": "2026-03-26T22:58:24.792Z"
   },
   {
     "id": "micro-ip-arp",
@@ -298,7 +445,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.677Z"
+    "updatedAt": "2026-03-26T22:58:24.790Z"
   },
   {
     "id": "micro-http-https",
@@ -325,7 +472,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.676Z"
+    "updatedAt": "2026-03-26T22:58:24.787Z"
   },
   {
     "id": "micro-encapsulation",
@@ -351,7 +498,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.674Z"
+    "updatedAt": "2026-03-26T22:58:24.784Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -374,7 +521,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.671Z"
+    "updatedAt": "2026-03-26T22:58:24.780Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -398,7 +545,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.670Z"
+    "updatedAt": "2026-03-26T22:58:24.779Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -420,7 +567,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.669Z"
+    "updatedAt": "2026-03-26T22:58:24.778Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -443,7 +590,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.668Z"
+    "updatedAt": "2026-03-26T22:58:24.777Z"
   },
   {
     "id": "macro-network-view",
@@ -466,7 +613,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.666Z"
+    "updatedAt": "2026-03-26T22:58:24.776Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -490,7 +637,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.664Z"
+    "updatedAt": "2026-03-26T22:58:24.773Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -513,6 +660,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-26T10:05:29.660Z"
+    "updatedAt": "2026-03-26T22:58:24.772Z"
   }
 ]

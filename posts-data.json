@@ -1,5 +1,20 @@
 [
   {
+    "slug": "django-migration",
+    "title": "Django Migration 완전 정복 — migrate, run-syncdb, FK 순서 문제",
+    "path": "/post/study/backend/django/django-migration"
+  },
+  {
+    "slug": "django-version-compatibility",
+    "title": "Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈",
+    "path": "/post/study/backend/django/django-version-compatibility"
+  },
+  {
+    "slug": "django-settings",
+    "title": "Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL",
+    "path": "/post/study/backend/django-settings"
+  },
+  {
     "slug": "celery-beat",
     "title": "Celery Beat — 주기적 태스크 스케줄링",
     "path": "/post/study/infra/celery/celery-beat"
@@ -18,6 +33,21 @@
     "slug": "celery-django",
     "title": "Django + Celery — 비동기 작업과 스케줄링의 기초",
     "path": "/post/study/infra/celery-django"
+  },
+  {
+    "slug": "docker-basics",
+    "title": "Docker 기초 — Image, Container, Volume, Network",
+    "path": "/post/study/infra/docker/docker-basics"
+  },
+  {
+    "slug": "docker-compose-basics",
+    "title": "Docker Compose 기초 — env_file, 변수 치환, depends_on",
+    "path": "/post/study/infra/docker/docker-compose-basics"
+  },
+  {
+    "slug": "docker-compose-django",
+    "title": "Docker Compose로 Django 5개 서비스 띄우기",
+    "path": "/post/study/infra/docker-compose-django"
   },
   {
     "slug": "gitlab-artifacts-vs-cache",
