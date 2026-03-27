@@ -1,6 +1,11 @@
 {
+  "django-architecture": 0,
+  "django-lifecycle": 0,
   "django-migration": 0,
+  "django-orm-deep": 0,
+  "django-security": 0,
   "django-version-compatibility": 0,
+  "django-overview": 0,
   "django-settings": 0,
   "celery-beat": 0,
   "celery-broker": 0,

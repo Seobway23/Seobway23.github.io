@@ -1,13 +1,38 @@
 [
   {
+    "slug": "django-architecture",
+    "title": "Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할",
+    "path": "/post/study/backend/django/django-architecture"
+  },
+  {
+    "slug": "django-lifecycle",
+    "title": "Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름",
+    "path": "/post/study/backend/django/django-lifecycle"
+  },
+  {
     "slug": "django-migration",
     "title": "Django Migration 완전 정복 — migrate, run-syncdb, FK 순서 문제",
     "path": "/post/study/backend/django/django-migration"
   },
   {
+    "slug": "django-orm-deep",
+    "title": "Django ORM 심층 — QuerySet 지연 실행, Manager, Active Record",
+    "path": "/post/study/backend/django/django-orm-deep"
+  },
+  {
+    "slug": "django-security",
+    "title": "Django 보안 — 기본 탑재된 방어 (CSRF, XSS, SQL Injection, Clickjacking)",
+    "path": "/post/study/backend/django/django-security"
+  },
+  {
     "slug": "django-version-compatibility",
     "title": "Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈",
     "path": "/post/study/backend/django/django-version-compatibility"
+  },
+  {
+    "slug": "django-overview",
+    "title": "Django 프레임워크 큰 그림 — 철학, 구조, 핵심 개념 한눈에",
+    "path": "/post/study/backend/django-overview"
   },
   {
     "slug": "django-settings",
