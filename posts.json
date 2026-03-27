@@ -23,7 +23,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.149Z"
+    "updatedAt": "2026-03-27T04:35:34.586Z"
   },
   {
     "id": "django-overview",
@@ -49,7 +49,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.152Z"
+    "updatedAt": "2026-03-27T04:35:34.589Z"
   },
   {
     "id": "django-orm-deep",
@@ -75,7 +75,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.147Z"
+    "updatedAt": "2026-03-27T04:35:34.584Z"
   },
   {
     "id": "django-lifecycle",
@@ -102,7 +102,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.145Z"
+    "updatedAt": "2026-03-27T04:35:34.582Z"
   },
   {
     "id": "django-architecture",
@@ -129,7 +129,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.141Z"
+    "updatedAt": "2026-03-27T04:35:34.578Z"
   },
   {
     "id": "docker-compose-django",
@@ -154,7 +154,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.160Z"
+    "updatedAt": "2026-03-27T04:35:34.597Z"
   },
   {
     "id": "docker-compose-basics",
@@ -178,7 +178,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.159Z"
+    "updatedAt": "2026-03-27T04:35:34.596Z"
   },
   {
     "id": "docker-basics",
@@ -201,7 +201,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.159Z"
+    "updatedAt": "2026-03-27T04:35:34.596Z"
   },
   {
     "id": "django-version-compatibility",
@@ -226,7 +226,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.150Z"
+    "updatedAt": "2026-03-27T04:35:34.587Z"
   },
   {
     "id": "django-settings",
@@ -251,7 +251,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.153Z"
+    "updatedAt": "2026-03-27T04:35:34.590Z"
   },
   {
     "id": "django-migration",
@@ -276,7 +276,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.146Z"
+    "updatedAt": "2026-03-27T04:35:34.583Z"
   },
   {
     "id": "celery-worker",
@@ -303,7 +303,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.156Z"
+    "updatedAt": "2026-03-27T04:35:34.593Z"
   },
   {
     "id": "celery-django",
@@ -329,7 +329,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.158Z"
+    "updatedAt": "2026-03-27T04:35:34.594Z"
   },
   {
     "id": "celery-broker",
@@ -355,7 +355,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.155Z"
+    "updatedAt": "2026-03-27T04:35:34.592Z"
   },
   {
     "id": "celery-beat",
@@ -379,7 +379,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.154Z"
+    "updatedAt": "2026-03-27T04:35:34.591Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -403,7 +403,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.172Z"
+    "updatedAt": "2026-03-27T04:35:34.614Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -428,7 +428,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.186Z"
+    "updatedAt": "2026-03-27T04:35:34.628Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -451,7 +451,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.184Z"
+    "updatedAt": "2026-03-27T04:35:34.626Z"
   },
   {
     "id": "micro-protocol",
@@ -474,7 +474,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.183Z"
+    "updatedAt": "2026-03-27T04:35:34.625Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -502,7 +502,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.182Z"
+    "updatedAt": "2026-03-27T04:35:34.623Z"
   },
   {
     "id": "micro-network-view",
@@ -527,7 +527,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.168Z"
+    "updatedAt": "2026-03-27T04:35:34.606Z"
   },
   {
     "id": "micro-network-traffic",
@@ -552,7 +552,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.180Z"
+    "updatedAt": "2026-03-27T04:35:34.622Z"
   },
   {
     "id": "micro-ip-arp",
@@ -577,7 +577,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.177Z"
+    "updatedAt": "2026-03-27T04:35:34.619Z"
   },
   {
     "id": "micro-http-https",
@@ -604,7 +604,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.176Z"
+    "updatedAt": "2026-03-27T04:35:34.617Z"
   },
   {
     "id": "micro-encapsulation",
@@ -630,7 +630,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.174Z"
+    "updatedAt": "2026-03-27T04:35:34.615Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -653,7 +653,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.171Z"
+    "updatedAt": "2026-03-27T04:35:34.612Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -677,7 +677,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.170Z"
+    "updatedAt": "2026-03-27T04:35:34.610Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -699,7 +699,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.170Z"
+    "updatedAt": "2026-03-27T04:35:34.609Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -722,7 +722,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.168Z"
+    "updatedAt": "2026-03-27T04:35:34.607Z"
   },
   {
     "id": "macro-network-view",
@@ -745,7 +745,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.167Z"
+    "updatedAt": "2026-03-27T04:35:34.605Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -769,7 +769,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.164Z"
+    "updatedAt": "2026-03-27T04:35:34.601Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -792,6 +792,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-03-27T03:51:25.161Z"
+    "updatedAt": "2026-03-27T04:35:34.598Z"
   }
 ]
