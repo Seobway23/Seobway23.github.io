@@ -21,6 +21,17 @@ import typescript from "highlight.js/lib/languages/typescript";
 import css from "highlight.js/lib/languages/css";
 import html from "highlight.js/lib/languages/xml";
 import bash from "highlight.js/lib/languages/bash";
+import python from "highlight.js/lib/languages/python";
+import yaml from "highlight.js/lib/languages/yaml";
+import json from "highlight.js/lib/languages/json";
+import sql from "highlight.js/lib/languages/sql";
+import dockerfile from "highlight.js/lib/languages/dockerfile";
+import ini from "highlight.js/lib/languages/ini";
+import java from "highlight.js/lib/languages/java";
+import go from "highlight.js/lib/languages/go";
+import plaintext from "highlight.js/lib/languages/plaintext";
+import shell from "highlight.js/lib/languages/shell";
+import nginx from "highlight.js/lib/languages/nginx";
 
 // Register languages
 hljs.registerLanguage("javascript", javascript);
@@ -28,6 +39,17 @@ hljs.registerLanguage("typescript", typescript);
 hljs.registerLanguage("css", css);
 hljs.registerLanguage("html", html);
 hljs.registerLanguage("bash", bash);
+hljs.registerLanguage("python", python);
+hljs.registerLanguage("yaml", yaml);
+hljs.registerLanguage("json", json);
+hljs.registerLanguage("sql", sql);
+hljs.registerLanguage("dockerfile", dockerfile);
+hljs.registerLanguage("ini", ini);
+hljs.registerLanguage("java", java);
+hljs.registerLanguage("go", go);
+hljs.registerLanguage("plaintext", plaintext);
+hljs.registerLanguage("shell", shell);
+hljs.registerLanguage("nginx", nginx);
 
 const categoryLabels: Record<string, string> = {
   react: "React",
