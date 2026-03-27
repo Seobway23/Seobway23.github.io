@@ -170,7 +170,7 @@ function SidebarCategoryBranch({
               : undefined
           }
         >
-          <span className="flex-1 min-w-0 truncate">{node.label}</span>
+          <span className="flex-1 min-w-0 break-words">{node.label}</span>
           <span className="shrink-0 rounded-full bg-black/10 px-2 py-0.5 text-xs dark:bg-white/10">
             {node.count}
           </span>
@@ -507,7 +507,7 @@ export default function LeftSidebar({
   // 데스크톱: 일반 사이드바
   if (showDesktop) {
     return (
-      <aside className="w-64 flex-shrink-0 hidden lg:block">
+      <aside className="w-72 flex-shrink-0 hidden lg:block">
         <div className="sticky top-24">{sidebarContent}</div>
       </aside>
     );
