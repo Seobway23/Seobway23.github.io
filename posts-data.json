@@ -40,6 +40,31 @@
     "path": "/post/study/backend/django-settings"
   },
   {
+    "slug": "react-query-advanced",
+    "title": "React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션",
+    "path": "/post/study/frontend/react-query/react-query-advanced"
+  },
+  {
+    "slug": "react-query-cache",
+    "title": "React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거",
+    "path": "/post/study/frontend/react-query/react-query-cache"
+  },
+  {
+    "slug": "react-query-mutations",
+    "title": "React Query useMutation 심층 — 라이프사이클, 콜백, 낙관적 업데이트",
+    "path": "/post/study/frontend/react-query/react-query-mutations"
+  },
+  {
+    "slug": "react-query-overview",
+    "title": "TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준",
+    "path": "/post/study/frontend/react-query/react-query-overview"
+  },
+  {
+    "slug": "react-query-queries",
+    "title": "React Query useQuery 심층 — QueryClient, 쿼리 키, 전체 옵션 완전 정리",
+    "path": "/post/study/frontend/react-query/react-query-queries"
+  },
+  {
     "slug": "celery-beat",
     "title": "Celery Beat — 주기적 태스크 스케줄링",
     "path": "/post/study/infra/celery/celery-beat"
