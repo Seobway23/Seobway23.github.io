@@ -1,5 +1,6 @@
 import { Mail, Github, Linkedin, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getAllPosts } from "@/lib/posts";
 import { getViewsData } from "@/lib/views";
@@ -18,6 +19,7 @@ import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/use-theme";
 import type { Post } from "@shared/schema";
+import { publicUrl } from "@/lib/public-path";
 
 export default function About() {
   const { theme } = useTheme();
@@ -285,6 +287,27 @@ export default function About() {
                   </span>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Portfolio */}
+          <Card className="toss-card">
+            <CardHeader>
+              <CardTitle>포트폴리오</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                프로젝트/성과를 한 곳에서 정리한 포트폴리오 페이지입니다.
+              </p>
+              <Button asChild className="w-full toss-button">
+                <a
+                  href={publicUrl("portfolio/index.html")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  포트폴리오 보러가기
+                </a>
+              </Button>
             </CardContent>
           </Card>
         </div>

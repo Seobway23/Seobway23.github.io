@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seobway Portfolio 2026 (baseline)</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/portfolio/css/style.css" />
+  </head>
+
+  <body>
+    <div id="keyboard-container">
+      <canvas id="keyboard-canvas"></canvas>
+      <div id="keyboard-label">
+        Click a key to explore — "Works", "Resume", "Hire Me"
+      </div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div id="logo">
+      <div class="logo-text"><span>Seobway</span> 2026</div>
+    </div>
+
+    <button class="close-overlay" id="btn-close-overlay" aria-label="닫기">
+      ✕ Close
+    </button>
+
+    <div id="drawer-tools">
+      <button class="drawer-trigger" id="btn-drawer-toggle" aria-label="편집 도구">
+        ✏️ Edit Tools
+      </button>
+      <div class="drawer-content" id="drawer-content">
+        <button class="drawer-btn" id="btn-draw" title="그리기 (D)">🖌 Pen Drawing</button>
+        <button class="drawer-btn" id="btn-clear" title="지우기 (C)">🧹 Clear All</button>
+        <button class="drawer-btn" id="btn-exit-draw" style="display: none" title="도구 종료 (Esc)">
+          ❌ Exit Tools
+        </button>
+        <div class="divider"></div>
+        <button class="drawer-btn" id="btn-fs" title="전체화면 (F)">⛶ Fullscreen</button>
+      </div>
+    </div>
+
+    <!-- Bottom bar (Simplified) -->
+    <div id="bottom-bar">
+      <div class="bb-status">Product Engineer Portfolio 2026</div>
+    </div>
+
+    <!-- Drawing canvas -->
+    <canvas id="draw-canvas"></canvas>
+
+    <!-- STAGE (Now acts as an Overlay Container) -->
+    <div class="stage-overlay" id="stage-overlay">
+      <!-- ══ CONTENT: Career / Resume ══ -->
+      <section class="overlay-panel" id="panel-resume">
+        <div class="anim-item">
+          <div class="eyebrow">Career Description / Resume</div>
+          <h1>
+            비즈니스 병목을 해결하는<br /><span class="grad-text"
+              >Product Engineer Seobway</span
+            >
+          </h1>
+          <div class="divider"></div>
+        </div>
+        <div class="overview-grid">
+          <div class="ps-list">
+            <div class="ps-item">
+              <div class="ps-num">1</div>
+              <div class="ps-body">
+                <strong>도메인 몰입형 개발</strong>전문 지식이 필요한 토목/구조
+                도메인을 직접 학습
+              </div>
+            </div>
+            <div class="ps-item">
+              <div class="ps-num">2</div>
+              <div class="ps-body">
+                <strong>시스템화와 자동화</strong>반복 작업을 자동화하여 생산성
+                극대화
+              </div>
+            </div>
+          </div>
+          <div class="card blue">
+            <div class="c-label">Tech Stack</div>
+            <div class="skill-group">
+              <div class="skill-tag">React / TypeScript</div>
+              <div class="skill-tag">Electron</div>
+              <div class="skill-tag">Django</div>
+              <div class="skill-tag">Three.js</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ CONTENT: Works / Projects ══ -->
+      <section class="overlay-panel" id="panel-works">
+        <div class="anim-item">
+          <div class="eyebrow">Project Portfolio</div>
+          <h1>핵심 성과 및 문제 해결 사례</h1>
+          <div class="divider"></div>
+        </div>
+        <div class="project-grid">
+          <div class="project-mini-card" onclick="showProjectDetail('unione')">
+            <h3>UniOne: 구조계산 자동화</h3>
+            <p>업무 리드타임 80% 단축</p>
+          </div>
+          <div class="project-mini-card" onclick="showProjectDetail('pms')">
+            <h3>PMS: 사내 관리 시스템</h3>
+            <p>전사 프로세스 디지털 전환</p>
+          </div>
+          <div class="project-mini-card" onclick="showProjectDetail('hackathon')">
+            <h3>24+ Hackathons</h3>
+            <p>데이터 기반 문제 해결</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ CONTENT: Hire Me / Contact ══ -->
+      <section class="overlay-panel" id="panel-contact">
+        <div class="anim-item" style="text-align: center">
+          <h1 class="grad-text">함께 효율의 가치를 만들고 싶습니다</h1>
+          <div class="divider" style="margin: 1rem auto"></div>
+          <div class="contact-grid">
+            <div class="contact-item">
+              <div class="ci-label">Email</div>
+              <div class="ci-val">ljs88@example.com</div>
+            </div>
+            <div class="contact-item">
+              <div class="ci-label">GitHub</div>
+              <div class="ci-val">github.com/ljs88</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="/portfolio/js/main.baseline.js"></script>
+    <script src="/portfolio/js/projects.baseline.js" type="module"></script>
+    <script src="/portfolio/js/perf-agent.js"></script>
+  </body>
+</html>
+

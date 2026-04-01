@@ -1,0 +1,498 @@
+/* ══════════ CSS VARIABLES (Consistent Dark Mode) ══════════ */
+:root {
+  --brand-blue: #0074D9;
+  --brand-green: #2ECC71;
+  --brand-glow: #4DA8FF;
+  --brand-gradient: linear-gradient(135deg, #0074D9 0%, #2ECC71 100%);
+
+  --bg-base: #000000;
+  /* Deep black for 3D stage */
+  --bg-surface: rgba(22, 34, 51, 0.75);
+  /* Improved opacity for performance */
+  --bg-panel: rgba(10, 15, 25, 0.85);
+  /* Overlay panel bg */
+
+  --text-primary: #D8EAF8;
+  --text-secondary: #7EB8E0;
+  --text-muted: #456070;
+
+  --accent-primary: #4DA8FF;
+  --accent-secondary: #2ECC71;
+
+  --border-default: rgba(77, 168, 255, 0.15);
+  --border-active: rgba(77, 168, 255, 0.4);
+
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+
+  --shadow-lx: 0 30px 60px rgba(0, 0, 0, 0.6);
+  --theme-transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ══════════ GLOBAL ══════════ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════ 3D KEYBOARD STAGE ══════════ */
+#keyboard-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #0a111a 0%, #000000 100%);
+}
+
+#keyboard-canvas {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#keyboard-canvas:active {
+  cursor: grabbing;
+}
+
+#keyboard-label {
+  position: absolute;
+  bottom: 5rem;
+  width: 100%;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ══════════ KEYBOARD: LIGHT TOGGLE ══════════ */
+.kbd-light-toggle {
+  /* Drawer 안에 들어가는 버튼이라, 고정 위치 스타일은 쓰지 않음 */
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.kbd-light-toggle:hover {
+  color: #fff;
+}
+
+.kbd-light-toggle:active {
+  transform: none;
+}
+
+/* ══════════ OVERLAY ENGINE ══════════ */
+.stage-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.4s ease;
+}
+
+.stage-overlay.active {
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  /* Reduced for performance */
+}
+
+.overlay-panel {
+  position: absolute;
+  width: min(90vw, 900px);
+  max-height: 85vh;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-lg);
+  padding: 4rem 5rem;
+  box-shadow: var(--shadow-lx);
+  overflow-y: auto;
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  backdrop-filter: blur(12px);
+  /* Optimized from 20px */
+  will-change: transform, opacity;
+}
+
+.overlay-panel.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.close-overlay {
+  position: fixed;
+  top: 2rem;
+  right: 2.5rem;
+  z-index: 200;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  padding: 0.8rem 1.8rem;
+  border-radius: 100px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s;
+  display: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.close-overlay.active {
+  display: block;
+}
+
+.close-overlay:hover {
+  background: var(--accent-primary);
+  color: #000;
+}
+
+/* ══════════ TYPOGRAPHY & BLOCKS ══════════ */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+.overlay-panel h1 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.grad-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.divider {
+  width: 50px;
+  height: 6px;
+  background: var(--brand-gradient);
+  border-radius: 3px;
+  margin-bottom: 2rem;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+.ps-item {
+  display: flex;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-default);
+  margin-bottom: 1rem;
+}
+
+.ps-num {
+  width: 28px;
+  height: 28px;
+  background: var(--brand-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.card {
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-md);
+}
+
+.skill-tag {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  margin: 0.3rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* ══════════ WORKS GRID ══════════ */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.project-mini-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  padding: 2.2rem;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+
+.project-mini-card:hover {
+  background: rgba(40, 60, 90, 0.8);
+  border-color: var(--accent-primary);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(0, 116, 217, 0.3);
+}
+
+.project-mini-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.6rem;
+}
+
+.project-mini-card p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* ══════════ DRAWER TOOLS (LEFT-MIDDLE) ══════════ */
+#drawer-tools {
+  position: fixed;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.drawer-trigger {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.drawer-trigger:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent-primary);
+}
+
+.drawer-content {
+  background: rgba(10, 15, 25, 0.9);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(15px);
+  opacity: 0;
+  transform: scale(0.9) translateX(-10px);
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+#drawer-tools.active .drawer-content {
+  opacity: 1;
+  transform: scale(1) translateX(0);
+  pointer-events: auto;
+}
+
+.drawer-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.drawer-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.drawer-btn .divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0.4rem 0;
+  pointer-events: none;
+}
+
+/* ══════════ LOGO & BOTTOM (Simplified) ══════════ */
+#logo {
+  position: fixed;
+  top: 2rem;
+  left: 2.5rem;
+  z-index: 50;
+}
+
+.logo-text {
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.logo-text span {
+  color: var(--accent-primary);
+}
+
+#bottom-bar {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 0.6rem 2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+}
+
+.bb-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ══════════ CONTACT ══════════ */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.contact-item {
+  padding: 2.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-default);
+  text-align: left;
+}
+
+.ci-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.ci-val {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+/* ══════════ DRAWING ══════════ */
+#draw-canvas {
+  position: fixed;
+  pointer-events: none;
+  z-index: 500;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#draw-canvas.active {
+  pointer-events: all;
+  cursor: crosshair;
+}
+
+
+/* 모바일 화면에서 편집 도구 숨기기 */
+@media (max-width: 768px) {
+  #drawer-tools {
+    display: none !important;
+  }
+}
+
+/* ══════════ MOBILE RESPONSIVE (V19) ══════════ */
+@media (max-width: 768px) {
+  .overlay-panel {
+    padding: 2.5rem 1.5rem;
+    /* 여백 축소 */
+    width: 95vw;
+    max-height: 90vh;
+  }
+
+  .overlay-panel h1 {
+    font-size: 1.8rem;
+    /* 제목 크기 축소 */
+    line-height: 1.3;
+  }
+
+  .overview-grid,
+  .contact-grid {
+    grid-template-columns: 1fr;
+    /* 1열로 변경 */
+    gap: 1.5rem;
+  }
+
+  .close-overlay {
+    top: 1rem;
+    right: 1rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.8rem;
+  }
+
+  .eyebrow {
+    margin-bottom: 0.8rem;
+  }
+
+  #bottom-bar {
+    display: none;
+    /* 화면 확보를 위해 하단 바 숨김 */
+  }
+}
