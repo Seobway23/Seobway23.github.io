@@ -275,6 +275,30 @@
 }
 
 @layer components {
+  .prose .glossary-term {
+    @apply inline-flex items-center cursor-help underline decoration-dotted underline-offset-4;
+    @apply rounded-sm px-1 -mx-0.5;
+    @apply transition-colors;
+    background-color: hsl(var(--accent) / 0.35);
+  }
+
+  .prose .glossary-term:hover {
+    @apply text-foreground;
+    background-color: hsl(var(--accent) / 0.6);
+  }
+
+  .prose .glossary-term:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background rounded-sm;
+  }
+
+  .glossary-related-link {
+    @apply text-foreground/90 hover:text-foreground;
+    @apply underline underline-offset-2 decoration-transparent hover:decoration-foreground/40;
+    @apply transition-colors;
+  }
+}
+
+@layer components {
   .toss-card {
     @apply backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm;
     background: rgba(255, 255, 255, 0.95);

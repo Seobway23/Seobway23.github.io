@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RightSidebar from "../components/right-sidebar";
 import UtterancesComments from "../components/utterances-comments";
+import { PostGlossaryLayer } from "@/components/post-glossary-layer";
 import { useReadingProgress } from "../hooks/use-reading-progress";
 import { apiRequest } from "@/lib/queryClient";
 import { trackPostView } from "@/lib/analytics";
@@ -665,6 +666,12 @@ export default function Post() {
                   dangerouslySetInnerHTML={{
                     __html: formatContent(post.content),
                   }}
+                />
+                <PostGlossaryLayer
+                  glossary={post.glossary}
+                  rootRef={contentRef as unknown as React.RefObject<HTMLElement | null>}
+                  isMobile={isMobile}
+                  postSlug={post.slug}
                 />
 
                 {/* Tags */}
