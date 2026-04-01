@@ -125,6 +125,11 @@
     "path": "/post/study/infra/gstack/gstack-skills-ship"
   },
   {
+    "slug": "k8s-zero-downtime-deployment",
+    "title": "Jenkins + ArgoCD로 구현하는 K8s 무중단 배포",
+    "path": "/post/study/infra/k8s-zero-downtime-deployment"
+  },
+  {
     "slug": "macro-network-view",
     "title": "거시 네트워크",
     "path": "/post/study/network/chapter01"
