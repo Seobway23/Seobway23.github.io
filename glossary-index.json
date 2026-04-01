@@ -1,0 +1,67 @@
+{
+  "docker": [
+    "django-migration",
+    "django-version-compatibility",
+    "django-settings",
+    "docker-basics",
+    "docker-compose-basics",
+    "docker-compose-django",
+    "gitlab-cicd-guide",
+    "k8s-zero-downtime-deployment"
+  ],
+  "service": [
+    "django-settings",
+    "docker-basics",
+    "docker-compose-basics",
+    "docker-compose-django",
+    "k8s-zero-downtime-deployment",
+    "macro-network-view",
+    "cdn-content-delivery-network",
+    "circuit-vs-packet-switching",
+    "isp-internet-service-provider",
+    "micro-http-https",
+    "micro-ip-arp",
+    "micro-network-traffic",
+    "micro-osi-7layer"
+  ],
+  "kubernetes": [
+    "gitlab-cicd-guide",
+    "k8s-zero-downtime-deployment"
+  ],
+  "pod": [
+    "gitlab-cicd-guide",
+    "k8s-zero-downtime-deployment"
+  ],
+  "deployment": [
+    "gitlab-cicd-guide",
+    "k8s-zero-downtime-deployment"
+  ],
+  "jenkins": [
+    "k8s-zero-downtime-deployment"
+  ],
+  "jenkinsfile": [
+    "k8s-zero-downtime-deployment"
+  ],
+  "statefulset": [
+    "k8s-zero-downtime-deployment"
+  ],
+  "namespace": [
+    "k8s-zero-downtime-deployment"
+  ],
+  "pv": [
+    "k8s-zero-downtime-deployment",
+    "micro-network-view",
+    "micro-encapsulation",
+    "micro-ip-arp",
+    "micro-tcp-udp"
+  ],
+  "argocd": [
+    "k8s-zero-downtime-deployment"
+  ],
+  "gitops": [
+    "k8s-zero-downtime-deployment"
+  ],
+  "kustomize": [
+    "k8s-zero-downtime-deployment"
+  ]
+}

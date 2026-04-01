@@ -1,0 +1,133 @@
+{
+  "terms": {
+    "jenkins": {
+      "id": "jenkins",
+      "label": "Jenkins",
+      "description": "CI(지속적 통합)를 자동화하는 도구로, 빌드·테스트·배포 파이프라인을 잡고 실행합니다.",
+      "aliases": [
+        "Jenkins",
+        "jenkins"
+      ]
+    },
+    "jenkinsfile": {
+      "id": "jenkinsfile",
+      "label": "Jenkinsfile",
+      "description": "Jenkins Pipeline을 코드로 정의하는 파일로, stages/steps 등을 선언해 파이프라인을 버전 관리합니다.",
+      "aliases": [
+        "Jenkinsfile"
+      ]
+    },
+    "docker": {
+      "id": "docker",
+      "label": "Docker",
+      "description": "앱과 실행 환경(OS/라이브러리)을 컨테이너 이미지로 묶어 어디서나 동일하게 실행할 수 있게 해주는 도구입니다.",
+      "aliases": [
+        "Docker",
+        "도커"
+      ]
+    },
+    "kubernetes": {
+      "id": "kubernetes",
+      "label": "Kubernetes",
+      "description": "여러 노드에 컨테이너를 배포·스케일·복구하는 오케스트레이션 시스템입니다.",
+      "aliases": [
+        "Kubernetes",
+        "kubernetes",
+        "K8s",
+        "k8s",
+        "쿠버네티스"
+      ]
+    },
+    "pod": {
+      "id": "pod",
+      "label": "Pod",
+      "description": "Kubernetes에서 컨테이너를 실행하는 가장 작은 배포 단위입니다.",
+      "aliases": [
+        "Pod",
+        "pod",
+        "파드"
+      ]
+    },
+    "deployment": {
+      "id": "deployment",
+      "label": "Deployment",
+      "description": "상태 없는(Stateless) 애플리케이션을 롤링 업데이트로 교체하는 Kubernetes 리소스입니다.",
+      "aliases": [
+        "Deployment",
+        "deployment",
+        "디플로이먼트"
+      ]
+    },
+    "statefulset": {
+      "id": "statefulset",
+      "label": "StatefulSet",
+      "description": "고정된 이름/스토리지 등 상태가 필요한 워크로드(DB 등)에 쓰는 Kubernetes 리소스입니다.",
+      "aliases": [
+        "StatefulSet",
+        "statefulset",
+        "스테이트풀셋"
+      ]
+    },
+    "service": {
+      "id": "service",
+      "label": "Service",
+      "description": "Pod 집합에 고정된 네트워크 엔드포인트를 제공해, Pod IP가 바뀌어도 안정적으로 접근하게 해줍니다.",
+      "aliases": [
+        "Service",
+        "service",
+        "서비스"
+      ]
+    },
+    "namespace": {
+      "id": "namespace",
+      "label": "Namespace",
+      "description": "클러스터 안 리소스를 논리적으로 분리하는 공간(테넌트/환경 분리)입니다.",
+      "aliases": [
+        "Namespace",
+        "namespace",
+        "네임스페이스"
+      ]
+    },
+    "pv": {
+      "id": "pv",
+      "label": "PV/PVC",
+      "description": "PV는 실제 저장 공간, PVC는 워크로드가 저장 공간을 요청/바인딩하는 선언입니다.",
+      "aliases": [
+        "PV/PVC",
+        "PV",
+        "PVC",
+        "PersistentVolume",
+        "PersistentVolumeClaim",
+        "영구 볼륨"
+      ]
+    },
+    "argocd": {
+      "id": "argocd",
+      "label": "Argo CD",
+      "description": "Git 저장소의 선언적 상태를 기준으로 클러스터 상태를 자동 동기화하는 GitOps CD 도구입니다.",
+      "aliases": [
+        "Argo CD",
+        "ArgoCD",
+        "argocd"
+      ]
+    },
+    "gitops": {
+      "id": "gitops",
+      "label": "GitOps",
+      "description": "Git을 인프라/애플리케이션 상태의 단일 진실원천(SSoT)으로 두고, 변경을 커밋으로 관리하는 운영 방식입니다.",
+      "aliases": [
+        "GitOps",
+        "gitops"
+      ]
+    },
+    "kustomize": {
+      "id": "kustomize",
+      "label": "Kustomize",
+      "description": "base/overlay로 매니페스트를 조합해 환경별 차이를 관리하는 Kubernetes 구성 도구입니다.",
+      "aliases": [
+        "Kustomize",
+        "kustomize"
+      ]
+    }
+  }
+}
