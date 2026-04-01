@@ -1,9 +1,9 @@
 /* ══════════ CSS VARIABLES (Consistent Dark Mode) ══════════ */
 :root {
-  --brand-blue: #0074D9;
-  --brand-green: #2ECC71;
-  --brand-glow: #4DA8FF;
-  --brand-gradient: linear-gradient(135deg, #0074D9 0%, #2ECC71 100%);
+  --brand-blue: #0074d9;
+  --brand-green: #2ecc71;
+  --brand-glow: #4da8ff;
+  --brand-gradient: linear-gradient(135deg, #0074d9 0%, #2ecc71 100%);
 
   --bg-base: #000000;
   /* Deep black for 3D stage */
@@ -12,12 +12,12 @@
   --bg-panel: rgba(10, 15, 25, 0.85);
   /* Overlay panel bg */
 
-  --text-primary: #D8EAF8;
-  --text-secondary: #7EB8E0;
+  --text-primary: #d8eaf8;
+  --text-secondary: #7eb8e0;
   --text-muted: #456070;
 
-  --accent-primary: #4DA8FF;
-  --accent-secondary: #2ECC71;
+  --accent-primary: #4da8ff;
+  --accent-secondary: #2ecc71;
 
   --border-default: rgba(77, 168, 255, 0.15);
   --border-active: rgba(77, 168, 255, 0.4);
@@ -42,7 +42,10 @@ html,
 body {
   height: 100%;
   overflow: hidden;
-  font-family: 'Pretendard', -apple-system, sans-serif;
+  font-family:
+    "Pretendard",
+    -apple-system,
+    sans-serif;
   background: var(--bg-base);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -449,7 +452,6 @@ body {
   pointer-events: all;
   cursor: crosshair;
 }
-
 
 /* 모바일 화면에서 편집 도구 숨기기 */
 @media (max-width: 768px) {

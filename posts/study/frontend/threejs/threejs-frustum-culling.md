@@ -104,16 +104,16 @@ geo.computeBoundingBox();
 
 ---
 
-## 참고
-
-<a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a>
-
-<a href="https://threejs.org/manual/en/tips.html" target="_blank">[2] Tips on Optimizing — Three.js Manual</a>
-
----
-
 ## 관련 글
 
 - [DPR과 캔버스 해상도: 선명도/성능의 본질 →](/post/threejs-dpr-and-canvas-resolution)
 - [glTF 로딩: 씬 그래프, 렌더 타이밍 →](/post/threejs-gltf-loading)
 - [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
+
+---
+
+## 참고
+
+<a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a>
+
+<a href="https://threejs.org/manual/en/tips.html" target="_blank">[2] Tips on Optimizing — Three.js Manual</a>

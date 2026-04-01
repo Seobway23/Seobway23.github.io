@@ -155,7 +155,8 @@ function toggleDraw(force) {
   drawActive = force !== undefined ? force : !drawActive;
   drawCanvas.classList.toggle("active", drawActive);
   btnExitDraw.style.display = drawActive ? "block" : "none"; // Show only when drawing
-  if (btnDraw) btnDraw.innerHTML = drawActive ? "🛑 Stop Drawing" : "🖌 Pen Drawing";
+  if (btnDraw)
+    btnDraw.innerHTML = drawActive ? "🛑 Stop Drawing" : "🖌 Pen Drawing";
   if (drawActive) {
     sizeDrawCanvas();
     // Keep tools open when drawing

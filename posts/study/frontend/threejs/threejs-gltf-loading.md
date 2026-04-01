@@ -72,11 +72,11 @@ loader.load(
     render(); // render on demand라면 명시적으로 한 번 호출
   },
   (xhr) => {
-    console.log(`${(xhr.loaded / xhr.total * 100).toFixed(1)}% loaded`);
+    console.log(`${((xhr.loaded / xhr.total) * 100).toFixed(1)}% loaded`);
   },
   (error) => {
     console.error("GLTFLoader error:", error);
-  }
+  },
 );
 ```
 
@@ -102,12 +102,14 @@ async function loadModel(url) {
 이때는 `DRACOLoader`를 `GLTFLoader`에 연결해야 한다.
 
 ```javascript
-import { GLTFLoader }   from "three/addons/loaders/GLTFLoader.js";
-import { DRACOLoader }  from "three/addons/loaders/DRACOLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 const dracoLoader = new DRACOLoader();
 // Draco 디코더 WASM을 제공하는 경로 (three.js examples/jsm/libs/draco/)
-dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/");
+dracoLoader.setDecoderPath(
+  "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/",
+);
 
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
@@ -140,16 +142,16 @@ Three.js는 "렌더 함수가 호출되었을 때"만 화면이 갱신된다.
 
 ---
 
-## 참고
-
-<a href="https://threejs.org/manual/en/load-gltf.html" target="_blank">[1] Loading a .GLTF File — Three.js Manual</a>
-
-<a href="https://threejs.org/manual/en/rendering-on-demand.html" target="_blank">[2] Rendering on Demand — Three.js Manual</a>
-
----
-
 ## 관련 글
 
 - [Frustum Culling: 보이는 것만 그리기 →](/post/threejs-frustum-culling)
 - [Raycaster & Picking 성능 →](/post/threejs-raycaster-picking-performance)
 - [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
+
+---
+
+## 참고
+
+<a href="https://threejs.org/manual/en/load-gltf.html" target="_blank">[1] Loading a .GLTF File — Three.js Manual</a>
+
+<a href="https://threejs.org/manual/en/rendering-on-demand.html" target="_blank">[2] Rendering on Demand — Three.js Manual</a>

@@ -39,7 +39,7 @@ Three.js 매뉴얼은 picking을 "사용자가 클릭/터치한 오브젝트를 
 
 ```javascript
 // ❌ 나쁜 패턴: 이벤트마다 즉시 계산
-canvas.addEventListener('pointermove', (e) => {
+canvas.addEventListener("pointermove", (e) => {
   const pointer = getPointerNDC(e); // Normalized Device Coordinates
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(scene.children); // 매 이벤트마다 실행!
@@ -64,16 +64,16 @@ canvas.addEventListener('pointermove', (e) => {
 
 ```javascript
 // ✅ 좋은 패턴: rAF 스로틀
-const pointer   = new THREE.Vector2();
+const pointer = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
-let   pendingPointer = null; // 이벤트에서 받은 마지막 위치
+let pendingPointer = null; // 이벤트에서 받은 마지막 위치
 
 // 이벤트 핸들러: 위치만 저장
-canvas.addEventListener('pointermove', (e) => {
+canvas.addEventListener("pointermove", (e) => {
   const rect = canvas.getBoundingClientRect();
   pendingPointer = {
-    x:  ((e.clientX - rect.left)  / rect.width)  * 2 - 1,
-    y: -((e.clientY - rect.top)   / rect.height) * 2 + 1,
+    x: ((e.clientX - rect.left) / rect.width) * 2 - 1,
+    y: -((e.clientY - rect.top) / rect.height) * 2 + 1,
   };
 });
 
@@ -170,14 +170,14 @@ flowchart TD
 
 ---
 
-## 참고
-
-<a href="https://threejs.org/manual/en/picking.html" target="_blank">[1] Picking — Three.js Manual</a>
-
----
-
 ## 관련 글
 
 - [glTF 로딩: 씬 그래프, 렌더 타이밍 →](/post/threejs-gltf-loading)
 - [Frustum Culling: 보이는 것만 그리기 →](/post/threejs-frustum-culling)
 - [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
+
+---
+
+## 참고
+
+<a href="https://threejs.org/manual/en/picking.html" target="_blank">[1] Picking — Three.js Manual</a>

@@ -23,8 +23,8 @@ WebGL을 직접 쓰면 해야 할 일이 폭발한다.
 
 ```javascript
 // ── 순수 WebGL로 삼각형 하나를 그리는 최소 코드
-const canvas = document.getElementById('c');
-const gl = canvas.getContext('webgl2');
+const canvas = document.getElementById("c");
+const gl = canvas.getContext("webgl2");
 
 // 1) 셰이더 소스 작성 (GLSL)
 const vertSrc = `
@@ -52,11 +52,14 @@ gl.useProgram(prog);
 // 3) 버텍스 버퍼 수동 생성 + 업로드
 const buf = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-gl.bufferData(gl.ARRAY_BUFFER,
-  new Float32Array([-0.5,-0.5, 0.5,-0.5, 0,0.5]), gl.STATIC_DRAW);
+gl.bufferData(
+  gl.ARRAY_BUFFER,
+  new Float32Array([-0.5, -0.5, 0.5, -0.5, 0, 0.5]),
+  gl.STATIC_DRAW,
+);
 
 // 4) 어트리뷰트 수동 연결
-const loc = gl.getAttribLocation(prog, 'a_position');
+const loc = gl.getAttribLocation(prog, "a_position");
 gl.enableVertexAttribArray(loc);
 gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
@@ -72,7 +75,7 @@ Three.js는 그 모든 것을 "바로 쓸 수 있는 단위"로 묶어준다.<a 
 // ── Three.js: 큐브 하나 추가
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshStandardMaterial({ color: 0x7dd3fc });
-const mesh     = new THREE.Mesh(geometry, material);
+const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 ```
 
@@ -115,13 +118,13 @@ Three.js 앱이 버벅이는 원인은 보통 3가지가 섞여 나온다.
 
 ---
 
-## 참고
-
-<a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a>
-
----
-
 ## 관련 글
 
 - [렌더링 파이프라인: Scene → Camera → Renderer →](/post/threejs-rendering-pipeline)
 - [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
+
+---
+
+## 참고
+
+<a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a>
