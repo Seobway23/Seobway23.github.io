@@ -253,6 +253,7 @@ export function PostGlossaryLayer({
       const original = node.nodeValue || "";
       let remaining = original;
       let guard = 0;
+      let didWrap = false;
       const frag = document.createDocumentFragment();
 
       while (remaining && guard < 50) {
@@ -268,6 +269,7 @@ export function PostGlossaryLayer({
         span.tabIndex = 0;
         span.textContent = found.matchText;
         frag.appendChild(span);
+        didWrap = true;
         remaining = remaining.slice(found.index + found.matchText.length);
       }
 
@@ -275,7 +277,7 @@ export function PostGlossaryLayer({
         frag.appendChild(document.createTextNode(remaining));
       }
 
-      if (frag.childNodes.length > 0 && frag.textContent !== original) {
+      if (didWrap) {
         node.parentNode?.replaceChild(frag, node);
       }
     }
