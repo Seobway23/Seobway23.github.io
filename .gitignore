@@ -21,3 +21,6 @@ ga-service-account-key.json
 !pnpm-lock.yaml
 
 /docs/*
+
+CONTEXT.md
+CLAUDE.md
