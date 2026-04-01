@@ -42,6 +42,9 @@ export const insertCommentSchema = createInsertSchema(comments).omit({
 });
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
-export type Post = typeof posts.$inferSelect;
+export type Post = (typeof posts.$inferSelect) & {
+  /** 글 본문 용어 사전 (글별) */
+  glossary?: Record<string, string>;
+};
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof comments.$inferSelect;

@@ -8,12 +8,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import matter from "gray-matter";
 import { marked } from "marked";
+import yaml from "js-yaml";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const publicDir = path.join(__dirname, "../public");
 const postsDir = path.join(__dirname, "../posts");
+const glossaryPath = path.join(__dirname, "../data/glossary.yml");
 
 // public 디렉토리가 없으면 생성
 if (!fs.existsSync(publicDir)) {
@@ -204,6 +206,119 @@ function fixBoldBeforeCJK(markdown) {
     .join("");
 }
 
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function loadGlobalGlossary() {
+  if (!fs.existsSync(glossaryPath)) {
+    console.warn(`⚠️ 전역 glossary 파일 없음: ${glossaryPath}`);
+    return { terms: {} };
+  }
+  try {
+    const raw = fs.readFileSync(glossaryPath, "utf-8");
+    const data = yaml.load(raw);
+    const termsRaw =
+      data &&
+      typeof data === "object" &&
+      !Array.isArray(data) &&
+      data.terms &&
+      typeof data.terms === "object" &&
+      !Array.isArray(data.terms)
+        ? data.terms
+        : {};
+
+    const terms = Object.fromEntries(
+      Object.entries(termsRaw)
+        .filter(([id]) => typeof id === "string" && id.trim().length > 0)
+        .map(([id, term]) => {
+          const t = term && typeof term === "object" && !Array.isArray(term) ? term : {};
+          const label = typeof t.label === "string" && t.label.trim().length > 0 ? t.label.trim() : id;
+          const description =
+            typeof t.description === "string" && t.description.trim().length > 0
+              ? t.description.trim()
+              : "";
+          const aliases = Array.isArray(t.aliases)
+            ? t.aliases.filter((a) => typeof a === "string" && a.trim().length > 0).map((a) => a.trim())
+            : [];
+          const uniqueAliases = Array.from(new Set([label, ...aliases]));
+          return [id, { id, label, description, aliases: uniqueAliases }];
+        })
+    );
+
+    return { terms };
+  } catch (e) {
+    console.error(`❌ 전역 glossary 파싱 실패: ${glossaryPath}`, e);
+    return { terms: {} };
+  }
+}
+
+function indexTermMentionsInMarkdown(markdown, glossary) {
+  const terms = glossary?.terms && typeof glossary.terms === "object" ? glossary.terms : {};
+  const entries = Object.values(terms);
+  if (entries.length === 0) return [];
+
+  // 코드 펜스/인라인 코드 제외. 링크 텍스트는 남겨도 되지만, URL/마크다운 문법에 걸리기 쉬워 링크를 통째로 제거.
+  let text = String(markdown || "");
+  text = text.replace(/```[\s\S]*?```/g, " ");
+  text = text.replace(/`[^`]+`/g, " ");
+  text = text.replace(/!\[[^\]]*\]\([^)]+\)/g, " ");
+  text = text.replace(/\[[^\]]+\]\([^)]+\)/g, " ");
+
+  const ids = [];
+  for (const term of entries) {
+    const aliases = Array.isArray(term.aliases) ? term.aliases : [];
+    const hay = text;
+    const found = aliases.some((alias) => {
+      if (!alias) return false;
+      // 엄격: alias 그대로 포함 여부만 확인(정확도 우선). 자동 매칭의 세부 경계는 런타임에서 더 엄격하게 처리.
+      return hay.includes(alias) || hay.toLowerCase().includes(alias.toLowerCase());
+    });
+    if (found) ids.push(term.id);
+  }
+  return ids;
+}
+
+/**
+ * Glossary 마크업([[termId|label]])을 HTML span으로 치환한다.
+ * - 코드 펜스 내부는 제외
+ * - termId는 [a-zA-Z0-9_-]+만 허용
+ */
+function applyGlossaryMarkup(markdown, glossary, filePath) {
+  if (!markdown || typeof markdown !== "string") return markdown || "";
+  const parts = markdown.split(/(```[\s\S]*?```)/g);
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 1) return part; // 코드 블록
+      return part.replace(
+        /\[\[([a-zA-Z0-9_-]+)(?:\|([^\]]+))?\]\]/g,
+        (_m, termId, label) => {
+          const display = (label || termId || "").trim();
+          if (glossary && typeof glossary === "object") {
+            if (!(termId in glossary)) {
+              console.warn(
+                `⚠️ glossary 정의 없음: ${termId} (${filePath})`
+              );
+            }
+          } else {
+            console.warn(
+              `⚠️ glossary 데이터 없음: ${termId} (${filePath})`
+            );
+          }
+          return `<span class="glossary-term" data-term="${escapeHtml(
+            termId
+          )}" tabindex="0">${escapeHtml(display)}</span>`;
+        }
+      );
+    })
+    .join("");
+}
+
 /**
  * 마크다운 파일에서 게시글 데이터 추출
  * @param {Map<string,string>} filenameToSlug - 파일명(확장자 제외) → slug 맵
@@ -230,6 +345,24 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     processedContent = processMarkdownFootnotes(processedContent).content;
     // marked v12+: **text**한글 볼드 인식 실패 보정
     processedContent = fixBoldBeforeCJK(processedContent);
+
+    // 글별 용어 사전 (frontmatter glossary)
+    // - { termId: "설명", ... } 형태만 허용
+    // - 값이 문자열이 아니면 제외
+    const glossary =
+      data &&
+      data.glossary &&
+      typeof data.glossary === "object" &&
+      !Array.isArray(data.glossary)
+        ? Object.fromEntries(
+            Object.entries(data.glossary).filter(
+              ([, v]) => typeof v === "string" && v.trim().length > 0
+            )
+          )
+        : undefined;
+
+    // Glossary 마크업 치환 (코드 블록 제외)
+    processedContent = applyGlossaryMarkup(processedContent, glossary, filePath);
 
     // marked 설정
     marked.setOptions({
@@ -279,6 +412,7 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
       slug: slug,
       excerpt: excerpt,
       content: htmlContent,
+      glossary: glossary,
       coverImage: coverImage || null,
       // 폴더 경로를 우선 카테고리로 사용 (frontmatter category는 덮어쓰지 않음)
       category: normalizedCategory || data.category || "",
@@ -344,6 +478,9 @@ function generatePostsData() {
   const markdownFiles = getAllMarkdownFiles(postsDir);
   console.log(`📄 ${markdownFiles.length}개의 마크다운 파일 발견`);
 
+  const globalGlossary = loadGlobalGlossary();
+  const glossaryIndex = Object.create(null);
+
   // 1차 패스: 파일명 → slug 맵 구성 (링크 변환용)
   const filenameToSlug = new Map();
   markdownFiles.forEach((filePath) => {
@@ -374,6 +511,14 @@ function generatePostsData() {
         title: post.title,
         path: postPath,
       });
+
+      const raw = fs.readFileSync(filePath, "utf-8");
+      const { content } = matter(raw);
+      const mentioned = indexTermMentionsInMarkdown(content, globalGlossary);
+      for (const termId of mentioned) {
+        if (!glossaryIndex[termId]) glossaryIndex[termId] = [];
+        if (!glossaryIndex[termId].includes(post.slug)) glossaryIndex[termId].push(post.slug);
+      }
     }
   });
 
@@ -397,6 +542,16 @@ function generatePostsData() {
   const postsPath = path.join(publicDir, "posts.json");
   fs.writeFileSync(postsPath, JSON.stringify(posts, null, 2), "utf-8");
   console.log(`✅ 전체 게시글 데이터를 ${postsPath}에 저장했습니다.`);
+
+  // glossary.json 저장 (전역 용어 사전)
+  const glossaryJsonPath = path.join(publicDir, "glossary.json");
+  fs.writeFileSync(glossaryJsonPath, JSON.stringify(globalGlossary, null, 2), "utf-8");
+  console.log(`✅ 전역 glossary 데이터를 ${glossaryJsonPath}에 저장했습니다.`);
+
+  // glossary-index.json 저장 (termId -> post slugs)
+  const glossaryIndexPath = path.join(publicDir, "glossary-index.json");
+  fs.writeFileSync(glossaryIndexPath, JSON.stringify(glossaryIndex, null, 2), "utf-8");
+  console.log(`✅ glossary 인덱스를 ${glossaryIndexPath}에 저장했습니다.`);
 
   // posts-data.json 저장 (간단한 정보만 - 조회수/댓글 스크립트용)
   const postsDataPath = path.join(publicDir, "posts-data.json");
