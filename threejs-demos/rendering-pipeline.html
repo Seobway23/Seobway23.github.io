@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Three.js 렌더링 파이프라인 데모</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #canvas-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    /* 파이프라인 라벨 */
+    #pipeline {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15,23,42,0.85);
+      border: 1px solid #334155;
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .step {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .step-scene   { background: #1e3a5f; color: #7dd3fc; }
+    .step-camera  { background: #1c3a2b; color: #6ee7b7; }
+    .step-renderer{ background: #3b1f5e; color: #c4b5fd; }
+    .step-canvas  { background: #4a1f1f; color: #fca5a5; }
+    .arrow { color: #475569; font-size: 14px; }
+
+    /* 하단 정보 바 */
+    #info-bar {
+      background: #0f172a;
+      border-top: 1px solid #1e293b;
+      padding: 8px 20px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      font-size: 12px;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+    #info-bar span { color: #e2e8f0; font-weight: 600; }
+    .label { color: #64748b; margin-right: 2px; }
+
+    /* 컨트롤 */
+    #controls {
+      position: absolute;
+      bottom: 52px;
+      right: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    button {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #334155; }
+    button.active { background: #1e3a5f; border-color: #7dd3fc; color: #7dd3fc; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="canvas-wrapper">
+    <canvas id="c"></canvas>
+
+    <div id="pipeline">
+      <span class="step step-scene">Scene</span>
+      <span class="arrow">→</span>
+      <span class="step step-camera">Camera</span>
+      <span class="arrow">→</span>
+      <span class="step step-renderer">Renderer</span>
+      <span class="arrow">→</span>
+      <span class="step step-canvas">Canvas</span>
+    </div>
+
+    <div id="controls">
+      <button id="btn-pause">⏸ Pause rAF</button>
+      <button id="btn-wireframe">⬡ Wireframe</button>
+    </div>
+  </div>
+
+  <div id="info-bar">
+    <div><span class="label">프레임:</span> <span id="frame-count">0</span></div>
+    <div><span class="label">rAF:</span> <span id="raf-status">running</span></div>
+    <div><span class="label">Objects in Scene:</span> <span id="obj-count">0</span></div>
+    <div><span class="label">Draw Calls:</span> <span id="draw-calls">0</span></div>
+    <div style="margin-left:auto; color:#475569; font-size:11px">드래그로 회전 · 스크롤로 줌</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const canvas = document.getElementById('c');
+    const wrapper = document.getElementById('canvas-wrapper');
+
+    // ── Renderer
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+
+    // ── Scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0f172a);
+    scene.fog = new THREE.Fog(0x0f172a, 10, 30);
+
+    // ── Camera
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+    camera.position.set(3, 2.5, 4);
+
+    // ── Lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(5, 8, 5);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // ── Ground
+    const groundGeo = new THREE.PlaneGeometry(20, 20);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -1.1;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // ── Grid helper
+    const grid = new THREE.GridHelper(20, 20, 0x334155, 0x1e293b);
+    grid.position.y = -1.09;
+    scene.add(grid);
+
+    // ── Main cube (6면 다른 색 = Scene의 오브젝트)
+    const cubeGeo = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+    const materials = [
+      new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.3 }),  // +X 하늘
+      new THREE.MeshStandardMaterial({ color: 0x6ee7b7, roughness: 0.3 }),  // -X 민트
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.3 }),  // +Y 노랑
+      new THREE.MeshStandardMaterial({ color: 0xf87171, roughness: 0.3 }),  // -Y 빨강
+      new THREE.MeshStandardMaterial({ color: 0xc4b5fd, roughness: 0.3 }),  // +Z 보라
+      new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.3 }),  // -Z 초록
+    ];
+    const cube = new THREE.Mesh(cubeGeo, materials);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
+    scene.add(cube);
+
+    // ── 작은 주변 구들 (오브젝트 수 보여주기)
+    const sphereGeo = new THREE.SphereGeometry(0.18, 16, 12);
+    const positions = [
+      [-1.8, -0.6,  0.5], [1.8, -0.6, -0.5],
+      [ 0.5, -0.6, -1.8], [-0.5, -0.6, 1.8],
+    ];
+    positions.forEach(([x, y, z], i) => {
+      const mat = new THREE.MeshStandardMaterial({
+        color: [0x7dd3fc, 0x6ee7b7, 0xfbbf24, 0xc4b5fd][i],
+        roughness: 0.4, emissive: [0x1a3a4f, 0x0d3322, 0x3d2e00, 0x2a1a5e][i],
+      });
+      const sphere = new THREE.Mesh(sphereGeo, mat);
+      sphere.position.set(x, y, z);
+      sphere.castShadow = true;
+      scene.add(sphere);
+    });
+
+    // ── Axes helper (x=red, y=green, z=blue)
+    const axes = new THREE.AxesHelper(2);
+    scene.add(axes);
+
+    // ── OrbitControls
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.target.set(0, 0, 0);
+
+    // ── Resize 처리
+    function resize() {
+      const w = wrapper.clientWidth;
+      const h = wrapper.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    new ResizeObserver(resize).observe(wrapper);
+
+    // ── Stats
+    let frameCount = 0;
+    let rafId = null;
+    let paused = false;
+    let wireframe = false;
+
+    const elFrame = document.getElementById('frame-count');
+    const elRaf   = document.getElementById('raf-status');
+    const elObj   = document.getElementById('obj-count');
+    const elDraw  = document.getElementById('draw-calls');
+
+    // ── Render loop
+    function animate() {
+      rafId = requestAnimationFrame(animate);
+      const t = performance.now() * 0.001;
+      cube.rotation.x = t * 0.4;
+      cube.rotation.y = t * 0.6;
+      controls.update();
+      renderer.render(scene, camera);
+
+      frameCount++;
+      elFrame.textContent = frameCount;
+      elRaf.textContent   = 'running';
+      elObj.textContent   = scene.children.length;
+      elDraw.textContent  = renderer.info.render.calls;
+    }
+    animate();
+
+    // ── Pause 버튼
+    const btnPause = document.getElementById('btn-pause');
+    btnPause.addEventListener('click', () => {
+      paused = !paused;
+      if (paused) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+        elRaf.textContent = 'paused';
+        btnPause.textContent = '▶ Resume rAF';
+        btnPause.classList.add('active');
+      } else {
+        btnPause.textContent = '⏸ Pause rAF';
+        btnPause.classList.remove('active');
+        animate();
+      }
+    });
+
+    // ── Wireframe 버튼
+    const btnWire = document.getElementById('btn-wireframe');
+    btnWire.addEventListener('click', () => {
+      wireframe = !wireframe;
+      materials.forEach(m => m.wireframe = wireframe);
+      btnWire.classList.toggle('active', wireframe);
+    });
+  </script>
+</body>
+</html>

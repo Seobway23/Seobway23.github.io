@@ -65,6 +65,41 @@
     "path": "/post/study/frontend/react-query/react-query-queries"
   },
   {
+    "slug": "threejs-dpr-and-canvas-resolution",
+    "title": "devicePixelRatio, setPixelRatio, 캔버스 해상도: Three.js 선명도/성능의 본질",
+    "path": "/post/study/frontend/threejs/threejs-dpr-and-canvas-resolution"
+  },
+  {
+    "slug": "threejs-frustum-culling",
+    "title": "Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유",
+    "path": "/post/study/frontend/threejs/threejs-frustum-culling"
+  },
+  {
+    "slug": "threejs-gltf-loading",
+    "title": "glTF 모델을 Three.js에 올리는 방식: 로더, 씬 그래프, 렌더 타이밍",
+    "path": "/post/study/frontend/threejs/threejs-gltf-loading"
+  },
+  {
+    "slug": "threejs-portfolio-rendering-optimization-story",
+    "title": "Three.js 포트폴리오 렌더링 최적화 실전기: '버벅임'은 3D가 아니라 경쟁이었다",
+    "path": "/post/study/frontend/threejs/threejs-portfolio-rendering-optimization-story"
+  },
+  {
+    "slug": "threejs-raycaster-picking-performance",
+    "title": "Raycaster & Picking 성능: pointermove에서 바로 intersectObjects() 하면 왜 버벅일까?",
+    "path": "/post/study/frontend/threejs/threejs-raycaster-picking-performance"
+  },
+  {
+    "slug": "threejs-rendering-pipeline",
+    "title": "Three.js 렌더링 파이프라인: Scene → Camera → Renderer 한 번에 이해하기",
+    "path": "/post/study/frontend/threejs/threejs-rendering-pipeline"
+  },
+  {
+    "slug": "why-threejs-exists",
+    "title": "Three.js는 왜 만들어졌나: WebGL을 '직접' 쓰지 않기 위해",
+    "path": "/post/study/frontend/threejs/why-threejs-exists"
+  },
+  {
     "slug": "celery-beat",
     "title": "Celery Beat — 주기적 태스크 스케줄링",
     "path": "/post/study/infra/celery/celery-beat"
