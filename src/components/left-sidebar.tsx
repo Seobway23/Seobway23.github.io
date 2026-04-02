@@ -507,7 +507,7 @@ export default function LeftSidebar({
   // 데스크톱: 일반 사이드바
   if (showDesktop) {
     return (
-      <aside className="w-72 flex-shrink-0 hidden lg:block">
+      <aside className="hidden w-full min-w-0 max-w-[18rem] flex-shrink-0 lg:block">
         <div className="sticky top-24">{sidebarContent}</div>
       </aside>
     );

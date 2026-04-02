@@ -94,7 +94,7 @@ export default function RightSidebar({
   };
 
   return (
-    <aside className="w-64 flex-shrink-0 hidden lg:block">
+    <aside className="hidden w-full min-w-0 max-w-64 flex-shrink-0 lg:block">
       <div className="sticky top-24 space-y-4">
         {/* Table of Contents — H2 드롭다운, H3 자식 */}
         {groupedToc.length > 0 && (

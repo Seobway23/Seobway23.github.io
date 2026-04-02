@@ -162,7 +162,8 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* lg: 4등분 그리드 + 고정폭 사이드바는 셀(1/4)보다 넓어져 겹침 → 18rem 고정 트랙 + 유동 메인 */}
+      <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-8">
         <LeftSidebar
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
@@ -170,7 +171,7 @@ export default function Home() {
           onMobileOpenChange={setMobileMenuOpen}
         />
 
-        <main className="lg:col-span-3">
+        <main className="min-w-0">
           {/* Hero Section */}
           {(() => {
             const currentParams = new URLSearchParams(window.location.search);
