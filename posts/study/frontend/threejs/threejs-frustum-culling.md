@@ -7,7 +7,9 @@ author: Seobway
 readTime: 11
 featured: false
 createdAt: 2026-04-01
-excerpt: 프러스텀(카메라 절두체)과 컬링의 개념을 정리하고, 왜 '그리기 전에 빼는 것'이 가장 강력한 최적화인지 설명한다.
+excerpt: >
+  프러스텀(카메라 절두체)과 컬링의 개념을 정리하고, 왜 '그리기 전에 빼는 것'이
+  가장 강력한 최적화인지 설명한다.
 ---
 
 ## 이 글에서 다룰 것
@@ -104,16 +106,16 @@ geo.computeBoundingBox();
 
 ---
 
-## 관련 글
-
-- [DPR과 캔버스 해상도: 선명도/성능의 본질 →](/post/threejs-dpr-and-canvas-resolution)
-- [glTF 로딩: 씬 그래프, 렌더 타이밍 →](/post/threejs-gltf-loading)
-- [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
-
----
-
 ## 참고
 
 <a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a>
 
 <a href="https://threejs.org/manual/en/tips.html" target="_blank">[2] Tips on Optimizing — Three.js Manual</a>
+
+---
+
+## 관련 글
+
+- [DPR과 캔버스 해상도: 선명도/성능의 본질 →](/post/threejs-dpr-and-canvas-resolution)
+- [glTF 로딩: 씬 그래프, 렌더 타이밍 →](/post/threejs-gltf-loading)
+- [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)

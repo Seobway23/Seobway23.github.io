@@ -7,7 +7,9 @@ author: Seobway
 readTime: 12
 featured: false
 createdAt: 2026-04-01
-excerpt: Three.js가 장면을 화면에 그리는 최소 구성(Scene/Camera/Renderer)과 렌더 루프(requestAnimationFrame)의 의미를 "왜 이렇게 설계됐는지" 관점에서 정리한다.
+excerpt: >
+  Three.js가 장면을 화면에 그리는 최소 구성(Scene/Camera/Renderer)과 렌더 루프(requestAnimationFrame)의
+  의미를 "왜 이렇게 설계됐는지" 관점에서 정리한다.
 ---
 
 ## 이 글의 목표
@@ -191,14 +193,6 @@ Three.js 공식 매뉴얼은 "움직이지 않는 화면을 굳이 매 프레임
 
 ---
 
-## 관련 글
-
-- [Three.js는 왜 만들어졌나 →](/post/why-threejs-exists)
-- [DPR과 캔버스 해상도: 선명도/성능의 본질 →](/post/threejs-dpr-and-canvas-resolution)
-- [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
-
----
-
 ## 참고
 
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame" target="_blank">[1] Window: requestAnimationFrame() — MDN Web Docs</a>
@@ -206,3 +200,11 @@ Three.js 공식 매뉴얼은 "움직이지 않는 화면을 굳이 매 프레임
 <a href="https://threejs.org/manual/en/rendering-on-demand.html" target="_blank">[2] Rendering on Demand — Three.js Manual</a>
 
 <a href="https://threejs.org/manual/en/responsive.html" target="_blank">[3] Responsive Design — Three.js Manual</a>
+
+---
+
+## 관련 글
+
+- [Three.js는 왜 만들어졌나 →](/post/why-threejs-exists)
+- [DPR과 캔버스 해상도: 선명도/성능의 본질 →](/post/threejs-dpr-and-canvas-resolution)
+- [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)

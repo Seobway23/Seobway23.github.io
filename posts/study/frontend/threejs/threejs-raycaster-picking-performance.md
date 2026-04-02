@@ -7,7 +7,9 @@ author: Seobway
 readTime: 16
 featured: false
 createdAt: 2026-04-01
-excerpt: Raycaster 기반 picking이 비싼 이유(삼각형 교차 테스트)와, 이벤트 폭주를 rAF로 제어하는 실전 패턴을 정리한다.
+excerpt: >
+  Raycaster 기반 picking이 비싼 이유(삼각형 교차 테스트)와, 이벤트 폭주를 rAF로 제어하는
+  실전 패턴을 정리한다.
 ---
 
 ## 1) Picking(피킹)이란
@@ -170,14 +172,14 @@ flowchart TD
 
 ---
 
+## 참고
+
+<a href="https://threejs.org/manual/en/picking.html" target="_blank">[1] Picking — Three.js Manual</a>
+
+---
+
 ## 관련 글
 
 - [glTF 로딩: 씬 그래프, 렌더 타이밍 →](/post/threejs-gltf-loading)
 - [Frustum Culling: 보이는 것만 그리기 →](/post/threejs-frustum-culling)
 - [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
-
----
-
-## 참고
-
-<a href="https://threejs.org/manual/en/picking.html" target="_blank">[1] Picking — Three.js Manual</a>

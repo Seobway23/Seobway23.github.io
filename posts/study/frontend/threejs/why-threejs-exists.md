@@ -7,7 +7,9 @@ author: Seobway
 readTime: 10
 featured: false
 createdAt: 2026-04-01
-excerpt: Three.js를 단순 "라이브러리"가 아니라 WebGL 추상화 계층으로 보고, Scene 그래프/로더/머티리얼이 어떤 문제를 해결하려고 존재하는지 정리한다.
+excerpt: >
+  Three.js를 단순 "라이브러리"가 아니라 WebGL 추상화 계층으로 보고, Scene 그래프/로더/머티리얼이
+  어떤 문제를 해결하려고 존재하는지 정리한다.
 ---
 
 ## 이 글의 관점
@@ -118,13 +120,13 @@ Three.js 앱이 버벅이는 원인은 보통 3가지가 섞여 나온다.
 
 ---
 
+## 참고
+
+<a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a>
+
+---
+
 ## 관련 글
 
 - [렌더링 파이프라인: Scene → Camera → Renderer →](/post/threejs-rendering-pipeline)
 - [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
-
----
-
-## 참고
-
-<a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a>

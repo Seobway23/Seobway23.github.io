@@ -7,7 +7,9 @@ author: Seobway
 readTime: 15
 featured: false
 createdAt: 2026-04-01
-excerpt: Three.js에서 glTF를 로딩해 씬에 붙이는 기본 흐름과, 로딩 완료 시점에 '언제 렌더해야 하는지(render on demand)'까지 연결해서 설명한다.
+excerpt: >
+  Three.js에서 glTF를 로딩해 씬에 붙이는 기본 흐름과, 로딩 완료 시점에
+  '언제 렌더해야 하는지(render on demand)'까지 연결해서 설명한다.
 ---
 
 ## 왜 glTF가 기준 포맷인가
@@ -142,16 +144,16 @@ Three.js는 "렌더 함수가 호출되었을 때"만 화면이 갱신된다.
 
 ---
 
-## 관련 글
-
-- [Frustum Culling: 보이는 것만 그리기 →](/post/threejs-frustum-culling)
-- [Raycaster & Picking 성능 →](/post/threejs-raycaster-picking-performance)
-- [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)
-
----
-
 ## 참고
 
 <a href="https://threejs.org/manual/en/load-gltf.html" target="_blank">[1] Loading a .GLTF File — Three.js Manual</a>
 
 <a href="https://threejs.org/manual/en/rendering-on-demand.html" target="_blank">[2] Rendering on Demand — Three.js Manual</a>
+
+---
+
+## 관련 글
+
+- [Frustum Culling: 보이는 것만 그리기 →](/post/threejs-frustum-culling)
+- [Raycaster & Picking 성능 →](/post/threejs-raycaster-picking-performance)
+- [Three.js 포트폴리오 최적화 실전기 →](/post/threejs-portfolio-rendering-optimization-story)

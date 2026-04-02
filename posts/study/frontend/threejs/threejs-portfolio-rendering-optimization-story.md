@@ -241,6 +241,16 @@ flowchart TD
 
 ---
 
+## 참고
+
+<a href="https://threejs.org/manual/en/picking.html" target="_blank">[1] Picking — Three.js Manual</a>
+
+<a href="https://threejs.org/manual/en/responsive.html" target="_blank">[2] Responsive Design — Three.js Manual</a>
+
+<a href="https://threejs.org/manual/en/rendering-on-demand.html" target="_blank">[3] Rendering on Demand — Three.js Manual</a>
+
+---
+
 ## 관련 글
 
 - [Three.js는 왜 만들어졌나 →](/post/why-threejs-exists)
@@ -249,13 +259,3 @@ flowchart TD
 - [Frustum Culling: 보이는 것만 그리기 →](/post/threejs-frustum-culling)
 - [glTF 로딩: 씬 그래프, 렌더 타이밍 →](/post/threejs-gltf-loading)
 - [Raycaster & Picking 성능 →](/post/threejs-raycaster-picking-performance)
-
----
-
-## 참고
-
-<a href="https://threejs.org/manual/en/picking.html" target="_blank">[1] Picking — Three.js Manual</a>
-
-<a href="https://threejs.org/manual/en/responsive.html" target="_blank">[2] Responsive Design — Three.js Manual</a>
-
-<a href="https://threejs.org/manual/en/rendering-on-demand.html" target="_blank">[3] Rendering on Demand — Three.js Manual</a>
