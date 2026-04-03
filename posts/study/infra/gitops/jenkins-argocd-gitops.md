@@ -197,6 +197,13 @@ docker buildx build \
 
 ### ArgoCD가 동작하는 원리
 
+**폴링 vs Webhook**:
+- 기본: **3분(180초)** 마다 매니페스트 저장소를 폴링 (`timeout.reconciliation` 설정값)<a href="https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/" target="_blank"><sup>[1]</sup></a>
+- Webhook 설정 시: GitLab/GitHub push 이벤트를 즉시 수신 → 폴링 대기 없이 Sync 트리거
+- Webhook은 **신뢰하지 않음** — Refresh만 트리거하고 blind sync는 하지 않음
+
+
+
 ```mermaid
 %% desc: ArgoCD Sync 루프 — Git 상태와 클러스터 상태를 지속적으로 일치시킴
 sequenceDiagram
@@ -204,7 +211,7 @@ sequenceDiagram
   participant A as ArgoCD
   participant K as k3s Cluster
 
-  loop 1분마다 (또는 Webhook 즉시)
+  loop 3분마다 폴링 (기본값 180초, Webhook 설정 시 즉시)
     A->>G: 매니페스트 상태 확인
     G-->>A: kustomization.yaml (newTag: abc123)
     A->>K: 현재 클러스터 상태 확인
@@ -352,13 +359,13 @@ sequenceDiagram
   J->>M: kustomization.yaml 태그 업데이트
   J-->>D: Build 성공 알림
 
-  loop 1분 이내
+  loop 최대 3분 이내 (Webhook 설정 시 즉시)
     A->>M: 변경 감지
     A->>K: kubectl apply
     K-->>A: Sync 완료
   end
 
-  Note over D,K: 총 소요시간: 빌드 3~8분 + ArgoCD sync < 1분
+  Note over D,K: 총 소요시간: 빌드 3~8분 + ArgoCD sync 최대 3분
 ```
 
 ---
