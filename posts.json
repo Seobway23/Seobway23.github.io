@@ -1,5 +1,104 @@
 [
   {
+    "id": "kubectl-debugging",
+    "title": "kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링",
+    "slug": "kubectl-debugging",
+    "excerpt": "배포 후 서버가 왜 안 되는지 모를 때 kubectl을 쓴다. logs, exec, describe, top —  쿠버네티스 환경에서 실제 문제를 진단하는 명령어를 상황별로 정리한다.\n",
+    "content": "<h2>배포 이후: &quot;서버가 이상해요&quot;</h2>\n<p>자동화 배포가 완성되면 다음 문제가 찾아온다. &quot;잘 배포됐다는데 왜 에러가 나요?&quot; </p>\n<p>SSH로 서버에 들어가 로그 파일을 찾는 시대는 끝났다. 쿠버네티스 환경에서는 <strong>kubectl</strong>로 모든 것을 진단한다.</p>\n<pre><code class=\"language-mermaid\">%% desc: 쿠버네티스 디버깅 의사결정 트리\nflowchart TD\n  A[&quot;문제 발생&quot;]\n  B[&quot;Pod 상태 확인\\nkubectl get pods&quot;]\n  \n  C1[&quot;Running 인데 에러&quot;]\n  C2[&quot;CrashLoopBackOff&quot;]\n  C3[&quot;Pending / Error&quot;]\n\n  D1[&quot;로그 확인\\nkubectl logs -f&quot;]\n  D2[&quot;종료 직전 로그\\nkubectl logs --previous&quot;]\n  D3[&quot;이벤트 확인\\nkubectl describe pod&quot;]\n\n  E1[&quot;코드/환경변수\\n문제 해결&quot;]\n  E2[&quot;OOMKilled?\\nResource Limit 조정&quot;]\n  E3[&quot;이미지 Pull 실패?\\nScheduling 문제?&quot;]\n\n  A --&gt; B\n  B --&gt; C1 --&gt; D1 --&gt; E1\n  B --&gt; C2 --&gt; D2 --&gt; E2\n  B --&gt; C3 --&gt; D3 --&gt; E3\n</code></pre>\n<hr>\n<h2>기본: Pod 상태 한눈에 보기</h2>\n<pre><code class=\"language-bash\"># 특정 네임스페이스의 모든 Pod 확인\nkubectl get pods -n pms-web\n\n# 출력 예시:\n# NAME                         READY   STATUS    RESTARTS   AGE\n# pms-web-7d9f8b6c4-xk2pq     1/1     Running   0          2d\n# pms-web-7d9f8b6c4-r8mnv     1/1     Running   0          2d\n# celery-worker-59b7d4-hj3lp   1/1     Running   2          1d\n# mysql-0                      1/1     Running   0          7d\n\n# 더 상세한 정보 (-o wide: 노드, IP까지)\nkubectl get pods -n pms-web -o wide\n\n# 모든 네임스페이스 동시 확인\nkubectl get pods --all-namespaces\n</code></pre>\n<h3>STATUS 코드 해석</h3>\n<table>\n<thead>\n<tr>\n<th>STATUS</th>\n<th>의미</th>\n<th>해결 방향</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>Running</code></td>\n<td>정상 실행 중</td>\n<td>—</td>\n</tr>\n<tr>\n<td><code>Pending</code></td>\n<td>노드 스케줄링 대기</td>\n<td><code>describe</code>로 이벤트 확인</td>\n</tr>\n<tr>\n<td><code>CrashLoopBackOff</code></td>\n<td>실행 → 충돌 → 재시작 반복</td>\n<td><code>logs --previous</code>로 원인 확인</td>\n</tr>\n<tr>\n<td><code>OOMKilled</code></td>\n<td>메모리 초과로 강제 종료</td>\n<td>Resource Limit 증가</td>\n</tr>\n<tr>\n<td><code>ImagePullBackOff</code></td>\n<td>이미지 Pull 실패</td>\n<td>이미지 태그/레지스트리 인증 확인</td>\n</tr>\n<tr>\n<td><code>Terminating</code></td>\n<td>삭제 중 (오래되면 강제 삭제)</td>\n<td><code>delete pod --grace-period=0</code></td>\n</tr>\n</tbody></table>\n<hr>\n<h2>kubectl logs — 로그 확인</h2>\n<pre><code class=\"language-bash\"># 기본: 특정 Pod의 로그\nkubectl logs pms-web-7d9f8b6c4-xk2pq -n pms-web\n\n# -f (follow): 실시간 스트리밍 (tail -f와 동일)\nkubectl logs -f pms-web-7d9f8b6c4-xk2pq -n pms-web\n\n# --tail: 마지막 N줄만 출력\nkubectl logs --tail=100 pms-web-7d9f8b6c4-xk2pq -n pms-web\n\n# --since: 최근 시간 기준 (1h, 30m, 2h)\nkubectl logs --since=30m pms-web-7d9f8b6c4-xk2pq -n pms-web\n\n# --previous (-p): 이전 컨테이너 로그 (CrashLoopBackOff 시 핵심)\nkubectl logs --previous pms-web-7d9f8b6c4-xk2pq -n pms-web\n\n# Deployment 이름으로 (Pod 이름 모를 때)\nkubectl logs -f deployment/pms-web -n pms-web\n\n# 여러 Pod 동시 로그 (라벨 셀렉터)\nkubectl logs -f -l app=pms-web -n pms-web --max-log-requests=10\n</code></pre>\n<h3>Django 에러 로그 찾기 예시</h3>\n<pre><code class=\"language-bash\"># 에러만 필터링 (grep 파이프)\nkubectl logs -f deployment/pms-web -n pms-web | grep -i &quot;error\\|exception\\|traceback&quot;\n\n# 특정 시간대 에러 확인\nkubectl logs --since=1h deployment/pms-web -n pms-web | grep &quot;ERROR&quot;\n</code></pre>\n<hr>\n<h2>kubectl exec — 컨테이너 내부 접속</h2>\n<pre><code class=\"language-bash\"># 컨테이너에 bash 셸로 접속\nkubectl exec -it pms-web-7d9f8b6c4-xk2pq -n pms-web -- /bin/bash\n\n# sh만 있는 경우 (Alpine 등 경량 이미지)\nkubectl exec -it pms-web-7d9f8b6c4-xk2pq -n pms-web -- /bin/sh\n\n# 단일 명령 실행 (접속 없이)\nkubectl exec pms-web-7d9f8b6c4-xk2pq -n pms-web -- python manage.py check\nkubectl exec pms-web-7d9f8b6c4-xk2pq -n pms-web -- env | grep DJANGO\n</code></pre>\n<h3>접속 후 활용 예시</h3>\n<pre><code class=\"language-bash\"># 컨테이너 내부에서 할 수 있는 것들:\n\n# 환경변수 확인 (DB 연결 정보 등)\nenv | grep -E &quot;DATABASE|SECRET|REDIS&quot;\n\n# Django 쉘 진입\npython manage.py shell\n\n# 수동 마이그레이션 실행\npython manage.py migrate\n\n# 파일 시스템 확인\nls -la /app/logs/\ncat /app/config/settings.py\n\n# DB 연결 테스트\npython manage.py dbshell\n</code></pre>\n<blockquote>\n<p><strong>주의</strong>: 컨테이너는 임시(Ephemeral)다. <code>exec</code>으로 접속해서 파일을 수정해도 Pod가 재시작되면 사라진다. 영구 변경은 반드시 코드/ConfigMap/Secret을 통해 해야 한다.</p>\n</blockquote>\n<hr>\n<h2>kubectl describe — 상세 이벤트 확인</h2>\n<pre><code class=\"language-bash\"># Pod 상세 정보 (Events 섹션이 핵심)\nkubectl describe pod pms-web-7d9f8b6c4-xk2pq -n pms-web\n\n# Deployment 상태\nkubectl describe deployment pms-web -n pms-web\n\n# Service 확인 (엔드포인트, 포트 등)\nkubectl describe service pms-web-svc -n pms-web\n</code></pre>\n<h3>describe 출력에서 볼 것</h3>\n<pre><code class=\"language-yaml\"># kubectl describe pod 출력 예시 (핵심 부분)\nName:         pms-web-7d9f8b6c4-xk2pq\nNamespace:    pms-web\nStatus:       Running\n\nContainers:\n  web:\n    Image:      myorg/pms-web:a1b2c3d4-42\n    Limits:\n      cpu:     500m\n      memory:  512Mi\n    Requests:\n      cpu:     250m\n      memory:  256Mi\n    Environment:\n      DJANGO_SECRET_KEY:  &lt;set to the key &#39;secret-key&#39; in secret &#39;pms-secrets&#39;&gt;\n      DATABASE_URL:       &lt;set to the key &#39;db-url&#39; in secret &#39;pms-secrets&#39;&gt;\n\nEvents:\n  Type     Reason            Age   Message\n  ----     ------            ---   -------\n  Normal   Scheduled         5m    Successfully assigned pms-web/...\n  Normal   Pulling           5m    Pulling image &quot;myorg/pms-web:a1b2c3d4-42&quot;\n  Normal   Pulled            4m    Successfully pulled image\n  Normal   Created           4m    Created container web\n  Normal   Started           4m    Started container web\n  Warning  BackOff           2m    Back-off restarting failed container  # ← 문제 신호\n</code></pre>\n<hr>\n<h2>kubectl top — 리소스 모니터링</h2>\n<pre><code class=\"language-bash\"># 노드별 CPU/Memory 사용량\nkubectl top nodes\n\n# 출력 예시:\n# NAME         CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%\n# k3s-server   234m         11%    1842Mi           47%\n\n# Pod별 리소스 사용량\nkubectl top pods -n pms-web\n\n# 출력 예시:\n# NAME                          CPU(cores)   MEMORY(bytes)\n# pms-web-7d9f8b6c4-xk2pq     15m          145Mi\n# celery-worker-59b7d4-hj3lp   85m          212Mi\n# mysql-0                      32m          387Mi\n\n# 컨테이너별 세분화\nkubectl top pods -n pms-web --containers\n</code></pre>\n<blockquote>\n<p><strong>필요 조건</strong>: <code>kubectl top</code>은 Metrics Server가 설치되어 있어야 한다. k3s는 기본 포함.</p>\n</blockquote>\n<h3>OOMKilled 진단</h3>\n<pre><code class=\"language-bash\"># 메모리로 인해 죽은 Pod 확인\nkubectl describe pod &lt;pod-name&gt; -n pms-web | grep -A5 &quot;OOMKilled\\|Last State&quot;\n\n# 출력:\n# Last State: Terminated\n#   Reason: OOMKilled       # ← 메모리 초과\n#   Exit Code: 137\n\n# 해결: Deployment의 resources.limits.memory 증가\nkubectl edit deployment pms-web -n pms-web\n# 또는 kustomization에서 patch로 설정\n</code></pre>\n<hr>\n<h2>Deployment 운영 명령어</h2>\n<pre><code class=\"language-bash\"># 재시작 (코드 변경 없이 Pod 교체)\nkubectl rollout restart deployment/pms-web -n pms-web\n\n# 롤아웃 상태 확인\nkubectl rollout status deployment/pms-web -n pms-web\n\n# 롤백 (이전 버전으로)\nkubectl rollout undo deployment/pms-web -n pms-web\n\n# 스케일 조정\nkubectl scale deployment pms-web --replicas=3 -n pms-web\n\n# 특정 리비전으로 롤백\nkubectl rollout undo deployment/pms-web --to-revision=3 -n pms-web\n\n# 롤아웃 히스토리 확인\nkubectl rollout history deployment/pms-web -n pms-web\n</code></pre>\n<hr>\n<h2>실전 디버깅 시나리오</h2>\n<h3>시나리오 1: 배포 직후 Pod이 계속 재시작됨</h3>\n<pre><code class=\"language-bash\"># 1. 상태 확인\nkubectl get pods -n pms-web\n# → CrashLoopBackOff 확인\n\n# 2. 이전 실행 로그 확인 (죽기 전 로그)\nkubectl logs --previous deployment/pms-web -n pms-web\n# → Django 에러: ImproperlyConfigured: DATABASE_URL not set\n\n# 3. 환경변수 확인\nkubectl exec deployment/pms-web -n pms-web -- env | grep DATABASE\n# → DATABASE_URL이 없음 → Secret 누락\n\n# 4. Secret 확인\nkubectl get secret pms-secrets -n pms-web -o yaml\n</code></pre>\n<h3>시나리오 2: 배포는 됐는데 API가 500 에러</h3>\n<pre><code class=\"language-bash\"># 1. 실시간 로그 모니터링하면서 요청 보내기\nkubectl logs -f deployment/pms-web -n pms-web | grep -v &quot;GET /health&quot;\n\n# 2. Django Traceback 발견\n# → AttributeError: &#39;NoneType&#39; object has no attribute &#39;team&#39;\n# → 신규 User에 Profile이 없어서 created_by 권한 체크에서 실패\n\n# 3. 컨테이너 접속 후 확인\nkubectl exec -it deployment/pms-web -n pms-web -- python manage.py shell\n# &gt;&gt;&gt; from django.contrib.auth import get_user_model\n# &gt;&gt;&gt; User = get_user_model()\n# &gt;&gt;&gt; User.objects.filter(profile__isnull=True).count()\n# 3  → Profile 없는 유저 존재\n</code></pre>\n<h3>시나리오 3: Django migration 적용 안 됨</h3>\n<pre><code class=\"language-bash\"># 배포 후 마이그레이션 실행\nkubectl exec deployment/pms-web -n pms-web -- python manage.py migrate\n\n# 또는 Job으로 실행 (권장)\nkubectl apply -f - &lt;&lt;EOF\napiVersion: batch/v1\nkind: Job\nmetadata:\n  name: django-migrate\n  namespace: pms-web\nspec:\n  template:\n    spec:\n      containers:\n        - name: migrate\n          image: myorg/pms-web:a1b2c3d4-42\n          command: [&quot;python&quot;, &quot;manage.py&quot;, &quot;migrate&quot;]\n          envFrom:\n            - secretRef:\n                name: pms-secrets\n      restartPolicy: Never\nEOF\n</code></pre>\n<hr>\n<h2>자주 쓰는 명령어 치트시트</h2>\n<pre><code class=\"language-bash\"># ── 상태 확인 ──────────────────────────────────────────────────────\nkubectl get pods -n pms-web                          # Pod 목록\nkubectl get all -n pms-web                           # 모든 리소스\nkubectl get events -n pms-web --sort-by=&#39;.lastTimestamp&#39;  # 최근 이벤트\n\n# ── 로그 ────────────────────────────────────────────────────────────\nkubectl logs -f deployment/pms-web -n pms-web        # 실시간 로그\nkubectl logs --previous &lt;pod&gt; -n pms-web             # 이전 실행 로그\nkubectl logs --since=30m deployment/pms-web -n pms-web  # 최근 30분\n\n# ── 접속 ────────────────────────────────────────────────────────────\nkubectl exec -it &lt;pod&gt; -n pms-web -- /bin/bash       # bash 접속\nkubectl exec &lt;pod&gt; -n pms-web -- &lt;command&gt;           # 단일 명령\n\n# ── 상세 정보 ────────────────────────────────────────────────────────\nkubectl describe pod &lt;pod&gt; -n pms-web                # Pod 이벤트\nkubectl describe node &lt;node&gt;                         # 노드 상태\n\n# ── 리소스 사용량 ────────────────────────────────────────────────────\nkubectl top nodes                                    # 노드 CPU/MEM\nkubectl top pods -n pms-web                          # Pod CPU/MEM\n\n# ── 배포 관리 ────────────────────────────────────────────────────────\nkubectl rollout restart deployment/pms-web -n pms-web\nkubectl rollout status deployment/pms-web -n pms-web\nkubectl rollout undo deployment/pms-web -n pms-web\nkubectl scale deployment pms-web --replicas=3 -n pms-web\n</code></pre>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://kubernetes.io/docs/reference/kubectl/quick-reference/\" target=\"_blank\">[1] kubectl Quick Reference — 공식 문서</a></p>\n<p><a href=\"https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/\" target=\"_blank\">[2] Debug Pods — Kubernetes 공식 문서</a></p>\n<p><a href=\"https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/\" target=\"_blank\">[3] Resource Usage Monitoring — Kubernetes 공식 문서</a></p>\n<p><a href=\"https://docs.k3s.io/quick-start\" target=\"_blank\">[4] k3s Quick Start — 공식 문서</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/jenkins-argocd-gitops\">GitOps 파이프라인 — Jenkins + ArgoCD + k3s →</a></li>\n<li><a href=\"/post/gitlab-cicd-guide\">GitLab CI/CD — .gitlab-ci.yml → K3s →</a></li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/infra/kubernetes",
+    "tags": [
+      "Kubernetes",
+      "kubectl",
+      "k3s",
+      "모니터링",
+      "로그",
+      "디버깅",
+      "DevOps",
+      "인프라"
+    ],
+    "author": "Seobway",
+    "readTime": 11,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-03T11:45:45.415Z"
+  },
+  {
+    "id": "jenkins-argocd-gitops",
+    "title": "GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기",
+    "slug": "jenkins-argocd-gitops",
+    "excerpt": "GitLab push 한 번으로 Jenkins가 빌드하고, ArgoCD가 k3s에 자동 배포하는 전체 흐름. Docker Buildx 멀티 플랫폼 빌드, 레이어 캐싱, GitOps의 핵심 원칙까지 로우 레벨로 설명한다.\n",
+    "content": "<h2>현대 배포의 목표: &quot;사람이 서버에 로그인하지 않는다&quot;</h2>\n<p>코드를 배포하는 방법은 크게 두 가지다.</p>\n<table>\n<thead>\n<tr>\n<th>방식</th>\n<th>설명</th>\n<th>문제점</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Push 방식</strong></td>\n<td>CI 서버가 직접 kubectl apply</td>\n<td>CI 서버에 클러스터 자격증명 노출</td>\n</tr>\n<tr>\n<td>**Pull 방식 (GitOps)<strong></td>\n<td>Git 변경 → ArgoCD가 감지 후 적용</td>\n<td></strong>보안 ↑, 감사 이력 ↑**</td>\n</tr>\n</tbody></table>\n<p>GitOps는 <strong>Git 저장소가 인프라의 단일 진실의 원천(Single Source of Truth)</strong>이 되는 방식이다.<a href=\"https://argo-cd.readthedocs.io/en/stable/core_concepts/\" target=\"_blank\"><sup>[1]</sup></a></p>\n<hr>\n<h2>전체 파이프라인 구조</h2>\n<pre><code class=\"language-mermaid\">%% desc: GitLab → Jenkins → DockerHub → ArgoCD → k3s 전체 흐름\nflowchart LR\n  subgraph DEV[&quot;개발자&quot;]\n    A[&quot;git push\\n(GitLab)&quot;]\n  end\n\n  subgraph CI[&quot;CI: Jenkins&quot;]\n    B[&quot;Webhook 수신&quot;]\n    C[&quot;Docker Buildx\\n멀티플랫폼 빌드&quot;]\n    D[&quot;DockerHub\\nImage Push\\n태그: git-{commit}-{build}&quot;]\n    E[&quot;K8s 매니페스트\\n저장소 태그 업데이트\\n(kustomization.yaml)&quot;]\n  end\n\n  subgraph CD[&quot;CD: ArgoCD&quot;]\n    F[&quot;매니페스트 저장소\\n변경 감지\\n(1분 폴링 or Webhook)&quot;]\n    G[&quot;k3s 클러스터\\n자동 동기화\\nkubectl apply&quot;]\n  end\n\n  subgraph K8S[&quot;k3s Cluster&quot;]\n    H[&quot;Django Web\\nDeployment&quot;]\n    I[&quot;Celery Worker\\nDeployment&quot;]\n    J[&quot;Redis\\nStatefulSet&quot;]\n    K[&quot;MySQL\\nStatefulSet&quot;]\n  end\n\n  A --&gt; B --&gt; C --&gt; D --&gt; E --&gt; F --&gt; G --&gt; H\n  G --&gt; I &amp; J &amp; K\n</code></pre>\n<hr>\n<h2>Jenkins: CI 파이프라인 상세</h2>\n<h3>Jenkinsfile 구조</h3>\n<pre><code class=\"language-groovy\">// Jenkinsfile\npipeline {\n    agent any\n\n    environment {\n        // Jenkins Credentials에 저장된 비밀값 주입\n        DOCKERHUB_CRED  = credentials(&#39;dockerhub-credentials&#39;)\n        IMAGE_NAME      = &quot;myorg/pms-web&quot;\n        // 이미지 태그: Git 커밋 해시 + Jenkins 빌드 번호\n        IMAGE_TAG       = &quot;${GIT_COMMIT[0..7]}-${BUILD_NUMBER}&quot;\n        MANIFEST_REPO   = &quot;git@gitlab.com:myorg/k8s-manifests.git&quot;\n    }\n\n    stages {\n        stage(&#39;Checkout&#39;) {\n            steps {\n                checkout scm\n            }\n        }\n\n        stage(&#39;Build &amp; Push&#39;) {\n            steps {\n                script {\n                    // Docker Buildx: 멀티 플랫폼 빌드\n                    sh &quot;&quot;&quot;\n                        docker buildx create --use --name multiarch-builder || true\n\n                        docker buildx build \\\\\n                            --platform linux/amd64,linux/arm64 \\\\\n                            --cache-from type=registry,ref=${IMAGE_NAME}:buildcache \\\\\n                            --cache-to   type=registry,ref=${IMAGE_NAME}:buildcache,mode=max \\\\\n                            --tag ${IMAGE_NAME}:${IMAGE_TAG} \\\\\n                            --tag ${IMAGE_NAME}:latest \\\\\n                            --push \\\\\n                            .\n                    &quot;&quot;&quot;\n                }\n            }\n        }\n\n        stage(&#39;Update Manifest&#39;) {\n            steps {\n                script {\n                    // 매니페스트 저장소의 이미지 태그를 새 태그로 교체\n                    sh &quot;&quot;&quot;\n                        git clone ${MANIFEST_REPO} manifests\n                        cd manifests\n                        sed -i &#39;s|newTag:.*|newTag: ${IMAGE_TAG}|&#39; kustomization.yaml\n                        git config user.email &quot;jenkins@ci&quot;\n                        git config user.name  &quot;Jenkins CI&quot;\n                        git add kustomization.yaml\n                        git commit -m &quot;ci: update image tag to ${IMAGE_TAG}&quot;\n                        git push origin main\n                    &quot;&quot;&quot;\n                }\n            }\n        }\n    }\n\n    post {\n        failure {\n            // Slack, Email 알림\n            echo &quot;Pipeline failed!&quot;\n        }\n    }\n}\n</code></pre>\n<hr>\n<h2>Docker Buildx: 멀티 플랫폼 빌드와 레이어 캐싱</h2>\n<h3>왜 Buildx인가</h3>\n<p>일반 <code>docker build</code>는 현재 시스템 아키텍처(amd64)만 지원한다. Buildx를 쓰면 <strong>한 번의 명령으로 amd64/arm64 양쪽 이미지</strong>를 동시에 빌드할 수 있다.<a href=\"https://docs.docker.com/reference/cli/docker/buildx/build/\" target=\"_blank\"><sup>[2]</sup></a></p>\n<pre><code class=\"language-mermaid\">%% desc: Docker Buildx 레이어 캐싱 동작 — 변경된 레이어부터만 다시 빌드\nflowchart TD\n  A[&quot;FROM python:3.11-slim\\n(기반 이미지)&quot;]\n  B[&quot;COPY requirements.txt\\npip install\\n→ 의존성 설치&quot;]\n  C[&quot;COPY . .\\n→ 애플리케이션 코드&quot;]\n  D[&quot;CMD gunicorn...&quot;]\n\n  A --&gt;|&quot;캐시 HIT ✅&quot;| B\n  B --&gt;|&quot;캐시 HIT ✅\\n(requirements.txt 변경 없음)&quot;| C\n  C --&gt;|&quot;캐시 MISS ❌\\n(코드 변경)&quot;| D\n\n  style C fill:#ff6b6b,color:#fff\n  style D fill:#ff6b6b,color:#fff\n</code></pre>\n<pre><code class=\"language-dockerfile\"># Dockerfile — 캐싱을 최대화하는 레이어 순서\nFROM python:3.11-slim\n\nWORKDIR /app\n\n# requirements.txt를 먼저 복사 → pip install 결과가 캐시됨\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\n# 코드는 마지막에 복사 → 코드가 바뀌어도 pip install은 재실행 안 됨\nCOPY . .\n\nCMD [&quot;gunicorn&quot;, &quot;config.wsgi:application&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8000&quot;]\n</code></pre>\n<h3>캐시 플래그 설명</h3>\n<pre><code class=\"language-bash\">docker buildx build \\\n  --cache-from type=registry,ref=myimage:buildcache \\\n  # ↑ 이전 빌드의 캐시를 레지스트리에서 가져옴\n\n  --cache-to type=registry,ref=myimage:buildcache,mode=max \\\n  # ↑ 현재 빌드 캐시를 레지스트리에 저장 (mode=max: 모든 레이어 저장)\n\n  --platform linux/amd64,linux/arm64 \\\n  # ↑ 두 아키텍처 동시 빌드\n\n  --push \\\n  # ↑ 빌드 후 즉시 레지스트리에 푸시\n</code></pre>\n<p><strong>효과</strong>: 의존성이 변경되지 않으면 <code>pip install</code> 단계를 건너뛰어 <strong>빌드 시간 70~80% 절약</strong>.</p>\n<hr>\n<h2>ArgoCD: GitOps CD</h2>\n<h3>ArgoCD가 동작하는 원리</h3>\n<p><strong>폴링 vs Webhook</strong>:</p>\n<ul>\n<li>기본: <strong>3분(180초)</strong> 마다 매니페스트 저장소를 폴링 (<code>timeout.reconciliation</code> 설정값)<a href=\"https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/\" target=\"_blank\"><sup>[1]</sup></a></li>\n<li>Webhook 설정 시: GitLab/GitHub push 이벤트를 즉시 수신 → 폴링 대기 없이 Sync 트리거</li>\n<li>Webhook은 <strong>신뢰하지 않음</strong> — Refresh만 트리거하고 blind sync는 하지 않음</li>\n</ul>\n<pre><code class=\"language-mermaid\">%% desc: ArgoCD Sync 루프 — Git 상태와 클러스터 상태를 지속적으로 일치시킴\nsequenceDiagram\n  participant G as Git (매니페스트 저장소)\n  participant A as ArgoCD\n  participant K as k3s Cluster\n\n  loop 3분마다 폴링 (기본값 180초, Webhook 설정 시 즉시)\n    A-&gt;&gt;G: 매니페스트 상태 확인\n    G--&gt;&gt;A: kustomization.yaml (newTag: abc123)\n    A-&gt;&gt;K: 현재 클러스터 상태 확인\n    K--&gt;&gt;A: 현재 실행 중: tag xyz789\n    A-&gt;&gt;A: Diff 감지: abc123 ≠ xyz789\n    A-&gt;&gt;K: kubectl apply -k ./overlays/prod\n    K--&gt;&gt;A: Sync 완료\n  end\n</code></pre>\n<h3>kustomization.yaml 구조</h3>\n<pre><code class=\"language-yaml\"># k8s-manifests/overlays/prod/kustomization.yaml\napiVersion: kustomize.config.k8s.io/v1beta1\nkind: Kustomization\n\nresources:\n  - ../../base\n\nimages:\n  - name: myorg/pms-web\n    newTag: abc1234-42   # ← Jenkins가 이 값을 sed로 교체\n</code></pre>\n<pre><code class=\"language-yaml\"># k8s-manifests/base/deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: pms-web\n  namespace: pms-web\nspec:\n  replicas: 2\n  selector:\n    matchLabels:\n      app: pms-web\n  template:\n    spec:\n      containers:\n        - name: web\n          image: myorg/pms-web  # kustomize가 태그를 붙여줌\n          ports:\n            - containerPort: 8000\n          env:\n            - name: DJANGO_SECRET_KEY\n              valueFrom:\n                secretKeyRef:\n                  name: pms-secrets\n                  key: secret-key\n</code></pre>\n<hr>\n<h2>k3s: 왜 경량 Kubernetes인가</h2>\n<p>k3s는 Rancher Lab이 만든 <strong>경량 Kubernetes 배포판</strong>이다.<a href=\"https://docs.k3s.io/\" target=\"_blank\"><sup>[3]</sup></a></p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>일반 K8s</th>\n<th>k3s</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>바이너리 크기</td>\n<td>~수백 MB</td>\n<td>~70MB</td>\n</tr>\n<tr>\n<td>메모리 요구량</td>\n<td>2GB+</td>\n<td>512MB</td>\n</tr>\n<tr>\n<td>설치</td>\n<td>복잡</td>\n<td>`curl -sfL <a href=\"https://get.k3s.io\">https://get.k3s.io</a></td>\n</tr>\n<tr>\n<td>용도</td>\n<td>대규모 프로덕션</td>\n<td>소규모 서버, 엣지, IoT, 개발</td>\n</tr>\n</tbody></table>\n<h3>이 프로젝트의 k3s 리소스 구조</h3>\n<pre><code class=\"language-mermaid\">%% desc: k3s 클러스터 내 리소스 — Deployment vs StatefulSet 구분\nflowchart TD\n  subgraph NS[&quot;Namespace: pms-web&quot;]\n    subgraph DEP[&quot;Deployment (상태 없음, 확장 가능)&quot;]\n      D1[&quot;Django Web\\n× 2 replicas&quot;]\n      D2[&quot;Celery Worker\\n× 2 replicas&quot;]\n    end\n    subgraph STS[&quot;StatefulSet (상태 있음, 데이터 보존)&quot;]\n      S1[&quot;MySQL\\n× 1\\n+ PersistentVolume&quot;]\n      S2[&quot;Redis\\n× 1\\n+ PersistentVolume&quot;]\n    end\n    subgraph SVC[&quot;Service&quot;]\n      V1[&quot;ClusterIP: mysql-svc&quot;]\n      V2[&quot;ClusterIP: redis-svc&quot;]\n      V3[&quot;LoadBalancer: web-svc\\n(외부 노출)&quot;]\n    end\n  end\n\n  D1 --&gt; V1 &amp; V2\n  D2 --&gt; V1 &amp; V2\n  V3 --&gt; D1\n</code></pre>\n<p><strong>Deployment vs StatefulSet</strong>:</p>\n<ul>\n<li><code>Deployment</code>: Pod이 죽어도 데이터가 없어도 됨 → Django, Celery</li>\n<li><code>StatefulSet</code>: Pod에 고정 이름이 붙고 PVC(영구 스토리지)가 유지됨 → MySQL, Redis</li>\n</ul>\n<hr>\n<h2>이미지 태그 전략: 왜 git-{commit}-{build} 형태인가</h2>\n<pre><code class=\"language-bash\"># 나쁜 예: latest 태그만 사용\ndocker push myimage:latest\n# → 어느 커밋이 배포됐는지 알 수 없음\n# → Rollback 불가\n\n# 좋은 예: Commit Hash + Build Number\ndocker push myimage:a1b2c3d4-42\n# → git show a1b2c3d4로 어느 코드인지 즉시 확인\n# → 이전 태그로 kustomization.yaml만 되돌리면 Rollback 완료\n</code></pre>\n<h3>롤백 방법</h3>\n<pre><code class=\"language-bash\"># 방법 1: Git revert (권장 — GitOps 원칙 유지)\ngit revert HEAD\ngit push origin main\n# → ArgoCD가 감지 후 이전 태그로 자동 롤백\n\n# 방법 2: 직접 태그 수정 (긴급 상황)\nsed -i &#39;s|newTag:.*|newTag: a1b2c3d4-38|&#39; kustomization.yaml\ngit commit -am &quot;hotfix: rollback to build 38&quot;\ngit push\n</code></pre>\n<hr>\n<h2>배포 흐름 최종 요약</h2>\n<pre><code class=\"language-mermaid\">%% desc: 개발자 git push → 서버 자동 배포까지 전체 단계 타임라인\nsequenceDiagram\n  participant D as 개발자\n  participant G as GitLab\n  participant J as Jenkins\n  participant R as DockerHub\n  participant M as Manifest Repo\n  participant A as ArgoCD\n  participant K as k3s\n\n  D-&gt;&gt;G: git push origin main\n  G-&gt;&gt;J: Webhook 트리거\n  J-&gt;&gt;J: Docker Buildx 빌드\n  J-&gt;&gt;R: Image Push (tag: abc123-42)\n  J-&gt;&gt;M: kustomization.yaml 태그 업데이트\n  J--&gt;&gt;D: Build 성공 알림\n\n  loop 최대 3분 이내 (Webhook 설정 시 즉시)\n    A-&gt;&gt;M: 변경 감지\n    A-&gt;&gt;K: kubectl apply\n    K--&gt;&gt;A: Sync 완료\n  end\n\n  Note over D,K: 총 소요시간: 빌드 3~8분 + ArgoCD sync 최대 3분\n</code></pre>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://argo-cd.readthedocs.io/en/stable/core_concepts/\" target=\"_blank\">[1] ArgoCD Core Concepts — 공식 문서</a></p>\n<p><a href=\"https://docs.docker.com/reference/cli/docker/buildx/build/\" target=\"_blank\">[2] Docker Buildx build — 공식 문서</a></p>\n<p><a href=\"https://docs.k3s.io/\" target=\"_blank\">[3] k3s 공식 문서</a></p>\n<p><a href=\"https://www.jenkins.io/doc/book/pipeline/syntax/\" target=\"_blank\">[4] Jenkins Pipeline Syntax — 공식 문서</a></p>\n<p><a href=\"https://kustomize.io/\" target=\"_blank\">[5] Kustomize 공식 문서</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/kubectl-debugging\">kubectl 실전 — 로그, 디버깅, 모니터링 →</a></li>\n<li><a href=\"/post/gitlab-cicd-guide\">GitLab CI/CD — .gitlab-ci.yml → K3s →</a></li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/infra/gitops",
+    "tags": [
+      "GitOps",
+      "Jenkins",
+      "ArgoCD",
+      "Kubernetes",
+      "k3s",
+      "CI/CD",
+      "Docker",
+      "Buildx",
+      "DevOps"
+    ],
+    "author": "Seobway",
+    "readTime": 18,
+    "views": 0,
+    "featured": true,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-03T11:45:45.408Z"
+  },
+  {
+    "id": "drf-serializer-validation",
+    "title": "DRF Serializer 검증 완전 정복 — validate_<field>가 return을 빠뜨리면 생기는 일",
+    "slug": "drf-serializer-validation",
+    "excerpt": "validate_category()에서 검증을 통과했는데 저장된 데이터에 category가 없다?  DRF Serializer 검증 라이프사이클을 이해하면 이런 '조용한 실패'를 다시는 겪지 않는다.\n",
+    "content": "<h2>오늘의 시행착오: 검증 통과 → 데이터 유실</h2>\n<pre><code class=\"language-python\"># ❌ 이 코드의 문제가 보이는가?\ndef validate_category(self, value):\n    if not Category.objects.filter(id=value).exists():\n        raise serializers.ValidationError(&quot;존재하지 않는 카테고리입니다.&quot;)\n    # return이 없다!\n</code></pre>\n<p>카테고리 검증 로직을 완성했고, ValidationError도 잘 발생시킨다. 그런데 정작 유효한 값으로 저장을 시도하면 <strong>category 필드가 빠진 채로 저장</strong>된다.</p>\n<p>에러도 없다. 경고도 없다. 그냥 조용히 사라진다.</p>\n<hr>\n<h2>Serializer 검증 라이프사이클</h2>\n<p>DRF가 <code>.is_valid()</code>를 호출할 때 내부에서 어떤 일이 벌어지는지 전체 흐름을 이해해야 한다.<a href=\"https://www.django-rest-framework.org/api-guide/serializers/#validation\" target=\"_blank\"><sup>[1]</sup></a></p>\n<pre><code class=\"language-mermaid\">%% desc: DRF Serializer.is_valid() 내부 검증 순서\nflowchart TD\n  A[&quot;is_valid() 호출&quot;]\n  B[&quot;1단계: run_validators()\\n각 필드의 validators 리스트 실행&quot;]\n  C[&quot;2단계: validate_&lt;field&gt;()\\n필드별 커스텀 검증 메서드\\n→ 반드시 value를 return해야 함&quot;]\n  D[&quot;3단계: validate()\\n전체 데이터 교차 검증\\n→ 반드시 data를 return해야 함&quot;]\n  E[&quot;validated_data 완성&quot;]\n  F[&quot;save() / create() / update() 호출 가능&quot;]\n\n  A --&gt; B --&gt; C --&gt; D --&gt; E --&gt; F\n\n  B --&gt;|&quot;ValidationError 발생&quot;| ERR[&quot;is_valid() = False\\nerrors 딕셔너리 채움&quot;]\n  C --&gt;|&quot;ValidationError 발생&quot;| ERR\n  D --&gt;|&quot;ValidationError 발생&quot;| ERR\n</code></pre>\n<p><strong>핵심</strong>: 각 단계는 <strong>검증 + 값 변환</strong>을 동시에 수행한다. 값을 return하지 않으면 <code>None</code>이 반환되어 <code>validated_data</code>에서 해당 필드가 <code>None</code>으로 덮어씌워진다.</p>\n<hr>\n<h2>1단계: 필드 레벨 validators</h2>\n<pre><code class=\"language-python\">from rest_framework import serializers\nfrom rest_framework.validators import UniqueValidator\n\nclass TaskSerializer(serializers.ModelSerializer):\n    title = serializers.CharField(\n        validators=[\n            UniqueValidator(\n                queryset=Task.objects.all(),\n                message=&quot;이미 존재하는 제목입니다.&quot;\n            )\n        ]\n    )\n</code></pre>\n<p><code>validators</code> 리스트는 <code>validate_&lt;field&gt;</code> 메서드보다 먼저 실행된다. 값을 <strong>반환하지 않고 에러만 raise</strong>한다.</p>\n<hr>\n<h2>2단계: validate_&lt;field&gt;() — 반드시 return</h2>\n<pre><code class=\"language-python\">class TaskSerializer(serializers.ModelSerializer):\n\n    def validate_category(self, value):\n        &quot;&quot;&quot;\n        value: 클라이언트가 보낸 category 값 (이미 타입 변환 완료)\n        반드시 value를 return해야 validated_data에 들어간다.\n        &quot;&quot;&quot;\n        if not Category.objects.filter(id=value).exists():\n            raise serializers.ValidationError(&quot;존재하지 않는 카테고리입니다.&quot;)\n\n        # ✅ 이 한 줄이 없으면 validated_data[&#39;category&#39;] = None\n        return value\n\n    def validate_due_date(self, value):\n        &quot;&quot;&quot;날짜 검증 + 변환 예시&quot;&quot;&quot;\n        if value &lt; date.today():\n            raise serializers.ValidationError(&quot;과거 날짜는 설정할 수 없습니다.&quot;)\n        return value  # ✅ 반드시 return\n\n    def validate_priority(self, value):\n        &quot;&quot;&quot;값을 변환해서 반환하는 예시&quot;&quot;&quot;\n        # 입력값을 정규화하여 반환할 수도 있다\n        return value.upper()  # &#39;high&#39; → &#39;HIGH&#39;\n</code></pre>\n<h3>Python에서 return이 없으면 어떻게 되는가</h3>\n<pre><code class=\"language-python\">def validate_category(self, value):\n    if not Category.objects.filter(id=value).exists():\n        raise serializers.ValidationError(&quot;...&quot;)\n    # return 없음 → Python이 암묵적으로 None 반환\n\n# DRF 내부 동작 (간략화):\nvalidated_value = self.validate_category(raw_value)  # None 반환\nvalidated_data[&#39;category&#39;] = validated_value          # None 저장됨\n</code></pre>\n<p>Python의 모든 함수는 <code>return</code> 없으면 <code>None</code>을 반환한다. DRF는 이것을 &quot;의도적인 None 설정&quot;으로 해석한다.</p>\n<hr>\n<h2>3단계: validate() — 교차 검증</h2>\n<p>복수 필드 간의 관계를 검증할 때 사용한다.</p>\n<pre><code class=\"language-python\">class TaskSerializer(serializers.ModelSerializer):\n\n    def validate(self, data):\n        &quot;&quot;&quot;\n        data: 모든 필드 레벨 검증이 완료된 validated_data\n        반드시 data를 return해야 한다.\n        &quot;&quot;&quot;\n        start_date = data.get(&#39;start_date&#39;)\n        end_date = data.get(&#39;end_date&#39;)\n\n        if start_date and end_date and start_date &gt; end_date:\n            raise serializers.ValidationError(\n                &quot;종료일은 시작일 이후여야 합니다.&quot;\n            )\n\n        # 비즈니스 로직: 마감일 기본값 설정\n        if not data.get(&#39;due_date&#39;) and start_date:\n            data[&#39;due_date&#39;] = start_date + timedelta(days=7)\n\n        return data  # ✅ 반드시 return\n</code></pre>\n<hr>\n<h2>전체 예시: TaskModelSerializer</h2>\n<pre><code class=\"language-python\">from rest_framework import serializers\nfrom datetime import date, timedelta\nfrom .models import Task, Category\n\nclass TaskModelSerializer(serializers.ModelSerializer):\n\n    class Meta:\n        model = Task\n        fields = [\n            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;,\n            &#39;category&#39;, &#39;priority&#39;, &#39;due_date&#39;,\n            &#39;start_date&#39;, &#39;end_date&#39;, &#39;created_by&#39;,\n        ]\n        read_only_fields = [&#39;id&#39;, &#39;created_by&#39;]\n\n    # ── 필드 레벨 검증 ────────────────────────────────────────────────\n\n    def validate_title(self, value):\n        &quot;&quot;&quot;빈 문자열·공백 차단&quot;&quot;&quot;\n        if not value.strip():\n            raise serializers.ValidationError(&quot;제목은 공백일 수 없습니다.&quot;)\n        return value.strip()  # 앞뒤 공백 제거 후 반환\n\n    def validate_category(self, value):\n        &quot;&quot;&quot;카테고리 존재 여부 확인&quot;&quot;&quot;\n        if not Category.objects.filter(id=value).exists():\n            raise serializers.ValidationError(&quot;존재하지 않는 카테고리입니다.&quot;)\n        return value  # ✅ 핵심\n\n    def validate_priority(self, value):\n        VALID = [&#39;LOW&#39;, &#39;MEDIUM&#39;, &#39;HIGH&#39;, &#39;CRITICAL&#39;]\n        if value.upper() not in VALID:\n            raise serializers.ValidationError(\n                f&quot;우선순위는 {VALID} 중 하나여야 합니다.&quot;\n            )\n        return value.upper()\n\n    def validate_due_date(self, value):\n        if value and value &lt; date.today():\n            raise serializers.ValidationError(&quot;과거 날짜는 설정할 수 없습니다.&quot;)\n        return value\n\n    # ── 교차 검증 ────────────────────────────────────────────────────\n\n    def validate(self, data):\n        start = data.get(&#39;start_date&#39;)\n        end = data.get(&#39;end_date&#39;)\n\n        if start and end and start &gt; end:\n            raise serializers.ValidationError({\n                &#39;end_date&#39;: &quot;종료일은 시작일 이후여야 합니다.&quot;\n            })\n\n        return data\n\n    # ── 저장 시 created_by 주입 ──────────────────────────────────────\n\n    def create(self, validated_data):\n        &quot;&quot;&quot;request.user를 created_by에 자동 주입&quot;&quot;&quot;\n        request = self.context.get(&#39;request&#39;)\n        if request and request.user.is_authenticated:\n            validated_data[&#39;created_by&#39;] = request.user\n        return super().create(validated_data)\n</code></pre>\n<hr>\n<h2>검증 에러 응답 구조</h2>\n<pre><code class=\"language-python\"># 단일 필드 에러\nraise serializers.ValidationError(&quot;메시지&quot;)\n# → {&quot;category&quot;: [&quot;메시지&quot;]}\n\n# non_field_errors (교차 검증)\nraise serializers.ValidationError(&quot;메시지&quot;)  # validate() 안에서\n# → {&quot;non_field_errors&quot;: [&quot;메시지&quot;]}\n\n# 특정 필드 지정\nraise serializers.ValidationError({&quot;end_date&quot;: &quot;종료일이 잘못됐습니다.&quot;})\n# → {&quot;end_date&quot;: [&quot;종료일이 잘못됐습니다.&quot;]}\n</code></pre>\n<pre><code class=\"language-json\">// 실제 API 응답 예시 (HTTP 400)\n{\n  &quot;category&quot;: [&quot;존재하지 않는 카테고리입니다.&quot;],\n  &quot;due_date&quot;: [&quot;과거 날짜는 설정할 수 없습니다.&quot;],\n  &quot;non_field_errors&quot;: [&quot;종료일은 시작일 이후여야 합니다.&quot;]\n}\n</code></pre>\n<hr>\n<h2>검증 흐름 요약표</h2>\n<table>\n<thead>\n<tr>\n<th>메서드</th>\n<th>실행 시점</th>\n<th>입력</th>\n<th>반드시 return</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>validators</code> 리스트</td>\n<td>가장 먼저</td>\n<td>개별 필드 값</td>\n<td>불필요 (에러만 raise)</td>\n</tr>\n<tr>\n<td><code>validate_&lt;field&gt;()</code></td>\n<td>필드별 순서대로</td>\n<td>해당 필드 값</td>\n<td><strong>반드시 value return</strong></td>\n</tr>\n<tr>\n<td><code>validate()</code></td>\n<td>마지막</td>\n<td>전체 validated_data</td>\n<td><strong>반드시 data return</strong></td>\n</tr>\n</tbody></table>\n<hr>\n<h2>흔한 실수 목록</h2>\n<pre><code class=\"language-python\"># ❌ 1. return 없음 → 필드가 None으로 저장\ndef validate_category(self, value):\n    if not Category.objects.filter(id=value).exists():\n        raise serializers.ValidationError(&quot;없는 카테고리&quot;)\n    # return 없음!\n\n# ❌ 2. validate()에서 data 대신 None 반환\ndef validate(self, data):\n    if data[&#39;start&#39;] &gt; data[&#39;end&#39;]:\n        raise serializers.ValidationError(&quot;날짜 오류&quot;)\n    # return 없음! → validated_data 전체가 None\n\n# ❌ 3. validate()에서 수정한 data를 반환 안 함\ndef validate(self, data):\n    data[&#39;slug&#39;] = slugify(data[&#39;title&#39;])\n    # return data 빠짐 → slug 변환 안 됨\n\n# ✅ 올바른 패턴\ndef validate_category(self, value):\n    # ... 검증 ...\n    return value  # 항상 return\n\ndef validate(self, data):\n    # ... 교차 검증 ...\n    data[&#39;computed_field&#39;] = some_value\n    return data  # 항상 return\n</code></pre>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://www.django-rest-framework.org/api-guide/serializers/#validation\" target=\"_blank\">[1] DRF Serializers — Validation — 공식 문서</a></p>\n<p><a href=\"https://www.django-rest-framework.org/api-guide/validators/\" target=\"_blank\">[2] DRF Validators — 공식 문서</a></p>\n<p><a href=\"https://www.django-rest-framework.org/api-guide/fields/#field-level-validation\" target=\"_blank\">[3] DRF Field-level validation — 공식 문서</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/django-object-permissions\">Django 객체 레벨 권한 — Owner와 팀 기반 접근 제어 →</a></li>\n<li><a href=\"/post/django-migration\">Django Migration 완전 정복 →</a></li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "DRF",
+      "Serializer",
+      "Validation",
+      "REST",
+      "API",
+      "시행착오"
+    ],
+    "author": "Seobway",
+    "readTime": 13,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-03T11:45:45.369Z"
+  },
+  {
+    "id": "django-object-permissions",
+    "title": "Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어",
+    "slug": "django-object-permissions",
+    "excerpt": "IsAuthenticated만으로는 \"내 일정을 남이 수정하는 것\"을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다.\n",
+    "content": "<h2>왜 IsAuthenticated만으로는 부족한가</h2>\n<pre><code class=\"language-python\"># 이 코드의 구멍은?\nclass TaskViewSet(ModelViewSet):\n    permission_classes = [IsAuthenticated]\n    queryset = Task.objects.all()\n    serializer_class = TaskSerializer\n</code></pre>\n<p>로그인한 사용자라면 <strong>누구든</strong> 모든 Task를 수정·삭제할 수 있다.<br><code>IsAuthenticated</code>는 &quot;로그인했는가&quot;만 확인하지, &quot;이 데이터의 주인인가&quot;를 확인하지 않는다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Django DRF 권한 체계 — 3개 레이어\nflowchart TD\n  A[&quot;요청 도착&quot;]\n  B[&quot;Authentication\\n인증: 이 사람이 누구인가?\\nJWT·Session·Token&quot;]\n  C[&quot;Permission (View 레벨)\\nhas_permission()\\n이 뷰에 접근할 수 있는가?\\nIsAuthenticated 등&quot;]\n  D[&quot;Object Permission (Object 레벨)\\nhas_object_permission()\\n이 특정 객체를 다룰 수 있는가?\\n→ 여기가 핵심&quot;]\n  E[&quot;비즈니스 로직 실행&quot;]\n\n  A --&gt; B\n  B --&gt;|&quot;인증 실패&quot;| ERR1[&quot;401 Unauthorized&quot;]\n  B --&gt; C\n  C --&gt;|&quot;권한 없음&quot;| ERR2[&quot;403 Forbidden&quot;]\n  C --&gt; D\n  D --&gt;|&quot;객체 권한 없음&quot;| ERR2\n  D --&gt; E\n</code></pre>\n<hr>\n<h2>Step 1: 모델에 소유자 필드 추가</h2>\n<p>누가 만들었는지 모르면 소유권 검사가 불가능하다. <code>created_by</code>를 먼저 추가한다.<a href=\"https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ForeignKey\" target=\"_blank\"><sup>[1]</sup></a></p>\n<pre><code class=\"language-python\"># models.py\nfrom django.db import models\nfrom django.contrib.auth import get_user_model\n\nUser = get_user_model()\n\nclass Task(models.Model):\n    title = models.CharField(max_length=200)\n    description = models.TextField(blank=True)\n    category = models.ForeignKey(&#39;Category&#39;, on_delete=models.SET_NULL, null=True)\n    due_date = models.DateField(null=True, blank=True)\n\n    # ── 소유권 필드 ───────────────────────────────────────────────────\n    created_by = models.ForeignKey(\n        User,\n        on_delete=models.SET_NULL,\n        null=True,       # 기존 데이터 호환: null 허용\n        blank=True,\n        related_name=&#39;created_tasks&#39;,\n        verbose_name=&#39;작성자&#39;,\n    )\n\n    created_at = models.DateTimeField(auto_now_add=True)\n    updated_at = models.DateTimeField(auto_now=True)\n\n    class Meta:\n        ordering = [&#39;-created_at&#39;]\n</code></pre>\n<blockquote>\n<p><strong>null=True가 필요한 이유</strong>: 기존에 데이터가 있는 테이블에 ForeignKey를 추가하면 기존 행에 넣을 값이 없다. <code>null=True</code>를 지정하지 않으면 <code>makemigrations</code> 시 기본값을 요구하고, 잘못된 값을 입력하면 DB 무결성이 깨진다.</p>\n</blockquote>\n<h3>마이그레이션 생성</h3>\n<pre><code class=\"language-bash\">python manage.py makemigrations tasks --name task_auditing_fields\npython manage.py migrate\n</code></pre>\n<p>생성되는 <code>0003_task_auditing_fields.py</code>:</p>\n<pre><code class=\"language-python\">from django.conf import settings\nfrom django.db import migrations, models\nimport django.db.models.deletion\n\nclass Migration(migrations.Migration):\n\n    dependencies = [\n        (&#39;tasks&#39;, &#39;0002_previous_migration&#39;),\n        migrations.swappable_dependency(settings.AUTH_USER_MODEL),\n    ]\n\n    operations = [\n        migrations.AddField(\n            model_name=&#39;task&#39;,\n            name=&#39;created_by&#39;,\n            field=models.ForeignKey(\n                blank=True,\n                null=True,\n                on_delete=django.db.models.deletion.SET_NULL,\n                related_name=&#39;created_tasks&#39;,\n                to=settings.AUTH_USER_MODEL,\n                verbose_name=&#39;작성자&#39;,\n            ),\n        ),\n    ]\n</code></pre>\n<hr>\n<h2>Step 2: 커스텀 Permission 클래스 작성</h2>\n<p>DRF의 <code>BasePermission</code>을 상속한다.<a href=\"https://www.django-rest-framework.org/api-guide/permissions/#custom-permissions\" target=\"_blank\"><sup>[2]</sup></a></p>\n<pre><code class=\"language-python\"># permissions.py\nfrom rest_framework.permissions import BasePermission, SAFE_METHODS\n\n# 승인된 팀 코드 목록\nPRIVILEGED_TEAMS = {&#39;MGMT&#39;, &#39;SALES&#39;}  # 경영지원, 기술영업\n\n\nclass IsOwnerOrPrivilegedTeam(BasePermission):\n    &quot;&quot;&quot;\n    접근 허용 조건 (OR 관계):\n    1. 이 객체를 만든 사람 (Owner)\n    2. MGMT / SALES 팀 소속 (상위 권한 보유 팀)\n    &quot;&quot;&quot;\n\n    def has_permission(self, request, view):\n        &quot;&quot;&quot;뷰 접근 자체: 로그인만 확인&quot;&quot;&quot;\n        return request.user and request.user.is_authenticated\n\n    def has_object_permission(self, request, view, obj):\n        &quot;&quot;&quot;객체 수준 권한: 읽기는 허용, 쓰기는 조건 확인&quot;&quot;&quot;\n\n        # 읽기(GET, HEAD, OPTIONS)는 항상 허용\n        if request.method in SAFE_METHODS:\n            return True\n\n        # 조건 1: 소유자 본인\n        if obj.created_by == request.user:\n            return True\n\n        # 조건 2: 상위 권한 팀 (User 모델에 team/department 필드가 있다고 가정)\n        user_team = getattr(request.user, &#39;team&#39;, None)\n        if user_team and user_team.upper() in PRIVILEGED_TEAMS:\n            return True\n\n        return False\n</code></pre>\n<h3>팀 정보를 어디서 가져오는가</h3>\n<pre><code class=\"language-python\"># User 모델 확장 예시 (Profile 또는 AbstractUser)\nclass UserProfile(models.Model):\n    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name=&#39;profile&#39;)\n    team = models.CharField(\n        max_length=20,\n        choices=[\n            (&#39;MGMT&#39;, &#39;경영지원&#39;),\n            (&#39;SALES&#39;, &#39;기술영업&#39;),\n            (&#39;DEV&#39;, &#39;개발&#39;),\n            (&#39;OPS&#39;, &#39;운영&#39;),\n        ],\n        default=&#39;DEV&#39;,\n    )\n\n# Permission에서 접근\nuser_team = getattr(request.user.profile, &#39;team&#39;, None)\n</code></pre>\n<hr>\n<h2>Step 3: ViewSet에 권한 적용</h2>\n<pre><code class=\"language-python\"># views.py\nfrom rest_framework import viewsets, status\nfrom rest_framework.permissions import IsAuthenticated\nfrom rest_framework.response import Response\nfrom .models import Task\nfrom .serializers import TaskModelSerializer\nfrom .permissions import IsOwnerOrPrivilegedTeam\n\n\nclass TaskViewSet(viewsets.ModelViewSet):\n    serializer_class = TaskModelSerializer\n\n    # ── 권한: 로그인 + 객체 레벨 권한 ────────────────────────────────\n    permission_classes = [IsOwnerOrPrivilegedTeam]\n\n    def get_queryset(self):\n        &quot;&quot;&quot;\n        일반 사용자: 본인이 만든 태스크만 조회\n        MGMT/SALES: 전체 조회\n        &quot;&quot;&quot;\n        user = self.request.user\n        team = getattr(getattr(user, &#39;profile&#39;, None), &#39;team&#39;, &#39;&#39;)\n\n        if team.upper() in {&#39;MGMT&#39;, &#39;SALES&#39;}:\n            return Task.objects.all().select_related(&#39;created_by&#39;, &#39;category&#39;)\n\n        return Task.objects.filter(\n            created_by=user\n        ).select_related(&#39;created_by&#39;, &#39;category&#39;)\n\n    def perform_create(self, serializer):\n        &quot;&quot;&quot;생성 시 자동으로 created_by 주입&quot;&quot;&quot;\n        serializer.save(created_by=self.request.user)\n\n    def get_permissions(self):\n        &quot;&quot;&quot;\n        액션별 권한 클래스를 다르게 설정할 수 있다.\n        create는 로그인만 확인, update/delete는 객체 권한 필요\n        &quot;&quot;&quot;\n        if self.action == &#39;create&#39;:\n            return [IsAuthenticated()]\n        return [IsOwnerOrPrivilegedTeam()]\n</code></pre>\n<hr>\n<h2>권한 매트릭스</h2>\n<pre><code class=\"language-mermaid\">%% desc: 역할별 Task CRUD 권한 매트릭스\nflowchart LR\n  subgraph OWNER[&quot;소유자 (Owner)&quot;]\n    O1[&quot;본인 Task 조회 ✅&quot;]\n    O2[&quot;본인 Task 수정 ✅&quot;]\n    O3[&quot;본인 Task 삭제 ✅&quot;]\n    O4[&quot;타인 Task 조회 ❌&quot;]\n    O5[&quot;타인 Task 수정 ❌&quot;]\n  end\n\n  subgraph MGMT_SALES[&quot;MGMT / SALES 팀&quot;]\n    M1[&quot;전체 Task 조회 ✅&quot;]\n    M2[&quot;전체 Task 수정 ✅&quot;]\n    M3[&quot;전체 Task 삭제 ✅&quot;]\n  end\n\n  subgraph OTHERS[&quot;일반 사용자&quot;]\n    G1[&quot;본인 Task 조회 ✅&quot;]\n    G2[&quot;타인 Task 수정 ❌ → 403&quot;]\n  end\n</code></pre>\n<table>\n<thead>\n<tr>\n<th>액션</th>\n<th>본인(Owner)</th>\n<th>MGMT/SALES</th>\n<th>타팀 일반 사용자</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>List (GET)</td>\n<td>본인 것만</td>\n<td>전체</td>\n<td>본인 것만</td>\n</tr>\n<tr>\n<td>Retrieve (GET)</td>\n<td>✅</td>\n<td>✅</td>\n<td>❌ 403</td>\n</tr>\n<tr>\n<td>Create (POST)</td>\n<td>✅</td>\n<td>✅</td>\n<td>✅</td>\n</tr>\n<tr>\n<td>Update (PUT/PATCH)</td>\n<td>✅</td>\n<td>✅</td>\n<td>❌ 403</td>\n</tr>\n<tr>\n<td>Destroy (DELETE)</td>\n<td>✅</td>\n<td>✅</td>\n<td>❌ 403</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>Step 4: Serializer에서 created_by 읽기 전용 처리</h2>\n<pre><code class=\"language-python\">class TaskModelSerializer(serializers.ModelSerializer):\n    # 소유자 정보: 읽기 전용으로 노출\n    created_by = serializers.SerializerMethodField()\n\n    class Meta:\n        model = Task\n        fields = [&#39;id&#39;, &#39;title&#39;, &#39;category&#39;, &#39;due_date&#39;, &#39;created_by&#39;, ...]\n        read_only_fields = [&#39;id&#39;, &#39;created_by&#39;]\n\n    def get_created_by(self, obj):\n        if obj.created_by:\n            return {\n                &#39;id&#39;: obj.created_by.id,\n                &#39;username&#39;: obj.created_by.username,\n                &#39;team&#39;: getattr(getattr(obj.created_by, &#39;profile&#39;, None), &#39;team&#39;, None),\n            }\n        return None\n</code></pre>\n<hr>\n<h2>다중 날짜 일정 지원</h2>\n<p>오늘 구현한 다른 기능: 달력에서 여러 날짜를 선택해 일정 범위를 지정하는 기능.</p>\n<pre><code class=\"language-python\"># 모델에 start_date, end_date 추가\nclass Task(models.Model):\n    # 기존 필드...\n    start_date = models.DateField(null=True, blank=True)\n    end_date = models.DateField(null=True, blank=True)\n</code></pre>\n<pre><code class=\"language-python\"># Serializer: 날짜 범위 교차 검증\ndef validate(self, data):\n    start = data.get(&#39;start_date&#39;)\n    end = data.get(&#39;end_date&#39;)\n\n    if start and end and start &gt; end:\n        raise serializers.ValidationError({\n            &#39;end_date&#39;: &quot;종료일은 시작일 이후여야 합니다.&quot;\n        })\n\n    return data  # ✅ 반드시 return\n</code></pre>\n<pre><code class=\"language-tsx\">// Frontend: ScheduleCalendar.tsx — 2번 클릭으로 범위 지정\nconst [rangeStart, setRangeStart] = useState&lt;Date | null&gt;(null)\n\nconst handleDateClick = (date: Date) =&gt; {\n  if (!rangeStart) {\n    setRangeStart(date)       // 첫 번째 클릭: 시작일 설정\n  } else {\n    const start = rangeStart &lt; date ? rangeStart : date\n    const end = rangeStart &lt; date ? date : rangeStart\n\n    openNewScheduleModal({ start_date: start, end_date: end })\n    setRangeStart(null)       // 선택 완료 후 초기화\n  }\n}\n</code></pre>\n<hr>\n<h2>권한 테스트 작성</h2>\n<pre><code class=\"language-python\">from rest_framework.test import APITestCase\nfrom rest_framework import status\nfrom django.contrib.auth import get_user_model\nfrom .models import Task\n\nUser = get_user_model()\n\n\nclass TaskPermissionTest(APITestCase):\n\n    def setUp(self):\n        self.owner = User.objects.create_user(&#39;owner&#39;, password=&#39;pass&#39;)\n        self.other = User.objects.create_user(&#39;other&#39;, password=&#39;pass&#39;)\n        self.mgmt_user = User.objects.create_user(&#39;mgmt&#39;, password=&#39;pass&#39;)\n        # mgmt_user.profile.team = &#39;MGMT&#39; 설정 가정\n\n        self.task = Task.objects.create(\n            title=&#39;Test Task&#39;,\n            created_by=self.owner\n        )\n\n    def test_owner_can_update(self):\n        self.client.force_authenticate(user=self.owner)\n        res = self.client.patch(f&#39;/api/tasks/{self.task.id}/&#39;, {&#39;title&#39;: &#39;Updated&#39;})\n        self.assertEqual(res.status_code, status.HTTP_200_OK)\n\n    def test_other_user_cannot_update(self):\n        self.client.force_authenticate(user=self.other)\n        res = self.client.patch(f&#39;/api/tasks/{self.task.id}/&#39;, {&#39;title&#39;: &#39;Hacked&#39;})\n        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)\n\n    def test_mgmt_can_update_any(self):\n        self.client.force_authenticate(user=self.mgmt_user)\n        res = self.client.patch(f&#39;/api/tasks/{self.task.id}/&#39;, {&#39;title&#39;: &#39;Managed&#39;})\n        self.assertEqual(res.status_code, status.HTTP_200_OK)\n</code></pre>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ForeignKey\" target=\"_blank\">[1] Django ForeignKey — 공식 문서</a></p>\n<p><a href=\"https://www.django-rest-framework.org/api-guide/permissions/#custom-permissions\" target=\"_blank\">[2] DRF Custom Permissions — 공식 문서</a></p>\n<p><a href=\"https://www.django-rest-framework.org/api-guide/permissions/#object-level-permissions\" target=\"_blank\">[3] DRF Object Level Permissions — 공식 문서</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/drf-serializer-validation\">DRF Serializer 검증 완전 정복 →</a></li>\n<li><a href=\"/post/django-migration\">Django Migration 완전 정복 →</a></li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "DRF",
+      "Permissions",
+      "ObjectPermission",
+      "RBAC",
+      "Authorization",
+      "권한시스템"
+    ],
+    "author": "Seobway",
+    "readTime": 14,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-03T11:45:45.362Z"
+  },
+  {
     "id": "why-threejs-exists",
     "title": "Three.js는 왜 만들어졌나: WebGL을 '직접' 쓰지 않기 위해",
     "slug": "why-threejs-exists",
@@ -18,7 +117,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.466Z"
+    "updatedAt": "2026-04-03T11:45:45.395Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -40,7 +139,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.463Z"
+    "updatedAt": "2026-04-03T11:45:45.394Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -62,7 +161,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.455Z"
+    "updatedAt": "2026-04-03T11:45:45.388Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
@@ -84,7 +183,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.453Z"
+    "updatedAt": "2026-04-03T11:45:45.387Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -106,7 +205,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.451Z"
+    "updatedAt": "2026-04-03T11:45:45.385Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -128,7 +227,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.450Z"
+    "updatedAt": "2026-04-03T11:45:45.384Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -150,7 +249,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.450Z"
+    "updatedAt": "2026-04-03T11:45:45.382Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -185,7 +284,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.485Z"
+    "updatedAt": "2026-04-03T11:45:45.413Z"
   },
   {
     "id": "react-query-queries",
@@ -210,14 +309,14 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.448Z"
+    "updatedAt": "2026-04-03T11:45:45.381Z"
   },
   {
     "id": "react-query-overview",
     "title": "TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준",
     "slug": "react-query-overview",
     "excerpt": "Redux로 서버 데이터를 관리하다 지쳤는가? TanStack Query(React Query v5)가 서버 상태와 클라이언트 상태를 구분하고 캐싱·백그라운드 동기화·에러 처리를 자동화하는 방식을 설명한다.\n",
-    "content": "<h2>왜 React Query인가</h2>\n<p>React로 데이터를 fetching하는 고전적인 방법:</p>\n<pre><code class=\"language-tsx\">function TodoList() {\n  const [todos, setTodos] = useState([]);\n  const [isLoading, setIsLoading] = useState(false);\n  const [error, setError] = useState(null);\n\n  useEffect(() =&gt; {\n    setIsLoading(true);\n    fetch(&#39;/api/todos&#39;)\n      .then(res =&gt; res.json())\n      .then(data =&gt; setTodos(data))\n      .catch(setError)\n      .finally(() =&gt; setIsLoading(false));\n  }, []);\n  // ...\n}\n</code></pre>\n<p>이것만으로는 처리되지 않는 것들:</p>\n<ul>\n<li>컴포넌트가 다시 마운트될 때 재요청?</li>\n<li>탭을 다시 활성화할 때 갱신?</li>\n<li>네트워크 재연결 시 갱신?</li>\n<li>여러 컴포넌트에서 같은 데이터를 요청할 때 중복 제거?</li>\n<li>캐시 무효화와 재검증?</li>\n<li>에러 시 자동 재시도?</li>\n</ul>\n<p>이 모든 것이 <strong>TanStack Query</strong>가 해결하는 문제다.<a href=\"https://tanstack.com/query/latest/docs/framework/react/overview\" target=\"_blank\"><sup>[1]</sup></a></p>\n<hr>\n<h2>서버 상태 vs 클라이언트 상태</h2>\n<p>React Query의 핵심 통찰은 상태를 두 종류로 구분하는 것이다.<a href=\"https://tkdodo.eu/blog/react-query-as-a-state-manager\" target=\"_blank\"><sup>[2]</sup></a></p>\n<pre><code class=\"language-mermaid\">%% desc: 서버 상태와 클라이언트 상태의 근본적 차이\nflowchart LR\n  subgraph CLIENT[&quot;클라이언트 상태&quot;]\n    C1[&quot;모달 열림/닫힘&quot;]\n    C2[&quot;다크모드 설정&quot;]\n    C3[&quot;폼 입력값&quot;]\n    C4[&quot;선택된 탭&quot;]\n  end\n\n  subgraph SERVER[&quot;서버 상태&quot;]\n    S1[&quot;API 응답 데이터&quot;]\n    S2[&quot;사용자 프로필&quot;]\n    S3[&quot;상품 목록&quot;]\n    S4[&quot;댓글 데이터&quot;]\n  end\n\n  CLIENT --&gt; CL[&quot;내 앱이 소유\\n동기적\\n항상 최신&quot;]\n  SERVER --&gt; SL[&quot;서버가 소유\\n비동기적\\n언제든 stale&quot;]\n</code></pre>\n<table>\n<thead>\n<tr>\n<th>차원</th>\n<th>클라이언트 상태</th>\n<th>서버 상태</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>소유권</td>\n<td>내 앱</td>\n<td>원격 서버</td>\n</tr>\n<tr>\n<td>지속성</td>\n<td>메모리</td>\n<td>DB / API</td>\n</tr>\n<tr>\n<td>동기화</td>\n<td>불필요</td>\n<td>지속적 동기화 필요</td>\n</tr>\n<tr>\n<td>Staleness</td>\n<td>항상 최신</td>\n<td>즉시 outdated 가능</td>\n</tr>\n<tr>\n<td>비동기</td>\n<td>거의 없음</td>\n<td>항상</td>\n</tr>\n</tbody></table>\n<p>서버 상태 관리를 Redux로 하면:</p>\n<ul>\n<li>Action creators, reducers, selectors, middleware(thunk/saga) 전부 직접 작성</li>\n<li>캐시 무효화 없음, 백그라운드 갱신 없음, stale 추적 없음</li>\n<li>React Query 10줄이 Redux 수백 줄을 대체한다</li>\n</ul>\n<blockquote>\n<p><strong>TkDodo</strong>: React Query is not a cache — it&#39;s a <strong>synchronization tool</strong>. 서버가 진짜 데이터 소유자이고, React Query는 UI를 그것과 동기화한다.</p>\n</blockquote>\n<hr>\n<h2>Stale-While-Revalidate 전략</h2>\n<p>React Query는 HTTP의 <code>stale-while-revalidate</code> 캐싱 원칙을 채택한다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Stale-While-Revalidate — 캐시된 데이터를 즉시 보여주고 백그라운드에서 재검증\nsequenceDiagram\n  participant U as 사용자\n  participant C as React Query Cache\n  participant S as 서버\n\n  U-&gt;&gt;C: 컴포넌트 마운트\n  C--&gt;&gt;U: ① 캐시 데이터 즉시 반환 (spinner 없음)\n  C-&gt;&gt;S: ② 백그라운드에서 재검증 요청\n  S--&gt;&gt;C: ③ 새 데이터 수신\n  C--&gt;&gt;U: ④ 변경됐으면 조용히 UI 업데이트\n  Note over U,S: 변경 없으면 UI 업데이트 없음 (structural sharing)\n</code></pre>\n<ol>\n<li><strong>캐시 데이터 즉시 반환</strong> — spinner 없음, 빠른 UI</li>\n<li><strong>백그라운드에서 재검증</strong> — 네트워크 요청 진행</li>\n<li><strong>변경 시 조용히 업데이트</strong> — loading 상태 없이</li>\n</ol>\n<blockquote>\n<p><strong>핵심</strong>: stale 데이터가 데이터 없음보다 낫다. 데이터 없음 = loading spinner = 느린 UX.</p>\n</blockquote>\n<hr>\n<h2>설치</h2>\n<pre><code class=\"language-bash\">npm install @tanstack/react-query\n# DevTools (개발 환경)\nnpm install @tanstack/react-query-devtools\n</code></pre>\n<hr>\n<h2>빠른 시작</h2>\n<pre><code class=\"language-tsx\">// main.tsx — QueryClient는 반드시 컴포넌트 밖에서 생성\nimport { QueryClient, QueryClientProvider } from &#39;@tanstack/react-query&#39;\nimport { ReactQueryDevtools } from &#39;@tanstack/react-query-devtools&#39;\n\nconst queryClient = new QueryClient({\n  defaultOptions: {\n    queries: {\n      staleTime: 1000 * 60,    // 1분 전역 기본값\n      retry: 3,\n    },\n  },\n})\n\nfunction App() {\n  return (\n    &lt;QueryClientProvider client={queryClient}&gt;\n      &lt;TodoApp /&gt;\n      &lt;ReactQueryDevtools initialIsOpen={false} /&gt;\n    &lt;/QueryClientProvider&gt;\n  )\n}\n</code></pre>\n<pre><code class=\"language-tsx\">// components/TodoList.tsx\nimport { useQuery } from &#39;@tanstack/react-query&#39;\n\nfunction TodoList() {\n  const { data, isLoading, isError, error } = useQuery({\n    queryKey: [&#39;todos&#39;],\n    queryFn: () =&gt; fetch(&#39;/api/todos&#39;).then(res =&gt; res.json()),\n  })\n\n  if (isLoading) return &lt;Spinner /&gt;\n  if (isError) return &lt;Alert message={error.message} /&gt;\n\n  return (\n    &lt;ul&gt;\n      {data.map(todo =&gt; &lt;li key={todo.id}&gt;{todo.title}&lt;/li&gt;)}\n    &lt;/ul&gt;\n  )\n}\n</code></pre>\n<p>이게 전부다. 자동으로 처리되는 것들:</p>\n<ul>\n<li>✅ 로딩/에러/성공 상태 관리</li>\n<li>✅ 에러 시 자동 재시도 (3회)</li>\n<li>✅ 윈도우 포커스 복귀 시 백그라운드 갱신</li>\n<li>✅ 동일 키 중복 요청 자동 dedup</li>\n<li>✅ 5분간 캐시 유지 (gcTime 기본값)</li>\n</ul>\n<hr>\n<h2>Redux/Zustand와의 역할 분담</h2>\n<p>React Query를 도입한 뒤 남은 진짜 클라이언트 상태는 매우 작다.</p>\n<pre><code class=\"language-mermaid\">%% desc: React Query 도입 전후 상태 관리 구조 변화\nflowchart TD\n  subgraph BEFORE[&quot;React Query 도입 전&quot;]\n    R1[&quot;Redux Store\\n서버 데이터 + 클라이언트 상태\\n전부 섞임&quot;]\n  end\n\n  subgraph AFTER[&quot;React Query 도입 후&quot;]\n    RQ[&quot;TanStack Query\\nAPI 데이터·캐시·동기화&quot;]\n    ZU[&quot;Zustand / useState\\n모달·다크모드·폼 상태&quot;]\n  end\n</code></pre>\n<p>서버 상태 → React Query<br>진짜 클라이언트 상태 (UI 토글, 모달, 폼) → Zustand 또는 <code>useState</code></p>\n<hr>\n<h2>포스트 구성</h2>\n<table>\n<thead>\n<tr>\n<th>포스트</th>\n<th>내용</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><a href=\"/post/react-query-queries\">QueryClient · Query Keys · useQuery 심층</a></td>\n<td>QueryClient 설정, 쿼리 키 팩토리, useQuery 전체 옵션, status vs fetchStatus</td>\n</tr>\n<tr>\n<td><a href=\"/post/react-query-mutations\">useMutation · Optimistic Updates</a></td>\n<td>mutation 라이프사이클, 두 레벨 콜백, 낙관적 업데이트</td>\n</tr>\n<tr>\n<td><a href=\"/post/react-query-cache\">캐시 · 무효화 · Prefetch</a></td>\n<td>staleTime vs gcTime, invalidateQueries, setQueryData, 백그라운드 트리거</td>\n</tr>\n<tr>\n<td><a href=\"/post/react-query-advanced\">고급 패턴 · v5 마이그레이션</a></td>\n<td>Infinite Query, 병렬 쿼리, Suspense, Custom Hooks, v4→v5 변경점</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://tanstack.com/query/latest/docs/framework/react/overview\" target=\"_blank\">[1] TanStack Query v5 Overview — 공식 문서</a></p>\n<p><a href=\"https://tkdodo.eu/blog/react-query-as-a-state-manager\" target=\"_blank\">[2] React Query as a State Manager — TkDodo</a></p>\n<p><a href=\"https://tkdodo.eu/blog/practical-react-query\" target=\"_blank\">[3] Practical React Query — TkDodo</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/react-query-queries\">QueryClient · Query Keys · useQuery 심층 →</a></li>\n<li><a href=\"/post/react-query-mutations\">useMutation · Optimistic Updates →</a></li>\n<li><a href=\"/post/react-query-cache\">캐시 · 무효화 · Prefetch →</a></li>\n<li><a href=\"/post/react-query-advanced\">고급 패턴 · v5 마이그레이션 →</a></li>\n</ul>\n",
+    "content": "<h2>이 시리즈 구성</h2>\n<table>\n<thead>\n<tr>\n<th>포스트</th>\n<th>내용</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>[1편] TanStack Query 개요 (현재 글)</strong></td>\n<td>왜 React Query인가, 서버/클라이언트 상태, SWR 전략, Zustand 역할 분담</td>\n</tr>\n<tr>\n<td><a href=\"/post/react-query-queries\">[2편] QueryClient · Query Keys · useQuery 심층</a></td>\n<td>QueryClient 설정, 쿼리 키 팩토리, useQuery 전체 옵션, status vs fetchStatus</td>\n</tr>\n<tr>\n<td><a href=\"/post/react-query-mutations\">[3편] useMutation · Optimistic Updates</a></td>\n<td>mutation 라이프사이클, 두 레벨 콜백, 낙관적 업데이트</td>\n</tr>\n<tr>\n<td><a href=\"/post/react-query-cache\">[4편] 캐시 · 무효화 · Prefetch</a></td>\n<td>staleTime vs gcTime, invalidateQueries, setQueryData, 백그라운드 트리거</td>\n</tr>\n<tr>\n<td><a href=\"/post/react-query-advanced\">[5편] 고급 패턴 · v5 마이그레이션</a></td>\n<td>Infinite Query, 병렬 쿼리, Suspense, Custom Hooks, v4→v5 변경점</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>왜 React Query인가</h2>\n<p>React로 데이터를 fetching하는 고전적인 방법:</p>\n<pre><code class=\"language-tsx\">function TodoList() {\n  const [todos, setTodos] = useState([]);\n  const [isLoading, setIsLoading] = useState(false);\n  const [error, setError] = useState(null);\n\n  useEffect(() =&gt; {\n    setIsLoading(true);\n    fetch(&#39;/api/todos&#39;)\n      .then(res =&gt; res.json())\n      .then(data =&gt; setTodos(data))\n      .catch(setError)\n      .finally(() =&gt; setIsLoading(false));\n  }, []);\n  // ...\n}\n</code></pre>\n<p>이것만으로는 처리되지 않는 것들:</p>\n<ul>\n<li>컴포넌트가 다시 마운트될 때 재요청?</li>\n<li>탭을 다시 활성화할 때 갱신?</li>\n<li>네트워크 재연결 시 갱신?</li>\n<li>여러 컴포넌트에서 같은 데이터를 요청할 때 중복 제거?</li>\n<li>캐시 무효화와 재검증?</li>\n<li>에러 시 자동 재시도?</li>\n</ul>\n<p>이 모든 것이 <strong>TanStack Query</strong>가 해결하는 문제다.<a href=\"https://tanstack.com/query/latest/docs/framework/react/overview\" target=\"_blank\"><sup>[1]</sup></a></p>\n<hr>\n<h2>서버 상태 vs 클라이언트 상태</h2>\n<p>React Query의 핵심 통찰은 상태를 두 종류로 구분하는 것이다.<a href=\"https://tkdodo.eu/blog/react-query-as-a-state-manager\" target=\"_blank\"><sup>[2]</sup></a></p>\n<pre><code class=\"language-mermaid\">%% desc: 서버 상태와 클라이언트 상태의 근본적 차이\nflowchart LR\n  subgraph CLIENT[&quot;클라이언트 상태&quot;]\n    C1[&quot;모달 열림/닫힘&quot;]\n    C2[&quot;다크모드 설정&quot;]\n    C3[&quot;폼 입력값&quot;]\n    C4[&quot;선택된 탭&quot;]\n  end\n\n  subgraph SERVER[&quot;서버 상태&quot;]\n    S1[&quot;API 응답 데이터&quot;]\n    S2[&quot;사용자 프로필&quot;]\n    S3[&quot;상품 목록&quot;]\n    S4[&quot;댓글 데이터&quot;]\n  end\n\n  CLIENT --&gt; CL[&quot;내 앱이 소유\\n동기적\\n항상 최신&quot;]\n  SERVER --&gt; SL[&quot;서버가 소유\\n비동기적\\n언제든 stale&quot;]\n</code></pre>\n<table>\n<thead>\n<tr>\n<th>차원</th>\n<th>클라이언트 상태</th>\n<th>서버 상태</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>소유권</td>\n<td>내 앱</td>\n<td>원격 서버</td>\n</tr>\n<tr>\n<td>지속성</td>\n<td>메모리</td>\n<td>DB / API</td>\n</tr>\n<tr>\n<td>동기화</td>\n<td>불필요</td>\n<td>지속적 동기화 필요</td>\n</tr>\n<tr>\n<td>Staleness</td>\n<td>항상 최신</td>\n<td>즉시 outdated 가능</td>\n</tr>\n<tr>\n<td>비동기</td>\n<td>거의 없음</td>\n<td>항상</td>\n</tr>\n</tbody></table>\n<p>서버 상태 관리를 Redux로 하면:</p>\n<ul>\n<li>Action creators, reducers, selectors, middleware(thunk/saga) 전부 직접 작성</li>\n<li>캐시 무효화 없음, 백그라운드 갱신 없음, stale 추적 없음</li>\n<li>React Query 10줄이 Redux 수백 줄을 대체한다</li>\n</ul>\n<blockquote>\n<p><strong>TkDodo</strong>: React Query is not a cache — it&#39;s a <strong>synchronization tool</strong>. 서버가 진짜 데이터 소유자이고, React Query는 UI를 그것과 동기화한다.</p>\n</blockquote>\n<hr>\n<h2>Stale-While-Revalidate 전략</h2>\n<p>React Query는 HTTP의 <code>stale-while-revalidate</code> 캐싱 원칙을 채택한다.</p>\n<p><strong>실생활 비유</strong>: 카카오톡 채널 피드를 열었을 때, 앱이 이전에 저장해둔 게시글을 <strong>즉시 보여준다</strong>. 동시에 백그라운드에서 서버에 새 글이 있는지 확인하고, 있으면 <strong>조용히 업데이트</strong>한다. 빈 화면 + 스피너를 보여주는 것보다 훨씬 빠른 UX.</p>\n<pre><code class=\"language-mermaid\">%% desc: Stale-While-Revalidate — 캐시된 데이터를 즉시 보여주고 백그라운드에서 재검증\nsequenceDiagram\n  participant U as 사용자\n  participant C as React Query Cache\n  participant S as 서버\n\n  U-&gt;&gt;C: 컴포넌트 마운트\n  C--&gt;&gt;U: ① 캐시 데이터 즉시 반환 (스피너 없음)\n  C-&gt;&gt;S: ② 백그라운드에서 재검증 요청\n  S--&gt;&gt;C: ③ 새 데이터 수신\n  C--&gt;&gt;U: ④ 변경됐으면 조용히 UI 업데이트\n  Note over U,S: 변경 없으면 UI 업데이트 없음 (structural sharing)\n</code></pre>\n<ol>\n<li><strong>캐시 데이터 즉시 반환</strong> — 스피너(로딩 애니메이션) 없음, 빠른 UI</li>\n<li><strong>백그라운드에서 재검증</strong> — 네트워크 요청이 진행 중이지만 사용자는 이미 내용을 보고 있음</li>\n<li><strong>변경 시 조용히 업데이트</strong> — loading 상태 없이 새 데이터로 교체</li>\n</ol>\n<blockquote>\n<p><strong>핵심</strong>: stale(오래된) 데이터가 데이터 없음보다 낫다. 데이터 없음 = 스피너(빈 화면 + 원형 로딩 표시) = 느린 UX.</p>\n</blockquote>\n<hr>\n<h2>설치</h2>\n<pre><code class=\"language-npm\">npm install @tanstack/react-query\nnpm install -D @tanstack/react-query-devtools\n</code></pre>\n<pre><code class=\"language-yarn\">yarn add @tanstack/react-query\nyarn add -D @tanstack/react-query-devtools\n</code></pre>\n<pre><code class=\"language-pnpm\">pnpm add @tanstack/react-query\npnpm add -D @tanstack/react-query-devtools\n</code></pre>\n<hr>\n<h2>빠른 시작</h2>\n<pre><code class=\"language-tsx\">// main.tsx — QueryClient는 반드시 컴포넌트 밖에서 생성\nimport { QueryClient, QueryClientProvider } from &#39;@tanstack/react-query&#39;\nimport { ReactQueryDevtools } from &#39;@tanstack/react-query-devtools&#39;\n\nconst queryClient = new QueryClient({\n  defaultOptions: {\n    queries: {\n      staleTime: 1000 * 60,    // 1분 전역 기본값\n      retry: 3,\n    },\n  },\n})\n\nfunction App() {\n  return (\n    &lt;QueryClientProvider client={queryClient}&gt;\n      &lt;TodoApp /&gt;\n      {/* 개발 환경에서만 표시되는 쿼리 디버거 */}\n      &lt;ReactQueryDevtools initialIsOpen={false} /&gt;\n    &lt;/QueryClientProvider&gt;\n  )\n}\n</code></pre>\n<pre><code class=\"language-tsx\">// components/TodoList.tsx\nimport { useQuery } from &#39;@tanstack/react-query&#39;\n\nfunction TodoList() {\n  const { data, isLoading, isError, error } = useQuery({\n    queryKey: [&#39;todos&#39;],\n    queryFn: () =&gt; fetch(&#39;/api/todos&#39;).then(res =&gt; res.json()),\n  })\n\n  // isLoading: 아직 데이터가 없고 처음 요청 중인 상태\n  // → 스피너(Spinner): 원형 로딩 애니메이션 컴포넌트. 데이터가 올 때까지 임시로 표시\n  if (isLoading) return &lt;Spinner /&gt;\n\n  if (isError) return &lt;Alert message={error.message} /&gt;\n\n  return (\n    &lt;ul&gt;\n      {data.map(todo =&gt; &lt;li key={todo.id}&gt;{todo.title}&lt;/li&gt;)}\n    &lt;/ul&gt;\n  )\n}\n</code></pre>\n<p>이게 전부다. 자동으로 처리되는 것들:</p>\n<ul>\n<li>✅ 로딩/에러/성공 상태 관리</li>\n<li>✅ 에러 시 자동 재시도 (3회)</li>\n<li>✅ 윈도우 포커스 복귀 시 백그라운드 갱신</li>\n<li>✅ 동일 키 중복 요청 자동 dedup</li>\n<li>✅ 5분간 캐시 유지 (gcTime 기본값)</li>\n</ul>\n<hr>\n<h2>Redux / Zustand 와의 역할 분담</h2>\n<p>React Query를 도입한 뒤 남은 진짜 클라이언트 상태는 매우 작다.</p>\n<pre><code class=\"language-mermaid\">%% desc: React Query 도입 전후 상태 관리 구조 변화\nflowchart TD\n  subgraph BEFORE[&quot;React Query 도입 전&quot;]\n    R1[&quot;Redux Store\\n서버 데이터 + 클라이언트 상태\\n전부 섞임&quot;]\n  end\n\n  subgraph AFTER[&quot;React Query 도입 후&quot;]\n    RQ[&quot;TanStack Query\\nAPI 데이터·캐시·동기화&quot;]\n    ZU[&quot;Zustand / useState\\n모달·다크모드·폼 상태&quot;]\n  end\n</code></pre>\n<table>\n<thead>\n<tr>\n<th>역할</th>\n<th>담당</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>서버 데이터 (API 응답, 목록, 상세)</td>\n<td><strong>TanStack Query</strong></td>\n</tr>\n<tr>\n<td>전역 UI 상태 (모달, 사이드바, 테마)</td>\n<td><strong>Zustand</strong></td>\n</tr>\n<tr>\n<td>로컬 컴포넌트 상태 (입력값, 토글)</td>\n<td><strong>useState</strong></td>\n</tr>\n</tbody></table>\n<h3>Zustand — 클라이언트 상태 관리</h3>\n<p>Zustand는 Redux의 복잡한 boilerplate 없이 전역 상태를 관리하는 경량 라이브러리다. React Query가 서버 상태를 담당하고, Zustand가 클라이언트 UI 상태를 담당하는 조합이 현재 가장 많이 쓰인다.</p>\n<pre><code class=\"language-npm\">npm install zustand\n</code></pre>\n<pre><code class=\"language-yarn\">yarn add zustand\n</code></pre>\n<pre><code class=\"language-pnpm\">pnpm add zustand\n</code></pre>\n<pre><code class=\"language-tsx\">// store/ui-store.ts — 전역 UI 상태 (React Query와 역할 분리)\nimport { create } from &#39;zustand&#39;\n\ninterface UIStore {\n  // 모달 상태\n  isModalOpen: boolean\n  openModal: () =&gt; void\n  closeModal: () =&gt; void\n\n  // 사이드바 상태\n  isSidebarOpen: boolean\n  toggleSidebar: () =&gt; void\n\n  // 테마\n  theme: &#39;light&#39; | &#39;dark&#39;\n  toggleTheme: () =&gt; void\n}\n\nexport const useUIStore = create&lt;UIStore&gt;((set) =&gt; ({\n  isModalOpen: false,\n  openModal: () =&gt; set({ isModalOpen: true }),\n  closeModal: () =&gt; set({ isModalOpen: false }),\n\n  isSidebarOpen: true,\n  toggleSidebar: () =&gt; set((state) =&gt; ({ isSidebarOpen: !state.isSidebarOpen })),\n\n  theme: &#39;dark&#39;,\n  toggleTheme: () =&gt;\n    set((state) =&gt; ({ theme: state.theme === &#39;dark&#39; ? &#39;light&#39; : &#39;dark&#39; })),\n}))\n</code></pre>\n<pre><code class=\"language-tsx\">// 컴포넌트에서 사용 — 서버 데이터는 React Query, UI 상태는 Zustand\nfunction PostList() {\n  // 서버 상태: React Query\n  const { data: posts, isLoading } = useQuery({\n    queryKey: [&#39;posts&#39;],\n    queryFn: fetchPosts,\n  })\n\n  // 클라이언트 상태: Zustand\n  const { isModalOpen, openModal, closeModal } = useUIStore()\n\n  if (isLoading) return &lt;Spinner /&gt;\n\n  return (\n    &lt;div&gt;\n      {posts?.map(post =&gt; (\n        &lt;PostCard key={post.id} post={post} onSelect={openModal} /&gt;\n      ))}\n      {isModalOpen &amp;&amp; &lt;PostModal onClose={closeModal} /&gt;}\n    &lt;/div&gt;\n  )\n}\n</code></pre>\n<p><strong>Zustand의 특징</strong>:</p>\n<ul>\n<li>Redux의 Action/Reducer/Dispatch 패턴 없음 → 함수 직접 호출</li>\n<li><code>set()</code>으로 상태 업데이트, <code>get()</code>으로 현재 상태 참조</li>\n<li><code>persist</code> 미들웨어로 localStorage 자동 동기화 가능</li>\n<li>번들 크기 ~1KB (Redux toolkit 대비 매우 가벼움)</li>\n</ul>\n<blockquote>\n<p>Zustand를 서버 데이터 저장소로 쓰지 말 것. <code>fetch</code> 후 <code>set()</code>으로 저장하면 캐싱·갱신·에러 처리를 전부 직접 구현해야 한다. 그게 React Query가 해결하는 문제다.</p>\n</blockquote>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://tanstack.com/query/latest/docs/framework/react/overview\" target=\"_blank\">[1] TanStack Query v5 Overview — 공식 문서</a></p>\n<p><a href=\"https://tkdodo.eu/blog/react-query-as-a-state-manager\" target=\"_blank\">[2] React Query as a State Manager — TkDodo</a></p>\n<p><a href=\"https://tkdodo.eu/blog/practical-react-query\" target=\"_blank\">[3] Practical React Query — TkDodo</a></p>\n<p><a href=\"https://docs.pmnd.rs/zustand/getting-started/introduction\" target=\"_blank\">[4] Zustand 공식 문서</a></p>\n<hr>\n<h2>다음 글</h2>\n<ul>\n<li><a href=\"/post/react-query-queries\">[2편] QueryClient · Query Keys · useQuery 심층 →</a></li>\n<li><a href=\"/post/react-query-mutations\">[3편] useMutation · Optimistic Updates →</a></li>\n<li><a href=\"/post/react-query-cache\">[4편] 캐시 · 무효화 · Prefetch →</a></li>\n<li><a href=\"/post/react-query-advanced\">[5편] 고급 패턴 · v5 마이그레이션 →</a></li>\n</ul>\n",
     "coverImage": null,
     "category": "study/frontend/react-query",
     "tags": [
@@ -230,11 +329,11 @@
       "cache"
     ],
     "author": "Seobway",
-    "readTime": 10,
+    "readTime": 12,
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.447Z"
+    "updatedAt": "2026-04-03T11:45:45.379Z"
   },
   {
     "id": "react-query-mutations",
@@ -257,7 +356,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.445Z"
+    "updatedAt": "2026-04-03T11:45:45.377Z"
   },
   {
     "id": "react-query-cache",
@@ -281,7 +380,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.443Z"
+    "updatedAt": "2026-04-03T11:45:45.376Z"
   },
   {
     "id": "react-query-advanced",
@@ -305,7 +404,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.442Z"
+    "updatedAt": "2026-04-03T11:45:45.374Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -330,7 +429,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.426Z"
+    "updatedAt": "2026-04-03T11:45:45.355Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -353,7 +452,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.425Z"
+    "updatedAt": "2026-04-03T11:45:45.353Z"
   },
   {
     "id": "gstack-overview",
@@ -377,7 +476,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.420Z"
+    "updatedAt": "2026-04-03T11:45:45.348Z"
   },
   {
     "id": "django-security",
@@ -403,7 +502,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.436Z"
+    "updatedAt": "2026-04-03T11:45:45.366Z"
   },
   {
     "id": "django-overview",
@@ -429,7 +528,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.439Z"
+    "updatedAt": "2026-04-03T11:45:45.370Z"
   },
   {
     "id": "django-orm-deep",
@@ -455,7 +554,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.434Z"
+    "updatedAt": "2026-04-03T11:45:45.365Z"
   },
   {
     "id": "django-lifecycle",
@@ -482,7 +581,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.431Z"
+    "updatedAt": "2026-04-03T11:45:45.360Z"
   },
   {
     "id": "django-architecture",
@@ -509,7 +608,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.429Z"
+    "updatedAt": "2026-04-03T11:45:45.357Z"
   },
   {
     "id": "docker-compose-django",
@@ -534,7 +633,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.476Z"
+    "updatedAt": "2026-04-03T11:45:45.403Z"
   },
   {
     "id": "docker-compose-basics",
@@ -558,7 +657,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.476Z"
+    "updatedAt": "2026-04-03T11:45:45.402Z"
   },
   {
     "id": "docker-basics",
@@ -581,7 +680,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.475Z"
+    "updatedAt": "2026-04-03T11:45:45.401Z"
   },
   {
     "id": "django-version-compatibility",
@@ -606,7 +705,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.438Z"
+    "updatedAt": "2026-04-03T11:45:45.368Z"
   },
   {
     "id": "django-settings",
@@ -631,7 +730,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.440Z"
+    "updatedAt": "2026-04-03T11:45:45.372Z"
   },
   {
     "id": "django-migration",
@@ -656,7 +755,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.432Z"
+    "updatedAt": "2026-04-03T11:45:45.361Z"
   },
   {
     "id": "celery-worker",
@@ -683,7 +782,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.472Z"
+    "updatedAt": "2026-04-03T11:45:45.398Z"
   },
   {
     "id": "celery-django",
@@ -709,7 +808,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.473Z"
+    "updatedAt": "2026-04-03T11:45:45.399Z"
   },
   {
     "id": "celery-broker",
@@ -735,7 +834,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.470Z"
+    "updatedAt": "2026-04-03T11:45:45.397Z"
   },
   {
     "id": "celery-beat",
@@ -759,7 +858,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.468Z"
+    "updatedAt": "2026-04-03T11:45:45.396Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -783,7 +882,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.499Z"
+    "updatedAt": "2026-04-03T11:45:45.425Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -808,7 +907,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.516Z"
+    "updatedAt": "2026-04-03T11:45:45.440Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -831,7 +930,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.514Z"
+    "updatedAt": "2026-04-03T11:45:45.439Z"
   },
   {
     "id": "micro-protocol",
@@ -854,7 +953,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.512Z"
+    "updatedAt": "2026-04-03T11:45:45.438Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -882,7 +981,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.510Z"
+    "updatedAt": "2026-04-03T11:45:45.436Z"
   },
   {
     "id": "micro-network-view",
@@ -907,7 +1006,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.492Z"
+    "updatedAt": "2026-04-03T11:45:45.418Z"
   },
   {
     "id": "micro-network-traffic",
@@ -932,7 +1031,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.508Z"
+    "updatedAt": "2026-04-03T11:45:45.433Z"
   },
   {
     "id": "micro-ip-arp",
@@ -957,7 +1056,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.507Z"
+    "updatedAt": "2026-04-03T11:45:45.431Z"
   },
   {
     "id": "micro-http-https",
@@ -984,7 +1083,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.504Z"
+    "updatedAt": "2026-04-03T11:45:45.429Z"
   },
   {
     "id": "micro-encapsulation",
@@ -1010,7 +1109,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.501Z"
+    "updatedAt": "2026-04-03T11:45:45.427Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -1033,7 +1132,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.497Z"
+    "updatedAt": "2026-04-03T11:45:45.424Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -1057,7 +1156,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.496Z"
+    "updatedAt": "2026-04-03T11:45:45.423Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -1079,7 +1178,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.495Z"
+    "updatedAt": "2026-04-03T11:45:45.420Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -1102,7 +1201,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.494Z"
+    "updatedAt": "2026-04-03T11:45:45.419Z"
   },
   {
     "id": "macro-network-view",
@@ -1125,7 +1224,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.489Z"
+    "updatedAt": "2026-04-03T11:45:45.416Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -1149,7 +1248,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.480Z"
+    "updatedAt": "2026-04-03T11:45:45.406Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -1172,6 +1271,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-03T10:18:28.478Z"
+    "updatedAt": "2026-04-03T11:45:45.405Z"
   }
 ]

@@ -7,6 +7,7 @@
     "docker-compose-basics",
     "docker-compose-django",
     "gitlab-cicd-guide",
+    "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment"
   ],
   "service": [
@@ -26,29 +27,36 @@
   ],
   "kubernetes": [
     "gitlab-cicd-guide",
-    "k8s-zero-downtime-deployment"
+    "jenkins-argocd-gitops",
+    "k8s-zero-downtime-deployment",
+    "kubectl-debugging"
   ],
   "pod": [
     "gitlab-cicd-guide",
-    "k8s-zero-downtime-deployment"
+    "jenkins-argocd-gitops",
+    "k8s-zero-downtime-deployment",
+    "kubectl-debugging"
   ],
   "deployment": [
     "gitlab-cicd-guide",
-    "k8s-zero-downtime-deployment"
+    "jenkins-argocd-gitops",
+    "k8s-zero-downtime-deployment",
+    "kubectl-debugging"
   ],
   "jenkins": [
+    "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment"
   ],
   "jenkinsfile": [
+    "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment"
   ],
   "statefulset": [
-    "k8s-zero-downtime-deployment"
-  ],
-  "namespace": [
+    "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment"
   ],
   "pv": [
+    "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment",
     "micro-network-view",
     "micro-encapsulation",
@@ -56,12 +64,18 @@
     "micro-tcp-udp"
   ],
   "argocd": [
+    "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment"
   ],
   "gitops": [
+    "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment"
   ],
   "kustomize": [
+    "jenkins-argocd-gitops",
+    "k8s-zero-downtime-deployment"
+  ],
+  "namespace": [
     "k8s-zero-downtime-deployment"
   ]
 }

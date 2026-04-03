@@ -30,6 +30,11 @@
     "path": "/post/study/backend/django/django-migration"
   },
   {
+    "slug": "django-object-permissions",
+    "title": "Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어",
+    "path": "/post/study/backend/django/django-object-permissions"
+  },
+  {
     "slug": "django-orm-deep",
     "title": "Django ORM 심층 — QuerySet 지연 실행, Manager, Active Record",
     "path": "/post/study/backend/django/django-orm-deep"
@@ -43,6 +48,11 @@
     "slug": "django-version-compatibility",
     "title": "Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈",
     "path": "/post/study/backend/django/django-version-compatibility"
+  },
+  {
+    "slug": "drf-serializer-validation",
+    "title": "DRF Serializer 검증 완전 정복 — validate_<field>가 return을 빠뜨리면 생기는 일",
+    "path": "/post/study/backend/django/drf-serializer-validation"
   },
   {
     "slug": "django-overview",
@@ -160,9 +170,19 @@
     "path": "/post/study/infra/gitlab-cicd-guide"
   },
   {
+    "slug": "jenkins-argocd-gitops",
+    "title": "GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기",
+    "path": "/post/study/infra/gitops/jenkins-argocd-gitops"
+  },
+  {
     "slug": "k8s-zero-downtime-deployment",
     "title": "Jenkins + ArgoCD로 구현하는 K8s 무중단 배포",
     "path": "/post/study/infra/k8s-zero-downtime-deployment"
+  },
+  {
+    "slug": "kubectl-debugging",
+    "title": "kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링",
+    "path": "/post/study/infra/kubernetes/kubectl-debugging"
   },
   {
     "slug": "macro-network-view",
