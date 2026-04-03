@@ -65,7 +65,7 @@ flowchart LR
 
 그리고 독자가 직접 눌러서 측정할 수 있도록 "실험 페이지"를 만들었다.
 
-- `public/portfolio/perf-lab.html`
+- <a href="/portfolio/perf-lab.html" target="_blank" rel="noopener noreferrer">렌더링 성능 실험실(Perf Lab) 열기 →</a>
   - 3개를 동시에 띄우고
   - 버튼 한 번으로 지표 표를 뽑는다
 

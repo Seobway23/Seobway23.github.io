@@ -248,6 +248,8 @@ export default function Home() {
                         performance: "Performance",
                         nextjs: "Next.js",
                         frontend: "Frontend",
+                        ai: "AI",
+                        gstack: "gstack",
                       };
                       // 카테고리 경로에서 마지막 부분 추출
                       const categoryName =

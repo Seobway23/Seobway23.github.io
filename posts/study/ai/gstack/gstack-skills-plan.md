@@ -1,7 +1,7 @@
 ---
 title: "gstack 스킬 1~5: Think & Plan — 코드 한 줄 쓰기 전에 하는 것들"
 slug: gstack-skills-plan
-category: study/infra/gstack
+category: study/ai/gstack
 tags: [gstack, claude-code, planning, design, architecture, office-hours]
 author: Seobway
 readTime: 14

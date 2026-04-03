@@ -1,7 +1,7 @@
 ---
 title: "gstack 스킬 6~13: Build, Test & Ship — AI가 직접 브라우저 켜고 배포한다"
 slug: gstack-skills-ship
-category: study/infra/gstack
+category: study/ai/gstack
 tags: [gstack, claude-code, qa, ship, deployment, review, chromium, retro]
 author: Seobway
 readTime: 15

@@ -1,4 +1,11 @@
-import { posts, comments, type Post, type InsertPost, type Comment, type InsertComment } from "@shared/schema";
+import {
+  posts,
+  comments,
+  type Post,
+  type InsertPost,
+  type Comment,
+  type InsertComment,
+} from "@shared/schema";
 
 export interface IStorage {
   // Posts
@@ -9,7 +16,7 @@ export interface IStorage {
   getFeaturedPosts(): Promise<Post[]>;
   incrementPostViews(id: number): Promise<void>;
   searchPosts(query: string): Promise<Post[]>;
-  
+
   // Comments
   getCommentsByPostId(postId: number): Promise<Comment[]>;
   createComment(comment: InsertComment): Promise<Comment>;
@@ -35,7 +42,8 @@ export class MemStorage implements IStorage {
         id: 1,
         title: "React 18의 새로운 Concurrent Features 완벽 정리",
         slug: "react-18-concurrent-features",
-        excerpt: "React 18에서 도입된 Concurrent Features와 Suspense, useTransition 등의 새로운 기능들을 실제 예제와 함께 자세히 알아보겠습니다.",
+        excerpt:
+          "React 18에서 도입된 Concurrent Features와 Suspense, useTransition 등의 새로운 기능들을 실제 예제와 함께 자세히 알아보겠습니다.",
         content: `
 # React 18의 주요 변화점
 
@@ -115,7 +123,8 @@ React 18의 Concurrent Features는 사용자 경험을 크게 개선시킵니다
         id: 2,
         title: "웹 성능 최적화: Core Web Vitals 완벽 가이드",
         slug: "web-performance-core-web-vitals",
-        excerpt: "Core Web Vitals를 이해하고 실제 웹사이트의 성능을 측정하고 개선하는 방법을 단계별로 알아보겠습니다.",
+        excerpt:
+          "Core Web Vitals를 이해하고 실제 웹사이트의 성능을 측정하고 개선하는 방법을 단계별로 알아보겠습니다.",
         content: `
 # Core Web Vitals란?
 
@@ -161,7 +170,8 @@ new PerformanceObserver((entryList) => {
         id: 3,
         title: "TypeScript 5.0 새로운 기능과 개선사항 정리",
         slug: "typescript-5-new-features",
-        excerpt: "TypeScript 5.0에서 추가된 새로운 기능들과 성능 개선사항을 예제 코드와 함께 살펴보겠습니다.",
+        excerpt:
+          "TypeScript 5.0에서 추가된 새로운 기능들과 성능 개선사항을 예제 코드와 함께 살펴보겠습니다.",
         content: `
 # TypeScript 5.0의 주요 변화
 
@@ -205,7 +215,8 @@ class C {
         id: 4,
         title: "CSS Grid vs Flexbox: 언제 무엇을 사용해야 할까?",
         slug: "css-grid-vs-flexbox-guide",
-        excerpt: "CSS의 두 가지 주요 레이아웃 시스템인 Grid와 Flexbox의 차이점을 알아보고, 각각의 장단점과 적절한 사용 시나리오를 실제 예제와 함께 비교해보겠습니다.",
+        excerpt:
+          "CSS의 두 가지 주요 레이아웃 시스템인 Grid와 Flexbox의 차이점을 알아보고, 각각의 장단점과 적절한 사용 시나리오를 실제 예제와 함께 비교해보겠습니다.",
         content: `
 # CSS Grid vs Flexbox
 
@@ -249,7 +260,8 @@ CSS의 두 가지 주요 레이아웃 시스템을 비교해보겠습니다.
         id: 5,
         title: "Next.js 13 App Directory 완벽 가이드",
         slug: "nextjs-13-app-directory-guide",
-        excerpt: "Next.js 13의 새로운 App Directory를 사용하여 모던한 React 애플리케이션을 구축하는 방법을 알아보겠습니다.",
+        excerpt:
+          "Next.js 13의 새로운 App Directory를 사용하여 모던한 React 애플리케이션을 구축하는 방법을 알아보겠습니다.",
         content: `
 # App Directory 소개
 
@@ -281,10 +293,10 @@ app/
         coverImage: null,
         createdAt: new Date("2024-01-05"),
         updatedAt: new Date("2024-01-05"),
-      }
+      },
     ];
 
-    samplePosts.forEach(post => {
+    samplePosts.forEach((post) => {
       this.posts.set(post.id, post);
       this.currentPostId = Math.max(this.currentPostId, post.id + 1);
     });
@@ -295,7 +307,8 @@ app/
         postId: 1,
         name: "이개발",
         email: "dev@example.com",
-        content: "정말 유용한 정보네요! 특히 React 18의 Concurrent Features 부분이 인상깊었습니다.",
+        content:
+          "정말 유용한 정보네요! 특히 React 18의 Concurrent Features 부분이 인상깊었습니다.",
         createdAt: new Date("2024-01-16T10:30:00"),
       },
       {
@@ -303,7 +316,8 @@ app/
         postId: 1,
         name: "박프론트",
         email: "frontend@example.com",
-        content: "코드 예제가 정말 도움이 되었습니다. useTransition 사용법을 이해하는데 큰 도움이 되었어요.",
+        content:
+          "코드 예제가 정말 도움이 되었습니다. useTransition 사용법을 이해하는데 큰 도움이 되었어요.",
         createdAt: new Date("2024-01-16T14:20:00"),
       },
       {
@@ -311,20 +325,22 @@ app/
         postId: 2,
         name: "김웹개발",
         email: "web@example.com",
-        content: "성능 최적화 가이드 감사합니다. Core Web Vitals 개선에 바로 적용해보겠습니다.",
+        content:
+          "성능 최적화 가이드 감사합니다. Core Web Vitals 개선에 바로 적용해보겠습니다.",
         createdAt: new Date("2024-01-13T09:15:00"),
-      }
+      },
     ];
 
-    sampleComments.forEach(comment => {
+    sampleComments.forEach((comment) => {
       this.comments.set(comment.id, comment);
       this.currentCommentId = Math.max(this.currentCommentId, comment.id + 1);
     });
   }
 
   async getAllPosts(): Promise<Post[]> {
-    return Array.from(this.posts.values()).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return Array.from(this.posts.values()).sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }
 
@@ -333,18 +349,21 @@ app/
   }
 
   async getPostBySlug(slug: string): Promise<Post | undefined> {
-    return Array.from(this.posts.values()).find(post => post.slug === slug);
+    return Array.from(this.posts.values()).find((post) => post.slug === slug);
   }
 
   async getPostsByCategory(category: string): Promise<Post[]> {
     return Array.from(this.posts.values())
-      .filter(post => post.category === category)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .filter((post) => post.category === category)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
   }
 
   async getFeaturedPosts(): Promise<Post[]> {
     return Array.from(this.posts.values())
-      .filter(post => post.featured)
+      .filter((post) => post.featured)
       .sort((a, b) => b.views - a.views);
   }
 
@@ -358,17 +377,21 @@ app/
 
   async searchPosts(query: string): Promise<Post[]> {
     const lowerQuery = query.toLowerCase();
-    return Array.from(this.posts.values()).filter(post =>
-      post.title.toLowerCase().includes(lowerQuery) ||
-      post.excerpt.toLowerCase().includes(lowerQuery) ||
-      post.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+    return Array.from(this.posts.values()).filter(
+      (post) =>
+        post.title.toLowerCase().includes(lowerQuery) ||
+        post.excerpt.toLowerCase().includes(lowerQuery) ||
+        post.tags.some((tag) => tag.toLowerCase().includes(lowerQuery)),
     );
   }
 
   async getCommentsByPostId(postId: number): Promise<Comment[]> {
     return Array.from(this.comments.values())
-      .filter(comment => comment.postId === postId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .filter((comment) => comment.postId === postId)
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
   }
 
   async createComment(insertComment: InsertComment): Promise<Comment> {
