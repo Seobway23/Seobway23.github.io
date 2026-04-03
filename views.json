@@ -1,4 +1,7 @@
 {
+  "gstack-overview": 0,
+  "gstack-skills-plan": 0,
+  "gstack-skills-ship": 0,
   "django-architecture": 0,
   "django-lifecycle": 0,
   "django-migration": 0,
@@ -28,9 +31,6 @@
   "docker-compose-django": 0,
   "gitlab-artifacts-vs-cache": 14,
   "gitlab-cicd-guide": 23,
-  "gstack-overview": 0,
-  "gstack-skills-plan": 0,
-  "gstack-skills-ship": 0,
   "k8s-zero-downtime-deployment": 8,
   "macro-network-view": 5,
   "micro-network-view": 0,

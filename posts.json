@@ -18,7 +18,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.404Z"
+    "updatedAt": "2026-04-03T10:18:28.466Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -40,7 +40,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.403Z"
+    "updatedAt": "2026-04-03T10:18:28.463Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -62,14 +62,14 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.398Z"
+    "updatedAt": "2026-04-03T10:18:28.455Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
     "title": "Three.js 포트폴리오 렌더링 최적화 실전기: '버벅임'은 3D가 아니라 경쟁이었다",
     "slug": "threejs-portfolio-rendering-optimization-story",
     "excerpt": "\"오버레이 내용이 늦게 뜨고 버벅였다\"는 체감 문제를, 측정 가능한 실험(perf lab)으로 쪼개서 원인-가설-실험-트레이드오프로 해결한 과정을 기록한다.\n",
-    "content": "<h2>이 글은 튜토리얼이 아니다</h2>\n<p>Three.js &quot;사용법&quot;을 설명하지 않는다.<br>대신 실제로 겪은 최적화 시행착오를 <strong>스토리라인(문제→가설→측정→실험→결론)</strong>으로 정리한다.</p>\n<p>핵심은 하나다.</p>\n<blockquote>\n<p>버벅임은 단순히 &quot;3D가 무거워서&quot;가 아니라, <strong>UI 전환 순간</strong>에 메인스레드/GPU가 동시에 바빠지는 &quot;경쟁&quot;에서 터진다.</p>\n</blockquote>\n<hr>\n<h2>문제 → 해결 전체 구조</h2>\n<pre><code class=\"language-mermaid\">%% desc: 3가지 병목과 해결책 한눈에\nflowchart LR\n  subgraph 문제들\n    P1[&quot;문제 1\\nsetTimeout(250ms)\\n하드 딜레이&quot;]\n    P2[&quot;문제 2\\n오버레이 전환 시\\nGPU·메인스레드 경쟁&quot;]\n    P3[&quot;문제 3\\npointermove\\n레이캐스트 폭주&quot;]\n  end\n\n  subgraph 해결책\n    S1[&quot;딜레이 제거\\n오버레이 즉시 표시&quot;]\n    S2[&quot;오버레이 열릴 때\\n3D pause\\n닫히면 resume&quot;]\n    S3[&quot;rAF 스로틀\\n프레임당 1회만 계산&quot;]\n  end\n\n  P1 --&gt; S1\n  P2 --&gt; S2\n  P3 --&gt; S3\n\n  style P1 fill:#4a1f1f,color:#fca5a5,stroke:#334155\n  style P2 fill:#4a1f1f,color:#fca5a5,stroke:#334155\n  style P3 fill:#4a1f1f,color:#fca5a5,stroke:#334155\n  style S1 fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style S2 fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style S3 fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n</code></pre>\n<hr>\n<h2>0) 재현 가능한 실험 환경부터 만든다 (이게 포인트)</h2>\n<p>말로 &quot;빨라졌다&quot;는 설득력이 약하다.<br>그래서 비교 케이스 3개를 고정했다.</p>\n<ul>\n<li><strong>Before</strong>: baseline</li>\n<li><strong>After</strong>: 최적화 버전</li>\n<li><strong>Hybrid(실사용)</strong>: 선명도는 유지하면서 오버레이 UX는 개선</li>\n</ul>\n<p>그리고 독자가 직접 눌러서 측정할 수 있도록 &quot;실험 페이지&quot;를 만들었다.</p>\n<ul>\n<li><code>public/portfolio/perf-lab.html</code><ul>\n<li>3개를 동시에 띄우고</li>\n<li>버튼 한 번으로 지표 표를 뽑는다</li>\n</ul>\n</li>\n</ul>\n<p>이 한 페이지로 &quot;주관적 체감&quot;을 &quot;재현 가능한 실험&quot;으로 바꿀 수 있다.</p>\n<hr>\n<h2>1) 첫 번째 병목: 오버레이가 늦게 뜬다</h2>\n<p>처음엔 &quot;Three.js가 무거워서 UI가 늦게 뜨는 것&quot;처럼 보였는데, 실제로는 더 단순했다.</p>\n<ul>\n<li>오버레이 열기 함수에 <code>setTimeout(250ms)</code>가 들어 있었다</li>\n<li>그래서 최소 250ms는 무조건 늦게 뜬다</li>\n</ul>\n<p><strong>Before (문제 코드)</strong></p>\n<pre><code class=\"language-javascript\">// ❌ 하드 딜레이\nfunction openOverlay(id) {\n  setTimeout(() =&gt; {\n    overlay.classList.add(&quot;active&quot;);\n    loadContent(id);\n  }, 250); // 왜 있었는지 불명... 애니메이션 의도였던 것 같음\n}\n</code></pre>\n<p><strong>After (해결)</strong></p>\n<pre><code class=\"language-javascript\">// ✅ 즉시 표시, 애니메이션은 CSS transition에 위임\nfunction openOverlay(id) {\n  loadContent(id); // 콘텐츠 즉시 세팅\n  overlay.classList.add(&quot;active&quot;); // CSS transition으로 페이드인\n  pause3D(); // 3D 루프는 pause (다음 병목 해결과 연결)\n}\n</code></pre>\n<blockquote>\n<p>포인트: &quot;렌더링 최적화&quot;가 아니라 <strong>UI 반응성 문제</strong>였다.</p>\n</blockquote>\n<hr>\n<h2>2) 두 번째 병목: 오버레이 전환 순간의 &#39;경쟁&#39;</h2>\n<p>오버레이가 뜨는 순간엔 DOM 업데이트/레이아웃/페인트가 들어간다.<br>그런데 3D가 계속 풀로 돌아가면(특히 고DPI) GPU/메인스레드가 바빠서 UI가 눌리는 순간이 나온다.</p>\n<pre><code class=\"language-mermaid\">%% desc: 오버레이 전환 시 메인스레드 경쟁 구조\nsequenceDiagram\n  participant User as 사용자\n  participant DOM as DOM/Layout\n  participant RAF as rAF 루프\n  participant GPU as GPU\n\n  User-&gt;&gt;DOM: 오버레이 클릭\n  DOM-&gt;&gt;DOM: 레이아웃·페인트 (비쌈)\n  RAF-&gt;&gt;GPU: renderer.render() 동시 실행\n  Note over DOM,GPU: 메인스레드 + GPU 경쟁&lt;br/&gt;→ 오버레이가 늦게/버벅이며 등장\n</code></pre>\n<p><strong>해결</strong></p>\n<pre><code class=\"language-javascript\">let rafId = null;\n\nfunction pause3D() {\n  if (rafId !== null) {\n    cancelAnimationFrame(rafId);\n    rafId = null;\n  }\n}\n\nfunction resume3D() {\n  if (rafId === null) {\n    animate(); // 루프 재시작\n  }\n}\n\nfunction openOverlay(id) {\n  loadContent(id);\n  overlay.classList.add(&quot;active&quot;);\n  pause3D(); // ← 오버레이가 뜨는 동안 3D는 쉰다\n}\n\nfunction closeOverlay() {\n  overlay.classList.remove(&quot;active&quot;);\n  resume3D(); // ← 닫히면 다시 시작\n}\n</code></pre>\n<p>이건 &quot;프레임을 낮추는 최적화&quot;가 아니라, <strong>전환 순간에 우선순위를 UI로 양보</strong>하는 설계다.</p>\n<hr>\n<h2>3) 세 번째 병목: pointermove + Raycaster</h2>\n<p><code>pointermove</code>는 이벤트가 많이 온다.<br>여기서 매번 레이캐스트를 돌리면 메인스레드가 계속 바쁘다.</p>\n<p>Three.js 매뉴얼도 picking(raycasting)이 CPU를 많이 먹는다고 경고한다.<a href=\"https://threejs.org/manual/en/picking.html\" target=\"_blank\"><sup>[1]</sup></a></p>\n<p><strong>해결</strong></p>\n<pre><code class=\"language-javascript\">// 이벤트에서 바로 계산하지 않고, 마지막 포인터 위치만 저장\nlet pendingPointer = null;\n\ncanvas.addEventListener(&quot;pointermove&quot;, (e) =&gt; {\n  const rect = canvas.getBoundingClientRect();\n  pendingPointer = {\n    x: ((e.clientX - rect.left) / rect.width) * 2 - 1,\n    y: -((e.clientY - rect.top) / rect.height) * 2 + 1,\n  };\n});\n\n// rAF에서 프레임당 1회만 레이캐스트 실행\nfunction animate() {\n  rafId = requestAnimationFrame(animate);\n\n  if (pendingPointer) {\n    pointer.set(pendingPointer.x, pendingPointer.y);\n    pendingPointer = null;\n    raycaster.setFromCamera(pointer, camera);\n    const hits = raycaster.intersectObjects(pickTargets);\n    updateHover(hits);\n  }\n\n  renderer.render(scene, camera);\n}\n</code></pre>\n<hr>\n<h2>4) 트레이드오프: 선명도(DPR) vs 성능</h2>\n<p>여기서 가장 큰 &quot;체감&quot;이 갈린다.</p>\n<ul>\n<li>DPR을 낮추면 프레임은 살아나지만</li>\n<li>모델/글로우/엣지 선명도가 떨어진다</li>\n</ul>\n<p>Three.js 매뉴얼은 HD-DPI에서 내부 픽셀 수 폭증을 설명하면서, &quot;그냥 안 하는 선택&quot;도 현실적이라고 말한다.<a href=\"https://threejs.org/manual/en/responsive.html\" target=\"_blank\"><sup>[2]</sup></a></p>\n<p>그래서 최종 결론은 이렇게 갔다.</p>\n<h3>Hybrid(실사용)</h3>\n<pre><code class=\"language-mermaid\">%% desc: Hybrid 전략 — 선명도 유지 + UI 반응성 확보\nflowchart TD\n  Keep[&quot;고DPR 유지\\n선명도 그대로&quot;]\n  Delay[&quot;하드 딜레이 제거\\n오버레이 즉시 표시&quot;]\n  Pause[&quot;오버레이 열 때만 3D pause\\n전환 경쟁 제거&quot;]\n  Throttle[&quot;pointermove rAF 스로틀\\n공짜에 가까운 최적화&quot;]\n\n  Keep --&gt; Result[&quot;시각 품질 + UI 반응성\\n동시 확보&quot;]\n  Delay --&gt; Result\n  Pause --&gt; Result\n  Throttle --&gt; Result\n\n  style Keep     fill:#1e3a5f,color:#7dd3fc,stroke:#334155\n  style Delay    fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style Pause    fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style Throttle fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style Result   fill:#3b1f5e,color:#c4b5fd,stroke:#2563eb\n</code></pre>\n<ul>\n<li><strong>선명도는 이전처럼</strong>(고DPR 유지)</li>\n<li><strong>오버레이는 즉시 표시</strong>(하드 딜레이 제거)</li>\n<li><strong>오버레이 열 때만 3D pause</strong>(전환 경쟁 제거)</li>\n<li><strong>pointermove는 rAF 스로틀</strong>(공짜에 가까운 최적화)</li>\n</ul>\n<blockquote>\n<p>이 조합이 &quot;눈으로 보는 품질&quot;과 &quot;UI 반응성&quot;을 동시에 잡았다.</p>\n</blockquote>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://threejs.org/manual/en/picking.html\" target=\"_blank\">[1] Picking — Three.js Manual</a></p>\n<p><a href=\"https://threejs.org/manual/en/responsive.html\" target=\"_blank\">[2] Responsive Design — Three.js Manual</a></p>\n<p><a href=\"https://threejs.org/manual/en/rendering-on-demand.html\" target=\"_blank\">[3] Rendering on Demand — Three.js Manual</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/why-threejs-exists\">Three.js는 왜 만들어졌나 →</a></li>\n<li><a href=\"/post/threejs-rendering-pipeline\">렌더링 파이프라인: Scene → Camera → Renderer →</a></li>\n<li><a href=\"/post/threejs-dpr-and-canvas-resolution\">DPR과 캔버스 해상도: 선명도/성능의 본질 →</a></li>\n<li><a href=\"/post/threejs-frustum-culling\">Frustum Culling: 보이는 것만 그리기 →</a></li>\n<li><a href=\"/post/threejs-gltf-loading\">glTF 로딩: 씬 그래프, 렌더 타이밍 →</a></li>\n<li><a href=\"/post/threejs-raycaster-picking-performance\">Raycaster &amp; Picking 성능 →</a></li>\n</ul>\n",
+    "content": "<h2>이 글은 튜토리얼이 아니다</h2>\n<p>Three.js &quot;사용법&quot;을 설명하지 않는다.<br>대신 실제로 겪은 최적화 시행착오를 <strong>스토리라인(문제→가설→측정→실험→결론)</strong>으로 정리한다.</p>\n<p>핵심은 하나다.</p>\n<blockquote>\n<p>버벅임은 단순히 &quot;3D가 무거워서&quot;가 아니라, <strong>UI 전환 순간</strong>에 메인스레드/GPU가 동시에 바빠지는 &quot;경쟁&quot;에서 터진다.</p>\n</blockquote>\n<hr>\n<h2>문제 → 해결 전체 구조</h2>\n<pre><code class=\"language-mermaid\">%% desc: 3가지 병목과 해결책 한눈에\nflowchart LR\n  subgraph 문제들\n    P1[&quot;문제 1\\nsetTimeout(250ms)\\n하드 딜레이&quot;]\n    P2[&quot;문제 2\\n오버레이 전환 시\\nGPU·메인스레드 경쟁&quot;]\n    P3[&quot;문제 3\\npointermove\\n레이캐스트 폭주&quot;]\n  end\n\n  subgraph 해결책\n    S1[&quot;딜레이 제거\\n오버레이 즉시 표시&quot;]\n    S2[&quot;오버레이 열릴 때\\n3D pause\\n닫히면 resume&quot;]\n    S3[&quot;rAF 스로틀\\n프레임당 1회만 계산&quot;]\n  end\n\n  P1 --&gt; S1\n  P2 --&gt; S2\n  P3 --&gt; S3\n\n  style P1 fill:#4a1f1f,color:#fca5a5,stroke:#334155\n  style P2 fill:#4a1f1f,color:#fca5a5,stroke:#334155\n  style P3 fill:#4a1f1f,color:#fca5a5,stroke:#334155\n  style S1 fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style S2 fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style S3 fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n</code></pre>\n<hr>\n<h2>0) 재현 가능한 실험 환경부터 만든다 (이게 포인트)</h2>\n<p>말로 &quot;빨라졌다&quot;는 설득력이 약하다.<br>그래서 비교 케이스 3개를 고정했다.</p>\n<ul>\n<li><strong>Before</strong>: baseline</li>\n<li><strong>After</strong>: 최적화 버전</li>\n<li><strong>Hybrid(실사용)</strong>: 선명도는 유지하면서 오버레이 UX는 개선</li>\n</ul>\n<p>그리고 독자가 직접 눌러서 측정할 수 있도록 &quot;실험 페이지&quot;를 만들었다.</p>\n<ul>\n<li><a href=\"/portfolio/perf-lab.html\" target=\"_blank\" rel=\"noopener noreferrer\">렌더링 성능 실험실(Perf Lab) 열기 →</a><ul>\n<li>3개를 동시에 띄우고</li>\n<li>버튼 한 번으로 지표 표를 뽑는다</li>\n</ul>\n</li>\n</ul>\n<p>이 한 페이지로 &quot;주관적 체감&quot;을 &quot;재현 가능한 실험&quot;으로 바꿀 수 있다.</p>\n<hr>\n<h2>1) 첫 번째 병목: 오버레이가 늦게 뜬다</h2>\n<p>처음엔 &quot;Three.js가 무거워서 UI가 늦게 뜨는 것&quot;처럼 보였는데, 실제로는 더 단순했다.</p>\n<ul>\n<li>오버레이 열기 함수에 <code>setTimeout(250ms)</code>가 들어 있었다</li>\n<li>그래서 최소 250ms는 무조건 늦게 뜬다</li>\n</ul>\n<p><strong>Before (문제 코드)</strong></p>\n<pre><code class=\"language-javascript\">// ❌ 하드 딜레이\nfunction openOverlay(id) {\n  setTimeout(() =&gt; {\n    overlay.classList.add(&quot;active&quot;);\n    loadContent(id);\n  }, 250); // 왜 있었는지 불명... 애니메이션 의도였던 것 같음\n}\n</code></pre>\n<p><strong>After (해결)</strong></p>\n<pre><code class=\"language-javascript\">// ✅ 즉시 표시, 애니메이션은 CSS transition에 위임\nfunction openOverlay(id) {\n  loadContent(id); // 콘텐츠 즉시 세팅\n  overlay.classList.add(&quot;active&quot;); // CSS transition으로 페이드인\n  pause3D(); // 3D 루프는 pause (다음 병목 해결과 연결)\n}\n</code></pre>\n<blockquote>\n<p>포인트: &quot;렌더링 최적화&quot;가 아니라 <strong>UI 반응성 문제</strong>였다.</p>\n</blockquote>\n<hr>\n<h2>2) 두 번째 병목: 오버레이 전환 순간의 &#39;경쟁&#39;</h2>\n<p>오버레이가 뜨는 순간엔 DOM 업데이트/레이아웃/페인트가 들어간다.<br>그런데 3D가 계속 풀로 돌아가면(특히 고DPI) GPU/메인스레드가 바빠서 UI가 눌리는 순간이 나온다.</p>\n<pre><code class=\"language-mermaid\">%% desc: 오버레이 전환 시 메인스레드 경쟁 구조\nsequenceDiagram\n  participant User as 사용자\n  participant DOM as DOM/Layout\n  participant RAF as rAF 루프\n  participant GPU as GPU\n\n  User-&gt;&gt;DOM: 오버레이 클릭\n  DOM-&gt;&gt;DOM: 레이아웃·페인트 (비쌈)\n  RAF-&gt;&gt;GPU: renderer.render() 동시 실행\n  Note over DOM,GPU: 메인스레드 + GPU 경쟁&lt;br/&gt;→ 오버레이가 늦게/버벅이며 등장\n</code></pre>\n<p><strong>해결</strong></p>\n<pre><code class=\"language-javascript\">let rafId = null;\n\nfunction pause3D() {\n  if (rafId !== null) {\n    cancelAnimationFrame(rafId);\n    rafId = null;\n  }\n}\n\nfunction resume3D() {\n  if (rafId === null) {\n    animate(); // 루프 재시작\n  }\n}\n\nfunction openOverlay(id) {\n  loadContent(id);\n  overlay.classList.add(&quot;active&quot;);\n  pause3D(); // ← 오버레이가 뜨는 동안 3D는 쉰다\n}\n\nfunction closeOverlay() {\n  overlay.classList.remove(&quot;active&quot;);\n  resume3D(); // ← 닫히면 다시 시작\n}\n</code></pre>\n<p>이건 &quot;프레임을 낮추는 최적화&quot;가 아니라, <strong>전환 순간에 우선순위를 UI로 양보</strong>하는 설계다.</p>\n<hr>\n<h2>3) 세 번째 병목: pointermove + Raycaster</h2>\n<p><code>pointermove</code>는 이벤트가 많이 온다.<br>여기서 매번 레이캐스트를 돌리면 메인스레드가 계속 바쁘다.</p>\n<p>Three.js 매뉴얼도 picking(raycasting)이 CPU를 많이 먹는다고 경고한다.<a href=\"https://threejs.org/manual/en/picking.html\" target=\"_blank\"><sup>[1]</sup></a></p>\n<p><strong>해결</strong></p>\n<pre><code class=\"language-javascript\">// 이벤트에서 바로 계산하지 않고, 마지막 포인터 위치만 저장\nlet pendingPointer = null;\n\ncanvas.addEventListener(&quot;pointermove&quot;, (e) =&gt; {\n  const rect = canvas.getBoundingClientRect();\n  pendingPointer = {\n    x: ((e.clientX - rect.left) / rect.width) * 2 - 1,\n    y: -((e.clientY - rect.top) / rect.height) * 2 + 1,\n  };\n});\n\n// rAF에서 프레임당 1회만 레이캐스트 실행\nfunction animate() {\n  rafId = requestAnimationFrame(animate);\n\n  if (pendingPointer) {\n    pointer.set(pendingPointer.x, pendingPointer.y);\n    pendingPointer = null;\n    raycaster.setFromCamera(pointer, camera);\n    const hits = raycaster.intersectObjects(pickTargets);\n    updateHover(hits);\n  }\n\n  renderer.render(scene, camera);\n}\n</code></pre>\n<hr>\n<h2>4) 트레이드오프: 선명도(DPR) vs 성능</h2>\n<p>여기서 가장 큰 &quot;체감&quot;이 갈린다.</p>\n<ul>\n<li>DPR을 낮추면 프레임은 살아나지만</li>\n<li>모델/글로우/엣지 선명도가 떨어진다</li>\n</ul>\n<p>Three.js 매뉴얼은 HD-DPI에서 내부 픽셀 수 폭증을 설명하면서, &quot;그냥 안 하는 선택&quot;도 현실적이라고 말한다.<a href=\"https://threejs.org/manual/en/responsive.html\" target=\"_blank\"><sup>[2]</sup></a></p>\n<p>그래서 최종 결론은 이렇게 갔다.</p>\n<h3>Hybrid(실사용)</h3>\n<pre><code class=\"language-mermaid\">%% desc: Hybrid 전략 — 선명도 유지 + UI 반응성 확보\nflowchart TD\n  Keep[&quot;고DPR 유지\\n선명도 그대로&quot;]\n  Delay[&quot;하드 딜레이 제거\\n오버레이 즉시 표시&quot;]\n  Pause[&quot;오버레이 열 때만 3D pause\\n전환 경쟁 제거&quot;]\n  Throttle[&quot;pointermove rAF 스로틀\\n공짜에 가까운 최적화&quot;]\n\n  Keep --&gt; Result[&quot;시각 품질 + UI 반응성\\n동시 확보&quot;]\n  Delay --&gt; Result\n  Pause --&gt; Result\n  Throttle --&gt; Result\n\n  style Keep     fill:#1e3a5f,color:#7dd3fc,stroke:#334155\n  style Delay    fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style Pause    fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style Throttle fill:#1c3a2b,color:#6ee7b7,stroke:#334155\n  style Result   fill:#3b1f5e,color:#c4b5fd,stroke:#2563eb\n</code></pre>\n<ul>\n<li><strong>선명도는 이전처럼</strong>(고DPR 유지)</li>\n<li><strong>오버레이는 즉시 표시</strong>(하드 딜레이 제거)</li>\n<li><strong>오버레이 열 때만 3D pause</strong>(전환 경쟁 제거)</li>\n<li><strong>pointermove는 rAF 스로틀</strong>(공짜에 가까운 최적화)</li>\n</ul>\n<blockquote>\n<p>이 조합이 &quot;눈으로 보는 품질&quot;과 &quot;UI 반응성&quot;을 동시에 잡았다.</p>\n</blockquote>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://threejs.org/manual/en/picking.html\" target=\"_blank\">[1] Picking — Three.js Manual</a></p>\n<p><a href=\"https://threejs.org/manual/en/responsive.html\" target=\"_blank\">[2] Responsive Design — Three.js Manual</a></p>\n<p><a href=\"https://threejs.org/manual/en/rendering-on-demand.html\" target=\"_blank\">[3] Rendering on Demand — Three.js Manual</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/why-threejs-exists\">Three.js는 왜 만들어졌나 →</a></li>\n<li><a href=\"/post/threejs-rendering-pipeline\">렌더링 파이프라인: Scene → Camera → Renderer →</a></li>\n<li><a href=\"/post/threejs-dpr-and-canvas-resolution\">DPR과 캔버스 해상도: 선명도/성능의 본질 →</a></li>\n<li><a href=\"/post/threejs-frustum-culling\">Frustum Culling: 보이는 것만 그리기 →</a></li>\n<li><a href=\"/post/threejs-gltf-loading\">glTF 로딩: 씬 그래프, 렌더 타이밍 →</a></li>\n<li><a href=\"/post/threejs-raycaster-picking-performance\">Raycaster &amp; Picking 성능 →</a></li>\n</ul>\n",
     "coverImage": null,
     "category": "study/frontend/threejs",
     "tags": [
@@ -84,7 +84,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.397Z"
+    "updatedAt": "2026-04-03T10:18:28.453Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -106,7 +106,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.395Z"
+    "updatedAt": "2026-04-03T10:18:28.451Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -128,7 +128,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.394Z"
+    "updatedAt": "2026-04-03T10:18:28.450Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -150,7 +150,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.393Z"
+    "updatedAt": "2026-04-03T10:18:28.450Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -185,7 +185,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.436Z"
+    "updatedAt": "2026-04-03T10:18:28.485Z"
   },
   {
     "id": "react-query-queries",
@@ -210,7 +210,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.391Z"
+    "updatedAt": "2026-04-03T10:18:28.448Z"
   },
   {
     "id": "react-query-overview",
@@ -234,7 +234,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.389Z"
+    "updatedAt": "2026-04-03T10:18:28.447Z"
   },
   {
     "id": "react-query-mutations",
@@ -257,7 +257,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.388Z"
+    "updatedAt": "2026-04-03T10:18:28.445Z"
   },
   {
     "id": "react-query-cache",
@@ -281,7 +281,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.387Z"
+    "updatedAt": "2026-04-03T10:18:28.443Z"
   },
   {
     "id": "react-query-advanced",
@@ -305,7 +305,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.385Z"
+    "updatedAt": "2026-04-03T10:18:28.442Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -314,7 +314,7 @@
     "excerpt": "gstack의 Build~Reflect 단계 8개 스킬 상세 분석. 실제 Chromium으로 클릭 테스트하는 /qa, 한 커맨드로 CI까지 도는 /ship, 커밋 히스토리 전체를 분석하는 /retro.\n",
     "content": "<h2>Build, Test &amp; Ship 단계 개요</h2>\n<p>Think &amp; Plan이 끝난 뒤의 단계. 코드를 짜고, 실제 브라우저로 검증하고, 프로덕션에 올린다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Build, Test &amp; Ship 스킬 흐름\nflowchart LR\n    A[&quot;Plan 단계 완료&quot;] --&gt; B[&quot;/review\\n스태프 엔지니어\\nPR diff 분석&quot;]\n    B --&gt; C[&quot;/qa\\nQA 리드\\n실제 Chromium 클릭&quot;]\n    C --&gt; D[&quot;/cso\\n보안 책임자\\nOWASP + STRIDE&quot;]\n    D --&gt; E[&quot;/benchmark\\n퍼포먼스 엔지니어\\nCore Web Vitals&quot;]\n    E --&gt; F[&quot;/ship\\n릴리즈 엔지니어\\nsync→test→PR&quot;]\n    F --&gt; G[&quot;/land-and-deploy\\n머지 → CI → 프로덕션 검증&quot;]\n    G --&gt; H[&quot;/canary\\nSRE\\n배포 후 감시&quot;]\n    H --&gt; I[&quot;/retro\\n엔지니어링 매니저\\n주간 회고&quot;]\n    I --&gt; J[&quot;/document-release\\n테크니컬 라이터\\n문서 자동 최신화&quot;]\n</code></pre>\n<hr>\n<h2>스킬 6: <code>/review</code> — 프로덕션 버그 헌터</h2>\n<p><strong>역할:</strong> 스태프 엔지니어</p>\n<p>base 브랜치 대비 diff를 분석해 <strong>CI는 통과하지만 프로덕션에서 터지는 버그</strong>를 찾는다.<a href=\"https://github.com/garrytan/gstack\" target=\"_blank\"><sup>[1]</sup></a></p>\n<h3>탐지 항목</h3>\n<table>\n<thead>\n<tr>\n<th>카테고리</th>\n<th>탐지 내용</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>보안</td>\n<td>SQL injection, LLM 트러스트 바운더리 위반, 인증 우회</td>\n</tr>\n<tr>\n<td>구조적</td>\n<td>조건부 사이드 이펙트, 암묵적 상태 전이, 숨겨진 결합</td>\n</tr>\n<tr>\n<td>성능</td>\n<td>N+1 쿼리, 불필요한 재렌더링, 메모리 누수 패턴</td>\n</tr>\n<tr>\n<td>일관성</td>\n<td>API 응답 형식 불일치, 에러 처리 누락</td>\n</tr>\n</tbody></table>\n<h3>동작 방식</h3>\n<pre><code class=\"language-bash\">/review           # 현재 브랜치 diff 전체 리뷰\n/review --fix     # 명백한 이슈 자동 수정\n</code></pre>\n<p>명백한 이슈는 자동 수정. 판단이 필요한 이슈는 리포트만 생성하고 결정을 사용자에게 남긴다.</p>\n<hr>\n<h2>스킬 7: <code>/qa</code> — 실제 브라우저 QA</h2>\n<p><strong>역할:</strong> QA 리드</p>\n<p>gstack의 핵심 차별점. <strong>실제 Playwright 기반 Chromium 브라우저</strong>로 앱을 직접 클릭하고 스크린샷을 찍어 디자인까지 검증한다.</p>\n<h3>텍스트 기반 AI vs <code>/qa</code></h3>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>텍스트 기반 AI</th>\n<th>gstack <code>/qa</code></th>\n</tr>\n</thead>\n<tbody><tr>\n<td>렌더링 확인</td>\n<td>❌ 불가</td>\n<td>✅ 실제 Chromium</td>\n</tr>\n<tr>\n<td>클릭 동작</td>\n<td>❌ 불가</td>\n<td>✅ 실제 클릭 (~100ms/커맨드)</td>\n</tr>\n<tr>\n<td>스크린샷</td>\n<td>❌ 불가</td>\n<td>✅ before/after 어노테이션</td>\n</tr>\n<tr>\n<td>시각적 버그</td>\n<td>❌ 코드만 분석</td>\n<td>✅ 렌더링 결과 직접 확인</td>\n</tr>\n<tr>\n<td>회귀 테스트</td>\n<td>수동</td>\n<td>✅ 버그 수정마다 자동 생성</td>\n</tr>\n</tbody></table>\n<h3>탐지 항목</h3>\n<pre><code class=\"language-mermaid\">%% desc: /qa 탐지 항목\nmindmap\n  root[&quot;/qa 탐지&quot;]\n    시각적 문제\n      간격 불일치\n      정렬 깨짐\n      폰트 계층 이상\n    인터랙션\n      느린 반응성\n      AI 슬롭 패턴\n      호버 상태 누락\n    상태 완전성\n      빈 상태\n      에러 상태\n      로딩 상태\n    반응형\n      모바일 중단점\n      오버플로우\n</code></pre>\n<h3>버그 수정 흐름</h3>\n<pre><code class=\"language-mermaid\">%% desc: /qa 자동 버그 수정 루프\nsequenceDiagram\n    participant Q as /qa\n    participant B as Chromium\n    participant C as 코드베이스\n\n    Q-&gt;&gt;B: 앱 클릭 + 스크린샷\n    B--&gt;&gt;Q: before 스크린샷\n    Q-&gt;&gt;Q: 우선순위 디자인 감사 리포트 (알파벳 등급)\n    Q-&gt;&gt;C: 버그 수정 (atomic 커밋)\n    Q-&gt;&gt;C: 회귀 테스트 자동 생성\n    Q-&gt;&gt;B: 재검증 클릭 + 스크린샷\n    B--&gt;&gt;Q: after 스크린샷\n    Q-&gt;&gt;Q: before/after 비교 어노테이션\n</code></pre>\n<h3><code>/qa-only</code> — 수정 없이 리포트만</h3>\n<pre><code class=\"language-bash\">/qa        # 버그 탐지 + 자동 수정 + 회귀 테스트 생성\n/qa-only   # 버그 탐지 + 리포트만 (코드 변경 없음)\n</code></pre>\n<hr>\n<h2>스킬 8: <code>/ship</code> — 릴리즈 엔지니어</h2>\n<p><strong>역할:</strong> 릴리즈 엔지니어</p>\n<p>sync → test → coverage audit → push → PR 오픈을 <strong>한 커맨드</strong>로 처리한다.</p>\n<h3>실행 순서</h3>\n<pre><code class=\"language-mermaid\">%% desc: /ship 실행 순서\nflowchart TD\n    A[&quot;/ship 시작&quot;] --&gt; B[&quot;main 브랜치 동기화&quot;]\n    B --&gt; C[&quot;테스트 실행&quot;]\n    C --&gt; D{테스트 통과?}\n    D --&gt;|❌ 실패| E[&quot;실패 내용 리포트\\n중단&quot;]\n    D --&gt;|✅ 통과| F[&quot;커버리지 감사\\n(테스트 프레임워크 없으면 부트스트랩)&quot;]\n    F --&gt; G[&quot;커버리지 리포트 생성&quot;]\n    G --&gt; H[&quot;브랜치 푸시&quot;]\n    H --&gt; I[&quot;PR 오픈&quot;]\n    I --&gt; J[&quot;/document-release 자동 호출&quot;]\n    J --&gt; K[&quot;완료&quot;]\n</code></pre>\n<h3>테스트 커버리지 목표</h3>\n<table>\n<thead>\n<tr>\n<th>상태</th>\n<th>동작</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>테스트 프레임워크 없음</td>\n<td>처음부터 자동 부트스트랩</td>\n</tr>\n<tr>\n<td>커버리지 &lt; 기준</td>\n<td>커버리지 감사 리포트 + 경고</td>\n</tr>\n<tr>\n<td>커버리지 통과</td>\n<td>정상 진행</td>\n</tr>\n</tbody></table>\n<blockquote>\n<p><strong>목표: 100% 테스트 커버리지.</strong> Vibe coding(감으로 짜기)을 yolo coding이 아닌 안전한 개발로 만든다.</p>\n</blockquote>\n<h3><code>/document-release</code> 자동 연동</h3>\n<p><code>/ship</code>이 완료되면 자동으로 <code>/document-release</code>를 호출해 문서를 최신화한다. 별도로 실행할 필요 없다.</p>\n<hr>\n<h2>스킬 9: <code>/land-and-deploy</code> — 머지 후 프로덕션 검증</h2>\n<p><strong>역할:</strong> 릴리즈 엔지니어 (머지 후)</p>\n<p>PR 머지, CI 파이프라인 완료 대기, 프로덕션 헬스 검증을 순서대로 처리한다.</p>\n<pre><code class=\"language-bash\">/land-and-deploy   # PR 머지 → CI 대기 → 프로덕션 헬스 체크 → 성공 선언\n</code></pre>\n<p><code>/ship</code>이 PR을 열었다면, <code>/land-and-deploy</code>가 그것을 프로덕션까지 완전히 도달시킨다.</p>\n<hr>\n<h2>스킬 10: <code>/canary</code> — 배포 후 모니터링</h2>\n<p><strong>역할:</strong> SRE (Site Reliability Engineer)</p>\n<p>배포 직후 에러율과 회귀를 실시간으로 감시한다.</p>\n<pre><code class=\"language-bash\">/canary            # 배포 후 모니터링 시작\n/canary --window=30m  # 30분 감시 윈도우\n</code></pre>\n<p>문제 발생 시 알림. 롤백 여부 결정을 위한 데이터 제공.</p>\n<hr>\n<h2>스킬 11: <code>/benchmark</code> — 성능 베이스라인</h2>\n<p><strong>역할:</strong> 퍼포먼스 엔지니어</p>\n<p>모든 배포에 측정 가능한 성능 데이터를 붙인다.</p>\n<h3>측정 항목</h3>\n<table>\n<thead>\n<tr>\n<th>메트릭</th>\n<th>기준</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>LCP (Largest Contentful Paint)</td>\n<td>&lt; 2.5초 (Good)</td>\n</tr>\n<tr>\n<td>FID (First Input Delay)</td>\n<td>&lt; 100ms (Good)</td>\n</tr>\n<tr>\n<td>CLS (Cumulative Layout Shift)</td>\n<td>&lt; 0.1 (Good)</td>\n</tr>\n<tr>\n<td>TTFB (Time to First Byte)</td>\n<td>&lt; 800ms</td>\n</tr>\n<tr>\n<td>번들 사이즈</td>\n<td>이전 배포 대비 변화량</td>\n</tr>\n</tbody></table>\n<p>배포마다 베이스라인을 기록해 성능 회귀를 추적한다.</p>\n<hr>\n<h2>스킬 12: <code>/document-release</code> — 자동 문서화</h2>\n<p><strong>역할:</strong> 테크니컬 라이터 (없던 그 엔지니어)</p>\n<p>코드가 바뀌면 문서도 바뀌어야 한다. <code>/document-release</code>가 이를 자동화한다.</p>\n<h3>업데이트 대상</h3>\n<pre><code class=\"language-mermaid\">%% desc: /document-release 업데이트 범위\nflowchart LR\n    D[&quot;/document-release&quot;] --&gt; A[&quot;README.md\\n설치·사용법 최신화&quot;]\n    D --&gt; B[&quot;ARCHITECTURE.md\\n컴포넌트 다이어그램 갱신&quot;]\n    D --&gt; C[&quot;CONTRIBUTING.md\\n개발 가이드 업데이트&quot;]\n    D --&gt; E[&quot;CLAUDE.md\\n프로젝트 규칙 동기화&quot;]\n    D --&gt; F[&quot;CHANGELOG.md\\n이번 배포 변경 내역&quot;]\n    D --&gt; G[&quot;TODOS.md\\n완료 항목 체크&quot;]\n    D --&gt; H[&quot;VERSION\\n선택적 버전 범프&quot;]\n</code></pre>\n<p>동작 방식:</p>\n<ol>\n<li>프로젝트 내 모든 문서 파일 읽기</li>\n<li>현재 diff와 교차 참조</li>\n<li>드리프트된 모든 섹션 업데이트</li>\n</ol>\n<p><code>/ship</code>에 의해 자동 호출되지만 독립 실행도 가능:</p>\n<pre><code class=\"language-bash\">/document-release          # 문서 갱신만\n/document-release --bump   # 문서 갱신 + VERSION 범프\n</code></pre>\n<hr>\n<h2>스킬 13: <code>/retro</code> — 주간 엔지니어링 회고</h2>\n<p><strong>역할:</strong> 엔지니어링 매니저</p>\n<p>커밋 히스토리, 작업 패턴, 코드 품질 메트릭을 분석해 팀 회고를 진행한다.</p>\n<h3>분석 항목</h3>\n<pre><code class=\"language-mermaid\">%% desc: /retro 분석 항목\nmindmap\n  root[&quot;/retro&quot;]\n    커밋 분석\n      커밋 수\n      순 코드 변화량\n      배포 빈도\n    팀 메트릭\n      개인별 배포 스트릭\n      테스트 건강 트렌드\n      리뷰 사이클 타임\n    피드백\n      칭찬 포인트\n      성장 포인트\n    AI 도구 크로스 분석\n      Claude Code\n      Codex\n      Gemini\n</code></pre>\n<h3>모드</h3>\n<pre><code class=\"language-bash\">/retro             # 현재 프로젝트 주간 회고\n/retro global      # 모든 프로젝트 + 모든 AI 도구 크로스 분석\n</code></pre>\n<h3>영구 히스토리</h3>\n<p>회고 결과는 <code>~/.gstack/retros/</code>에 저장된다. 시간이 지나면서 트렌드를 추적할 수 있다.</p>\n<hr>\n<h2>Build, Test &amp; Ship 단계 요약</h2>\n<table>\n<thead>\n<tr>\n<th>스킬</th>\n<th>필수 여부</th>\n<th>실행 시점</th>\n<th>주요 아웃풋</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/review</code></td>\n<td>선택</td>\n<td>PR 생성 전</td>\n<td>버그 리포트 + 자동 수정</td>\n</tr>\n<tr>\n<td><code>/qa</code></td>\n<td>선택 (강권)</td>\n<td>머지 전</td>\n<td>스크린샷 감사 + 자동 수정 + 회귀 테스트</td>\n</tr>\n<tr>\n<td><code>/cso</code></td>\n<td>선택</td>\n<td>배포 전</td>\n<td>OWASP + STRIDE 감사 리포트</td>\n</tr>\n<tr>\n<td><code>/benchmark</code></td>\n<td>선택</td>\n<td>배포마다</td>\n<td>Core Web Vitals 베이스라인</td>\n</tr>\n<tr>\n<td><code>/ship</code></td>\n<td>선택</td>\n<td>배포 준비 시</td>\n<td>PR + 커버리지 리포트</td>\n</tr>\n<tr>\n<td><code>/land-and-deploy</code></td>\n<td>선택</td>\n<td>머지 결정 시</td>\n<td>프로덕션 헬스 검증</td>\n</tr>\n<tr>\n<td><code>/canary</code></td>\n<td>선택</td>\n<td>배포 직후</td>\n<td>에러율 + 회귀 감시</td>\n</tr>\n<tr>\n<td><code>/document-release</code></td>\n<td>자동 (<code>/ship</code> 연동)</td>\n<td>배포마다</td>\n<td>전체 문서 최신화</td>\n</tr>\n<tr>\n<td><code>/retro</code></td>\n<td>선택</td>\n<td>주 1회</td>\n<td>팀 메트릭 + 트렌드</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://github.com/garrytan/gstack\" target=\"_blank\">[1] garrytan/gstack — GitHub</a></p>\n<p><a href=\"https://www.toolworthy.ai/tool/gstack\" target=\"_blank\">[2] GStack Review 2026 — toolworthy.ai</a></p>\n<p><a href=\"https://agentnativedev.medium.com/garry-tans-gstack-running-claude-like-an-engineering-team-392f1bd38085\" target=\"_blank\">[3] Garry Tan&#39;s gstack: Running Claude Like an Engineering Team — Agent Native</a></p>\n<p><a href=\"https://www.marktechpost.com/2026/03/14/garry-tan-releases-gstack-an-open-source-claude-code-system-for-planning-code-review-qa-and-shipping/\" target=\"_blank\">[4] Garry Tan Releases gstack — MarkTechPost</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/gstack-overview\">gstack 개요 — 전체 구조와 철학 →</a></li>\n<li><a href=\"/post/gstack-skills-plan\">gstack Think &amp; Plan 스킬 1~5 →</a></li>\n</ul>\n",
     "coverImage": null,
-    "category": "study/infra/gstack",
+    "category": "study/ai/gstack",
     "tags": [
       "gstack",
       "claude-code",
@@ -330,7 +330,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.431Z"
+    "updatedAt": "2026-04-03T10:18:28.426Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -339,7 +339,7 @@
     "excerpt": "gstack의 Think & Plan 단계 5개 스킬 상세 분석. /office-hours가 묻는 6가지 강제 질문, /plan-ceo-review의 10-star product 모드, /plan-eng-review가 유일한 필수 배포 게이트인 이유를 뜯어본다.\n",
     "content": "<h2>Think &amp; Plan 단계 개요</h2>\n<p>gstack 스프린트의 첫 번째 단계. <strong>코드를 한 줄도 쓰기 전에</strong> 제품을 리프레이밍하고, 아키텍처를 확정하고, 디자인 시스템을 잡는다.</p>\n<pre><code class=\"language-mermaid\">%% desc: Think &amp; Plan 단계 스킬 흐름\nflowchart TD\n    A[&quot;/office-hours\\n💡 프로덕트 전략가\\n6가지 강제 질문&quot;] --&gt; B[&quot;~/.gstack/projects/\\n설계 문서 저장&quot;]\n    B --&gt; C[&quot;/plan-ceo-review\\n👔 CEO 모드\\n10-star product 탐색&quot;]\n    C --&gt; D[&quot;/plan-design-review\\n🎨 디자인 감사\\n0~10점 채점 + 플랜 수정&quot;]\n    D --&gt; E[&quot;/design-consultation\\n🖌️ 디자인 시스템 빌더\\nDESIGN.md 생성&quot;]\n    E --&gt; F[&quot;/plan-eng-review\\n⚙️ 아키텍처 잠금\\n유일한 필수 배포 게이트&quot;]\n    F --&gt; G[&quot;Build 단계로&quot;]\n</code></pre>\n<blockquote>\n<p><strong>핵심</strong>: <code>/office-hours</code>가 만든 설계 문서를 <code>/plan-ceo-review</code>가 읽고, <code>/design-consultation</code>이 만든 <code>DESIGN.md</code>를 <code>/plan-eng-review</code>와 <code>/design-review</code>가 읽는다. 각 스킬은 독립적으로 동작하지 않고 서로 아웃풋을 넘긴다.</p>\n</blockquote>\n<hr>\n<h2>스킬 1: <code>/office-hours</code> — YC 오피스 아워 모드</h2>\n<p><strong>역할:</strong> 프로덕트 전략가 / 창업 어드바이저</p>\n<p>Claude가 YC 파트너 페르소나를 취해 오피스 아워를 진행한다. 아이디어를 실제 YC 심사 관점에서 6가지 강제 질문으로 재검토한다.<a href=\"https://github.com/garrytan/gstack\" target=\"_blank\"><sup>[1]</sup></a></p>\n<h3>동작 방식</h3>\n<pre><code class=\"language-mermaid\">%% desc: /office-hours 세션 흐름\nsequenceDiagram\n    participant U as 사용자\n    participant G as /office-hours (YC 파트너)\n    participant F as ~/.gstack/projects/\n\n    U-&gt;&gt;G: /office-hours (아이디어 설명)\n    G-&gt;&gt;U: 강제 질문 1: 누가 이 문제를 가장 절실하게 겪나?\n    G-&gt;&gt;U: 강제 질문 2: 지금 어떻게 해결하고 있나?\n    G-&gt;&gt;U: 강제 질문 3: 왜 지금이고, 왜 당신인가?\n    G-&gt;&gt;U: 강제 질문 4: 실제로 만들어 본 적 있나?\n    G-&gt;&gt;U: 강제 질문 5: 1년 후 성공은 어떻게 생겼나?\n    G-&gt;&gt;U: 강제 질문 6: 지금 당장 할 수 있는 한 가지 현실적 행동은?\n    U-&gt;&gt;G: 답변\n    G-&gt;&gt;F: 설계 문서 저장 (영구 보존)\n    G-&gt;&gt;U: 세션 마감 과제 (반드시 구체적 행동)\n</code></pre>\n<h3>핵심 규칙</h3>\n<ul>\n<li><strong>절대 구현을 시작하지 않는다.</strong> 오직 설계 문서만 생성한다.</li>\n<li>세션은 <code>~/.gstack/projects/</code>에 영구 저장되어 대화 종료 후에도 결정이 살아있다.</li>\n<li>마지막 과제는 반드시 구체적 현실 행동이어야 한다. <em>&quot;가서 만들어라&quot;</em> 같은 추상적 지시는 금지.</li>\n</ul>\n<h3>언제 쓰나?</h3>\n<p>새 기능이나 프로젝트를 시작하기 전. 특히 구현에 뛰어들고 싶은 충동이 강할 때일수록 먼저 여기서 멈춰야 한다.</p>\n<hr>\n<h2>스킬 2: <code>/plan-ceo-review</code> — 10-Star Product 모드</h2>\n<p><strong>역할:</strong> CEO / 창업자 (Brian Chesky 모드)</p>\n<p>기능 요청을 문자 그대로 받지 않는다. 그 안에 숨겨진 10-star product를 찾는다.<a href=\"https://www.sitepoint.com/gstack-garry-tan-claude-code/\" target=\"_blank\"><sup>[2]</sup></a></p>\n<h3>4가지 Scope 모드</h3>\n<pre><code class=\"language-mermaid\">%% desc: /plan-ceo-review 4가지 Scope 모드\nflowchart LR\n    R[&quot;요청\\n&#39;로그인 버튼 추가&#39;&quot;] --&gt; CEO[&quot;/plan-ceo-review&quot;]\n\n    CEO --&gt; A[&quot;📈 Scope Expansion\\n크게 꿈꾸기\\n→ 전체 인증 시스템 재설계 제안&quot;]\n    CEO --&gt; B[&quot;🔍 Selective Expansion\\n기회 하나씩 제시\\n→ 사용자가 선택&quot;]\n    CEO --&gt; C[&quot;🎯 Hold Scope\\n기존 플랜 최고 강도 검토\\n→ 확장 없이 완성도 극대화&quot;]\n    CEO --&gt; D[&quot;✂️ Scope Reduction\\n최소 버전 찾기\\n→ 지금 당장 필요한 것만&quot;]\n</code></pre>\n<h3>예시 사용</h3>\n<pre><code class=\"language-bash\"># 기본 (자동 모드 선택)\n/plan-ceo-review\n\n# 명시적 모드 지정\n/plan-ceo-review --scope expand\n/plan-ceo-review --scope reduce\n</code></pre>\n<h3>포인트</h3>\n<p>이 스킬이 &quot;Brian Chesky 모드&quot;라고 불리는 이유: Airbnb CEO가 팀에게 5-star가 아닌 11-star 경험을 먼저 설계하게 한 뒤 현실적 버전으로 내려오는 방식을 쓴다. Garry Tan이 수천 개 스타트업을 평가하며 몸에 밴 사고 방식을 그대로 인코딩했다.</p>\n<hr>\n<h2>스킬 3: <code>/plan-eng-review</code> — 아키텍처 잠금 (유일한 필수 게이트)</h2>\n<p><strong>역할:</strong> 엔지니어링 매니저</p>\n<p>gstack의 27개 커맨드 중 <strong>배포를 실제로 막을 수 있는 유일한 게이트</strong>다. 나머지 리뷰는 모두 정보 제공용이고 건너뛸 수 있다. 이것만 필수다.</p>\n<h3>검토 항목</h3>\n<pre><code class=\"language-mermaid\">%% desc: /plan-eng-review 검토 영역\nflowchart TD\n    R[&quot;/plan-eng-review 시작&quot;] --&gt; A[&quot;아키텍처 품질\\n데이터 플로우 다이어그램\\n컴포넌트 경계&quot;]\n    R --&gt; B[&quot;숨겨진 가정 노출\\n엣지 케이스 목록화\\n실패 시나리오&quot;]\n    R --&gt; C[&quot;코드 표준\\n네이밍·패턴 일관성\\n기술 부채 식별&quot;]\n    R --&gt; D[&quot;테스트 플랜\\n커버리지 목표\\nQA 픽업 항목&quot;]\n    R --&gt; E[&quot;성능 기준\\n부하 추정\\n병목 지점 예측&quot;]\n\n    A &amp; B &amp; C &amp; D &amp; E --&gt; F[&quot;아키텍처 잠금\\n다음 단계: Build&quot;]\n</code></pre>\n<h3>비활성화 (팀 결정 시)</h3>\n<pre><code class=\"language-bash\">gstack-config set skip_eng_review true\n</code></pre>\n<h3>왜 이것만 필수인가?</h3>\n<p>설계는 나중에 바꾸기 어렵다. 디자인 문제는 UI를 고치면 되고, 보안 문제는 패치하면 된다. 하지만 잘못된 아키텍처 결정은 전체 시스템을 다시 쓰게 만든다. <code>/plan-eng-review</code>는 이 순간을 강제로 잡는다.</p>\n<hr>\n<h2>스킬 4: <code>/plan-design-review</code> — 구현 전 디자인 감사</h2>\n<p><strong>역할:</strong> 시니어 디자이너</p>\n<p>구현이 시작되기 전 <strong>플랜 단계에서</strong> 디자인을 심사한다. <code>/design-review</code>가 구현 후 실제 UI를 감사하는 것과 다르다.</p>\n<h3>채점 방식</h3>\n<p>각 디자인 차원을 <strong>0~10점</strong>으로 채점한다:</p>\n<table>\n<thead>\n<tr>\n<th>차원</th>\n<th>0점</th>\n<th>10점</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>정보 계층</td>\n<td>모든 것이 동등하게 강조됨</td>\n<td>사용자 시선이 자연스럽게 흐름</td>\n</tr>\n<tr>\n<td>타이포그래피</td>\n<td>폰트 크기·굵기 무작위</td>\n<td>의미와 계층을 정확히 반영</td>\n</tr>\n<tr>\n<td>간격 리듬</td>\n<td>일관성 없는 패딩·마진</td>\n<td>4px/8px 그리드 기반 일관성</td>\n</tr>\n<tr>\n<td>상태 완전성</td>\n<td>기본 상태만 설계</td>\n<td>빈 상태·에러·로딩 모두 설계</td>\n</tr>\n<tr>\n<td>반응형</td>\n<td>데스크톱만 고려</td>\n<td>모든 중단점에서 의도적 레이아웃</td>\n</tr>\n</tbody></table>\n<p>10점이 어떤 모습인지 설명한 뒤 플랜을 직접 수정한다.</p>\n<hr>\n<h2>스킬 5: <code>/design-consultation</code> — 디자인 시스템 빌더</h2>\n<p><strong>역할:</strong> 디자인 파트너</p>\n<p>단순히 폰트와 컬러를 고르는 것이 아니다. 경쟁 환경을 리서치하고 실제 제품 목업을 생성하며 <code>DESIGN.md</code>를 작성한다.</p>\n<h3>아웃풋 흐름</h3>\n<pre><code class=\"language-mermaid\">%% desc: /design-consultation 아웃풋이 시스템에 흐르는 방식\nflowchart LR\n    D[&quot;/design-consultation&quot;] --&gt; M[&quot;DESIGN.md\\n타이포그래피\\n컬러 팔레트\\n컴포넌트 패턴\\n모션 원칙&quot;]\n\n    M --&gt; R[&quot;/design-review\\nDESIGN.md 기준으로\\n구현 감사&quot;]\n    M --&gt; E[&quot;/plan-eng-review\\nDESIGN.md 읽어\\n기술 제약 확인&quot;]\n</code></pre>\n<h3>단계</h3>\n<ol>\n<li><strong>리서치</strong>: 경쟁 제품 디자인 분석</li>\n<li><strong>제안</strong>: 안전한 선택 + 창의적 리스크 옵션 둘 다 제시</li>\n<li><strong>목업</strong>: 실제 제품의 핵심 화면 생성</li>\n<li><strong>문서화</strong>: <code>DESIGN.md</code> 작성</li>\n</ol>\n<h3>포인트</h3>\n<p><code>DESIGN.md</code>는 단순 문서가 아니다. 이후 <code>/design-review</code>와 <code>/plan-eng-review</code>가 이 파일을 읽어 작업한다. 디자인 결정이 전체 시스템으로 흘러가는 구조다.</p>\n<hr>\n<h2>Think &amp; Plan 단계 요약</h2>\n<table>\n<thead>\n<tr>\n<th>스킬</th>\n<th>필수 여부</th>\n<th>주요 아웃풋</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/office-hours</code></td>\n<td>선택 (신규 프로젝트 강권)</td>\n<td>설계 문서 (<code>~/.gstack/projects/</code>)</td>\n</tr>\n<tr>\n<td><code>/plan-ceo-review</code></td>\n<td>선택</td>\n<td>Scope 결정 문서</td>\n</tr>\n<tr>\n<td><code>/plan-design-review</code></td>\n<td>선택</td>\n<td>디자인 채점 + 수정된 플랜</td>\n</tr>\n<tr>\n<td><code>/design-consultation</code></td>\n<td>선택</td>\n<td><code>DESIGN.md</code></td>\n</tr>\n<tr>\n<td><code>/plan-eng-review</code></td>\n<td><strong>필수</strong> ⚠️</td>\n<td>아키텍처 잠금 + 테스트 플랜</td>\n</tr>\n</tbody></table>\n<p>이 5개를 순서대로 마치면 Build 단계에서 AI가 구현에 집중할 수 있는 명확한 토대가 만들어진다.</p>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://github.com/garrytan/gstack\" target=\"_blank\">[1] garrytan/gstack — GitHub</a></p>\n<p><a href=\"https://www.sitepoint.com/gstack-garry-tan-claude-code/\" target=\"_blank\">[2] GStack Tutorial: Garry Tan&#39;s Claude Code Workflow — SitePoint</a></p>\n<p><a href=\"https://agentnativedev.medium.com/garry-tans-gstack-running-claude-like-an-engineering-team-392f1bd38085\" target=\"_blank\">[3] Garry Tan&#39;s gstack: Running Claude Like an Engineering Team — Agent Native</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/gstack-overview\">gstack 개요 — 전체 구조와 철학 →</a></li>\n<li><a href=\"/post/gstack-skills-ship\">gstack Build, Test &amp; Ship 스킬 6~13 →</a></li>\n</ul>\n",
     "coverImage": null,
-    "category": "study/infra/gstack",
+    "category": "study/ai/gstack",
     "tags": [
       "gstack",
       "claude-code",
@@ -353,7 +353,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.429Z"
+    "updatedAt": "2026-04-03T10:18:28.425Z"
   },
   {
     "id": "gstack-overview",
@@ -362,7 +362,7 @@
     "excerpt": "Y Combinator CEO 개리 탄이 공개한 오픈소스 Claude Code 스킬 모음 gstack. 13개 스프린트 스킬이 CEO·디자이너·엔지니어·QA·릴리즈 엔지니어를 한 CLI 안에 구현한다. 60일에 60만 줄, 그 구조를 뜯어본다.\n",
     "content": "<h2>gstack이 뭔가?</h2>\n<p><strong>gstack</strong>은 Y Combinator CEO <strong>Garry Tan</strong>이 2026년 3월 12일 공개한 오픈소스 Claude Code 스킬 모음이다.<a href=\"https://github.com/garrytan/gstack\" target=\"_blank\"><sup>[1]</sup></a></p>\n<p>Claude Code CLI를 <em>가상 엔지니어링팀</em>으로 변환하는 것이 핵심 아이디어다. 슬래시 커맨드 하나로 CEO, 시니어 디자이너, 엔지니어링 매니저, 스태프 엔지니어, QA 리드, 보안 책임자, 릴리즈 엔지니어가 번갈아 등장한다.</p>\n<p>출시 11일 만에 GitHub Star <strong>39,000개</strong>, Fork <strong>2,700+</strong>. MIT 라이선스, 무료 오픈소스.</p>\n<hr>\n<h2>핵심 철학: 프로세스다, 도구가 아니다</h2>\n<blockquote>\n<p><strong>&quot;gstack is a process, not a collection of tools.&quot;</strong></p>\n</blockquote>\n<p>같은 AI에게 같은 대화에서 기획 → 구현 → 리뷰 → 배포를 모두 맡기면 조직적 진실을 거스른다. 개발의 각 단계는 근본적으로 다른 인지 모드가 필요하다. gstack은 이걸 분리한다.</p>\n<pre><code class=\"language-mermaid\">%% desc: gstack 스프린트 라이프사이클\nflowchart LR\n    A[&quot;💡 Think\\n/office-hours\\n/plan-ceo-review&quot;] --&gt; B[&quot;📐 Plan\\n/plan-eng-review\\n/plan-design-review\\n/design-consultation&quot;]\n    B --&gt; C[&quot;🔨 Build\\n/review\\n/investigate\\n/codex&quot;]\n    C --&gt; D[&quot;🧪 Test\\n/qa\\n/cso\\n/benchmark&quot;]\n    D --&gt; E[&quot;🚀 Ship\\n/ship\\n/land-and-deploy\\n/canary&quot;]\n    E --&gt; F[&quot;🔁 Reflect\\n/retro\\n/document-release&quot;]\n    F -.-&gt;|다음 스프린트| A\n</code></pre>\n<p>각 스킬은 다음 스킬에 아웃풋을 넘긴다:</p>\n<ul>\n<li><code>/office-hours</code> 가 설계 문서 작성 → <code>/plan-ceo-review</code> 가 읽음</li>\n<li><code>/plan-eng-review</code> 가 테스트 플랜 작성 → <code>/qa</code> 가 픽업</li>\n<li><code>/review</code> 가 버그 발견 → <code>/ship</code> 이 수정 검증</li>\n<li><code>/ship</code> 이 자동으로 <code>/document-release</code> 호출</li>\n</ul>\n<hr>\n<h2>숫자로 보는 신뢰도</h2>\n<p>Garry Tan이 gstack으로 직접 찍은 수치:</p>\n<table>\n<thead>\n<tr>\n<th>지표</th>\n<th>수치</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>기간</td>\n<td>60일 (파트타임)</td>\n</tr>\n<tr>\n<td>총 코드량</td>\n<td>60만+ 줄 (35%가 테스트)</td>\n</tr>\n<tr>\n<td>일일 생산량</td>\n<td>1만~2만 줄</td>\n</tr>\n<tr>\n<td>1주 커밋 수</td>\n<td>362개</td>\n</tr>\n<tr>\n<td>1주 추가 라인</td>\n<td>140,751줄 (3개 프로젝트)</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>지원 도구 — 어디서 쓸 수 있나?</h2>\n<p>gstack은 <strong>Claude Code 네이티브</strong>이지만 <code>--host</code> 플래그로 다른 AI 코딩 도구도 공식 지원한다.</p>\n<table>\n<thead>\n<tr>\n<th>도구</th>\n<th>지원</th>\n<th>설치 플래그</th>\n<th>슬래시 커맨드</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Claude Code</strong></td>\n<td>✅ Primary</td>\n<td><code>./setup</code></td>\n<td><code>/skill-name</code></td>\n</tr>\n<tr>\n<td><strong>Codex CLI</strong> (OpenAI)</td>\n<td>✅ 공식</td>\n<td><code>./setup --host codex</code></td>\n<td>자연어</td>\n</tr>\n<tr>\n<td><strong>Cursor</strong></td>\n<td>✅ 공식</td>\n<td><code>./setup --host codex</code></td>\n<td><code>@skill-name</code></td>\n</tr>\n<tr>\n<td><strong>Gemini CLI</strong></td>\n<td>✅ 공식</td>\n<td><code>./setup --host gemini</code></td>\n<td>자연어</td>\n</tr>\n<tr>\n<td><strong>Antigravity</strong></td>\n<td>⚠️ 비공식</td>\n<td><code>antigravity-awesome-skills</code></td>\n<td><code>Use @skill-name</code></td>\n</tr>\n<tr>\n<td><strong>Windsurf / Kiro</strong></td>\n<td>⚠️ 비공식</td>\n<td><code>antigravity-awesome-skills</code></td>\n<td>자연어</td>\n</tr>\n</tbody></table>\n<blockquote>\n<p><strong>Antigravity(Google)</strong>는 gstack 공식 지원 대상이 아니다. 동일한 <strong>SKILL.md 오픈 표준</strong>을 쓰는 커뮤니티 라이브러리 <a href=\"https://github.com/sickn33/antigravity-awesome-skills\"><code>antigravity-awesome-skills</code></a> 를 통해 연결한다.</p>\n</blockquote>\n<hr>\n<h2>설치 방법</h2>\n<h3>Claude Code (전역)</h3>\n<pre><code class=\"language-bash\">git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack\ncd ~/.claude/skills/gstack &amp;&amp; ./setup\n</code></pre>\n<h3>Claude Code (프로젝트 단위 — 팀 공유)</h3>\n<pre><code class=\"language-bash\"># 프로젝트 루트에서\ncp -Rf ~/.claude/skills/gstack .claude/skills/gstack\nrm -rf .claude/skills/gstack/.git\ncd .claude/skills/gstack &amp;&amp; ./setup\n</code></pre>\n<p>팀원들이 repo를 클론하면 동일한 스킬을 바로 사용할 수 있다.</p>\n<h3>Cursor / Codex CLI</h3>\n<pre><code class=\"language-bash\">git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git .agents/skills/gstack\ncd .agents/skills/gstack &amp;&amp; ./setup --host codex\n</code></pre>\n<h3>Gemini CLI</h3>\n<pre><code class=\"language-bash\">git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/gstack\ncd ~/gstack &amp;&amp; ./setup --host gemini\n</code></pre>\n<h3>Antigravity / Kiro / Windsurf (커뮤니티)</h3>\n<pre><code class=\"language-bash\">npx antigravity-awesome-skills --antigravity  # Antigravity\nnpx antigravity-awesome-skills --cursor       # Cursor\nnpx antigravity-awesome-skills --kiro         # Kiro\n</code></pre>\n<h3>업그레이드</h3>\n<pre><code class=\"language-bash\">/gstack-upgrade  # Claude Code 내에서 실행\n</code></pre>\n<hr>\n<h2>내부 구조 — 스킬은 어떻게 동작하나?</h2>\n<p>gstack의 스킬은 <strong>SKILL.md 파일</strong>이다. 각 스킬 디렉터리 구조:</p>\n<pre><code>review/\n├── SKILL.md          ← 스킬 정의 (frontmatter + 워크플로우)\n└── (선택: 스크립트, 레퍼런스 문서)\n</code></pre>\n<p>SKILL.md 포맷:</p>\n<pre><code class=\"language-yaml\">---\nname: review\ndescription: Staff engineer code review with auto-fixes. Use when...\n---\n\n## Overview\n...\n\n## When to Use\n...\n\n## Instructions\n(단계별 워크플로우)\n</code></pre>\n<p>Claude Code는 <strong>3단계 점진적 로딩</strong>으로 스킬을 처리한다:</p>\n<pre><code class=\"language-mermaid\">%% desc: SKILL.md 3단계 점진적 로딩\nsequenceDiagram\n    participant C as Claude Code 시작\n    participant F as Frontmatter\n    participant B as SKILL.md 본문\n    participant S as 스크립트/파일\n\n    C-&gt;&gt;F: 모든 스킬 frontmatter 읽기 (name + description)\n    F--&gt;&gt;C: 시스템 프롬프트에 요약 삽입\n    Note over C,F: 컨텍스트 페널티 최소화\n\n    C-&gt;&gt;B: 사용자가 /review 호출 시\n    B--&gt;&gt;C: 전체 SKILL.md 본문 로드\n    Note over C,B: 활성화 시에만 로드\n\n    C-&gt;&gt;S: 실행 중 필요한 스크립트/파일\n    S--&gt;&gt;C: 필요 시점에만 로드\n    Note over C,S: 온디맨드 로드\n</code></pre>\n<blockquote>\n<p><code>description</code> 필드가 <strong>트리거 메커니즘</strong>이다. &quot;언제 사용하는가&quot;에 대한 모든 안내가 반드시 여기에 있어야 한다. 본문은 활성화 이후에야 로드되기 때문이다.</p>\n</blockquote>\n<h3>저장 위치</h3>\n<table>\n<thead>\n<tr>\n<th>범위</th>\n<th>Claude Code</th>\n<th>Codex/Cursor</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>전역 (사용자)</td>\n<td><code>~/.claude/skills/gstack/</code></td>\n<td><code>~/.codex/skills/gstack/</code></td>\n</tr>\n<tr>\n<td>프로젝트 (팀 공유)</td>\n<td><code>.claude/skills/gstack/</code></td>\n<td><code>.agents/skills/gstack/</code></td>\n</tr>\n<tr>\n<td>설정 파일</td>\n<td><code>~/.gstack/config.yaml</code></td>\n<td>동일</td>\n</tr>\n<tr>\n<td>설계/플랜 상태</td>\n<td><code>~/.gstack/projects/</code></td>\n<td>동일</td>\n</tr>\n</tbody></table>\n<p>프로젝트 레벨 스킬이 전역 스킬보다 우선된다.</p>\n<hr>\n<h2>13개 스프린트 스킬 전체 목록</h2>\n<p>gstack의 27개 커맨드 중 핵심은 스프린트 라이프사이클을 구성하는 <strong>13개 스프린트 스킬</strong>이다.</p>\n<h3>Think &amp; Plan (기획)</h3>\n<table>\n<thead>\n<tr>\n<th>커맨드</th>\n<th>역할</th>\n<th>한 줄 설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/office-hours</code></td>\n<td>프로덕트 전략가</td>\n<td>YC 오피스 아워 — 6가지 강제 질문으로 코드 전에 리프레이밍</td>\n</tr>\n<tr>\n<td><code>/plan-ceo-review</code></td>\n<td>CEO / 창업자</td>\n<td>10-star product 찾기 — 4가지 Scope 모드</td>\n</tr>\n<tr>\n<td><code>/plan-eng-review</code></td>\n<td>엔지니어링 매니저</td>\n<td>아키텍처 잠금 — <strong>유일한 필수 배포 게이트</strong></td>\n</tr>\n<tr>\n<td><code>/plan-design-review</code></td>\n<td>시니어 디자이너</td>\n<td>구현 전 디자인 0~10점 채점 + 플랜 수정</td>\n</tr>\n<tr>\n<td><code>/design-consultation</code></td>\n<td>디자인 파트너</td>\n<td>디자인 시스템 + DESIGN.md 생성</td>\n</tr>\n</tbody></table>\n<h3>Build &amp; Test (구현 · 검증)</h3>\n<table>\n<thead>\n<tr>\n<th>커맨드</th>\n<th>역할</th>\n<th>한 줄 설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/review</code></td>\n<td>스태프 엔지니어</td>\n<td>diff 기반 프로덕션 버그 헌팅 + 자동 수정</td>\n</tr>\n<tr>\n<td><code>/qa</code></td>\n<td>QA 리드</td>\n<td>실제 Chromium으로 클릭 테스트 + 자동 버그 수정</td>\n</tr>\n</tbody></table>\n<h3>Ship &amp; Reflect (배포 · 회고)</h3>\n<table>\n<thead>\n<tr>\n<th>커맨드</th>\n<th>역할</th>\n<th>한 줄 설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/ship</code></td>\n<td>릴리즈 엔지니어</td>\n<td>sync → test → coverage → push → PR (원커맨드)</td>\n</tr>\n<tr>\n<td><code>/land-and-deploy</code></td>\n<td>릴리즈 엔지니어</td>\n<td>머지 → CI 대기 → 프로덕션 헬스 검증</td>\n</tr>\n<tr>\n<td><code>/canary</code></td>\n<td>SRE</td>\n<td>배포 후 에러·회귀 감시</td>\n</tr>\n<tr>\n<td><code>/benchmark</code></td>\n<td>퍼포먼스 엔지니어</td>\n<td>Core Web Vitals + 성능 베이스라인</td>\n</tr>\n<tr>\n<td><code>/document-release</code></td>\n<td>테크니컬 라이터</td>\n<td>README·CHANGELOG·ARCHITECTURE 자동 최신화</td>\n</tr>\n<tr>\n<td><code>/retro</code></td>\n<td>엔지니어링 매니저</td>\n<td>주간 커밋 분석 + 팀 메트릭 회고</td>\n</tr>\n</tbody></table>\n<p>→ 각 스킬 상세 분석: <a href=\"/post/gstack-skills-plan\">Think &amp; Plan 스킬 →</a> · <a href=\"/post/gstack-skills-ship\">Build, Test &amp; Ship 스킬 →</a></p>\n<hr>\n<h2>왜 각광받나?</h2>\n<p><strong>1. 조직 문제를 해결한다</strong><br>같은 AI가 같은 대화에서 여러 역할을 동시에 하면 인지 모드 충돌이 일어난다. gstack은 단계별로 완전히 다른 페르소나를 부여해 이를 분리한다.</p>\n<p><strong>2. YC CEO의 실제 사고를 인코딩했다</strong><br><code>/plan-ceo-review</code>가 &quot;10-star product는?&quot;을 묻는 건 제네릭 프롬프트가 아니다. 수천 개 스타트업을 평가한 Garry Tan의 실제 사고 방식이다. 의도적으로 편향(opinionated)된 도구다.</p>\n<p><strong>3. 실제 브라우저 통합</strong><br>텍스트 기반 AI 코딩 도구와 달리, <code>/qa</code>는 Playwright 기반 실제 Chromium 데몬을 써서 앱을 직접 클릭하고 스크린샷을 어노테이션한다.</p>\n<p><strong>4. 스마트 리뷰 라우팅</strong><br>CEO는 인프라 버그 안 봄, 디자인 리뷰는 백엔드 전용 변경 때 스킵. 어느 리뷰가 적절한지 자동 라우팅된다.</p>\n<hr>\n<h2>논란</h2>\n<p>수용은 양극화됐다. 지지 측: <em>&quot;소프트웨어 개발의 미래를 엿본다.&quot;</em> 비판 측: <em>&quot;그냥 텍스트 파일에 프롬프트 넣은 것.&quot;</em><a href=\"https://techcrunch.com/2026/03/17/why-garry-tans-claude-code-setup-has-gotten-so-much-love-and-hate/\" target=\"_blank\"><sup>[2]</sup></a></p>\n<p>비판은 기술적으로 맞다. gstack은 최하위 레벨에서 마크다운 파일이다. 반론도 기술적으로 맞다. 모든 소프트웨어는 최하위 레벨에서 디스크의 비트다. 가치는 그 안에 인코딩된 구조·순서·철학에 있다.</p>\n<hr>\n<h2>Superpowers와의 비교</h2>\n<p>gstack과 직접 비교되는 도구는 IDE(Cursor, Codex)가 아니라 동일한 &quot;스킬 팩&quot; 개념의 <strong>Superpowers</strong> (Jesse Vincent)다.</p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th><strong>gstack</strong></th>\n<th><strong>Superpowers</strong></th>\n</tr>\n</thead>\n<tbody><tr>\n<td>창작자</td>\n<td>Garry Tan (YC CEO)</td>\n<td>Jesse Vincent</td>\n</tr>\n<tr>\n<td>GitHub Stars</td>\n<td>39,000+</td>\n<td>106,000+</td>\n</tr>\n<tr>\n<td>핵심 철학</td>\n<td>가상 엔지니어링팀, 단계별 인지 분리</td>\n<td>7단계 TDD 강제 파이프라인</td>\n</tr>\n<tr>\n<td>QA</td>\n<td>실제 Chromium 브라우저</td>\n<td>텍스트 기반</td>\n</tr>\n<tr>\n<td>설치</td>\n<td>Claude Code, Cursor, Gemini CLI, Codex</td>\n<td>Claude Code 중심</td>\n</tr>\n<tr>\n<td>병행 사용</td>\n<td>✅ 권장</td>\n<td>✅ 권장</td>\n</tr>\n</tbody></table>\n<blockquote>\n<p>YC Bookface 포럼 최다 추천: <strong>둘 다 써라.</strong> Superpowers로 TDD 구현 규율, gstack으로 기획·시각 QA를 담당한다.</p>\n</blockquote>\n<hr>\n<h2>참고</h2>\n<p><a href=\"https://github.com/garrytan/gstack\" target=\"_blank\">[1] garrytan/gstack — GitHub</a></p>\n<p><a href=\"https://techcrunch.com/2026/03/17/why-garry-tans-claude-code-setup-has-gotten-so-much-love-and-hate/\" target=\"_blank\">[2] Why Garry Tan&#39;s Claude Code setup has gotten so much love, and hate — TechCrunch</a></p>\n<p><a href=\"https://www.sitepoint.com/gstack-garry-tan-claude-code/\" target=\"_blank\">[3] GStack Tutorial: Garry Tan&#39;s Claude Code Workflow — SitePoint</a></p>\n<p><a href=\"https://github.com/sickn33/antigravity-awesome-skills\" target=\"_blank\">[4] antigravity-awesome-skills — GitHub</a></p>\n<p><a href=\"https://agentnativedev.medium.com/garry-tans-gstack-running-claude-like-an-engineering-team-392f1bd38085\" target=\"_blank\">[5] Garry Tan&#39;s gstack: Running Claude Like an Engineering Team — Agent Native</a></p>\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/gstack-skills-plan\">gstack Think &amp; Plan 스킬 1~5 상세 분석 →</a></li>\n<li><a href=\"/post/gstack-skills-ship\">gstack Build, Test &amp; Ship 스킬 6~13 상세 분석 →</a></li>\n</ul>\n",
     "coverImage": null,
-    "category": "study/infra/gstack",
+    "category": "study/ai/gstack",
     "tags": [
       "gstack",
       "claude-code",
@@ -377,7 +377,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.426Z"
+    "updatedAt": "2026-04-03T10:18:28.420Z"
   },
   {
     "id": "django-security",
@@ -403,7 +403,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.378Z"
+    "updatedAt": "2026-04-03T10:18:28.436Z"
   },
   {
     "id": "django-overview",
@@ -429,7 +429,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.381Z"
+    "updatedAt": "2026-04-03T10:18:28.439Z"
   },
   {
     "id": "django-orm-deep",
@@ -455,7 +455,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.376Z"
+    "updatedAt": "2026-04-03T10:18:28.434Z"
   },
   {
     "id": "django-lifecycle",
@@ -482,7 +482,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.373Z"
+    "updatedAt": "2026-04-03T10:18:28.431Z"
   },
   {
     "id": "django-architecture",
@@ -509,7 +509,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.368Z"
+    "updatedAt": "2026-04-03T10:18:28.429Z"
   },
   {
     "id": "docker-compose-django",
@@ -534,7 +534,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.417Z"
+    "updatedAt": "2026-04-03T10:18:28.476Z"
   },
   {
     "id": "docker-compose-basics",
@@ -558,7 +558,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.416Z"
+    "updatedAt": "2026-04-03T10:18:28.476Z"
   },
   {
     "id": "docker-basics",
@@ -581,7 +581,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.414Z"
+    "updatedAt": "2026-04-03T10:18:28.475Z"
   },
   {
     "id": "django-version-compatibility",
@@ -606,7 +606,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.380Z"
+    "updatedAt": "2026-04-03T10:18:28.438Z"
   },
   {
     "id": "django-settings",
@@ -631,7 +631,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.383Z"
+    "updatedAt": "2026-04-03T10:18:28.440Z"
   },
   {
     "id": "django-migration",
@@ -656,7 +656,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.375Z"
+    "updatedAt": "2026-04-03T10:18:28.432Z"
   },
   {
     "id": "celery-worker",
@@ -683,7 +683,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.409Z"
+    "updatedAt": "2026-04-03T10:18:28.472Z"
   },
   {
     "id": "celery-django",
@@ -709,7 +709,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.411Z"
+    "updatedAt": "2026-04-03T10:18:28.473Z"
   },
   {
     "id": "celery-broker",
@@ -735,7 +735,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.407Z"
+    "updatedAt": "2026-04-03T10:18:28.470Z"
   },
   {
     "id": "celery-beat",
@@ -759,7 +759,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.406Z"
+    "updatedAt": "2026-04-03T10:18:28.468Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -783,7 +783,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.449Z"
+    "updatedAt": "2026-04-03T10:18:28.499Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -808,7 +808,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.474Z"
+    "updatedAt": "2026-04-03T10:18:28.516Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -831,7 +831,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.471Z"
+    "updatedAt": "2026-04-03T10:18:28.514Z"
   },
   {
     "id": "micro-protocol",
@@ -854,7 +854,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.468Z"
+    "updatedAt": "2026-04-03T10:18:28.512Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -882,7 +882,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.465Z"
+    "updatedAt": "2026-04-03T10:18:28.510Z"
   },
   {
     "id": "micro-network-view",
@@ -907,7 +907,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.441Z"
+    "updatedAt": "2026-04-03T10:18:28.492Z"
   },
   {
     "id": "micro-network-traffic",
@@ -932,7 +932,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.462Z"
+    "updatedAt": "2026-04-03T10:18:28.508Z"
   },
   {
     "id": "micro-ip-arp",
@@ -957,7 +957,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.459Z"
+    "updatedAt": "2026-04-03T10:18:28.507Z"
   },
   {
     "id": "micro-http-https",
@@ -984,7 +984,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.456Z"
+    "updatedAt": "2026-04-03T10:18:28.504Z"
   },
   {
     "id": "micro-encapsulation",
@@ -1010,7 +1010,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.452Z"
+    "updatedAt": "2026-04-03T10:18:28.501Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -1033,7 +1033,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.447Z"
+    "updatedAt": "2026-04-03T10:18:28.497Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -1057,7 +1057,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.445Z"
+    "updatedAt": "2026-04-03T10:18:28.496Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -1079,7 +1079,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.443Z"
+    "updatedAt": "2026-04-03T10:18:28.495Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -1102,7 +1102,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.442Z"
+    "updatedAt": "2026-04-03T10:18:28.494Z"
   },
   {
     "id": "macro-network-view",
@@ -1125,7 +1125,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.438Z"
+    "updatedAt": "2026-04-03T10:18:28.489Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -1149,7 +1149,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.422Z"
+    "updatedAt": "2026-04-03T10:18:28.480Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -1172,6 +1172,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-02T15:41:57.419Z"
+    "updatedAt": "2026-04-03T10:18:28.478Z"
   }
 ]

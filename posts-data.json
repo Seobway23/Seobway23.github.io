@@ -1,5 +1,20 @@
 [
   {
+    "slug": "gstack-overview",
+    "title": "gstack: YC CEO가 공개한 Claude Code 가상 엔지니어링팀 구성법",
+    "path": "/post/study/ai/gstack/gstack-overview"
+  },
+  {
+    "slug": "gstack-skills-plan",
+    "title": "gstack 스킬 1~5: Think & Plan — 코드 한 줄 쓰기 전에 하는 것들",
+    "path": "/post/study/ai/gstack/gstack-skills-plan"
+  },
+  {
+    "slug": "gstack-skills-ship",
+    "title": "gstack 스킬 6~13: Build, Test & Ship — AI가 직접 브라우저 켜고 배포한다",
+    "path": "/post/study/ai/gstack/gstack-skills-ship"
+  },
+  {
     "slug": "django-architecture",
     "title": "Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할",
     "path": "/post/study/backend/django/django-architecture"
@@ -143,21 +158,6 @@
     "slug": "gitlab-cicd-guide",
     "title": "GitLab CI/CD — .gitlab-ci.yml -> K3s",
     "path": "/post/study/infra/gitlab-cicd-guide"
-  },
-  {
-    "slug": "gstack-overview",
-    "title": "gstack: YC CEO가 공개한 Claude Code 가상 엔지니어링팀 구성법",
-    "path": "/post/study/infra/gstack/gstack-overview"
-  },
-  {
-    "slug": "gstack-skills-plan",
-    "title": "gstack 스킬 1~5: Think & Plan — 코드 한 줄 쓰기 전에 하는 것들",
-    "path": "/post/study/infra/gstack/gstack-skills-plan"
-  },
-  {
-    "slug": "gstack-skills-ship",
-    "title": "gstack 스킬 6~13: Build, Test & Ship — AI가 직접 브라우저 켜고 배포한다",
-    "path": "/post/study/infra/gstack/gstack-skills-ship"
   },
   {
     "slug": "k8s-zero-downtime-deployment",
