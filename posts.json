@@ -22,7 +22,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.415Z"
+    "updatedAt": "2026-04-04T01:04:29.453Z"
   },
   {
     "id": "jenkins-argocd-gitops",
@@ -48,7 +48,34 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.408Z"
+    "updatedAt": "2026-04-04T01:04:29.447Z"
+  },
+  {
+    "id": "drf-views",
+    "title": "DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router",
+    "slug": "drf-views",
+    "excerpt": "DRF의 뷰 계층을 APIView부터 ModelViewSet까지 단계별로 설명한다. 각 레벨의 코드량 차이, ViewSet이 Router와 어떻게 URL을 자동 생성하는지, 언제 어떤 클래스를 선택해야 하는지 기준을 제시한다.",
+    "content": "<h2>DRF 뷰 계층 구조</h2>\n<p>DRF는 뷰를 여러 레벨로 제공한다. 위로 올라갈수록 코드가 줄어들고, 아래로 내려올수록 유연성이 높아진다.</p>\n<pre><code>APIView                  ← 가장 유연, 모든 것 직접 구현\n  └─ GenericAPIView      ← queryset, serializer_class 연결\n       └─ Mixins         ← list, create, retrieve, update, destroy 행동 단위\n            └─ Generic Views  ← Mixin 조합 (ListCreateAPIView 등)\n                 └─ ViewSet   ← URL action 기반 뷰 묶음\n                      └─ ModelViewSet  ← CRUD 완성\n</code></pre>\n<hr>\n<h2>시리즈 구성</h2>\n<table>\n<thead>\n<tr>\n<th>순서</th>\n<th>제목</th>\n<th>설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>7</td>\n<td>DRF 기초</td>\n<td>Serializer, ModelSerializer</td>\n</tr>\n<tr>\n<td><strong>8</strong></td>\n<td><strong>DRF Views</strong> ←</td>\n<td><strong>APIView, ViewSet, Router</strong></td>\n</tr>\n<tr>\n<td>9</td>\n<td>DRF 인증</td>\n<td>Token, JWT, SimpleJWT</td>\n</tr>\n<tr>\n<td>10</td>\n<td>DRF Serializer 검증 심화</td>\n<td>validate_<field>, 3단계 검증</td>\n</tr>\n<tr>\n<td>11</td>\n<td>Django 객체 레벨 권한</td>\n<td>Owner, 팀 기반 접근 제어</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>@api_view — 함수형 뷰</h2>\n<p>가장 간단한 형태. 함수형 뷰에 DRF 기능을 붙인다.</p>\n<pre><code class=\"language-python\">from rest_framework.decorators import api_view, permission_classes\nfrom rest_framework.permissions import IsAuthenticated\nfrom rest_framework.response import Response\nfrom rest_framework import status\nfrom .models import Task\nfrom .serializers import TaskSerializer\n\n@api_view([&#39;GET&#39;, &#39;POST&#39;])\n@permission_classes([IsAuthenticated])\ndef task_list(request):\n    if request.method == &#39;GET&#39;:\n        tasks = Task.objects.filter(created_by=request.user)\n        serializer = TaskSerializer(tasks, many=True)\n        return Response(serializer.data)\n\n    elif request.method == &#39;POST&#39;:\n        serializer = TaskSerializer(data=request.data)\n        serializer.is_valid(raise_exception=True)\n        serializer.save(created_by=request.user)\n        return Response(serializer.data, status=status.HTTP_201_CREATED)\n</code></pre>\n<p><strong>언제 쓰나:</strong> 빠른 프로토타입, 단일 엔드포인트, 메서드 로직이 복잡할 때.</p>\n<hr>\n<h2>APIView — 클래스 기반 기본</h2>\n<p>HTTP 메서드(get, post, put, delete)를 클래스 메서드로 분리한다.<br>인증, 권한, 파싱, 렌더링이 자동으로 처리된다.</p>\n<pre><code class=\"language-python\">from rest_framework.views import APIView\nfrom rest_framework.response import Response\nfrom rest_framework import status\nfrom rest_framework.permissions import IsAuthenticated\n\nclass TaskListView(APIView):\n    permission_classes = [IsAuthenticated]\n\n    def get(self, request):\n        tasks = Task.objects.filter(created_by=request.user)\n        serializer = TaskSerializer(tasks, many=True)\n        return Response(serializer.data)\n\n    def post(self, request):\n        serializer = TaskSerializer(data=request.data)\n        serializer.is_valid(raise_exception=True)\n        serializer.save(created_by=request.user)\n        return Response(serializer.data, status=status.HTTP_201_CREATED)\n\n\nclass TaskDetailView(APIView):\n    permission_classes = [IsAuthenticated]\n\n    def get_object(self, pk, user):\n        try:\n            return Task.objects.get(pk=pk, created_by=user)\n        except Task.DoesNotExist:\n            raise Http404\n\n    def get(self, request, pk):\n        task = self.get_object(pk, request.user)\n        serializer = TaskSerializer(task)\n        return Response(serializer.data)\n\n    def patch(self, request, pk):\n        task = self.get_object(pk, request.user)\n        serializer = TaskSerializer(task, data=request.data, partial=True)\n        serializer.is_valid(raise_exception=True)\n        serializer.save()\n        return Response(serializer.data)\n\n    def delete(self, request, pk):\n        task = self.get_object(pk, request.user)\n        task.delete()\n        return Response(status=status.HTTP_204_NO_CONTENT)\n</code></pre>\n<p><strong>언제 쓰나:</strong> 비즈니스 로직이 복잡해서 제네릭 뷰에 맞지 않을 때. 예외적인 쿼리, 다중 시리얼라이저.</p>\n<hr>\n<h2>GenericAPIView + Mixins</h2>\n<p><code>GenericAPIView</code>에 <code>queryset</code>과 <code>serializer_class</code>를 선언하고, Mixin으로 행동을 붙인다.</p>\n<pre><code class=\"language-python\">from rest_framework import generics, mixins\n\nclass TaskListView(\n    mixins.ListModelMixin,\n    mixins.CreateModelMixin,\n    generics.GenericAPIView,\n):\n    queryset = Task.objects.all()\n    serializer_class = TaskSerializer\n    permission_classes = [IsAuthenticated]\n\n    def get_queryset(self):\n        # 현재 사용자의 태스크만\n        return Task.objects.filter(created_by=self.request.user)\n\n    def get(self, request, *args, **kwargs):\n        return self.list(request, *args, **kwargs)\n\n    def post(self, request, *args, **kwargs):\n        return self.create(request, *args, **kwargs)\n</code></pre>\n<p>Mixin 종류:</p>\n<table>\n<thead>\n<tr>\n<th>Mixin</th>\n<th>제공하는 메서드</th>\n<th>HTTP 동작</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>ListModelMixin</code></td>\n<td><code>list()</code></td>\n<td>GET (목록)</td>\n</tr>\n<tr>\n<td><code>CreateModelMixin</code></td>\n<td><code>create()</code></td>\n<td>POST</td>\n</tr>\n<tr>\n<td><code>RetrieveModelMixin</code></td>\n<td><code>retrieve()</code></td>\n<td>GET (단건)</td>\n</tr>\n<tr>\n<td><code>UpdateModelMixin</code></td>\n<td><code>update()</code>, <code>partial_update()</code></td>\n<td>PUT, PATCH</td>\n</tr>\n<tr>\n<td><code>DestroyModelMixin</code></td>\n<td><code>destroy()</code></td>\n<td>DELETE</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>Generic Views — Mixin 조합</h2>\n<p>자주 쓰는 Mixin 조합을 미리 만들어놓은 뷰들이다.</p>\n<pre><code class=\"language-python\">from rest_framework import generics\n\n# GET(목록) + POST\nclass TaskListView(generics.ListCreateAPIView):\n    queryset = Task.objects.all()\n    serializer_class = TaskSerializer\n    permission_classes = [IsAuthenticated]\n\n    def get_queryset(self):\n        return Task.objects.filter(created_by=self.request.user)\n\n    def perform_create(self, serializer):\n        # save() 호출 직전 — 추가 데이터 주입\n        serializer.save(created_by=self.request.user)\n\n\n# GET(단건) + PUT + PATCH + DELETE\nclass TaskDetailView(generics.RetrieveUpdateDestroyAPIView):\n    queryset = Task.objects.all()\n    serializer_class = TaskSerializer\n    permission_classes = [IsAuthenticated]\n</code></pre>\n<p>Generic Views 전체 목록:</p>\n<table>\n<thead>\n<tr>\n<th>클래스</th>\n<th>지원 메서드</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>ListAPIView</code></td>\n<td>GET (목록)</td>\n</tr>\n<tr>\n<td><code>CreateAPIView</code></td>\n<td>POST</td>\n</tr>\n<tr>\n<td><code>RetrieveAPIView</code></td>\n<td>GET (단건)</td>\n</tr>\n<tr>\n<td><code>UpdateAPIView</code></td>\n<td>PUT, PATCH</td>\n</tr>\n<tr>\n<td><code>DestroyAPIView</code></td>\n<td>DELETE</td>\n</tr>\n<tr>\n<td><code>ListCreateAPIView</code></td>\n<td>GET, POST</td>\n</tr>\n<tr>\n<td><code>RetrieveUpdateAPIView</code></td>\n<td>GET, PUT, PATCH</td>\n</tr>\n<tr>\n<td><code>RetrieveDestroyAPIView</code></td>\n<td>GET, DELETE</td>\n</tr>\n<tr>\n<td><code>RetrieveUpdateDestroyAPIView</code></td>\n<td>GET, PUT, PATCH, DELETE</td>\n</tr>\n</tbody></table>\n<p><strong>언제 쓰나:</strong> 표준 CRUD에 약간의 커스터마이징이 필요할 때. <code>get_queryset()</code>, <code>perform_create()</code> 오버라이드로 대부분 처리 가능.</p>\n<hr>\n<h2>perform_create / perform_update / perform_destroy</h2>\n<p>Generic Views의 훅 메서드. <code>save()</code> 직전에 호출되어 추가 데이터를 주입하거나 사이드 이펙트를 처리한다.</p>\n<pre><code class=\"language-python\">class TaskListView(generics.ListCreateAPIView):\n    queryset = Task.objects.all()\n    serializer_class = TaskSerializer\n\n    def perform_create(self, serializer):\n        # 현재 사용자를 created_by로 자동 설정\n        serializer.save(created_by=self.request.user)\n\n    def perform_update(self, serializer):\n        serializer.save(updated_by=self.request.user)\n\n    def perform_destroy(self, instance):\n        # 실제 삭제 대신 soft delete\n        instance.is_deleted = True\n        instance.save()\n</code></pre>\n<hr>\n<h2>ViewSet — action 기반</h2>\n<p>ViewSet은 연관된 뷰들을 하나의 클래스로 묶는다.<br>HTTP 메서드가 아닌 <strong>action</strong>(<code>list</code>, <code>create</code>, <code>retrieve</code>, <code>update</code>, <code>destroy</code>) 이름으로 메서드를 정의한다.</p>\n<pre><code class=\"language-python\">from rest_framework import viewsets\nfrom rest_framework.response import Response\n\nclass TaskViewSet(viewsets.ViewSet):\n    &quot;&quot;&quot;직접 구현하는 ViewSet&quot;&quot;&quot;\n\n    def list(self, request):\n        &quot;&quot;&quot;GET /tasks/&quot;&quot;&quot;\n        tasks = Task.objects.filter(created_by=request.user)\n        serializer = TaskSerializer(tasks, many=True)\n        return Response(serializer.data)\n\n    def create(self, request):\n        &quot;&quot;&quot;POST /tasks/&quot;&quot;&quot;\n        serializer = TaskSerializer(data=request.data)\n        serializer.is_valid(raise_exception=True)\n        serializer.save(created_by=request.user)\n        return Response(serializer.data, status=201)\n\n    def retrieve(self, request, pk=None):\n        &quot;&quot;&quot;GET /tasks/{pk}/&quot;&quot;&quot;\n        task = get_object_or_404(Task, pk=pk, created_by=request.user)\n        serializer = TaskSerializer(task)\n        return Response(serializer.data)\n\n    def update(self, request, pk=None):\n        &quot;&quot;&quot;PUT /tasks/{pk}/&quot;&quot;&quot;\n        ...\n\n    def partial_update(self, request, pk=None):\n        &quot;&quot;&quot;PATCH /tasks/{pk}/&quot;&quot;&quot;\n        ...\n\n    def destroy(self, request, pk=None):\n        &quot;&quot;&quot;DELETE /tasks/{pk}/&quot;&quot;&quot;\n        ...\n</code></pre>\n<hr>\n<h2>ModelViewSet — CRUD 완성</h2>\n<p><code>ModelViewSet</code>은 <code>queryset</code>과 <code>serializer_class</code>만 선언하면 5개 action을 모두 자동으로 구현한다.</p>\n<pre><code class=\"language-python\">from rest_framework import viewsets, permissions\n\nclass TaskViewSet(viewsets.ModelViewSet):\n    serializer_class = TaskSerializer\n    permission_classes = [permissions.IsAuthenticated]\n\n    def get_queryset(self):\n        return Task.objects.filter(\n            created_by=self.request.user\n        ).select_related(&#39;category&#39;).prefetch_related(&#39;tags&#39;)\n\n    def perform_create(self, serializer):\n        serializer.save(created_by=self.request.user)\n</code></pre>\n<p>이 15줄이 아래 모든 엔드포인트를 처리한다:</p>\n<pre><code>GET    /tasks/          → list\nPOST   /tasks/          → create\nGET    /tasks/{pk}/     → retrieve\nPUT    /tasks/{pk}/     → update\nPATCH  /tasks/{pk}/     → partial_update\nDELETE /tasks/{pk}/     → destroy\n</code></pre>\n<hr>\n<h2>Router — URL 자동 생성</h2>\n<p>ViewSet과 Router를 연결하면 URL을 수동으로 작성할 필요가 없다.</p>\n<pre><code class=\"language-python\"># tasks/urls.py\nfrom django.urls import path, include\nfrom rest_framework.routers import DefaultRouter\nfrom .views import TaskViewSet, CategoryViewSet\n\nrouter = DefaultRouter()\nrouter.register(&#39;tasks&#39;, TaskViewSet, basename=&#39;task&#39;)\nrouter.register(&#39;categories&#39;, CategoryViewSet, basename=&#39;category&#39;)\n\nurlpatterns = [\n    path(&#39;&#39;, include(router.urls)),\n]\n</code></pre>\n<p><code>DefaultRouter</code>가 생성하는 URL:</p>\n<table>\n<thead>\n<tr>\n<th>URL</th>\n<th>메서드</th>\n<th>Action</th>\n<th>URL Name</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>/tasks/</code></td>\n<td>GET</td>\n<td>list</td>\n<td><code>task-list</code></td>\n</tr>\n<tr>\n<td><code>/tasks/</code></td>\n<td>POST</td>\n<td>create</td>\n<td><code>task-list</code></td>\n</tr>\n<tr>\n<td><code>/tasks/{pk}/</code></td>\n<td>GET</td>\n<td>retrieve</td>\n<td><code>task-detail</code></td>\n</tr>\n<tr>\n<td><code>/tasks/{pk}/</code></td>\n<td>PUT</td>\n<td>update</td>\n<td><code>task-detail</code></td>\n</tr>\n<tr>\n<td><code>/tasks/{pk}/</code></td>\n<td>PATCH</td>\n<td>partial_update</td>\n<td><code>task-detail</code></td>\n</tr>\n<tr>\n<td><code>/tasks/{pk}/</code></td>\n<td>DELETE</td>\n<td>destroy</td>\n<td><code>task-detail</code></td>\n</tr>\n</tbody></table>\n<hr>\n<h2>@action — 커스텀 엔드포인트</h2>\n<p>CRUD 외에 비즈니스 액션이 필요하면 <code>@action</code> 데코레이터를 쓴다.</p>\n<pre><code class=\"language-python\">from rest_framework.decorators import action\nfrom rest_framework.response import Response\n\nclass TaskViewSet(viewsets.ModelViewSet):\n    serializer_class = TaskSerializer\n    permission_classes = [permissions.IsAuthenticated]\n\n    def get_queryset(self):\n        return Task.objects.filter(created_by=self.request.user)\n\n    def perform_create(self, serializer):\n        serializer.save(created_by=self.request.user)\n\n    @action(detail=True, methods=[&#39;post&#39;])\n    def complete(self, request, pk=None):\n        &quot;&quot;&quot;POST /tasks/{pk}/complete/ — 태스크 완료 처리&quot;&quot;&quot;\n        task = self.get_object()\n        task.status = Task.STATUS_DONE\n        task.save()\n        serializer = self.get_serializer(task)\n        return Response(serializer.data)\n\n    @action(detail=True, methods=[&#39;post&#39;])\n    def reopen(self, request, pk=None):\n        &quot;&quot;&quot;POST /tasks/{pk}/reopen/ — 태스크 재개&quot;&quot;&quot;\n        task = self.get_object()\n        task.status = Task.STATUS_TODO\n        task.save()\n        return Response({&#39;status&#39;: &#39;reopened&#39;})\n\n    @action(detail=False, methods=[&#39;get&#39;])\n    def overdue(self, request):\n        &quot;&quot;&quot;GET /tasks/overdue/ — 마감 초과 태스크 목록&quot;&quot;&quot;\n        from django.utils import timezone\n        today = timezone.now().date()\n        tasks = self.get_queryset().filter(\n            due_date__lt=today,\n            status__in=[Task.STATUS_TODO, Task.STATUS_IN_PROGRESS],\n        )\n        serializer = self.get_serializer(tasks, many=True)\n        return Response(serializer.data)\n\n    @action(detail=False, methods=[&#39;get&#39;])\n    def stats(self, request):\n        &quot;&quot;&quot;GET /tasks/stats/ — 상태별 통계&quot;&quot;&quot;\n        qs = self.get_queryset()\n        return Response({\n            &#39;total&#39;: qs.count(),\n            &#39;todo&#39;: qs.filter(status=Task.STATUS_TODO).count(),\n            &#39;in_progress&#39;: qs.filter(status=Task.STATUS_IN_PROGRESS).count(),\n            &#39;done&#39;: qs.filter(status=Task.STATUS_DONE).count(),\n        })\n</code></pre>\n<p><code>@action(detail=True)</code>는 <code>tasks/{pk}/complete/</code>처럼 특정 객체 액션이고,<br><code>@action(detail=False)</code>는 <code>tasks/overdue/</code>처럼 컬렉션 액션이다.</p>\n<hr>\n<h2>뷰 선택 기준</h2>\n<table>\n<thead>\n<tr>\n<th>상황</th>\n<th>선택</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>비표준 로직, 다중 모델, 복잡한 쿼리</td>\n<td><code>APIView</code></td>\n</tr>\n<tr>\n<td>표준 CRUD + 약간의 커스터마이징</td>\n<td><code>GenericAPIView</code> / Generic Views</td>\n</tr>\n<tr>\n<td>완전 표준 CRUD</td>\n<td><code>ModelViewSet</code></td>\n</tr>\n<tr>\n<td>CRUD 일부만 노출 (조회만, 생성만)</td>\n<td><code>ReadOnlyModelViewSet</code>, 또는 개별 Mixin 조합</td>\n</tr>\n<tr>\n<td>커스텀 액션 필요</td>\n<td><code>ModelViewSet</code> + <code>@action</code></td>\n</tr>\n</tbody></table>\n<hr>\n<h2>get_serializer_class — 상황별 다른 Serializer</h2>\n<p>목록 조회와 상세 조회에서 다른 시리얼라이저를 쓰고 싶을 때:</p>\n<pre><code class=\"language-python\">class TaskViewSet(viewsets.ModelViewSet):\n    permission_classes = [permissions.IsAuthenticated]\n\n    def get_serializer_class(self):\n        if self.action == &#39;list&#39;:\n            return TaskListSerializer    # 경량 버전\n        return TaskDetailSerializer      # 상세 버전\n\n    def get_queryset(self):\n        qs = Task.objects.filter(created_by=self.request.user)\n        if self.action == &#39;list&#39;:\n            return qs.select_related(&#39;category&#39;)\n        return qs.select_related(&#39;category&#39;).prefetch_related(&#39;tags&#39;, &#39;comments&#39;)\n</code></pre>\n<hr>\n<h2>마치며</h2>\n<p>DRF Views 핵심 요약:</p>\n<ul>\n<li><code>APIView</code> — 가장 유연, 모든 것 직접 구현</li>\n<li><code>GenericAPIView</code> + Mixin — 표준 행동을 조합</li>\n<li>Generic Views — 자주 쓰는 조합을 미리 만들어놓은 것</li>\n<li><code>ModelViewSet</code> + Router — CRUD + URL 자동 생성, 가장 생산적</li>\n<li><code>@action</code> — CRUD 외 커스텀 엔드포인트 추가</li>\n<li><code>get_serializer_class()</code> — 액션별로 다른 시리얼라이저 선택</li>\n</ul>\n<hr>\n<h2>다음 글</h2>\n<ul>\n<li><a href=\"/study/backend/django/drf-authentication\">DRF 인증</a> — Token, JWT, SimpleJWT</li>\n<li><a href=\"/study/backend/django/drf-serializer-validation\">DRF Serializer 검증 심화</a></li>\n</ul>\n<hr>\n<h2>References</h2>\n<h2>참고/주석</h2>\n<ol>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "DRF",
+      "APIView",
+      "ViewSet",
+      "Router",
+      "GenericAPIView",
+      "ModelViewSet",
+      "CRUD",
+      "REST",
+      "Python"
+    ],
+    "author": "Seobway",
+    "readTime": 14,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-04T01:04:29.407Z"
   },
   {
     "id": "drf-serializer-validation",
@@ -72,7 +99,86 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.369Z"
+    "updatedAt": "2026-04-04T01:04:29.405Z"
+  },
+  {
+    "id": "drf-overview",
+    "title": "DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초",
+    "slug": "drf-overview",
+    "excerpt": "Django REST Framework가 무엇인지, Serializer가 왜 필요한지, ModelSerializer로 CRUD API를 얼마나 빠르게 만들 수 있는지 — DRF의 핵심 흐름을 단계별로 설명한다.",
+    "content": "<h2>DRF가 필요한 이유</h2>\n<p>Django 기본 View로도 JSON API를 만들 수 있다.</p>\n<pre><code class=\"language-python\"># Django 기본으로 JSON API 만들기\nimport json\nfrom django.http import JsonResponse\nfrom django.views import View\nfrom .models import Task\n\nclass TaskListView(View):\n    def get(self, request):\n        tasks = Task.objects.all()\n        data = []\n        for task in tasks:\n            data.append({\n                &#39;id&#39;: task.id,\n                &#39;title&#39;: task.title,\n                &#39;status&#39;: task.status,\n                &#39;created_at&#39;: task.created_at.isoformat(),\n            })\n        return JsonResponse({&#39;results&#39;: data})\n\n    def post(self, request):\n        body = json.loads(request.body)\n        # 검증 없음, 오류 처리 없음, 직렬화 없음\n        task = Task.objects.create(**body)\n        return JsonResponse({&#39;id&#39;: task.id}, status=201)\n</code></pre>\n<p>이 코드에는 문제가 많다:</p>\n<ul>\n<li>직렬화/역직렬화를 손으로 구현해야 한다</li>\n<li>입력값 검증이 없다</li>\n<li>인증/권한 로직이 없다</li>\n<li>오류 응답 형식이 일관되지 않는다</li>\n<li>파일 업로드, 중첩 객체 등 처리가 복잡하다</li>\n</ul>\n<p>DRF는 이 모든 것을 체계적으로 해결한다.</p>\n<hr>\n<h2>시리즈 구성</h2>\n<table>\n<thead>\n<tr>\n<th>순서</th>\n<th>제목</th>\n<th>설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>7</strong></td>\n<td><strong>DRF 기초</strong> ←</td>\n<td><strong>Serializer, ModelSerializer</strong></td>\n</tr>\n<tr>\n<td>8</td>\n<td>DRF Views</td>\n<td>APIView, ViewSet, Router</td>\n</tr>\n<tr>\n<td>9</td>\n<td>DRF 인증</td>\n<td>Token, JWT, SimpleJWT</td>\n</tr>\n<tr>\n<td>10</td>\n<td>DRF Serializer 검증 심화</td>\n<td>validate_<field>, 3단계 검증</td>\n</tr>\n<tr>\n<td>11</td>\n<td>Django 객체 레벨 권한</td>\n<td>Owner, 팀 기반 접근 제어</td>\n</tr>\n</tbody></table>\n<p>앞선 시리즈:</p>\n<table>\n<thead>\n<tr>\n<th>순서</th>\n<th>제목</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>1</td>\n<td>Django 큰 그림</td>\n</tr>\n<tr>\n<td>2</td>\n<td>MTV 아키텍처</td>\n</tr>\n<tr>\n<td>3</td>\n<td>요청-응답 라이프사이클</td>\n</tr>\n<tr>\n<td>4</td>\n<td>Django 모델</td>\n</tr>\n<tr>\n<td>5</td>\n<td>Django URL 라우팅</td>\n</tr>\n<tr>\n<td>6</td>\n<td>Django ORM 심층</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>REST API란</h2>\n<p>REST는 HTTP를 올바르게 쓰는 규칙이다.</p>\n<table>\n<thead>\n<tr>\n<th>HTTP 메서드</th>\n<th>의미</th>\n<th>예시</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>GET</td>\n<td>조회</td>\n<td><code>GET /api/tasks/</code></td>\n</tr>\n<tr>\n<td>POST</td>\n<td>생성</td>\n<td><code>POST /api/tasks/</code></td>\n</tr>\n<tr>\n<td>PUT</td>\n<td>전체 수정</td>\n<td><code>PUT /api/tasks/42/</code></td>\n</tr>\n<tr>\n<td>PATCH</td>\n<td>부분 수정</td>\n<td><code>PATCH /api/tasks/42/</code></td>\n</tr>\n<tr>\n<td>DELETE</td>\n<td>삭제</td>\n<td><code>DELETE /api/tasks/42/</code></td>\n</tr>\n</tbody></table>\n<p>HTTP 상태 코드로 결과를 표현한다:</p>\n<table>\n<thead>\n<tr>\n<th>상태 코드</th>\n<th>의미</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>200 OK</td>\n<td>성공 (GET, PUT, PATCH)</td>\n</tr>\n<tr>\n<td>201 Created</td>\n<td>생성 성공 (POST)</td>\n</tr>\n<tr>\n<td>204 No Content</td>\n<td>삭제 성공 (DELETE)</td>\n</tr>\n<tr>\n<td>400 Bad Request</td>\n<td>잘못된 요청 (검증 오류)</td>\n</tr>\n<tr>\n<td>401 Unauthorized</td>\n<td>인증 필요</td>\n</tr>\n<tr>\n<td>403 Forbidden</td>\n<td>권한 없음</td>\n</tr>\n<tr>\n<td>404 Not Found</td>\n<td>리소스 없음</td>\n</tr>\n<tr>\n<td>500 Internal Server Error</td>\n<td>서버 오류</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>Serializer의 역할</h2>\n<p>Serializer는 두 가지 방향으로 동작한다.</p>\n<pre><code>Python 객체 → Serializer → JSON (직렬화, Serialization)\nJSON       → Serializer → Python 객체 (역직렬화, Deserialization + 검증)\n</code></pre>\n<pre><code class=\"language-mermaid\">flowchart LR\n    A[Django Model Instance] --&gt;|to_representation| B[Serializer]\n    B --&gt;|직렬화| C[JSON Response]\n    \n    D[HTTP Request Body JSON] --&gt;|to_internal_value| E[Serializer]\n    E --&gt;|검증| F{is_valid?}\n    F --&gt;|True| G[validated_data]\n    F --&gt;|False| H[errors]\n    G --&gt;|save| I[DB 저장]\n</code></pre>\n<h3>기본 Serializer 작성</h3>\n<pre><code class=\"language-python\"># tasks/serializers.py\nfrom rest_framework import serializers\n\nclass TaskSerializer(serializers.Serializer):\n    id = serializers.IntegerField(read_only=True)\n    title = serializers.CharField(max_length=200)\n    status = serializers.ChoiceField(choices=[&#39;todo&#39;, &#39;in_progress&#39;, &#39;done&#39;])\n    priority = serializers.IntegerField(min_value=0, max_value=2)\n    created_at = serializers.DateTimeField(read_only=True)\n\n    def create(self, validated_data):\n        return Task.objects.create(**validated_data)\n\n    def update(self, instance, validated_data):\n        instance.title = validated_data.get(&#39;title&#39;, instance.title)\n        instance.status = validated_data.get(&#39;status&#39;, instance.status)\n        instance.save()\n        return instance\n</code></pre>\n<p>기본 <code>Serializer</code>는 모든 필드를 직접 선언해야 하고, <code>create()</code>와 <code>update()</code>를 직접 구현해야 한다.</p>\n<hr>\n<h2>ModelSerializer — 빠른 CRUD</h2>\n<p><code>ModelSerializer</code>는 모델을 기반으로 필드를 자동 생성하고, <code>create()</code>와 <code>update()</code>를 기본 구현해준다.</p>\n<pre><code class=\"language-python\">from rest_framework import serializers\nfrom .models import Task, Category, Tag\n\nclass TagSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Tag\n        fields = [&#39;id&#39;, &#39;name&#39;]\n\n\nclass CategorySerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Category\n        fields = [&#39;id&#39;, &#39;name&#39;]\n\n\nclass TaskSerializer(serializers.ModelSerializer):\n    # 중첩 직렬화: category 객체를 JSON으로 펼쳐서 출력\n    category = CategorySerializer(read_only=True)\n    # 쓰기 전용: category_id로 FK 설정\n    category_id = serializers.PrimaryKeyRelatedField(\n        queryset=Category.objects.all(),\n        source=&#39;category&#39;,\n        write_only=True,\n        required=False,\n    )\n    tags = TagSerializer(many=True, read_only=True)\n\n    class Meta:\n        model = Task\n        fields = [\n            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;, &#39;status&#39;, &#39;priority&#39;,\n            &#39;due_date&#39;, &#39;category&#39;, &#39;category_id&#39;, &#39;tags&#39;, &#39;created_at&#39;,\n        ]\n        read_only_fields = [&#39;id&#39;, &#39;created_at&#39;]\n</code></pre>\n<h3>Meta.fields 설정 방식</h3>\n<pre><code class=\"language-python\">class Meta:\n    model = Task\n    fields = &#39;__all__&#39;          # 모든 필드 (권장하지 않음 — 민감 필드 노출 위험)\n    fields = [&#39;id&#39;, &#39;title&#39;]    # 명시적 목록 (권장)\n    exclude = [&#39;password&#39;]      # 특정 필드만 제외\n</code></pre>\n<p><code>fields = &#39;__all__&#39;</code>은 개발 편의를 위해 쓰지만, 나중에 모델에 민감한 필드가 추가될 경우 자동으로 노출된다.<br><strong>실제 서비스에서는 명시적 목록을 쓰는 것이 안전하다.</strong></p>\n<hr>\n<h2>read_only / write_only 패턴</h2>\n<pre><code class=\"language-python\">class UserSerializer(serializers.ModelSerializer):\n    # write_only: 요청에서는 받지만 응답에는 포함하지 않음\n    password = serializers.CharField(write_only=True, min_length=8)\n\n    # read_only: 응답에는 포함하지만 수정 불가\n    created_at = serializers.DateTimeField(read_only=True)\n\n    class Meta:\n        model = User\n        fields = [&#39;id&#39;, &#39;email&#39;, &#39;password&#39;, &#39;created_at&#39;]\n        read_only_fields = [&#39;id&#39;, &#39;created_at&#39;]  # Meta에서 일괄 설정도 가능\n</code></pre>\n<hr>\n<h2>검증 흐름</h2>\n<pre><code class=\"language-python\"># views.py\nfrom rest_framework.views import APIView\nfrom rest_framework.response import Response\nfrom rest_framework import status\n\nclass TaskListView(APIView):\n    def post(self, request):\n        serializer = TaskSerializer(data=request.data)\n\n        # is_valid() — 검증 실행\n        if not serializer.is_valid():\n            # 검증 실패: 400 + errors 반환\n            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)\n\n        # validated_data — 검증된 데이터 (안전하게 사용 가능)\n        task = serializer.save(created_by=request.user)\n\n        return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)\n</code></pre>\n<p><code>raise_exception=True</code>를 쓰면 DRF가 자동으로 400 응답을 돌려준다.</p>\n<pre><code class=\"language-python\"># 더 간결한 방식\ndef post(self, request):\n    serializer = TaskSerializer(data=request.data)\n    serializer.is_valid(raise_exception=True)  # 검증 실패 시 자동 400\n    task = serializer.save(created_by=request.user)\n    return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)\n</code></pre>\n<p><code>serializer.errors</code>가 반환하는 형태:</p>\n<pre><code class=\"language-json\">{\n    &quot;title&quot;: [&quot;이 필드는 필수입니다.&quot;],\n    &quot;status&quot;: [&quot;\\&quot;invalid_status\\&quot;은(는) 올바른 선택이 아닙니다.&quot;],\n    &quot;priority&quot;: [&quot;유효한 정수(integer)를 넣어주세요.&quot;]\n}\n</code></pre>\n<hr>\n<h2>save() 내부 동작</h2>\n<p><code>serializer.save()</code>는 인스턴스 여부에 따라 <code>create()</code> 또는 <code>update()</code>를 호출한다.</p>\n<pre><code class=\"language-python\"># 생성 (instance 없음)\nserializer = TaskSerializer(data=request.data)\nserializer.is_valid(raise_exception=True)\nserializer.save()   # → create(validated_data) 호출\n\n# 수정 (instance 있음)\ntask = Task.objects.get(pk=pk)\nserializer = TaskSerializer(task, data=request.data, partial=True)\nserializer.is_valid(raise_exception=True)\nserializer.save()   # → update(task, validated_data) 호출\n</code></pre>\n<p><code>save()</code>에 키워드 인자를 추가하면 <code>validated_data</code>에 병합된다.</p>\n<pre><code class=\"language-python\"># request.user를 created_by로 자동 설정\nserializer.save(created_by=request.user)\n\n# 뷰에서 URL 파라미터로 받은 값 주입\nserializer.save(task=task)  # Comment 생성 시 부모 Task 연결\n</code></pre>\n<hr>\n<h2>중첩 Serializer</h2>\n<p>관계된 객체를 JSON에 포함할 때 중첩 시리얼라이저를 쓴다.</p>\n<pre><code class=\"language-python\">class CommentSerializer(serializers.ModelSerializer):\n    author_name = serializers.CharField(source=&#39;author.username&#39;, read_only=True)\n\n    class Meta:\n        model = Comment\n        fields = [&#39;id&#39;, &#39;body&#39;, &#39;author_name&#39;, &#39;created_at&#39;]\n\n\nclass TaskDetailSerializer(serializers.ModelSerializer):\n    category = CategorySerializer(read_only=True)\n    tags = TagSerializer(many=True, read_only=True)\n    comments = CommentSerializer(many=True, read_only=True)\n    comment_count = serializers.SerializerMethodField()\n\n    class Meta:\n        model = Task\n        fields = [\n            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;, &#39;status&#39;, &#39;priority&#39;,\n            &#39;category&#39;, &#39;tags&#39;, &#39;comments&#39;, &#39;comment_count&#39;, &#39;created_at&#39;,\n        ]\n\n    def get_comment_count(self, obj):\n        return obj.comments.count()\n</code></pre>\n<p><code>SerializerMethodField</code>는 모델에 없는 계산 값을 응답에 포함할 때 쓴다.<br><code>get_{field_name}</code> 메서드를 정의하면 된다.</p>\n<hr>\n<h2>실전: Task CRUD 시리얼라이저 전체</h2>\n<pre><code class=\"language-python\"># tasks/serializers.py\nfrom rest_framework import serializers\nfrom .models import Task, Category, Tag\n\n\nclass TagSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Tag\n        fields = [&#39;id&#39;, &#39;name&#39;]\n\n\nclass CategorySerializer(serializers.ModelSerializer):\n    task_count = serializers.SerializerMethodField()\n\n    class Meta:\n        model = Category\n        fields = [&#39;id&#39;, &#39;name&#39;, &#39;task_count&#39;]\n\n    def get_task_count(self, obj):\n        return obj.tasks.count()\n\n\nclass TaskListSerializer(serializers.ModelSerializer):\n    &quot;&quot;&quot;목록 조회용 — 경량 버전&quot;&quot;&quot;\n    category_name = serializers.CharField(source=&#39;category.name&#39;, read_only=True)\n    tag_names = serializers.SlugRelatedField(\n        source=&#39;tags&#39;, many=True, read_only=True, slug_field=&#39;name&#39;\n    )\n    is_overdue = serializers.BooleanField(read_only=True)\n\n    class Meta:\n        model = Task\n        fields = [\n            &#39;id&#39;, &#39;title&#39;, &#39;status&#39;, &#39;priority&#39;,\n            &#39;category_name&#39;, &#39;tag_names&#39;, &#39;due_date&#39;, &#39;is_overdue&#39;, &#39;created_at&#39;,\n        ]\n\n\nclass TaskDetailSerializer(serializers.ModelSerializer):\n    &quot;&quot;&quot;단건 조회용 — 상세 버전&quot;&quot;&quot;\n    category = CategorySerializer(read_only=True)\n    category_id = serializers.PrimaryKeyRelatedField(\n        queryset=Category.objects.all(),\n        source=&#39;category&#39;,\n        write_only=True,\n        required=False,\n        allow_null=True,\n    )\n    tags = TagSerializer(many=True, read_only=True)\n    tag_ids = serializers.PrimaryKeyRelatedField(\n        queryset=Tag.objects.all(),\n        source=&#39;tags&#39;,\n        many=True,\n        write_only=True,\n        required=False,\n    )\n\n    class Meta:\n        model = Task\n        fields = [\n            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;, &#39;status&#39;, &#39;priority&#39;, &#39;due_date&#39;,\n            &#39;category&#39;, &#39;category_id&#39;, &#39;tags&#39;, &#39;tag_ids&#39;, &#39;created_at&#39;, &#39;updated_at&#39;,\n        ]\n        read_only_fields = [&#39;id&#39;, &#39;created_at&#39;, &#39;updated_at&#39;]\n\n    def validate_title(self, value):\n        if len(value.strip()) &lt; 2:\n            raise serializers.ValidationError(&#39;제목은 2자 이상이어야 합니다.&#39;)\n        return value.strip()\n</code></pre>\n<hr>\n<h2>마치며</h2>\n<p>DRF Serializer 핵심 요약:</p>\n<ul>\n<li><code>Serializer</code> = Python 객체 ↔ JSON 변환 + 검증 레이어</li>\n<li><code>ModelSerializer</code> = 모델 기반 자동 필드 생성, create()/update() 기본 구현</li>\n<li><code>is_valid(raise_exception=True)</code> = 검증 + 자동 400 응답</li>\n<li><code>save(**kwargs)</code> = create 또는 update 호출, kwargs는 validated_data에 병합</li>\n<li>목록/상세 용도에 따라 시리얼라이저를 분리하는 것이 관리하기 좋다</li>\n</ul>\n<hr>\n<h2>다음 글</h2>\n<ul>\n<li><a href=\"/study/backend/django/drf-views\">DRF Views</a> — APIView, ViewSet, Router</li>\n<li><a href=\"/study/backend/django/drf-authentication\">DRF 인증</a> — Token, JWT, SimpleJWT</li>\n<li><a href=\"/study/backend/django/drf-serializer-validation\">DRF Serializer 검증 심화</a> — validate_<field> 완전 정복</li>\n</ul>\n<hr>\n<h2>References</h2>\n<h2>참고/주석</h2>\n<ol>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "DRF",
+      "REST",
+      "API",
+      "Serializer",
+      "ModelSerializer",
+      "Validation",
+      "JSONResponse",
+      "Python"
+    ],
+    "author": "Seobway",
+    "readTime": 14,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-04T01:04:29.403Z"
+  },
+  {
+    "id": "drf-authentication",
+    "title": "DRF 완전 정복 3편 — 인증(Authentication) — Token, JWT, SimpleJWT",
+    "slug": "drf-authentication",
+    "excerpt": "DRF의 Authentication과 Permission이 어떻게 분리되는지, TokenAuthentication과 JWT(djangorestframework-simplejwt)의 차이, Access/Refresh 토큰 패턴, API 보안 설정 방법을 단계별로 설명한다.",
+    "content": "<h2>Authentication vs Authorization</h2>\n<p>인증과 권한은 다르다. DRF는 이 둘을 명확하게 분리한다.</p>\n<table>\n<thead>\n<tr>\n<th>개념</th>\n<th>질문</th>\n<th>DRF에서</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Authentication (인증)</strong></td>\n<td>&quot;당신이 누구입니까?&quot;</td>\n<td><code>request.user</code>, <code>request.auth</code></td>\n</tr>\n<tr>\n<td><strong>Authorization (권한)</strong></td>\n<td>&quot;이 작업을 할 수 있습니까?&quot;</td>\n<td><code>permission_classes</code></td>\n</tr>\n</tbody></table>\n<p>인증이 실패해도 DRF는 즉시 거부하지 않는다. <code>request.user</code>가 <code>AnonymousUser</code>로 설정될 뿐이다.<br>거부는 Permission이 결정한다.</p>\n<pre><code class=\"language-python\">class TaskListView(APIView):\n    authentication_classes = [JWTAuthentication]   # &quot;누구세요?&quot;\n    permission_classes = [IsAuthenticated]          # &quot;로그인한 사람만&quot;\n\n    def get(self, request):\n        # 여기 도달했으면 request.user는 인증된 User 객체\n        tasks = Task.objects.filter(created_by=request.user)\n        ...\n</code></pre>\n<hr>\n<h2>시리즈 구성</h2>\n<table>\n<thead>\n<tr>\n<th>순서</th>\n<th>제목</th>\n<th>설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>7</td>\n<td>DRF 기초</td>\n<td>Serializer, ModelSerializer</td>\n</tr>\n<tr>\n<td>8</td>\n<td>DRF Views</td>\n<td>APIView, ViewSet, Router</td>\n</tr>\n<tr>\n<td><strong>9</strong></td>\n<td><strong>DRF 인증</strong> ←</td>\n<td><strong>Token, JWT, SimpleJWT</strong></td>\n</tr>\n<tr>\n<td>10</td>\n<td>DRF Serializer 검증 심화</td>\n<td>validate_<field>, 3단계 검증</td>\n</tr>\n<tr>\n<td>11</td>\n<td>Django 객체 레벨 권한</td>\n<td>Owner, 팀 기반 접근 제어</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>DRF 인증 흐름</h2>\n<pre><code class=\"language-mermaid\">flowchart TD\n    A[HTTP 요청] --&gt; B{Authorization 헤더?}\n    B --&gt;|없음| C[request.user = AnonymousUser]\n    B --&gt;|있음| D[authentication_classes 순서대로 시도]\n    D --&gt; E{토큰 유효?}\n    E --&gt;|유효| F[request.user = User 객체]\n    E --&gt;|유효하지 않음| G[401 Unauthorized]\n    C --&gt; H{permission_classes 확인}\n    F --&gt; H\n    H --&gt;|통과| I[View 로직 실행]\n    H --&gt;|거부| J[403 Forbidden]\n</code></pre>\n<hr>\n<h2>SessionAuthentication</h2>\n<p>Django의 세션 쿠키 기반 인증이다. 브라우저에서 Django Admin이나 Browsable API를 쓸 때 동작한다.</p>\n<pre><code class=\"language-python\"># settings.py\nREST_FRAMEWORK = {\n    &#39;DEFAULT_AUTHENTICATION_CLASSES&#39;: [\n        &#39;rest_framework.authentication.SessionAuthentication&#39;,\n    ],\n}\n</code></pre>\n<ul>\n<li>쿠키에 <code>sessionid</code> 저장</li>\n<li>CSRF 토큰 필수 (POST/PUT/PATCH/DELETE)</li>\n<li>모바일 앱, SPA에는 적합하지 않음</li>\n</ul>\n<hr>\n<h2>TokenAuthentication</h2>\n<p>간단한 토큰 기반 인증이다. 사용자별로 하나의 토큰을 발급해 <code>Authorization: Token &lt;token&gt;</code> 헤더로 전송한다.</p>\n<h3>설정</h3>\n<pre><code class=\"language-python\"># settings.py\nINSTALLED_APPS = [\n    ...\n    &#39;rest_framework&#39;,\n    &#39;rest_framework.authtoken&#39;,  # 토큰 테이블 추가\n]\n\nREST_FRAMEWORK = {\n    &#39;DEFAULT_AUTHENTICATION_CLASSES&#39;: [\n        &#39;rest_framework.authentication.TokenAuthentication&#39;,\n    ],\n}\n</code></pre>\n<pre><code class=\"language-bash\">python manage.py migrate  # authtoken_token 테이블 생성\n</code></pre>\n<h3>토큰 발급 뷰 추가</h3>\n<pre><code class=\"language-python\"># config/urls.py\nfrom rest_framework.authtoken.views import obtain_auth_token\n\nurlpatterns = [\n    path(&#39;api/token/&#39;, obtain_auth_token),  # POST로 username+password → token\n]\n</code></pre>\n<pre><code class=\"language-bash\"># 토큰 발급\ncurl -X POST http://localhost:8000/api/token/ \\\n  -d &#39;{&quot;username&quot;: &quot;user&quot;, &quot;password&quot;: &quot;pass&quot;}&#39; \\\n  -H &quot;Content-Type: application/json&quot;\n\n# 응답\n{&quot;token&quot;: &quot;9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b&quot;}\n</code></pre>\n<pre><code class=\"language-bash\"># 인증된 요청\ncurl http://localhost:8000/api/tasks/ \\\n  -H &quot;Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b&quot;\n</code></pre>\n<h3>TokenAuthentication의 한계</h3>\n<ul>\n<li>토큰 하나가 영구적으로 유효 (만료 없음)</li>\n<li>탈취 시 즉시 무효화할 방법이 제한적</li>\n<li>사용자별 하나의 토큰 (멀티 디바이스 미지원)</li>\n</ul>\n<p>실제 서비스에서는 <strong>JWT</strong>를 쓰는 것이 일반적이다.</p>\n<hr>\n<h2>JWT — djangorestframework-simplejwt</h2>\n<p>JWT(JSON Web Token)는 토큰 자체에 사용자 정보를 담는 방식이다.<br>서버가 DB를 조회하지 않아도 토큰을 검증할 수 있다.<sup id=\"fnref-jwt-intro\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-jwt-intro\" aria-label=\"각주 1\">[1]</a></sup></p>\n<pre><code>Header.Payload.Signature\neyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MDAwMDAwMH0.xxx\n</code></pre>\n<p>JWT는 두 가지 토큰으로 운영한다:</p>\n<table>\n<thead>\n<tr>\n<th>토큰</th>\n<th>수명</th>\n<th>역할</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Access Token</strong></td>\n<td>5분 ~ 1시간</td>\n<td>API 요청에 사용</td>\n</tr>\n<tr>\n<td><strong>Refresh Token</strong></td>\n<td>7일 ~ 30일</td>\n<td>Access Token 갱신에 사용</td>\n</tr>\n</tbody></table>\n<p>Access Token이 만료되면 Refresh Token으로 새 Access Token을 발급받는다.<br>Refresh Token이 만료되면 다시 로그인해야 한다.</p>\n<h3>설치</h3>\n<pre><code class=\"language-bash\">pip install djangorestframework-simplejwt\n</code></pre>\n<h3>설정</h3>\n<pre><code class=\"language-python\"># settings.py\nfrom datetime import timedelta\n\nINSTALLED_APPS = [\n    ...\n    &#39;rest_framework&#39;,\n    &#39;rest_framework_simplejwt&#39;,\n]\n\nREST_FRAMEWORK = {\n    &#39;DEFAULT_AUTHENTICATION_CLASSES&#39;: [\n        &#39;rest_framework_simplejwt.authentication.JWTAuthentication&#39;,\n    ],\n    &#39;DEFAULT_PERMISSION_CLASSES&#39;: [\n        &#39;rest_framework.permissions.IsAuthenticated&#39;,\n    ],\n}\n\nSIMPLE_JWT = {\n    # Access Token 수명\n    &#39;ACCESS_TOKEN_LIFETIME&#39;: timedelta(minutes=30),\n    # Refresh Token 수명\n    &#39;REFRESH_TOKEN_LIFETIME&#39;: timedelta(days=7),\n\n    # Refresh Token 사용 시 새 Refresh Token도 발급\n    &#39;ROTATE_REFRESH_TOKENS&#39;: True,\n    # 사용된 Refresh Token을 블랙리스트에 등록 (재사용 방지)\n    &#39;BLACKLIST_AFTER_ROTATION&#39;: True,\n\n    # 토큰에 포함할 클레임\n    &#39;UPDATE_LAST_LOGIN&#39;: True,\n    &#39;USER_ID_FIELD&#39;: &#39;id&#39;,\n    &#39;USER_ID_CLAIM&#39;: &#39;user_id&#39;,\n\n    # 알고리즘\n    &#39;ALGORITHM&#39;: &#39;HS256&#39;,\n    &#39;SIGNING_KEY&#39;: SECRET_KEY,\n}\n</code></pre>\n<h3>URL 등록</h3>\n<pre><code class=\"language-python\"># config/urls.py\nfrom rest_framework_simplejwt.views import (\n    TokenObtainPairView,\n    TokenRefreshView,\n    TokenVerifyView,\n)\n\nurlpatterns = [\n    # POST username + password → access + refresh 발급\n    path(&#39;api/token/&#39;, TokenObtainPairView.as_view(), name=&#39;token_obtain_pair&#39;),\n    # POST refresh → 새 access 발급\n    path(&#39;api/token/refresh/&#39;, TokenRefreshView.as_view(), name=&#39;token_refresh&#39;),\n    # POST token → 유효 여부 확인\n    path(&#39;api/token/verify/&#39;, TokenVerifyView.as_view(), name=&#39;token_verify&#39;),\n]\n</code></pre>\n<h3>실제 사용 흐름</h3>\n<pre><code class=\"language-bash\"># 1. 로그인 → 토큰 발급\ncurl -X POST http://localhost:8000/api/token/ \\\n  -H &quot;Content-Type: application/json&quot; \\\n  -d &#39;{&quot;username&quot;: &quot;user&quot;, &quot;password&quot;: &quot;pass&quot;}&#39;\n\n# 응답\n{\n    &quot;access&quot;: &quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...&quot;,\n    &quot;refresh&quot;: &quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...&quot;\n}\n\n# 2. API 요청 — Authorization: Bearer {access}\ncurl http://localhost:8000/api/tasks/ \\\n  -H &quot;Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...&quot;\n\n# 3. Access Token 만료 시 갱신\ncurl -X POST http://localhost:8000/api/token/refresh/ \\\n  -H &quot;Content-Type: application/json&quot; \\\n  -d &#39;{&quot;refresh&quot;: &quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...&quot;}&#39;\n\n# 응답 (ROTATE_REFRESH_TOKENS=True면 refresh도 새로 발급)\n{\n    &quot;access&quot;: &quot;새로운 access token...&quot;,\n    &quot;refresh&quot;: &quot;새로운 refresh token...&quot;\n}\n</code></pre>\n<hr>\n<h2>토큰에 커스텀 클레임 추가</h2>\n<p>기본 JWT에는 <code>user_id</code>만 들어있다. 추가 정보(email, role 등)가 필요하면 커스텀 serializer를 만든다.</p>\n<pre><code class=\"language-python\"># authentication/serializers.py\nfrom rest_framework_simplejwt.serializers import TokenObtainPairSerializer\n\nclass CustomTokenObtainPairSerializer(TokenObtainPairSerializer):\n    @classmethod\n    def get_token(cls, user):\n        token = super().get_token(user)\n\n        # 커스텀 클레임 추가\n        token[&#39;email&#39;] = user.email\n        token[&#39;username&#39;] = user.username\n        token[&#39;is_staff&#39;] = user.is_staff\n\n        return token\n</code></pre>\n<pre><code class=\"language-python\"># authentication/views.py\nfrom rest_framework_simplejwt.views import TokenObtainPairView\nfrom .serializers import CustomTokenObtainPairSerializer\n\nclass CustomTokenObtainPairView(TokenObtainPairView):\n    serializer_class = CustomTokenObtainPairSerializer\n</code></pre>\n<pre><code class=\"language-python\"># config/urls.py\nurlpatterns = [\n    path(&#39;api/token/&#39;, CustomTokenObtainPairView.as_view(), name=&#39;token_obtain_pair&#39;),\n    ...\n]\n</code></pre>\n<hr>\n<h2>Permission 클래스</h2>\n<p>인증(Authentication) 이후 권한(Permission)을 확인한다.</p>\n<table>\n<thead>\n<tr>\n<th>Permission 클래스</th>\n<th>동작</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>AllowAny</code></td>\n<td>모두 허용 (기본값)</td>\n</tr>\n<tr>\n<td><code>IsAuthenticated</code></td>\n<td>로그인한 사용자만</td>\n</tr>\n<tr>\n<td><code>IsAdminUser</code></td>\n<td><code>is_staff=True</code>인 사용자만</td>\n</tr>\n<tr>\n<td><code>IsAuthenticatedOrReadOnly</code></td>\n<td>비인증은 GET만, 인증은 모두</td>\n</tr>\n</tbody></table>\n<h3>전역 설정 vs 뷰별 설정</h3>\n<pre><code class=\"language-python\"># settings.py — 전역 기본값\nREST_FRAMEWORK = {\n    &#39;DEFAULT_PERMISSION_CLASSES&#39;: [\n        &#39;rest_framework.permissions.IsAuthenticated&#39;,\n    ],\n}\n</code></pre>\n<pre><code class=\"language-python\"># views.py — 뷰별 오버라이드\nfrom rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser\n\nclass PublicTaskListView(generics.ListAPIView):\n    # 전역 설정을 이 뷰에서만 덮어씀\n    permission_classes = [AllowAny]\n    queryset = Task.objects.filter(is_public=True)\n    serializer_class = TaskSerializer\n\n\nclass AdminOnlyView(generics.ListAPIView):\n    permission_classes = [IsAdminUser]\n    queryset = Task.objects.all()\n    serializer_class = TaskSerializer\n</code></pre>\n<hr>\n<h2>실전: 회원가입 + 로그인 + 보호된 API 전체 예제</h2>\n<pre><code class=\"language-python\"># users/serializers.py\nfrom django.contrib.auth.models import User\nfrom rest_framework import serializers\n\nclass RegisterSerializer(serializers.ModelSerializer):\n    password = serializers.CharField(write_only=True, min_length=8)\n    password2 = serializers.CharField(write_only=True)\n\n    class Meta:\n        model = User\n        fields = [&#39;username&#39;, &#39;email&#39;, &#39;password&#39;, &#39;password2&#39;]\n\n    def validate(self, data):\n        if data[&#39;password&#39;] != data[&#39;password2&#39;]:\n            raise serializers.ValidationError({&#39;password&#39;: &#39;비밀번호가 일치하지 않습니다.&#39;})\n        return data\n\n    def create(self, validated_data):\n        validated_data.pop(&#39;password2&#39;)\n        user = User.objects.create_user(**validated_data)\n        return user\n\n\nclass UserProfileSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = User\n        fields = [&#39;id&#39;, &#39;username&#39;, &#39;email&#39;, &#39;date_joined&#39;]\n        read_only_fields = [&#39;id&#39;, &#39;date_joined&#39;]\n</code></pre>\n<pre><code class=\"language-python\"># users/views.py\nfrom rest_framework import generics, permissions\nfrom rest_framework.response import Response\nfrom rest_framework.views import APIView\nfrom .serializers import RegisterSerializer, UserProfileSerializer\n\nclass RegisterView(generics.CreateAPIView):\n    serializer_class = RegisterSerializer\n    permission_classes = [permissions.AllowAny]\n\n\nclass UserProfileView(generics.RetrieveUpdateAPIView):\n    serializer_class = UserProfileSerializer\n    permission_classes = [permissions.IsAuthenticated]\n\n    def get_object(self):\n        return self.request.user\n</code></pre>\n<pre><code class=\"language-python\"># users/urls.py\nfrom django.urls import path\nfrom rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView\nfrom .views import RegisterView, UserProfileView\n\nurlpatterns = [\n    path(&#39;register/&#39;, RegisterView.as_view(), name=&#39;register&#39;),\n    path(&#39;login/&#39;, TokenObtainPairView.as_view(), name=&#39;login&#39;),\n    path(&#39;token/refresh/&#39;, TokenRefreshView.as_view(), name=&#39;token-refresh&#39;),\n    path(&#39;me/&#39;, UserProfileView.as_view(), name=&#39;me&#39;),\n]\n</code></pre>\n<hr>\n<h2>Blacklist — Refresh Token 무효화 (로그아웃)</h2>\n<p>JWT는 서버가 상태를 저장하지 않아 토큰을 즉시 무효화할 수 없다.<br><code>rest_framework_simplejwt.token_blacklist</code> 앱으로 로그아웃 시 Refresh Token을 블랙리스트에 등록한다.</p>\n<pre><code class=\"language-python\"># settings.py\nINSTALLED_APPS = [\n    ...\n    &#39;rest_framework_simplejwt.token_blacklist&#39;,\n]\n</code></pre>\n<pre><code class=\"language-bash\">python manage.py migrate\n</code></pre>\n<pre><code class=\"language-python\"># users/views.py\nfrom rest_framework_simplejwt.tokens import RefreshToken\nfrom rest_framework.views import APIView\nfrom rest_framework.response import Response\nfrom rest_framework import status, permissions\n\nclass LogoutView(APIView):\n    permission_classes = [permissions.IsAuthenticated]\n\n    def post(self, request):\n        try:\n            refresh_token = request.data[&#39;refresh&#39;]\n            token = RefreshToken(refresh_token)\n            token.blacklist()  # 블랙리스트에 등록\n            return Response({&#39;detail&#39;: &#39;로그아웃 완료&#39;}, status=status.HTTP_205_RESET_CONTENT)\n        except Exception:\n            return Response({&#39;detail&#39;: &#39;유효하지 않은 토큰&#39;}, status=status.HTTP_400_BAD_REQUEST)\n</code></pre>\n<hr>\n<h2>인증 방식 선택 기준</h2>\n<table>\n<thead>\n<tr>\n<th>상황</th>\n<th>추천</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Django Admin + Browsable API만</td>\n<td><code>SessionAuthentication</code></td>\n</tr>\n<tr>\n<td>단순 내부 API, 만료 불필요</td>\n<td><code>TokenAuthentication</code></td>\n</tr>\n<tr>\n<td>SPA, 모바일 앱, 외부 API</td>\n<td><code>JWT (SimpleJWT)</code></td>\n</tr>\n<tr>\n<td>엔터프라이즈, SSO 필요</td>\n<td>OAuth2 (django-oauth-toolkit)</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>마치며</h2>\n<p>DRF 인증 핵심 요약:</p>\n<ul>\n<li>Authentication = &quot;누구&quot;, Permission = &quot;가능 여부&quot; — 두 개념이 분리돼 있다</li>\n<li><code>SessionAuthentication</code>: 브라우저 기반, CSRF 필요</li>\n<li><code>TokenAuthentication</code>: 단순, 만료 없음</li>\n<li><code>JWT (SimpleJWT)</code>: Access(단기) + Refresh(장기) 분리, 실전 표준</li>\n<li><code>ROTATE_REFRESH_TOKENS = True</code>: Refresh Token 재발급으로 보안 강화</li>\n<li>로그아웃은 Blacklist로 Refresh Token 무효화</li>\n</ul>\n<hr>\n<h2>다음 글</h2>\n<ul>\n<li><a href=\"/study/backend/django/drf-serializer-validation\">DRF Serializer 검증 심화</a> — validate_<field> 완전 정복</li>\n<li><a href=\"/study/backend/django/django-object-permissions\">Django 객체 레벨 권한</a> — Owner, 팀 기반 접근 제어</li>\n</ul>\n<hr>\n<h2>References</h2>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-jwt-intro\" style=\"scroll-margin-top: 96px;\">JWT Introduction: https://jwt.io/introduction <a href=\"#fnref-jwt-intro\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "DRF",
+      "Authentication",
+      "JWT",
+      "SimpleJWT",
+      "TokenAuth",
+      "SessionAuth",
+      "Security",
+      "Authorization"
+    ],
+    "author": "Seobway",
+    "readTime": 13,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-04T01:04:29.401Z"
+  },
+  {
+    "id": "django-urls",
+    "title": "Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router",
+    "slug": "django-urls",
+    "excerpt": "Django URL 라우팅이 어떻게 동작하는지, path()와 re_path()의 차이, include()로 앱별 URL을 분리하는 방법, namespace로 URL 이름 충돌을 방지하는 방법, DRF Router가 ViewSet URL을 자동 생성하는 방식을 설명한다.",
+    "content": "<h2>URL 라우팅이 하는 일</h2>\n<p>HTTP 요청이 들어오면 Django는 <code>settings.ROOT_URLCONF</code>에 지정된 URLconf 모듈을 읽는다.<br>그 안의 <code>urlpatterns</code> 리스트를 <strong>순서대로</strong> 매칭하고, 처음 일치하는 패턴의 뷰를 호출한다.<sup id=\"fnref-django-urls\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-urls\" aria-label=\"각주 1\">[1]</a></sup></p>\n<pre><code>요청: GET /api/tasks/42/\n\nROOT_URLCONF = &#39;config.urls&#39;\n  → config/urls.py → urlpatterns\n    → &#39;&#39; → tasks/urls.py\n      → &#39;api/tasks/&lt;int:pk&gt;/&#39; → TaskDetailView\n</code></pre>\n<hr>\n<h2>시리즈 구성</h2>\n<table>\n<thead>\n<tr>\n<th>순서</th>\n<th>제목</th>\n<th>설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>1</td>\n<td>Django 큰 그림</td>\n<td>철학, MTV, Batteries Included</td>\n</tr>\n<tr>\n<td>2</td>\n<td>MTV 아키텍처</td>\n<td>Project, App, settings.py</td>\n</tr>\n<tr>\n<td>3</td>\n<td>요청-응답 라이프사이클</td>\n<td>HTTP 요청 처리 11단계</td>\n</tr>\n<tr>\n<td>4</td>\n<td>Django 모델</td>\n<td>필드, 관계, Meta</td>\n</tr>\n<tr>\n<td><strong>5</strong></td>\n<td><strong>Django URL 라우팅</strong> ←</td>\n<td><strong>path(), include(), namespace</strong></td>\n</tr>\n<tr>\n<td>6</td>\n<td>Django ORM 심층</td>\n<td>QuerySet, N+1, select_related</td>\n</tr>\n<tr>\n<td>7</td>\n<td>DRF 기초</td>\n<td>Serializer, ModelSerializer</td>\n</tr>\n<tr>\n<td>8</td>\n<td>DRF Views</td>\n<td>APIView, ViewSet, Router</td>\n</tr>\n<tr>\n<td>9</td>\n<td>DRF 인증</td>\n<td>Token, JWT, SimpleJWT</td>\n</tr>\n<tr>\n<td>10</td>\n<td>Django Migration</td>\n<td>makemigrations, FK 순서 문제</td>\n</tr>\n<tr>\n<td>11</td>\n<td>Django 보안</td>\n<td>CSRF, XSS, SQL Injection</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>path() 기초</h2>\n<p><code>path(route, view, kwargs=None, name=None)</code> — 가장 일반적인 URL 등록 방법이다.</p>\n<pre><code class=\"language-python\"># config/urls.py\nfrom django.contrib import admin\nfrom django.urls import path, include\n\nurlpatterns = [\n    path(&#39;admin/&#39;, admin.site.urls),\n    path(&#39;api/&#39;, include(&#39;tasks.urls&#39;)),\n    path(&#39;api/users/&#39;, include(&#39;users.urls&#39;)),\n]\n</code></pre>\n<pre><code class=\"language-python\"># tasks/urls.py\nfrom django.urls import path\nfrom . import views\n\nurlpatterns = [\n    path(&#39;tasks/&#39;, views.TaskListView.as_view(), name=&#39;task-list&#39;),\n    path(&#39;tasks/&lt;int:pk&gt;/&#39;, views.TaskDetailView.as_view(), name=&#39;task-detail&#39;),\n    path(&#39;tasks/&lt;uuid:task_id&gt;/comments/&#39;, views.CommentListView.as_view(), name=&#39;comment-list&#39;),\n]\n</code></pre>\n<h3>타입 컨버터</h3>\n<p><code>&lt;타입:변수명&gt;</code> 형태로 URL 파라미터를 자동으로 변환한다.</p>\n<table>\n<thead>\n<tr>\n<th>컨버터</th>\n<th>매칭 예시</th>\n<th>Python 타입</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>str</code></td>\n<td><code>django</code> (기본값, <code>/</code> 제외)</td>\n<td><code>str</code></td>\n</tr>\n<tr>\n<td><code>int</code></td>\n<td><code>42</code></td>\n<td><code>int</code></td>\n</tr>\n<tr>\n<td><code>slug</code></td>\n<td><code>my-task-title</code></td>\n<td><code>str</code></td>\n</tr>\n<tr>\n<td><code>uuid</code></td>\n<td><code>6ba7b810-9dad-11d1-80b4-00c04fd430c8</code></td>\n<td><code>UUID</code></td>\n</tr>\n<tr>\n<td><code>path</code></td>\n<td><code>uploads/2026/04/file.pdf</code> (<code>/</code> 포함)</td>\n<td><code>str</code></td>\n</tr>\n</tbody></table>\n<pre><code class=\"language-python\"># int 컨버터 — pk가 정수로 자동 변환\npath(&#39;tasks/&lt;int:pk&gt;/&#39;, views.TaskDetailView.as_view())\n\n# uuid 컨버터 — UUID 객체로 변환\npath(&#39;tasks/&lt;uuid:task_id&gt;/&#39;, views.TaskDetailView.as_view())\n\n# slug 컨버터 — 알파벳, 숫자, 하이픈, 언더스코어\npath(&#39;posts/&lt;slug:slug&gt;/&#39;, views.PostDetailView.as_view())\n</code></pre>\n<hr>\n<h2>re_path() — 정규식이 필요할 때</h2>\n<p><code>path()</code>의 타입 컨버터로 표현할 수 없는 복잡한 패턴은 <code>re_path()</code>를 쓴다.</p>\n<pre><code class=\"language-python\">from django.urls import re_path\n\nurlpatterns = [\n    # 4자리 연도 + 2자리 월\n    re_path(r&#39;^articles/(?P&lt;year&gt;[0-9]{4})/(?P&lt;month&gt;[0-9]{2})/$&#39;, views.archive),\n\n    # 특정 확장자만 허용\n    re_path(r&#39;^files/(?P&lt;filename&gt;[\\w.]+\\.(pdf|docx|xlsx))$&#39;, views.download),\n]\n</code></pre>\n<p>대부분의 경우 <code>path()</code>로 충분하다. 정규식은 코드 가독성을 낮추므로 꼭 필요한 상황에서만 사용한다.</p>\n<hr>\n<h2>include() — 앱별 URL 분리</h2>\n<p>프로젝트가 커지면 모든 URL을 <code>config/urls.py</code> 하나에 넣는 것은 관리하기 어렵다.<br><code>include()</code>로 앱별 <code>urls.py</code>를 분리한다.</p>\n<pre><code class=\"language-python\"># config/urls.py\nfrom django.urls import path, include\nfrom django.conf import settings\nfrom django.conf.urls.static import static\n\nurlpatterns = [\n    path(&#39;admin/&#39;, admin.site.urls),\n\n    # API v1 prefix로 묶기\n    path(&#39;api/v1/&#39;, include([\n        path(&#39;tasks/&#39;, include(&#39;tasks.urls&#39;, namespace=&#39;tasks&#39;)),\n        path(&#39;users/&#39;, include(&#39;users.urls&#39;, namespace=&#39;users&#39;)),\n        path(&#39;auth/&#39;, include(&#39;authentication.urls&#39;, namespace=&#39;auth&#39;)),\n    ])),\n]\n\n# 개발 환경에서 미디어 파일 서빙\nif settings.DEBUG:\n    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)\n</code></pre>\n<hr>\n<h2>namespace — URL 이름 충돌 방지</h2>\n<p>프로젝트가 커지면 여러 앱에서 같은 URL 이름을 쓸 수 있다.<br><code>namespace</code>로 구분하면 <code>app_name:url_name</code> 형태로 명확하게 참조한다.</p>\n<pre><code class=\"language-python\"># tasks/urls.py\napp_name = &#39;tasks&#39;  # 앱 네임스페이스 선언\n\nurlpatterns = [\n    path(&#39;&#39;, views.TaskListView.as_view(), name=&#39;list&#39;),\n    path(&#39;&lt;int:pk&gt;/&#39;, views.TaskDetailView.as_view(), name=&#39;detail&#39;),\n    path(&#39;create/&#39;, views.TaskCreateView.as_view(), name=&#39;create&#39;),\n]\n</code></pre>\n<pre><code class=\"language-python\"># users/urls.py\napp_name = &#39;users&#39;\n\nurlpatterns = [\n    path(&#39;&#39;, views.UserListView.as_view(), name=&#39;list&#39;),  # &#39;list&#39; 중복이지만 OK\n    path(&#39;&lt;int:pk&gt;/&#39;, views.UserDetailView.as_view(), name=&#39;detail&#39;),\n]\n</code></pre>\n<pre><code class=\"language-python\"># 코드에서 reverse()로 URL 생성\nfrom django.urls import reverse\n\n# tasks:list → /api/v1/tasks/\nreverse(&#39;tasks:list&#39;)\n\n# tasks:detail → /api/v1/tasks/42/\nreverse(&#39;tasks:detail&#39;, kwargs={&#39;pk&#39;: 42})\n\n# users:list → /api/v1/users/\nreverse(&#39;users:list&#39;)\n</code></pre>\n<hr>\n<h2>name= 파라미터를 써야 하는 이유</h2>\n<p>URL 경로를 하드코딩하면 나중에 경로를 바꿀 때 모든 곳을 수정해야 한다.<br><code>name</code>을 쓰면 경로가 바뀌어도 <code>reverse()</code> 호출부는 그대로다.</p>\n<pre><code class=\"language-python\"># BAD: 경로 하드코딩\nredirect(&#39;/api/v1/tasks/&#39;)\n\n# GOOD: 이름으로 참조\nfrom django.urls import reverse\nredirect(reverse(&#39;tasks:list&#39;))\n</code></pre>\n<p>DRF에서는 <code>reverse()</code> 대신 <code>HyperlinkedIdentityField</code>나 시리얼라이저의 URL 필드에서 name을 참조한다.</p>\n<hr>\n<h2>URL 설계 베스트 프랙티스</h2>\n<h3>API 버전 관리</h3>\n<pre><code class=\"language-python\"># config/urls.py\nurlpatterns = [\n    path(&#39;api/v1/&#39;, include(&#39;api.v1.urls&#39;)),\n    path(&#39;api/v2/&#39;, include(&#39;api.v2.urls&#39;)),\n]\n</code></pre>\n<h3>REST 리소스 명명 규칙</h3>\n<pre><code>GET    /api/v1/tasks/          → 목록 조회\nPOST   /api/v1/tasks/          → 생성\nGET    /api/v1/tasks/42/       → 단건 조회\nPUT    /api/v1/tasks/42/       → 전체 수정\nPATCH  /api/v1/tasks/42/       → 부분 수정\nDELETE /api/v1/tasks/42/       → 삭제\n\nGET    /api/v1/tasks/42/comments/   → 중첩 리소스\nPOST   /api/v1/tasks/42/comments/\n</code></pre>\n<hr>\n<h2>DRF Router — ViewSet URL 자동 생성</h2>\n<p>ViewSet을 사용하면 Router가 URL을 자동으로 생성한다. 직접 <code>urlpatterns</code>에 등록할 필요가 없다.</p>\n<pre><code class=\"language-python\"># tasks/urls.py\nfrom django.urls import path, include\nfrom rest_framework.routers import DefaultRouter\nfrom . import views\n\nrouter = DefaultRouter()\nrouter.register(r&#39;tasks&#39;, views.TaskViewSet, basename=&#39;task&#39;)\nrouter.register(r&#39;categories&#39;, views.CategoryViewSet, basename=&#39;category&#39;)\n\nurlpatterns = [\n    path(&#39;&#39;, include(router.urls)),\n]\n</code></pre>\n<p><code>router.register(&#39;tasks&#39;, TaskViewSet)</code>가 자동 생성하는 URL:</p>\n<table>\n<thead>\n<tr>\n<th>URL 패턴</th>\n<th>HTTP 메서드</th>\n<th>ViewSet action</th>\n<th>name</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>tasks/</code></td>\n<td>GET</td>\n<td><code>list</code></td>\n<td><code>task-list</code></td>\n</tr>\n<tr>\n<td><code>tasks/</code></td>\n<td>POST</td>\n<td><code>create</code></td>\n<td><code>task-list</code></td>\n</tr>\n<tr>\n<td><code>tasks/{pk}/</code></td>\n<td>GET</td>\n<td><code>retrieve</code></td>\n<td><code>task-detail</code></td>\n</tr>\n<tr>\n<td><code>tasks/{pk}/</code></td>\n<td>PUT</td>\n<td><code>update</code></td>\n<td><code>task-detail</code></td>\n</tr>\n<tr>\n<td><code>tasks/{pk}/</code></td>\n<td>PATCH</td>\n<td><code>partial_update</code></td>\n<td><code>task-detail</code></td>\n</tr>\n<tr>\n<td><code>tasks/{pk}/</code></td>\n<td>DELETE</td>\n<td><code>destroy</code></td>\n<td><code>task-detail</code></td>\n</tr>\n</tbody></table>\n<p><code>@action</code> 데코레이터로 커스텀 엔드포인트를 추가하면 Router가 이것도 자동으로 URL에 포함한다.</p>\n<pre><code class=\"language-python\"># views.py\nfrom rest_framework.decorators import action\nfrom rest_framework.response import Response\n\nclass TaskViewSet(viewsets.ModelViewSet):\n    queryset = Task.objects.all()\n    serializer_class = TaskSerializer\n\n    @action(detail=True, methods=[&#39;post&#39;])\n    def complete(self, request, pk=None):\n        task = self.get_object()\n        task.status = Task.STATUS_DONE\n        task.save()\n        return Response({&#39;status&#39;: &#39;completed&#39;})\n\n    @action(detail=False, methods=[&#39;get&#39;])\n    def overdue(self, request):\n        tasks = Task.objects.filter(...)\n        serializer = self.get_serializer(tasks, many=True)\n        return Response(serializer.data)\n</code></pre>\n<p><code>@action(detail=True)</code>는 <code>tasks/{pk}/complete/</code>으로, <code>detail=False</code>는 <code>tasks/overdue/</code>로 생성된다.</p>\n<hr>\n<h2>전체 URL 구조 예시</h2>\n<pre><code>config/\n├── urls.py              # ROOT_URLCONF\ntasks/\n├── urls.py\nusers/\n└── urls.py\n</code></pre>\n<pre><code class=\"language-python\"># config/urls.py\nfrom django.contrib import admin\nfrom django.urls import path, include\nfrom rest_framework.routers import DefaultRouter\n\nurlpatterns = [\n    path(&#39;admin/&#39;, admin.site.urls),\n    path(&#39;api/v1/&#39;, include([\n        path(&#39;&#39;, include(&#39;tasks.urls&#39;)),\n        path(&#39;&#39;, include(&#39;users.urls&#39;)),\n    ])),\n]\n</code></pre>\n<pre><code class=\"language-python\"># tasks/urls.py\nfrom django.urls import path, include\nfrom rest_framework.routers import DefaultRouter\nfrom .views import TaskViewSet, CategoryViewSet\n\napp_name = &#39;tasks&#39;\nrouter = DefaultRouter()\nrouter.register(&#39;tasks&#39;, TaskViewSet, basename=&#39;task&#39;)\nrouter.register(&#39;categories&#39;, CategoryViewSet, basename=&#39;category&#39;)\n\nurlpatterns = [\n    path(&#39;&#39;, include(router.urls)),\n]\n</code></pre>\n<pre><code class=\"language-python\"># users/urls.py\nfrom django.urls import path\nfrom .views import UserProfileView, RegisterView\n\napp_name = &#39;users&#39;\n\nurlpatterns = [\n    path(&#39;users/me/&#39;, UserProfileView.as_view(), name=&#39;me&#39;),\n    path(&#39;users/register/&#39;, RegisterView.as_view(), name=&#39;register&#39;),\n]\n</code></pre>\n<p>최종 URL 목록:</p>\n<pre><code>/admin/\n/api/v1/tasks/\n/api/v1/tasks/{pk}/\n/api/v1/tasks/{pk}/complete/\n/api/v1/tasks/overdue/\n/api/v1/categories/\n/api/v1/categories/{pk}/\n/api/v1/users/me/\n/api/v1/users/register/\n</code></pre>\n<hr>\n<h2>마치며</h2>\n<p>Django URL 라우팅의 핵심:</p>\n<ul>\n<li><code>path()</code> + 타입 컨버터로 대부분 처리한다</li>\n<li><code>include()</code>로 앱별 URLconf를 분리한다</li>\n<li><code>namespace</code>와 <code>name</code>을 반드시 설정해 <code>reverse()</code>로 URL을 생성한다</li>\n<li>DRF ViewSet + Router로 CRUD URL을 자동 생성한다</li>\n<li><code>/api/v1/</code> prefix로 버전을 관리한다</li>\n</ul>\n<hr>\n<h2>다음 글</h2>\n<ul>\n<li><a href=\"/study/backend/django/drf-overview\">DRF 기초</a> — Serializer, ModelSerializer</li>\n<li><a href=\"/study/backend/django/drf-views\">DRF Views</a> — APIView, ViewSet, Router</li>\n</ul>\n<hr>\n<h2>References</h2>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-urls\" style=\"scroll-margin-top: 96px;\">Django Documentation — URL dispatcher: https://docs.djangoproject.com/en/5.2/topics/http/urls/ <a href=\"#fnref-django-urls\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "URL",
+      "URLconf",
+      "path",
+      "include",
+      "namespace",
+      "Router",
+      "DRF",
+      "Routing",
+      "Python"
+    ],
+    "author": "Seobway",
+    "readTime": 11,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-04T01:04:29.397Z"
   },
   {
     "id": "django-object-permissions",
@@ -96,7 +202,34 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.362Z"
+    "updatedAt": "2026-04-04T01:04:29.392Z"
+  },
+  {
+    "id": "django-models",
+    "title": "Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션",
+    "slug": "django-models",
+    "excerpt": "Django 모델은 Python 클래스로 DB 테이블을 정의한다. 각 필드 타입의 용도와 ForeignKey, ManyToManyField, OneToOneField 세 가지 관계의 차이, Meta 클래스로 인덱스·정렬·제약조건을 설정하는 방법을 설명한다.",
+    "content": "<h2>모델이란 무엇인가</h2>\n<p>Django에서 모델은 <strong>데이터의 단일 정보 소스</strong>다.<sup id=\"fnref-django-models\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-django-models\" aria-label=\"각주 1\">[1]</a></sup></p>\n<p>Python 클래스 하나가 DB 테이블 하나에 대응되고, 클래스의 속성이 테이블의 컬럼이 된다.<br>SQL을 직접 쓰지 않아도 Python 코드만으로 스키마를 정의하고, ORM이 실제 SQL로 변환해 실행한다.</p>\n<pre><code class=\"language-python\">from django.db import models\n\nclass Task(models.Model):\n    title = models.CharField(max_length=200)\n    is_done = models.BooleanField(default=False)\n    created_at = models.DateTimeField(auto_now_add=True)\n</code></pre>\n<p>위 코드 세 줄이 아래 SQL을 대신한다.</p>\n<pre><code class=\"language-sql\">CREATE TABLE tasks_task (\n    id         INTEGER PRIMARY KEY AUTOINCREMENT,\n    title      VARCHAR(200) NOT NULL,\n    is_done    BOOLEAN NOT NULL DEFAULT FALSE,\n    created_at DATETIME NOT NULL\n);\n</code></pre>\n<hr>\n<h2>시리즈 구성</h2>\n<table>\n<thead>\n<tr>\n<th>순서</th>\n<th>제목</th>\n<th>설명</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>1</td>\n<td>Django 큰 그림</td>\n<td>철학, MTV, Batteries Included</td>\n</tr>\n<tr>\n<td>2</td>\n<td>MTV 아키텍처</td>\n<td>Project, App, settings.py</td>\n</tr>\n<tr>\n<td>3</td>\n<td>요청-응답 라이프사이클</td>\n<td>HTTP 요청 처리 11단계</td>\n</tr>\n<tr>\n<td><strong>4</strong></td>\n<td>**Django 모델<strong> ←</td>\n<td></strong>필드, 관계, Meta**</td>\n</tr>\n<tr>\n<td>5</td>\n<td>Django URL 라우팅</td>\n<td>path(), include(), namespace</td>\n</tr>\n<tr>\n<td>6</td>\n<td>Django ORM 심층</td>\n<td>QuerySet, N+1, select_related</td>\n</tr>\n<tr>\n<td>7</td>\n<td>DRF 기초</td>\n<td>Serializer, ModelSerializer</td>\n</tr>\n<tr>\n<td>8</td>\n<td>DRF Views</td>\n<td>APIView, ViewSet, Router</td>\n</tr>\n<tr>\n<td>9</td>\n<td>DRF 인증</td>\n<td>Token, JWT, SimpleJWT</td>\n</tr>\n<tr>\n<td>10</td>\n<td>Django Migration</td>\n<td>makemigrations, FK 순서 문제</td>\n</tr>\n<tr>\n<td>11</td>\n<td>Django 보안</td>\n<td>CSRF, XSS, SQL Injection</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>기본 필드 타입</h2>\n<p>Django는 DB 컬럼 타입별로 다양한 필드 클래스를 제공한다.</p>\n<h3>문자열 필드</h3>\n<pre><code class=\"language-python\">class Article(models.Model):\n    # 짧은 문자열 — max_length 필수, VARCHAR로 매핑\n    title = models.CharField(max_length=200)\n\n    # 긴 텍스트 — max_length 없음, TEXT로 매핑\n    body = models.TextField()\n\n    # 이메일 형식 자동 검증\n    contact = models.EmailField(max_length=254)\n\n    # URL 형식 자동 검증\n    homepage = models.URLField(blank=True)\n\n    # UUID 저장 (32자 16진수)\n    external_id = models.UUIDField(default=uuid.uuid4, editable=False)\n\n    # 선택지 제한 (choices)\n    STATUS_CHOICES = [\n        (&#39;draft&#39;, &#39;초안&#39;),\n        (&#39;published&#39;, &#39;발행&#39;),\n        (&#39;archived&#39;, &#39;보관&#39;),\n    ]\n    status = models.CharField(\n        max_length=20,\n        choices=STATUS_CHOICES,\n        default=&#39;draft&#39;,\n    )\n</code></pre>\n<blockquote>\n<p><strong>주의: CharField에 null=True를 쓰지 않는다.</strong><br>빈 문자열은 <code>&#39;&#39;</code>(빈 문자열)로 저장한다. <code>null=True</code>를 추가하면 <code>None</code>과 <code>&#39;&#39;</code> 두 가지 &quot;없음&quot; 상태가 생겨 혼란스럽다. Django 컨벤션은 CharField/TextField는 <code>blank=True</code>만 사용한다.</p>\n</blockquote>\n<h3>숫자 필드</h3>\n<pre><code class=\"language-python\">class Product(models.Model):\n    # 정수\n    quantity = models.IntegerField(default=0)\n    view_count = models.PositiveIntegerField(default=0)\n\n    # 고정 소수점 — 금액, 비율 등 정확도가 중요할 때\n    price = models.DecimalField(max_digits=10, decimal_places=2)\n\n    # 부동 소수점 — 정확도보다 범위가 중요할 때\n    latitude = models.FloatField()\n</code></pre>\n<h3>날짜/시간 필드</h3>\n<pre><code class=\"language-python\">class Post(models.Model):\n    # auto_now_add=True: 생성 시 자동 설정, 이후 수정 불가\n    created_at = models.DateTimeField(auto_now_add=True)\n\n    # auto_now=True: 저장할 때마다 자동 갱신\n    updated_at = models.DateTimeField(auto_now=True)\n\n    # 직접 날짜 입력받을 때\n    published_at = models.DateTimeField(null=True, blank=True)\n\n    # 날짜만 (시간 없음)\n    due_date = models.DateField(null=True, blank=True)\n</code></pre>\n<h3>파일/이미지 필드</h3>\n<pre><code class=\"language-python\">class Profile(models.Model):\n    # FileField: 파일 경로를 문자열로 DB에 저장, 실제 파일은 MEDIA_ROOT에\n    resume = models.FileField(upload_to=&#39;resumes/&#39;)\n\n    # ImageField: FileField + Pillow로 이미지 유효성 검증\n    avatar = models.ImageField(upload_to=&#39;avatars/&#39;, blank=True)\n</code></pre>\n<pre><code class=\"language-python\"># settings.py\nMEDIA_URL = &#39;/media/&#39;\nMEDIA_ROOT = BASE_DIR / &#39;media&#39;\n</code></pre>\n<h3>기타 필드</h3>\n<pre><code class=\"language-python\">class Config(models.Model):\n    # JSON 데이터 — PostgreSQL은 jsonb, 나머지는 TEXT\n    metadata = models.JSONField(default=dict)\n\n    # True/False\n    is_active = models.BooleanField(default=True)\n\n    # IP 주소 자동 검증\n    last_ip = models.GenericIPAddressField(null=True, blank=True)\n</code></pre>\n<hr>\n<h2>null=True vs blank=True 차이</h2>\n<p>이 두 옵션은 전혀 다른 레벨에서 동작한다.</p>\n<table>\n<thead>\n<tr>\n<th>옵션</th>\n<th>적용 레벨</th>\n<th>의미</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>null=True</code></td>\n<td><strong>DB 레벨</strong></td>\n<td>컬럼에 NULL 허용</td>\n</tr>\n<tr>\n<td><code>blank=True</code></td>\n<td><strong>폼/검증 레벨</strong></td>\n<td>빈 값 입력 허용</td>\n</tr>\n</tbody></table>\n<pre><code class=\"language-python\"># DB에는 NULL로 저장 가능, 폼에서는 필수 입력 (unusual pattern)\nfield = models.IntegerField(null=True)\n\n# DB에는 NOT NULL, 폼에서는 빈 값 허용 → 빈 문자열 &#39;&#39;로 저장\nfield = models.CharField(max_length=100, blank=True)\n\n# DB와 폼 모두 선택사항\nfield = models.IntegerField(null=True, blank=True)\n</code></pre>\n<p><strong>가이드라인:</strong></p>\n<ul>\n<li>문자열 필드(Char, Text): <code>blank=True</code>만 사용</li>\n<li>숫자/날짜 필드에서 선택 입력: <code>null=True, blank=True</code> 함께</li>\n</ul>\n<hr>\n<h2>관계 필드 — 3가지 핵심</h2>\n<h3>ForeignKey (N:1 관계)</h3>\n<p>가장 많이 쓰이는 관계다. &quot;하나의 카테고리에 여러 개의 태스크&quot;처럼 N(Task) : 1(Category) 관계를 표현한다.</p>\n<pre><code class=\"language-python\">class Category(models.Model):\n    name = models.CharField(max_length=100)\n\n    def __str__(self):\n        return self.name\n\n\nclass Task(models.Model):\n    title = models.CharField(max_length=200)\n\n    # ForeignKey: Task(N) → Category(1)\n    category = models.ForeignKey(\n        Category,\n        on_delete=models.SET_NULL,   # Category 삭제 시 NULL로\n        null=True,\n        blank=True,\n        related_name=&#39;tasks&#39;,        # category.tasks.all() 로 역참조\n    )\n</code></pre>\n<h4>on_delete 옵션</h4>\n<table>\n<thead>\n<tr>\n<th>옵션</th>\n<th>동작</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>CASCADE</code></td>\n<td>부모 삭제 시 자식도 삭제 (주문 삭제 → 주문상품 삭제)</td>\n</tr>\n<tr>\n<td><code>SET_NULL</code></td>\n<td>부모 삭제 시 FK 컬럼을 NULL로 (null=True 필요)</td>\n</tr>\n<tr>\n<td><code>PROTECT</code></td>\n<td>자식이 있으면 부모 삭제 차단 (에러 발생)</td>\n</tr>\n<tr>\n<td><code>SET_DEFAULT</code></td>\n<td>부모 삭제 시 default 값으로 설정</td>\n</tr>\n<tr>\n<td><code>DO_NOTHING</code></td>\n<td>아무것도 안 함 (DB에서 직접 처리)</td>\n</tr>\n</tbody></table>\n<pre><code class=\"language-python\"># 역참조 사용 예\ncategory = Category.objects.get(id=1)\ntasks = category.tasks.all()          # related_name=&#39;tasks&#39; 덕분\ntasks = category.task_set.all()       # related_name 없으면 이렇게\n</code></pre>\n<h3>ManyToManyField (N:M 관계)</h3>\n<p>&quot;하나의 태스크에 여러 태그, 하나의 태그에 여러 태스크&quot;처럼 양방향으로 다수가 연결되는 관계다.</p>\n<pre><code class=\"language-python\">class Tag(models.Model):\n    name = models.CharField(max_length=50, unique=True)\n\n    def __str__(self):\n        return self.name\n\n\nclass Task(models.Model):\n    title = models.CharField(max_length=200)\n\n    # ManyToManyField: Django가 중간 테이블(tasks_task_tags)을 자동 생성\n    tags = models.ManyToManyField(\n        Tag,\n        blank=True,\n        related_name=&#39;tasks&#39;,\n    )\n</code></pre>\n<pre><code class=\"language-python\"># 사용법\ntask = Task.objects.get(id=1)\ntask.tags.add(tag1, tag2)\ntask.tags.remove(tag1)\ntask.tags.set([tag2, tag3])   # 현재 태그를 tag2, tag3으로 교체\ntask.tags.clear()              # 모두 제거\ntask.tags.all()                # 연결된 태그 QuerySet\n</code></pre>\n<h4>through 모델 — 중간 테이블에 추가 데이터가 필요할 때</h4>\n<p>태그를 붙인 날짜나 태그를 붙인 사람 같은 정보가 필요하면 <code>through</code>로 직접 중간 모델을 지정한다.</p>\n<pre><code class=\"language-python\">class TaskTag(models.Model):\n    task = models.ForeignKey(Task, on_delete=models.CASCADE)\n    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)\n    tagged_by = models.ForeignKey(\n        settings.AUTH_USER_MODEL,\n        on_delete=models.SET_NULL,\n        null=True,\n    )\n    tagged_at = models.DateTimeField(auto_now_add=True)\n\n    class Meta:\n        unique_together = [[&#39;task&#39;, &#39;tag&#39;]]\n\n\nclass Task(models.Model):\n    title = models.CharField(max_length=200)\n    tags = models.ManyToManyField(Tag, through=&#39;TaskTag&#39;, blank=True)\n</code></pre>\n<pre><code class=\"language-python\"># through 모델을 쓰면 add()가 아닌 직접 생성\nTaskTag.objects.create(task=task, tag=tag, tagged_by=request.user)\n</code></pre>\n<h3>OneToOneField (1:1 관계)</h3>\n<p>하나의 User에 하나의 Profile처럼 테이블을 확장할 때 사용한다.<br>ForeignKey에 <code>unique=True</code>를 건 것과 동일하지만, 역참조가 QuerySet이 아닌 단일 객체다.</p>\n<pre><code class=\"language-python\">class Profile(models.Model):\n    # User와 1:1 연결 — User 삭제 시 Profile도 삭제\n    user = models.OneToOneField(\n        settings.AUTH_USER_MODEL,\n        on_delete=models.CASCADE,\n        related_name=&#39;profile&#39;,\n    )\n    bio = models.TextField(blank=True)\n    avatar = models.ImageField(upload_to=&#39;avatars/&#39;, blank=True)\n    website = models.URLField(blank=True)\n</code></pre>\n<pre><code class=\"language-python\"># 역참조: ForeignKey는 .objects QuerySet, OneToOne은 단일 객체\nuser = User.objects.get(id=1)\nprofile = user.profile           # 단일 Profile 객체\n# user.profile.all() 은 불가 — QuerySet이 아님\n</code></pre>\n<h4>post_save 시그널로 자동 생성</h4>\n<pre><code class=\"language-python\">from django.db.models.signals import post_save\nfrom django.dispatch import receiver\n\n@receiver(post_save, sender=User)\ndef create_user_profile(sender, instance, created, **kwargs):\n    if created:\n        Profile.objects.create(user=instance)\n</code></pre>\n<hr>\n<h2>Meta 클래스</h2>\n<p>모델의 동작 방식을 세부 조정하는 내부 클래스다.</p>\n<pre><code class=\"language-python\">class Task(models.Model):\n    title = models.CharField(max_length=200)\n    priority = models.IntegerField(default=0)\n    created_at = models.DateTimeField(auto_now_add=True)\n    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)\n\n    class Meta:\n        # 기본 정렬: -created_at이면 최신순\n        ordering = [&#39;-created_at&#39;, &#39;priority&#39;]\n\n        # 인덱스 설정 (자주 필터링하는 컬럼)\n        indexes = [\n            models.Index(fields=[&#39;category&#39;, &#39;created_at&#39;]),\n            models.Index(fields=[&#39;priority&#39;]),\n        ]\n\n        # 복합 유니크 제약\n        unique_together = [[&#39;title&#39;, &#39;category&#39;]]\n\n        # Django 5.1+: UniqueConstraint로 더 세밀하게\n        constraints = [\n            models.UniqueConstraint(\n                fields=[&#39;title&#39;, &#39;category&#39;],\n                name=&#39;unique_task_title_per_category&#39;,\n            ),\n            models.CheckConstraint(\n                check=models.Q(priority__gte=0),\n                name=&#39;task_priority_non_negative&#39;,\n            ),\n        ]\n\n        # Admin, 오류 메시지에 표시되는 이름\n        verbose_name = &#39;태스크&#39;\n        verbose_name_plural = &#39;태스크 목록&#39;\n\n        # DB 테이블 이름 직접 지정 (기본: appname_modelname)\n        db_table = &#39;tasks&#39;\n</code></pre>\n<h3>abstract 모델 — 공통 필드 재사용</h3>\n<pre><code class=\"language-python\">class TimeStampedModel(models.Model):\n    &quot;&quot;&quot;생성/수정 시각을 자동 기록하는 추상 모델&quot;&quot;&quot;\n    created_at = models.DateTimeField(auto_now_add=True)\n    updated_at = models.DateTimeField(auto_now=True)\n\n    class Meta:\n        abstract = True  # DB 테이블 생성 안 됨, 상속만 가능\n\n\nclass Task(TimeStampedModel):\n    title = models.CharField(max_length=200)\n    # created_at, updated_at 자동으로 포함됨\n\n\nclass Comment(TimeStampedModel):\n    body = models.TextField()\n    # created_at, updated_at 자동으로 포함됨\n</code></pre>\n<hr>\n<h2><strong>str</strong> 메서드</h2>\n<p>Admin, shell, 디버그 출력 등 모든 곳에서 모델 객체를 사람이 읽을 수 있게 표현한다.<br><strong>반드시 정의해야 한다.</strong></p>\n<pre><code class=\"language-python\">class Task(models.Model):\n    title = models.CharField(max_length=200)\n    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)\n\n    def __str__(self):\n        return f&#39;[{self.category}] {self.title}&#39;\n</code></pre>\n<pre><code class=\"language-python\"># __str__ 없으면\n&gt;&gt;&gt; Task.objects.first()\n&lt;Task: Task object (1)&gt;  # 의미 없음\n\n# __str__ 있으면\n&gt;&gt;&gt; Task.objects.first()\n&lt;Task: [개발] Django 모델 정리&gt;  # 명확함\n</code></pre>\n<hr>\n<h2>실전 예제: Task 앱 전체 모델</h2>\n<p>Task 관리 앱의 모델을 처음부터 끝까지 작성한다.</p>\n<pre><code class=\"language-python\"># tasks/models.py\nimport uuid\nfrom django.conf import settings\nfrom django.db import models\n\n\nclass TimeStampedModel(models.Model):\n    created_at = models.DateTimeField(auto_now_add=True)\n    updated_at = models.DateTimeField(auto_now=True)\n\n    class Meta:\n        abstract = True\n\n\nclass Category(TimeStampedModel):\n    name = models.CharField(max_length=100, unique=True)\n    description = models.TextField(blank=True)\n\n    class Meta:\n        verbose_name = &#39;카테고리&#39;\n        verbose_name_plural = &#39;카테고리 목록&#39;\n        ordering = [&#39;name&#39;]\n\n    def __str__(self):\n        return self.name\n\n\nclass Tag(models.Model):\n    name = models.CharField(max_length=50, unique=True)\n\n    def __str__(self):\n        return self.name\n\n\nclass Task(TimeStampedModel):\n    PRIORITY_LOW = 0\n    PRIORITY_MEDIUM = 1\n    PRIORITY_HIGH = 2\n    PRIORITY_CHOICES = [\n        (PRIORITY_LOW, &#39;낮음&#39;),\n        (PRIORITY_MEDIUM, &#39;보통&#39;),\n        (PRIORITY_HIGH, &#39;높음&#39;),\n    ]\n\n    STATUS_TODO = &#39;todo&#39;\n    STATUS_IN_PROGRESS = &#39;in_progress&#39;\n    STATUS_DONE = &#39;done&#39;\n    STATUS_CHOICES = [\n        (STATUS_TODO, &#39;할 일&#39;),\n        (STATUS_IN_PROGRESS, &#39;진행 중&#39;),\n        (STATUS_DONE, &#39;완료&#39;),\n    ]\n\n    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)\n    title = models.CharField(max_length=200)\n    description = models.TextField(blank=True)\n\n    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM)\n    status = models.CharField(\n        max_length=20, choices=STATUS_CHOICES, default=STATUS_TODO\n    )\n\n    due_date = models.DateField(null=True, blank=True)\n\n    # FK 관계\n    category = models.ForeignKey(\n        Category,\n        on_delete=models.SET_NULL,\n        null=True,\n        blank=True,\n        related_name=&#39;tasks&#39;,\n    )\n    created_by = models.ForeignKey(\n        settings.AUTH_USER_MODEL,\n        on_delete=models.SET_NULL,\n        null=True,\n        related_name=&#39;created_tasks&#39;,\n    )\n    assigned_to = models.ForeignKey(\n        settings.AUTH_USER_MODEL,\n        on_delete=models.SET_NULL,\n        null=True,\n        blank=True,\n        related_name=&#39;assigned_tasks&#39;,\n    )\n\n    # M2M 관계\n    tags = models.ManyToManyField(Tag, blank=True, related_name=&#39;tasks&#39;)\n\n    class Meta:\n        ordering = [&#39;-created_at&#39;]\n        indexes = [\n            models.Index(fields=[&#39;status&#39;, &#39;priority&#39;]),\n            models.Index(fields=[&#39;created_by&#39;, &#39;created_at&#39;]),\n            models.Index(fields=[&#39;due_date&#39;]),\n        ]\n        verbose_name = &#39;태스크&#39;\n        verbose_name_plural = &#39;태스크 목록&#39;\n\n    def __str__(self):\n        return f&#39;[{self.get_status_display()}] {self.title}&#39;\n\n    @property\n    def is_overdue(self):\n        from django.utils import timezone\n        if self.due_date and self.status != self.STATUS_DONE:\n            return self.due_date &lt; timezone.now().date()\n        return False\n\n\nclass Comment(TimeStampedModel):\n    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name=&#39;comments&#39;)\n    author = models.ForeignKey(\n        settings.AUTH_USER_MODEL,\n        on_delete=models.SET_NULL,\n        null=True,\n    )\n    body = models.TextField()\n\n    class Meta:\n        ordering = [&#39;created_at&#39;]\n\n    def __str__(self):\n        return f&#39;{self.author} → {self.task.title[:30]}&#39;\n</code></pre>\n<hr>\n<h2>자주 하는 실수</h2>\n<h3>1. ForeignKey로 연결된 객체를 N+1로 조회</h3>\n<pre><code class=\"language-python\"># BAD: Task 수만큼 category 쿼리 추가 발생\ntasks = Task.objects.all()\nfor task in tasks:\n    print(task.category.name)  # 매번 DB 쿼리\n\n# GOOD: JOIN으로 한 번에 가져오기\ntasks = Task.objects.select_related(&#39;category&#39;, &#39;created_by&#39;).all()\nfor task in tasks:\n    print(task.category.name)  # 추가 쿼리 없음\n</code></pre>\n<h3>2. ManyToMany를 즉시 평가하지 않고 N+1 유발</h3>\n<pre><code class=\"language-python\"># BAD\ntasks = Task.objects.all()\nfor task in tasks:\n    print(task.tags.all())  # 매번 쿼리\n\n# GOOD\ntasks = Task.objects.prefetch_related(&#39;tags&#39;).all()\nfor task in tasks:\n    print(task.tags.all())  # 미리 가져온 캐시 사용\n</code></pre>\n<h3>3. CharField에 null=True 추가</h3>\n<pre><code class=\"language-python\"># BAD: 빈 상태가 None과 &#39;&#39; 두 가지\nname = models.CharField(max_length=100, null=True, blank=True)\n\n# GOOD: 빈 상태는 &#39;&#39; 하나로 통일\nname = models.CharField(max_length=100, blank=True, default=&#39;&#39;)\n</code></pre>\n<hr>\n<h2>마치며</h2>\n<p>Django 모델을 제대로 설계하면 ORM이 나머지를 처리한다.</p>\n<p>핵심 원칙:</p>\n<ul>\n<li><strong>FK, M2M, O2O</strong> 중 관계 유형을 먼저 명확히 정한다</li>\n<li><code>on_delete</code>를 비즈니스 로직에 맞게 선택한다 (CASCADE vs SET_NULL vs PROTECT)</li>\n<li><code>null=True</code> / <code>blank=True</code> 차이를 정확히 이해하고 적용한다</li>\n<li><code>abstract = True</code> 추상 모델로 공통 필드(created_at, updated_at)를 재사용한다</li>\n<li><code>__str__</code>을 반드시 정의한다</li>\n<li><code>Meta.indexes</code>로 자주 쓰는 필터 컬럼에 인덱스를 설정한다</li>\n</ul>\n<hr>\n<h2>다음 글</h2>\n<ul>\n<li><a href=\"/study/backend/django/django-urls\">Django URL 라우팅</a> — path(), include(), namespace</li>\n<li><a href=\"/study/backend/django/drf-overview\">DRF 기초</a> — Serializer, ModelSerializer</li>\n</ul>\n<hr>\n<h2>References</h2>\n<h2>참고/주석</h2>\n<ol>\n<li id=\"fn-django-models\" style=\"scroll-margin-top: 96px;\">Django Documentation — Models: https://docs.djangoproject.com/en/5.2/topics/db/models/ <a href=\"#fnref-django-models\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/backend/django",
+    "tags": [
+      "Django",
+      "Model",
+      "ORM",
+      "ForeignKey",
+      "ManyToMany",
+      "OneToOne",
+      "Meta",
+      "ModelFields",
+      "Database",
+      "Python"
+    ],
+    "author": "Seobway",
+    "readTime": 15,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-03T00:00:00.000Z",
+    "updatedAt": "2026-04-04T01:04:29.390Z"
   },
   {
     "id": "why-threejs-exists",
@@ -117,7 +250,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.395Z"
+    "updatedAt": "2026-04-04T01:04:29.428Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -139,7 +272,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.394Z"
+    "updatedAt": "2026-04-04T01:04:29.427Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -161,7 +294,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.388Z"
+    "updatedAt": "2026-04-04T01:04:29.425Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
@@ -183,7 +316,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.387Z"
+    "updatedAt": "2026-04-04T01:04:29.424Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -205,7 +338,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.385Z"
+    "updatedAt": "2026-04-04T01:04:29.422Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -227,7 +360,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.384Z"
+    "updatedAt": "2026-04-04T01:04:29.421Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -249,7 +382,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.382Z"
+    "updatedAt": "2026-04-04T01:04:29.420Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -284,7 +417,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.413Z"
+    "updatedAt": "2026-04-04T01:04:29.452Z"
   },
   {
     "id": "react-query-queries",
@@ -309,7 +442,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.381Z"
+    "updatedAt": "2026-04-04T01:04:29.418Z"
   },
   {
     "id": "react-query-overview",
@@ -333,7 +466,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.379Z"
+    "updatedAt": "2026-04-04T01:04:29.417Z"
   },
   {
     "id": "react-query-mutations",
@@ -356,7 +489,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.377Z"
+    "updatedAt": "2026-04-04T01:04:29.415Z"
   },
   {
     "id": "react-query-cache",
@@ -380,7 +513,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.376Z"
+    "updatedAt": "2026-04-04T01:04:29.414Z"
   },
   {
     "id": "react-query-advanced",
@@ -404,7 +537,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.374Z"
+    "updatedAt": "2026-04-04T01:04:29.412Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -429,7 +562,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.355Z"
+    "updatedAt": "2026-04-04T01:04:29.378Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -452,7 +585,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.353Z"
+    "updatedAt": "2026-04-04T01:04:29.376Z"
   },
   {
     "id": "gstack-overview",
@@ -476,7 +609,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.348Z"
+    "updatedAt": "2026-04-04T01:04:29.371Z"
   },
   {
     "id": "django-security",
@@ -502,7 +635,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.366Z"
+    "updatedAt": "2026-04-04T01:04:29.395Z"
   },
   {
     "id": "django-overview",
@@ -528,7 +661,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.370Z"
+    "updatedAt": "2026-04-04T01:04:29.408Z"
   },
   {
     "id": "django-orm-deep",
@@ -554,7 +687,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.365Z"
+    "updatedAt": "2026-04-04T01:04:29.393Z"
   },
   {
     "id": "django-lifecycle",
@@ -581,7 +714,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.360Z"
+    "updatedAt": "2026-04-04T01:04:29.383Z"
   },
   {
     "id": "django-architecture",
@@ -608,7 +741,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.357Z"
+    "updatedAt": "2026-04-04T01:04:29.381Z"
   },
   {
     "id": "docker-compose-django",
@@ -633,7 +766,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.403Z"
+    "updatedAt": "2026-04-04T01:04:29.441Z"
   },
   {
     "id": "docker-compose-basics",
@@ -657,7 +790,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.402Z"
+    "updatedAt": "2026-04-04T01:04:29.440Z"
   },
   {
     "id": "docker-basics",
@@ -680,7 +813,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.401Z"
+    "updatedAt": "2026-04-04T01:04:29.438Z"
   },
   {
     "id": "django-version-compatibility",
@@ -705,7 +838,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.368Z"
+    "updatedAt": "2026-04-04T01:04:29.399Z"
   },
   {
     "id": "django-settings",
@@ -730,7 +863,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.372Z"
+    "updatedAt": "2026-04-04T01:04:29.410Z"
   },
   {
     "id": "django-migration",
@@ -755,7 +888,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.361Z"
+    "updatedAt": "2026-04-04T01:04:29.384Z"
   },
   {
     "id": "celery-worker",
@@ -782,7 +915,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.398Z"
+    "updatedAt": "2026-04-04T01:04:29.433Z"
   },
   {
     "id": "celery-django",
@@ -808,7 +941,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.399Z"
+    "updatedAt": "2026-04-04T01:04:29.436Z"
   },
   {
     "id": "celery-broker",
@@ -834,7 +967,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.397Z"
+    "updatedAt": "2026-04-04T01:04:29.431Z"
   },
   {
     "id": "celery-beat",
@@ -858,7 +991,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.396Z"
+    "updatedAt": "2026-04-04T01:04:29.429Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -882,7 +1015,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.425Z"
+    "updatedAt": "2026-04-04T01:04:29.466Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -907,7 +1040,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.440Z"
+    "updatedAt": "2026-04-04T01:04:29.481Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -930,7 +1063,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.439Z"
+    "updatedAt": "2026-04-04T01:04:29.479Z"
   },
   {
     "id": "micro-protocol",
@@ -953,7 +1086,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.438Z"
+    "updatedAt": "2026-04-04T01:04:29.478Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -981,7 +1114,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.436Z"
+    "updatedAt": "2026-04-04T01:04:29.476Z"
   },
   {
     "id": "micro-network-view",
@@ -1006,7 +1139,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.418Z"
+    "updatedAt": "2026-04-04T01:04:29.456Z"
   },
   {
     "id": "micro-network-traffic",
@@ -1031,7 +1164,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.433Z"
+    "updatedAt": "2026-04-04T01:04:29.475Z"
   },
   {
     "id": "micro-ip-arp",
@@ -1056,7 +1189,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.431Z"
+    "updatedAt": "2026-04-04T01:04:29.473Z"
   },
   {
     "id": "micro-http-https",
@@ -1083,7 +1216,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.429Z"
+    "updatedAt": "2026-04-04T01:04:29.470Z"
   },
   {
     "id": "micro-encapsulation",
@@ -1109,7 +1242,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.427Z"
+    "updatedAt": "2026-04-04T01:04:29.468Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -1132,7 +1265,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.424Z"
+    "updatedAt": "2026-04-04T01:04:29.464Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -1156,7 +1289,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.423Z"
+    "updatedAt": "2026-04-04T01:04:29.462Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -1178,7 +1311,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.420Z"
+    "updatedAt": "2026-04-04T01:04:29.460Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -1201,7 +1334,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.419Z"
+    "updatedAt": "2026-04-04T01:04:29.457Z"
   },
   {
     "id": "macro-network-view",
@@ -1224,7 +1357,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.416Z"
+    "updatedAt": "2026-04-04T01:04:29.455Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -1248,7 +1381,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.406Z"
+    "updatedAt": "2026-04-04T01:04:29.445Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -1271,6 +1404,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-03T11:45:45.405Z"
+    "updatedAt": "2026-04-04T01:04:29.443Z"
   }
 ]

@@ -30,6 +30,11 @@
     "path": "/post/study/backend/django/django-migration"
   },
   {
+    "slug": "django-models",
+    "title": "Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션",
+    "path": "/post/study/backend/django/django-models"
+  },
+  {
     "slug": "django-object-permissions",
     "title": "Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어",
     "path": "/post/study/backend/django/django-object-permissions"
@@ -45,14 +50,34 @@
     "path": "/post/study/backend/django/django-security"
   },
   {
+    "slug": "django-urls",
+    "title": "Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router",
+    "path": "/post/study/backend/django/django-urls"
+  },
+  {
     "slug": "django-version-compatibility",
     "title": "Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈",
     "path": "/post/study/backend/django/django-version-compatibility"
   },
   {
+    "slug": "drf-authentication",
+    "title": "DRF 완전 정복 3편 — 인증(Authentication) — Token, JWT, SimpleJWT",
+    "path": "/post/study/backend/django/drf-authentication"
+  },
+  {
+    "slug": "drf-overview",
+    "title": "DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초",
+    "path": "/post/study/backend/django/drf-overview"
+  },
+  {
     "slug": "drf-serializer-validation",
     "title": "DRF Serializer 검증 완전 정복 — validate_<field>가 return을 빠뜨리면 생기는 일",
     "path": "/post/study/backend/django/drf-serializer-validation"
+  },
+  {
+    "slug": "drf-views",
+    "title": "DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router",
+    "path": "/post/study/backend/django/drf-views"
   },
   {
     "slug": "django-overview",

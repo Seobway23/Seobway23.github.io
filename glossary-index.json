@@ -10,7 +10,14 @@
     "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment"
   ],
+  "namespace": [
+    "django-models",
+    "django-urls",
+    "k8s-zero-downtime-deployment"
+  ],
   "service": [
+    "drf-authentication",
+    "drf-overview",
     "django-settings",
     "docker-basics",
     "docker-compose-basics",
@@ -73,9 +80,6 @@
   ],
   "kustomize": [
     "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
-  ],
-  "namespace": [
     "k8s-zero-downtime-deployment"
   ]
 }
