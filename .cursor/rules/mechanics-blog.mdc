@@ -1,0 +1,15 @@
+---
+description: 역학·토질·토압 시리즈 포스트 작성 시 — 유도·비전공자 설명·시각화 원칙 문서 필수 참조
+globs: posts/study/mechanics/**/*.md
+alwaysApply: false
+---
+
+# 역학 블로그 (`posts/study/mechanics/`)
+
+**이 폴더 아래 마크다운을 새로 쓰거나 수정할 때**, 아래 문서를 **반드시 읽고** 그 원칙에 맞춘다.
+
+## 필수 참조
+
+- **`docs/mechanics-post-principles.md`** — 시리즈 작성 원칙: **공식 유도 필수**, 비전공자도 따라갈 **설명**, **시각화** 우선, 권장 글 구조, 로드맵 요지, 체크리스트.
+
+역학 글도 일반 블로그 규격은 **`CLAUDE.md`** · **`blog-post-writing` 스킬**을 따른다. 충돌 시 `CLAUDE.md`의 포맷 규칙이 우선이고, **역학 콘텐츠 방향**(유도·난이도·viz)은 `mechanics-post-principles.md`가 우선이다.

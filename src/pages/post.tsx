@@ -58,6 +58,10 @@ const categoryLabels: Record<string, string> = {
   css: "CSS",
   performance: "Performance",
   nextjs: "Next.js",
+  mechanics: "역학",
+  "study/mechanics": "역학",
+  "study/mechanics/basics": "역학 · 기초",
+  "study/mechanics/earth-pressure": "역학 · 토압",
 };
 
 export default function Post() {
@@ -342,6 +346,13 @@ export default function Post() {
         if (codeBlocks) {
           codeBlocks.forEach((block) => {
             if (block.classList.contains("language-mermaid")) return;
+            if (
+              block.classList.contains("language-diagramatics") ||
+              block.classList.contains("language-jsxgraph") ||
+              block.classList.contains("language-three")
+            ) {
+              return;
+            }
             if ((block as HTMLElement).dataset.highlighted) {
               (block as HTMLElement).removeAttribute("data-highlighted");
             }
@@ -479,6 +490,9 @@ export default function Post() {
             }
           }
         }
+
+        const { hydrateMechanicsVisualizations } = await import("@/lib/post-mechanics-viz");
+        await hydrateMechanicsVisualizations(contentRef.current);
       }, 100);
 
       return () => clearTimeout(timer);

@@ -1,64 +1,30 @@
 ---
-description: 블로그 포스트 작성, 카테고리 구조, 마크다운 frontmatter 규칙
+description: 블로그 마크다운 작성 시 필수 참조 문서(CLAUDE.md, 스킬) 안내 — posts 편집 시 적용
 globs: posts/**/*.md
 alwaysApply: false
 ---
 
-# 블로그 콘텐츠 관리 규칙
+# 블로그 콘텐츠 — 반드시 참고할 문서
 
-## 포스트 파일 구조
+`posts/**/*.md` 를 **새로 쓰거나 수정할 때** 아래 순서로 본다. 이 파일은 요약 안내만 담고, 세부 규칙은 정본에 있다.
 
-### 경로 = 카테고리
-```
-posts/
-  frontend/
-    css/         → 카테고리: frontend/css
-    react/       → 카테고리: frontend/react
-    typescript/  → 카테고리: frontend/typescript
-  backend/
-    nodejs/      → 카테고리: backend/nodejs
-```
+## 1. 정본 (필수)
 
-### Frontmatter 필수 필드
-```markdown
----
-title: "포스트 제목"
-date: "2025-01-15"
-tags: ["React", "TypeScript", "성능"]
-excerpt: "포스트 요약 (없으면 본문 앞 150자 자동 추출)"
-author: "작성자명"
----
-```
+1. **저장소 루트 `CLAUDE.md`** — 블로그 포맷(frontmatter, `## 참고`, `## 관련 글`, 각주 금지, 수식·Mermaid·역학 펜스·용어 사전 요약 등). **블로그 글 작업 시 이 파일을 먼저 읽고 그대로 따른다.**
+2. **`.cursor/skills/blog-post-writing/SKILL.md`** — 워크플로, KaTeX 문법, diagramatics/jsxgraph/three 프리셋 표, 체크리스트, 관련 소스 경로.
 
-### 선택 필드
-```markdown
----
-coverImage: "/images/cover.jpg"   # 커버 이미지 (없으면 카테고리별 Unsplash)
-views: 0                           # 초기값, GA에서 자동 갱신됨
----
-```
+**`posts/study/mechanics/`** 아래 역학·토압 글을 쓸 때는 추가로 **`docs/mechanics-post-principles.md`** 필독. (전용 규칙: `.cursor/rules/mechanics-blog.mdc` .)
 
-## 포스트 작성 후 처리
+레퍼런스 예시 글: `posts/study/frontend/react-query/react-query-mutations.md`
 
-새 포스트 추가 후 반드시 실행:
-```bash
-npm run generate:posts    # JSON 재생성
-npm run fetch:views       # GA 조회수 업데이트 (선택)
-```
+## 2. 빠른 상기 (정본과 충돌 시 정본 우선)
 
-## Slug 생성 규칙
-- 파일명이 곧 slug: `css-modern-techniques.md` → slug: `css-modern-techniques`
-- URL: `/post/css-modern-techniques`
-- GA 추적 경로: `/post/frontend/css/css-modern-techniques` (원본) + `/post/css-modern-techniques` (단축)
+- **Frontmatter:** `slug`, `category`, `tags`, `author`, `readTime`, `featured`, `createdAt`, `excerpt` (루트 `CLAUDE.md` 템플릿).
+- 글 반영: **`npm run generate:posts`**
+- H1 금지 · 섹션 사이 `---` · 하단 `## 참고` · 맨 아래 `## 관련 글`
+- 수식: `$...$`, `$$...$$` (코드 펜스·인라인 `` ` `` 안 제외)
 
-## 마크다운 코드 블록 언어 지정
-하이라이팅 지원 언어: `javascript`, `typescript`, `css`, `html`, `bash`
-```markdown
-\`\`\`typescript
-const example: string = "TypeScript";
-\`\`\`
-```
+## 3. 이 규칙 파일의 역할
 
-## 카테고리 아이콘/색상
-`src/lib/data.ts`의 `CATEGORY_COLORS` 맵에서 관리
-새 카테고리 추가 시 해당 파일 업데이트 필요
+- Cursor가 `posts/` 아래 마크다운을 다룰 때 이 규칙이 붙으며, **항상 루트 `CLAUDE.md`를 참고하라**는 지시를 재확인한다.
+- `CLAUDE.md`는 프로젝트 루트에 둔다(복사본을 `.cursor`에 두지 않아도 됨). Claude Code·Cursor 모두 루트 `CLAUDE.md`를 표준으로 본다.
