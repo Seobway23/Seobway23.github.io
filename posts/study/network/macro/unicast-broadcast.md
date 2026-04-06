@@ -116,6 +116,13 @@ flowchart LR
 브로드캐스트는 **상대를 모를 때 쓰는 질문**이다. ARP로 MAC 주소를 찾고, DHCP로 IP 서버를 발견한다.  
 정보를 얻고 나면 이후 통신은 **유니캐스트**로 전환한다. "모를 때 브로드캐스트, 알고 나서 유니캐스트"가 실제 네트워크의 작동 패턴이다.
 
+---
+
+## 관련 글
+
+- [회선 교환 vs 패킷 교환 →](/post/circuit-vs-packet-switching) — 패킷이 어떤 방식으로 전달되는지와 맞닿은 개념
+- [IP와 ARP — 주소와 경로의 언어 →](/post/micro-ip-arp) — ARP·DHCP에서 브로드캐스트가 쓰이는 맥락
+
 [^unicast]: Unicast, <a href="https://en.wikipedia.org/wiki/Unicast" target="_blank">Wikipedia</a>
 [^broadcast]: Broadcasting (networking), <a href="https://en.wikipedia.org/wiki/Broadcasting_(networking)" target="_blank">Wikipedia</a>
 [^arp]: Address Resolution Protocol, <a href="https://en.wikipedia.org/wiki/Address_Resolution_Protocol" target="_blank">Wikipedia</a>

@@ -245,9 +245,9 @@ CELERY_BROKER_POOL_LIMIT = 10                       # 연결 풀 크기
 
 ## 관련 글
 
-- [Django + Celery 개요](/post/celery-django): 브로커 설정을 포함한 전체 Celery 설정
-- [Celery Worker — 내부 구조와 동시성 모델](/post/celery-worker): ACK 설정과 Prefetch가 브로커 메시지 보장에 미치는 영향
-- [Celery Beat — 주기적 태스크 스케줄링](/post/celery-beat): Beat가 브로커에 발행하는 스케줄 메시지
+- [Django + Celery 개요 →](/post/celery-django) — 브로커 설정을 포함한 전체 Celery 설정
+- [Celery Worker — 내부 구조와 동시성 모델 →](/post/celery-worker) — ACK 설정과 Prefetch가 브로커 메시지 보장에 미치는 영향
+- [Celery Beat — 주기적 태스크 스케줄링 →](/post/celery-beat) — Beat가 브로커에 발행하는 스케줄 메시지
 
 ---
 

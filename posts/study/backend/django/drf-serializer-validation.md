@@ -290,11 +290,11 @@ def validate(self, data):
 
 ## 참고
 
-<a href="https://www.django-rest-framework.org/api-guide/serializers/#validation" target="_blank">[1] DRF Serializers — Validation — 공식 문서</a>
-
-<a href="https://www.django-rest-framework.org/api-guide/validators/" target="_blank">[2] DRF Validators — 공식 문서</a>
-
-<a href="https://www.django-rest-framework.org/api-guide/fields/#field-level-validation" target="_blank">[3] DRF Field-level validation — 공식 문서</a>
+<ol>
+<li><a href="https://www.django-rest-framework.org/api-guide/serializers/#validation" target="_blank">[1] DRF Serializers — Validation — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/validators/" target="_blank">[2] DRF Validators — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/fields/#field-level-validation" target="_blank">[3] DRF Field-level validation — 공식 문서</a></li>
+</ol>
 
 ---
 

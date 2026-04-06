@@ -372,13 +372,12 @@ kubectl scale deployment pms-web --replicas=3 -n pms-web
 
 ## 참고
 
-<a href="https://kubernetes.io/docs/reference/kubectl/quick-reference/" target="_blank">[1] kubectl Quick Reference — 공식 문서</a>
-
-<a href="https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/" target="_blank">[2] Debug Pods — Kubernetes 공식 문서</a>
-
-<a href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/" target="_blank">[3] Resource Usage Monitoring — Kubernetes 공식 문서</a>
-
-<a href="https://docs.k3s.io/quick-start" target="_blank">[4] k3s Quick Start — 공식 문서</a>
+<ol>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/quick-reference/" target="_blank">[1] kubectl Quick Reference — 공식 문서</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/" target="_blank">[2] Debug Pods — Kubernetes 공식 문서</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/" target="_blank">[3] Resource Usage Monitoring — Kubernetes 공식 문서</a></li>
+<li><a href="https://docs.k3s.io/quick-start" target="_blank">[4] k3s Quick Start — 공식 문서</a></li>
+</ol>
 
 ---
 

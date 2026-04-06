@@ -455,16 +455,12 @@ DRF Views 핵심 요약:
 
 ---
 
-## 다음 글
+## 관련 글
 
-- [DRF 인증](/study/backend/django/drf-authentication) — Token, JWT, SimpleJWT
-- [DRF Serializer 검증 심화](/study/backend/django/drf-serializer-validation)
+- [DRF 인증 →](/post/drf-authentication) — Token, JWT, SimpleJWT
+- [DRF Serializer 검증 심화 →](/post/drf-serializer-validation)
 
----
-
-## References
-
-[^drf-views]: DRF Documentation — Views: https://www.django-rest-framework.org/api-guide/views/
-[^drf-generic-views]: DRF Documentation — Generic views: https://www.django-rest-framework.org/api-guide/generic-views/
-[^drf-viewsets]: DRF Documentation — ViewSets: https://www.django-rest-framework.org/api-guide/viewsets/
-[^drf-routers]: DRF Documentation — Routers: https://www.django-rest-framework.org/api-guide/routers/
+[^drf-views]: <a href="https://www.django-rest-framework.org/api-guide/views/" target="_blank">DRF Documentation — Views</a>
+[^drf-generic-views]: <a href="https://www.django-rest-framework.org/api-guide/generic-views/" target="_blank">DRF Documentation — Generic views</a>
+[^drf-viewsets]: <a href="https://www.django-rest-framework.org/api-guide/viewsets/" target="_blank">DRF Documentation — ViewSets</a>
+[^drf-routers]: <a href="https://www.django-rest-framework.org/api-guide/routers/" target="_blank">DRF Documentation — Routers</a>

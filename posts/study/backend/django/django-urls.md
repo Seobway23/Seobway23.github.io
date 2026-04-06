@@ -374,15 +374,11 @@ Django URL 라우팅의 핵심:
 
 ---
 
-## 다음 글
+## 관련 글
 
-- [DRF 기초](/study/backend/django/drf-overview) — Serializer, ModelSerializer
-- [DRF Views](/study/backend/django/drf-views) — APIView, ViewSet, Router
+- [DRF 기초 →](/post/drf-overview) — Serializer, ModelSerializer
+- [DRF Views →](/post/drf-views) — APIView, ViewSet, Router
 
----
-
-## References
-
-[^django-urls]: Django Documentation — URL dispatcher: https://docs.djangoproject.com/en/5.2/topics/http/urls/
-[^django-path]: Django Documentation — path() function: https://docs.djangoproject.com/en/5.2/ref/urls/#path
-[^drf-routers]: Django REST Framework — Routers: https://www.django-rest-framework.org/api-guide/routers/
+[^django-urls]: <a href="https://docs.djangoproject.com/en/5.2/topics/http/urls/" target="_blank">Django Documentation — URL dispatcher</a>
+[^django-path]: <a href="https://docs.djangoproject.com/en/5.2/ref/urls/#path" target="_blank">Django Documentation — path()</a>
+[^drf-routers]: <a href="https://www.django-rest-framework.org/api-guide/routers/" target="_blank">Django REST Framework — Routers</a>

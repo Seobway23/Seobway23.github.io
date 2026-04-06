@@ -383,11 +383,11 @@ class TaskPermissionTest(APITestCase):
 
 ## 참고
 
-<a href="https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ForeignKey" target="_blank">[1] Django ForeignKey — 공식 문서</a>
-
-<a href="https://www.django-rest-framework.org/api-guide/permissions/#custom-permissions" target="_blank">[2] DRF Custom Permissions — 공식 문서</a>
-
-<a href="https://www.django-rest-framework.org/api-guide/permissions/#object-level-permissions" target="_blank">[3] DRF Object Level Permissions — 공식 문서</a>
+<ol>
+<li><a href="https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ForeignKey" target="_blank">[1] Django ForeignKey — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/permissions/#custom-permissions" target="_blank">[2] DRF Custom Permissions — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/permissions/#object-level-permissions" target="_blank">[3] DRF Object Level Permissions — 공식 문서</a></li>
+</ol>
 
 ---
 

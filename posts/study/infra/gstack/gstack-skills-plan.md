@@ -207,11 +207,11 @@ flowchart LR
 
 ## 참고
 
-<a href="https://github.com/garrytan/gstack" target="_blank">[1] garrytan/gstack — GitHub</a>
-
-<a href="https://www.sitepoint.com/gstack-garry-tan-claude-code/" target="_blank">[2] GStack Tutorial: Garry Tan's Claude Code Workflow — SitePoint</a>
-
-<a href="https://agentnativedev.medium.com/garry-tans-gstack-running-claude-like-an-engineering-team-392f1bd38085" target="_blank">[3] Garry Tan's gstack: Running Claude Like an Engineering Team — Agent Native</a>
+<ol>
+<li><a href="https://github.com/garrytan/gstack" target="_blank">[1] garrytan/gstack — GitHub</a></li>
+<li><a href="https://www.sitepoint.com/gstack-garry-tan-claude-code/" target="_blank">[2] GStack Tutorial: Garry Tan's Claude Code Workflow — SitePoint</a></li>
+<li><a href="https://agentnativedev.medium.com/garry-tans-gstack-running-claude-like-an-engineering-team-392f1bd38085" target="_blank">[3] Garry Tan's gstack: Running Claude Like an Engineering Team — Agent Native</a></li>
+</ol>
 
 ---
 

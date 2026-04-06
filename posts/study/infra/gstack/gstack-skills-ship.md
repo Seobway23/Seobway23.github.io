@@ -308,13 +308,12 @@ mindmap
 
 ## 참고
 
-<a href="https://github.com/garrytan/gstack" target="_blank">[1] garrytan/gstack — GitHub</a>
-
-<a href="https://www.toolworthy.ai/tool/gstack" target="_blank">[2] GStack Review 2026 — toolworthy.ai</a>
-
-<a href="https://agentnativedev.medium.com/garry-tans-gstack-running-claude-like-an-engineering-team-392f1bd38085" target="_blank">[3] Garry Tan's gstack: Running Claude Like an Engineering Team — Agent Native</a>
-
-<a href="https://www.marktechpost.com/2026/03/14/garry-tan-releases-gstack-an-open-source-claude-code-system-for-planning-code-review-qa-and-shipping/" target="_blank">[4] Garry Tan Releases gstack — MarkTechPost</a>
+<ol>
+<li><a href="https://github.com/garrytan/gstack" target="_blank">[1] garrytan/gstack — GitHub</a></li>
+<li><a href="https://www.toolworthy.ai/tool/gstack" target="_blank">[2] GStack Review 2026 — toolworthy.ai</a></li>
+<li><a href="https://agentnativedev.medium.com/garry-tans-gstack-running-claude-like-an-engineering-team-392f1bd38085" target="_blank">[3] Garry Tan's gstack: Running Claude Like an Engineering Team — Agent Native</a></li>
+<li><a href="https://www.marktechpost.com/2026/03/14/garry-tan-releases-gstack-an-open-source-claude-code-system-for-planning-code-review-qa-and-shipping/" target="_blank">[4] Garry Tan Releases gstack — MarkTechPost</a></li>
+</ol>
 
 ---
 

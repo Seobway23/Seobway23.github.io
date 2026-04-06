@@ -215,9 +215,9 @@ Docker를 쓰는 이유도 결국 환경 고정이다.
 
 ## 관련 글
 
-- [Django Migration 완전 정복](/post/django-migration): 버전 업그레이드 후 migration 상태 확인 방법
-- [Django settings 분리와 환경변수 관리](/post/django-settings): 환경별로 다른 Django 설정을 안전하게 관리
-- [Docker Compose로 Django 5개 서비스 띄우기](/post/docker-compose-django): Docker로 모든 팀원이 같은 환경을 쓰는 방법
+- [Django Migration 완전 정복 →](/post/django-migration) — 버전 업그레이드 후 migration 상태 확인 방법
+- [Django settings 분리와 환경변수 관리 →](/post/django-settings) — 환경별로 다른 Django 설정을 안전하게 관리
+- [Docker Compose로 Django 5개 서비스 띄우기 →](/post/docker-compose-django) — Docker로 모든 팀원이 같은 환경을 쓰는 방법
 
 ---
 

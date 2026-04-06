@@ -362,9 +362,9 @@ CSP_DEFAULT_SRC = ("'self'",)
 
 ## 관련 글
 
-- [Django 프레임워크 큰 그림](/post/django-overview): 보안을 포함한 Django 전체 구조
-- [Django 요청-응답 라이프사이클](/post/django-lifecycle): 미들웨어 스택에서 보안이 적용되는 위치
-- [Django ORM 심층](/post/django-orm-deep): SQL Injection 방어의 실제 구현인 파라미터화된 쿼리
+- [Django 프레임워크 큰 그림 →](/post/django-overview) — 보안을 포함한 Django 전체 구조
+- [Django 요청-응답 라이프사이클 →](/post/django-lifecycle) — 미들웨어 스택에서 보안이 적용되는 위치
+- [Django ORM 심층 →](/post/django-orm-deep) — SQL Injection 방어의 실제 구현인 파라미터화된 쿼리
 
 ---
 

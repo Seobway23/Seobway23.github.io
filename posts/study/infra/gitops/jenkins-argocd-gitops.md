@@ -372,15 +372,13 @@ sequenceDiagram
 
 ## 참고
 
-<a href="https://argo-cd.readthedocs.io/en/stable/core_concepts/" target="_blank">[1] ArgoCD Core Concepts — 공식 문서</a>
-
-<a href="https://docs.docker.com/reference/cli/docker/buildx/build/" target="_blank">[2] Docker Buildx build — 공식 문서</a>
-
-<a href="https://docs.k3s.io/" target="_blank">[3] k3s 공식 문서</a>
-
-<a href="https://www.jenkins.io/doc/book/pipeline/syntax/" target="_blank">[4] Jenkins Pipeline Syntax — 공식 문서</a>
-
-<a href="https://kustomize.io/" target="_blank">[5] Kustomize 공식 문서</a>
+<ol>
+<li><a href="https://argo-cd.readthedocs.io/en/stable/core_concepts/" target="_blank">[1] ArgoCD Core Concepts — 공식 문서</a></li>
+<li><a href="https://docs.docker.com/reference/cli/docker/buildx/build/" target="_blank">[2] Docker Buildx build — 공식 문서</a></li>
+<li><a href="https://docs.k3s.io/" target="_blank">[3] k3s 공식 문서</a></li>
+<li><a href="https://www.jenkins.io/doc/book/pipeline/syntax/" target="_blank">[4] Jenkins Pipeline Syntax — 공식 문서</a></li>
+<li><a href="https://kustomize.io/" target="_blank">[5] Kustomize 공식 문서</a></li>
+</ol>
 
 ---
 

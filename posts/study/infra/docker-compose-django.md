@@ -302,9 +302,9 @@ docker compose up -d
 
 ## 관련 글
 
-- [Docker 기초 — Image, Container, Volume, Network](/post/docker-basics): 서비스 구성의 기본 개념
-- [Docker Compose 기초 — env_file, interpolation, depends_on](/post/docker-compose-basics): .env 파일 구분과 healthcheck 상세
-- [Django settings 분리와 환경변수 관리](/post/django-settings): DJANGO_SETTINGS_MODULE, django-environ, DATABASE_URL 설정법
+- [Docker 기초 — Image, Container, Volume, Network →](/post/docker-basics) — 서비스 구성의 기본 개념
+- [Docker Compose 기초 — env_file, interpolation, depends_on →](/post/docker-compose-basics) — .env 파일 구분과 healthcheck 상세
+- [Django settings 분리와 환경변수 관리 →](/post/django-settings) — DJANGO_SETTINGS_MODULE, django-environ, DATABASE_URL 설정법
 
 ---
 

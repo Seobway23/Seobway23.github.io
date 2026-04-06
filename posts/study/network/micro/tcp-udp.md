@@ -223,10 +223,10 @@ flowchart TD
 
 ## 관련 글
 
-- [HTTP와 HTTPS — 웹을 움직이는 프로토콜](/post/micro-http-https): [TCP](/post/micro-tcp-udp) 위에서 동작하는 [HTTP](/post/micro-http-https)의 진화
-- [IP와 ARP — 주소와 경로의 언어](/post/micro-ip-arp): TCP/UDP가 사용하는 [IP](/post/micro-ip-arp) 헤더의 Protocol 필드
-- [캡슐화와 역캡슐화 — PDU의 여정](/post/micro-encapsulation): TCP 세그먼트가 [IP 패킷](/post/micro-encapsulation)으로 캡슐화되는 과정
-- [트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡](/post/micro-network-traffic): TCP 혼잡 제어와 [네트워크 성능](/post/micro-network-traffic)의 관계
+- [HTTP와 HTTPS — 웹을 움직이는 프로토콜 →](/post/micro-http-https) — TCP 위에서 동작하는 HTTP의 진화
+- [IP와 ARP — 주소와 경로의 언어 →](/post/micro-ip-arp) — TCP/UDP가 사용하는 IP 헤더의 Protocol 필드
+- [캡슐화와 역캡슐화 — PDU의 여정 →](/post/micro-encapsulation) — TCP 세그먼트가 IP 패킷으로 캡슐화되는 과정
+- [트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡 →](/post/micro-network-traffic) — TCP 혼잡 제어와 네트워크 성능의 관계
 
 ---
 

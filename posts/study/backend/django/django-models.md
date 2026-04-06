@@ -615,17 +615,13 @@ Django 모델을 제대로 설계하면 ORM이 나머지를 처리한다.
 
 ---
 
-## 다음 글
+## 관련 글
 
-- [Django URL 라우팅](/study/backend/django/django-urls) — path(), include(), namespace
-- [DRF 기초](/study/backend/django/drf-overview) — Serializer, ModelSerializer
+- [Django URL 라우팅 →](/post/django-urls) — path(), include(), namespace
+- [DRF 기초 →](/post/drf-overview) — Serializer, ModelSerializer
 
----
-
-## References
-
-[^django-models]: Django Documentation — Models: https://docs.djangoproject.com/en/5.2/topics/db/models/
-[^django-fields]: Django Documentation — Model field reference: https://docs.djangoproject.com/en/5.2/ref/models/fields/
-[^django-relations]: Django Documentation — Many-to-one relationships: https://docs.djangoproject.com/en/5.2/topics/db/examples/many_to_one/
-[^django-m2m]: Django Documentation — Many-to-many relationships: https://docs.djangoproject.com/en/5.2/topics/db/examples/many_to_many/
-[^django-meta]: Django Documentation — Meta options: https://docs.djangoproject.com/en/5.2/ref/models/options/
+[^django-models]: <a href="https://docs.djangoproject.com/en/5.2/topics/db/models/" target="_blank">Django Documentation — Models</a>
+[^django-fields]: <a href="https://docs.djangoproject.com/en/5.2/ref/models/fields/" target="_blank">Django Documentation — Model field reference</a>
+[^django-relations]: <a href="https://docs.djangoproject.com/en/5.2/topics/db/examples/many_to_one/" target="_blank">Django Documentation — Many-to-one relationships</a>
+[^django-m2m]: <a href="https://docs.djangoproject.com/en/5.2/topics/db/examples/many_to_many/" target="_blank">Django Documentation — Many-to-many relationships</a>
+[^django-meta]: <a href="https://docs.djangoproject.com/en/5.2/ref/models/options/" target="_blank">Django Documentation — Meta options</a>

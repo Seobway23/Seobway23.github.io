@@ -552,15 +552,13 @@ function App() {
 
 ## 참고
 
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries" target="_blank">[1] Infinite Queries — TanStack Query Docs</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/parallel-queries" target="_blank">[2] Parallel Queries — TanStack Query Docs</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/suspense" target="_blank">[3] Suspense — TanStack Query Docs</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/migrating-to-v5" target="_blank">[4] Migrating to v5 — TanStack Query Docs</a>
-
-<a href="https://tkdodo.eu/blog/react-query-fa-qs" target="_blank">[5] React Query FAQs — TkDodo</a>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries" target="_blank">[1] Infinite Queries — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/parallel-queries" target="_blank">[2] Parallel Queries — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/suspense" target="_blank">[3] Suspense — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/migrating-to-v5" target="_blank">[4] Migrating to v5 — TanStack Query Docs</a></li>
+<li><a href="https://tkdodo.eu/blog/react-query-fa-qs" target="_blank">[5] React Query FAQs — TkDodo</a></li>
+</ol>
 
 ---
 

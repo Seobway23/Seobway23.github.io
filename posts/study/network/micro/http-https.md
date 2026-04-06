@@ -222,10 +222,10 @@ flowchart TD
 
 ## 관련 글
 
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): HTTP가 기반으로 사용하는 [TCP](/post/micro-tcp-udp)의 연결 방식
-- [캡슐화와 역캡슐화 — PDU의 여정](/post/micro-encapsulation): HTTP 메시지가 [TCP 세그먼트](/post/micro-encapsulation)로 캡슐화되는 과정
-- [OSI 7계층 모델](/post/micro-osi-7layer): HTTP가 속한 [응용 계층](/post/micro-osi-7layer)의 전체 구조
-- [프로토콜 — 왜 패킷 교환을 쓰는가](/post/micro-protocol): HTTP 이전에 필요한 네트워크 기초 개념
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — HTTP가 기반으로 사용하는 TCP의 연결 방식
+- [캡슐화와 역캡슐화 — PDU의 여정 →](/post/micro-encapsulation) — HTTP 메시지가 TCP 세그먼트로 캡슐화되는 과정
+- [OSI 7계층 모델 →](/post/micro-osi-7layer) — HTTP가 속한 응용 계층의 전체 구조
+- [프로토콜 — 왜 패킷 교환을 쓰는가 →](/post/micro-protocol) — HTTP 이전에 필요한 네트워크 기초 개념
 
 ---
 

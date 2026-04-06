@@ -159,10 +159,10 @@ RFC 1122가 강조하는 핵심 원칙:
 
 ## 관련 글
 
-- [OSI 7계층 모델](/post/micro-osi-7layer): [OSI 모델](/post/micro-osi-7layer)과의 상세 비교
-- [캡슐화와 역캡슐화 — PDU의 여정](/post/micro-encapsulation): [TCP/IP 각 계층](/post/micro-encapsulation)에서 데이터가 포장되는 방식
-- [IP와 ARP — 주소와 경로의 언어](/post/micro-ip-arp): [인터넷 계층](/post/micro-ip-arp)의 핵심 프로토콜
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): [전송 계층](/post/micro-tcp-udp)의 두 프로토콜
+- [OSI 7계층 모델 →](/post/micro-osi-7layer) — OSI 모델과의 상세 비교
+- [캡슐화와 역캡슐화 — PDU의 여정 →](/post/micro-encapsulation) — TCP/IP 각 계층에서 데이터가 포장되는 방식
+- [IP와 ARP — 주소와 경로의 언어 →](/post/micro-ip-arp) — 인터넷 계층의 핵심 프로토콜
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — 전송 계층의 두 프로토콜
 
 ---
 

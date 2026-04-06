@@ -142,20 +142,20 @@ flowchart TD
 미시 구조에서 언급된 핵심 개념들을 각각 상세히 다룬 글이다.
 
 ### 프로토콜
-- [프로토콜 — 왜 패킷 교환을 쓰는가](/post/micro-protocol): 회선 교환의 한계, 패킷 교환의 등장 배경
-- [IP와 ARP — 주소와 경로의 언어](/post/micro-ip-arp): IPv4 헤더 구조, ARP 요청·응답 흐름
-- [HTTP와 HTTPS — 웹을 움직이는 프로토콜](/post/micro-http-https): HTTP 버전 진화, TLS 핸드셰이크
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): 3-way 핸드셰이크, 흐름 제어, 혼잡 제어
+- [프로토콜 — 왜 패킷 교환을 쓰는가 →](/post/micro-protocol) — 회선 교환의 한계, 패킷 교환의 등장 배경
+- [IP와 ARP — 주소와 경로의 언어 →](/post/micro-ip-arp) — IPv4 헤더 구조, ARP 요청·응답 흐름
+- [HTTP와 HTTPS — 웹을 움직이는 프로토콜 →](/post/micro-http-https) — HTTP 버전 진화, TLS 핸드셰이크
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — 3-way 핸드셰이크, 흐름 제어, 혼잡 제어
 
 ### 참조 모델
-- [OSI 7계층 모델](/post/micro-osi-7layer): 각 계층의 역할과 대표 프로토콜
-- [TCP/IP 참조 모델](/post/micro-tcp-ip-model): 현재 인터넷의 실질적 4계층 모델
+- [OSI 7계층 모델 →](/post/micro-osi-7layer) — 각 계층의 역할과 대표 프로토콜
+- [TCP/IP 참조 모델 →](/post/micro-tcp-ip-model) — 현재 인터넷의 실질적 4계층 모델
 
 ### 데이터 흐름
-- [캡슐화와 역캡슐화 — PDU의 여정](/post/micro-encapsulation): 헤더 구조, 각 계층의 PDU 이름
+- [캡슐화와 역캡슐화 — PDU의 여정 →](/post/micro-encapsulation) — 헤더 구조, 각 계층의 PDU 이름
 
 ### 성능 지표
-- [트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡](/post/micro-network-traffic): 네트워크 성능을 측정하는 방법
+- [트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡 →](/post/micro-network-traffic) — 네트워크 성능을 측정하는 방법
 
 ---
 

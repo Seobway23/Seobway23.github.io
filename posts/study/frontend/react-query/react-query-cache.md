@@ -349,13 +349,12 @@ sequenceDiagram
 
 ## 참고
 
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/caching" target="_blank">[1] Caching — TanStack Query Docs</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults" target="_blank">[2] Important Defaults — TanStack Query Docs</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation" target="_blank">[3] Query Invalidation — TanStack Query Docs</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/prefetching" target="_blank">[4] Prefetching — TanStack Query Docs</a>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/caching" target="_blank">[1] Caching — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults" target="_blank">[2] Important Defaults — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation" target="_blank">[3] Query Invalidation — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/prefetching" target="_blank">[4] Prefetching — TanStack Query Docs</a></li>
+</ol>
 
 ---
 

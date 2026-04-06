@@ -304,9 +304,9 @@ autorestart=true
 
 ## 관련 글
 
-- [Celery Worker — 내부 구조와 동시성 모델](/post/celery-worker): Worker 프로세스·스레드 모델, Prefetch, 태스크 생명주기
-- [Celery Beat — 주기적 태스크 스케줄링](/post/celery-beat): crontab 문법, django-celery-beat 동적 스케줄 관리
-- [Celery Broker — Redis vs RabbitMQ](/post/celery-broker): 메시지 브로커 선택 기준과 AMQP 개념
+- [Celery Worker — 내부 구조와 동시성 모델 →](/post/celery-worker) — Worker 프로세스·스레드 모델, Prefetch, 태스크 생명주기
+- [Celery Beat — 주기적 태스크 스케줄링 →](/post/celery-beat) — crontab 문법, django-celery-beat 동적 스케줄 관리
+- [Celery Broker — Redis vs RabbitMQ →](/post/celery-broker) — 메시지 브로커 선택 기준과 AMQP 개념
 
 ---
 

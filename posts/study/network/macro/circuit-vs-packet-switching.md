@@ -131,9 +131,9 @@ flowchart LR
 
 ## 관련 글
 
-- [ISP — 인터넷 접속을 파는 사람들](./isp): 패킷 교환 트래픽을 전달하는 인터넷 사업자 계층 구조
-- [IXP — ISP들이 만나는 물리적 교차로](./ixp): 패킷이 ISP 간을 넘나드는 교환 포인트
-- [유니캐스트와 브로드캐스트](./unicast-broadcast): 패킷이 누구에게 전달되는지 결정하는 전송 방식
+- [ISP — 인터넷 접속을 파는 사람들 →](/post/isp-internet-service-provider) — 패킷 교환 트래픽을 전달하는 인터넷 사업자 계층 구조
+- [IXP — ISP들이 만나는 물리적 교차로 →](/post/ixp-internet-exchange-point) — 패킷이 ISP 간을 넘나드는 교환 포인트
+- [유니캐스트와 브로드캐스트 →](/post/unicast-and-broadcast) — 패킷이 누구에게 전달되는지 결정하는 전송 방식
 
 ---
 

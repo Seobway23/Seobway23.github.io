@@ -114,14 +114,16 @@ NIC는 그 이더넷 신호를 주고받는 하드웨어이고, MAC 주소라는
 
 이 세 가지가 맞물려야 비로소 물리적 연결이 완성된다. 랜선 하나 꽂는 행위가 이걸 전부 한 번에 시작시킨다.
 
-다음에는 이 연결된 기기들이 데이터를 주고받을 때 신호를 어떻게 나누는지, 허브와 스위치가 거기서 어떤 역할을 하는지 이어서 살펴보겠다.
+다음에는 이 연결된 기기들이 데이터를 주고받을 때 신호를 어떻게 나누는지, **[허브와 스위치가 거기서 어떤 역할을 하는지 →](/post/micro-hub-and-switch)** 이어서 살펴보겠다.
 
 ---
 
-## References
+## 관련 글
 
-[^ieee8023]: IEEE 802.3 Ethernet Working Group: https://standards.ieee.org/ieee/802.3/6935/
-[^ieee8023ab]: IEEE 802.3ab — 1000BASE-T (Gigabit Ethernet): https://standards.ieee.org/ieee/802.3ab/2165/
-[^ieee8023an]: IEEE 802.3an — 10GBASE-T: https://standards.ieee.org/ieee/802.3an/3560/
-[^ieee-mac]: IEEE MAC Address Registration Authority: https://standards.ieee.org/products-programs/regauth/mac/
-[^cisco-autoneg]: Cisco — Configuring and Troubleshooting Ethernet 10/100/1000Mb Half/Full Duplex Auto-Negotiation: https://www.cisco.com/c/en/us/support/docs/lan-switching/ethernet/10561-3.html
+- [허브는 왜 사라졌을까 — 허브와 스위치 →](/post/micro-hub-and-switch) — 같은 케이블 위에서 충돌·MAC 테이블·스위칭 이야기
+
+[^ieee8023]: <a href="https://standards.ieee.org/ieee/802.3/6935/" target="_blank">IEEE 802.3 Ethernet Working Group</a>
+[^ieee8023ab]: <a href="https://standards.ieee.org/ieee/802.3ab/2165/" target="_blank">IEEE 802.3ab — 1000BASE-T (Gigabit Ethernet)</a>
+[^ieee8023an]: <a href="https://standards.ieee.org/ieee/802.3an/3560/" target="_blank">IEEE 802.3an — 10GBASE-T</a>
+[^ieee-mac]: <a href="https://standards.ieee.org/products-programs/regauth/mac/" target="_blank">IEEE MAC Address Registration Authority</a>
+[^cisco-autoneg]: <a href="https://www.cisco.com/c/en/us/support/docs/lan-switching/ethernet/10561-3.html" target="_blank">Cisco — Configuring and Troubleshooting Ethernet Auto-Negotiation</a>

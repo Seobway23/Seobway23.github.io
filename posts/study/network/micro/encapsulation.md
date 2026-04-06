@@ -206,10 +206,10 @@ flowchart TD
 
 ## 관련 글
 
-- [OSI 7계층 모델](/post/micro-osi-7layer): 각 PDU가 속한 [계층의 역할](/post/micro-osi-7layer) 전체 그림
-- [TCP/IP 참조 모델](/post/micro-tcp-ip-model): [TCP/IP 4계층](/post/micro-tcp-ip-model)에서의 캡슐화 구조
-- [IP와 ARP — 주소와 경로의 언어](/post/micro-ip-arp): [IP 헤더](/post/micro-ip-arp) 상세 구조
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): [TCP 헤더](/post/micro-tcp-udp)와 세그먼트 구조
+- [OSI 7계층 모델 →](/post/micro-osi-7layer) — 각 PDU가 속한 계층의 역할 전체 그림
+- [TCP/IP 참조 모델 →](/post/micro-tcp-ip-model) — TCP/IP 4계층에서의 캡슐화 구조
+- [IP와 ARP — 주소와 경로의 언어 →](/post/micro-ip-arp) — IP 헤더 상세 구조
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — TCP 헤더와 세그먼트 구조
 
 ---
 

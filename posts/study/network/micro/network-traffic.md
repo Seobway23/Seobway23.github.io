@@ -246,9 +246,9 @@ flowchart TD
 
 ## 관련 글
 
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): [TCP 혼잡 제어](/post/micro-tcp-udp)(AIMD, Slow Start)의 상세 동작
-- [프로토콜 — 왜 패킷 교환을 쓰는가](/post/micro-protocol): [패킷 교환](/post/micro-protocol)이 혼잡에 취약한 이유와 설계 트레이드오프
-- [캡슐화와 역캡슐화 — PDU의 여정](/post/micro-encapsulation): 트래픽을 구성하는 [패킷 구조](/post/micro-encapsulation)
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — TCP 혼잡 제어(AIMD, Slow Start)의 상세 동작
+- [프로토콜 — 왜 패킷 교환을 쓰는가 →](/post/micro-protocol) — 패킷 교환이 혼잡에 취약한 이유와 설계 트레이드오프
+- [캡슐화와 역캡슐화 — PDU의 여정 →](/post/micro-encapsulation) — 트래픽을 구성하는 패킷 구조
 
 ---
 

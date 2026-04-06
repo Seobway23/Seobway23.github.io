@@ -166,10 +166,10 @@ OSI가 실패한 이유:
 
 ## 관련 글
 
-- [TCP/IP 참조 모델](/post/micro-tcp-ip-model): OSI 7계층을 4계층으로 압축한 [TCP/IP 모델](/post/micro-tcp-ip-model)
-- [캡슐화와 역캡슐화 — PDU의 여정](/post/micro-encapsulation): 각 계층의 [PDU](/post/micro-encapsulation)가 실제로 어떻게 만들어지는지
-- [IP와 ARP — 주소와 경로의 언어](/post/micro-ip-arp): OSI 3계층인 [네트워크 계층](/post/micro-ip-arp)의 핵심 프로토콜
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): OSI 4계층인 [전송 계층](/post/micro-tcp-udp)의 핵심 프로토콜
+- [TCP/IP 참조 모델 →](/post/micro-tcp-ip-model) — OSI 7계층을 4계층으로 압축한 TCP/IP 모델
+- [캡슐화와 역캡슐화 — PDU의 여정 →](/post/micro-encapsulation) — 각 계층의 PDU가 실제로 어떻게 만들어지는지
+- [IP와 ARP — 주소와 경로의 언어 →](/post/micro-ip-arp) — OSI 3계층인 네트워크 계층의 핵심 프로토콜
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — OSI 4계층인 전송 계층의 핵심 프로토콜
 
 ---
 

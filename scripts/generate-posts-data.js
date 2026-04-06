@@ -46,7 +46,7 @@ function normalizeCoverImageUrl(src) {
  * - 정의: [^id]: 설명...
  * 결과:
  * - 본문 참조를 sup 링크로 변환
- * - 문서 하단에 "참고/주석" 섹션 HTML 추가
+ * - 문서 하단에 "참고" 섹션 HTML 추가 (수동 `## 참고`와 동일 제목)
  */
 function processMarkdownFootnotes(markdown) {
   if (!markdown || typeof markdown !== "string") {
@@ -90,6 +90,20 @@ function processMarkdownFootnotes(markdown) {
     return { content: markdown, hasFootnotes: false };
   }
 
+  // 끝의 빈 `## References` 헤더 제거 — 각주는 아래 `## 참고`로 합쳐짐
+  while (keptLines.length > 0 && keptLines[keptLines.length - 1].trim() === "") {
+    keptLines.pop();
+  }
+  if (
+    keptLines.length > 0 &&
+    /^##\s+references\s*$/i.test(keptLines[keptLines.length - 1].trim())
+  ) {
+    keptLines.pop();
+    while (keptLines.length > 0 && keptLines[keptLines.length - 1].trim() === "") {
+      keptLines.pop();
+    }
+  }
+
   const toSafeId = (raw) =>
     String(raw)
       .trim()
@@ -100,7 +114,10 @@ function processMarkdownFootnotes(markdown) {
   const orderedRefIds = [];
   const refIndexMap = new Map();
   const safeIdMap = new Map();
-  const contentWithRefs = keptLines.join("\n").replace(/\[\^([^\]]+)\]/g, (_m, idRaw) => {
+
+  const keptJoined = keptLines.join("\n");
+  // 문서 전체에서 등장 순서대로 각주 id 수집 (본문·관련 글 섹션 분리 전)
+  keptJoined.replace(/\[\^([^\]]+)\]/g, (_m, idRaw) => {
     const id = String(idRaw).trim();
     if (!refIndexMap.has(id)) {
       orderedRefIds.push(id);
@@ -113,10 +130,27 @@ function processMarkdownFootnotes(markdown) {
       }
       safeIdMap.set(id, safeId);
     }
-    const n = refIndexMap.get(id);
-    const safeId = safeIdMap.get(id);
-    return `<sup id="fnref-${safeId}" style="scroll-margin-top: 96px;"><a href="#fn-${safeId}" aria-label="각주 ${n}">[${n}]</a></sup>`;
+    return "";
   });
+
+  const applyRefReplacements = (text) =>
+    text.replace(/\[\^([^\]]+)\]/g, (_m, idRaw) => {
+      const id = String(idRaw).trim();
+      const n = refIndexMap.get(id);
+      const safeId = safeIdMap.get(id);
+      return `<sup id="fnref-${safeId}" style="scroll-margin-top: 96px;"><a href="#fn-${safeId}" aria-label="각주 ${n}">[${n}]</a></sup>`;
+    });
+  const relatedHeading = "\n## 관련 글\n";
+  const relIdx = keptJoined.lastIndexOf(relatedHeading);
+  let mainPart = keptJoined;
+  let relatedPart = "";
+  if (relIdx !== -1) {
+    mainPart = keptJoined.slice(0, relIdx).replace(/\s+$/, "");
+    relatedPart = keptJoined.slice(relIdx + 1);
+  }
+
+  const mainWithRefs = applyRefReplacements(mainPart);
+  const relatedWithRefs = relatedPart ? applyRefReplacements(relatedPart) : "";
 
   const footnoteMap = new Map(footnotes.map((f) => [f.id, f.text]));
   const footnoteLines = orderedRefIds.map((id) => {
@@ -127,15 +161,20 @@ function processMarkdownFootnotes(markdown) {
 
   const footnotesBlock = [
     "",
-    "## 참고/주석",
+    "## 참고",
     "",
     "<ol>",
     ...footnoteLines,
     "</ol>",
   ].join("\n");
 
+  const content =
+    relatedPart !== ""
+      ? `${mainWithRefs}${footnotesBlock}\n\n${relatedWithRefs}\n`
+      : `${mainWithRefs}${footnotesBlock}\n`;
+
   return {
-    content: `${contentWithRefs}\n${footnotesBlock}\n`,
+    content,
     hasFootnotes: true,
   };
 }

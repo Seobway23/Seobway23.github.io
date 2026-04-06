@@ -171,11 +171,11 @@ flowchart BT
 
 ## 관련 글
 
-- [IP와 ARP — 주소와 경로의 언어](/post/micro-ip-arp): [IP](/post/micro-ip-arp)가 어떻게 패킷에 주소를 붙이고, [ARP](/post/micro-ip-arp)가 IP 주소를 MAC 주소로 변환하는지
-- [HTTP와 HTTPS — 웹을 움직이는 프로토콜](/post/micro-http-https): Tim Berners-Lee가 만든 웹 프로토콜의 진화
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): [TCP](/post/micro-tcp-udp)의 3-way 핸드셰이크와 [UDP](/post/micro-tcp-udp)의 단순성
-- [OSI 7계층 모델](/post/micro-osi-7layer): 프로토콜들을 어떻게 계층으로 분류하는가
-- [회선 교환 vs 패킷 교환](/post/circuit-vs-packet-switching): 더 자세한 비교
+- [IP와 ARP — 주소와 경로의 언어 →](/post/micro-ip-arp) — IP가 패킷에 주소를 붙이고 ARP가 IP를 MAC으로 변환하는 과정
+- [HTTP와 HTTPS — 웹을 움직이는 프로토콜 →](/post/micro-http-https) — Tim Berners-Lee가 만든 웹 프로토콜의 진화
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — TCP의 3-way 핸드셰이크와 UDP의 단순성
+- [OSI 7계층 모델 →](/post/micro-osi-7layer) — 프로토콜을 계층으로 분류하는 틀
+- [회선 교환 vs 패킷 교환 →](/post/circuit-vs-packet-switching) — 회선·패킷 방식의 더 자세한 비교
 
 ---
 

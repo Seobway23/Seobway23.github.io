@@ -278,9 +278,9 @@ Django의 async 지원 진화:
 
 ## 관련 글
 
-- [Django 프레임워크 큰 그림](/post/django-overview): 전체 철학과 구조 개요
-- [Django 요청-응답 라이프사이클](/post/django-lifecycle): MTV 각 레이어가 요청 처리에서 어떤 순서로 개입하는가
-- [Django ORM — QuerySet과 지연 실행](/post/django-orm-deep): Model 레이어 심층 탐구
+- [Django 프레임워크 큰 그림 →](/post/django-overview) — 전체 철학과 구조 개요
+- [Django 요청-응답 라이프사이클 →](/post/django-lifecycle) — MTV 각 레이어가 요청 처리에서 어떤 순서로 개입하는가
+- [Django ORM — QuerySet과 지연 실행 →](/post/django-orm-deep) — Model 레이어 심층 탐구
 
 ---
 

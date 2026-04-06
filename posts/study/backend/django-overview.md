@@ -179,10 +179,10 @@ flowchart TD
 
 ## 관련 글
 
-- [Django 요청-응답 라이프사이클](/post/django-lifecycle): HTTP 요청이 Django를 통과하는 전체 흐름 — Middleware → URL → View → ORM → Template
-- [Django MTV 아키텍처와 앱 구조](/post/django-architecture): MTV 패턴 심층, Project vs App, settings.py의 역할, WSGI vs ASGI
-- [Django ORM — QuerySet과 지연 실행](/post/django-orm-deep): Active Record 패턴, QuerySet 지연 실행, Manager, N+1 문제
-- [Django 보안 — 기본 탑재된 방어](/post/django-security): CSRF, XSS, SQL Injection, Clickjacking 각각 어떻게 막는가
+- [Django 요청-응답 라이프사이클 →](/post/django-lifecycle) — HTTP 요청이 Django를 통과하는 전체 흐름 — Middleware → URL → View → ORM → Template
+- [Django MTV 아키텍처와 앱 구조 →](/post/django-architecture) — MTV 패턴 심층, Project vs App, settings.py의 역할, WSGI vs ASGI
+- [Django ORM — QuerySet과 지연 실행 →](/post/django-orm-deep) — Active Record 패턴, QuerySet 지연 실행, Manager, N+1 문제
+- [Django 보안 — 기본 탑재된 방어 →](/post/django-security) — CSRF, XSS, SQL Injection, Clickjacking 각각 어떻게 막는가
 
 ---
 

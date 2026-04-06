@@ -295,9 +295,9 @@ sequenceDiagram
 
 ## 관련 글
 
-- [Django 프레임워크 큰 그림](/post/django-overview): Django 철학과 전체 구조 개요
-- [Django MTV 아키텍처와 앱 구조](/post/django-architecture): MTV 패턴, Project vs App, WSGI vs ASGI 상세
-- [Django ORM — QuerySet과 지연 실행](/post/django-orm-deep): ⑦단계 ORM 동작 심층 탐구
+- [Django 프레임워크 큰 그림 →](/post/django-overview) — Django 철학과 전체 구조 개요
+- [Django MTV 아키텍처와 앱 구조 →](/post/django-architecture) — MTV 패턴, Project vs App, WSGI vs ASGI 상세
+- [Django ORM — QuerySet과 지연 실행 →](/post/django-orm-deep) — ⑦단계 ORM 동작 심층 탐구
 
 ---
 

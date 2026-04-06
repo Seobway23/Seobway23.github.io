@@ -479,16 +479,12 @@ DRF 인증 핵심 요약:
 
 ---
 
-## 다음 글
+## 관련 글
 
-- [DRF Serializer 검증 심화](/study/backend/django/drf-serializer-validation) — validate_<field> 완전 정복
-- [Django 객체 레벨 권한](/study/backend/django/django-object-permissions) — Owner, 팀 기반 접근 제어
+- [DRF Serializer 검증 심화 →](/post/drf-serializer-validation) — validate_<field> 완전 정복
+- [Django 객체 레벨 권한 →](/post/django-object-permissions) — Owner, 팀 기반 접근 제어
 
----
-
-## References
-
-[^drf-auth]: DRF Documentation — Authentication: https://www.django-rest-framework.org/api-guide/authentication/
-[^simplejwt]: djangorestframework-simplejwt: https://django-rest-framework-simplejwt.readthedocs.io/
-[^jwt-intro]: JWT Introduction: https://jwt.io/introduction
-[^drf-permissions]: DRF Documentation — Permissions: https://www.django-rest-framework.org/api-guide/permissions/
+[^drf-auth]: <a href="https://www.django-rest-framework.org/api-guide/authentication/" target="_blank">DRF Documentation — Authentication</a>
+[^simplejwt]: <a href="https://django-rest-framework-simplejwt.readthedocs.io/" target="_blank">djangorestframework-simplejwt</a>
+[^jwt-intro]: <a href="https://jwt.io/introduction" target="_blank">JWT Introduction</a>
+[^drf-permissions]: <a href="https://www.django-rest-framework.org/api-guide/permissions/" target="_blank">DRF Documentation — Permissions</a>

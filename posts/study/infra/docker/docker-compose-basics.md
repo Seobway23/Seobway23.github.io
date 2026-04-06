@@ -245,8 +245,8 @@ docker compose down -v
 
 ## 관련 글
 
-- [Docker 기초 — Image, Container, Volume, Network](/post/docker-basics): Compose 이전에 알아야 할 Docker 핵심 개념
-- [Docker Compose로 Django 5개 서비스 띄우기](/post/docker-compose-django): env_file과 healthcheck를 실전 프로젝트에 적용
+- [Docker 기초 — Image, Container, Volume, Network →](/post/docker-basics) — Compose 이전에 알아야 할 Docker 핵심 개념
+- [Docker Compose로 Django 5개 서비스 띄우기 →](/post/docker-compose-django) — env_file과 healthcheck를 실전 프로젝트에 적용
 
 ---
 

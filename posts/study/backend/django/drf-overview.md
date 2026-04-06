@@ -421,17 +421,13 @@ DRF Serializer 핵심 요약:
 
 ---
 
-## 다음 글
+## 관련 글
 
-- [DRF Views](/study/backend/django/drf-views) — APIView, ViewSet, Router
-- [DRF 인증](/study/backend/django/drf-authentication) — Token, JWT, SimpleJWT
-- [DRF Serializer 검증 심화](/study/backend/django/drf-serializer-validation) — validate_<field> 완전 정복
+- [DRF Views →](/post/drf-views) — APIView, ViewSet, Router
+- [DRF 인증 →](/post/drf-authentication) — Token, JWT, SimpleJWT
+- [DRF Serializer 검증 심화 →](/post/drf-serializer-validation) — validate_<field> 완전 정복
 
----
-
-## References
-
-[^drf-serializers]: DRF Documentation — Serializers: https://www.django-rest-framework.org/api-guide/serializers/
-[^drf-fields]: DRF Documentation — Fields: https://www.django-rest-framework.org/api-guide/fields/
-[^drf-relations]: DRF Documentation — Relations: https://www.django-rest-framework.org/api-guide/relations/
-[^rest-tutorial]: DRF Tutorial: https://www.django-rest-framework.org/tutorial/quickstart/
+[^drf-serializers]: <a href="https://www.django-rest-framework.org/api-guide/serializers/" target="_blank">DRF Documentation — Serializers</a>
+[^drf-fields]: <a href="https://www.django-rest-framework.org/api-guide/fields/" target="_blank">DRF Documentation — Fields</a>
+[^drf-relations]: <a href="https://www.django-rest-framework.org/api-guide/relations/" target="_blank">DRF Documentation — Relations</a>
+[^rest-tutorial]: <a href="https://www.django-rest-framework.org/tutorial/quickstart/" target="_blank">DRF Tutorial — Quickstart</a>

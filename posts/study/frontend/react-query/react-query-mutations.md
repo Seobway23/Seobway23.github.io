@@ -341,11 +341,11 @@ mutation.mutate(todo, {
 
 ## 참고
 
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/mutations" target="_blank">[1] Mutations — TanStack Query Docs</a>
-
-<a href="https://tkdodo.eu/blog/mastering-mutations-in-react-query" target="_blank">[2] Mastering Mutations in React Query — TkDodo</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates" target="_blank">[3] Optimistic Updates — TanStack Query Docs</a>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/mutations" target="_blank">[1] Mutations — TanStack Query Docs</a></li>
+<li><a href="https://tkdodo.eu/blog/mastering-mutations-in-react-query" target="_blank">[2] Mastering Mutations in React Query — TkDodo</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates" target="_blank">[3] Optimistic Updates — TanStack Query Docs</a></li>
+</ol>
 
 ---
 

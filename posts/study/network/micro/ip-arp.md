@@ -209,10 +209,10 @@ flowchart TD
 
 ## 관련 글
 
-- [프로토콜 — 왜 패킷 교환을 쓰는가](/post/micro-protocol): [패킷 교환](/post/micro-protocol)이 IP 주소 체계가 필요해진 배경
-- [캡슐화와 역캡슐화 — PDU의 여정](/post/micro-encapsulation): IP 헤더가 [캡슐화](/post/micro-encapsulation)되는 과정
-- [OSI 7계층 모델](/post/micro-osi-7layer): IP가 속한 [네트워크 계층](/post/micro-osi-7layer)의 전체 그림
-- [TCP와 UDP — 신뢰성과 속도의 트레이드오프](/post/micro-tcp-udp): IP 위에서 동작하는 [전송 계층](/post/micro-tcp-udp) 프로토콜
+- [프로토콜 — 왜 패킷 교환을 쓰는가 →](/post/micro-protocol) — 패킷 교환이 IP 주소 체계를 필요로 하게 된 배경
+- [캡슐화와 역캡슐화 — PDU의 여정 →](/post/micro-encapsulation) — IP 헤더가 캡슐화되는 과정
+- [OSI 7계층 모델 →](/post/micro-osi-7layer) — IP가 속한 네트워크 계층의 전체 그림
+- [TCP와 UDP — 신뢰성과 속도의 트레이드오프 →](/post/micro-tcp-udp) — IP 위에서 동작하는 전송 계층 프로토콜
 
 ---
 

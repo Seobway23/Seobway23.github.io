@@ -230,9 +230,9 @@ Beat와 Worker는 항상 함께 실행해야 한다.
 
 ## 관련 글
 
-- [Django + Celery 개요](/post/celery-django): Celery 전체 설정과 주기적 태스크 기본 예시
-- [Celery Worker — 내부 구조와 동시성 모델](/post/celery-worker): Beat가 발행한 태스크를 실행하는 Worker
-- [Celery Broker — Redis vs RabbitMQ](/post/celery-broker): Beat가 메시지를 발행하는 브로커
+- [Django + Celery 개요 →](/post/celery-django) — Celery 전체 설정과 주기적 태스크 기본 예시
+- [Celery Worker — 내부 구조와 동시성 모델 →](/post/celery-worker) — Beat가 발행한 태스크를 실행하는 Worker
+- [Celery Broker — Redis vs RabbitMQ →](/post/celery-broker) — Beat가 메시지를 발행하는 브로커
 
 ---
 

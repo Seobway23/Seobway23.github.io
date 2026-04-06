@@ -95,8 +95,8 @@ CDN은 정적 콘텐츠에 강하지만, **동적 콘텐츠**(로그인 세션, 
 
 ## 관련 글
 
-- [ISP — 인터넷 접속을 파는 사람들](./isp): CDN이 배치되는 네트워크 인프라의 기반
-- [IXP — ISP들이 만나는 물리적 교차로](./ixp): CDN 트래픽이 ISP 간을 넘나드는 교차점
+- [ISP — 인터넷 접속을 파는 사람들 →](/post/isp-internet-service-provider) — CDN이 배치되는 네트워크 인프라의 기반
+- [IXP — ISP들이 만나는 물리적 교차로 →](/post/ixp-internet-exchange-point) — CDN 트래픽이 ISP 간을 넘나드는 교차점
 
 ---
 

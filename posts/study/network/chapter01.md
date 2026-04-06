@@ -196,11 +196,11 @@ flowchart LR
 
 거시 구조에서 언급된 핵심 개념들을 각각 상세히 다룬 글이다.
 
-- [ISP — 인터넷 접속을 파는 사람들](/post/isp-internet-service-provider): ISP 계층 구조(Tier 1/2/3)와 Transit·Peering의 차이
-- [CDN — 콘텐츠를 가장 빠른 경로로 전달하는 방법](/post/cdn-content-delivery-network): 엣지 서버 분산과 DNS 기반 라우팅
-- [IXP — ISP들이 만나는 물리적 교차로](/post/ixp-internet-exchange-point): ISP 간 직접 트래픽 교환으로 비용과 지연을 동시에 줄이는 방법
-- [회선 교환 vs 패킷 교환](/post/circuit-vs-packet-switching): 인터넷이 전화망과 다른 이유
-- [유니캐스트와 브로드캐스트](/post/unicast-and-broadcast): 누구에게 데이터를 보낼 것인가
+- [ISP — 인터넷 접속을 파는 사람들 →](/post/isp-internet-service-provider) — ISP 계층 구조(Tier 1/2/3)와 Transit·Peering의 차이
+- [CDN — 콘텐츠를 가장 빠른 경로로 전달하는 방법 →](/post/cdn-content-delivery-network) — 엣지 서버 분산과 DNS 기반 라우팅
+- [IXP — ISP들이 만나는 물리적 교차로 →](/post/ixp-internet-exchange-point) — ISP 간 직접 트래픽 교환으로 비용과 지연을 동시에 줄이는 방법
+- [회선 교환 vs 패킷 교환 →](/post/circuit-vs-packet-switching) — 인터넷이 전화망과 다른 이유
+- [유니캐스트와 브로드캐스트 →](/post/unicast-and-broadcast) — 누구에게 데이터를 보낼 것인가
 
 [^computer-network]: Computer network, <a href="https://en.wikipedia.org/wiki/Computer_network" target="_blank">Wikipedia</a>
 [^internet]: Internet, <a href="https://en.wikipedia.org/wiki/Internet" target="_blank">Wikipedia</a>

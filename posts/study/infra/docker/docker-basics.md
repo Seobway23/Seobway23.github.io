@@ -238,8 +238,8 @@ flowchart TD
 
 ## 관련 글
 
-- [Docker Compose 기초 — env_file, interpolation, depends_on](/post/docker-compose-basics): 이 글의 개념을 바탕으로 Compose 파일 작성법
-- [Docker Compose로 Django 5개 서비스 띄우기](/post/docker-compose-django): 실전 Django + MySQL + Redis + Celery 구성
+- [Docker Compose 기초 — env_file, interpolation, depends_on →](/post/docker-compose-basics) — 이 글의 개념을 바탕으로 Compose 파일 작성법
+- [Docker Compose로 Django 5개 서비스 띄우기 →](/post/docker-compose-django) — 실전 Django + MySQL + Redis + Celery 구성
 
 ---
 

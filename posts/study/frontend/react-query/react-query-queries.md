@@ -415,13 +415,12 @@ function TodoList() {
 
 ## 참고
 
-<a href="https://tanstack.com/query/latest/docs/framework/react/reference/QueryClient" target="_blank">[1] QueryClient — TanStack Query Docs</a>
-
-<a href="https://tkdodo.eu/blog/effective-react-query-keys" target="_blank">[2] Effective React Query Keys — TkDodo</a>
-
-<a href="https://tkdodo.eu/blog/the-query-options-api" target="_blank">[3] The Query Options API — TkDodo</a>
-
-<a href="https://tanstack.com/query/latest/docs/framework/react/guides/queries" target="_blank">[4] Queries — TanStack Query Docs</a>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/reference/QueryClient" target="_blank">[1] QueryClient — TanStack Query Docs</a></li>
+<li><a href="https://tkdodo.eu/blog/effective-react-query-keys" target="_blank">[2] Effective React Query Keys — TkDodo</a></li>
+<li><a href="https://tkdodo.eu/blog/the-query-options-api" target="_blank">[3] The Query Options API — TkDodo</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/queries" target="_blank">[4] Queries — TanStack Query Docs</a></li>
+</ol>
 
 ---
 

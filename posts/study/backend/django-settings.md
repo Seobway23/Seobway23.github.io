@@ -270,8 +270,8 @@ docker compose exec web python manage.py migrate
 
 ## 관련 글
 
-- [Docker Compose로 Django 5개 서비스 띄우기](/post/docker-compose-django): .env.local, DATABASE_URL을 실전 프로젝트에 적용
-- [Django Migration 완전 정복](/post/django-migration): settings 설정 이후 migrate 실행 방법과 순서 문제
+- [Docker Compose로 Django 5개 서비스 띄우기 →](/post/docker-compose-django) — .env.local, DATABASE_URL을 실전 프로젝트에 적용
+- [Django Migration 완전 정복 →](/post/django-migration) — settings 설정 이후 migrate 실행 방법과 순서 문제
 
 ---
 

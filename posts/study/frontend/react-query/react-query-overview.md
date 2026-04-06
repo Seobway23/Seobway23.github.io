@@ -318,17 +318,16 @@ function PostList() {
 
 ## 참고
 
-<a href="https://tanstack.com/query/latest/docs/framework/react/overview" target="_blank">[1] TanStack Query v5 Overview — 공식 문서</a>
-
-<a href="https://tkdodo.eu/blog/react-query-as-a-state-manager" target="_blank">[2] React Query as a State Manager — TkDodo</a>
-
-<a href="https://tkdodo.eu/blog/practical-react-query" target="_blank">[3] Practical React Query — TkDodo</a>
-
-<a href="https://docs.pmnd.rs/zustand/getting-started/introduction" target="_blank">[4] Zustand 공식 문서</a>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/overview" target="_blank">[1] TanStack Query v5 Overview — 공식 문서</a></li>
+<li><a href="https://tkdodo.eu/blog/react-query-as-a-state-manager" target="_blank">[2] React Query as a State Manager — TkDodo</a></li>
+<li><a href="https://tkdodo.eu/blog/practical-react-query" target="_blank">[3] Practical React Query — TkDodo</a></li>
+<li><a href="https://docs.pmnd.rs/zustand/getting-started/introduction" target="_blank">[4] Zustand 공식 문서</a></li>
+</ol>
 
 ---
 
-## 다음 글
+## 관련 글
 
 - [[2편] QueryClient · Query Keys · useQuery 심층 →](/post/react-query-queries)
 - [[3편] useMutation · Optimistic Updates →](/post/react-query-mutations)

@@ -208,9 +208,9 @@ python manage.py migrate --fake-initial
 
 ## 관련 글
 
-- [Django settings 분리와 환경변수 관리](/post/django-settings): migrate 실행 전 DATABASE_URL 설정법
-- [Docker Compose로 Django 5개 서비스 띄우기](/post/docker-compose-django): Docker 환경에서의 마이그레이션 실행 순서
-- [Django 버전 호환성과 내부 API 위험](/post/django-version-compatibility): 마이그레이션 외에 버전 업그레이드 시 주의할 점
+- [Django settings 분리와 환경변수 관리 →](/post/django-settings) — migrate 실행 전 DATABASE_URL 설정법
+- [Docker Compose로 Django 5개 서비스 띄우기 →](/post/docker-compose-django) — Docker 환경에서의 마이그레이션 실행 순서
+- [Django 버전 호환성과 내부 API 위험 →](/post/django-version-compatibility) — 마이그레이션 외에 버전 업그레이드 시 주의할 점
 
 ---
 
