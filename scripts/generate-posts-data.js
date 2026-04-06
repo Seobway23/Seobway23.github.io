@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import matter from "gray-matter";
 import { marked } from "marked";
 import yaml from "js-yaml";
+import katex from "katex";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -359,6 +360,123 @@ function applyGlossaryMarkup(markdown, glossary, filePath) {
 }
 
 /**
+ * TeX를 임시 토큰으로 바꾼 뒤 marked로 마크다운을 HTML로 만든 다음, 토큰을 KaTeX HTML로 치환한다.
+ *
+ * 이유:
+ * 1) 인라인 수식을 먼저 KaTeX(<span>)로 바면 **강조와 테이블 셀 경계(|) 토큰이 끼어 marked 파싱이 깨짐.
+ * 2) 플레이스홀더에 밑줄(_012)을 쓰면 marked가 _이탤릭_으로 분해하므로 MATHPXI0MATHPXI 형태만 사용.
+ * 3) GFM 표 한 줄에 **가 여러 번 있으면 셀을 넘겨 짝이 맞을 수 있음 — 표 안 볼드는 HTML <strong> 권장.
+ */
+function splitMarkdownByCodeFences(markdown) {
+  const fenceRe = /```[\s\S]*?```/g;
+  const parts = [];
+  let last = 0;
+  let m;
+  while ((m = fenceRe.exec(markdown)) !== null) {
+    if (m.index > last) {
+      parts.push({ type: "text", content: markdown.slice(last, m.index) });
+    }
+    parts.push({ type: "fence", content: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < markdown.length) {
+    parts.push({ type: "text", content: markdown.slice(last) });
+  }
+  if (parts.length === 0) {
+    parts.push({ type: "text", content: markdown });
+  }
+  return parts;
+}
+
+function replaceMathInPlainSegmentWithPlaceholders(text, slots, nextIndex) {
+  const inlineCodeRe = /`[^`]*`/g;
+  const chunks = [];
+  let last = 0;
+  let m;
+  while ((m = inlineCodeRe.exec(text)) !== null) {
+    if (m.index > last) {
+      chunks.push({ type: "math", content: text.slice(last, m.index) });
+    }
+    chunks.push({ type: "code", content: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) {
+    chunks.push({ type: "math", content: text.slice(last) });
+  }
+  if (chunks.length === 0) {
+    chunks.push({ type: "math", content: text });
+  }
+
+  return chunks
+    .map((seg) =>
+      seg.type === "code" ? seg.content : dollarMathToPlaceholders(seg.content, slots, nextIndex),
+    )
+    .join("");
+}
+
+function dollarMathToPlaceholders(s, slots, nextIndex) {
+  let str = s;
+  // 플레이스홀더에 _ 나 * 를 쓰지 않는다 — marked가 _이탤릭_ / 강조로 분해해 깨뜨림
+  str = str.replace(/\$\$([\s\S]*?)\$\$/g, (full, raw) => {
+    const tex = String(raw).trim();
+    if (!tex) return full;
+    const id = `MATHPXD${nextIndex()}MATHPXD`;
+    slots.push({ id, tex, display: true });
+    return id;
+  });
+  str = str.replace(/(?<!\$)\$(?!\$)((?:[^$\\]|\\.)+?)\$(?!\$)/g, (full, raw) => {
+    const tex = String(raw).trim();
+    if (!tex) return full;
+    const id = `MATHPXI${nextIndex()}MATHPXI`;
+    slots.push({ id, tex, display: false });
+    return id;
+  });
+  return str;
+}
+
+function markdownWithMathPlaceholders(markdown) {
+  if (!markdown || typeof markdown !== "string") {
+    return { markdown: markdown || "", slots: [] };
+  }
+  const slots = [];
+  let n = 0;
+  const nextIndex = () => n++;
+
+  const out = splitMarkdownByCodeFences(markdown)
+    .map((p) =>
+      p.type === "fence" ? p.content : replaceMathInPlainSegmentWithPlaceholders(p.content, slots, nextIndex),
+    )
+    .join("");
+
+  return { markdown: out, slots };
+}
+
+function injectKatexPlaceholdersIntoHtml(html, slots) {
+  let result = html;
+  for (const { id, tex, display } of slots) {
+    let rendered;
+    try {
+      rendered = katex.renderToString(tex, {
+        displayMode: display,
+        throwOnError: false,
+        strict: "ignore",
+      });
+    } catch {
+      rendered = escapeHtml(tex);
+    }
+    if (display) {
+      rendered = `\n<div class="post-math-display">${rendered}</div>\n`;
+    }
+    if (!result.includes(id)) {
+      console.warn(`⚠️ 수식 플레이스홀더가 HTML에 없음(본문에 ${id} 패턴을 쓰지 마세요): ${id}`);
+      continue;
+    }
+    result = result.split(id).join(rendered);
+  }
+  return result;
+}
+
+/**
  * 마크다운 파일에서 게시글 데이터 추출
  * @param {Map<string,string>} filenameToSlug - 파일명(확장자 제외) → slug 맵
  */
@@ -403,6 +521,9 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     // Glossary 마크업 치환 (코드 블록 제외)
     processedContent = applyGlossaryMarkup(processedContent, glossary, filePath);
 
+    // 수식 → 플레이스홀더 (코드 펜스·인라인 코드 제외). marked 이후 KaTeX 치환.
+    const { markdown: mdForMarked, slots: mathSlots } = markdownWithMathPlaceholders(processedContent);
+
     // marked 설정
     marked.setOptions({
       breaks: true,
@@ -424,8 +545,8 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
       return `<a href="${finalHref}"${titleAttr}>${text}</a>`;
     };
 
-    // 마크다운을 HTML로 변환
-    const htmlContent = marked.parse(processedContent, { renderer });
+    // 마크다운을 HTML로 변환 후 수식 플레이스홀더를 KaTeX로 복원
+    const htmlContent = injectKatexPlaceholdersIntoHtml(marked.parse(mdForMarked, { renderer }), mathSlots);
 
     // excerpt 생성 (frontmatter에 없으면 content에서 추출)
     let excerpt = data.excerpt || "";

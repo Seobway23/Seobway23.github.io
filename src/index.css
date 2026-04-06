@@ -1,3 +1,6 @@
+@import url("../node_modules/jsxgraph/distrib/jsxgraph.css");
+@import url("../node_modules/katex/dist/katex.min.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -779,6 +782,160 @@ html:not(.dark) .prose :not(pre) > code {
 
 .dark .mermaid-caption-text {
   color: #94a3b8;
+}
+
+/* ─── 역학 시각화 테스트 블록 (Diagramatics / JSXGraph / Three.js) ─── */
+.mechanics-viz-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -12px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+  flex-wrap: wrap;
+}
+
+.mechanics-viz-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #0d9488;
+  background: rgba(13, 148, 136, 0.08);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dark .mechanics-viz-badge {
+  color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.1);
+  border-color: rgba(45, 212, 191, 0.28);
+}
+
+.mechanics-viz-text {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.dark .mechanics-viz-text {
+  color: #94a3b8;
+}
+
+.mechanics-viz-inner svg.diagramatics-canvas {
+  min-height: 360px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.mechanics-viz-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.mechanics-viz-toolbar button {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(30, 41, 59, 0.85);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.mechanics-viz-toolbar button:hover {
+  background: rgba(51, 65, 85, 0.95);
+  border-color: rgba(148, 163, 184, 0.7);
+}
+
+.mechanics-viz-toolbar button.mechanics-viz-toolbar-btn--active {
+  border-color: rgba(45, 212, 191, 0.55);
+  background: rgba(13, 148, 136, 0.25);
+  color: #5eead4;
+}
+
+.mechanics-viz-3d-legend {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #cbd5e1;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+}
+
+.mechanics-viz-3d-legend ul {
+  margin: 0.35em 0 0.35em 1.1em;
+  padding: 0;
+}
+
+.mechanics-viz-3d-legend p {
+  margin: 0.25em 0;
+}
+
+.mechanics-viz-inner canvas {
+  display: block;
+  width: 100% !important;
+  touch-action: none;
+  cursor: grab;
+}
+
+.mechanics-viz-inner canvas:active {
+  cursor: grabbing;
+}
+
+.mechanics-viz-hint {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #64748b;
+  padding: 6px 2px 0;
+}
+
+.dark .mechanics-viz-hint {
+  color: #94a3b8;
+}
+
+/* KaTeX (포스트 본문, 빌드 타임 렌더) — 가로 스크롤바 없이 본문 너비 안에 맞춤 */
+.post-math-display {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  overflow-x: visible;
+  overflow-y: visible;
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.prose .post-math-display .katex-display {
+  margin: 0;
+  overflow-x: visible;
+  max-width: 100%;
+}
+
+/* 디스플레이 수식: 화면이 좁을수록 전체가 한 화면에 들어오도록 글자만 축소 (스크롤 대신) */
+.prose .post-math-display .katex-display > .katex {
+  font-size: clamp(0.72rem, 0.55rem + 1.65vw, 1.21em);
+  max-width: 100%;
+}
+
+/* 인라인·블록 공통: 스크롤 강제 없음 */
+.prose .katex {
+  overflow-x: visible;
+}
+
+.dark .prose .katex,
+.dark .prose .katex-mathml {
+  color: rgb(226 232 240);
 }
 
 /* Utterances 댓글 시스템 스타일링 */
