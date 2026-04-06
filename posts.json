@@ -1,5 +1,57 @@
 [
   {
+    "id": "mysql-restore-test",
+    "title": "백업의 증명 — K3s에서 mysqldump 복구 테스트",
+    "slug": "mysql-restore-test",
+    "excerpt": "덤프 파일이 존재한다고 백업이 된 게 아니다. 복구가 되어야 백업이다. K3s 클러스터 안에 임시 MySQL Pod를 띄워 덤프를 import하고 검증하는 전체 과정을 정리한다.\n",
+    "content": "<p>&quot;백업 완료&quot;라는 로그만 보고 안심한 적이 있다.</p>\n<p>막상 복구가 필요한 순간이 오면 그때서야 파일이 깨졌거나, import가 안 되거나, 테이블이 절반밖에 없다는 걸 알게 된다. 그게 최악의 타이밍이다.</p>\n<p>백업 파일이 생겼다면, 그 다음 해야 할 일은 그 파일로 실제로 복구해보는 것이다. 운영 환경에 직접 하면 위험하니, 클러스터 안에 임시 네임스페이스를 만들어서 테스트한다.</p>\n<hr>\n<h2>전체 흐름</h2>\n<pre><code class=\"language-mermaid\">flowchart TD\n    A[덤프 파일 선택] --&gt; B[테스트 네임스페이스 생성]\n    B --&gt; C[임시 MySQL Pod 실행]\n    C --&gt; D{MySQL 접속 가능?}\n    D --&gt;|아니오| E[mysqladmin ping 대기]\n    E --&gt; D\n    D --&gt;|예| F[테스트 DB 생성]\n    F --&gt; G[덤프 import]\n    G --&gt; H[테이블/데이터 검증]\n    H --&gt; I[네임스페이스 삭제]\n</code></pre>\n<hr>\n<h2>0) 덤프 파일 확인</h2>\n<p>먼저 어떤 파일을 복구할지 정한다.</p>\n<pre><code class=\"language-bash\">ls -la /data/pms/mysql-dumps | tail -10\ndu -sh /data/pms/mysql-dumps\n</code></pre>\n<pre><code class=\"language-bash\"># 복구할 파일 지정 (실제 파일명으로 변경)\nDUMP=/data/pms/mysql-dumps/pms_db_20260406_030012.sql.gz\n</code></pre>\n<p>파일 내용이 정상인지 미리 확인해두면 좋다.</p>\n<pre><code class=\"language-bash\"># mysqldump 헤더가 나오면 파일이 깨지지 않은 것\nzcat &quot;$DUMP&quot; | head -n 20\n\n# 테이블 목록\nzcat &quot;$DUMP&quot; | grep -n &quot;CREATE TABLE&quot; | head -20\n</code></pre>\n<hr>\n<h2>1) 테스트 네임스페이스와 Pod 준비</h2>\n<p>운영 네임스페이스(<code>pms-web</code>)와 완전히 분리된 공간을 만든다. 테스트가 끝나면 이 네임스페이스째 삭제한다.</p>\n<pre><code class=\"language-bash\">kubectl create ns mysql-restore-test\n\nkubectl -n mysql-restore-test run mysql-test \\\n  --image=mysql:8.0 \\\n  --env MYSQL_ROOT_PASSWORD=&#39;testpass&#39; \\\n  --port 3306\n\nkubectl -n mysql-restore-test expose pod mysql-test \\\n  --name mysql-test \\\n  --port 3306\n</code></pre>\n<hr>\n<h2>2) MySQL이 &quot;접속 가능&quot;할 때까지 대기</h2>\n<p>여기서 흔히 실수하는 부분이 있다.</p>\n<p><code>kubectl wait --for=condition=Ready pod/mysql-test</code>로 Pod가 Ready가 됐다고 해서 MySQL에 바로 접속할 수 있는 게 아니다. readinessProbe를 설정하지 않으면 컨테이너가 시작되자마자 Ready 상태가 된다. 하지만 MySQL 초기화(root 비밀번호 설정, 시스템 테이블 생성 등)는 아직 진행 중일 수 있다.<sup id=\"fnref-k8s-readiness\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-k8s-readiness\" aria-label=\"각주 1\">[1]</a></sup></p>\n<p>이 상태에서 접속하면 아래 오류가 나온다:</p>\n<pre><code>ERROR 1045 (28000): Access denied for user &#39;root&#39;@&#39;localhost&#39;\n</code></pre>\n<p>실제로 비밀번호가 틀린 게 아니라 MySQL이 아직 준비가 안 된 것이다.</p>\n<h3>방법 A: 로그로 확인</h3>\n<pre><code class=\"language-bash\">kubectl -n mysql-restore-test logs pod/mysql-test --follow\n</code></pre>\n<p>아래 메시지가 나오면 준비 완료다:</p>\n<pre><code>2026-04-06T03:00:00.000000Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections.\n</code></pre>\n<h3>방법 B: mysqladmin ping 루프 (권장)</h3>\n<p>로그를 보고 있을 수 없으면 자동으로 대기하는 스크립트를 쓴다.</p>\n<pre><code class=\"language-bash\">for i in $(seq 1 60); do\n  kubectl -n mysql-restore-test exec mysql-test -- \\\n    mysqladmin ping -uroot -ptestpass --silent 2&gt;/dev/null &amp;&amp; break\n  echo &quot;대기 중... ($i/60)&quot;\n  sleep 2\ndone\necho &quot;MySQL 준비 완료&quot;\n</code></pre>\n<p>최대 2분을 60회 대기한다. 보통 20~40초면 된다.</p>\n<hr>\n<h2>3) 테스트 DB 생성</h2>\n<pre><code class=\"language-bash\">kubectl -n mysql-restore-test exec mysql-test -- \\\n  mysql -uroot -ptestpass \\\n  -e &quot;CREATE DATABASE pms_restore_test\n      DEFAULT CHARACTER SET utf8mb4\n      COLLATE utf8mb4_unicode_ci;&quot;\n</code></pre>\n<p>운영 DB 이름과 다르게 만든다. 이름이 같으면 나중에 혼동될 수 있다.</p>\n<hr>\n<h2>4) 덤프 Import</h2>\n<p>파일을 Pod 안으로 복사하지 않아도 된다. stdin 파이프로 바로 넘긴다.</p>\n<pre><code class=\"language-bash\">gunzip -c &quot;$DUMP&quot; | kubectl -n mysql-restore-test exec -i mysql-test -- \\\n  mysql -uroot -ptestpass pms_restore_test\n</code></pre>\n<p>DB 크기에 따라 수십 초~수 분이 걸릴 수 있다. 오류 없이 프롬프트로 돌아오면 완료다.</p>\n<p>import 중 오류가 발생하면 MySQL Pod 로그를 확인한다.</p>\n<pre><code class=\"language-bash\">kubectl -n mysql-restore-test logs pod/mysql-test --tail=100\n</code></pre>\n<hr>\n<h2>5) 복구 검증</h2>\n<h3>테이블 목록 확인</h3>\n<pre><code class=\"language-bash\">kubectl -n mysql-restore-test exec mysql-test -- \\\n  mysql -uroot -ptestpass \\\n  -D pms_restore_test \\\n  -e &quot;SHOW TABLES;&quot;\n</code></pre>\n<p>원본 DB의 테이블 수와 일치하는지 확인한다.</p>\n<h3>대표 테이블 row count 확인</h3>\n<p>운영 DB와 row 수가 비슷한지 대략적으로 확인한다. 백업 시점에 따라 약간 다를 수 있다.</p>\n<pre><code class=\"language-bash\"># 테이블명은 실제 존재하는 것으로 변경\nkubectl -n mysql-restore-test exec mysql-test -- \\\n  mysql -uroot -ptestpass \\\n  -D pms_restore_test \\\n  -e &quot;SELECT COUNT(*) FROM users;\n      SELECT COUNT(*) FROM orders;\n      SELECT COUNT(*) FROM products;&quot;\n</code></pre>\n<h3>특정 레코드 확인 (선택)</h3>\n<p>최근 생성된 레코드가 있다면 그 데이터가 덤프에 포함돼 있는지 확인한다.</p>\n<pre><code class=\"language-bash\">kubectl -n mysql-restore-test exec mysql-test -- \\\n  mysql -uroot -ptestpass \\\n  -D pms_restore_test \\\n  -e &quot;SELECT id, created_at FROM users ORDER BY created_at DESC LIMIT 5;&quot;\n</code></pre>\n<hr>\n<h2>6) 테스트 정리</h2>\n<p>검증이 끝나면 테스트 네임스페이스를 삭제한다.</p>\n<pre><code class=\"language-bash\">kubectl delete ns mysql-restore-test\n</code></pre>\n<p>Pod, Service, 임시 데이터가 전부 삭제된다.</p>\n<hr>\n<h2>트러블슈팅</h2>\n<h3>Pod Ready인데 접속이 안 됨</h3>\n<p>readinessProbe가 없어서 MySQL 초기화 전에 Ready 상태가 된 것이다.<br><code>mysqladmin ping</code> 루프로 대기한 뒤 재시도한다.</p>\n<h3><code>Access denied for user &#39;root&#39;@&#39;localhost&#39;</code></h3>\n<p>두 가지 원인:</p>\n<ol>\n<li>MySQL 초기화가 아직 진행 중 → <code>mysqladmin ping</code> 대기 후 재시도</li>\n<li>비밀번호가 실제로 틀린 경우 → <code>MYSQL_ROOT_PASSWORD</code> 환경변수 확인</li>\n</ol>\n<h3>import 도중 <code>Table doesn&#39;t exist</code> 또는 FK 오류</h3>\n<p>덤프에 <code>SET FOREIGN_KEY_CHECKS=0</code>이 없으면 FK 참조 순서 문제로 실패할 수 있다. mysqldump 기본 옵션으로 만든 덤프라면 이 구문이 포함돼 있어야 한다.</p>\n<pre><code class=\"language-bash\">zcat &quot;$DUMP&quot; | grep &quot;FOREIGN_KEY_CHECKS&quot;\n</code></pre>\n<p>없으면 import 전에 수동으로 비활성화한다.</p>\n<pre><code class=\"language-bash\">gunzip -c &quot;$DUMP&quot; | kubectl -n mysql-restore-test exec -i mysql-test -- \\\n  mysql -uroot -ptestpass \\\n  -e &quot;SET FOREIGN_KEY_CHECKS=0;&quot; pms_restore_test\n</code></pre>\n<h3>import가 너무 오래 걸림</h3>\n<p>DB 크기와 노드 리소스(CPU, 디스크 I/O)에 따라 다르다. 수백 MB 이상이면 수 분 이상 걸릴 수 있다.</p>\n<pre><code class=\"language-bash\"># 노드 디스크 I/O 확인\nkubectl top nodes\n# Pod 리소스 확인\nkubectl -n mysql-restore-test top pod mysql-test\n</code></pre>\n<hr>\n<h2>복구 테스트를 정례화해야 하는 이유</h2>\n<p>파일이 존재하는 것과 복구가 되는 것은 다르다.</p>\n<p>실제로 발생하는 문제들:</p>\n<ul>\n<li>덤프 도중 네트워크 오류로 파일이 잘림 (gzip 오류로 확인 가능)</li>\n<li>권한 문제로 일부 테이블이 누락됨</li>\n<li>캐릭터셋 불일치로 한글 데이터가 깨짐</li>\n<li>mysqldump 버전과 MySQL 버전 불일치</li>\n</ul>\n<p>이런 문제는 복구를 실제로 해보기 전까지는 발견하기 어렵다. 장애가 나서 복구하는 순간에 알게 되면 늦다.</p>\n<p>월 1회 이 Runbook을 그대로 실행해보는 것을 권장한다. 복잡한 작업이 아니니 20분이면 된다.</p>\n<hr>\n<h2>참고</h2>\n<ol>\n<li id=\"fn-k8s-readiness\" style=\"scroll-margin-top: 96px;\">Kubernetes Documentation — Configure Liveness, Readiness and Startup Probes: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ <a href=\"#fnref-k8s-readiness\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/infra/kubernetes",
+    "tags": [
+      "Kubernetes",
+      "k3s",
+      "MySQL",
+      "mysqldump",
+      "Restore",
+      "Backup",
+      "DevOps",
+      "인프라",
+      "복구테스트"
+    ],
+    "author": "Seobway",
+    "readTime": 12,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-06T00:00:00.000Z",
+    "updatedAt": "2026-04-06T09:48:27.768Z"
+  },
+  {
+    "id": "mysql-backup-k8s",
+    "title": "K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로",
+    "slug": "mysql-backup-k8s",
+    "excerpt": "백업 크론은 돌고 있었다. 그런데 실제로 백업이 되고 있었을까. rsync 기반 물리 백업에서 K8s CronJob+mysqldump 논리 백업으로 전환한 과정과 이유를 정리한다.\n",
+    "content": "<p>백업이 있다고 안심하다가 정작 복구할 때 안 된다는 걸 알게 되는 게 최악의 시나리오다.</p>\n<p>우리 서버에도 백업 스크립트가 있었다. 매일 새벽 3시에 크론이 돌았고, 로그에는 &quot;백업 완료&quot;가 찍혔다. 그런데 막상 뜯어보니 문제가 한두 가지가 아니었다.</p>\n<hr>\n<h2>V1: 있었지만 믿을 수 없었던 백업</h2>\n<p>기존 스크립트는 <code>/home/vegeterian/backup/container/rsync_backup.sh</code>였다. 노드 crontab에 등록되어 있었고, 새벽 3시에 자동 실행됐다.</p>\n<pre><code class=\"language-bash\">0 3 * * * /home/vegeterian/backup/container/rsync_backup.sh\n</code></pre>\n<p>스크립트가 백업하는 항목:</p>\n<ul>\n<li>uploads 디렉터리</li>\n<li>Grafana / Loki / Prometheus 볼륨</li>\n<li><strong>MySQL 데이터 디렉터리 (ibdata, ibd 등 물리 파일)</strong></li>\n</ul>\n<p>여기서 첫 번째 문제가 보인다. MySQL을 <strong>물리 백업</strong>으로 처리하고 있었다.</p>\n<h3>문제 1: 실행 중 물리 백업의 위험</h3>\n<p>MySQL이 돌고 있는 상태에서 데이터 디렉터리를 rsync로 복사하면, 복사 도중에도 MySQL이 파일을 계속 변경한다. 결과물은 특정 시점의 일관된 스냅샷이 아니다.</p>\n<p>스크립트 주석에도 &quot;MySQL (컨테이너 중지 후 권장)&quot;이라고 적혀 있었다. 알고 있었지만 중지하지 않고 돌리고 있었다는 뜻이다. 이 상태의 덤프로 복구하면 InnoDB 내부 불일치로 복구 자체가 실패할 수 있다.<sup id=\"fnref-mysql-backup-types\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-mysql-backup-types\" aria-label=\"각주 1\">[1]</a></sup></p>\n<h3>문제 2: 실패가 가려지는 구조</h3>\n<p>대상 경로(<code>/mnt/backup/daesan-server/...</code>)가 존재하지 않으면 rsync가 <code>mkdir ... failed: No such file or directory</code> 오류를 냈다. 그런데 스크립트는 오류 여부를 확인하지 않고 마지막에 무조건 &quot;백업 완료&quot;를 로그에 남겼다.</p>\n<pre><code class=\"language-bash\"># 실제 스크립트의 구조 (의사 코드)\nrsync -av /source/ /mnt/backup/daesan-server/  # 실패해도\necho &quot;백업 완료 $(date)&quot;                          # 항상 출력\n</code></pre>\n<p>새벽 3시 로그를 아침에 확인하면 항상 성공처럼 보였다.</p>\n<h3>문제 3: PMS DB를 백업하는 건지 불명확</h3>\n<p><code>pms-web</code> 네임스페이스에는 MySQL Pod가 없었다. MySQL은 다른 스택(<code>daesan-webpage-server</code>)에서 운영됐고, 스크립트는 그 스택의 볼륨 경로를 백업했다. 과연 이 백업이 PMS 운영 DB를 백업하는 것인지 확인할 방법이 없었다.</p>\n<hr>\n<h2>무엇이 달라야 하는가</h2>\n<p>정리하면 세 가지가 필요했다.</p>\n<ol>\n<li><strong>논리 백업(mysqldump)으로 전환</strong> — 실행 중에도 일관된 덤프 가능</li>\n<li><strong>실패가 실패로 기록되는 구조</strong> — exit code 기반 성공/실패 판단</li>\n<li><strong>백업 대상이 명확해야 함</strong> — 어떤 DB를 백업하는지 코드에 드러나야 함</li>\n</ol>\n<p>그리고 K8s 환경이면 노드 crontab보다 <strong>K8s CronJob</strong>이 자연스럽다. 클러스터 안에서 관리되고, kubectl로 상태를 확인할 수 있고, Secret을 통해 DB 접속정보를 주입할 수 있다.</p>\n<hr>\n<h2>V2: K8s CronJob + mysqldump</h2>\n<h3>핵심 아이디어: Secret에서 접속정보 읽기</h3>\n<p>DB 비밀번호를 스크립트에 하드코딩하지 않는다. 이미 <code>pms-web-secrets</code>라는 Secret이 있고, 거기에 <code>DATABASE_URL</code>이 들어 있었다.</p>\n<pre><code>DATABASE_URL=mysql://user:password@host:3306/dbname\n</code></pre>\n<p>CronJob에서 <code>envFrom.secretRef</code>로 이 Secret을 주입하고, 컨테이너 안에서 URL을 파싱해 mysqldump에 넘긴다.</p>\n<h3>저장 경로 준비</h3>\n<pre><code class=\"language-bash\">sudo mkdir -p /data/pms/mysql-dumps\nsudo chmod 700 /data/pms/mysql-dumps\n</code></pre>\n<p>CronJob에서 이 경로를 <code>hostPath</code>로 마운트한다. <code>/backup</code>으로 매핑한다.</p>\n<h3>CronJob 매니페스트</h3>\n<pre><code class=\"language-yaml\">apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: mysql-dump\n  namespace: pms-web\nspec:\n  schedule: &quot;0 3 * * *&quot;         # 매일 새벽 3시\n  concurrencyPolicy: Forbid      # 이전 job이 안 끝나면 새 job 생성 안 함\n  successfulJobsHistoryLimit: 3\n  failedJobsHistoryLimit: 3\n  jobTemplate:\n    spec:\n      template:\n        spec:\n          restartPolicy: OnFailure\n          containers:\n            - name: mysqldump\n              image: mysql:8.0\n              envFrom:\n                - secretRef:\n                    name: pms-web-secrets   # DATABASE_URL 주입\n              volumeMounts:\n                - name: backup-volume\n                  mountPath: /backup\n              command:\n                - /bin/bash\n                - -c\n                - |\n                  set -euo pipefail\n\n                  # DATABASE_URL 파싱\n                  # 형식: mysql://user:password@host:port/dbname\n                  DB_USER=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*://\\(&lt;sup id=&quot;fnref-ref&quot; style=&quot;scroll-margin-top: 96px;&quot;&gt;&lt;a href=&quot;#fn-ref&quot; aria-label=&quot;각주 2&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;*\\):.*|\\1|p&#39;)\n                  DB_PASS=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*://&lt;sup id=&quot;fnref-ref&quot; style=&quot;scroll-margin-top: 96px;&quot;&gt;&lt;a href=&quot;#fn-ref&quot; aria-label=&quot;각주 2&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;*:\\(&lt;sup id=&quot;fnref-ref-2&quot; style=&quot;scroll-margin-top: 96px;&quot;&gt;&lt;a href=&quot;#fn-ref-2&quot; aria-label=&quot;각주 3&quot;&gt;[3]&lt;/a&gt;&lt;/sup&gt;*\\)@.*|\\1|p&#39;)\n                  DB_HOST=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*@\\(&lt;sup id=&quot;fnref-ref&quot; style=&quot;scroll-margin-top: 96px;&quot;&gt;&lt;a href=&quot;#fn-ref&quot; aria-label=&quot;각주 2&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;*\\):.*|\\1|p&#39;)\n                  DB_PORT=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*:\\([0-9]*\\)/.*|\\1|p&#39;)\n                  DB_NAME=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*/\\(&lt;sup id=&quot;fnref-ref-3&quot; style=&quot;scroll-margin-top: 96px;&quot;&gt;&lt;a href=&quot;#fn-ref-3&quot; aria-label=&quot;각주 4&quot;&gt;[4]&lt;/a&gt;&lt;/sup&gt;*\\).*|\\1|p&#39;)\n\n                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)\n                  OUTPUT=&quot;/backup/${DB_NAME}_${TIMESTAMP}.sql.gz&quot;\n\n                  echo &quot;[$(date)] 백업 시작: $DB_NAME → $OUTPUT&quot;\n\n                  mysqldump \\\n                    -h &quot;$DB_HOST&quot; \\\n                    -P &quot;$DB_PORT&quot; \\\n                    -u &quot;$DB_USER&quot; \\\n                    -p&quot;$DB_PASS&quot; \\\n                    --no-tablespaces \\\n                    --single-transaction \\\n                    --routines \\\n                    &quot;$DB_NAME&quot; \\\n                    | gzip &gt; &quot;$OUTPUT&quot;\n\n                  echo &quot;[$(date)] 백업 완료: $(du -sh &quot;$OUTPUT&quot;)&quot;\n\n                  # 보관 정책: 14일 초과 파일 삭제\n                  find /backup -name &#39;*.sql.gz&#39; -mtime +14 -delete\n                  echo &quot;[$(date)] 보관 정책 적용 완료 (14일 초과 삭제)&quot;\n          volumes:\n            - name: backup-volume\n              hostPath:\n                path: /data/pms/mysql-dumps\n                type: DirectoryOrCreate\n</code></pre>\n<h3>mysqldump 옵션 선택 이유</h3>\n<pre><code class=\"language-bash\">--single-transaction   # InnoDB: 트랜잭션으로 일관된 스냅샷 (테이블 잠금 없음)\n--no-tablespaces       # PROCESS 권한 없어도 실행 가능\n--routines             # 저장 프로시저/함수 포함\n</code></pre>\n<p><code>--single-transaction</code>이 핵심이다. InnoDB 테이블에서 <code>BEGIN TRANSACTION</code> → 덤프 → <code>COMMIT</code> 순으로 동작해, 다른 트랜잭션이 커밋되더라도 일관된 시점의 데이터를 읽는다.<sup id=\"fnref-mysqldump-docs\" style=\"scroll-margin-top: 96px;\"><a href=\"#fn-mysqldump-docs\" aria-label=\"각주 5\">[5]</a></sup> 서비스를 중단하지 않아도 된다.</p>\n<p><code>--no-tablespaces</code>는 초기에 <code>PROCESS privilege</code> 오류가 발생해서 추가했다. 권한을 올리는 대신 옵션으로 해결했다.</p>\n<hr>\n<h2>CronJob 적용 및 확인</h2>\n<pre><code class=\"language-bash\">kubectl apply -f /root/mysql-dump-cronjob.yaml -n pms-web\nkubectl get cronjob -n pms-web mysql-dump\n</code></pre>\n<p>스케줄이 돌기 전에 수동으로 1회 실행해서 즉시 검증할 수 있다.</p>\n<pre><code class=\"language-bash\"># 수동 실행\nkubectl -n pms-web delete job mysql-dump-manual --ignore-not-found\nkubectl -n pms-web create job --from=cronjob/mysql-dump mysql-dump-manual\n\n# 완료 대기\nkubectl -n pms-web wait \\\n  --for=condition=complete job/mysql-dump-manual \\\n  --timeout=600s\n\n# 로그 확인\nkubectl -n pms-web logs job/mysql-dump-manual --tail=200\n</code></pre>\n<p>로그에서 아래를 확인한다:</p>\n<pre><code>[2026-04-06 03:00:12] 백업 시작: pms_db → /backup/pms_db_20260406_030012.sql.gz\n[2026-04-06 03:00:45] 백업 완료: 48M /backup/pms_db_20260406_030012.sql.gz\n[2026-04-06 03:00:45] 보관 정책 적용 완료 (14일 초과 삭제)\n</code></pre>\n<h3>덤프 파일 내용 직접 확인</h3>\n<pre><code class=\"language-bash\"># 노드에서\nls -la /data/pms/mysql-dumps | tail\ndu -sh /data/pms/mysql-dumps\n\n# 파일 내용 앞부분 (mysqldump 헤더와 버전 정보)\nzcat /data/pms/mysql-dumps/pms_db_20260406_030012.sql.gz | head -n 40\n\n# CREATE TABLE 목록\nzcat /data/pms/mysql-dumps/pms_db_20260406_030012.sql.gz | grep -n &quot;CREATE TABLE&quot;\n</code></pre>\n<p>헤더에 <code>mysqldump</code>로 시작하고, CREATE TABLE 문들이 나오면 덤프가 정상이다.</p>\n<hr>\n<h2>V1 vs V2 비교</h2>\n<table>\n<thead>\n<tr>\n<th>항목</th>\n<th>V1 (rsync)</th>\n<th>V2 (CronJob+mysqldump)</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>백업 방식</td>\n<td>물리 파일 복사</td>\n<td>논리 덤프 (SQL)</td>\n</tr>\n<tr>\n<td>실행 중 일관성</td>\n<td>보장 안 됨</td>\n<td><code>--single-transaction</code>으로 보장</td>\n</tr>\n<tr>\n<td>실패 감지</td>\n<td>실패해도 &quot;완료&quot; 출력</td>\n<td><code>set -euo pipefail</code>, exit code 기반</td>\n</tr>\n<tr>\n<td>접속정보 위치</td>\n<td>스크립트 내 하드코딩</td>\n<td>K8s Secret 주입</td>\n</tr>\n<tr>\n<td>관리 위치</td>\n<td>노드 crontab</td>\n<td>K8s CronJob (kubectl로 관리)</td>\n</tr>\n<tr>\n<td>보관 정책</td>\n<td>없음</td>\n<td>14일 자동 삭제</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>그래서 진짜 백업인가</h2>\n<p>파일이 생겼다고 백업이 완성된 게 아니다. <strong>복구가 되어야 백업이다.</strong></p>\n<p>다음 글에서는 이 덤프 파일을 실제로 K3s 클러스터 안에 임시 MySQL Pod를 띄워 import하고, 테이블이 정상인지 확인하는 과정을 다룬다.</p>\n<hr>\n<h2>참고</h2>\n<ol>\n<li id=\"fn-mysql-backup-types\" style=\"scroll-margin-top: 96px;\">MySQL Documentation — Backup and Recovery Types: https://dev.mysql.com/doc/refman/8.0/en/backup-types.html <a href=\"#fnref-mysql-backup-types\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-ref\" style=\"scroll-margin-top: 96px;\"> <a href=\"#fnref-ref\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-ref-2\" style=\"scroll-margin-top: 96px;\"> <a href=\"#fnref-ref-2\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-ref-3\" style=\"scroll-margin-top: 96px;\"> <a href=\"#fnref-ref-3\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n<li id=\"fn-mysqldump-docs\" style=\"scroll-margin-top: 96px;\">MySQL Documentation — mysqldump: https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html <a href=\"#fnref-mysqldump-docs\" aria-label=\"본문으로 돌아가기\">↩</a></li>\n</ol>\n",
+    "coverImage": null,
+    "category": "study/infra/kubernetes",
+    "tags": [
+      "Kubernetes",
+      "k3s",
+      "MySQL",
+      "mysqldump",
+      "CronJob",
+      "Backup",
+      "DevOps",
+      "인프라",
+      "데이터베이스"
+    ],
+    "author": "Seobway",
+    "readTime": 14,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-06T00:00:00.000Z",
+    "updatedAt": "2026-04-06T09:48:27.766Z"
+  },
+  {
     "id": "claude-code-harness-leak-architecture",
     "title": "Claude Code 하네스 유출이 말해 주는 것 — 모델이 아니라 오케스트레이션",
     "slug": "claude-code-harness-leak-architecture",
@@ -22,7 +74,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.932Z"
+    "updatedAt": "2026-04-06T09:48:27.670Z"
   },
   {
     "id": "micro-hub-and-switch",
@@ -49,7 +101,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.042Z"
+    "updatedAt": "2026-04-06T09:48:27.795Z"
   },
   {
     "id": "micro-ethernet-nic-cable",
@@ -74,7 +126,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.038Z"
+    "updatedAt": "2026-04-06T09:48:27.788Z"
   },
   {
     "id": "kubectl-debugging",
@@ -99,7 +151,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.020Z"
+    "updatedAt": "2026-04-06T09:48:27.764Z"
   },
   {
     "id": "jenkins-argocd-gitops",
@@ -125,7 +177,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.014Z"
+    "updatedAt": "2026-04-06T09:48:27.753Z"
   },
   {
     "id": "drf-views",
@@ -152,7 +204,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.971Z"
+    "updatedAt": "2026-04-06T09:48:27.710Z"
   },
   {
     "id": "drf-serializer-validation",
@@ -176,7 +228,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.969Z"
+    "updatedAt": "2026-04-06T09:48:27.708Z"
   },
   {
     "id": "drf-overview",
@@ -202,7 +254,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.968Z"
+    "updatedAt": "2026-04-06T09:48:27.707Z"
   },
   {
     "id": "drf-authentication",
@@ -228,7 +280,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.966Z"
+    "updatedAt": "2026-04-06T09:48:27.704Z"
   },
   {
     "id": "django-urls",
@@ -255,7 +307,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.962Z"
+    "updatedAt": "2026-04-06T09:48:27.700Z"
   },
   {
     "id": "django-object-permissions",
@@ -279,7 +331,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.957Z"
+    "updatedAt": "2026-04-06T09:48:27.694Z"
   },
   {
     "id": "django-models",
@@ -306,7 +358,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.955Z"
+    "updatedAt": "2026-04-06T09:48:27.692Z"
   },
   {
     "id": "why-threejs-exists",
@@ -327,7 +379,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.994Z"
+    "updatedAt": "2026-04-06T09:48:27.733Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -349,7 +401,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.993Z"
+    "updatedAt": "2026-04-06T09:48:27.732Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -371,7 +423,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.990Z"
+    "updatedAt": "2026-04-06T09:48:27.729Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
@@ -393,7 +445,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.988Z"
+    "updatedAt": "2026-04-06T09:48:27.727Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -415,7 +467,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.986Z"
+    "updatedAt": "2026-04-06T09:48:27.725Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -437,7 +489,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.985Z"
+    "updatedAt": "2026-04-06T09:48:27.724Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -459,7 +511,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.984Z"
+    "updatedAt": "2026-04-06T09:48:27.723Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -494,7 +546,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.019Z"
+    "updatedAt": "2026-04-06T09:48:27.762Z"
   },
   {
     "id": "react-query-queries",
@@ -519,7 +571,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.983Z"
+    "updatedAt": "2026-04-06T09:48:27.721Z"
   },
   {
     "id": "react-query-overview",
@@ -543,7 +595,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.981Z"
+    "updatedAt": "2026-04-06T09:48:27.720Z"
   },
   {
     "id": "react-query-mutations",
@@ -566,7 +618,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.980Z"
+    "updatedAt": "2026-04-06T09:48:27.718Z"
   },
   {
     "id": "react-query-cache",
@@ -590,7 +642,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.978Z"
+    "updatedAt": "2026-04-06T09:48:27.717Z"
   },
   {
     "id": "react-query-advanced",
@@ -614,7 +666,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.976Z"
+    "updatedAt": "2026-04-06T09:48:27.714Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -639,7 +691,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.943Z"
+    "updatedAt": "2026-04-06T09:48:27.680Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -662,7 +714,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.940Z"
+    "updatedAt": "2026-04-06T09:48:27.678Z"
   },
   {
     "id": "gstack-overview",
@@ -686,7 +738,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.938Z"
+    "updatedAt": "2026-04-06T09:48:27.675Z"
   },
   {
     "id": "django-security",
@@ -712,7 +764,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.960Z"
+    "updatedAt": "2026-04-06T09:48:27.698Z"
   },
   {
     "id": "django-overview",
@@ -738,7 +790,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.973Z"
+    "updatedAt": "2026-04-06T09:48:27.711Z"
   },
   {
     "id": "django-orm-deep",
@@ -764,7 +816,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.958Z"
+    "updatedAt": "2026-04-06T09:48:27.696Z"
   },
   {
     "id": "django-lifecycle",
@@ -791,7 +843,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.947Z"
+    "updatedAt": "2026-04-06T09:48:27.685Z"
   },
   {
     "id": "django-architecture",
@@ -818,7 +870,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.945Z"
+    "updatedAt": "2026-04-06T09:48:27.683Z"
   },
   {
     "id": "docker-compose-django",
@@ -843,7 +895,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.009Z"
+    "updatedAt": "2026-04-06T09:48:27.748Z"
   },
   {
     "id": "docker-compose-basics",
@@ -867,7 +919,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.007Z"
+    "updatedAt": "2026-04-06T09:48:27.747Z"
   },
   {
     "id": "docker-basics",
@@ -890,7 +942,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.005Z"
+    "updatedAt": "2026-04-06T09:48:27.745Z"
   },
   {
     "id": "django-version-compatibility",
@@ -915,7 +967,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.963Z"
+    "updatedAt": "2026-04-06T09:48:27.702Z"
   },
   {
     "id": "django-settings",
@@ -940,7 +992,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.974Z"
+    "updatedAt": "2026-04-06T09:48:27.713Z"
   },
   {
     "id": "django-migration",
@@ -965,7 +1017,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.949Z"
+    "updatedAt": "2026-04-06T09:48:27.687Z"
   },
   {
     "id": "celery-worker",
@@ -992,7 +1044,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.000Z"
+    "updatedAt": "2026-04-06T09:48:27.740Z"
   },
   {
     "id": "celery-django",
@@ -1018,7 +1070,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.002Z"
+    "updatedAt": "2026-04-06T09:48:27.742Z"
   },
   {
     "id": "celery-broker",
@@ -1044,7 +1096,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.998Z"
+    "updatedAt": "2026-04-06T09:48:27.737Z"
   },
   {
     "id": "celery-beat",
@@ -1068,7 +1120,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:58.996Z"
+    "updatedAt": "2026-04-06T09:48:27.735Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -1092,7 +1144,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.035Z"
+    "updatedAt": "2026-04-06T09:48:27.784Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -1117,7 +1169,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.054Z"
+    "updatedAt": "2026-04-06T09:48:27.807Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -1140,7 +1192,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.053Z"
+    "updatedAt": "2026-04-06T09:48:27.806Z"
   },
   {
     "id": "micro-protocol",
@@ -1163,7 +1215,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.050Z"
+    "updatedAt": "2026-04-06T09:48:27.804Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -1191,7 +1243,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.049Z"
+    "updatedAt": "2026-04-06T09:48:27.802Z"
   },
   {
     "id": "micro-network-view",
@@ -1216,7 +1268,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.025Z"
+    "updatedAt": "2026-04-06T09:48:27.775Z"
   },
   {
     "id": "micro-network-traffic",
@@ -1241,7 +1293,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.047Z"
+    "updatedAt": "2026-04-06T09:48:27.801Z"
   },
   {
     "id": "micro-ip-arp",
@@ -1266,7 +1318,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.045Z"
+    "updatedAt": "2026-04-06T09:48:27.798Z"
   },
   {
     "id": "micro-http-https",
@@ -1293,7 +1345,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.040Z"
+    "updatedAt": "2026-04-06T09:48:27.793Z"
   },
   {
     "id": "micro-encapsulation",
@@ -1319,7 +1371,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.037Z"
+    "updatedAt": "2026-04-06T09:48:27.786Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -1342,7 +1394,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.034Z"
+    "updatedAt": "2026-04-06T09:48:27.782Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -1366,7 +1418,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.032Z"
+    "updatedAt": "2026-04-06T09:48:27.780Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -1388,7 +1440,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.029Z"
+    "updatedAt": "2026-04-06T09:48:27.779Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -1411,7 +1463,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.027Z"
+    "updatedAt": "2026-04-06T09:48:27.778Z"
   },
   {
     "id": "macro-network-view",
@@ -1434,7 +1486,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.022Z"
+    "updatedAt": "2026-04-06T09:48:27.771Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -1458,7 +1510,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.012Z"
+    "updatedAt": "2026-04-06T09:48:27.751Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -1481,6 +1533,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-06T01:38:59.010Z"
+    "updatedAt": "2026-04-06T09:48:27.750Z"
   }
 ]

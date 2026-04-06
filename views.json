@@ -42,6 +42,8 @@
   "jenkins-argocd-gitops": 0,
   "k8s-zero-downtime-deployment": 8,
   "kubectl-debugging": 0,
+  "mysql-backup-k8s": 0,
+  "mysql-restore-test": 0,
   "macro-network-view": 5,
   "micro-network-view": 0,
   "cdn-content-delivery-network": 0,

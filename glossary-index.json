@@ -13,7 +13,9 @@
   "namespace": [
     "django-models",
     "django-urls",
-    "k8s-zero-downtime-deployment"
+    "k8s-zero-downtime-deployment",
+    "mysql-backup-k8s",
+    "mysql-restore-test"
   ],
   "service": [
     "drf-authentication",
@@ -23,6 +25,8 @@
     "docker-compose-basics",
     "docker-compose-django",
     "k8s-zero-downtime-deployment",
+    "mysql-backup-k8s",
+    "mysql-restore-test",
     "macro-network-view",
     "cdn-content-delivery-network",
     "circuit-vs-packet-switching",
@@ -36,13 +40,17 @@
     "gitlab-cicd-guide",
     "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment",
-    "kubectl-debugging"
+    "kubectl-debugging",
+    "mysql-backup-k8s",
+    "mysql-restore-test"
   ],
   "pod": [
     "gitlab-cicd-guide",
     "jenkins-argocd-gitops",
     "k8s-zero-downtime-deployment",
-    "kubectl-debugging"
+    "kubectl-debugging",
+    "mysql-backup-k8s",
+    "mysql-restore-test"
   ],
   "deployment": [
     "gitlab-cicd-guide",

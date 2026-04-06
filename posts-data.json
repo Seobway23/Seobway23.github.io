@@ -215,6 +215,16 @@
     "path": "/post/study/infra/kubernetes/kubectl-debugging"
   },
   {
+    "slug": "mysql-backup-k8s",
+    "title": "K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로",
+    "path": "/post/study/infra/kubernetes/mysql-backup-k8s"
+  },
+  {
+    "slug": "mysql-restore-test",
+    "title": "백업의 증명 — K3s에서 mysqldump 복구 테스트",
+    "path": "/post/study/infra/kubernetes/mysql-restore-test"
+  },
+  {
     "slug": "macro-network-view",
     "title": "거시 네트워크",
     "path": "/post/study/network/chapter01"
