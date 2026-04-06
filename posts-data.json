@@ -250,9 +250,19 @@
     "path": "/post/study/network/micro/encapsulation"
   },
   {
+    "slug": "micro-ethernet-nic-cable",
+    "title": "랜선 꽂으면 왜 연결이 될까 — 이더넷, NIC, 케이블 이야기",
+    "path": "/post/study/network/micro/ethernet-nic-cable"
+  },
+  {
     "slug": "micro-http-https",
     "title": "HTTP와 HTTPS — 웹을 움직이는 프로토콜",
     "path": "/post/study/network/micro/http-https"
+  },
+  {
+    "slug": "micro-hub-and-switch",
+    "title": "허브는 왜 사라졌을까 — 허브와 스위치, 충돌의 역사",
+    "path": "/post/study/network/micro/hub-and-switch"
   },
   {
     "slug": "micro-ip-arp",
