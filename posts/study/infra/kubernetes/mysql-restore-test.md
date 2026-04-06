@@ -42,13 +42,13 @@ flowchart TD
 먼저 어떤 파일을 복구할지 정한다.
 
 ```bash
-ls -la /data/pms/mysql-dumps | tail -10
-du -sh /data/pms/mysql-dumps
+ls -la /data/app/mysql-dumps | tail -10
+du -sh /data/app/mysql-dumps
 ```
 
 ```bash
 # 복구할 파일 지정 (실제 파일명으로 변경)
-DUMP=/data/pms/mysql-dumps/pms_db_20260406_030012.sql.gz
+DUMP=/data/app/mysql-dumps/app_db_20260406_030012.sql.gz
 ```
 
 파일 내용이 정상인지 미리 확인해두면 좋다.
@@ -65,7 +65,7 @@ zcat "$DUMP" | grep -n "CREATE TABLE" | head -20
 
 ## 1) 테스트 네임스페이스와 Pod 준비
 
-운영 네임스페이스(`pms-web`)와 완전히 분리된 공간을 만든다. 테스트가 끝나면 이 네임스페이스째 삭제한다.
+운영 네임스페이스(`app-prod`)와 완전히 분리된 공간을 만든다. 테스트가 끝나면 이 네임스페이스째 삭제한다.
 
 ```bash
 kubectl create ns mysql-restore-test
@@ -86,7 +86,7 @@ kubectl -n mysql-restore-test expose pod mysql-test \
 
 여기서 흔히 실수하는 부분이 있다.
 
-`kubectl wait --for=condition=Ready pod/mysql-test`로 Pod가 Ready가 됐다고 해서 MySQL에 바로 접속할 수 있는 게 아니다. readinessProbe를 설정하지 않으면 컨테이너가 시작되자마자 Ready 상태가 된다. 하지만 MySQL 초기화(root 비밀번호 설정, 시스템 테이블 생성 등)는 아직 진행 중일 수 있다.[^k8s-readiness]
+`kubectl wait --for=condition=Ready pod/mysql-test`로 Pod가 Ready가 됐다고 해서 MySQL에 바로 접속할 수 있는 게 아니다. readinessProbe를 설정하지 않으면 컨테이너가 시작되자마자 Ready 상태가 된다. 하지만 MySQL 초기화(root 비밀번호 설정, 시스템 테이블 생성 등)는 아직 진행 중일 수 있다.<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/" target="_blank"><sup>[1]</sup></a>
 
 이 상태에서 접속하면 아래 오류가 나온다:
 
@@ -131,7 +131,7 @@ echo "MySQL 준비 완료"
 ```bash
 kubectl -n mysql-restore-test exec mysql-test -- \
   mysql -uroot -ptestpass \
-  -e "CREATE DATABASE pms_restore_test
+  -e "CREATE DATABASE app_restore_test
       DEFAULT CHARACTER SET utf8mb4
       COLLATE utf8mb4_unicode_ci;"
 ```
@@ -146,7 +146,7 @@ kubectl -n mysql-restore-test exec mysql-test -- \
 
 ```bash
 gunzip -c "$DUMP" | kubectl -n mysql-restore-test exec -i mysql-test -- \
-  mysql -uroot -ptestpass pms_restore_test
+  mysql -uroot -ptestpass app_restore_test
 ```
 
 DB 크기에 따라 수십 초~수 분이 걸릴 수 있다. 오류 없이 프롬프트로 돌아오면 완료다.
@@ -166,7 +166,7 @@ kubectl -n mysql-restore-test logs pod/mysql-test --tail=100
 ```bash
 kubectl -n mysql-restore-test exec mysql-test -- \
   mysql -uroot -ptestpass \
-  -D pms_restore_test \
+  -D app_restore_test \
   -e "SHOW TABLES;"
 ```
 
@@ -180,7 +180,7 @@ kubectl -n mysql-restore-test exec mysql-test -- \
 # 테이블명은 실제 존재하는 것으로 변경
 kubectl -n mysql-restore-test exec mysql-test -- \
   mysql -uroot -ptestpass \
-  -D pms_restore_test \
+  -D app_restore_test \
   -e "SELECT COUNT(*) FROM users;
       SELECT COUNT(*) FROM orders;
       SELECT COUNT(*) FROM products;"
@@ -193,7 +193,7 @@ kubectl -n mysql-restore-test exec mysql-test -- \
 ```bash
 kubectl -n mysql-restore-test exec mysql-test -- \
   mysql -uroot -ptestpass \
-  -D pms_restore_test \
+  -D app_restore_test \
   -e "SELECT id, created_at FROM users ORDER BY created_at DESC LIMIT 5;"
 ```
 
@@ -237,7 +237,7 @@ zcat "$DUMP" | grep "FOREIGN_KEY_CHECKS"
 ```bash
 gunzip -c "$DUMP" | kubectl -n mysql-restore-test exec -i mysql-test -- \
   mysql -uroot -ptestpass \
-  -e "SET FOREIGN_KEY_CHECKS=0;" pms_restore_test
+  -e "SET FOREIGN_KEY_CHECKS=0;" app_restore_test
 ```
 
 ### import가 너무 오래 걸림
@@ -269,9 +269,11 @@ kubectl -n mysql-restore-test top pod mysql-test
 
 ---
 
-## References
+## 참고
 
-[^mysqldump-docs]: MySQL Documentation — mysqldump: https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html
-[^k8s-readiness]: Kubernetes Documentation — Configure Liveness, Readiness and Startup Probes: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-[^k8s-namespace]: Kubernetes Documentation — Namespaces: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
-[^mysql-restore]: MySQL Documentation — Reloading SQL-Format Backups: https://dev.mysql.com/doc/refman/8.0/en/reloading-sql-format-dumps.html
+<ol>
+<li><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/" target="_blank">[1] Configure Liveness, Readiness and Startup Probes — Kubernetes Documentation</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html" target="_blank">[2] mysqldump — MySQL Documentation</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/8.0/en/reloading-sql-format-dumps.html" target="_blank">[3] Reloading SQL-Format Backups — MySQL Documentation</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/" target="_blank">[4] Namespaces — Kubernetes Documentation</a></li>
+</ol>
