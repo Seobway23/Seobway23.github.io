@@ -246,6 +246,26 @@ function fixBoldBeforeCJK(markdown) {
     .join("");
 }
 
+/**
+ * LaTeX 괄호 수식 표기(\(...\), \[...\])를 달러 표기($...$, $$...$$)로 정규화한다.
+ * - 이 프로젝트의 수식 파이프라인은 $/$$ 기반이라, 작성자가 관성적으로 \( \)를 쓰면 렌더링이 깨진다.
+ * - 코드 펜스 내부는 절대 변환하지 않는다.
+ */
+function normalizeLatexDelimiters(markdown) {
+  if (!markdown || typeof markdown !== "string") return markdown || "";
+  const parts = markdown.split(/(```[\s\S]*?```)/g);
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 1) return part; // 코드 블록
+      // display: \[ ... \]  -> $$ ... $$
+      let s = part.replace(/\\\[((?:.|\n)*?)\\\]/g, (_m, inner) => `\n$$\n${String(inner).trim()}\n$$\n`);
+      // inline: \( ... \) -> $ ... $
+      s = s.replace(/\\\(((?:.|\n)*?)\\\)/g, (_m, inner) => `$${String(inner).trim()}$`);
+      return s;
+    })
+    .join("");
+}
+
 function escapeHtml(text) {
   return String(text)
     .replace(/&/g, "&amp;")
@@ -253,6 +273,166 @@ function escapeHtml(text) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+/**
+ * 코드 탭 블록 처리
+ *
+ * 작성 문법:
+ * <!-- code-tabs:start -->
+ * ```typescript
+ * ...
+ * ```
+ * ```python
+ * ...
+ * ```
+ * <!-- code-tabs:end -->
+ *
+ * - start/end 사이의 "연속된 코드 펜스들"을 하나의 탭 UI로 묶는다.
+ * - 마크다운 → HTML 변환(marked) 후 placeholder를 최종 HTML로 치환한다.
+ */
+function processCodeTabs(markdown) {
+  if (!markdown || typeof markdown !== "string") {
+    return { markdown: markdown || "", slots: [] };
+  }
+
+  const START = "<!-- code-tabs:start -->";
+  const END = "<!-- code-tabs:end -->";
+
+  const lines = String(markdown).split("\n");
+  const slots = [];
+  let out = [];
+
+  let i = 0;
+  let n = 0;
+  const nextIndex = () => n++;
+
+  const isFenceStart = (line) => /^```/.test(line.trim());
+  const parseFenceInfo = (line) => {
+    const m = line.trim().match(/^```([a-zA-Z0-9_-]+)?\s*$/);
+    return { lang: (m && m[1] ? m[1] : "").trim() };
+  };
+
+  while (i < lines.length) {
+    const line = lines[i].replace(/\r$/, "");
+    if (line.trim() !== START) {
+      out.push(line);
+      i++;
+      continue;
+    }
+
+    // start
+    i++;
+    const tabs = [];
+
+    while (i < lines.length) {
+      const cur = lines[i].replace(/\r$/, "");
+      if (cur.trim() === END) {
+        i++;
+        break;
+      }
+
+      if (!isFenceStart(cur)) {
+        // start/end 안에서는 코드 펜스만 허용. 그 외는 무시(공백 등).
+        i++;
+        continue;
+      }
+
+      const { lang } = parseFenceInfo(cur);
+      i++;
+      const body = [];
+      while (i < lines.length) {
+        const l = lines[i].replace(/\r$/, "");
+        if (l.trim() === "```") {
+          i++;
+          break;
+        }
+        body.push(l);
+        i++;
+      }
+
+      const rawLang = lang || "plaintext";
+      const normalizedLang =
+        rawLang.toLowerCase() === "ts"
+          ? "typescript"
+          : rawLang.toLowerCase() === "js"
+            ? "javascript"
+            : rawLang.toLowerCase() === "py"
+              ? "python"
+              : rawLang.toLowerCase() === "c++"
+                ? "cpp"
+                : rawLang.toLowerCase();
+
+      const label =
+        normalizedLang === "typescript"
+          ? "TypeScript"
+          : normalizedLang === "javascript"
+            ? "JavaScript"
+            : normalizedLang === "python"
+              ? "Python"
+              : normalizedLang === "cpp"
+                ? "C++"
+                : normalizedLang;
+
+      tabs.push({
+        lang: normalizedLang || "plaintext",
+        label,
+        code: body.join("\n"),
+      });
+    }
+
+    // 탭이 2개 이상일 때만 탭 UI로 만든다. (1개면 그냥 원문 유지)
+    if (tabs.length < 2) {
+      out.push(START);
+      for (const t of tabs) {
+        out.push(`\`\`\`${t.lang}`);
+        out.push(t.code);
+        out.push("```");
+      }
+      out.push(END);
+      continue;
+    }
+
+    const id = `CODETABSPX${nextIndex()}CODETABSPX`;
+    slots.push({ id, tabs });
+    out.push(id);
+  }
+
+  return { markdown: out.join("\n"), slots };
+}
+
+function injectCodeTabsPlaceholdersIntoHtml(html, slots) {
+  let result = String(html || "");
+  if (!slots || slots.length === 0) return result;
+
+  const build = (slot, idx) => {
+    const groupId = `code-tabs-${idx}`;
+    const triggers = slot.tabs
+      .map((t, i) => {
+        const isActive = i === 0;
+        return `<button type="button" class="code-tabs__trigger" role="tab" aria-selected="${isActive}" aria-controls="${groupId}-panel-${i}" data-code-tab="${escapeHtml(t.lang)}" data-code-tab-index="${i}">${escapeHtml(t.label)}</button>`;
+      })
+      .join("");
+
+    const panels = slot.tabs
+      .map((t, i) => {
+        const isActive = i === 0;
+        return `<div class="code-tabs__panel" role="tabpanel" id="${groupId}-panel-${i}" data-code-panel="${escapeHtml(t.lang)}" data-code-panel-index="${i}" ${isActive ? "" : "hidden"}><pre><code class="language-${escapeHtml(t.lang)}">${escapeHtml(t.code)}</code></pre></div>`;
+      })
+      .join("");
+
+    return `<div class="code-tabs" data-code-tabs data-code-tabs-id="${groupId}"><div class="code-tabs__list" role="tablist">${triggers}</div>${panels}</div>`;
+  };
+
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
+    if (!result.includes(slot.id)) {
+      console.warn(`⚠️ 코드탭 플레이스홀더가 HTML에 없음: ${slot.id}`);
+      continue;
+    }
+    result = result.split(slot.id).join(build(slot, i));
+  }
+  return result;
 }
 
 function loadGlobalGlossary() {
@@ -502,6 +682,11 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     processedContent = processMarkdownFootnotes(processedContent).content;
     // marked v12+: **text**한글 볼드 인식 실패 보정
     processedContent = fixBoldBeforeCJK(processedContent);
+    // 수식 구분자 정규화: \( \), \[ \] -> $ / $$ (코드 블록 제외)
+    processedContent = normalizeLatexDelimiters(processedContent);
+    // 코드 탭 블록 처리 (marked 이후 HTML로 치환)
+    const { markdown: mdWithCodeTabs, slots: codeTabsSlots } = processCodeTabs(processedContent);
+    processedContent = mdWithCodeTabs;
 
     // 글별 용어 사전 (frontmatter glossary)
     // - { termId: "설명", ... } 형태만 허용
@@ -545,8 +730,9 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
       return `<a href="${finalHref}"${titleAttr}>${text}</a>`;
     };
 
-    // 마크다운을 HTML로 변환 후 수식 플레이스홀더를 KaTeX로 복원
-    const htmlContent = injectKatexPlaceholdersIntoHtml(marked.parse(mdForMarked, { renderer }), mathSlots);
+    // 마크다운을 HTML로 변환 후 수식 플레이스홀더를 KaTeX로 복원 + 코드탭 플레이스홀더 치환
+    const htmlWithMath = injectKatexPlaceholdersIntoHtml(marked.parse(mdForMarked, { renderer }), mathSlots);
+    const htmlContent = injectCodeTabsPlaceholdersIntoHtml(htmlWithMath, codeTabsSlots);
 
     // excerpt 생성 (frontmatter에 없으면 content에서 추출)
     let excerpt = data.excerpt || "";

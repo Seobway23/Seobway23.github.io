@@ -23,6 +23,7 @@ import css from "highlight.js/lib/languages/css";
 import html from "highlight.js/lib/languages/xml";
 import bash from "highlight.js/lib/languages/bash";
 import python from "highlight.js/lib/languages/python";
+import cpp from "highlight.js/lib/languages/cpp";
 import yaml from "highlight.js/lib/languages/yaml";
 import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
@@ -41,6 +42,7 @@ hljs.registerLanguage("css", css);
 hljs.registerLanguage("html", html);
 hljs.registerLanguage("bash", bash);
 hljs.registerLanguage("python", python);
+hljs.registerLanguage("cpp", cpp);
 hljs.registerLanguage("yaml", yaml);
 hljs.registerLanguage("json", json);
 hljs.registerLanguage("sql", sql);
@@ -341,6 +343,48 @@ export default function Post() {
   useEffect(() => {
     if (post && contentRef.current) {
       const timer = setTimeout(async () => {
+        // 0) Code tabs 초기화 (DOM 기반)
+        const initCodeTabs = (root: HTMLElement) => {
+          const groups = root.querySelectorAll<HTMLElement>("[data-code-tabs]");
+          groups.forEach((group) => {
+            if (group.dataset.codeTabsInitialized === "true") return;
+            group.dataset.codeTabsInitialized = "true";
+
+            const triggers = Array.from(
+              group.querySelectorAll<HTMLButtonElement>(".code-tabs__trigger")
+            );
+            const panels = Array.from(
+              group.querySelectorAll<HTMLElement>(".code-tabs__panel")
+            );
+            if (triggers.length === 0 || panels.length === 0) return;
+
+            const setActive = (idx: number) => {
+              triggers.forEach((t, i) => {
+                const active = i === idx;
+                t.setAttribute("aria-selected", active ? "true" : "false");
+                if (active) t.classList.add("is-active");
+                else t.classList.remove("is-active");
+              });
+              panels.forEach((p, i) => {
+                const active = i === idx;
+                if (active) p.removeAttribute("hidden");
+                else p.setAttribute("hidden", "");
+              });
+            };
+
+            triggers.forEach((t) => {
+              t.addEventListener("click", () => {
+                const idx = Number(t.dataset.codeTabIndex || "0");
+                setActive(Number.isFinite(idx) ? idx : 0);
+              });
+            });
+
+            setActive(0);
+          });
+        };
+
+        initCodeTabs(contentRef.current);
+
         // 1) hljs: mermaid 블록 제외하고 하이라이팅
         const codeBlocks = contentRef.current?.querySelectorAll("pre code");
         if (codeBlocks) {

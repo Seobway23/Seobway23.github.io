@@ -606,6 +606,51 @@ html:not(.dark) .prose :not(pre) > code {
   color: inherit;
 }
 
+/* ─── Code tabs (markdown → HTML 후처리) ─────────────────────────────── */
+.prose .code-tabs {
+  margin: 1.5rem 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+.prose .code-tabs__list {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+}
+
+.prose .code-tabs__trigger {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.prose .code-tabs__trigger.is-active,
+.prose .code-tabs__trigger[aria-selected="true"] {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.prose .code-tabs__panel {
+  margin: 0;
+}
+
+.prose .code-tabs__panel pre {
+  margin: 0;
+  border-radius: 0;
+}
+
 .prose a {
   color: #3b82f6;
   text-decoration: underline;
