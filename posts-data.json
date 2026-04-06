@@ -20,6 +20,11 @@
     "path": "/post/study/ai/gstack/gstack-skills-ship"
   },
   {
+    "slug": "kadane-algorithm",
+    "title": "Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP",
+    "path": "/post/study/algorithm/kadane-algorithm"
+  },
+  {
     "slug": "django-architecture",
     "title": "Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할",
     "path": "/post/study/backend/django/django-architecture"
@@ -223,6 +228,26 @@
     "slug": "mysql-restore-test",
     "title": "백업의 증명 — K3s에서 mysqldump 복구 테스트",
     "path": "/post/study/infra/kubernetes/mysql-restore-test"
+  },
+  {
+    "slug": "mechanics-basics-forces-intro",
+    "title": "힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1)",
+    "path": "/post/study/mechanics/basics/mechanics-basics-forces-intro"
+  },
+  {
+    "slug": "mechanics-basics-moment-intro",
+    "title": "모멘트와 작용점 — ‘어디를 축으로 돌리나’ (역학 기초 2)",
+    "path": "/post/study/mechanics/basics/mechanics-basics-moment-intro"
+  },
+  {
+    "slug": "earth-pressure-overview",
+    "title": "토압이 뭔가요? — 수평 힘 Ph부터 주동·수동·이론 지도까지",
+    "path": "/post/study/mechanics/earth-pressure/earth-pressure-overview"
+  },
+  {
+    "slug": "mechanics-force-equilibrium",
+    "title": "옹벽 힘의 평형 — Ph, 저면 마찰, 미끄럼·전도와 안전율 (토압 시리즈 실전 1)",
+    "path": "/post/study/mechanics/earth-pressure/mechanics-force-equilibrium"
   },
   {
     "slug": "macro-network-view",
