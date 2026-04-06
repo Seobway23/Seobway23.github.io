@@ -1,5 +1,10 @@
 [
   {
+    "slug": "claude-code-harness-leak-architecture",
+    "title": "Claude Code 하네스 유출이 말해 주는 것 — 모델이 아니라 오케스트레이션",
+    "path": "/post/study/ai/claude-code-harness-leak-architecture"
+  },
+  {
     "slug": "gstack-overview",
     "title": "gstack: YC CEO가 공개한 Claude Code 가상 엔지니어링팀 구성법",
     "path": "/post/study/ai/gstack/gstack-overview"

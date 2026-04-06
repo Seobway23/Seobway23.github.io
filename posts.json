@@ -1,5 +1,30 @@
 [
   {
+    "id": "claude-code-harness-leak-architecture",
+    "title": "Claude Code 하네스 유출이 말해 주는 것 — 모델이 아니라 오케스트레이션",
+    "slug": "claude-code-harness-leak-architecture",
+    "excerpt": "2026년 3월 npm 패키지에 실린 소스맵이 Claude Code CLI의 대규모 TypeScript 하네스를 드러냈다. 여기서는 법적 논쟁보다, 공개된 분석을 바탕으로 한 **현재 국면**과 **하네스가 어떻게 짜여 보이는지**만 정리한다.\n",
+    "content": "<h2>무슨 일이 있었나</h2>\n<p>2026년 3월 31일, 보안 연구자 <strong>Chaofan Shou</strong>가 X(트위터)에 <strong>Claude Code<strong> npm 패키지 안에 이상한 </strong>소스맵(<code>.map</code>)</strong> 이 포함돼 있다고 알렸다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a> 곧이어 이 소스맵이 Anthropic 쪽 <strong>Cloudflare R2<strong> 에 올라간 압축 파일을 가리키고, 그 안에 </strong>약 51만 줄·1,900여 개 파일 분량의 TypeScript<strong> 가 들어 있다는 분석이 퍼진다. 외신·보안 블로그에서도 같은 사건을 다루며, 패키징 실수로 </strong>디버깅용 산출물이 공개 배포물에 섞였다</strong>는 점을 공통으로 짚는다.<a href=\"https://helixar.ai/press/anthropic-claude-code-source-leak-npm-source-map/\" target=\"_blank\"><sup>[2]</sup></a></p>\n<p>Anthropic은 <strong>“보안 침해가 아니라 릴리스 패키징상의 휴먼 에러”</strong> 라는 선에서 고객 데이터·자격 증명 유출은 없었다고 밝혔고, <strong>CLI 소스가 노출된 범위</strong>로 제한됐다고 설명한다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a></p>\n<p>기술적 원인으로는 <strong>Bun</strong> 빌드 체인에서 소스맵이 기대와 다르게 포함됐다는 지적(공개 이슈와의 연관)과, <strong><code>.npmignore</code> / 패키지 설정</strong> 으로 막지 못한 채 배포됐다는 이야기가 함께 나온다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a> <strong>2025년 2월에도 비슷한 소스맵 유출</strong> 이 있었다는 정리도 있어, “한 번 고쳤는데 다시”라는 인상을 준다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a></p>\n<hr>\n<h2>이 글의 초점</h2>\n<p>법적·윤리적 논쟁, DMCA, 미러 사이트, <strong>가짜 “유출본” 레포에 심은 악성코드<strong> 같은 주제는 중요하지만, 여기서는 </strong>엔지니어 입장에서 “지금 무엇이 드러났고, 생태계가 어떻게 반응했는가”</strong> 에 맞춘다.</p>\n<p>에이전트형 코딩 도구에서 <strong>모델(가중치·API 뒤의 추론)<strong> 과 </strong>하네스(도구 호출, 권한, 메모리, 컨텍스트·세션 관리)<strong> 를 나누어 보면, 이번 사건은 후자가 </strong>블랙박스가 아니었다는 것을 실물로 보여 준 사례</strong>에 가깝다. 공개된 분석들이 공통으로 짚는 구조는 대략 다음과 같다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a></p>\n<ul>\n<li><strong>권한이 나뉜 다수의 도구</strong>(파일·셸·Git·스크래핑 등)와 샌드박스·접근 제어 쪽 설계</li>\n<li><strong>단기·세션·장기</strong>를 아우르는 <strong>메모리·지속성</strong> 층의 분리</li>\n<li><strong>기능 플래그</strong> 로 아직 공개되지 않은 능력이 코드베이스에 존재한다는 흔적</li>\n<li><strong>MCP<strong> 등 </strong>전송·확장</strong> 방식을 여러 갈래로 두는 부분</li>\n<li>컨텍스트 창을 어떻게 채우고 비울지에 대한 <strong>정리(eviction)·엔트로피</strong> 성격의 로직</li>\n</ul>\n<p>“챗봇에 프롬프트만 얹은 얇은 래퍼”가 아니라, <strong>실사용을 견디기 위한 오케스트레이션 레이어</strong>가 따로 두껍게 깔려 있다는 해석이 설득력을 얻는다.</p>\n<hr>\n<h2>그 직후 GitHub에서 벌어진 일: claw-code와 이슈 탭</h2>\n<p>유출 직후, <strong>Sigrid Jin<strong> 이 이름을 건 </strong>클린룸 재구현<strong> 이 GitHub에 올라오며 짧은 기간에 </strong>스타 수가 10만 단위를 넘어 16만·17만에 가깝게<strong> 불었다는 보도·정리가 있다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a> 저장소 이름·소유자는 포크·이전 등으로 바뀌는 경우가 많아, 숫자는 </strong>검색 시점의 GitHub UI</strong> 를 기준으로 보면 된다. 대표적으로 공개되어 널리 인용되는 저장소는 <strong><code>ultraworkers/claw-code</code></strong> 쪽으로 정리되는 경우가 많다.<a href=\"https://github.com/ultraworkers/claw-code\" target=\"_blank\"><sup>[4]</sup></a></p>\n<p>이런 저장소의 <strong>Issues<strong> 는 단순 버그 리포트 수준을 넘어, </strong>클린룸이 실제로 무엇을 의미하는지<strong>, </strong>라이선스·출처</strong>, <strong>Anthropic과의 관계</strong>, <strong>DMCA·저작권<strong> 을 둘러싼 논쟁이 한꺼번에 몰리는 공간이 됐다. “스타가 많이 달렸다”는 것은 기술적 검증을 대신하지 않지만, </strong>하네스·에이전트 오케스트레이션이 얼마나 많은 개발자의 관심을 끄는 축인지</strong> 를 보여 주는 지표로는 읽을 만하다.</p>\n<hr>\n<h2>위험 요소와 국면</h2>\n<ul>\n<li><strong>패키징·공급망</strong> — 소스맵 한 장이 <strong>IP·로드맵 추론</strong>까지 연결될 수 있다는 점에서, npm 배포 파이프라인은 감사 대상이 된다. 같은 시기에 <strong>별도의 npm 공급망 공격</strong> 이 겹쳤다는 보고도 있어, “유출 소식 + 급히 클론” 조합은 특히 위험하다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a></li>\n<li><strong>DMCA와 생태계<strong> — 광범위한 저장소 네트워크에 대한 조치가 </strong>과도하게 적용<strong>됐다가 일부 </strong>철회<strong>됐다는 서술이 있고, 그 과정에서 </strong>오픈소스 포크·스킬-only 저장소</strong>까지 영향을 받았다는 불만이 제기됐다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a></li>\n<li><strong>가짜 미러·트로이<strong> — “진짜 유출”을 사칭한 저장소에 </strong>정보 탈취·채굴기<strong> 등이 실렸다는 경고가 있다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a> </strong>공식 설치 경로 외 바이너리/소스는 이미 침해된 것으로 가정</strong>하는 편이 안전하다.</li>\n<li><strong>산업 쪽 읽기<strong> — 하네스 설계가 </strong>아키텍처 힌트<strong>로 읽히는 순간, 경쟁 제품 입장에서는 </strong>모델 격차만<strong>이 아니라 </strong>실행·에코시스템·모델–하네스 공동 설계</strong> 쪽 경쟁이 더 드러난다. 기술적 봉인이 어려워지면 <strong>API 과금·구독</strong> 쪽으로 모트가 이동한다는 관측도 나온다.<a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\"><sup>[1]</sup></a></li>\n</ul>\n<hr>\n<h2>마무리</h2>\n<p>이번 사건에서 정리할 수 있는 핵심은 하나다. <strong>에이전트 제품의 가치가 모델 한 축에만 있지 않고, 도구·메모리·컨텍스트·권한이 합쳐진 오케스트레이션<strong> 에도 크게 실려 있다는 점이, 유출된 하네스 분석을 통해 </strong>구체적으로 관찰 가능한 형태<strong>로 드러났다는 것이다. 동시에 </strong>반복된 패키징 실수<strong>, </strong>유출을 빙자한 공급망 공격<strong>, </strong>법·커뮤니티와의 마찰</strong> 은 같은 사건의 다른 면이다.</p>\n<p><strong>Anthropic이 공식 배포하는 경로의 Claude Code만<strong> 쓰고, 출처 불명 “유출 소스”는 </strong>실행도, 그대로 복붙도 하지 않는 것<strong>이 안전하다. 아키텍처는 </strong>합법적인 글·공식 문서·오픈 대안</strong>으로도 충분히 따라갈 수 있다.</p>\n<hr>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://paddo.dev/blog/claude-code-leak-harness-exposed/\" target=\"_blank\">[1] The Claude Code Leak: What the Harness Actually Looks Like — paddo.dev</a></li>\n<li><a href=\"https://helixar.ai/press/anthropic-claude-code-source-leak-npm-source-map/\" target=\"_blank\">[2] Anthropic Claude Code source leak (npm source map) — Helixar.ai 요약</a></li>\n<li><a href=\"https://breached.company/claude-code-source-map-leak-anthropic-2026/\" target=\"_blank\">[3] Claude Code source map leak 개요 — Breached.Company</a></li>\n<li><a href=\"https://github.com/ultraworkers/claw-code\" target=\"_blank\">[4] ultraworkers/claw-code — GitHub</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/gstack-overview\">gstack 개요 — 전체 구조와 철학 →</a> — Claude Code 위에 얹는 스킬·가상 엔지니어링 팀 워크플로</li>\n<li><a href=\"/post/gstack-skills-plan\">gstack Think &amp; Plan 스킬 1~5 →</a> — 기획·플랜 단계 스킬 묶음</li>\n<li><a href=\"/post/gstack-skills-ship\">gstack Build, Test &amp; Ship 스킬 6~13 →</a> — 리뷰·QA·배포 쪽 스킬 묶음</li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/ai",
+    "tags": [
+      "Claude Code",
+      "Anthropic",
+      "AI",
+      "에이전트",
+      "npm",
+      "보안",
+      "하네스",
+      "소스맵"
+    ],
+    "author": "Seobway",
+    "readTime": 9,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-04-06T00:00:00.000Z",
+    "updatedAt": "2026-04-06T01:38:58.932Z"
+  },
+  {
     "id": "micro-hub-and-switch",
     "title": "허브는 왜 사라졌을까 — 허브와 스위치, 충돌의 역사",
     "slug": "micro-hub-and-switch",
@@ -24,7 +49,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.938Z"
+    "updatedAt": "2026-04-06T01:38:59.042Z"
   },
   {
     "id": "micro-ethernet-nic-cable",
@@ -49,7 +74,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.934Z"
+    "updatedAt": "2026-04-06T01:38:59.038Z"
   },
   {
     "id": "kubectl-debugging",
@@ -74,7 +99,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.917Z"
+    "updatedAt": "2026-04-06T01:38:59.020Z"
   },
   {
     "id": "jenkins-argocd-gitops",
@@ -100,7 +125,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.911Z"
+    "updatedAt": "2026-04-06T01:38:59.014Z"
   },
   {
     "id": "drf-views",
@@ -127,7 +152,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.872Z"
+    "updatedAt": "2026-04-06T01:38:58.971Z"
   },
   {
     "id": "drf-serializer-validation",
@@ -151,7 +176,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.870Z"
+    "updatedAt": "2026-04-06T01:38:58.969Z"
   },
   {
     "id": "drf-overview",
@@ -177,7 +202,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.868Z"
+    "updatedAt": "2026-04-06T01:38:58.968Z"
   },
   {
     "id": "drf-authentication",
@@ -203,7 +228,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.866Z"
+    "updatedAt": "2026-04-06T01:38:58.966Z"
   },
   {
     "id": "django-urls",
@@ -230,7 +255,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.862Z"
+    "updatedAt": "2026-04-06T01:38:58.962Z"
   },
   {
     "id": "django-object-permissions",
@@ -254,7 +279,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.857Z"
+    "updatedAt": "2026-04-06T01:38:58.957Z"
   },
   {
     "id": "django-models",
@@ -281,7 +306,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.855Z"
+    "updatedAt": "2026-04-06T01:38:58.955Z"
   },
   {
     "id": "why-threejs-exists",
@@ -302,7 +327,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.892Z"
+    "updatedAt": "2026-04-06T01:38:58.994Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -324,7 +349,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.891Z"
+    "updatedAt": "2026-04-06T01:38:58.993Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -346,7 +371,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.890Z"
+    "updatedAt": "2026-04-06T01:38:58.990Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
@@ -368,7 +393,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.888Z"
+    "updatedAt": "2026-04-06T01:38:58.988Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -390,7 +415,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.887Z"
+    "updatedAt": "2026-04-06T01:38:58.986Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -412,7 +437,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.886Z"
+    "updatedAt": "2026-04-06T01:38:58.985Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -434,7 +459,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.884Z"
+    "updatedAt": "2026-04-06T01:38:58.984Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -469,7 +494,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.916Z"
+    "updatedAt": "2026-04-06T01:38:59.019Z"
   },
   {
     "id": "react-query-queries",
@@ -494,7 +519,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.883Z"
+    "updatedAt": "2026-04-06T01:38:58.983Z"
   },
   {
     "id": "react-query-overview",
@@ -518,7 +543,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.881Z"
+    "updatedAt": "2026-04-06T01:38:58.981Z"
   },
   {
     "id": "react-query-mutations",
@@ -541,7 +566,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.880Z"
+    "updatedAt": "2026-04-06T01:38:58.980Z"
   },
   {
     "id": "react-query-cache",
@@ -565,7 +590,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.878Z"
+    "updatedAt": "2026-04-06T01:38:58.978Z"
   },
   {
     "id": "react-query-advanced",
@@ -589,7 +614,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.877Z"
+    "updatedAt": "2026-04-06T01:38:58.976Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -614,7 +639,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.843Z"
+    "updatedAt": "2026-04-06T01:38:58.943Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -637,7 +662,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.841Z"
+    "updatedAt": "2026-04-06T01:38:58.940Z"
   },
   {
     "id": "gstack-overview",
@@ -661,7 +686,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.836Z"
+    "updatedAt": "2026-04-06T01:38:58.938Z"
   },
   {
     "id": "django-security",
@@ -687,7 +712,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.860Z"
+    "updatedAt": "2026-04-06T01:38:58.960Z"
   },
   {
     "id": "django-overview",
@@ -713,7 +738,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.873Z"
+    "updatedAt": "2026-04-06T01:38:58.973Z"
   },
   {
     "id": "django-orm-deep",
@@ -739,7 +764,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.858Z"
+    "updatedAt": "2026-04-06T01:38:58.958Z"
   },
   {
     "id": "django-lifecycle",
@@ -766,7 +791,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.848Z"
+    "updatedAt": "2026-04-06T01:38:58.947Z"
   },
   {
     "id": "django-architecture",
@@ -793,7 +818,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.845Z"
+    "updatedAt": "2026-04-06T01:38:58.945Z"
   },
   {
     "id": "docker-compose-django",
@@ -818,7 +843,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.903Z"
+    "updatedAt": "2026-04-06T01:38:59.009Z"
   },
   {
     "id": "docker-compose-basics",
@@ -842,7 +867,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.902Z"
+    "updatedAt": "2026-04-06T01:38:59.007Z"
   },
   {
     "id": "docker-basics",
@@ -865,7 +890,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.900Z"
+    "updatedAt": "2026-04-06T01:38:59.005Z"
   },
   {
     "id": "django-version-compatibility",
@@ -890,7 +915,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.864Z"
+    "updatedAt": "2026-04-06T01:38:58.963Z"
   },
   {
     "id": "django-settings",
@@ -915,7 +940,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.876Z"
+    "updatedAt": "2026-04-06T01:38:58.974Z"
   },
   {
     "id": "django-migration",
@@ -940,7 +965,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.849Z"
+    "updatedAt": "2026-04-06T01:38:58.949Z"
   },
   {
     "id": "celery-worker",
@@ -967,7 +992,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.896Z"
+    "updatedAt": "2026-04-06T01:38:59.000Z"
   },
   {
     "id": "celery-django",
@@ -993,7 +1018,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.898Z"
+    "updatedAt": "2026-04-06T01:38:59.002Z"
   },
   {
     "id": "celery-broker",
@@ -1019,7 +1044,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.894Z"
+    "updatedAt": "2026-04-06T01:38:58.998Z"
   },
   {
     "id": "celery-beat",
@@ -1043,7 +1068,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.893Z"
+    "updatedAt": "2026-04-06T01:38:58.996Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -1067,7 +1092,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.930Z"
+    "updatedAt": "2026-04-06T01:38:59.035Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -1092,7 +1117,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.948Z"
+    "updatedAt": "2026-04-06T01:38:59.054Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -1115,7 +1140,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.947Z"
+    "updatedAt": "2026-04-06T01:38:59.053Z"
   },
   {
     "id": "micro-protocol",
@@ -1138,7 +1163,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.946Z"
+    "updatedAt": "2026-04-06T01:38:59.050Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -1166,7 +1191,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.943Z"
+    "updatedAt": "2026-04-06T01:38:59.049Z"
   },
   {
     "id": "micro-network-view",
@@ -1191,7 +1216,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.921Z"
+    "updatedAt": "2026-04-06T01:38:59.025Z"
   },
   {
     "id": "micro-network-traffic",
@@ -1216,7 +1241,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.941Z"
+    "updatedAt": "2026-04-06T01:38:59.047Z"
   },
   {
     "id": "micro-ip-arp",
@@ -1241,7 +1266,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.940Z"
+    "updatedAt": "2026-04-06T01:38:59.045Z"
   },
   {
     "id": "micro-http-https",
@@ -1268,7 +1293,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.936Z"
+    "updatedAt": "2026-04-06T01:38:59.040Z"
   },
   {
     "id": "micro-encapsulation",
@@ -1294,7 +1319,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.933Z"
+    "updatedAt": "2026-04-06T01:38:59.037Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -1317,7 +1342,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.928Z"
+    "updatedAt": "2026-04-06T01:38:59.034Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -1341,7 +1366,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.926Z"
+    "updatedAt": "2026-04-06T01:38:59.032Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -1363,7 +1388,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.924Z"
+    "updatedAt": "2026-04-06T01:38:59.029Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -1386,7 +1411,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.923Z"
+    "updatedAt": "2026-04-06T01:38:59.027Z"
   },
   {
     "id": "macro-network-view",
@@ -1409,7 +1434,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.919Z"
+    "updatedAt": "2026-04-06T01:38:59.022Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -1433,7 +1458,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.908Z"
+    "updatedAt": "2026-04-06T01:38:59.012Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -1456,6 +1481,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-04-06T00:44:01.906Z"
+    "updatedAt": "2026-04-06T01:38:59.010Z"
   }
 ]
