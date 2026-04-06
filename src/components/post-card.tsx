@@ -20,6 +20,7 @@ const categoryLabels: Record<string, string> = {
   css: "CSS",
   performance: "Performance",
   nextjs: "Next.js",
+  "study/ai/gstack": "gstack",
 };
 
 export default function PostCard({ post, searchQuery }: PostCardProps) {

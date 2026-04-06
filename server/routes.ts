@@ -149,7 +149,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       typescript: "TypeScript", 
       css: "CSS",
       performance: "Performance",
-      nextjs: "Next.js"
+      nextjs: "Next.js",
+      "study/ai/gstack": "gstack",
     };
     return labels[category] || category;
   }

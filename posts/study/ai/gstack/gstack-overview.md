@@ -1,7 +1,7 @@
 ---
 title: "gstack: YC CEO가 공개한 Claude Code 가상 엔지니어링팀 구성법"
 slug: gstack-overview
-category: study/infra/gstack
+category: study/ai/gstack
 tags: [gstack, claude-code, ai, devtools, workflow, garry-tan, skill]
 author: Seobway
 readTime: 12

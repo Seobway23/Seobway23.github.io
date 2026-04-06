@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Perf Lab (Before vs After vs Hybrid)</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0d10;
+        --panel: #10141a;
+        --muted: #95a1b2;
+        --fg: #e9eef7;
+        --line: rgba(255, 255, 255, 0.1);
+        --good: #2ecc71;
+        --bad: #ff5d5d;
+        --warn: #ffd166;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        background: var(--bg);
+        color: var(--fg);
+      }
+      .wrap {
+        padding: 16px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .top {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        padding: 12px 14px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+      .title {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .title h1 {
+        font-size: 16px;
+        margin: 0;
+        letter-spacing: 0.2px;
+      }
+      .title p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      button {
+        appearance: none;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--fg);
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .card-head {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .badge {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      iframe {
+        width: 100%;
+        height: 520px;
+        border: 0;
+        background: #000;
+      }
+      .results {
+        margin-top: 12px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .results pre {
+        margin: 0;
+        padding: 12px 14px;
+        overflow: auto;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .hint {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        iframe {
+          height: 520px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="top">
+        <div class="title">
+          <h1>Portfolio Perf Lab — Before vs After</h1>
+          <p>
+            같은 브라우저/같은 화면에서 baseline/optimized/hybrid를 동시에 띄우고,
+            버튼 한 번으로 실측 지표를 다시 뽑습니다.
+          </p>
+        </div>
+        <div class="actions">
+          <button id="btn-run">측정 실행</button>
+          <button id="btn-copy" disabled>결과 복사</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-head">
+            <strong>Before (baseline)</strong>
+            <span class="badge" id="badge-before"></span>
+          </div>
+          <iframe
+            id="frame-before"
+            title="before"
+            src="/portfolio/index.baseline.html?perf=1"
+          ></iframe>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <strong>After (optimized)</strong>
+            <span class="badge" id="badge-after"></span>
+          </div>
+          <iframe
+            id="frame-after"
+            title="after"
+            src="/portfolio/index.html?perf=1"
+          ></iframe>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <strong>Hybrid (real)</strong>
+            <span class="badge" id="badge-hybrid"></span>
+          </div>
+          <iframe
+            id="frame-hybrid"
+            title="hybrid"
+            src="/portfolio/index.hybrid.html?perf=1"
+          ></iframe>
+        </div>
+      </div>
+
+      <div class="results">
+        <pre id="out">대기 중…</pre>
+      </div>
+
+      <div class="hint">
+        팁: 이 페이지는 “블로그 데모용”으로도 좋아요. 글에서
+        <code>/portfolio/perf-lab.html</code> 링크를 걸면, 독자가 직접 비교를
+        재현할 수 있습니다.
+      </div>
+    </div>
+
+    <script>
+      const beforeFrame = document.getElementById("frame-before");
+      const afterFrame = document.getElementById("frame-after");
+      const hybridFrame = document.getElementById("frame-hybrid");
+      const out = document.getElementById("out");
+      const btnRun = document.getElementById("btn-run");
+      const btnCopy = document.getElementById("btn-copy");
+      const badgeBefore = document.getElementById("badge-before");
+      const badgeAfter = document.getElementById("badge-after");
+      const badgeHybrid = document.getElementById("badge-hybrid");
+
+      function fmtMs(n) {
+        if (n == null || Number.isNaN(n)) return "-";
+        return `${n.toFixed(2)}ms`;
+      }
+
+      function toSummary(label, r) {
+        const cm = r.canvasMetrics;
+        const px = cm.canvas.cw * cm.canvas.ch;
+        return {
+          label,
+          dpr: cm.window.devicePixelRatio,
+          effectiveDprX: cm.canvas.effectiveDprX,
+          canvas: `${cm.canvas.cw}×${cm.canvas.ch} (${px.toLocaleString()} px)`,
+          overlay: {
+            mean: r.overlayDelay.mean,
+            p50: r.overlayDelay.p50,
+            p95: r.overlayDelay.p95,
+          },
+          jank: {
+            frameCount: r.jank.frameCount,
+            meanDt: r.jank.meanDt,
+            maxDt: r.jank.maxDt,
+            over33: r.jank.over33,
+            over50: r.jank.over50,
+            over100: r.jank.over100,
+          },
+          pointer: {
+            totalMs: r.pointerMove.totalMs,
+            perEventMs: r.pointerMove.perEventMs,
+          },
+        };
+      }
+
+      function render(before, after, hybrid) {
+        const b = toSummary("before", before);
+        const a = toSummary("after", after);
+        const h = toSummary("hybrid", hybrid);
+
+        badgeBefore.textContent = `effectiveDPR=${b.effectiveDprX}`;
+        badgeAfter.textContent = `effectiveDPR=${a.effectiveDprX}`;
+        badgeHybrid.textContent = `effectiveDPR=${h.effectiveDprX}`;
+
+        const lines = [];
+        lines.push("## 실측 요약");
+        lines.push("");
+        lines.push("| 항목 | Before | After | Hybrid |");
+        lines.push("|---|---:|---:|---:|");
+        lines.push(
+          `| canvas | ${b.canvas} | ${a.canvas} | ${h.canvas} |`,
+        );
+        lines.push(
+          `| overlay mean | ${fmtMs(b.overlay.mean)} | ${fmtMs(a.overlay.mean)} | ${fmtMs(h.overlay.mean)} |`,
+        );
+        lines.push(
+          `| overlay p50 | ${fmtMs(b.overlay.p50)} | ${fmtMs(a.overlay.p50)} | ${fmtMs(h.overlay.p50)} |`,
+        );
+        lines.push(
+          `| overlay p95 | ${fmtMs(b.overlay.p95)} | ${fmtMs(a.overlay.p95)} | ${fmtMs(h.overlay.p95)} |`,
+        );
+        lines.push(
+          `| jank mean dt | ${fmtMs(b.jank.meanDt)} | ${fmtMs(a.jank.meanDt)} | ${fmtMs(h.jank.meanDt)} |`,
+        );
+        lines.push(
+          `| jank max dt | ${fmtMs(b.jank.maxDt)} | ${fmtMs(a.jank.maxDt)} | ${fmtMs(h.jank.maxDt)} |`,
+        );
+        lines.push(
+          `| jank dt>50ms | ${b.jank.over50} | ${a.jank.over50} | ${h.jank.over50} |`,
+        );
+        lines.push(
+          `| pointer 300 events total | ${fmtMs(b.pointer.totalMs)} | ${fmtMs(a.pointer.totalMs)} | ${fmtMs(h.pointer.totalMs)} |`,
+        );
+        lines.push(
+          `| pointer per event | ${fmtMs(b.pointer.perEventMs)} | ${fmtMs(a.pointer.perEventMs)} | ${fmtMs(h.pointer.perEventMs)} |`,
+        );
+        lines.push("");
+        lines.push("### Raw JSON");
+        lines.push("```json");
+        lines.push(JSON.stringify({ before, after, hybrid }, null, 2));
+        lines.push("```");
+
+        out.textContent = lines.join("\n");
+        btnCopy.disabled = false;
+      }
+
+      function runOnFrame(frame, options) {
+        return new Promise((resolve, reject) => {
+          const requestId = Math.random().toString(16).slice(2);
+          const t = setTimeout(() => {
+            window.removeEventListener("message", onMsg);
+            reject(new Error("timeout waiting frame result"));
+          }, 20000);
+
+          function onMsg(e) {
+            const msg = e.data;
+            if (!msg || msg.type !== "PORTFOLIO_PERF_RESULT") return;
+            if (msg.requestId !== requestId) return;
+            clearTimeout(t);
+            window.removeEventListener("message", onMsg);
+            if (!msg.ok) reject(new Error(msg.error || "failed"));
+            else resolve(msg.result);
+          }
+
+          window.addEventListener("message", onMsg);
+          frame.contentWindow.postMessage(
+            { type: "PORTFOLIO_PERF_RUN", requestId, options },
+            "*",
+          );
+        });
+      }
+
+      async function run() {
+        btnRun.disabled = true;
+        btnCopy.disabled = true;
+        out.textContent = "측정 중… (약 15~20초)";
+
+        try {
+          const options = {
+            warmupMs: 1500,
+            overlayRuns: 12,
+            overlayPanelId: "works",
+            jankMs: 5000,
+            pointerEvents: 300,
+          };
+          const before = await runOnFrame(beforeFrame, options);
+          const after = await runOnFrame(afterFrame, options);
+          const hybrid = await runOnFrame(hybridFrame, options);
+          render(before, after, hybrid);
+        } catch (e) {
+          out.textContent = `실패: ${String(e?.stack || e)}`;
+        } finally {
+          btnRun.disabled = false;
+        }
+      }
+
+      btnRun.addEventListener("click", run);
+      btnCopy.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(out.textContent);
+          btnCopy.textContent = "복사됨";
+          setTimeout(() => (btnCopy.textContent = "결과 복사"), 900);
+        } catch {
+          // ignore
+        }
+      });
+    </script>
+  </body>
+</html>
+

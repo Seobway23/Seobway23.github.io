@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RightSidebar from "../components/right-sidebar";
 import UtterancesComments from "../components/utterances-comments";
+import { PostGlossaryLayer } from "@/components/post-glossary-layer";
 import { useReadingProgress } from "../hooks/use-reading-progress";
 import { apiRequest } from "@/lib/queryClient";
 import { trackPostView } from "@/lib/analytics";
@@ -592,8 +593,8 @@ export default function Post() {
     )}
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-center">
-        <div className="w-full max-w-4xl lg:max-w-none lg:grid lg:grid-cols-4 lg:gap-8">
-          <main className="lg:col-span-3 mx-auto max-w-4xl">
+        <div className="w-full max-w-4xl lg:max-w-none lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:gap-8">
+          <main className="mx-auto min-w-0 max-w-4xl w-full">
             {/* Back Button */}
             <Button
               variant="ghost"
@@ -665,6 +666,12 @@ export default function Post() {
                   dangerouslySetInnerHTML={{
                     __html: formatContent(post.content),
                   }}
+                />
+                <PostGlossaryLayer
+                  glossary={post.glossary}
+                  rootRef={contentRef as unknown as React.RefObject<HTMLElement | null>}
+                  isMobile={isMobile}
+                  postSlug={post.slug}
                 />
 
                 {/* Tags */}
