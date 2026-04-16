@@ -1,6 +1,6 @@
 # Claude Code Rules for This Project
 
-Cursor·에이전트: **`posts/**/\*.md`를 쓰거나 고칠 때는 이 파일(블로그 규칙·기능 요약)을 반드시 따른다.** 동일 안내는`.cursor/rules/blog-content-management.mdc`·`project-overview.mdc`에도 있다. 상세 워크플로는`.cursor/skills/blog-post-writing/SKILL.md` .
+Cursor·에이전트: **`posts/**/\*.md`를 쓰거나 고칠 때는 이 파일(블로그 규칙·기능 요약)을 반드시 따른다.** 동일 안내는`.cursor/rules/blog-content-management.mdc`·`project-overview.mdc`에도 있다. 상세 워크플로는`.cursor/skills/blog-post-writing/SKILL.md` . Cursor·Antigravity 등 도구별 에이전트 힌트 요약은 루트 **`AGENTS.md`** .
 
 ## PR 작성 규칙
 
@@ -107,6 +107,24 @@ excerpt: >
 ### Mermaid
 
 - ` ```mermaid ` 블록. 선택: 첫 줄 근처 `%% desc: 캡션` .
+
+### 콜아웃 (TIP·NOTICE·WARNING 등)
+
+길이가 있는 글에서는 **핵심 한 줄·주의사항**을 `::: 종류` … `:::` 블록으로 감싸 두면 읽기 좋다. 빌드 시 색 구분된 박스로 렌더된다 (`scripts/generate-posts-data.js` + `src/index.css`의 `.post-callout--*`).
+
+**문법:** 첫 줄에 `::: 소문자종류`만, 본문 마크다운, 마지막에 **단독 줄** `:::`
+
+**지원 종류:** `tip`, `note`, `info`, `notice`, `success`, `important`, `warning`, `danger`, `caution` (역할: `tip`·`success`는 권장·완료, `notice`·`info`는 안내, `warning`·`danger`·`caution`은 주의·위험, `important`는 반드시 확인 등)
+
+```markdown
+::: notice
+이 글은 **2026년 기준** 동작을 기준으로 설명한다.
+:::
+
+::: tip
+로컬 확인 후에는 `npm run generate:posts` 로 정적 JSON을 갱신한다.
+:::
+```
 
 ### 역학 시각화 (전용 펜스)
 

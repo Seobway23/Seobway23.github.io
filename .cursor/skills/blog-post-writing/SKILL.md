@@ -1,6 +1,6 @@
 ---
 name: blog-post-writing
-description: ModernDevBlog 포스트 작성·배포 전 가이드. frontmatter, 수식(KaTeX), Mermaid, 역학 시각화(diagramatics/jsxgraph/three), 용어 사전, 참고·관련 글 규칙, generate:posts·CI. 역학 시리즈는 docs/mechanics-post-principles.md 필독. 새 글 작성·마크다운 편집·블로그 콘텐츠 규칙 질문 시 사용.
+description: ModernDevBlog 포스트 작성·배포 전 가이드. frontmatter, 콜아웃(::: tip/notice/warning 등), 수식(KaTeX), Mermaid, 역학 시각화(diagramatics/jsxgraph/three), 용어 사전, 참고·관련 글 규칙, generate:posts·CI. 역학 시리즈는 docs/mechanics-post-principles.md 필독. 새 글 작성·마크다운 편집·블로그 콘텐츠 규칙 질문 시 사용.
 ---
 
 # ModernDevBlog — 블로그 포스트 작성 스킬
@@ -105,6 +105,37 @@ Markdown `[^1]` / `[^1]:` **사용 금지.**
 
 - **`## 관련 글`** 은 맨 아래 필수.
 - 링크는 `[표시 제목 →](/post/slug)` 형식 (`[slug]` 코드 링크 금지).
+
+### 콜아웃 (TIP / NOTICE / NOTE / WARNING 등)
+
+빌드 시 `::: 종류` … `:::` 블록이 **콜아웃(어도논)** HTML로 바뀐다. 라이트/다크 테마별 색은 `src/index.css`의 `.post-callout--*` 에 정의됨.
+
+**문법:** 첫 줄 `::: 소문자종류`, 본문(마크다운), 마지막에 **단독 줄** `:::`
+
+**지원 종류:** `tip`, `note`, `info`, `notice`, `success`, `important`, `warning`, `danger`, `caution`
+
+**작성 습관:** 섹션마다 장문만 두지 말고, **전제·주의·권장**을 `::: notice` / `::: warning` / `::: tip` 등으로 한 박스씩 넣으면 스캔하기 쉽다.
+
+````markdown
+::: notice
+이 절은 **실험적 API** 기준이며 버전마다 바뀔 수 있다.
+:::
+
+::: tip
+**권장:** 당장은 최적화 없이 두어도 되고, 데이터가 많아지면 `heavy_fn` 만 **Bulk** 로 바꾸면 된다.
+:::
+
+::: success
+위 단계를 마치면 **빌드 산출물**에 반영된다.
+:::
+
+::: warning
+이 설정은 **프로덕션에서 끄면** 안 된다.
+:::
+````
+
+- 본문에는 리스트·강조·인라인 코드·수식(`$…$`)·코드 탭 플레이스홀더가 들어갈 수 있다.
+- **코드 탭·용어 `[[term]]` 처리 순서**는 일반 본문과 같다(코드 탭 블록이 콜아웃 안에 있으면 빌드 파이프라인이 그대로 적용).
 
 ---
 
@@ -237,6 +268,7 @@ npm run build            # 프로덕션 검증
 
 - [ ] `slug` = 파일명, `category` = 폴더 경로
 - [ ] H2·`---`·`## 참고`·`## 관련 글`
+- [ ] **콜아웃** (`::: tip` · `::: notice` · `::: warning` 등): 길이가 있는 본문이면 핵심·주의를 1개 이상 박스로 분리했는지
 - [ ] 수식·Mermaid·역학 블록이 코드 펜스 밖에서 의도대로인지
 - [ ] `npm run generate:posts` 실행 후 확인
 

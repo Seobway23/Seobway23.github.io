@@ -651,6 +651,170 @@ html:not(.dark) .prose :not(pre) > code {
   border-radius: 0;
 }
 
+/* ─── 콜아웃 / 어도논 (::: tip … ::: — generate-posts-data.js) ─────────────── */
+.prose .post-callout {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: 0.5rem 0.75rem 0.75rem 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--callout-border);
+  background: var(--callout-bg);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.dark .prose .post-callout {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.prose .post-callout__accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--callout-accent);
+  border-radius: 0.375rem 0 0 0.375rem;
+}
+
+.prose .post-callout__frame {
+  padding: 0.875rem 1rem 1rem 1.125rem;
+  padding-left: 1.35rem;
+}
+
+.prose .post-callout__label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--callout-accent);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.prose .post-callout__content {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: hsl(var(--foreground));
+}
+
+.prose .post-callout__content > :first-child {
+  margin-top: 0;
+}
+.prose .post-callout__content > :last-child {
+  margin-bottom: 0;
+}
+
+.prose .post-callout__content p {
+  margin-bottom: 0.75rem;
+}
+.prose .post-callout__content p:last-child {
+  margin-bottom: 0;
+}
+
+.prose .post-callout__content ul,
+.prose .post-callout__content ol {
+  margin-bottom: 0.75rem;
+}
+
+.prose .post-callout__content pre {
+  margin: 0.75rem 0;
+}
+
+/* 타입별 색 — 라이트 */
+html:not(.dark) .prose .post-callout--tip {
+  --callout-accent: #15803d;
+  --callout-bg: #f0fdf4;
+  --callout-border: #bbf7d0;
+}
+html:not(.dark) .prose .post-callout--note {
+  --callout-accent: #2563eb;
+  --callout-bg: #eff6ff;
+  --callout-border: #bfdbfe;
+}
+html:not(.dark) .prose .post-callout--info {
+  --callout-accent: #0284c7;
+  --callout-bg: #f0f9ff;
+  --callout-border: #bae6fd;
+}
+html:not(.dark) .prose .post-callout--important {
+  --callout-accent: #7c3aed;
+  --callout-bg: #f5f3ff;
+  --callout-border: #ddd6fe;
+}
+html:not(.dark) .prose .post-callout--warning {
+  --callout-accent: #d97706;
+  --callout-bg: #fffbeb;
+  --callout-border: #fde68a;
+}
+html:not(.dark) .prose .post-callout--danger {
+  --callout-accent: #dc2626;
+  --callout-bg: #fef2f2;
+  --callout-border: #fecaca;
+}
+html:not(.dark) .prose .post-callout--caution {
+  --callout-accent: #ea580c;
+  --callout-bg: #fff7ed;
+  --callout-border: #fed7aa;
+}
+html:not(.dark) .prose .post-callout--notice {
+  --callout-accent: #0f766e;
+  --callout-bg: #f0fdfa;
+  --callout-border: #99f6e4;
+}
+html:not(.dark) .prose .post-callout--success {
+  --callout-accent: #047857;
+  --callout-bg: #ecfdf5;
+  --callout-border: #a7f3d0;
+}
+
+/* 타입별 색 — 다크 */
+.dark .prose .post-callout--tip {
+  --callout-accent: #4ade80;
+  --callout-bg: rgba(22, 163, 74, 0.14);
+  --callout-border: rgba(74, 222, 128, 0.28);
+}
+.dark .prose .post-callout--note {
+  --callout-accent: #60a5fa;
+  --callout-bg: rgba(37, 99, 235, 0.18);
+  --callout-border: rgba(96, 165, 250, 0.35);
+}
+.dark .prose .post-callout--info {
+  --callout-accent: #38bdf8;
+  --callout-bg: rgba(14, 165, 233, 0.14);
+  --callout-border: rgba(56, 189, 248, 0.3);
+}
+.dark .prose .post-callout--important {
+  --callout-accent: #c4b5fd;
+  --callout-bg: rgba(109, 40, 217, 0.2);
+  --callout-border: rgba(196, 181, 253, 0.35);
+}
+.dark .prose .post-callout--warning {
+  --callout-accent: #fbbf24;
+  --callout-bg: rgba(217, 119, 6, 0.16);
+  --callout-border: rgba(251, 191, 36, 0.35);
+}
+.dark .prose .post-callout--danger {
+  --callout-accent: #f87171;
+  --callout-bg: rgba(220, 38, 38, 0.16);
+  --callout-border: rgba(248, 113, 113, 0.35);
+}
+.dark .prose .post-callout--caution {
+  --callout-accent: #fb923c;
+  --callout-bg: rgba(234, 88, 12, 0.14);
+  --callout-border: rgba(251, 146, 60, 0.32);
+}
+.dark .prose .post-callout--notice {
+  --callout-accent: #2dd4bf;
+  --callout-bg: rgba(15, 118, 110, 0.18);
+  --callout-border: rgba(45, 212, 191, 0.32);
+}
+.dark .prose .post-callout--success {
+  --callout-accent: #34d399;
+  --callout-bg: rgba(5, 150, 105, 0.16);
+  --callout-border: rgba(52, 211, 153, 0.32);
+}
+
 .prose a {
   color: #3b82f6;
   text-decoration: underline;

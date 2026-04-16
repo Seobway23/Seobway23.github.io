@@ -401,6 +401,106 @@ function processCodeTabs(markdown) {
   return { markdown: out.join("\n"), slots };
 }
 
+/** 콜아웃(어도논) 블록 — VitePress 스타일 ::: type ... ::: */
+const CALLOUT_KINDS = new Set([
+  "tip",
+  "note",
+  "info",
+  "notice",
+  "success",
+  "important",
+  "warning",
+  "danger",
+  "caution",
+]);
+
+/**
+ * ::: tip / note / warning 등 한 블록을 추출하고 플레이스홀더로 바꾼다.
+ * - 코드 탭·각주 처리 이후에 호출 (본문 순서: glossary → code tabs → callouts).
+ * - 닫는 줄은 단독 `:::` (앞뒤 공백만 허용).
+ */
+function processCallouts(markdown) {
+  if (!markdown || typeof markdown !== "string") {
+    return { markdown: markdown || "", slots: [] };
+  }
+  const lines = String(markdown).split(/\r?\n/);
+  const out = [];
+  const slots = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i].replace(/\r$/, "");
+    const open = line.match(/^::: (\w+)\s*$/);
+    if (open && CALLOUT_KINDS.has(open[1].toLowerCase())) {
+      const kind = open[1].toLowerCase();
+      const startLine = i;
+      i++;
+      const body = [];
+      let closed = false;
+      while (i < lines.length) {
+        const cur = lines[i].replace(/\r$/, "");
+        if (/^:::\s*$/.test(cur)) {
+          closed = true;
+          i++;
+          break;
+        }
+        body.push(cur);
+        i++;
+      }
+      if (!closed) {
+        out.push(lines[startLine]);
+        i = startLine + 1;
+        continue;
+      }
+      const idx = slots.length;
+      slots.push({ kind, inner: body.join("\n") });
+      out.push("");
+      out.push(`@@POSTCALLOUT${idx}@@`);
+      out.push("");
+    } else {
+      out.push(line);
+      i++;
+    }
+  }
+  return { markdown: out.join("\n"), slots };
+}
+
+const CALLOUT_LABELS = {
+  tip: "TIP",
+  note: "NOTE",
+  info: "INFO",
+  notice: "NOTICE",
+  success: "SUCCESS",
+  important: "IMPORTANT",
+  warning: "WARNING",
+  danger: "DANGER",
+  caution: "CAUTION",
+};
+
+function buildCalloutAsideHtml(kind, innerHtml) {
+  const label = CALLOUT_LABELS[kind] || String(kind).toUpperCase();
+  return `<aside class="post-callout post-callout--${kind}" data-callout="${kind}" role="note" aria-label="${label}"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">${label}</span><div class="post-callout__content">${innerHtml}</div></div></aside>`;
+}
+
+/**
+ * marked 결과 HTML에서 @@POSTCALLOUTn@@ 를 실제 콜아웃 블록으로 치환한다.
+ */
+function injectCalloutsIntoHtml(html, calloutSlots, renderInnerHtml) {
+  let result = String(html || "");
+  if (!calloutSlots || calloutSlots.length === 0) return result;
+  for (let i = 0; i < calloutSlots.length; i++) {
+    const token = `@@POSTCALLOUT${i}@@`;
+    if (!result.includes(token)) {
+      console.warn(`⚠️ 콜아웃 플레이스홀더가 HTML에 없음: ${token}`);
+      continue;
+    }
+    const { kind, inner } = calloutSlots[i];
+    const innerHtml = renderInnerHtml(inner);
+    const block = buildCalloutAsideHtml(kind, innerHtml);
+    result = result.split(token).join(block);
+  }
+  return result;
+}
+
 function injectCodeTabsPlaceholdersIntoHtml(html, slots) {
   let result = String(html || "");
   if (!slots || slots.length === 0) return result;
@@ -687,6 +787,9 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     // 코드 탭 블록 처리 (marked 이후 HTML로 치환)
     const { markdown: mdWithCodeTabs, slots: codeTabsSlots } = processCodeTabs(processedContent);
     processedContent = mdWithCodeTabs;
+    // 콜아웃(::: tip 등) — 코드 탭 이후, 수식 플레이스홀더 이전
+    const { markdown: mdWithCallouts, slots: calloutSlots } = processCallouts(processedContent);
+    processedContent = mdWithCallouts;
 
     // 글별 용어 사전 (frontmatter glossary)
     // - { termId: "설명", ... } 형태만 허용
@@ -730,9 +833,18 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
       return `<a href="${finalHref}"${titleAttr}>${text}</a>`;
     };
 
-    // 마크다운을 HTML로 변환 후 수식 플레이스홀더를 KaTeX로 복원 + 코드탭 플레이스홀더 치환
+    // 마크다운을 HTML로 변환 후 수식 플레이스홀더를 KaTeX로 복원 + 코드탭 + 콜아웃 내부 마크다운 치환
     const htmlWithMath = injectKatexPlaceholdersIntoHtml(marked.parse(mdForMarked, { renderer }), mathSlots);
-    const htmlContent = injectCodeTabsPlaceholdersIntoHtml(htmlWithMath, codeTabsSlots);
+    const htmlAfterCodeTabs = injectCodeTabsPlaceholdersIntoHtml(htmlWithMath, codeTabsSlots);
+    const htmlContent = injectCalloutsIntoHtml(htmlAfterCodeTabs, calloutSlots, (innerMd) => {
+      let frag = fixBoldBeforeCJK(innerMd);
+      frag = normalizeLatexDelimiters(frag);
+      const { markdown: mdF, slots: mathSlotsF } = markdownWithMathPlaceholders(frag);
+      let h = marked.parse(mdF, { renderer });
+      h = injectKatexPlaceholdersIntoHtml(h, mathSlotsF);
+      h = injectCodeTabsPlaceholdersIntoHtml(h, codeTabsSlots);
+      return h;
+    });
 
     // excerpt 생성 (frontmatter에 없으면 content에서 추출)
     let excerpt = data.excerpt || "";

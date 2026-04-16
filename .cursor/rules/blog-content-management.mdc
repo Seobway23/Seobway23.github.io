@@ -10,8 +10,9 @@ alwaysApply: false
 
 ## 1. 정본 (필수)
 
-1. **저장소 루트 `CLAUDE.md`** — 블로그 포맷(frontmatter, `## 참고`, `## 관련 글`, 각주 금지, 수식·Mermaid·역학 펜스·용어 사전 요약 등). **블로그 글 작업 시 이 파일을 먼저 읽고 그대로 따른다.**
+1. **저장소 루트 `CLAUDE.md`** — 블로그 포맷(frontmatter, `## 참고`, `## 관련 글`, 각주 금지, 수식·Mermaid·역학 펜스·용어 사전·**콜아웃** 요약 등). **블로그 글 작업 시 이 파일을 먼저 읽고 그대로 따른다.**
 2. **`.cursor/skills/blog-post-writing/SKILL.md`** — 워크플로, KaTeX 문법, diagramatics/jsxgraph/three 프리셋 표, 체크리스트, 관련 소스 경로.
+3. **루트 `AGENTS.md`** — Cursor·Antigravity·기타 에이전트가 동일 규칙을 읽을 때 참고(콜아웃·정본 링크 요약).
 
 **`posts/study/mechanics/`** 아래 역학·토압 글을 쓸 때는 추가로 **`docs/mechanics-post-principles.md`** 필독. (전용 규칙: `.cursor/rules/mechanics-blog.mdc` .)
 
@@ -22,9 +23,10 @@ alwaysApply: false
 - **Frontmatter:** `slug`, `category`, `tags`, `author`, `readTime`, `featured`, `createdAt`, `excerpt` (루트 `CLAUDE.md` 템플릿).
 - 글 반영: **`npm run generate:posts`**
 - H1 금지 · 섹션 사이 `---` · 하단 `## 참고` · 맨 아래 `## 관련 글`
+- **콜아웃:** `::: tip` · `::: notice` · `::: warning` 등 (`CLAUDE.md`·`SKILL.md` 목록). 장문 글은 핵심·주의를 색 박스로 넣는 것을 권장.
 - 수식: `$...$`, `$$...$$` (코드 펜스·인라인 `` ` `` 안 제외)
 
 ## 3. 이 규칙 파일의 역할
 
 - Cursor가 `posts/` 아래 마크다운을 다룰 때 이 규칙이 붙으며, **항상 루트 `CLAUDE.md`를 참고하라**는 지시를 재확인한다.
-- `CLAUDE.md`는 프로젝트 루트에 둔다(복사본을 `.cursor`에 두지 않아도 됨). Claude Code·Cursor 모두 루트 `CLAUDE.md`를 표준으로 본다.
+- `CLAUDE.md`·`AGENTS.md`는 프로젝트 루트에 둔다(복사본을 `.cursor`에 두지 않아도 됨). Claude Code·Cursor·Antigravity 등은 루트 `CLAUDE.md` / `AGENTS.md`를 표준으로 본다.
