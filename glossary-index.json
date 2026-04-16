@@ -1,23 +1,7 @@
 {
-  "docker": [
-    "django-migration",
-    "django-version-compatibility",
-    "django-settings",
-    "docker-basics",
-    "docker-compose-basics",
-    "docker-compose-django",
-    "gitlab-cicd-guide",
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
-  ],
-  "namespace": [
-    "django-models",
-    "django-urls",
-    "k8s-zero-downtime-deployment",
-    "mysql-backup-k8s",
-    "mysql-restore-test"
-  ],
   "service": [
+    "architecture-patterns-layered-component-clean",
+    "db-orm-postgres-drizzle-neon-supabase",
     "drf-authentication",
     "drf-overview",
     "django-settings",
@@ -36,6 +20,31 @@
     "micro-network-traffic",
     "micro-osi-7layer"
   ],
+  "docker": [
+    "django-migration",
+    "django-version-compatibility",
+    "django-settings",
+    "docker-basics",
+    "docker-compose-basics",
+    "docker-compose-django",
+    "gitlab-cicd-guide",
+    "jenkins-argocd-gitops",
+    "k8s-zero-downtime-deployment"
+  ],
+  "namespace": [
+    "django-models",
+    "django-urls",
+    "k8s-zero-downtime-deployment",
+    "mysql-backup-k8s",
+    "mysql-restore-test"
+  ],
+  "deployment": [
+    "deployment-vercel-railway-github-actions",
+    "gitlab-cicd-guide",
+    "jenkins-argocd-gitops",
+    "k8s-zero-downtime-deployment",
+    "kubectl-debugging"
+  ],
   "kubernetes": [
     "gitlab-cicd-guide",
     "jenkins-argocd-gitops",
@@ -51,12 +60,6 @@
     "kubectl-debugging",
     "mysql-backup-k8s",
     "mysql-restore-test"
-  ],
-  "deployment": [
-    "gitlab-cicd-guide",
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment",
-    "kubectl-debugging"
   ],
   "jenkins": [
     "jenkins-argocd-gitops",

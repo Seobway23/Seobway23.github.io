@@ -5,6 +5,11 @@
     "path": "/post/study/ai/claude-code-harness-leak-architecture"
   },
   {
+    "slug": "context-engineering-prompts-rules-memory-skills",
+    "title": "Context Engineering — 프롬프트, Rules, 메모리, Skill 시스템",
+    "path": "/post/study/ai/context-engineering/context-engineering-prompts-rules-memory-skills"
+  },
+  {
     "slug": "gstack-overview",
     "title": "gstack: YC CEO가 공개한 Claude Code 가상 엔지니어링팀 구성법",
     "path": "/post/study/ai/gstack/gstack-overview"
@@ -20,9 +25,44 @@
     "path": "/post/study/ai/gstack/gstack-skills-ship"
   },
   {
+    "slug": "ai-development-process-spec-tdd-hooks",
+    "title": "AI 개발 프로세스 — 작업 분할, Spec, TDD Workflow, Hook 설계",
+    "path": "/post/study/ai/process/ai-development-process-spec-tdd-hooks"
+  },
+  {
+    "slug": "ai-code-verification-review-quality-security-performance-ux",
+    "title": "AI 코드 검증 — 품질·보안·성능·UX 리뷰 루프",
+    "path": "/post/study/ai/review/ai-code-verification-review-quality-security-performance-ux"
+  },
+  {
+    "slug": "ai-coding-tools-cursor-copilot-claude-code-mcp",
+    "title": "AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까",
+    "path": "/post/study/ai/workflow/ai-coding-tools-cursor-copilot-claude-code-mcp"
+  },
+  {
     "slug": "kadane-algorithm",
     "title": "Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP",
     "path": "/post/study/algorithm/kadane-algorithm"
+  },
+  {
+    "slug": "api-design-rest-openapi-rpc-server-actions",
+    "title": "API 설계 — REST 원칙, OpenAPI, Server Actions, RPC",
+    "path": "/post/study/architecture/api-design/api-design-rest-openapi-rpc-server-actions"
+  },
+  {
+    "slug": "architecture-patterns-layered-component-clean",
+    "title": "아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처",
+    "path": "/post/study/architecture/patterns/architecture-patterns-layered-component-clean"
+  },
+  {
+    "slug": "requirements-spec-user-story-tradeoff",
+    "title": "요구사항 분석 — Spec, 유저 스토리, 기술 선택 트레이드오프",
+    "path": "/post/study/architecture/requirements/requirements-spec-user-story-tradeoff"
+  },
+  {
+    "slug": "db-orm-postgres-drizzle-neon-supabase",
+    "title": "DB & ORM 기초 — PostgreSQL, 스키마 설계, Drizzle, Neon, Supabase",
+    "path": "/post/study/backend/database/db-orm-postgres-drizzle-neon-supabase"
   },
   {
     "slug": "django-architecture",
@@ -100,6 +140,81 @@
     "path": "/post/study/backend/django-settings"
   },
   {
+    "slug": "hono-rest-api-overview",
+    "title": "Hono로 REST API 시작하기 — 가벼운 서버 프레임워크가 주는 감각",
+    "path": "/post/study/backend/hono/hono-rest-api-overview"
+  },
+  {
+    "slug": "http-methods-and-status-codes",
+    "title": "HTTP 메서드와 상태 코드 기초 — GET, POST, PUT, PATCH, DELETE를 제대로 구분하기",
+    "path": "/post/study/backend/http/http-methods-and-status-codes"
+  },
+  {
+    "slug": "js-runtime-node-bun-deno",
+    "title": "Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가",
+    "path": "/post/study/backend/runtime/js-runtime-node-bun-deno"
+  },
+  {
+    "slug": "auth-security-authjs-owasp-passkeys",
+    "title": "인증 & 보안 — Auth.js, OWASP, 패스키 기초",
+    "path": "/post/study/backend/security/auth-security-authjs-owasp-passkeys"
+  },
+  {
+    "slug": "sql-joins-where-having-group-by",
+    "title": "SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기",
+    "path": "/post/study/backend/sql/sql-joins-where-having-group-by"
+  },
+  {
+    "slug": "code-quality-eslint-prettier-biome",
+    "title": "코드 품질 기초 — 가독성, 리팩토링, ESLint, Prettier, Biome",
+    "path": "/post/study/engineering/code-quality/code-quality-eslint-prettier-biome"
+  },
+  {
+    "slug": "git-branching-conventional-commits-husky",
+    "title": "Git & 릴리즈 기초 — 브랜치 전략, Conventional Commits, Husky",
+    "path": "/post/study/engineering/git/git-branching-conventional-commits-husky"
+  },
+  {
+    "slug": "observability-security-sentry-posthog-otel-npm-audit",
+    "title": "관측 & 보안 — Sentry, PostHog, OpenTelemetry, npm audit",
+    "path": "/post/study/engineering/observability-security/observability-security-sentry-posthog-otel-npm-audit"
+  },
+  {
+    "slug": "testing-vitest-playwright",
+    "title": "테스트 기초 — 테스트 사고법, Vitest, Playwright",
+    "path": "/post/study/engineering/testing/testing-vitest-playwright"
+  },
+  {
+    "slug": "state-data-fetching-tanstack-zustand-server-actions",
+    "title": "상태 & 데이터 페칭 — TanStack Query, Zustand, Server Actions",
+    "path": "/post/study/frontend/data-fetching/state-data-fetching-tanstack-zustand-server-actions"
+  },
+  {
+    "slug": "js-event-loop-and-async",
+    "title": "JS 이벤트 루프와 비동기 — 콜스택, 큐, 마이크로태스크를 한 번에 이해하기",
+    "path": "/post/study/frontend/javascript/js-event-loop-and-async"
+  },
+  {
+    "slug": "settimeout-vs-promise",
+    "title": "setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습",
+    "path": "/post/study/frontend/javascript/settimeout-vs-promise"
+  },
+  {
+    "slug": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
+    "title": "빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG",
+    "path": "/post/study/frontend/performance/build-performance-a11y-vite-turbopack-lighthouse-wcag"
+  },
+  {
+    "slug": "react-component-data-flow",
+    "title": "React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가",
+    "path": "/post/study/frontend/react/react-component-data-flow"
+  },
+  {
+    "slug": "react-controlled-vs-uncontrolled",
+    "title": "controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가",
+    "path": "/post/study/frontend/react/react-controlled-vs-uncontrolled"
+  },
+  {
     "slug": "react-query-advanced",
     "title": "React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션",
     "path": "/post/study/frontend/react-query/react-query-advanced"
@@ -123,6 +238,11 @@
     "slug": "react-query-queries",
     "title": "React Query useQuery 심층 — QueryClient, 쿼리 키, 전체 옵션 완전 정리",
     "path": "/post/study/frontend/react-query/react-query-queries"
+  },
+  {
+    "slug": "modern-css-tailwind-shadcn",
+    "title": "UI & 스타일링 기초 — 모던 CSS, Tailwind, shadcn/ui를 어떻게 볼 것인가",
+    "path": "/post/study/frontend/styling/modern-css-tailwind-shadcn"
   },
   {
     "slug": "threejs-dpr-and-canvas-resolution",
@@ -160,6 +280,11 @@
     "path": "/post/study/frontend/threejs/why-threejs-exists"
   },
   {
+    "slug": "typescript-type-system-basics",
+    "title": "TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법",
+    "path": "/post/study/frontend/typescript/typescript-type-system-basics"
+  },
+  {
     "slug": "celery-beat",
     "title": "Celery Beat — 주기적 태스크 스케줄링",
     "path": "/post/study/infra/celery/celery-beat"
@@ -178,6 +303,11 @@
     "slug": "celery-django",
     "title": "Django + Celery — 비동기 작업과 스케줄링의 기초",
     "path": "/post/study/infra/celery-django"
+  },
+  {
+    "slug": "deployment-vercel-railway-github-actions",
+    "title": "배포 & 운영 기초 — Vercel, Railway, GitHub Actions",
+    "path": "/post/study/infra/deployment/deployment-vercel-railway-github-actions"
   },
   {
     "slug": "docker-basics",
@@ -333,5 +463,10 @@
     "slug": "micro-tcp-udp",
     "title": "TCP와 UDP — 신뢰성과 속도의 트레이드오프",
     "path": "/post/study/network/micro/tcp-udp"
+  },
+  {
+    "slug": "ai-webdev-roadmap-foundation",
+    "title": "AI 웹개발자 로드맵 — 01~19 전체 학습 경로",
+    "path": "/post/study/roadmap/ai-webdev-roadmap-foundation"
   }
 ]
