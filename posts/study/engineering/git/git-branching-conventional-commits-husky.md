@@ -1,4 +1,4 @@
----
+﻿---
 title: "Git & 릴리즈 기초 — 브랜치 전략, Conventional Commits, Husky"
 slug: git-branching-conventional-commits-husky
 category: study/engineering/git
@@ -6,10 +6,25 @@ tags: [git, github-flow, gitflow, conventional-commits, husky, release]
 author: Seobway
 readTime: 12
 featured: false
+coverImage: /roadmap-thumbnails/step-04-git-release.svg
 createdAt: 2026-04-16
 excerpt: >
   Foundation 04 단계에서 필요한 Git 협업과 릴리즈 기초를 정리한다.
   브랜치 전략을 고르는 법, Conventional Commits의 의미, Husky로 커밋 전 검증을 거는 흐름을 본다.
+---
+
+## 이 시리즈 구성
+
+| 단계 | 포스트 | 내용 |
+|---|---|---|
+| 01 | [브라우저 & 클라이언트 →](/post/js-event-loop-and-async) | JS 비동기, React 설계, TypeScript |
+| 02 | [서버 & 데이터 →](/post/js-runtime-node-bun-deno) | 런타임, HTTP, Hono, SQL |
+| 03 | [코드 품질 →](/post/code-quality-eslint-prettier-biome) | 가독성, 리팩토링, ESLint, Prettier, Biome |
+| 04 | [Git & 릴리즈 →](/post/git-branching-conventional-commits-husky) | 브랜치 전략, Conventional Commits, Husky |
+| 05 | [UI & 스타일링 →](/post/modern-css-tailwind-shadcn) | 모던 CSS, Tailwind, shadcn/ui |
+| 06 | [AI 코딩 도구 →](/post/ai-coding-tools-cursor-copilot-claude-code-mcp) | Cursor, Copilot, Claude Code, MCP |
+| 07 | [DB & ORM →](/post/db-orm-postgres-drizzle-neon-supabase) | PostgreSQL, Drizzle, Neon, Supabase |
+
 ---
 
 ## Git은 저장 도구가 아니라 협업 프로토콜이다
@@ -133,6 +148,24 @@ Foundation 단계에서는 다음 정도면 충분하다.
 :::
 
 ---
+
+## 조금 더 깊게 보기
+
+### Git은 시간 여행보다 협업 기록에 가깝다
+
+Git을 처음 배우면 과거로 돌아가는 도구처럼 느껴진다. 하지만 팀에서는 Git이 **변경 이유를 공유하는 기록 시스템**이 된다. 어떤 브랜치에서 왜 바꿨고, 어떤 테스트를 거쳐 합쳤는지가 남아야 한다.
+
+### 브랜치 전략의 본질
+
+브랜치 전략은 멋있는 이름을 고르는 문제가 아니다. 배포가 자주 일어나고 PR 단위가 작다면 GitHub Flow가 단순하다. 릴리즈 준비와 장기 유지보수가 필요하면 Gitflow 같은 구조가 도움이 될 수 있다. 즉 전략은 팀의 배포 리듬에 맞아야 한다.
+
+### Conventional Commits의 실질 가치
+
+`feat`, `fix`, `docs` 같은 접두사는 단순한 예절이 아니다. 나중에 changelog, semantic versioning, release note 자동화의 입력이 된다. 커밋 메시지를 구조화하면 변경 이력을 기계도 읽을 수 있게 된다.
+
+### Husky를 붙일 때의 균형
+
+커밋 전 훅에 너무 많은 검사를 넣으면 개발 흐름이 끊긴다. 포맷, 빠른 lint 정도는 pre-commit에 두고, 느린 테스트나 빌드는 pre-push 또는 CI로 넘기는 편이 좋다. 훅은 개발자를 벌주는 장치가 아니라 실수를 빨리 알려주는 안전망이어야 한다.
 
 ## 참고
 

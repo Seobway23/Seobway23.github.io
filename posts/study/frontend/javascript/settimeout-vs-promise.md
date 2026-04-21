@@ -1,4 +1,4 @@
----
+﻿---
 title: "setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습"
 slug: settimeout-vs-promise
 category: study/frontend/javascript
@@ -6,10 +6,24 @@ tags: [javascript, setTimeout, promise, microtask, macrotask, event-loop]
 author: Seobway
 readTime: 10
 featured: false
+coverImage: /roadmap-thumbnails/step-01-browser-client.svg
 createdAt: 2026-04-16
 excerpt: >
   setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다.
   마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다.
+---
+
+## 이 시리즈 구성
+
+| 포스트 | 내용 |
+|---|---|
+| [로드맵 인덱스 →](/post/ai-webdev-roadmap-foundation) | 01~19 전체 학습 경로 |
+| [01-1. JS 이벤트 루프와 비동기 →](/post/js-event-loop-and-async) | 콜스택, 큐, 마이크로태스크 |
+| [01-2. setTimeout vs Promise →](/post/settimeout-vs-promise) | 비동기 실행 순서 예측 |
+| [01-3. React 단방향 데이터 흐름 →](/post/react-component-data-flow) | props/state, state 끌어올리기 |
+| [01-4. controlled vs uncontrolled →](/post/react-controlled-vs-uncontrolled) | React 폼 설계 |
+| [01-5. TypeScript 타입 시스템 기초 →](/post/typescript-type-system-basics) | any, unknown, union, narrowing |
+
 ---
 
 ## 왜 이 문제를 따로 연습해야 하는가
@@ -176,6 +190,22 @@ setTimeout(() => console.log('t1'), 0)
 ::: tip
 다음 단계에서는 각 예제를 Node.js 콘솔이나 브라우저 콘솔에서 직접 돌려 보자. "왜 그런지"를 말로 설명할 수 있을 때 비동기 기초가 훨씬 단단해진다.
 :::
+
+## 조금 더 깊게 보기
+
+### 왜 이 문제는 면접 단골인가
+
+`setTimeout`과 `Promise` 실행 순서는 단순 암기 문제가 아니다. 이 문제는 지원자가 JavaScript를 "위에서 아래로만 실행되는 코드"로 보는지, 아니면 런타임과 큐까지 포함한 실행 모델로 이해하는지 확인하기 좋다.
+
+### 개발자가 주의해야 할 포인트
+
+실무에서는 이 순서가 테스트에서 많이 드러난다. 컴포넌트 테스트에서 클릭 직후 바로 값을 확인하면 아직 Promise 콜백이 반영되지 않았을 수 있다. 반대로 타이머 기반 UI는 fake timer를 쓰지 않으면 테스트가 불안정해진다.
+
+### 디버깅 팁
+
+비동기 순서가 헷갈릴 때는 로그에 숫자만 찍지 말고 "sync start", "microtask", "timer"처럼 큐의 성격을 같이 적는다. 등록 순서와 실행 우선순위는 다르다.
+
+---
 
 ## 참고
 

@@ -1,4 +1,4 @@
----
+﻿---
 title: "controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가"
 slug: react-controlled-vs-uncontrolled
 category: study/frontend/react
@@ -6,10 +6,24 @@ tags: [react, forms, controlled-component, uncontrolled-component, ref]
 author: Seobway
 readTime: 10
 featured: false
+coverImage: /roadmap-thumbnails/step-01-browser-client.svg
 createdAt: 2026-04-16
 excerpt: >
   controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점,
   그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다.
+---
+
+## 이 시리즈 구성
+
+| 포스트 | 내용 |
+|---|---|
+| [로드맵 인덱스 →](/post/ai-webdev-roadmap-foundation) | 01~19 전체 학습 경로 |
+| [01-1. JS 이벤트 루프와 비동기 →](/post/js-event-loop-and-async) | 콜스택, 큐, 마이크로태스크 |
+| [01-2. setTimeout vs Promise →](/post/settimeout-vs-promise) | 비동기 실행 순서 예측 |
+| [01-3. React 단방향 데이터 흐름 →](/post/react-component-data-flow) | props/state, state 끌어올리기 |
+| [01-4. controlled vs uncontrolled →](/post/react-controlled-vs-uncontrolled) | React 폼 설계 |
+| [01-5. TypeScript 타입 시스템 기초 →](/post/typescript-type-system-basics) | any, unknown, union, narrowing |
+
 ---
 
 ## 왜 폼에서 갑자기 복잡해지는가
@@ -149,6 +163,22 @@ controlled와 uncontrolled는 둘 중 하나만 옳은 문제가 아니다.
 - 아니면 제출 시점에만 읽으면 되는가
 
 그 기준이 분명하면 폼 설계도 훨씬 단순해진다.
+
+## 조금 더 깊게 보기
+
+### 폼은 상태 동기화 문제다
+
+폼은 단순한 input 모음이 아니다. 사용자는 한 글자씩 입력하고, UI는 검증하고, 버튼 상태를 바꾸고, 에러 메시지를 보여준다. 그래서 폼은 화면과 데이터가 계속 왕복하는 상태 동기화 문제다.
+
+### controlled의 진짜 의미
+
+controlled 컴포넌트는 React가 입력값의 원본이 되는 방식이다. 비밀번호 강도 표시, 실시간 검색, 제출 버튼 활성화처럼 입력 중 값이 다른 UI에 영향을 주는 경우에 강력하다.
+
+### uncontrolled가 실무에서 사라지지 않는 이유
+
+제출 시점에만 값이 필요하거나 파일 input처럼 DOM API가 중심인 경우에는 uncontrolled가 더 단순하다. React Hook Form 같은 라이브러리가 uncontrolled 성격을 활용하는 것도 이 때문이다.
+
+---
 
 ## 참고
 

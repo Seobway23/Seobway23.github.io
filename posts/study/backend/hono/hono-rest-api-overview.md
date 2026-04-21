@@ -1,4 +1,4 @@
----
+﻿---
 title: "Hono로 REST API 시작하기 — 가벼운 서버 프레임워크가 주는 감각"
 slug: hono-rest-api-overview
 category: study/backend/hono
@@ -6,10 +6,23 @@ tags: [hono, rest-api, backend, nodejs, bun, deno, web-framework]
 author: Seobway
 readTime: 10
 featured: false
+coverImage: /roadmap-thumbnails/step-02-server-data.svg
 createdAt: 2026-04-16
 excerpt: >
   Hono를 왜 로드맵 초반에 배우면 좋은지 설명하고, 가벼운 라우팅과 JSON 응답 예제로
   REST API의 최소 골격을 익힌다.
+---
+
+## 이 시리즈 구성
+
+| 포스트 | 내용 |
+|---|---|
+| [로드맵 인덱스 →](/post/ai-webdev-roadmap-foundation) | 01~19 전체 학습 경로 |
+| [02-1. Node.js · Bun · Deno →](/post/js-runtime-node-bun-deno) | 서버 JavaScript 런타임 비교 |
+| [02-2. HTTP 메서드와 상태 코드 →](/post/http-methods-and-status-codes) | REST API의 기본 언어 |
+| [02-3. Hono로 REST API 시작하기 →](/post/hono-rest-api-overview) | 경량 서버 프레임워크 실습 |
+| [02-4. SQL JOIN · WHERE · HAVING · GROUP BY →](/post/sql-joins-where-having-group-by) | 쿼리 결과 예측과 집계 |
+
 ---
 
 ## 왜 Hono를 초반 실습 프레임워크로 고르는가
@@ -131,6 +144,22 @@ const posts = [
 Hono는 초반에 서버의 본질을 보기 좋게 해 주는 도구다.
 
 요청, 라우트, 상태 코드, JSON 응답이라는 최소 단위를 선명하게 보여 주기 때문에, 백엔드 기초를 잡는 단계에서 좋은 연습장이 된다.
+
+## 조금 더 깊게 보기
+
+### Hono를 배우는 진짜 이유
+
+Hono 자체를 깊게 외우는 것이 목표는 아니다. Hono는 HTTP 서버의 뼈대를 작고 선명하게 보여 주기 때문에 입문용으로 좋다. 요청을 받고, 경로를 나누고, body를 읽고, JSON과 상태 코드를 반환하는 흐름이 숨겨지지 않는다.
+
+### 프레임워크보다 먼저 봐야 할 것
+
+`app.get('/posts')`는 Hono 문법이면서 동시에 HTTP 설계다. 이 라우트가 어떤 리소스를 다루는지, 어떤 상태 코드를 반환하는지, 실패하면 어떤 JSON을 내려주는지를 같이 봐야 한다.
+
+### 실무 확장 방향
+
+처음에는 메모리 배열로 CRUD를 만든다. 그 다음 validation을 붙이고, DB를 붙이고, 인증 미들웨어를 붙인다. 마지막으로 에러 핸들링을 공통화한다.
+
+---
 
 ## 참고
 

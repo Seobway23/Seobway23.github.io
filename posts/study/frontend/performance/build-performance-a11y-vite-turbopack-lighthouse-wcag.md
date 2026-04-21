@@ -1,4 +1,4 @@
----
+﻿---
 title: "빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG"
 slug: build-performance-a11y-vite-turbopack-lighthouse-wcag
 category: study/frontend/performance
@@ -6,10 +6,25 @@ tags: [vite, turbopack, ssr, csr, ssg, lighthouse, accessibility, wcag, aria]
 author: Seobway
 readTime: 13
 featured: false
+coverImage: /roadmap-thumbnails/step-14-build-performance.svg
 createdAt: 2026-04-16
 excerpt: >
   Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어
   프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다.
+---
+
+## 이 시리즈 구성
+
+| 단계 | 포스트 | 내용 |
+|---|---|---|
+| 08 | [상태 & 데이터 페칭 →](/post/state-data-fetching-tanstack-zustand-server-actions) | TanStack Query, Zustand, Server Actions |
+| 09 | [API 설계 →](/post/api-design-rest-openapi-rpc-server-actions) | REST 원칙, OpenAPI, RPC |
+| 10 | [인증 & 보안 →](/post/auth-security-authjs-owasp-passkeys) | Auth.js, OWASP, 패스키 |
+| 11 | [요구사항 분석 →](/post/requirements-spec-user-story-tradeoff) | Spec, 유저 스토리, 기술 선택 |
+| 12 | [테스트 →](/post/testing-vitest-playwright) | 테스트 사고법, Vitest, Playwright |
+| 13 | [Context Engineering →](/post/context-engineering-prompts-rules-memory-skills) | 프롬프트, Rules, 메모리, Skill |
+| 14 | [빌드 · 성능 · a11y →](/post/build-performance-a11y-vite-turbopack-lighthouse-wcag) | Vite, Turbopack, Lighthouse, WCAG |
+
 ---
 
 ## 기능은 사용자에게 도착해야 완성이다
@@ -61,6 +76,36 @@ Lighthouse는 성능, 접근성, SEO, Best Practices를 측정하는 도구다.<
 :::
 
 ---
+
+## 조금 더 깊게 보기
+
+### 성능은 사용자 경험이다
+
+성능은 숫자 게임이 아니다. 사용자가 기다리는 시간, 버튼을 눌렀을 때 반응하는 느낌, 화면이 흔들리지 않는 안정감이 전부 성능이다. Lighthouse 점수는 출발점이지 최종 목표가 아니다.
+
+### 빌드 도구를 이해해야 하는 이유
+
+Vite나 Turbopack은 개발 경험을 빠르게 해준다. 하지만 번들러가 어떤 모듈을 묶고, 어떤 코드를 분리하고, 어떤 asset을 최적화하는지 모르면 성능 문제를 해결하기 어렵다. 번들 크기, code splitting, lazy loading은 기능이 커질수록 중요해진다.
+
+### 렌더링 전략은 제품 요구사항과 연결된다
+
+관리자 페이지는 CSR로도 충분할 수 있다. 마케팅 페이지는 SSG가 좋을 수 있다. 로그인 후 개인화된 대시보드는 SSR이나 client fetching을 섞어야 할 수 있다. 중요한 것은 기술 이름이 아니라 사용자에게 언제 어떤 HTML과 데이터를 보여줄지다.
+
+### a11y를 나중에 붙이면 비싸다
+
+접근성은 마지막에 aria 속성 몇 개 추가하는 작업이 아니다. 버튼을 button으로 만들고, label을 연결하고, 키보드 이동을 보장하고, 색 대비를 맞추는 기본 설계다. 초반부터 지키면 비용이 작고, 나중에 고치면 구조를 갈아엎게 된다.
+
+---
+
+## 실전 적용 시나리오
+
+블로그 상세 페이지가 느리다고 가정하자. 먼저 Lighthouse로 LCP, CLS, INP를 확인한다. 이미지가 크면 적절한 크기와 lazy loading을 적용한다. 번들이 크면 route-level code splitting을 본다. 초기 HTML이 중요하면 SSR/SSG 전략을 검토한다.
+
+접근성도 같은 흐름으로 본다. 제목 계층이 올바른지, 버튼이 키보드로 이동 가능한지, input에 label이 있는지, 색 대비가 충분한지 확인한다. 성능과 접근성은 별도 작업이 아니라 사용자 경험의 두 축이다.
+
+### 개발자 체크리스트
+
+새 페이지를 만들 때는 번들 크기, 이미지 크기, loading/error/empty 상태, 키보드 이동, aria가 필요한 컴포넌트를 함께 확인한다. 배포 직전에 점수만 맞추는 것보다 개발 중에 계속 작게 확인하는 편이 훨씬 싸다.
 
 ## 참고
 

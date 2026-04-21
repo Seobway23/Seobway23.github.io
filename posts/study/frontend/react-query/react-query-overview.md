@@ -132,6 +132,8 @@ sequenceDiagram
 
 ## 설치
 
+<!-- code-tabs:start -->
+
 ```npm
 npm install @tanstack/react-query
 npm install -D @tanstack/react-query-devtools
@@ -146,6 +148,8 @@ yarn add -D @tanstack/react-query-devtools
 pnpm add @tanstack/react-query
 pnpm add -D @tanstack/react-query-devtools
 ```
+
+<!-- code-tabs:end -->
 
 ---
 
@@ -236,6 +240,8 @@ flowchart TD
 
 Zustand는 Redux의 복잡한 boilerplate 없이 전역 상태를 관리하는 경량 라이브러리다. React Query가 서버 상태를 담당하고, Zustand가 클라이언트 UI 상태를 담당하는 조합이 현재 가장 많이 쓰인다.
 
+<!-- code-tabs:start -->
+
 ```npm
 npm install zustand
 ```
@@ -247,6 +253,8 @@ yarn add zustand
 ```pnpm
 pnpm add zustand
 ```
+
+<!-- code-tabs:end -->
 
 ```tsx
 // store/ui-store.ts — 전역 UI 상태 (React Query와 역할 분리)

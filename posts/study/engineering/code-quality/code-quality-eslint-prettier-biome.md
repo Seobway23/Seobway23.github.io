@@ -1,4 +1,4 @@
----
+﻿---
 title: "코드 품질 기초 — 가독성, 리팩토링, ESLint, Prettier, Biome"
 slug: code-quality-eslint-prettier-biome
 category: study/engineering/code-quality
@@ -6,10 +6,25 @@ tags: [code-quality, refactoring, eslint, prettier, biome, lint, format]
 author: Seobway
 readTime: 12
 featured: false
+coverImage: /roadmap-thumbnails/step-03-code-quality.svg
 createdAt: 2026-04-16
 excerpt: >
   Foundation 03 단계에서 필요한 코드 품질의 기준을 정리한다. 가독성·리팩토링 사고법,
   ESLint와 Prettier의 역할 분리, Biome을 언제 고려하면 좋은지까지 한 번에 본다.
+---
+
+## 이 시리즈 구성
+
+| 단계 | 포스트 | 내용 |
+|---|---|---|
+| 01 | [브라우저 & 클라이언트 →](/post/js-event-loop-and-async) | JS 비동기, React 설계, TypeScript |
+| 02 | [서버 & 데이터 →](/post/js-runtime-node-bun-deno) | 런타임, HTTP, Hono, SQL |
+| 03 | [코드 품질 →](/post/code-quality-eslint-prettier-biome) | 가독성, 리팩토링, ESLint, Prettier, Biome |
+| 04 | [Git & 릴리즈 →](/post/git-branching-conventional-commits-husky) | 브랜치 전략, Conventional Commits, Husky |
+| 05 | [UI & 스타일링 →](/post/modern-css-tailwind-shadcn) | 모던 CSS, Tailwind, shadcn/ui |
+| 06 | [AI 코딩 도구 →](/post/ai-coding-tools-cursor-copilot-claude-code-mcp) | Cursor, Copilot, Claude Code, MCP |
+| 07 | [DB & ORM →](/post/db-orm-postgres-drizzle-neon-supabase) | PostgreSQL, Drizzle, Neon, Supabase |
+
 ---
 
 ## 코드 품질은 "예쁘게 보이는 코드"가 아니다
@@ -140,6 +155,24 @@ Biome을 고려할 만한 경우:
 :::
 
 ---
+
+## 조금 더 깊게 보기
+
+### 코드 품질은 미래의 변경 비용이다
+
+품질이 낮은 코드는 당장 실행될 수는 있다. 하지만 다음 수정에서 비용을 폭발시킨다. 이름이 불명확하고, 함수가 길고, 조건문이 중첩되고, 포맷이 제각각이면 작은 변경도 무섭게 느껴진다.
+
+### 도구가 해결하는 것과 못 하는 것
+
+Prettier는 코드 모양을 맞춘다. ESLint는 위험한 패턴을 잡는다. Biome은 이 둘을 빠르게 통합하려는 선택지다. 하지만 이 도구들은 "왜 이 함수가 존재하는가"나 "이 책임이 여기 있는 게 맞는가"까지 자동으로 해결하지는 못한다.
+
+### 리팩토링의 기준
+
+리팩토링은 예쁘게 고치는 작업이 아니라 변경을 쉽게 만드는 작업이다. 같은 조건이 반복되면 함수로 빼고, 같은 데이터 조립이 반복되면 타입과 유틸로 묶고, 한 함수가 여러 일을 하면 책임을 나눈다. 이때 테스트가 있으면 리팩토링은 훨씬 안전해진다.
+
+### 실무 적용 팁
+
+팀 프로젝트에서는 먼저 포맷팅을 자동화한다. 그다음 lint를 CI에 붙인다. 마지막으로 규칙을 조금씩 강화한다. 처음부터 강한 규칙을 너무 많이 켜면 팀이 도구를 불편하게 느끼고 우회하기 시작한다.
 
 ## 참고
 

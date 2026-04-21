@@ -1,4 +1,4 @@
----
+﻿---
 title: "테스트 기초 — 테스트 사고법, Vitest, Playwright"
 slug: testing-vitest-playwright
 category: study/engineering/testing
@@ -6,10 +6,25 @@ tags: [testing, vitest, playwright, unit-test, e2e]
 author: Seobway
 readTime: 12
 featured: false
+coverImage: /roadmap-thumbnails/step-12-testing.svg
 createdAt: 2026-04-16
 excerpt: >
   Building 12 단계. 테스트를 작성하는 사고법, 단위 테스트와 E2E 테스트의 차이,
   Vitest와 Playwright를 어떤 역할로 쓰면 좋은지 정리한다.
+---
+
+## 이 시리즈 구성
+
+| 단계 | 포스트 | 내용 |
+|---|---|---|
+| 08 | [상태 & 데이터 페칭 →](/post/state-data-fetching-tanstack-zustand-server-actions) | TanStack Query, Zustand, Server Actions |
+| 09 | [API 설계 →](/post/api-design-rest-openapi-rpc-server-actions) | REST 원칙, OpenAPI, RPC |
+| 10 | [인증 & 보안 →](/post/auth-security-authjs-owasp-passkeys) | Auth.js, OWASP, 패스키 |
+| 11 | [요구사항 분석 →](/post/requirements-spec-user-story-tradeoff) | Spec, 유저 스토리, 기술 선택 |
+| 12 | [테스트 →](/post/testing-vitest-playwright) | 테스트 사고법, Vitest, Playwright |
+| 13 | [Context Engineering →](/post/context-engineering-prompts-rules-memory-skills) | 프롬프트, Rules, 메모리, Skill |
+| 14 | [빌드 · 성능 · a11y →](/post/build-performance-a11y-vite-turbopack-lighthouse-wcag) | Vite, Turbopack, Lighthouse, WCAG |
+
 ---
 
 ## 테스트는 "버그가 없다는 증명"이 아니다
@@ -72,6 +87,36 @@ test('login flow', async ({ page }) => {
 :::
 
 ---
+
+## 조금 더 깊게 보기
+
+### 테스트는 개발 속도를 늦추지 않는다
+
+초반에는 테스트가 느리게 느껴진다. 하지만 프로젝트가 커질수록 테스트는 변경 속도를 지켜준다. 테스트가 없으면 작은 수정도 수동 확인에 의존하고, 결국 개발자는 코드를 고치는 일을 두려워하게 된다.
+
+### 단위 테스트와 E2E의 균형
+
+Vitest 같은 단위 테스트는 빠르고 정확하다. 함수, 유틸, 비즈니스 규칙을 검증하기 좋다. Playwright 같은 E2E 테스트는 느리지만 사용자 흐름을 실제 브라우저에서 확인한다. 모든 것을 E2E로 검증하면 느리고, 모든 것을 단위 테스트로만 검증하면 연결 문제가 빠진다.
+
+### 무엇을 테스트하지 않을까
+
+테스트는 모든 줄을 덮는 것이 목표가 아니다. 구현 세부사항, 단순 스타일, 라이브러리 자체 동작은 과하게 테스트하지 않는다. 대신 돈, 권한, 데이터 손실, 핵심 사용자 흐름처럼 깨지면 큰 문제가 되는 곳을 우선한다.
+
+### 좋은 테스트 문장
+
+좋은 테스트 이름은 요구사항처럼 읽힌다. `it('shows validation error when email is invalid')`처럼 조건과 기대 결과가 드러나야 한다. 테스트 코드는 두 번째 문서다. 나중에 온 개발자가 테스트만 읽어도 기능의 의도를 이해할 수 있어야 한다.
+
+---
+
+## 실전 적용 시나리오
+
+게시글 작성 기능을 테스트한다고 하자. 제목 검증 함수는 Vitest로 단위 테스트한다. 작성 폼에서 빈 제목을 입력했을 때 에러가 보이는지는 컴포넌트 테스트로 본다. 실제 로그인 후 게시글을 작성하고 상세 페이지로 이동하는 흐름은 Playwright로 검증한다.
+
+이렇게 층을 나누면 빠른 테스트와 느린 테스트의 균형이 맞는다. 모든 것을 E2E로 테스트하면 느리고 불안정하다. 모든 것을 단위 테스트로만 보면 실제 사용자 흐름이 깨져도 모를 수 있다.
+
+### 좋은 테스트 데이터
+
+테스트 데이터는 현실적인 edge case를 포함해야 한다. 빈 문자열, 너무 긴 제목, 권한 없는 사용자, 네트워크 실패, 중복 요청 같은 케이스가 중요하다. 테스트는 happy path만 확인하는 장식이 아니라 실패를 안전하게 다루는 연습이다.
 
 ## 참고
 

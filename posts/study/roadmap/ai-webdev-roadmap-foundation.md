@@ -1,4 +1,4 @@
----
+﻿---
 title: "AI 웹개발자 로드맵 — 01~19 전체 학습 경로"
 slug: ai-webdev-roadmap-foundation
 category: study/roadmap
@@ -6,10 +6,21 @@ tags: [roadmap, foundation, building, operating, frontend, backend, architecture
 author: Seobway
 readTime: 20
 featured: false
+coverImage: /roadmap-thumbnails/roadmap-all.svg
 createdAt: 2026-04-16
 excerpt: >
   DevSkills 로드맵을 참고해 01~19 전체 학습 경로를 블로그 포스트로 재구성한다.
   Foundation, Building, Operating & Growing 단계별로 읽을 글과 공식 참고 사이트를 연결한다.
+---
+
+## 이 시리즈 구성
+
+| 구간 | 포스트 범위 | 목표 |
+|---|---|---|
+| Foundation | 01~07 | 코드를 읽고 이해하는 기본 체력 |
+| Building | 08~14 | 기능을 설계하고 만드는 역량 |
+| Operating & Growing | 15~19 | 배포, 운영, 관측, AI 검증 루프 |
+
 ---
 
 ## 이 글의 역할
@@ -149,6 +160,24 @@ flowchart TD
 :::
 
 ---
+
+## 이 로드맵을 읽는 법
+
+### 순서보다 중요한 것은 연결이다
+
+이 로드맵은 01부터 19까지 번호가 있지만, 학교 교과서처럼 한 번에 끝내는 목록은 아니다. 각 단계는 서로 연결되어 있다. 예를 들어 React 상태 관리를 제대로 이해하려면 JavaScript 비동기와 props/state 흐름이 필요하고, API 설계를 잘하려면 HTTP와 요구사항 분석이 필요하다. 배포와 관측은 테스트와 코드 품질이 없으면 불안정해진다.
+
+### 비개발자도 따라갈 수 있는 기준
+
+비개발자라면 각 포스트에서 용어를 모두 외우려 하지 않아도 된다. 대신 "이 기술이 어떤 문제를 해결하는가"를 먼저 잡으면 된다. TanStack Query는 서버 데이터 동기화 문제, GitHub Actions는 반복 검증 자동화 문제, Sentry는 운영 중 에러 추적 문제를 해결한다. 이렇게 문제 중심으로 보면 로드맵이 훨씬 덜 복잡해진다.
+
+### 개발자가 얻어야 할 인사이트
+
+개발자에게 이 로드맵의 핵심은 도구 목록이 아니라 판단 기준이다. 언제 Zustand가 아니라 TanStack Query를 써야 하는가, 언제 REST가 아니라 RPC가 편한가, 언제 Vercel이 적합하고 Railway가 적합한가, AI에게 어떤 작업을 맡기고 무엇을 사람이 검증해야 하는가. 이런 판단 기준을 각 포스트에서 가져가는 것이 목표다.
+
+### 추천 실습 방식
+
+각 단계마다 작은 산출물을 만든다. 01에서는 비동기 출력 순서 예측 노트, 02에서는 작은 Hono API, 03~04에서는 lint와 commit hook, 08~10에서는 인증이 있는 CRUD, 15~19에서는 배포와 관측, AI 리뷰 루프까지 붙인다. 읽기만 하면 지식이고, 작게 만들어 보면 역량이 된다.
 
 ## 참고
 

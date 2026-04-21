@@ -1,4 +1,4 @@
----
+﻿---
 title: "React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가"
 slug: react-component-data-flow
 category: study/frontend/react
@@ -6,10 +6,24 @@ tags: [react, props, state, data-flow, component-design, lifting-state-up]
 author: Seobway
 readTime: 11
 featured: false
+coverImage: /roadmap-thumbnails/step-01-browser-client.svg
 createdAt: 2026-04-16
 excerpt: >
   React의 props와 state 차이를 분명히 하고, 단방향 데이터 흐름과 state 끌어올리기를
   통해 컴포넌트를 어떻게 설계해야 하는지 정리한다.
+---
+
+## 이 시리즈 구성
+
+| 포스트 | 내용 |
+|---|---|
+| [로드맵 인덱스 →](/post/ai-webdev-roadmap-foundation) | 01~19 전체 학습 경로 |
+| [01-1. JS 이벤트 루프와 비동기 →](/post/js-event-loop-and-async) | 콜스택, 큐, 마이크로태스크 |
+| [01-2. setTimeout vs Promise →](/post/settimeout-vs-promise) | 비동기 실행 순서 예측 |
+| [01-3. React 단방향 데이터 흐름 →](/post/react-component-data-flow) | props/state, state 끌어올리기 |
+| [01-4. controlled vs uncontrolled →](/post/react-controlled-vs-uncontrolled) | React 폼 설계 |
+| [01-5. TypeScript 타입 시스템 기초 →](/post/typescript-type-system-basics) | any, unknown, union, narrowing |
+
 ---
 
 ## React에서 가장 먼저 잡아야 할 것
@@ -163,6 +177,22 @@ React 설계의 출발점은 거창한 패턴이 아니다.
 - 공유 상태는 공통 부모로 올린다
 
 이 네 줄이 정리되면 컴포넌트 구조가 훨씬 단순해진다.
+
+## 조금 더 깊게 보기
+
+### 비개발자 관점으로 보는 props와 state
+
+React 컴포넌트를 작은 부서라고 생각하면 이해가 쉽다. props는 상위 부서에서 내려온 업무 지시서이고, state는 그 부서가 현재 처리 중인 내부 메모다. 지시서는 마음대로 고치면 안 되고, 내부 메모는 상황에 따라 바뀔 수 있다.
+
+### 개발자가 실제로 고민해야 하는 질문
+
+React 설계에서 중요한 질문은 "이 컴포넌트를 어떻게 나눌까"보다 먼저 **이 상태의 주인이 누구인가**다. 상태의 주인이 분명하면 데이터 흐름은 자연스럽게 정리된다.
+
+### 실무에서 자주 하는 실수
+
+서버에서 온 데이터를 다시 로컬 state에 복사해 두거나, 형제 컴포넌트가 같은 값을 각각 state로 갖는 경우가 흔하다. 이런 구조는 원본이 무엇인지 흐리게 만들고 동기화 버그를 만든다.
+
+---
 
 ## 참고
 

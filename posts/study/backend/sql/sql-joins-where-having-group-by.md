@@ -1,4 +1,4 @@
----
+﻿---
 title: "SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기"
 slug: sql-joins-where-having-group-by
 category: study/backend/sql
@@ -6,10 +6,23 @@ tags: [sql, postgresql, join, where, having, group-by, aggregate]
 author: Seobway
 readTime: 13
 featured: false
+coverImage: /roadmap-thumbnails/step-02-server-data.svg
 createdAt: 2026-04-16
 excerpt: >
   SQL 입문에서 가장 자주 헷갈리는 JOIN, WHERE, HAVING, GROUP BY를 한 글에 묶어 정리한다.
   쿼리를 외우기보다 결과를 예측하는 감각을 만드는 것이 목표다.
+---
+
+## 이 시리즈 구성
+
+| 포스트 | 내용 |
+|---|---|
+| [로드맵 인덱스 →](/post/ai-webdev-roadmap-foundation) | 01~19 전체 학습 경로 |
+| [02-1. Node.js · Bun · Deno →](/post/js-runtime-node-bun-deno) | 서버 JavaScript 런타임 비교 |
+| [02-2. HTTP 메서드와 상태 코드 →](/post/http-methods-and-status-codes) | REST API의 기본 언어 |
+| [02-3. Hono로 REST API 시작하기 →](/post/hono-rest-api-overview) | 경량 서버 프레임워크 실습 |
+| [02-4. SQL JOIN · WHERE · HAVING · GROUP BY →](/post/sql-joins-where-having-group-by) | 쿼리 결과 예측과 집계 |
+
 ---
 
 ## 왜 SQL은 결과를 예측하는 연습이 중요한가
@@ -202,6 +215,22 @@ SQL은 "정답 쿼리 외우기"보다 **중간 결과 테이블을 상상하는
 백엔드 기초에서 SQL이 어려운 이유는 문법이 많아서가 아니라, **행과 그룹이 어떻게 변하는지 머릿속에서 추적해야 하기 때문**이다.
 
 그래서 JOIN, WHERE, HAVING, GROUP BY를 묶어서 이해하면 훨씬 빨리 감이 온다.
+
+## 조금 더 깊게 보기
+
+### SQL은 표를 변형하는 언어다
+
+SQL을 어렵게 느끼는 이유는 코드를 위에서 아래로 실행한다고 생각하기 때문이다. SQL은 절차형 코드라기보다 표를 선언적으로 변형하는 언어다.
+
+### JOIN을 머릿속에서 그리는 법
+
+JOIN은 두 표를 옆으로 붙이는 일이다. `INNER JOIN`은 양쪽에 짝이 있는 행만 남기고, `LEFT JOIN`은 왼쪽 표의 행을 보존한다. 실무에서 LEFT JOIN은 "주문이 없는 사용자도 보여줘" 같은 요구사항에서 자주 등장한다.
+
+### 개발자 인사이트
+
+ORM을 쓰더라도 SQL 결과를 예측하는 힘은 필수다. ORM 코드는 결국 SQL로 변환되고, 성능 문제도 SQL에서 드러난다. N+1 문제, 느린 JOIN, 잘못된 GROUP BY는 ORM을 잘 써도 피할 수 없다.
+
+---
 
 ## 참고
 
