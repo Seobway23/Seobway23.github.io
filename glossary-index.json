@@ -5,6 +5,7 @@
     "drf-authentication",
     "drf-overview",
     "django-settings",
+    "observability-security-sentry-posthog-otel-npm-audit",
     "docker-basics",
     "docker-compose-basics",
     "docker-compose-django",
