@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GestureTrail — Privacy Policy</title>
+    <meta
+      name="description"
+      content="GestureTrail does not collect personal data. Settings stay on your device."
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0a0a0c;
+        --surface: #14141a;
+        --border: rgba(255, 255, 255, 0.08);
+        --accent: #00d4ff;
+        --accent2: #a855f7;
+        --text: #f0f0f0;
+        --text-dim: #888;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.6;
+      }
+
+      #bg-canvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.35;
+      }
+
+      .wrap {
+        position: relative;
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 48px 24px 80px;
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .hero-logo {
+        width: 72px;
+        height: 72px;
+        background:
+          radial-gradient(circle at 40% 40%, #00d4ff33, transparent 70%),
+          linear-gradient(135deg, #1a1a2e, #0d0d1a);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 36px rgba(0, 212, 255, 0.18);
+      }
+
+      .product-name {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.8px;
+        background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .product-tag {
+        font-size: 13px;
+        color: var(--text-dim);
+        margin-top: 6px;
+      }
+
+      .lang-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 28px;
+      }
+
+      .lang-bar button {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        font-size: 13px;
+        font-weight: 500;
+        padding: 8px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition:
+          color 0.15s,
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .lang-bar button:hover {
+        color: var(--text);
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+
+      .lang-bar button[aria-pressed="true"] {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 212, 255, 0.25),
+          rgba(168, 85, 247, 0.15)
+        );
+        border-color: rgba(0, 212, 255, 0.45);
+        color: var(--text);
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.04);
+      }
+
+      .card h1 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 16px;
+        color: #fff;
+      }
+
+      .card p {
+        font-size: 15px;
+        color: #c8c8c8;
+        margin-bottom: 14px;
+      }
+
+      .card p:last-child {
+        margin-bottom: 0;
+      }
+
+      .card .accent {
+        color: var(--accent);
+      }
+
+      .card a {
+        color: var(--accent);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.35);
+      }
+
+      .card a:hover {
+        border-bottom-color: var(--accent);
+      }
+
+      .panel {
+        display: none;
+      }
+
+      .panel.active {
+        display: block;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 28px;
+        font-size: 12px;
+        color: var(--text-dim);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <div class="wrap">
+      <header class="brand">
+        <div class="hero-logo" aria-hidden="true">✨</div>
+        <div class="product-name">GestureTrail</div>
+        <p class="product-tag" data-i18n-tag>Privacy Policy</p>
+      </header>
+
+      <nav class="lang-bar" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">
+          English
+        </button>
+        <button type="button" data-lang="ko" aria-pressed="false">
+          한국어
+        </button>
+        <button type="button" data-lang="ja" aria-pressed="false">
+          日本語
+        </button>
+        <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+      </nav>
+
+      <main class="card">
+        <section
+          class="panel active"
+          id="panel-en"
+          lang="en"
+          data-lang-panel="en"
+        >
+          <h1>GestureTrail Privacy Policy</h1>
+          <p>
+            GestureTrail does not collect, store, or transmit any personal data.
+          </p>
+          <p>
+            All gesture settings are stored locally on your device using
+            Chrome&rsquo;s storage API and are never sent to any server.
+          </p>
+          <p>
+            Contact:
+            <a href="mailto:seobway24@gmail.com">seobway24@gmail.com</a>
+          </p>
+        </section>
+
+        <section
+          class="panel"
+          id="panel-ko"
+          lang="ko"
+          data-lang-panel="ko"
+          hidden
+        >
+          <h1>GestureTrail 개인정보처리방침</h1>
+          <p>GestureTrail은 개인정보를 수집·저장·전송하지 않습니다.</p>
+          <p>
+            모든 제스처 설정은 Chrome 저장소 API를 통해 사용자 기기에만
+            저장되며, 어떠한 서버로도 전송되지 않습니다.
+          </p>
+          <p>
+            문의: <a href="mailto:seobway24@gmail.com">seobway24@gmail.com</a>
+          </p>
+        </section>
+
+        <section
+          class="panel"
+          id="panel-ja"
+          lang="ja"
+          data-lang-panel="ja"
+          hidden
+        >
+          <h1>GestureTrail プライバシーポリシー</h1>
+          <p>GestureTrail は、個人データを収集・保存・送信しません。</p>
+          <p>
+            すべてのジェスチャー設定は、Chrome のストレージ API
+            によりお使いのデバイスにのみ保存され、サーバーへ送信されることはありません。
+          </p>
+          <p>
+            お問い合わせ:
+            <a href="mailto:seobway24@gmail.com">seobway24@gmail.com</a>
+          </p>
+        </section>
+
+        <section
+          class="panel"
+          id="panel-zh"
+          lang="zh-Hans"
+          data-lang-panel="zh"
+          hidden
+        >
+          <h1>GestureTrail 隐私政策</h1>
+          <p>GestureTrail 不会收集、存储或传输任何个人数据。</p>
+          <p>
+            所有手势设置均通过 Chrome 存储 API
+            仅保存在您的设备本地，绝不会发送到任何服务器。
+          </p>
+          <p>
+            联系：<a href="mailto:seobway24@gmail.com">seobway24@gmail.com</a>
+          </p>
+        </section>
+      </main>
+
+      <footer>
+        <span data-i18n-footer-en>GestureTrail · Local-only settings</span>
+        <span data-i18n-footer-ko hidden
+          >GestureTrail · 설정은 기기에만 저장됩니다</span
+        >
+        <span data-i18n-footer-ja hidden
+          >GestureTrail · 設定は端末内のみに保存されます</span
+        >
+        <span data-i18n-footer-zh hidden>GestureTrail · 设置仅保存在本机</span>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        var STORAGE_KEY = "gesturetrail-privacy-lang";
+        var tags = {
+          en: "Privacy Policy",
+          ko: "개인정보처리방침",
+          ja: "プライバシーポリシー",
+          zh: "隐私政策",
+        };
+
+        var canvas = document.getElementById("bg-canvas");
+        var ctx = canvas.getContext("2d");
+        var particles = [];
+
+        function resize() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        for (var i = 0; i < 36; i++) {
+          particles.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            r: Math.random() * 2 + 0.5,
+            alpha: Math.random() * 0.6 + 0.2,
+          });
+        }
+
+        function frame() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          particles.forEach(function (p) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width) p.x = 0;
+            if (p.y < 0) p.y = canvas.height;
+            if (p.y > canvas.height) p.y = 0;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0,212,255," + p.alpha + ")";
+            ctx.fill();
+          });
+          requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+
+        var titles = {
+          en: "GestureTrail — Privacy Policy",
+          ko: "GestureTrail — 개인정보처리방침",
+          ja: "GestureTrail — プライバシーポリシー",
+          zh: "GestureTrail — 隐私政策",
+        };
+
+        function setLang(code) {
+          var html = document.documentElement;
+          var mapLang = { en: "en", ko: "ko", ja: "ja", zh: "zh-Hans" };
+          html.setAttribute("lang", mapLang[code] || "en");
+          document.title = titles[code] || titles.en;
+
+          document.querySelectorAll("[data-lang-panel]").forEach(function (el) {
+            var on = el.getAttribute("data-lang-panel") === code;
+            el.classList.toggle("active", on);
+            el.hidden = !on;
+          });
+
+          document.querySelectorAll(".lang-bar button").forEach(function (btn) {
+            var on = btn.getAttribute("data-lang") === code;
+            btn.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+
+          var tagEl = document.querySelector("[data-i18n-tag]");
+          if (tagEl) tagEl.textContent = tags[code] || tags.en;
+
+          document
+            .querySelectorAll("[data-i18n-footer-en]")
+            .forEach(function (el) {
+              el.hidden = code !== "en";
+            });
+          document
+            .querySelectorAll("[data-i18n-footer-ko]")
+            .forEach(function (el) {
+              el.hidden = code !== "ko";
+            });
+          document
+            .querySelectorAll("[data-i18n-footer-ja]")
+            .forEach(function (el) {
+              el.hidden = code !== "ja";
+            });
+          document
+            .querySelectorAll("[data-i18n-footer-zh]")
+            .forEach(function (el) {
+              el.hidden = code !== "zh";
+            });
+
+          try {
+            localStorage.setItem(STORAGE_KEY, code);
+          } catch (e) {}
+        }
+
+        document.querySelectorAll(".lang-bar button").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            setLang(btn.getAttribute("data-lang"));
+          });
+        });
+
+        var initial = "en";
+        try {
+          var saved = localStorage.getItem(STORAGE_KEY);
+          if (saved && ["en", "ko", "ja", "zh"].indexOf(saved) !== -1) {
+            initial = saved;
+          } else {
+            var nav = (navigator.language || "").toLowerCase();
+            if (nav.indexOf("ko") === 0) initial = "ko";
+            else if (nav.indexOf("ja") === 0) initial = "ja";
+            else if (nav.indexOf("zh") === 0) initial = "zh";
+          }
+        } catch (e) {
+          var nav2 = (navigator.language || "").toLowerCase();
+          if (nav2.indexOf("ko") === 0) initial = "ko";
+          else if (nav2.indexOf("ja") === 0) initial = "ja";
+          else if (nav2.indexOf("zh") === 0) initial = "zh";
+        }
+        setLang(initial);
+      })();
+    </script>
+  </body>
+</html>
