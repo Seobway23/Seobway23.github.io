@@ -250,6 +250,7 @@ export default function Home() {
                         frontend: "Frontend",
                         ai: "AI",
                         gstack: "gstack",
+                        analysis: "분석",
                       };
                       // 카테고리 경로에서 마지막 부분 추출
                       const categoryName =

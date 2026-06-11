@@ -66,6 +66,7 @@ export default function About() {
       ai: "AI",
       algorithm: "Algorithm",
       study: "Study",
+      work: "Work",
     };
 
     return Array.from(categoryMap.entries())

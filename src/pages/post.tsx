@@ -64,6 +64,8 @@ const categoryLabels: Record<string, string> = {
   "study/mechanics": "역학",
   "study/mechanics/basics": "역학 · 기초",
   "study/mechanics/earth-pressure": "역학 · 토압",
+  work: "Work",
+  "work/analysis": "Work · 분석",
 };
 
 export default function Post() {

@@ -767,6 +767,11 @@ html:not(.dark) .prose .post-callout--success {
   --callout-bg: #ecfdf5;
   --callout-border: #a7f3d0;
 }
+html:not(.dark) .prose .post-callout--abstract {
+  --callout-accent: #4f46e5;
+  --callout-bg: #eef2ff;
+  --callout-border: #c7d2fe;
+}
 
 /* 타입별 색 — 다크 */
 .dark .prose .post-callout--tip {
@@ -813,6 +818,11 @@ html:not(.dark) .prose .post-callout--success {
   --callout-accent: #34d399;
   --callout-bg: rgba(5, 150, 105, 0.16);
   --callout-border: rgba(52, 211, 153, 0.32);
+}
+.dark .prose .post-callout--abstract {
+  --callout-accent: #818cf8;
+  --callout-bg: rgba(79, 70, 229, 0.18);
+  --callout-border: rgba(129, 140, 248, 0.35);
 }
 
 .prose a {
