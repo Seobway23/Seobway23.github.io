@@ -39,6 +39,12 @@ export const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
   "study/ai/gstack":
     "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
 
+  // ── Work ──────────────────────────────────────────────────────────────────
+  work:
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+  "work/analysis":
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+
   // ── Infra ─────────────────────────────────────────────────────────────────
   infra:
     "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",

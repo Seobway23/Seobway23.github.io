@@ -412,6 +412,7 @@ const CALLOUT_KINDS = new Set([
   "warning",
   "danger",
   "caution",
+  "abstract",
 ]);
 
 /**
@@ -474,6 +475,7 @@ const CALLOUT_LABELS = {
   warning: "WARNING",
   danger: "DANGER",
   caution: "CAUTION",
+  abstract: "TL;DR",
 };
 
 function buildCalloutAsideHtml(kind, innerHtml) {
