@@ -468,5 +468,10 @@
     "slug": "ai-webdev-roadmap-foundation",
     "title": "AI 웹개발자 로드맵 — 01~19 전체 학습 경로",
     "path": "/post/study/roadmap/ai-webdev-roadmap-foundation"
+  },
+  {
+    "slug": "ai-agent-qa-automation-token-economics",
+    "title": "AI 에이전트 QA 자동화 — 토큰 경제 분석",
+    "path": "/post/work/analysis/ai-agent-qa-automation-token-economics"
   }
 ]
