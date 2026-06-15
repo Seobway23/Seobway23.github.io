@@ -5,6 +5,8 @@ export type GlossaryTerm = {
   label: string;
   description: string;
   aliases: string[];
+  /** 설정된 경우 해당 카테고리(또는 그 하위)의 글에서만 용어 자동 감지 */
+  categories?: string[];
 };
 
 export type GlossaryData = {

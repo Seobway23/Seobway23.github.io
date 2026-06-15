@@ -8,6 +8,8 @@ interface PostGlossaryLayerProps {
   rootRef: React.RefObject<HTMLElement | null>;
   isMobile: boolean;
   postSlug?: string;
+  /** 글 카테고리 — glossary term의 categories 필드와 비교해 범위 밖 용어를 자동 감지에서 제외 */
+  postCategory?: string;
 }
 
 type OpenState = {
@@ -53,6 +55,7 @@ export function PostGlossaryLayer({
   rootRef,
   isMobile,
   postSlug,
+  postCategory,
 }: PostGlossaryLayerProps) {
   const [globalTerms, setGlobalTerms] = useState<
     Record<string, { id: string; label: string; description: string; aliases: string[] }>
@@ -99,6 +102,16 @@ export function PostGlossaryLayer({
     const out: Array<{ termId: string; alias: string; isAsciiWord: boolean }> = [];
     const asciiWordRe = /^[A-Za-z0-9_]+$/;
     for (const [termId, t] of Object.entries(globalTerms)) {
+      // categories 필드가 있으면 현재 글 카테고리가 허용 목록에 포함될 때만 활성화
+      const allowedCategories = Array.isArray((t as any).categories) ? (t as any).categories as string[] : null;
+      if (allowedCategories) {
+        if (!postCategory) continue; // 카테고리 없는 글이면 scoped term 제외
+        const categoryMatch = allowedCategories.some(
+          (cat) => postCategory === cat || postCategory.startsWith(cat + "/")
+        );
+        if (!categoryMatch) continue;
+      }
+
       const aliases = Array.isArray((t as any).aliases) ? (t as any).aliases : [];
       for (const a of aliases) {
         if (typeof a !== "string") continue;
@@ -110,7 +123,7 @@ export function PostGlossaryLayer({
     // 글별 glossary는 aliases가 없으므로 자동 매칭 대상은 전역 terms만.
     out.sort((a, b) => b.alias.length - a.alias.length);
     return out;
-  }, [globalTerms]);
+  }, [globalTerms, postCategory]);
 
   const [open, setOpen] = useState<OpenState>(null);
   const [related, setRelated] = useState<Array<{ slug: string; title: string }>>([]);

@@ -569,7 +569,10 @@ function loadGlobalGlossary() {
             ? t.aliases.filter((a) => typeof a === "string" && a.trim().length > 0).map((a) => a.trim())
             : [];
           const uniqueAliases = Array.from(new Set([label, ...aliases]));
-          return [id, { id, label, description, aliases: uniqueAliases }];
+          const categories = Array.isArray(t.categories)
+            ? t.categories.filter((c) => typeof c === "string" && c.trim().length > 0).map((c) => c.trim())
+            : undefined;
+          return [id, { id, label, description, aliases: uniqueAliases, ...(categories ? { categories } : {}) }];
         })
     );
 
