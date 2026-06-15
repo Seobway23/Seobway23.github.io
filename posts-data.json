@@ -165,6 +165,41 @@
     "path": "/post/study/backend/sql/sql-joins-where-having-group-by"
   },
   {
+    "slug": "electron-ipc-security-model",
+    "title": "Electron IPC와 보안 모델 — contextBridge, Context Isolation, Sandbox",
+    "path": "/post/study/electron/electron-ipc-security-model"
+  },
+  {
+    "slug": "electron-multi-process-architecture",
+    "title": "Electron 멀티 프로세스 아키텍처 — Main, Renderer, Preload, Utility 프로세스",
+    "path": "/post/study/electron/electron-multi-process-architecture"
+  },
+  {
+    "slug": "electron-native-layer-os-integration",
+    "title": "Electron 네이티브 계층 — OS 통합과 C++ 바인딩",
+    "path": "/post/study/electron/electron-native-layer-os-integration"
+  },
+  {
+    "slug": "electron-nodejs-libuv-integration",
+    "title": "Node.js, libuv, Chromium 통합 — Electron의 이중 이벤트 루프",
+    "path": "/post/study/electron/electron-nodejs-libuv-integration"
+  },
+  {
+    "slug": "electron-packaging-asar",
+    "title": "Electron 패키징과 asar — electron-builder로 배포하기",
+    "path": "/post/study/electron/electron-packaging-asar"
+  },
+  {
+    "slug": "electron-python-sidecar-bundling",
+    "title": "Python 사이드카 번들링 — PyInstaller로 Electron 앱에 Python 백엔드 넣기",
+    "path": "/post/study/electron/electron-python-sidecar-bundling"
+  },
+  {
+    "slug": "electron-renderer-chromium-rendering",
+    "title": "렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인",
+    "path": "/post/study/electron/electron-renderer-chromium-rendering"
+  },
+  {
     "slug": "code-quality-eslint-prettier-biome",
     "title": "코드 품질 기초 — 가독성, 리팩토링, ESLint, Prettier, Biome",
     "path": "/post/study/engineering/code-quality/code-quality-eslint-prettier-biome"

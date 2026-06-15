@@ -5,6 +5,8 @@
     "drf-authentication",
     "drf-overview",
     "django-settings",
+    "electron-multi-process-architecture",
+    "electron-packaging-asar",
     "observability-security-sentry-posthog-otel-npm-audit",
     "docker-basics",
     "docker-compose-basics",
@@ -25,6 +27,8 @@
     "django-migration",
     "django-version-compatibility",
     "django-settings",
+    "electron-packaging-asar",
+    "electron-python-sidecar-bundling",
     "docker-basics",
     "docker-compose-basics",
     "docker-compose-django",
@@ -35,6 +39,8 @@
   "namespace": [
     "django-models",
     "django-urls",
+    "electron-ipc-security-model",
+    "electron-python-sidecar-bundling",
     "k8s-zero-downtime-deployment",
     "mysql-backup-k8s",
     "mysql-restore-test"
