@@ -228,6 +228,7 @@ export async function getCategories(): Promise<
     performance: "Performance",
     nextjs: "Next.js",
     "work/analysis": "Work · 분석",
+    "study/electron": "Electron",
   };
 
   return Array.from(categoryMap.entries()).map(([name, count]) => ({
