@@ -7,6 +7,9 @@
       "aliases": [
         "Jenkins",
         "jenkins"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "jenkinsfile": {
@@ -15,6 +18,9 @@
       "description": "Jenkins Pipeline을 코드로 정의하는 파일로, stages/steps 등을 선언해 파이프라인을 버전 관리합니다.",
       "aliases": [
         "Jenkinsfile"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "docker": {
@@ -24,6 +30,9 @@
       "aliases": [
         "Docker",
         "도커"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "kubernetes": {
@@ -36,6 +45,10 @@
         "K8s",
         "k8s",
         "쿠버네티스"
+      ],
+      "categories": [
+        "study/infra",
+        "study/network"
       ]
     },
     "pod": {
@@ -46,6 +59,10 @@
         "Pod",
         "pod",
         "파드"
+      ],
+      "categories": [
+        "study/infra",
+        "study/network"
       ]
     },
     "deployment": {
@@ -56,6 +73,9 @@
         "Deployment",
         "deployment",
         "디플로이먼트"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "statefulset": {
@@ -66,6 +86,9 @@
         "StatefulSet",
         "statefulset",
         "스테이트풀셋"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "service": {
@@ -76,6 +99,10 @@
         "Service",
         "service",
         "서비스"
+      ],
+      "categories": [
+        "study/infra",
+        "study/network"
       ]
     },
     "namespace": {
@@ -86,6 +113,9 @@
         "Namespace",
         "namespace",
         "네임스페이스"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "pv": {
@@ -99,6 +129,9 @@
         "PersistentVolume",
         "PersistentVolumeClaim",
         "영구 볼륨"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "argocd": {
@@ -109,6 +142,9 @@
         "Argo CD",
         "ArgoCD",
         "argocd"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "gitops": {
@@ -118,6 +154,9 @@
       "aliases": [
         "GitOps",
         "gitops"
+      ],
+      "categories": [
+        "study/infra"
       ]
     },
     "kustomize": {
@@ -127,6 +166,9 @@
       "aliases": [
         "Kustomize",
         "kustomize"
+      ],
+      "categories": [
+        "study/infra"
       ]
     }
   }
