@@ -734,6 +734,7 @@ export default function Post() {
                   rootRef={contentRef as unknown as React.RefObject<HTMLElement | null>}
                   isMobile={isMobile}
                   postSlug={post.slug}
+                  postCategory={post.category}
                 />
 
                 {/* Tags */}
