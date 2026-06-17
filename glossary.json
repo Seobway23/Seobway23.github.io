@@ -170,6 +170,203 @@
       "categories": [
         "study/infra"
       ]
+    },
+    "v8": {
+      "id": "v8",
+      "label": "V8",
+      "description": "구글이 만든 오픈소스 JavaScript/WebAssembly 엔진입니다. JS 코드를 JIT로 기계어로 컴파일하고 힙·GC·콜 스택을 관리합니다. Chrome, Node.js, Electron이 모두 V8을 씁니다.",
+      "aliases": [
+        "V8"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "jit": {
+      "id": "jit",
+      "label": "JIT 컴파일",
+      "description": "코드를 실행 직전(런타임)에 기계어로 번역하는 컴파일 방식입니다. 매번 해석하는 인터프리터보다 반복 실행되는 코드를 훨씬 빠르게 돌릴 수 있어, V8이 JS를 빠르게 실행하는 핵심 기법입니다.",
+      "aliases": [
+        "JIT 컴파일",
+        "JIT"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "heap": {
+      "id": "heap",
+      "label": "힙",
+      "description": "객체·배열처럼 크기가 가변적인 값을 저장하는 메모리 영역입니다. 콜 스택과 달리 정해진 순서 없이 할당·해제되고, 더는 참조되지 않는 값은 GC가 찾아서 회수합니다.",
+      "aliases": [
+        "힙"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "gc": {
+      "id": "gc",
+      "label": "가비지 컬렉션",
+      "description": "더 이상 쓰이지 않는 메모리(객체)를 자동으로 찾아 해제하는 기능입니다. 개발자가 직접 메모리를 해제하지 않아도 V8 같은 엔진이 주기적으로 힙을 훑어 회수합니다.",
+      "aliases": [
+        "가비지 컬렉션",
+        "GC"
+      ],
+      "categories": [
+        "study/electron",
+        "study/frontend"
+      ]
+    },
+    "call-stack": {
+      "id": "call-stack",
+      "label": "콜 스택",
+      "description": "지금 실행 중인 함수 호출을 순서대로 쌓아두는 자료구조입니다. 함수가 호출되면 쌓이고(push), 끝나면 제거됩니다(pop). JS는 콜 스택이 하나뿐이라 한 번에 한 작업만 실행합니다(싱글 스레드).",
+      "aliases": [
+        "콜 스택",
+        "콜스택",
+        "Call Stack"
+      ],
+      "categories": [
+        "study/electron",
+        "study/frontend"
+      ]
+    },
+    "event-loop": {
+      "id": "event-loop",
+      "label": "이벤트 루프",
+      "description": "콜 스택이 비면 대기 중인 콜백(타이머, I/O 완료 등)을 꺼내 실행하는 반복 루프입니다. JS/Node가 싱글 스레드인데도 동시에 여러 작업을 처리하는 것처럼 보이게 하는 핵심 메커니즘입니다.",
+      "aliases": [
+        "이벤트 루프",
+        "Event Loop"
+      ],
+      "categories": [
+        "study/electron",
+        "study/frontend",
+        "study/backend",
+        "study/infra"
+      ]
+    },
+    "microtask": {
+      "id": "microtask",
+      "label": "마이크로태스크",
+      "description": "Promise 콜백, process.nextTick처럼 일반 이벤트 루프 단계보다 먼저 처리되는 우선순위 높은 작업 큐입니다. 현재 동기 코드가 끝나거나 단계가 바뀔 때마다 큐가 빌 때까지 먼저 비워집니다.",
+      "aliases": [
+        "마이크로태스크",
+        "Microtask"
+      ],
+      "categories": [
+        "study/electron",
+        "study/frontend"
+      ]
+    },
+    "libuv": {
+      "id": "libuv",
+      "label": "libuv",
+      "description": "Node.js를 위해 만들어진 크로스플랫폼 비동기 I/O 라이브러리입니다. 이벤트 루프와 OS별 비동기 입출력(epoll/kqueue/IOCP)을 하나의 인터페이스로 감싸줍니다.",
+      "aliases": [
+        "libuv"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "node-api": {
+      "id": "node-api",
+      "label": "Node-API",
+      "description": "네이티브(C/C++) 애드온이 V8/Node 버전이 바뀌어도 재컴파일 없이 동작하도록 만든 ABI 안정 API입니다. 모든 JS 값을 napi_value라는 불투명 타입으로 감싸 내부 구현 변화로부터 애드온을 격리합니다.",
+      "aliases": [
+        "Node-API",
+        "N-API",
+        "napi_value"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "abi": {
+      "id": "abi",
+      "label": "ABI",
+      "description": "컴파일된 바이너리끼리 함수를 호출하고 데이터를 주고받는 저수준 규약입니다. 이 규약이 바뀌면 기존에 컴파일된 네이티브 모듈이 깨져서 재컴파일이 필요해집니다.",
+      "aliases": [
+        "ABI"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "thread-pool": {
+      "id": "thread-pool",
+      "label": "스레드풀",
+      "description": "블로킹 작업(파일 I/O 등)을 메인 스레드 대신 처리하도록 미리 만들어둔 워커 스레드 묶음입니다. libuv는 기본 4개의 스레드풀을 두고 파일/DNS 작업을 여기서 처리합니다.",
+      "aliases": [
+        "스레드풀",
+        "Thread Pool"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "nonblocking-io": {
+      "id": "nonblocking-io",
+      "label": "논블로킹 I/O",
+      "description": "입출력 작업이 끝날 때까지 코드 실행을 멈추지 않고, 작업을 OS에 맡긴 뒤 완료되면 콜백으로 결과를 받는 방식입니다. Node.js가 싱글 스레드로도 많은 I/O를 동시에 처리할 수 있는 이유입니다.",
+      "aliases": [
+        "논블로킹 I/O",
+        "논블로킹"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "syscall": {
+      "id": "syscall",
+      "label": "시스템 콜",
+      "description": "애플리케이션이 OS 커널에 직접 요청하는 저수준 함수 호출입니다. read()/write() 같은 파일 입출력, epoll_wait() 같은 이벤트 대기가 모두 시스템 콜을 통해 이뤄집니다.",
+      "aliases": [
+        "시스템 콜",
+        "시스템콜"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "file-descriptor": {
+      "id": "file-descriptor",
+      "label": "파일 디스크립터",
+      "description": "OS가 열려 있는 파일·소켓 같은 입출력 자원을 식별하기 위해 부여하는 정수 번호입니다. epoll 같은 메커니즘은 이 번호를 감시해 입출력이 준비됐는지 통지합니다.",
+      "aliases": [
+        "파일 디스크립터",
+        "File Descriptor"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "epoll-kqueue-iocp": {
+      "id": "epoll-kqueue-iocp",
+      "label": "OS 비동기 폴링 메커니즘",
+      "description": "OS마다 다른, 여러 파일 디스크립터의 입출력 준비 상태를 감시하는 방식입니다. Linux는 epoll, macOS/BSD는 kqueue, Windows는 IOCP를 쓰며, libuv가 이 차이를 하나의 인터페이스로 통합합니다.",
+      "aliases": [
+        "OS 비동기 폴링 메커니즘",
+        "epoll",
+        "kqueue",
+        "IOCP"
+      ],
+      "categories": [
+        "study/electron"
+      ]
+    },
+    "nexttick": {
+      "id": "nexttick",
+      "label": "process.nextTick",
+      "description": "Node.js에서 현재 동작이 끝난 직후, 다음 이벤트 루프 단계로 넘어가기 전에 가장 먼저 실행되도록 콜백을 예약하는 함수입니다. 마이크로태스크와 함께 단계 전환 사이에 처리됩니다.",
+      "aliases": [
+        "process.nextTick"
+      ],
+      "categories": [
+        "study/electron"
+      ]
     }
   }
 }

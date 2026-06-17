@@ -1,4 +1,14 @@
 {
+  "abi": [
+    "gstack-skills-ship",
+    "django-version-compatibility",
+    "electron-multi-process-architecture",
+    "electron-native-layer-os-integration",
+    "electron-nodejs-libuv-integration",
+    "celery-broker",
+    "micro-ethernet-nic-cable",
+    "micro-network-traffic"
+  ],
   "service": [
     "architecture-patterns-layered-component-clean",
     "db-orm-postgres-drizzle-neon-supabase",
@@ -23,6 +33,15 @@
     "micro-network-traffic",
     "micro-osi-7layer"
   ],
+  "event-loop": [
+    "django-lifecycle",
+    "django-settings",
+    "electron-native-layer-os-integration",
+    "electron-nodejs-libuv-integration",
+    "electron-renderer-chromium-rendering",
+    "js-event-loop-and-async",
+    "settimeout-vs-promise"
+  ],
   "docker": [
     "django-migration",
     "django-version-compatibility",
@@ -44,6 +63,73 @@
     "k8s-zero-downtime-deployment",
     "mysql-backup-k8s",
     "mysql-restore-test"
+  ],
+  "syscall": [
+    "electron-ipc-security-model",
+    "electron-nodejs-libuv-integration"
+  ],
+  "v8": [
+    "electron-multi-process-architecture",
+    "electron-native-layer-os-integration",
+    "electron-nodejs-libuv-integration",
+    "electron-renderer-chromium-rendering"
+  ],
+  "node-api": [
+    "electron-native-layer-os-integration",
+    "electron-nodejs-libuv-integration"
+  ],
+  "jit": [
+    "electron-nodejs-libuv-integration",
+    "celery-worker",
+    "macro-network-view",
+    "circuit-vs-packet-switching"
+  ],
+  "heap": [
+    "electron-nodejs-libuv-integration"
+  ],
+  "gc": [
+    "electron-nodejs-libuv-integration",
+    "react-query-advanced",
+    "react-query-overview",
+    "react-query-queries",
+    "threejs-raycaster-picking-performance",
+    "cdn-content-delivery-network"
+  ],
+  "call-stack": [
+    "electron-nodejs-libuv-integration",
+    "js-event-loop-and-async",
+    "settimeout-vs-promise",
+    "react-component-data-flow",
+    "react-controlled-vs-uncontrolled",
+    "typescript-type-system-basics",
+    "micro-osi-7layer"
+  ],
+  "microtask": [
+    "electron-nodejs-libuv-integration",
+    "js-event-loop-and-async",
+    "settimeout-vs-promise",
+    "react-component-data-flow",
+    "react-controlled-vs-uncontrolled",
+    "typescript-type-system-basics"
+  ],
+  "libuv": [
+    "electron-nodejs-libuv-integration",
+    "electron-renderer-chromium-rendering"
+  ],
+  "thread-pool": [
+    "electron-nodejs-libuv-integration"
+  ],
+  "nonblocking-io": [
+    "electron-nodejs-libuv-integration"
+  ],
+  "file-descriptor": [
+    "electron-nodejs-libuv-integration"
+  ],
+  "epoll-kqueue-iocp": [
+    "electron-nodejs-libuv-integration"
+  ],
+  "nexttick": [
+    "electron-nodejs-libuv-integration"
   ],
   "deployment": [
     "deployment-vercel-railway-github-actions",
