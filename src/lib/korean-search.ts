@@ -134,14 +134,17 @@ export function composeHangul(
 /**
  * 한글 문자열을 초성 문자열로 변환
  * 예: "안녕" -> "ㅇㄴ", "리액트" -> "ㄹㅇㅌ"
- * 한글이 아닌 문자는 제거하고 초성만 반환
+ * 완성된 음절(가-힣)은 초성을 추출하고, 아직 조합되지 않은 낱자 자음
+ * (예: "ㅇ" 단독 입력, "일ㄹ"처럼 입력 중인 다음 글자의 초성)도 그대로 초성으로 인정한다.
+ * 한글이 아닌 문자는 제거한다.
  */
 export function toInitials(text: string): string {
   return text
     .split("")
     .map((char) => {
       const decomposed = decomposeHangul(char);
-      return decomposed ? decomposed.initial : "";
+      if (decomposed) return decomposed.initial;
+      return INITIAL_CONSONANTS.includes(char) ? char : "";
     })
     .filter((char) => char !== "") // 빈 문자열 제거
     .join("");
