@@ -503,6 +503,138 @@ function injectCalloutsIntoHtml(html, calloutSlots, renderInnerHtml) {
   return result;
 }
 
+/**
+ * 도메인 배경 카드 — ::: domain id="foo" title="제목" ... :::
+ * 본문에는 아무것도 남기지 않아(글의 흐름 방해 X) 숨은 <template>로 부록에 모은다.
+ * 본문 어딘가의 [[domain:foo|표시어]] 트리거를 누르면 이 카드가 모달로 열린다.
+ * - 콜아웃보다 먼저 호출한다(카드 내부 :::가 콜아웃 파서에 먹히지 않도록).
+ * - 여는 줄은 `::: domain <attrs>` 형태만 매칭하고, 닫는 줄은 단독 `:::`.
+ */
+function processDomainCards(markdown) {
+  if (!markdown || typeof markdown !== "string") {
+    return { markdown: markdown || "", cards: [] };
+  }
+  const lines = String(markdown).split(/\r?\n/);
+  const out = [];
+  const cards = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i].replace(/\r$/, "");
+    const open = line.match(/^::: domain\s+(.+?)\s*$/);
+    if (open) {
+      const attrs = open[1];
+      const idMatch = attrs.match(/id="([a-zA-Z0-9_-]+)"/);
+      const titleMatch = attrs.match(/title="([^"]*)"/);
+      const startLine = i;
+      i++;
+      const body = [];
+      let closed = false;
+      while (i < lines.length) {
+        const cur = lines[i].replace(/\r$/, "");
+        if (/^:::\s*$/.test(cur)) {
+          closed = true;
+          i++;
+          break;
+        }
+        body.push(cur);
+        i++;
+      }
+      if (!closed || !idMatch) {
+        // 닫히지 않았거나 id 없음 → 원문 유지(경고)
+        if (!idMatch) console.warn(`⚠️ 도메인 카드에 id="..." 없음: ${line}`);
+        out.push(lines[startLine]);
+        i = startLine + 1;
+        continue;
+      }
+      cards.push({
+        id: idMatch[1],
+        title: (titleMatch ? titleMatch[1] : idMatch[1]).trim(),
+        inner: body.join("\n"),
+      });
+      // 본문에는 아무것도 남기지 않는다.
+    } else {
+      out.push(line);
+      i++;
+    }
+  }
+  return { markdown: out.join("\n"), cards };
+}
+
+/**
+ * 도메인 트리거 마크업([[domain:id|label]])을 클릭 가능한 버튼으로 치환한다.
+ * - glossary([[termId]])보다 먼저 실행(둘의 정규식이 겹치지 않지만 순서를 명확히).
+ * - 코드 펜스 내부 제외.
+ */
+function applyDomainTriggerMarkup(markdown, cardIds, filePath) {
+  if (!markdown || typeof markdown !== "string") return markdown || "";
+  const parts = markdown.split(/(```[\s\S]*?```)/g);
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 1) return part; // 코드 블록
+      return part.replace(
+        /\[\[domain:([a-zA-Z0-9_-]+)(?:\|([^\]]+))?\]\]/g,
+        (_m, id, label) => {
+          const display = (label || id || "").trim();
+          if (cardIds && !cardIds.has(id)) {
+            console.warn(`⚠️ 도메인 카드 정의 없음: ${id} (${filePath})`);
+          }
+          return `<button type="button" class="domain-trigger" data-domain="${escapeHtml(
+            id
+          )}" aria-haspopup="dialog"><span class="domain-trigger__label">${escapeHtml(
+            display
+          )}</span><span class="domain-trigger__icon" aria-hidden="true">?</span></button>`;
+        }
+      );
+    })
+    .join("");
+}
+
+/**
+ * 추출한 도메인 카드들을 렌더된 HTML 뒤에 숨은 <template>로 붙인다.
+ * <template>은 브라우저가 렌더하지 않으므로 본문에 보이지 않고, 모달 열 때 innerHTML만 꺼내 쓴다.
+ */
+function buildDomainCardsHtml(cards, renderInnerHtml) {
+  if (!cards || cards.length === 0) return "";
+  const tpls = cards
+    .map(
+      (c) =>
+        `<template data-domain-card data-domain-id="${escapeHtml(
+          c.id
+        )}" data-domain-title="${escapeHtml(c.title)}">${renderInnerHtml(
+          c.inner
+        )}</template>`
+    )
+    .join("");
+  return `<div class="domain-cards" hidden aria-hidden="true">${tpls}</div>`;
+}
+
+/**
+ * GFM 표(| ... |) 행 안의 **볼드**를 <strong>으로 변환한다.
+ * marked는 한 줄에 **가 여러 번 나오면 셀 경계(|)를 넘어 짝을 잘못 맞춰
+ * (특히 한글 뒤 ** + 공백/괄호 조합) 표 안 볼드가 셀을 넘어 깨진다.
+ * 표 행은 한 줄이므로, 그 줄 안에서 **...**를 좌→우로 명시적으로 짝지어
+ * <strong>으로 바꿔 marked의 강조 파서를 우회한다. (코드 펜스 내부 제외)
+ */
+function convertTableBoldToStrong(markdown) {
+  if (!markdown || typeof markdown !== "string") return markdown || "";
+  const parts = markdown.split(/(```[\s\S]*?```)/g);
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 1) return part; // 코드 블록은 건드리지 않음
+      return part
+        .split("\n")
+        .map((line) => {
+          const trimmed = line.trimStart();
+          // 표 행만: |로 시작하고 셀 구분 |가 하나 이상 (구분선 | --- | 은 **가 없어 무해)
+          if (!trimmed.startsWith("|") || trimmed.indexOf("|", 1) === -1) return line;
+          // 여는 ** 뒤가 공백이 아닌 것만, 비탐욕 매칭으로 셀 안에서 좌→우 짝짓기
+          return line.replace(/\*\*(?!\s)([^\n]+?)\*\*/g, "<strong>$1</strong>");
+        })
+        .join("\n");
+    })
+    .join("");
+}
+
 function injectCodeTabsPlaceholdersIntoHtml(html, slots) {
   let result = String(html || "");
   if (!slots || slots.length === 0) return result;
@@ -785,6 +917,8 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     let processedContent = content.replace(/\\`/g, "`");
     // 각주 문법([^1], [^1]: ...)을 HTML 앵커 링크로 변환
     processedContent = processMarkdownFootnotes(processedContent).content;
+    // 표 셀 안의 **볼드** → <strong> (fixBoldBeforeCJK·marked가 표에서 ** 짝을 셀 너머로 잘못 맞추는 것을 사전 차단)
+    processedContent = convertTableBoldToStrong(processedContent);
     // marked v12+: **text**한글 볼드 인식 실패 보정
     processedContent = fixBoldBeforeCJK(processedContent);
     // 수식 구분자 정규화: \( \), \[ \] -> $ / $$ (코드 블록 제외)
@@ -792,6 +926,9 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     // 코드 탭 블록 처리 (marked 이후 HTML로 치환)
     const { markdown: mdWithCodeTabs, slots: codeTabsSlots } = processCodeTabs(processedContent);
     processedContent = mdWithCodeTabs;
+    // 도메인 배경 카드(::: domain ...) — 본문에서 제거하고 부록 template로 모음. 콜아웃보다 먼저.
+    const { markdown: mdWithoutDomain, cards: domainCards } = processDomainCards(processedContent);
+    processedContent = mdWithoutDomain;
     // 콜아웃(::: tip 등) — 코드 탭 이후, 수식 플레이스홀더 이전
     const { markdown: mdWithCallouts, slots: calloutSlots } = processCallouts(processedContent);
     processedContent = mdWithCallouts;
@@ -811,6 +948,12 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
           )
         : undefined;
 
+    // 도메인 트리거([[domain:id|label]]) → 버튼. glossary보다 먼저.
+    processedContent = applyDomainTriggerMarkup(
+      processedContent,
+      new Set(domainCards.map((c) => c.id)),
+      filePath
+    );
     // Glossary 마크업 치환 (코드 블록 제외)
     processedContent = applyGlossaryMarkup(processedContent, glossary, filePath);
 
@@ -841,15 +984,22 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     // 마크다운을 HTML로 변환 후 수식 플레이스홀더를 KaTeX로 복원 + 코드탭 + 콜아웃 내부 마크다운 치환
     const htmlWithMath = injectKatexPlaceholdersIntoHtml(marked.parse(mdForMarked, { renderer }), mathSlots);
     const htmlAfterCodeTabs = injectCodeTabsPlaceholdersIntoHtml(htmlWithMath, codeTabsSlots);
-    const htmlContent = injectCalloutsIntoHtml(htmlAfterCodeTabs, calloutSlots, (innerMd) => {
-      let frag = fixBoldBeforeCJK(innerMd);
+    const renderFragmentHtml = (innerMd) => {
+      let frag = convertTableBoldToStrong(innerMd); // 표 볼드 먼저 — 아래 fixBold의 셀 넘김 방지
+      frag = fixBoldBeforeCJK(frag);
       frag = normalizeLatexDelimiters(frag);
+      // 콜아웃/도메인 카드 안에서도 [[domain:id]] 트리거·[[term]] 용어사전이 동작하게 (본문과 동일 처리)
+      frag = applyDomainTriggerMarkup(frag, new Set(domainCards.map((c) => c.id)), filePath);
+      frag = applyGlossaryMarkup(frag, glossary, filePath);
       const { markdown: mdF, slots: mathSlotsF } = markdownWithMathPlaceholders(frag);
       let h = marked.parse(mdF, { renderer });
       h = injectKatexPlaceholdersIntoHtml(h, mathSlotsF);
       h = injectCodeTabsPlaceholdersIntoHtml(h, codeTabsSlots);
       return h;
-    });
+    };
+    let htmlContent = injectCalloutsIntoHtml(htmlAfterCodeTabs, calloutSlots, renderFragmentHtml);
+    // 도메인 배경 카드(숨은 template)를 본문 뒤에 붙인다.
+    htmlContent += buildDomainCardsHtml(domainCards, renderFragmentHtml);
 
     // excerpt 생성 (frontmatter에 없으면 content에서 추출)
     let excerpt = data.excerpt || "";

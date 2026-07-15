@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
-import { ArrowLeft, Eye, Clock, User } from "lucide-react";
+import { ArrowLeft, Eye, Clock, User, ListTree, X } from "lucide-react";
 import { useTheme } from "../hooks/use-theme";
 import { useIsMobile } from "../hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,8 @@ import RightSidebar from "../components/right-sidebar";
 import UtterancesComments from "../components/utterances-comments";
 import { PostGlossaryLayer } from "@/components/post-glossary-layer";
 import { useReadingProgress } from "../hooks/use-reading-progress";
+import { usePostToc } from "@/hooks/use-post-toc";
+import TocList from "@/components/toc-list";
 import { apiRequest } from "@/lib/queryClient";
 import { trackPostView } from "@/lib/analytics";
 import type { Post } from "../../shared/schema";
@@ -89,6 +91,28 @@ export default function Post() {
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const pinchRef = useRef<{ dist: number; cx: number; cy: number } | null>(null);
+
+  // 도메인 배경 모달 (본문 흐름을 방해하지 않고 클릭 시 열림)
+  const [domainModal, setDomainModal] = useState<{ title: string; html: string } | null>(null);
+  const closeDomainModal = () => setDomainModal(null);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDomainModal(null);
+    };
+    if (domainModal) window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [domainModal]);
+
+  // 모바일 목차 모달
+  const [tocModalOpen, setTocModalOpen] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTocModalOpen(false);
+    };
+    if (tocModalOpen) window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [tocModalOpen]);
 
   const closeMermaidModal = () => {
     setMermaidModal(null);
@@ -343,6 +367,9 @@ export default function Post() {
   // 코드 하이라이팅을 위한 ref
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // 목차 데이터(+현재 섹션) — PC 사이드바와 모바일 모달이 공유
+  const { groups: toc, activeId } = usePostToc(post?.content);
+
   // 콘텐츠가 렌더링된 후 코드 하이라이팅 + 머메이드 다이어그램 처리
   useEffect(() => {
     if (post && contentRef.current) {
@@ -541,6 +568,27 @@ export default function Post() {
 
         const { hydrateMechanicsVisualizations } = await import("@/lib/post-mechanics-viz");
         await hydrateMechanicsVisualizations(contentRef.current);
+
+        // 도메인 배경 트리거([[domain:id]]) → 클릭 시 모달 열기
+        const domainTriggers = contentRef.current?.querySelectorAll<HTMLButtonElement>(
+          ".domain-trigger"
+        );
+        domainTriggers?.forEach((btn) => {
+          if (btn.dataset.domainBound === "true") return;
+          btn.dataset.domainBound = "true";
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.domain;
+            if (!id || !contentRef.current) return;
+            const tpl = contentRef.current.querySelector<HTMLTemplateElement>(
+              `template[data-domain-card][data-domain-id="${id}"]`
+            );
+            if (!tpl) return;
+            setDomainModal({
+              title: tpl.dataset.domainTitle || "",
+              html: tpl.innerHTML,
+            });
+          });
+        });
       }, 100);
 
       return () => clearTimeout(timer);
@@ -588,6 +636,92 @@ export default function Post() {
 
   return (
     <>
+    {/* 모바일 목차 버튼 (lg 미만) — 스크롤 어디서든 접근 */}
+    {toc.length > 0 && (
+      <button
+        type="button"
+        onClick={() => setTocModalOpen(true)}
+        className="author-card-gradient lg:hidden fixed bottom-6 right-5 z-40 flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 transition-transform active:scale-95"
+        aria-label="목차 열기"
+      >
+        <ListTree className="h-4 w-4" aria-hidden />
+        목차
+      </button>
+    )}
+
+    {/* 모바일 목차 모달 (하단 시트) */}
+    {tocModalOpen && (
+      <div
+        className="lg:hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+        onClick={() => setTocModalOpen(false)}
+        role="dialog"
+        aria-modal="true"
+        aria-label="목차"
+      >
+        <div
+          className="flex max-h-[75vh] w-full max-w-lg flex-col rounded-2xl bg-white shadow-2xl dark:bg-gray-900"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-gray-700">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <ListTree className="h-4 w-4 text-muted-foreground" aria-hidden />
+              목차
+            </div>
+            <button
+              onClick={() => setTocModalOpen(false)}
+              aria-label="닫기"
+              className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="overflow-y-auto px-4 py-4">
+            <TocList
+              groups={toc}
+              activeId={activeId}
+              onNavigate={() => setTocModalOpen(false)}
+            />
+          </div>
+        </div>
+      </div>
+    )}
+    {/* 도메인 배경 모달 */}
+    {domainModal && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+        onClick={closeDomainModal}
+        role="dialog"
+        aria-modal="true"
+        aria-label={domainModal.title || "도메인 설명"}
+      >
+        <div
+          className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl flex flex-col w-full max-w-2xl max-h-[85vh]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-primary/10 text-primary flex-shrink-0">
+                도메인
+              </span>
+              <h2 className="text-base font-bold truncate">{domainModal.title}</h2>
+            </div>
+            <button
+              onClick={closeDomainModal}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+              aria-label="닫기"
+            >
+              ✕ 닫기
+            </button>
+          </div>
+          <div className="overflow-y-auto px-6 py-5">
+            <div
+              className="prose max-w-none dark:prose-invert prose-sm md:prose-base domain-modal-content"
+              dangerouslySetInnerHTML={{ __html: domainModal.html }}
+            />
+          </div>
+        </div>
+      </div>
+    )}
     {/* Mermaid 다이어그램 확대 모달 */}
     {mermaidModal && (
       <div
@@ -724,6 +858,7 @@ export default function Post() {
                 {/* Post Body */}
                 <div
                   ref={contentRef}
+                  id="post-body"
                   className="prose max-w-none dark:prose-invert md:prose-lg"
                   dangerouslySetInnerHTML={{
                     __html: formatContent(post.content),
@@ -770,7 +905,12 @@ export default function Post() {
           </main>
 
           {/* Right Sidebar */}
-          <RightSidebar post={post} readingProgress={readingProgress} />
+          <RightSidebar
+            post={post}
+            readingProgress={readingProgress}
+            toc={toc}
+            activeId={activeId}
+          />
         </div>
       </div>
     </div>
