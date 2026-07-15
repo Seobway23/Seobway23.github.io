@@ -508,5 +508,10 @@
     "slug": "ai-agent-qa-automation-token-economics",
     "title": "AI 에이전트 QA 자동화 — 토큰 경제 분석",
     "path": "/post/work/analysis/ai-agent-qa-automation-token-economics"
+  },
+  {
+    "slug": "cache-overlay-timing-rca",
+    "title": "저장은 됐는데 화면이 한 박자 늦는 이유 — 캐시가 옛 값을 먼저 준다",
+    "path": "/post/work/analysis/cache-overlay-timing-rca"
   }
 ]

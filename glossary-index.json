@@ -93,7 +93,8 @@
     "react-query-overview",
     "react-query-queries",
     "threejs-raycaster-picking-performance",
-    "cdn-content-delivery-network"
+    "cdn-content-delivery-network",
+    "cache-overlay-timing-rca"
   ],
   "call-stack": [
     "electron-nodejs-libuv-integration",
