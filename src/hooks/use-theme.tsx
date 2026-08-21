@@ -50,6 +50,14 @@ export function ThemeProvider({
         darkSyntax.disabled = true;
       }
     }
+
+    // PWA standalone 모드의 상태바·주소창 색을 현재 테마에 맞춘다
+    const themeColor = document.querySelector(
+      'meta[name="theme-color"]'
+    ) as HTMLMetaElement | null;
+    if (themeColor) {
+      themeColor.content = theme === "dark" ? "#0f172a" : "#ffffff";
+    }
   }, [theme]);
 
   const value = {

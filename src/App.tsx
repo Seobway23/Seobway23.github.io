@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./hooks/use-theme";
 import { initGA, trackPageView } from "./lib/analytics";
 import Layout from "./components/layout";
+import PwaUpdatePrompt from "./components/pwa-update-prompt";
 import Home from "./pages/home";
 import Post from "./pages/post";
 import About from "./pages/about";
@@ -47,6 +48,7 @@ function App() {
           <AppRoutes />
         </Layout>
         <Toaster />
+        <PwaUpdatePrompt />
       </TooltipProvider>
     </ThemeProvider>
   );
