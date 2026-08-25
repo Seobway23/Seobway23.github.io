@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH10 · 테스트 · 코드 품질 · Git — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="10">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">CHAPTER 10</div>
+    <h1>테스트 · 코드 품질 · Git</h1>
+    <p>코드를 "일단 돌아가게"에서 "고쳐도 안심"으로 만드는 도구들을 다룬다. 테스트로 회귀를 막고, 린트·포맷터로 코드 품질을 자동으로 지키고, Git으로 여러 사람의 변경을 안전하게 합친다. 셋 다 코드 자체보다 코드를 "계속 안전하게 바꿀 수 있게" 만드는 인프라다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">안전망</span>
+      <span class="pill">Vitest</span>
+      <span class="pill">Testing Library</span>
+      <span class="pill">Playwright</span>
+      <span class="pill">ESLint · Prettier · Biome</span>
+      <span class="pill">Git</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+
+      <p class="lead">이 챕터는 다음 질문에 답한다. 테스트는 왜 필요하고 무엇을 보장해주는가? <code>describe</code>/<code>it</code>/<code>expect</code>는 실제로 어떻게 동작하는가? Vitest와 React Testing Library로 실무 코드를 어떻게 검증하는가? E2E 테스트는 왜 몇 개만 유지해야 하는가? ESLint·Prettier·Biome은 각각 무슨 역할을 나눠 맡는가? Git에서 merge와 rebase는 무엇이 다르고, 실수했을 때 어떻게 되돌리는가?</p>
+
+      <!-- ============================================================ -->
+      <h2 id="s-why-test"><span class="h2num">§1</span>왜 테스트하나</h2>
+
+      <p>기능을 하나 고치고 나면 "혹시 다른 데가 깨지지 않았을까"라는 불안이 남는다. 코드가 커질수록 사람이 매번 화면을 손으로 눌러보며 확인하는 건 불가능해진다. 테스트는 이 확인 작업을 코드로 대신 시키는 것이다.</p>
+
+      <h3 id="s-regression-safety">회귀를 막는 안전망</h3>
+      <p><span class="t" data-tip="기능을 고치거나 새로 추가했는데, 예전에는 잘 되던 다른 기능이 망가지는 현상. '퇴행'이라고도 한다.">회귀(regression)</span>는 소프트웨어가 시간이 지나며 커질 때 가장 자주 일어나는 사고 유형이다. A 기능을 고치다가 전혀 관련 없어 보이는 B 기능이 죽는 식이다. 테스트가 있으면 코드를 바꾼 직후 자동으로 "예전에 보장했던 동작들이 여전히 맞는지"를 몇 초 안에 확인할 수 있다. 사람이 매번 모든 화면을 순회하며 눈으로 확인하는 것보다 훨씬 빠르고 훨씬 안 빼먹는다.</p>
+
+      <h3 id="s-refactor-doc">리팩터링을 가능하게 하는 문서</h3>
+      <p><span class="t" data-tip="겉으로 보이는 동작(입력에 대한 출력)은 그대로 유지하면서 내부 코드 구조만 개선하는 작업.">리팩터링(refactoring)</span>은 테스트 없이는 사실상 도박이다. 테스트가 없는 코드를 고치면 "고치기 전과 똑같이 동작하는지"를 증명할 방법이 없어서, 결국 아무도 그 코드를 건드리지 않으려는 코드(= 레거시)가 된다. 잘 만든 테스트는 코드가 무엇을 보장해야 하는지를 실행 가능한 형태로 적어 둔 문서 역할도 한다. 함수 이름과 주석은 거짓말을 할 수 있지만, 통과하는 테스트는 "적어도 이 입력에 대해서는 이 출력이 나온다"는 걸 실제로 검증한 상태로 남는다.</p>
+
+      <h3 id="s-pyramid-trophy">테스트 피라미드 vs 테스트 트로피</h3>
+      <p>테스트는 범위에 따라 크게 세 층으로 나뉜다. <span class="t" data-tip="함수 하나, 컴포넌트 하나처럼 가장 작은 단위를 다른 부분과 분리해서 검증하는 테스트. 빠르고 실패 원인이 명확하다.">단위 테스트(unit test)</span>는 함수나 컴포넌트 하나를 다른 것과 분리해 검증한다. <span class="t" data-tip="여러 모듈(컴포넌트 + 상태관리 + API 호출 등)이 실제로 맞물려 동작하는지를, 진짜에 가까운 환경에서 검증하는 테스트.">통합 테스트(integration test)</span>는 여러 모듈이 실제로 맞물려 동작하는지 확인한다. <span class="t" data-tip="End-to-End. 실제 브라우저를 띄워 사용자가 처음부터 끝까지 흐름을 수행하는 것을 그대로 재현하는 테스트. 가장 느리고 가장 현실에 가깝다.">E2E 테스트</span>는 진짜 브라우저에서 사용자의 전체 흐름을 그대로 재현한다.</p>
+      <p>전통적인 "테스트 피라미드" 모델은 단위 테스트를 가장 많이, E2E를 가장 적게 만들라고 말한다. 반면 프론트엔드 진영에서 널리 쓰이는 "테스트 트로피" 모델은 정적 분석(타입 검사·린트)을 기본 바닥에 깔고, 그 위에 통합 테스트를 가장 두껍게 둔다<sup class="ref"><a href="#r1">[1]</a></sup>. 이유는 단순하다. UI 컴포넌트는 대부분 다른 컴포넌트·훅·상태와 얽혀서 의미를 가지기 때문에, 각 조각을 완전히 고립시켜 단위 테스트만 촘촘히 쌓아도 "실제로 화면에서 잘 동작하는지"는 잘 보장되지 않는다.</p>
+
+      <div class="fig">
+        <svg viewBox="0 0 560 220" width="100%" height="220" role="img" aria-label="테스트 피라미드와 테스트 트로피 비교 도식">
+          <g font-family="var(--font)" font-size="12">
+            <text x="120" y="18" text-anchor="middle" style="fill:var(--fg);font-weight:800;font-size:13px">테스트 피라미드</text>
+            <rect x="10" y="130" width="220" height="40" rx="4" style="fill:var(--ok-weak);stroke:var(--ok)"/>
+            <text x="120" y="154" text-anchor="middle" style="fill:var(--fg)">단위 테스트 (가장 많이)</text>
+            <rect x="50" y="90" width="140" height="40" rx="4" style="fill:var(--info-weak);stroke:var(--info)"/>
+            <text x="120" y="114" text-anchor="middle" style="fill:var(--fg)">통합 테스트</text>
+            <rect x="90" y="50" width="60" height="40" rx="4" style="fill:var(--warn-weak);stroke:var(--warn)"/>
+            <text x="120" y="74" text-anchor="middle" style="fill:var(--fg);font-size:11px">E2E</text>
+          </g>
+          <g font-family="var(--font)" font-size="12" transform="translate(320,0)">
+            <text x="120" y="18" text-anchor="middle" style="fill:var(--fg);font-weight:800;font-size:13px">테스트 트로피</text>
+            <rect x="95" y="140" width="50" height="30" rx="4" style="fill:var(--purple-weak);stroke:var(--purple)"/>
+            <text x="120" y="159" text-anchor="middle" style="fill:var(--fg);font-size:10.5px">정적분석</text>
+            <rect x="65" y="105" width="110" height="35" rx="4" style="fill:var(--ok-weak);stroke:var(--ok)"/>
+            <text x="120" y="127" text-anchor="middle" style="fill:var(--fg);font-size:11px">단위 테스트</text>
+            <rect x="15" y="65" width="210" height="40" rx="4" style="fill:var(--info-weak);stroke:var(--info)"/>
+            <text x="120" y="89" text-anchor="middle" style="fill:var(--fg)">통합 테스트 (가장 많이)</text>
+            <rect x="90" y="30" width="60" height="35" rx="4" style="fill:var(--warn-weak);stroke:var(--warn)"/>
+            <text x="120" y="52" text-anchor="middle" style="fill:var(--fg);font-size:11px">E2E</text>
+          </g>
+        </svg>
+        <div class="fig__cap"><b>그림 1.</b> 피라미드는 단위 테스트를 가장 두껍게, 트로피는 통합 테스트를 가장 두껍게 쌓는다. 너비는 "이 층에 투자하는 상대적 비중"을 뜻하며 절대적인 개수 비율은 아니다. <span class="muted">출처: Testing Library, Guiding Principles<sup class="ref"><a href="#r1">[1]</a></sup></span></div>
+      </div>
+
+      <h3 id="s-integration-heavy">프론트엔드에서 통합 테스트 비중이 높은 이유</h3>
+      <p>버튼 컴포넌트 하나를 완전히 고립시켜 "클릭하면 <code>onClick</code>이 호출된다"만 확인하는 단위 테스트는 실제 버그를 거의 못 잡는다. 실무에서 나는 버그는 대부분 "이 컴포넌트와 저 훅이 만났을 때", "폼 상태와 API 응답이 합쳐졌을 때"처럼 조합 지점에서 발생한다. 그래서 React 컴포넌트를 테스트할 때는 자식 컴포넌트까지 실제로 렌더링한 상태에서, 사용자가 클릭·입력하는 흐름을 그대로 재현하는 통합 테스트 비중이 자연스럽게 높아진다. 이 접근은 §4에서 다루는 React Testing Library의 철학과 그대로 이어진다.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>구분</th><th>속도</th><th>실제 버그 포착력</th><th>실패 시 원인 특정</th></tr></thead>
+          <tbody>
+            <tr><td>단위 테스트</td><td>매우 빠름 (밀리초)</td><td>낮음 — 조합 지점의 버그를 놓친다</td><td>쉬움 — 함수 하나만 본다</td></tr>
+            <tr><td>통합 테스트</td><td>빠름 (수십~수백 밀리초)</td><td>높음 — 실제 사용 흐름과 가깝다</td><td>보통 — 여러 모듈이 얽혀 있다</td></tr>
+            <tr><td>E2E 테스트</td><td>느림 (초 단위)</td><td>가장 높음 — 브라우저·네트워크까지 포함</td><td>어려움 — 원인 후보가 가장 많다</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note note--tip"><span class="note__t">요약</span>테스트는 회귀 방지 + 리팩터링 안전망 + 실행 가능한 문서 세 가지 역할을 한다. 프론트엔드에서는 단위 테스트보다 통합 테스트에 더 무게를 싣는 편이 실제 버그를 더 많이 잡는다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-test-syntax"><span class="h2num">§2</span>테스트의 기본 문법</h2>
+
+      <p>Vitest, Jest, Playwright 등 거의 모든 JS 테스트 도구는 같은 뼈대 문법을 공유한다. 이 뼈대를 먼저 익히면 어떤 러너를 쓰든 코드를 그대로 읽을 수 있다.</p>
+
+      <h3 id="s-describe-it-expect">describe / it / expect 구조</h3>
+      <p><code>describe(이름, 함수)</code>는 관련 있는 테스트들을 하나의 그룹으로 묶는 역할만 한다(실행에는 영향을 주지 않는다). <code>it(이름, 함수)</code> — <code>test</code>라는 이름으로도 쓴다 — 는 "검증 가능한 동작 하나"를 정의한다. 그 안에서 <code>expect(실제값)</code>에 <code>.toBe()</code>, <code>.toEqual()</code> 같은 <span class="t" data-tip="expect()가 반환하는 객체의 메서드. '실제값이 이런 조건을 만족해야 한다'는 단언을 표현한다. 예: toBe, toEqual, toHaveBeenCalledWith.">매처(matcher)</span>를 이어 붙여서 "이 값이 이래야 한다"는 단언을 적는다. 매처가 조건을 만족하지 않으면 <span class="t" data-tip="함수 실행 도중 예외를 발생시켜서 정상 흐름을 중단시키는 것. 테스트 러너는 이 예외를 잡아서 '실패'로 기록한다.">에러를 던지고(throw)</span>, 테스트 러너는 그 에러를 잡아서 해당 테스트를 실패로 기록한다.</p>
+
+      <h3 id="s-aaa-pattern">AAA 패턴</h3>
+      <p>좋은 테스트 본문은 대부분 세 부분으로 나뉜다. <b>Arrange(준비)</b> — 테스트에 필요한 데이터와 상태를 만든다. <b>Act(실행)</b> — 검증하려는 동작을 실제로 수행한다. <b>Assert(단언)</b> — 결과가 기대와 같은지 확인한다. 이 순서를 지키면 테스트 하나가 "무엇을, 어떻게 했더니, 무엇이 나와야 하는가"를 한눈에 읽히게 만든다. 세 단계를 뒤섞거나 한 테스트 안에서 여러 개의 서로 다른 행동을 검증하면, 실패했을 때 어느 부분이 문제인지 찾기 어려워진다.</p>
+
+      <h3 id="s-good-test-names">좋은 테스트 이름</h3>
+      <p>테스트 이름은 함수 이름이 아니라 "어떤 상황에서 무엇을 해야 하는가"를 문장으로 서술해야 한다. <code>it('sum')</code>보다 <code>it('두 수를 더하면 합을 반환한다')</code>가 낫고, 더 나아가 <code>it('빈 배열을 넘기면 0을 반환한다')</code>처럼 경계 조건을 이름에 명시하면 테스트 목록만 봐도 이 코드가 어떤 상황들을 다루는지 문서처럼 읽힌다. 테스트가 실패했을 때도 러너가 출력하는 이름만으로 "무엇이 깨졌는지"를 바로 알 수 있어야 한다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <p>실제 테스트 러너(Vitest, Jest)는 내부적으로 크게 복잡하지 않다. <code>it</code>은 함수를 실행해보고 예외가 나는지 안 나는지만 보고, <code>expect().toBe()</code>는 "값이 다르면 에러를 던지는" 함수일 뿐이다. 아래 코드는 그 핵심 아이디어만 60줄 이하로 직접 구현한 것이다. <b>실행 버튼을 눌러</b> 통과하는 테스트와 일부러 실패시킨 테스트가 콘솔에 각각 어떻게 찍히는지 확인해 보자.</p>
+          <ul>
+            <li><code>expect(actual)</code> — 매처 객체를 돌려준다.</li>
+            <li><code>.toBe(expected)</code> — <code>===</code> 비교, 다르면 에러를 던진다.</li>
+            <li><code>it(name, fn)</code> — <code>fn()</code>을 실행하고 예외 여부로 PASS/FAIL을 콘솔에 찍는다.</li>
+            <li>두 번째 테스트는 <b>일부러</b> 틀린 기대값을 적어서 FAIL이 어떻게 보이는지 보여준다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="mini-test-runner.js" data-height="300">
+<script type="text/plain" class="pg__src">
+// ---- expect() 미니 구현: matcher 두 개만 지원 ----
+function expect(actual) {
+  return {
+    toBe(expected) {
+      if (actual !== expected) {
+        throw new Error(
+          '기대값 ' + JSON.stringify(expected) +
+          ' 이지만 실제값은 ' + JSON.stringify(actual) + ' 이다'
+        );
+      }
+    },
+    toEqual(expected) {
+      const a = JSON.stringify(actual);
+      const e = JSON.stringify(expected);
+      if (a !== e) {
+        throw new Error('기대값 ' + e + ' 이지만 실제값은 ' + a + ' 이다');
+      }
+    }
+  };
+}
+
+// ---- it() / describe() 미니 구현 ----
+function it(name, fn) {
+  try {
+    fn();
+    console.log('✅ PASS - ' + name);
+  } catch (err) {
+    console.log('❌ FAIL - ' + name + ' :: ' + err.message);
+  }
+}
+
+function describe(name, fn) {
+  console.log('# ' + name);
+  fn();
+}
+
+// ---- 테스트 대상 함수 ----
+function sum(a, b) {
+  return a + b;
+}
+
+// ---- 실제 테스트: AAA 패턴 ----
+describe('sum', function () {
+  it('두 수를 더하면 합을 반환한다', function () {
+    // Arrange
+    const a = 2, b = 3;
+    // Act
+    const result = sum(a, b);
+    // Assert
+    expect(result).toBe(5);
+  });
+
+  it('일부러 실패시켜본다 (기대값을 틀리게 적음)', function () {
+    const result = sum(2, 3);
+    expect(result).toBe(999);
+  });
+
+  it('객체를 깊은 비교로 검증한다 (toEqual)', function () {
+    const merged = Object.assign({}, { a: 1 }, { b: 2 });
+    expect(merged).toEqual({ a: 1, b: 2 });
+  });
+});
+</script>
+        </div>
+      </div>
+
+      <div class="note note--info"><span class="note__t">실제 러너와의 차이</span>실제 Vitest/Jest는 여기에 <code>beforeEach</code>/<code>afterEach</code>(각 테스트 전후 훅), 비동기 <code>it</code>, 스냅샷, 목(mock) 추적, 병렬 실행, 예쁜 diff 출력 같은 기능이 훨씬 많이 얹혀 있다. 하지만 뼈대는 방금 만든 것과 같다 — "함수를 실행하고, 예외가 안 나면 통과".</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-vitest"><span class="h2num">§3</span>Vitest</h2>
+
+      <h3 id="s-why-vitest">왜 Vite 프로젝트에서 Vitest인가</h3>
+      <p><span class="t" data-tip="Vite 팀이 만든 테스트 러너. Vite와 같은 설정 파일, 같은 플러그인, 같은 변환 파이프라인을 공유한다.">Vitest</span>는 <a href="ch07.html#s-vite">Vite</a>와 설정을 그대로 공유한다. Vite가 이미 처리하고 있는 <span class="t" data-tip="import.meta.env, 경로 alias, JSX/TS 변환 등 프로젝트가 이미 Vite 설정에 정의해 둔 규칙들.">alias, 환경변수, JSX/TS 변환</span> 같은 것들을 테스트에서도 똑같이 쓸 수 있어서, Vite로 빌드하는 프로젝트라면 별도의 변환 설정을 다시 만들 필요가 없다. Jest는 Babel 기반의 독립된 변환 파이프라인을 쓰기 때문에, Vite 프로젝트에 Jest를 얹으면 사실상 같은 일을 하는 설정을 두 벌 유지해야 한다. Vitest는 API도 대부분 Jest와 호환되도록 설계돼서(<code>describe</code>/<code>it</code>/<code>expect</code>/<code>vi</code>) 마이그레이션 비용도 낮다<sup class="ref"><a href="#r2">[2]</a></sup>.</p>
+
+      <h3 id="s-vitest-setup">설치와 설정</h3>
+      <p>Yarn Berry 기준 설치와 <code>vitest.config.ts</code> 설정은 다음과 같다<sup class="ref"><a href="#r3">[3]</a></sup>. <code>environment: 'jsdom'</code>은 Node.js 환경에 <span class="t" data-tip="브라우저 없이 JS만으로 DOM API(document, window 등)를 흉내내는 라이브러리. 테스트 러너가 실제 브라우저 없이도 DOM을 다루는 코드를 실행하게 해준다.">jsdom</span>으로 가짜 DOM을 만들어서, React 컴포넌트를 실제 브라우저 없이도 렌더링·조작할 수 있게 한다. <code>setupFiles</code>는 모든 테스트 파일 실행 전에 공통으로 한 번 실행할 초기화 코드(예: jest-dom 매처 확장)를 지정한다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>bash</span></div>
+        <pre><code class="language-bash">yarn add -D vitest jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>vitest.config.ts</span></div>
+        <pre><code class="language-ts">/// &lt;reference types="vitest" /&gt;
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    globals: true, // describe/it/expect를 import 없이 전역으로 사용
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+    },
+  },
+});</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/test/setup.ts</span></div>
+        <pre><code class="language-ts">import '@testing-library/jest-dom/vitest';</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>package.json</span></div>
+        <pre><code class="language-json">{
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  }
+}</code></pre>
+      </div>
+
+      <h3 id="s-vitest-file-convention">테스트 파일 위치 컨벤션</h3>
+      <p>Vitest는 기본적으로 <code>*.test.ts</code>, <code>*.spec.ts</code> 패턴에 맞는 파일을 모두 찾아서 실행한다. 실무에서는 크게 두 가지 배치 방식을 쓴다. <b>콜로케이션(co-location)</b>은 테스트 파일을 검증 대상 옆에 나란히 둔다 — 어떤 파일에 테스트가 있고 없는지 파일 트리만 봐도 바로 보인다. <b>분리형(<code>__tests__</code> 폴더)</b>은 소스 코드와 테스트를 물리적으로 분리해서, 프로덕션 번들에 테스트 관련 파일이 섞여 들어갈 걱정을 원천적으로 없앤다. 둘 중 정답은 없지만, 한 프로젝트 안에서는 하나로 통일해야 "이 파일 테스트는 어디 있지"를 매번 찾아 헤매지 않는다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>파일 구조 예시 — 콜로케이션</span></div>
+        <pre><code class="language-bash">src/
+  components/
+    LoginForm.tsx
+    LoginForm.test.tsx   # 바로 옆에 둔다
+  hooks/
+    useDebounce.ts
+    useDebounce.test.ts</code></pre>
+      </div>
+
+      <h3 id="s-vitest-watch-coverage">watch 모드와 커버리지</h3>
+      <p><code>vitest</code>를 인자 없이 실행하면 기본이 <span class="t" data-tip="파일이 바뀔 때마다 자동으로 관련 테스트만 다시 실행하는 모드. 저장하자마자 결과를 바로 확인할 수 있다.">watch 모드</span>다. 파일을 저장할 때마다 영향을 받은 테스트만 다시 돌려서 즉시 피드백을 준다. CI처럼 한 번만 실행하고 끝내야 하는 환경에서는 <code>vitest run</code>을 쓴다. <code>--coverage</code> 플래그를 붙이면 <span class="t" data-tip="테스트 실행 중 코드의 몇 퍼센트(라인/브랜치/함수)가 실제로 실행됐는지 측정하는 리포트.">커버리지 리포트</span>가 생성된다 — 어떤 줄이 테스트에서 한 번도 실행되지 않았는지 보여준다. 커버리지 숫자를 목표로 삼는 것의 함정은 §5에서 다룬다.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>watch 모드 단축키</th><th>동작</th></tr></thead>
+          <tbody>
+            <tr><td><code>a</code></td><td>전체 테스트 다시 실행</td></tr>
+            <tr><td><code>f</code></td><td>실패한 테스트만 다시 실행</td></tr>
+            <tr><td><code>p</code></td><td>파일 이름 패턴으로 필터링</td></tr>
+            <tr><td><code>q</code></td><td>watch 모드 종료</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-vitest-mocking">모킹: vi.fn / vi.mock / vi.useFakeTimers</h3>
+      <p><span class="t" data-tip="실제 함수 대신 호출 여부·인자·횟수를 기록하는 가짜 함수를 만드는 것. 콜백이 제대로 호출됐는지 검증할 때 쓴다.">모킹(mocking)</span>은 테스트 대상을 진짜 의존성(API 서버, 타이머, 파일 시스템)으로부터 떼어내기 위한 기법이다<sup class="ref"><a href="#r4">[4]</a></sup>. <code>vi.fn()</code>은 호출된 인자와 횟수를 기록하는 가짜 함수를 만든다. <code>vi.mock('./api')</code>은 모듈 전체를 가짜 구현으로 통째로 치환한다. <code>vi.useFakeTimers()</code>는 <code>setTimeout</code>/<code>setInterval</code> 같은 타이머를 가짜 시계로 바꿔서, 실제로 3초를 기다리지 않고도 "3초 후" 로직을 즉시 검증할 수 있게 한다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>vi.fn()의 핵심 아이디어</h4>
+          <p>실제 <code>vi.fn()</code>은 브라우저 플레이그라운드에서 import할 수 없으므로(외부 라이브러리 import 불가), 같은 아이디어를 직접 20줄로 구현했다. 호출될 때마다 인자를 배열에 기록해두고, 나중에 "이 인자로 호출된 적 있나?"를 검사하는 것이 핵심이다. 실제 <code>vi.fn()</code>도 원리는 동일하고, 여기에 <code>mockReturnValue</code>, <code>mockResolvedValue</code> 같은 편의 기능이 더 붙어 있을 뿐이다.</p>
+        </div>
+        <div class="pg" data-pg="js" data-title="mini-vi-fn.js" data-height="280">
+<script type="text/plain" class="pg__src">
+// vi.fn()의 핵심 아이디어를 직접 구현
+function fn(impl) {
+  const calls = [];
+  const mock = function () {
+    const args = Array.prototype.slice.call(arguments);
+    calls.push(args);
+    return impl ? impl.apply(null, args) : undefined;
+  };
+  mock.calls = calls;
+  mock.toHaveBeenCalledWith = function () {
+    const expected = Array.prototype.slice.call(arguments);
+    return calls.some(function (c) {
+      return JSON.stringify(c) === JSON.stringify(expected);
+    });
+  };
+  return mock;
+}
+
+// ---- 사용 예: 콜백이 올바른 인자로 호출됐는지 검증 ----
+const onSave = fn();
+
+function save(userId, cb) {
+  // 실제로는 API 호출 후 결과를 콜백으로 넘긴다고 가정
+  cb('saved:' + userId);
+}
+
+save('user-42', onSave);
+
+console.log('호출 횟수:', onSave.calls.length);
+console.log('실제로 호출된 인자:', JSON.stringify(onSave.calls[0]));
+console.log('원하는 인자로 호출됐나?', onSave.toHaveBeenCalledWith('saved:user-42'));
+console.log('엉뚱한 인자로는 호출 안 됐나?', onSave.toHaveBeenCalledWith('saved:user-99'));
+</script>
+        </div>
+      </div>
+
+      <p>실제 Vitest에서는 위 아이디어가 <code>vi.fn</code>, <code>vi.mock</code>, <code>vi.useFakeTimers</code>로 이미 제공된다. 아래는 실무에서 흔히 쓰는 조합 예시다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/greet.test.ts</span></div>
+        <pre><code class="language-ts">import { describe, it, expect, vi } from 'vitest';
+import { fetchUser } from './api';
+import { greetUserLater } from './greet';
+
+vi.mock('./api', () =&gt; ({
+  fetchUser: vi.fn(() =&gt; Promise.resolve({ id: 1, name: '홍길동' })),
+}));
+
+describe('greetUserLater', () =&gt; {
+  it('3초 후 사용자 이름으로 인사말을 콜백에 전달한다', async () =&gt; {
+    vi.useFakeTimers();
+    const cb = vi.fn();
+
+    greetUserLater(1, cb);
+    await vi.runAllTimersAsync(); // 3초를 실제로 기다리지 않고 즉시 통과
+
+    expect(fetchUser).toHaveBeenCalledWith(1);
+    expect(cb).toHaveBeenCalledWith('안녕하세요, 홍길동님');
+
+    vi.useRealTimers();
+  });
+});</code></pre>
+      </div>
+
+      <h3 id="s-vitest-snapshot">스냅샷 테스트</h3>
+      <p><span class="t" data-tip="어떤 값(주로 렌더링 결과나 직렬화된 객체)을 파일로 저장해두고, 다음 실행 때 그 값과 똑같은지 자동으로 비교하는 테스트 방식.">스냅샷 테스트</span>는 <code>expect(x).toMatchSnapshot()</code>을 처음 실행하면 결과를 파일로 저장하고, 다음부터는 그 파일과 비교해서 달라졌으면 실패시킨다<sup class="ref"><a href="#r5">[5]</a></sup>.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/PriceTag.test.tsx</span></div>
+        <pre><code class="language-tsx">import { it, expect } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { PriceTag } from './PriceTag';
+
+it('가격표 마크업이 이전 스냅샷과 같다', () =&gt; {
+  const html = renderToStaticMarkup(&lt;PriceTag amount={12000} /&gt;);
+  expect(html).toMatchSnapshot();
+});</code></pre>
+      </div>
+
+      <div class="note note--warn"><span class="note__t">흔한 실수</span>큰 컴포넌트 전체를 통째로 스냅샷 찍으면, 아주 작은 변경에도 diff가 수백 줄씩 나와서 리뷰어가 제대로 읽지 않고 그냥 <code>--update</code>로 덮어써 버리는(rubber-stamp) 습관이 생긴다. 값 하나, 포맷팅 함수의 결과처럼 작고 예측 가능한 범위에만 스냅샷을 쓰는 편이 안전하다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-rtl"><span class="h2num">§4</span>React Testing Library</h2>
+
+      <h3 id="s-rtl-philosophy">철학: 사용자가 하듯 테스트</h3>
+      <p><span class="t" data-tip="React 컴포넌트를 테스트하기 위한 라이브러리. 내부 state나 함수가 아니라, 사용자가 화면에서 보고 누르는 것을 기준으로 테스트하게 만든다.">React Testing Library(RTL)</span>의 핵심 철학은 "구현이 아니라 사용자가 경험하는 결과를 테스트하라"다<sup class="ref"><a href="#r6">[6]</a></sup>. state 변수 이름이 무엇인지, 내부에서 어떤 함수를 호출했는지는 테스트하지 않는다. 대신 "화면에 이 텍스트가 보이는가", "이 버튼을 누르면 이 문구가 나타나는가"처럼 사용자가 직접 확인할 수 있는 것만 검증한다. 이렇게 하면 내부 구현을 리팩터링해도(state를 <code>useReducer</code>로 바꾸든, 컴포넌트를 쪼개든) 사용자에게 보이는 동작이 같다면 테스트는 계속 통과한다.</p>
+
+      <h3 id="s-render-screen">render와 screen</h3>
+      <p><code>render(&lt;Component /&gt;)</code>는 컴포넌트를 jsdom 안에 실제로 그려 넣는다. <code>screen</code>은 "지금 렌더링된 문서 전체"에서 요소를 찾는 도구 모음이다(<code>screen.getByRole(...)</code> 같은 형태로 사용). 아래는 이후 예제들이 계속 테스트할 대상인 로그인 폼이다. 직접 입력해 보면서 어떤 요소들이 있는지 살펴보자.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>이 컴포넌트를 아래 코드블록들이 테스트한다</h4>
+          <p>이메일에 <code>@</code>가 없거나 비밀번호가 4자 미만이면 <code>role="alert"</code>인 에러 문구를 보여준다. RTL 코드에서는 <code>getByLabelText('이메일')</code>, <code>getByRole('button', {'{'} name: '로그인' {'}'})</code>, <code>getByRole('alert')</code>로 이 요소들을 찾는다 — 모두 사용자가 화면에서 인지하는 방식과 같다.</p>
+          <ul>
+            <li><code>htmlFor</code>/<code>id</code>로 label과 input을 연결 — <code>getByLabelText</code>가 이걸 이용한다.</li>
+            <li><code>&lt;button type="submit"&gt;</code> — role은 자동으로 <code>button</code>이 된다.</li>
+            <li><code>role="alert"</code> — 스크린 리더가 즉시 읽어주는 영역이라는 뜻도 겸한다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="react" data-title="LoginForm.jsx" data-height="320">
+<script type="text/plain" class="pg__src">
+function App() {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!email.includes('@')) {
+      setError('올바른 이메일을 입력하세요.');
+      return;
+    }
+    if (password.length < 4) {
+      setError('비밀번호는 4자 이상이어야 합니다.');
+      return;
+    }
+    setError('');
+    setPassword('');
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div style={{ marginBottom: 10 }}>
+        <label htmlFor="email">이메일</label><br />
+        <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+      <div style={{ marginBottom: 10 }}>
+        <label htmlFor="password">비밀번호</label><br />
+        <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </div>
+      <button type="submit">로그인</button>
+      {error && <p role="alert" style={{ color: '#c0392b', marginTop: 8 }}>{error}</p>}
+      {!error && password === '' && email !== '' && <p style={{ color: '#0f9d76' }}>입력을 계속하세요.</p>}
+    </form>
+  );
+}
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-query-priority">쿼리 우선순위</h3>
+      <p>RTL은 요소를 찾는 방법을 <code>getByRole</code>부터 <code>getByTestId</code>까지 우선순위 순으로 정리해 둔다<sup class="ref"><a href="#r7">[7]</a></sup>. 위쪽일수록 실제 사용자(그리고 스크린 리더 사용자)가 요소를 인지하는 방식에 가깝다.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>우선순위</th><th>쿼리</th><th>언제 쓰나</th><th>이유</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><code>getByRole</code></td><td>button, link, checkbox 등 인터랙티브 요소 대부분</td><td>스크린 리더가 인지하는 접근성 트리 기준과 가장 가깝다</td></tr>
+            <tr><td>2</td><td><code>getByLabelText</code></td><td>input, textarea, select 같은 form 필드</td><td>실사용자는 라벨을 보고 필드를 찾는다</td></tr>
+            <tr><td>3</td><td><code>getByPlaceholderText</code></td><td>라벨 없이 placeholder만 있는 필드</td><td>차선책. placeholder는 라벨의 접근성 대체재가 아니다</td></tr>
+            <tr><td>4</td><td><code>getByText</code></td><td>버튼·링크가 아닌 일반 텍스트</td><td>사용자가 읽는 문구 그대로 찾는다</td></tr>
+            <tr><td>5</td><td><code>getByDisplayValue</code></td><td>이미 값이 채워진 form 요소</td><td>현재 입력값 자체로 찾아야 할 때</td></tr>
+            <tr><td>6</td><td><code>getByAltText</code></td><td>img, area 등</td><td>대체 텍스트로 이미지를 식별</td></tr>
+            <tr><td>7</td><td><code>getByTitle</code></td><td>title 속성</td><td>스크린 리더 지원이 일관되지 않아 우선순위가 낮다</td></tr>
+            <tr><td>8</td><td><code>getByTestId</code></td><td>위 방법으로 도저히 특정할 수 없을 때</td><td>사용자는 test id를 볼 수 없다 — 최후의 수단</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-userevent-vs-fireevent">userEvent vs fireEvent</h3>
+      <p><code>fireEvent.click(el)</code>은 단 하나의 DOM 이벤트만 발생시킨다. <code>userEvent.click(el)</code>은 실제 사용자가 마우스를 올리고(hover), 포커스를 옮기고, 눌렀다 떼는 것까지 여러 이벤트를 실제 브라우저 순서 그대로 발생시킨다<sup class="ref"><a href="#r8">[8]</a></sup>. 예를 들어 <code>input</code>에 값을 넣을 때 <code>fireEvent.change</code>는 값만 한 번에 바꾸지만, <code>userEvent.type</code>은 키 하나하나를 눌러서 <code>onChange</code>가 글자 수만큼 여러 번 호출되는 실제 상황을 재현한다. 그래서 최신 RTL 가이드는 <code>fireEvent</code>보다 <code>userEvent</code>를 기본으로 쓰길 권장한다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/LoginForm.test.tsx</span></div>
+        <pre><code class="language-tsx">import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { LoginForm } from './LoginForm';
+
+test('이메일 형식이 아니면 에러 메시지를 보여준다', async () =&gt; {
+  const user = userEvent.setup();
+  render(&lt;LoginForm /&gt;);
+
+  await user.type(screen.getByLabelText('이메일'), 'not-an-email');
+  await user.type(screen.getByLabelText('비밀번호'), '1234');
+  await user.click(screen.getByRole('button', { name: '로그인' }));
+
+  expect(screen.getByRole('alert')).toHaveTextContent('올바른 이메일을 입력하세요.');
+});</code></pre>
+      </div>
+
+      <h3 id="s-findby-async">findBy와 비동기 대기</h3>
+      <p>API 호출 결과처럼 화면에 나중에 나타나는 요소는 <code>getBy</code>로 바로 찾을 수 없다(아직 DOM에 없어서 에러가 난다). <code>findBy</code>는 내부적으로 <code>waitFor</code>와 <code>getBy</code>를 합쳐서, 요소가 나타날 때까지 짧은 간격으로 재시도하다가 나타나면 반환하는 <span class="t" data-tip="함수를 실행한 즉시 결과를 반환하지 않고, Promise 등을 통해 나중에 결과가 도착하는 방식.">비동기(async)</span> 쿼리다. 반드시 <code>await</code>과 함께 써야 한다.</p>
+
+      <h3 id="s-msw">MSW로 네트워크 모킹</h3>
+      <p>실제 API 서버 없이 네트워크 요청을 가로채서 가짜 응답을 돌려주는 도구로 Mock Service Worker(MSW)가 널리 쓰인다. 컴포넌트의 <code>fetch</code> 호출 코드는 전혀 건드리지 않고, 테스트 쪽에서만 "이 경로로 요청이 오면 이 JSON을 돌려줘"라고 핸들러를 등록한다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/UserProfile.test.tsx</span></div>
+        <pre><code class="language-tsx">import { render, screen } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { UserProfile } from './UserProfile';
+
+const server = setupServer(
+  http.get('/api/users/1', () =&gt; HttpResponse.json({ id: 1, name: '홍길동' }))
+);
+
+beforeAll(() =&gt; server.listen());
+afterEach(() =&gt; server.resetHandlers());
+afterAll(() =&gt; server.close());
+
+test('사용자 정보를 불러와 이름을 표시한다', async () =&gt; {
+  render(&lt;UserProfile userId={1} /&gt;);
+
+  expect(await screen.findByText('홍길동')).toBeInTheDocument();
+});</code></pre>
+      </div>
+
+      <div class="note note--tip"><span class="note__t">요약</span>RTL은 <code>getByRole</code>을 최우선으로, <code>userEvent</code>로 실제 상호작용을 재현하고, <code>findBy</code> + MSW로 비동기 API 흐름까지 사용자 관점에서 검증한다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-what-to-test"><span class="h2num">§5</span>무엇을 테스트하고 무엇을 하지 않나</h2>
+
+      <h3 id="s-no-implementation-details">구현 세부사항 테스트 금지</h3>
+      <p><span class="t" data-tip="사용자에게는 보이지 않는, 코드 내부의 구조(state 변수명, 내부 함수 호출 여부, 렌더링 횟수 등).">구현 세부사항(implementation detail)</span>을 테스트에 끌어들이면, 코드를 리팩터링할 때마다(동작은 그대로인데도) 테스트가 같이 깨진다. 아래 실습은 "화면 텍스트로 찾는 쿼리"는 내부 구현이 바뀌어도 살아남고, "구현 세부사항에 의존한 검사"는 구현이 바뀌는 순간 깨지는 걸 직접 보여준다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>같은 화면, 다른 내부 구현</h4>
+          <p>카운터를 두 가지 방식으로 구현했다 — 하나는 <code>count</code> 변수를, 하나는 <code>value</code> 변수를 쓴다. 둘 다 화면에는 똑같이 "숫자: N"을 보여준다. 화면 텍스트로 검증하면 두 구현 모두 통과하지만, 내부 변수 이름에 직접 접근하는 검증은 구현이 바뀌면 실패한다.</p>
+        </div>
+        <div class="pg" data-pg="js" data-title="implementation-detail-demo.js" data-height="260">
+<script type="text/plain" class="pg__src">
+// 구현 A: 내부 변수명이 count
+function makeCounterA() {
+  let count = 3;
+  return {
+    getDisplayText: () => '숫자: ' + count,
+    __internal: { count }, // 구현 세부사항(원래는 외부에 노출 안 됨)
+  };
+}
+
+// 구현 B로 리팩터링: 내부 변수명이 value로 바뀜 (동작은 동일)
+function makeCounterB() {
+  let value = 3;
+  return {
+    getDisplayText: () => '숫자: ' + value,
+    __internal: { value }, // 이름이 바뀜
+  };
+}
+
+function testByScreenText(counter, label) {
+  const ok = counter.getDisplayText() === '숫자: 3';
+  console.log((ok ? '✅ PASS' : '❌ FAIL') + ' - [' + label + '] 화면 텍스트로 검증');
+}
+
+function testByImplementationDetail(counter, label) {
+  const ok = counter.__internal.count === 3; // count라는 이름에 직접 의존
+  console.log((ok ? '✅ PASS' : '❌ FAIL') + ' - [' + label + '] 내부 변수명(count)에 직접 의존해서 검증');
+}
+
+const a = makeCounterA();
+const b = makeCounterB();
+
+testByScreenText(a, '구현 A');
+testByScreenText(b, '구현 B (리팩터링 후)');
+testByImplementationDetail(a, '구현 A');
+testByImplementationDetail(b, '구현 B (리팩터링 후)'); // count가 없어서 실패
+</script>
+        </div>
+      </div>
+
+      <p>실행해 보면 화면 텍스트 기준 검증은 두 구현 모두 통과하지만, 내부 변수 이름에 의존한 검증은 구현 B에서 실패한다. 동작은 똑같이 잘 되는데도 테스트만 깨진 것이다 — 이런 테스트는 리팩터링을 방해하는 짐이 된다.</p>
+
+      <h3 id="s-coverage-trap">커버리지 숫자의 함정</h3>
+      <p>커버리지 100%는 "모든 줄이 실행됐다"는 뜻이지 "모든 상황이 검증됐다"는 뜻이 아니다. 함수를 호출만 하고 결과를 <code>expect</code>로 확인하지 않아도 그 줄은 "커버됐다"고 표시된다. 커버리지는 목표가 아니라 "테스트가 아예 없는 사각지대를 찾는 용도"로만 쓰는 편이 안전하다. 숫자를 팀 KPI로 강제하면 의미 없는 테스트를 억지로 채워 넣는 역효과가 난다.</p>
+
+      <h3 id="s-testable-design">테스트하기 좋은 컴포넌트 설계</h3>
+      <p>테스트하기 쉬운 컴포넌트는 대체로 설계도 좋은 컴포넌트다. 컴포넌트를 작게 쪼개고, API 호출 같은 부수효과는 커스텀 훅으로 분리하고(<a href="ch04.html#s-useeffect">useEffect</a> 참고), 의존성을 props나 인자로 주입받게 만들면 각 조각을 독립적으로 검증하기 쉬워진다. 반대로 컴포넌트 하나가 데이터 페칭, 폼 검증, 렌더링을 전부 떠안고 있으면 테스트 하나를 짜는 데도 온갖 목(mock)을 다 준비해야 한다 — 이건 테스트의 문제가 아니라 설계의 신호다.</p>
+
+      <p>테스트에 필요한 가짜 데이터를 매번 손으로 <code>{ id: 1, name: '홍길동', ... }</code>처럼 나열하면, 필드가 하나 늘 때마다 모든 테스트 파일을 고쳐야 한다. <b>테스트 데이터 팩토리</b>는 기본값을 가진 함수 하나로 이 문제를 없앤다 — 필요한 필드만 덮어써서 쓴다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/test/factories.ts</span></div>
+        <pre><code class="language-ts">import type { User } from '../types';
+
+export function makeUser(overrides: Partial&lt;User&gt; = {}): User {
+  return {
+    id: 1,
+    name: '홍길동',
+    email: 'hong@example.com',
+    role: 'member',
+    ...overrides,
+  };
+}
+
+// 사용: 관리자 케이스만 다르게
+const admin = makeUser({ role: 'admin' });</code></pre>
+      </div>
+
+      <div class="note note--warn"><span class="note__t">흔한 실수</span><code>useState</code> 훅을 직접 렌더링해서 반환값을 검사하거나, 컴포넌트 내부 함수를 이름으로 꺼내 단독 호출하는 테스트는 대표적인 구현 세부사항 테스트다. "이 함수가 호출됐는가"보다 "화면에 무엇이 보이는가"를 물어야 한다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-e2e"><span class="h2num">§6</span>E2E</h2>
+
+      <p><span class="t" data-tip="브라우저 자동화를 통해 실제 사용자 흐름(로그인 → 검색 → 결제 등)을 처음부터 끝까지 재현하는 테스트 도구. Microsoft가 만들었다.">Playwright</span>는 실제 브라우저(Chromium, Firefox, WebKit)를 자동으로 조작해서 사용자의 전체 흐름을 검증하는 E2E 테스트 도구다<sup class="ref"><a href="#r9">[9]</a></sup>.</p>
+
+      <h3 id="s-playwright-install">설치</h3>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>bash</span></div>
+        <pre><code class="language-bash">yarn create playwright
+# 또는 수동 설치
+yarn add -D @playwright/test
+npx playwright install</code></pre>
+      </div>
+
+      <h3 id="s-playwright-first-test">첫 테스트 작성</h3>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>e2e/login.spec.ts</span></div>
+        <pre><code class="language-ts">import { test, expect } from '@playwright/test';
+
+test('로그인 후 대시보드로 이동한다', async ({ page }) =&gt; {
+  await page.goto('/login');
+  await page.getByLabel('이메일').fill('user@example.com');
+  await page.getByLabel('비밀번호').fill('secret123');
+  await page.getByRole('button', { name: '로그인' }).click();
+
+  await expect(page.getByRole('heading', { name: '대시보드' })).toBeVisible();
+});</code></pre>
+      </div>
+
+      <p><code>baseURL</code>을 설정 파일에 지정해두면 테스트마다 전체 주소를 반복하지 않고 <code>/login</code>처럼 경로만 써도 된다. <code>webServer</code>는 테스트를 시작하기 전에 개발 서버를 Playwright가 직접 띄우고, 테스트가 끝나면 정리하게 한다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>playwright.config.ts</span></div>
+        <pre><code class="language-ts">import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  use: {
+    baseURL: 'http://localhost:5174',
+    trace: 'on-first-retry',
+  },
+  webServer: {
+    command: 'yarn dev',
+    url: 'http://localhost:5174',
+    reuseExistingServer: !process.env.CI,
+  },
+});</code></pre>
+      </div>
+
+      <h3 id="s-locator-strategy">로케이터 전략</h3>
+      <p><span class="t" data-tip="페이지에서 요소를 가리키는 방법을 표현하는 Playwright의 핵심 개념. 요소를 즉시 찾지 않고, '나중에 이 조건으로 요소를 찾겠다'는 지연된 질의를 나타낸다.">로케이터(locator)</span>는 RTL의 쿼리와 같은 우선순위를 따른다 — <code>getByRole</code>/<code>getByLabel</code>/<code>getByText</code>를 우선 쓰고, CSS 선택자나 XPath는 정말 방법이 없을 때만 쓴다<sup class="ref"><a href="#r10">[10]</a></sup>. 클래스명 같은 구현 세부사항으로 요소를 찾으면 스타일만 바꿔도 테스트가 깨진다.</p>
+
+      <h3 id="s-auto-waiting">auto-waiting</h3>
+      <p>Playwright의 로케이터는 클릭·입력 같은 동작을 실행하기 전에 해당 요소가 DOM에 붙어 있고, 보이고, 다른 요소에 가려지지 않고, 활성화돼 있는지까지 자동으로 재시도하며 기다린다. 그래서 <code>page.waitForTimeout(1000)</code> 같은 임의의 sleep을 코드에 넣을 필요가 거의 없다 — 그런 sleep은 느리기만 하고, 환경에 따라 부족하거나 과할 수 있어 오히려 <span class="t" data-tip="같은 코드인데도 실행할 때마다 성공했다 실패했다 하는, 원인이 타이밍 등 불안정한 요인에 있는 테스트.">flaky(불안정)</span>한 테스트의 원인이 된다.</p>
+
+      <h3 id="s-trace-viewer">트레이스 뷰어</h3>
+      <p><code>--trace on</code> 옵션으로 실행하면 각 단계의 스크린샷, DOM 스냅샷, 네트워크 로그, 콘솔 로그를 타임라인 형태로 기록한다. 테스트가 CI에서만 실패했을 때, 로컬에서 재현하기보다 이 트레이스 파일을 열어서 "그 순간 화면이 실제로 어땠는지"를 그대로 재생해 보는 게 훨씬 빠르다<sup class="ref"><a href="#r11">[11]</a></sup>.</p>
+
+      <h3 id="s-playwright-ci">CI에서 실행</h3>
+      <p>CI 환경은 로컬보다 느리고 리소스가 제한적이라 타임아웃과 재시도(retry) 설정을 CI 전용으로 따로 두는 경우가 많다<sup class="ref"><a href="#r12">[12]</a></sup>. 구체적인 워크플로 예시는 §11에서 다룬다.</p>
+
+      <h3 id="s-few-e2e">E2E를 몇 개만 유지해야 하는 이유</h3>
+      <p>E2E는 실제 브라우저를 띄우고 렌더링까지 기다려야 해서 단위 테스트보다 몇 배에서 몇십 배 느리다. 또 네트워크 지연, 애니메이션 타이밍, 외부 서비스 상태 같은 통제하기 어려운 변수에 노출돼서 flaky해지기 쉽다. 그래서 §1의 트로피 모델처럼 E2E는 "로그인", "결제"처럼 실패하면 서비스 전체가 마비되는 핵심 흐름(critical path) 몇 개만 남기고, 나머지 세부 동작 검증은 훨씬 빠르고 안정적인 단위·통합 테스트로 옮기는 것이 정석이다.</p>
+
+      <div class="note note--tip"><span class="note__t">요약</span>Playwright는 role 기반 로케이터 + auto-waiting으로 안정적인 E2E를 만든다. 다만 E2E는 느리고 불안정해지기 쉬우므로 핵심 흐름 몇 개만 유지한다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-lint"><span class="h2num">§7</span>린트</h2>
+
+      <p><span class="t" data-tip="코드를 실행하지 않고 정적으로 분석해서, 버그가 될 수 있는 패턴이나 스타일 위반을 찾아내는 도구.">린트(lint)</span>는 코드를 실행하지 않고도 "이 패턴은 버그가 될 가능성이 높다"거나 "이 스타일은 팀 규칙과 다르다"를 잡아낸다.</p>
+
+      <h3 id="s-eslint-flat-config">ESLint 9 flat config 구조</h3>
+      <p>ESLint 9부터는 <code>eslint.config.js</code> 기반의 <span class="t" data-tip="설정 객체들을 배열 하나에 순서대로 나열하는 ESLint의 새 설정 방식. 뒤에 오는 항목이 앞선 항목의 규칙을 덮어쓴다.">flat config</span>가 기본 방식이다<sup class="ref"><a href="#r13">[13]</a></sup>. 예전의 <code>.eslintrc</code>는 <code>extends</code>로 여러 설정을 계층적으로 상속하는 구조라 "최종적으로 이 규칙이 켜져 있는지 꺼져 있는지"를 추적하기 어려웠다. flat config는 배열 안에 설정 객체를 순서대로 나열하고, 뒤에 오는 객체가 앞의 것을 덮어쓰는 단순한 규칙만 따른다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>eslint.config.js</span></div>
+        <pre><code class="language-js">import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import globals from 'globals';
+
+export default tseslint.config(
+  { ignores: ['dist', 'node_modules', 'coverage'] },
+
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.browser,
+      parserOptions: {
+        project: './tsconfig.json',
+      },
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'jsx-a11y': jsxA11y,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      ...jsxA11y.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
+);</code></pre>
+      </div>
+
+      <h3 id="s-typescript-eslint">typescript-eslint</h3>
+      <p><code>typescript-eslint</code> 패키지는 ESLint가 TypeScript 문법을 이해하게 해주고, 나아가 <code>tsconfig.json</code>과 연결해서 <span class="t" data-tip="단순히 문법만 보는 게 아니라, 실제 타입 추론 결과까지 참고해서 검사하는 린트 규칙. 더 정확하지만 타입 체크를 동반해서 느리다.">타입 정보 기반(type-aware)</span> 규칙까지 제공한다 — 예를 들어 <code>await</code> 없이 Promise를 그냥 버려두는 코드를 잡아낼 수 있다. 다만 타입 정보를 쓰려면 타입 체크 과정이 같이 도는 만큼 일반 규칙보다 느리다.</p>
+
+      <h3 id="s-eslint-react-hooks">eslint-plugin-react-hooks</h3>
+      <p>훅의 두 가지 규칙(최상위에서만 호출, 조건문 안에서 호출 금지)을 강제하고, <code>exhaustive-deps</code> 규칙으로 <a href="ch04.html#s-useeffect">useEffect</a>의 의존성 배열에 실제로 사용 중인 값이 빠져 있는지 검사한다. 이 규칙을 끄고 싶은 유혹이 들 때가 많지만, 대부분은 의존성이 빠진 게 아니라 로직 구조 자체를 다시 봐야 한다는 신호다.</p>
+
+      <h3 id="s-jsx-a11y">jsx-a11y</h3>
+      <p>JSX 코드에서 접근성 문제를 정적으로 검사한다 — <code>alt</code> 없는 <code>img</code>, 클릭 핸들러만 있고 키보드로는 조작할 수 없는 <code>div</code>, 폼 요소에 연결된 라벨이 없는 경우 등을 빌드 전에 잡아낸다. WCAG/ARIA 기준 자체는 렌더링 전략 챕터의 접근성 절에서 더 다룬다.</p>
+
+      <h3 id="s-before-disabling-rules">규칙을 끄기 전에 생각할 것</h3>
+      <p><code>// eslint-disable-next-line</code>을 습관적으로 붙이기 전에, 그 규칙이 왜 존재하는지부터 확인한다. 대부분의 규칙은 실제로 사고를 낸 패턴을 근거로 추가된 것이다. 정말 예외적인 상황이라면 (1) 파일 전체가 아니라 그 줄만 끄고, (2) 왜 예외인지 주석을 남기고, (3) 팀 전체 설정에서 규칙 자체를 끄는 건 최후의 수단으로 남겨둔다.</p>
+
+      <div class="note note--tip"><span class="note__t">요약</span>flat config는 배열 순서로 설정이 결정된다. typescript-eslint(타입), react-hooks(훅 규칙), jsx-a11y(접근성)는 프론트엔드 프로젝트의 기본 3종 세트에 가깝다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-formatting"><span class="h2num">§8</span>포맷팅</h2>
+
+      <h3 id="s-prettier-role">Prettier의 역할 분리</h3>
+      <p><span class="t" data-tip="코드의 로직이 아니라 줄바꿈, 들여쓰기, 따옴표 같은 겉모습(스타일)만 일관되게 맞춰주는 도구.">Prettier</span>는 스타일(줄바꿈, 들여쓰기, 따옴표, 세미콜론)만 담당하고 로직 문제는 건드리지 않는다<sup class="ref"><a href="#r14">[14]</a></sup>. ESLint는 반대로 로직·품질 문제를 잡는 데 집중한다. 두 도구를 같이 쓸 때는 ESLint의 스타일 관련 규칙(줄바꿈 위치 등)을 <code>eslint-config-prettier</code>로 꺼서, 두 도구가 서로 다른 스타일을 강제하며 충돌하는 상황을 막는다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>eslint.config.js — Prettier와 충돌하는 스타일 규칙 끄기</span></div>
+        <pre><code class="language-js">import eslintConfigPrettier from 'eslint-config-prettier';
+
+export default tseslint.config(
+  // ...앞서 정의한 설정들...
+  eslintConfigPrettier, // 반드시 배열의 마지막에 위치 — 스타일 규칙을 덮어써서 끈다
+);</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>.prettierrc</span></div>
+        <pre><code class="language-json">{
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "tabWidth": 2
+}</code></pre>
+      </div>
+
+      <h3 id="s-biome">Biome 소개</h3>
+      <p><span class="t" data-tip="Rust로 작성된 린터 + 포맷터 올인원 도구. ESLint+Prettier 조합을 하나의 빠른 바이너리로 대체하는 것을 목표로 한다.">Biome</span>은 린트와 포맷을 하나의 Rust 기반 바이너리로 처리하는 도구다<sup class="ref"><a href="#r15">[15]</a></sup>. JS로 동작하는 ESLint·Prettier보다 훨씬 빨라서, 코드베이스가 크거나 커밋 전 검사(§11)처럼 자주 반복 실행되는 상황에서 체감 차이가 크다. 설정 파일도 <code>biome.json</code> 하나로 린트와 포맷 설정을 함께 관리한다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>biome.json</span></div>
+        <pre><code class="language-json">{
+  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2 },
+  "javascript": { "formatter": { "quoteStyle": "single" } }
+}</code></pre>
+      </div>
+
+      <h3 id="s-lint-format-compare">도입 판단 기준</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>항목</th><th>ESLint + Prettier</th><th>Biome</th></tr></thead>
+          <tbody>
+            <tr><td>실행 속도</td><td>JS 기반, 코드베이스가 커질수록 느려짐</td><td>Rust 기반, 체감상 훨씬 빠름</td></tr>
+            <tr><td>설정 파일</td><td><code>eslint.config.js</code> + <code>.prettierrc</code> (2개 이상)</td><td><code>biome.json</code> 1개</td></tr>
+            <tr><td>규칙 · 플러그인 생태계</td><td>매우 넓음 (jsx-a11y, react-hooks 등 세분화)</td><td>빠르게 성장 중이나 아직 ESLint보다 좁음</td></tr>
+            <tr><td>타입 인지 린팅</td><td>typescript-eslint로 지원 (느림, tsconfig 필요)</td><td>아직 타입 정보 기반 규칙 미지원</td></tr>
+            <tr><td>도입 난이도</td><td>대부분의 기존 프로젝트가 이미 사용 중</td><td>플러그인 의존도가 높은 프로젝트는 전환 비용 존재</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>이미 <code>eslint-plugin-react-hooks</code>, <code>jsx-a11y</code> 같은 특정 플러그인에 의존하고 있다면 아직은 ESLint 조합을 유지하는 편이 안전하다. 신규 프로젝트에서 속도와 설정 단순함이 더 중요하다면 Biome을 검토할 만하다.</p>
+
+      <!-- ============================================================ -->
+      <h2 id="s-git-practice"><span class="h2num">§9</span>Git 실전</h2>
+
+      <h3 id="s-worktree-staging-commit">작업트리 · 스테이징 · 커밋</h3>
+      <p><span class="t" data-tip="지금 디스크에 실제로 보이는 파일들의 상태. 방금 수정한 내용이 여기 있다.">작업트리(working tree)</span>는 지금 눈에 보이는 실제 파일 상태다. <span class="t" data-tip="다음 커밋에 포함시킬 변경사항을 미리 담아두는 중간 단계. git add로 파일을 여기로 옮긴다.">스테이징 영역(staging area, index)</span>은 "다음 커밋에 포함시킬 변경사항"만 따로 담아두는 중간 단계다. <span class="t" data-tip="스테이징된 상태를 저장소 히스토리에 하나의 스냅샷으로 기록하는 것.">커밋(commit)</span>은 그 스테이징 상태를 히스토리에 영구적으로 기록하는 행위다. 이 3단계 구조 덕분에 "작업 중인 파일 10개 중 관련 있는 2개만" 골라서 커밋하는 것이 가능하다.</p>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart LR
+  A["작업트리<br/>(Working Tree)"] -- "git add" --> B["스테이징 영역<br/>(Staging Area)"]
+  B -- "git commit" --> C["저장소 히스토리<br/>(Repository)"]
+  C -. "git reset --soft" .-> B
+  C -. "git checkout -- 파일" .-> A
+        </pre>
+        <div class="fig__cap"><b>그림 2.</b> git add는 작업트리 → 스테이징, git commit은 스테이징 → 저장소로 상태를 옮긴다. 점선은 되돌리는 방향이다. <span class="muted">출처: Pro Git Book, Git Basics<sup class="ref"><a href="#r16">[16]</a></sup></span></div>
+      </div>
+
+      <h3 id="s-branch-is-pointer">브랜치는 포인터다</h3>
+      <p><span class="t" data-tip="특정 커밋을 가리키는, 이동 가능한 이름표. 브랜치를 만드는 건 커밋 전체를 복사하는 게 아니라 이 이름표 하나를 새로 만드는 것뿐이라 매우 가볍다.">브랜치(branch)</span>는 특정 커밋을 가리키는 이름표일 뿐이다<sup class="ref"><a href="#r16">[16]</a></sup>. 브랜치를 새로 만드는 건 그 시점의 파일을 통째로 복사하는 게 아니라, "여기를 가리키는 이름표 하나"를 추가하는 것뿐이라 즉시 끝나고 용량도 거의 안 든다. 그 브랜치에서 커밋을 하나 더 만들면, 그 브랜치라는 이름표만 새 커밋을 가리키도록 자동으로 이동한다.</p>
+
+      <div class="fig">
+        <pre class="mermaid">
+gitGraph
+   commit id: "C1"
+   commit id: "C2"
+   branch feature
+   checkout feature
+   commit id: "C3"
+        </pre>
+        <div class="fig__cap"><b>그림 3.</b> main과 feature는 각자 특정 커밋을 가리키는 포인터일 뿐이다. feature에서 커밋할 때마다 feature라는 이름표만 앞으로 이동하고, main은 그대로 C2를 가리킨다. <span class="muted">출처: Pro Git Book, Branches in a Nutshell<sup class="ref"><a href="#r16">[16]</a></sup></span></div>
+      </div>
+
+      <h3 id="s-common-commands">자주 쓰는 명령</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>명령</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><code>git status</code></td><td>작업트리 / 스테이징 상태 확인</td></tr>
+            <tr><td><code>git add &lt;file&gt;</code></td><td>파일을 스테이징 영역에 추가</td></tr>
+            <tr><td><code>git commit -m "message"</code></td><td>스테이징된 변경을 커밋으로 기록</td></tr>
+            <tr><td><code>git log --oneline --graph</code></td><td>커밋 히스토리를 한 줄씩, 브랜치 그래프와 함께 확인</td></tr>
+            <tr><td><code>git branch</code></td><td>로컬 브랜치 목록 확인</td></tr>
+            <tr><td><code>git switch -c feature/x</code></td><td><code>feature/x</code> 브랜치를 새로 만들고 그 브랜치로 이동</td></tr>
+            <tr><td><code>git merge feature/x</code></td><td><code>feature/x</code>를 현재 브랜치에 합침</td></tr>
+            <tr><td><code>git rebase main</code></td><td>현재 브랜치의 커밋들을 main 끝에 다시 적용</td></tr>
+            <tr><td><code>git stash</code> / <code>git stash pop</code></td><td>변경사항을 임시 저장 / 복원</td></tr>
+            <tr><td><code>git diff</code></td><td>아직 스테이징하지 않은 변경 내용 확인</td></tr>
+            <tr><td><code>git push -u origin &lt;branch&gt;</code></td><td>원격 저장소에 브랜치를 처음 push하며 추적 설정</td></tr>
+            <tr><td><code>git pull --rebase</code></td><td>원격 변경을 받으면서 내 로컬 커밋을 그 위에 재배치</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-merge-vs-rebase">merge vs rebase</h3>
+      <p><span class="t" data-tip="두 브랜치의 변경 내용을 합쳐서, 두 부모를 가진 새로운 머지 커밋을 만드는 방식. 실제로 일어난 분기와 합류를 히스토리에 그대로 남긴다.">merge</span>는 두 브랜치를 합치면서 "두 부모를 가진" 새 커밋(머지 커밋)을 만든다. 분기했다가 다시 합류한 실제 히스토리가 그래프에 그대로 남는다.</p>
+
+      <div class="fig">
+        <pre class="mermaid">
+gitGraph
+   commit id: "C1"
+   commit id: "C2"
+   branch feature
+   checkout feature
+   commit id: "C3"
+   commit id: "C4"
+   checkout main
+   commit id: "C5"
+   merge feature id: "M1"
+        </pre>
+        <div class="fig__cap"><b>그림 4.</b> merge — C3, C4, C5가 각각 그대로 남고, 두 브랜치를 합치는 새 커밋 M1이 추가된다. 분기와 합류가 히스토리에 보존된다. <span class="muted">출처: Pro Git Book, Basic Branching and Merging<sup class="ref"><a href="#r16">[16]</a></sup></span></div>
+      </div>
+
+      <p><span class="t" data-tip="한 브랜치의 커밋들을 다른 브랜치의 최신 커밋 뒤로 하나씩 다시 적용하는 방식. 커밋 해시가 새로 생성되며, 히스토리가 한 줄로 곧게 펴진다.">rebase</span>는 feature 브랜치의 커밋들을 main의 최신 커밋 뒤에 하나씩 다시 적용한다. 겉보기엔 같은 변경 내용이지만 실제로는 새로운 커밋(해시가 다른 C3', C4')이 만들어지고, 히스토리가 분기 없이 한 줄로 곧게 펴진다.</p>
+
+      <div class="fig">
+        <pre class="mermaid">
+gitGraph
+   commit id: "C1"
+   commit id: "C2"
+   branch feature
+   checkout feature
+   commit id: "C3"
+   commit id: "C4"
+   checkout main
+   commit id: "C5"
+        </pre>
+        <div class="fig__cap"><b>그림 5.</b> rebase 전 — C3, C4는 C2에서 갈라져 나온 상태로, main은 이미 C5까지 진행됐다. <span class="muted">출처: Pro Git Book, Rebasing<sup class="ref"><a href="#r19">[19]</a></sup></span></div>
+      </div>
+
+      <div class="fig">
+        <pre class="mermaid">
+gitGraph
+   commit id: "C1"
+   commit id: "C2"
+   commit id: "C5"
+   branch feature
+   checkout feature
+   commit id: "C3-new"
+   commit id: "C4-new"
+        </pre>
+        <div class="fig__cap"><b>그림 6.</b> rebase 후 — feature의 커밋들이 C5 뒤로 다시 적용돼(C3', C4') 히스토리가 한 줄로 펴진다. C3, C4라는 원래 커밋은 더 이상 어떤 브랜치도 가리키지 않는다. <span class="muted">출처: Pro Git Book, Rebasing<sup class="ref"><a href="#r19">[19]</a></sup></span></div>
+      </div>
+
+      <div class="note note--danger"><span class="note__t">골든 룰</span>rebase는 커밋을 새로 만들어(해시가 바뀜) 히스토리를 다시 쓴다. 이미 push해서 다른 사람이 pull받은 브랜치를 rebase하면, 그 사람의 로컬 히스토리와 어긋나서 큰 혼란이 생긴다. <b>공유된(다른 사람이 이미 받아간) 히스토리는 절대 rebase하지 않는다</b> — 내 로컬에만 있는 커밋을 정리할 때만 쓴다<sup class="ref"><a href="#r19">[19]</a></sup>.</div>
+
+      <h3 id="s-conflict-resolution">충돌 해결 절차</h3>
+      <p><span class="t" data-tip="두 브랜치가 같은 파일의 같은 부분을 서로 다르게 고쳤을 때, Git이 어느 쪽을 남길지 자동으로 판단하지 못하는 상태.">충돌(conflict)</span>이 나면 다음 순서로 처리한다.</p>
+      <div class="grid grid--2">
+        <div class="card"><div class="card__title">1. 충돌 파일 확인</div><p><code>git status</code>로 "both modified"로 표시된 파일 목록을 확인한다.</p></div>
+        <div class="card"><div class="card__title">2. 마커 정리</div><p>파일을 열어 <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> / <code>=======</code> / <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> 마커 사이에서 남길 코드를 고르고 마커를 지운다.</p></div>
+        <div class="card"><div class="card__title">3. 해결 표시</div><p><code>git add &lt;file&gt;</code>로 "이 파일은 정리했다"고 표시한다.</p></div>
+        <div class="card"><div class="card__title">4. 이어가기</div><p>merge 중이었다면 <code>git commit</code>, rebase 중이었다면 <code>git rebase --continue</code>.</p></div>
+      </div>
+
+      <h3 id="s-undo-commands">되돌리기: reset / revert / restore / stash</h3>
+      <p>네 명령 모두 "되돌린다"는 점은 같지만 대상과 안전 범위가 다르다. <code>reset</code>은 히스토리 자체를 옮기고<sup class="ref"><a href="#r17">[17]</a></sup>, <code>revert</code>는 히스토리를 보존한 채 새 커밋으로 상쇄하고, <code>restore</code>는 파일 단위로만 되돌리고, <code>stash</code>는 커밋하지 않은 변경을 잠깐 다른 곳에 치워둔다<sup class="ref"><a href="#r18">[18]</a></sup>.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>상황</th><th>명령</th><th>효과</th></tr></thead>
+          <tbody>
+            <tr><td>커밋 안 한 특정 파일을 원래대로 되돌리고 싶다</td><td><code>git restore &lt;file&gt;</code></td><td>작업트리의 그 파일만 마지막 커밋 상태로 되돌림</td></tr>
+            <tr><td>스테이징만 취소하고 싶다 (내용은 유지)</td><td><code>git restore --staged &lt;file&gt;</code></td><td>스테이징 영역에서만 제외, 작업트리 내용은 그대로</td></tr>
+            <tr><td>로컬 커밋 몇 개를 완전히 없던 일로 하고 싶다</td><td><code>git reset --hard &lt;commit&gt;</code></td><td>히스토리와 작업트리를 모두 되돌림 (변경 내용 소실)</td></tr>
+            <tr><td>커밋은 취소하되 변경 내용은 남겨 다시 정리하고 싶다</td><td><code>git reset --soft</code> / <code>--mixed &lt;commit&gt;</code></td><td>히스토리만 되돌리고 변경 내용은 스테이징/작업트리에 남김</td></tr>
+            <tr><td>이미 push해서 남도 받아간 커밋을 되돌리고 싶다</td><td><code>git revert &lt;commit&gt;</code></td><td>히스토리를 지우지 않고 반대 내용의 새 커밋을 추가 — 공유 브랜치에 안전</td></tr>
+            <tr><td>커밋 안 한 변경을 잠깐 치워두고 다른 브랜치로 가고 싶다</td><td><code>git stash</code></td><td>작업트리 변경을 임시 저장하고 깨끗한 상태로 되돌림, <code>stash pop</code>으로 복원</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>실제 git 없이 되돌리기 개념 실습</h4>
+          <p>커밋 히스토리를 문자열 배열로 흉내내서, <code>reset --hard</code>(히스토리에서 잘라내기)와 <code>revert</code>(반대 내용의 새 커밋 추가)가 결과적으로 히스토리 배열을 어떻게 다르게 바꾸는지 콘솔로 비교한다.</p>
+        </div>
+        <div class="pg" data-pg="js" data-title="undo-simulator.js" data-height="260">
+<script type="text/plain" class="pg__src">
+const original = [
+  'C1: init',
+  'C2: add login',
+  'C3: fix typo',
+  'C4: add payment (버그 있음)',
+];
+
+function resetHard(history, toIndex) {
+  // reset --hard: 지정한 커밋 뒤는 히스토리에서 아예 사라진다
+  return history.slice(0, toIndex + 1);
+}
+
+function revert(history, indexToUndo) {
+  // revert: 지우지 않고 반대 내용의 새 커밋을 추가한다
+  const target = history[indexToUndo];
+  return history.concat(['C' + (history.length + 1) + ': revert "' + target + '"']);
+}
+
+console.log('원래 히스토리:', JSON.stringify(original));
+console.log('---');
+console.log('reset --hard C2 이후:', JSON.stringify(resetHard(original, 1)));
+console.log('→ C3, C4가 히스토리에서 완전히 사라졌다 (로컬 전용일 때만 안전)');
+console.log('---');
+console.log('revert C4 이후:', JSON.stringify(revert(original, 3)));
+console.log('→ C4는 그대로 남고, 그걸 되돌리는 새 커밋이 추가됐다 (공유 브랜치에 안전)');
+</script>
+        </div>
+      </div>
+
+      <div class="note note--tip"><span class="note__t">요약</span>브랜치는 가벼운 포인터다. merge는 히스토리를 보존하고, rebase는 히스토리를 한 줄로 펴되 공유된 히스토리에는 쓰지 않는다. 되돌릴 땐 "아직 공유 안 됐나(reset)" vs "이미 공유됐나(revert)"를 먼저 판단한다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-branch-strategy-release"><span class="h2num">§10</span>브랜치 전략과 릴리즈</h2>
+
+      <h3 id="s-trunk-vs-gitflow">trunk-based vs git-flow</h3>
+      <p><span class="t" data-tip="모두가 main(트렁크) 브랜치에 자주, 작은 단위로 병합하는 전략. 미완성 기능은 feature flag로 숨긴다.">trunk-based development</span>는 브랜치 수명을 하루~며칠로 짧게 유지하고 main에 자주 병합한다. <span class="t" data-tip="develop, feature, release, hotfix 등 여러 장기 브랜치를 역할별로 나누는 전통적인 브랜치 모델.">git-flow</span>는 develop/feature/release/hotfix처럼 여러 장기 브랜치를 역할별로 두는 무거운 모델이다.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>항목</th><th>trunk-based</th><th>git-flow</th></tr></thead>
+          <tbody>
+            <tr><td>브랜치 수명</td><td>짧다 (하루~며칠)</td><td>길다 (develop·release가 몇 주씩 유지)</td></tr>
+            <tr><td>병합 빈도</td><td>main에 자주, 작은 단위로</td><td>기능 완료 후 한 번에</td></tr>
+            <tr><td>미완성 기능 처리</td><td>feature flag로 숨기고 배포</td><td>별도 feature 브랜치에 격리</td></tr>
+            <tr><td>적합한 배포 방식</td><td>지속적 배포(CD), SaaS 웹 서비스</td><td>정해진 주기로 릴리즈하는 버전형 소프트웨어</td></tr>
+            <tr><td>충돌 위험</td><td>자주 합치므로 충돌이 작고 잦음</td><td>오래 격리하다 한 번에 합치므로 충돌이 크고 드묾</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-branch-naming">브랜치 이름 규칙</h3>
+      <p>trunk-based든 git-flow든, 브랜치 이름만 봐도 "무슨 작업인지, 어떤 이슈와 연결되는지"가 드러나야 나중에 찾기 쉽다. 이슈 트래커(Jira 등)를 쓰는 프로젝트에서는 이슈 키를 브랜치 이름에 그대로 넣는 방식이 흔하다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>브랜치 이름 예시</span></div>
+        <pre><code class="language-bash">feature/SCRUM-42-kpi-webhook   # 새 기능, 이슈 SCRUM-42
+fix/SCRUM-55-event-store-null  # 버그 수정, 이슈 SCRUM-55
+chore/SCRUM-60-upgrade-vite    # 잡무성 변경</code></pre>
+      </div>
+      <p>브랜치 타입(<code>feature</code>/<code>fix</code>/<code>chore</code>)은 아래에서 다룰 Conventional Commits의 <code>type</code>과 자연스럽게 맞물린다 — 브랜치에서 작업한 내용을 커밋할 때 같은 분류 감각을 그대로 이어 쓰면 된다.</p>
+
+      <h3 id="s-conventional-commits">Conventional Commits</h3>
+      <p><span class="t" data-tip="커밋 메시지를 'type(scope): subject' 형식으로 통일하는 규격. 커밋 메시지만 보고 자동으로 버전을 올리거나 CHANGELOG를 생성할 수 있게 해준다.">Conventional Commits</span>는 커밋 메시지를 <code>type(scope): subject</code> 형식으로 통일한다<sup class="ref"><a href="#r20">[20]</a></sup>.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>type</th><th>의미</th><th>예시</th></tr></thead>
+          <tbody>
+            <tr><td><code>feat</code></td><td>새 기능 추가</td><td><code>feat(auth): add oauth login</code></td></tr>
+            <tr><td><code>fix</code></td><td>버그 수정</td><td><code>fix(kpi): null 값 처리 오류 수정</code></td></tr>
+            <tr><td><code>docs</code></td><td>문서만 변경</td><td><code>docs: update README install 절차</code></td></tr>
+            <tr><td><code>style</code></td><td>동작에 영향 없는 포맷팅</td><td><code>style: run prettier</code></td></tr>
+            <tr><td><code>refactor</code></td><td>기능 변경 없는 구조 개선</td><td><code>refactor: extract useCounter hook</code></td></tr>
+            <tr><td><code>perf</code></td><td>성능 개선</td><td><code>perf: memoize expensive selector</code></td></tr>
+            <tr><td><code>test</code></td><td>테스트 추가/수정</td><td><code>test: add LoginForm RTL test</code></td></tr>
+            <tr><td><code>build</code></td><td>빌드 시스템·의존성 변경</td><td><code>build: bump vite to v6</code></td></tr>
+            <tr><td><code>ci</code></td><td>CI 설정 변경</td><td><code>ci: add coverage upload step</code></td></tr>
+            <tr><td><code>chore</code></td><td>그 외 잡무</td><td><code>chore: update .gitignore</code></td></tr>
+            <tr><td><code>revert</code></td><td>이전 커밋 되돌림</td><td><code>revert: revert "feat(auth): ..."</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>type</code> 뒤에 <code>!</code>를 붙이거나 본문에 <code>BREAKING CHANGE:</code>를 적으면 하위 호환이 깨진다는 뜻이고, 이는 §의 semver에서 MAJOR 버전 상승으로 이어진다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>커밋 메시지로 버전 상승 폭 판정하기</h4>
+          <p>정규식으로 <code>type(scope)!: subject</code> 형태를 파싱하고, breaking 여부 → <code>feat</code> → <code>fix</code> 순서로 버전을 얼마나 올려야 하는지 판정한다. 실제 semantic-release 같은 도구가 하는 일의 핵심 원리다.</p>
+        </div>
+        <div class="pg" data-pg="js" data-title="conventional-commit-parser.js" data-height="260">
+<script type="text/plain" class="pg__src">
+function parseCommit(msg) {
+  const m = msg.match(/^(\w+)(\(([^)]+)\))?(!)?:\s*(.+)$/);
+  if (!m) return null;
+  return { type: m[1], scope: m[3] || null, breaking: !!m[4], subject: m[5] };
+}
+
+function bumpFor(commit, body) {
+  if (commit.breaking || /BREAKING CHANGE:/.test(body || '')) return 'major';
+  if (commit.type === 'feat') return 'minor';
+  if (commit.type === 'fix') return 'patch';
+  return 'none (릴리즈 버전에 영향 없음)';
+}
+
+const samples = [
+  'feat(auth): add oauth login button',
+  'fix(kpi): null 값일 때 차트가 죽는 문제 수정',
+  'docs: update README',
+  'feat(api)!: rename response field "count" to "total"',
+];
+
+samples.forEach(function (s) {
+  const c = parseCommit(s);
+  console.log(s);
+  console.log('  → type=' + c.type + ', breaking=' + c.breaking + ', bump=' + bumpFor(c));
+});
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-semver-changelog">시맨틱 버전과 CHANGELOG 자동화</h3>
+      <p><span class="t" data-tip="MAJOR.MINOR.PATCH 세 숫자로 버전을 표현하는 규칙. 각 숫자가 오르는 조건이 명확히 정의돼 있어서, 버전 번호만 보고도 호환성 영향을 짐작할 수 있다.">시맨틱 버전(semver)</span>은 <code>MAJOR.MINOR.PATCH</code> 형태다<sup class="ref"><a href="#r21">[21]</a></sup>. MAJOR는 하위 호환이 깨지는 변경, MINOR는 하위 호환을 유지하며 기능을 추가한 변경, PATCH는 버그 수정을 뜻한다.</p>
+
+      <div class="pg" data-pg="js" data-title="semver-bump.js" data-height="220">
+<script type="text/plain" class="pg__src">
+function bumpVersion(version, type) {
+  const parts = version.split('.').map(Number);
+  const maj = parts[0], min = parts[1], patch = parts[2];
+  if (type === 'major') return (maj + 1) + '.0.0';
+  if (type === 'minor') return maj + '.' + (min + 1) + '.0';
+  if (type === 'patch') return maj + '.' + min + '.' + (patch + 1);
+  return version;
+}
+
+console.log('현재 버전: 2.4.1');
+console.log('fix 커밋만 있으면 (patch):', bumpVersion('2.4.1', 'patch'));
+console.log('feat 커밋이 있으면 (minor):', bumpVersion('2.4.1', 'minor'));
+console.log('breaking change가 있으면 (major):', bumpVersion('2.4.1', 'major'));
+</script>
+      </div>
+
+      <p>Conventional Commits로 커밋 타입이 통일돼 있으면, 도구가 커밋 로그를 스캔해서 다음 버전 번호를 자동으로 정하고 <code>CHANGELOG.md</code>도 자동 생성할 수 있다. 사람이 매 릴리즈마다 "이번엔 major인지 minor인지" 회의하지 않아도 된다.</p>
+
+      <h3 id="s-pr-review-checklist">PR 리뷰 체크리스트</h3>
+      <p>PR(Pull Request)을 올리고 리뷰를 요청하기 전에, 그리고 리뷰어로서 볼 때 확인할 항목이다<sup class="ref"><a href="#r22">[22]</a></sup>.</p>
+      <ul>
+        <li>이 PR의 목적(왜)이 설명에 한두 문장으로 적혀 있는가 — 무엇을 바꿨는지는 diff가 이미 보여준다.</li>
+        <li>테스트가 추가/수정됐는가, 아니면 왜 필요 없는지 설명이 있는가.</li>
+        <li>CI(lint, test, build)가 모두 통과했는가.</li>
+        <li>커밋 메시지가 Conventional Commits 형식을 따르는가.</li>
+        <li>PR 하나가 리뷰 가능한 크기인가 — 너무 크면 쪼갤 수 없는지 먼저 물어본다.</li>
+        <li>기존 동작을 바꿨다면 그 영향 범위(다른 화면·API 소비부)를 같이 확인했는가.</li>
+      </ul>
+
+      <!-- ============================================================ -->
+      <h2 id="s-automation"><span class="h2num">§11</span>자동화</h2>
+
+      <h3 id="s-husky-lint-staged">Husky + lint-staged</h3>
+      <p><span class="t" data-tip="Git이 특정 시점(커밋 전, push 전 등)에 자동으로 실행하는 스크립트. Husky는 이 훅을 팀 전체에 쉽게 공유·설정하게 해주는 도구.">Husky</span>는 커밋 직전처럼 Git이 제공하는 <span class="t" data-tip="commit, push 같은 Git 동작 전후에 자동으로 실행되도록 등록된 스크립트.">Git 훅(hook)</span>을 팀 전체에 쉽게 심어주는 도구다. <span class="t" data-tip="커밋에 실제로 포함되는(스테이징된) 파일만 골라서 린트/포맷을 실행해주는 도구. 프로젝트 전체를 매번 검사하지 않아 빠르다.">lint-staged</span>는 그 훅 안에서 "지금 커밋하려는 파일만" 골라 린트·포맷을 돌려서, 매번 코드베이스 전체를 검사하는 낭비를 없앤다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>bash</span></div>
+        <pre><code class="language-bash">yarn add -D husky lint-staged
+npx husky init   # Husky v9 기준. .husky/pre-commit 파일을 생성한다</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>.husky/pre-commit</span></div>
+        <pre><code class="language-bash">npx lint-staged</code></pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>package.json</span></div>
+        <pre><code class="language-json">{
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,css,md}": ["prettier --write"]
+  }
+}</code></pre>
+      </div>
+
+      <h3 id="s-github-actions-ci">GitHub Actions로 lint/test/build</h3>
+      <p>로컬 pre-commit 훅은 우회할 수 있으므로(<code>--no-verify</code>), 최종 관문은 항상 CI다. push나 PR마다 lint → test → build를 자동으로 돌려서, 통과하지 못하면 머지할 수 없게 만든다<sup class="ref"><a href="#r23">[23]</a></sup>.</p>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart LR
+  A["git push / PR 생성"] --> B["Job: lint<br/>eslint ."]
+  B --> C["Job: test<br/>vitest run --coverage"]
+  C --> D["Job: build<br/>vite build"]
+  D --> E{"모두 통과?"}
+  E -- "예" --> F["머지 가능 상태"]
+  E -- "아니오" --> G["PR에 실패 표시"]
+        </pre>
+        <div class="fig__cap"><b>그림 7.</b> lint → test → build 순서로 실행하면, 가장 빠르고 저렴한 검사(lint)에서 먼저 실패시켜 느린 build까지 기다리지 않게 한다. <span class="muted">출처: GitHub Docs, Actions<sup class="ref"><a href="#r23">[23]</a></sup></span></div>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>.github/workflows/ci.yml</span></div>
+        <pre><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn test run --coverage
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn build</code></pre>
+      </div>
+
+      <p><code>needs: [lint, test]</code>로 build job이 앞선 두 job의 성공을 전제로 실행되게 만든다. Yarn Berry 프로젝트에서는 <code>npm ci</code> 대신 <code>yarn install --immutable</code>을 써서 lockfile과 어긋나는 설치를 CI에서 차단한다. <code>actions/setup-node</code>의 <code>cache: yarn</code> 옵션은 의존성 캐시를 워크플로 실행 사이에 재사용해서, 매번 처음부터 전체 패키지를 내려받지 않게 한다 — 저장소가 클수록 빌드 시간 차이가 크다.</p>
+
+      <h3 id="s-release-automation">§10과 연결: 릴리즈 자동화</h3>
+      <p>§10에서 다룬 Conventional Commits와 semver를 CI에 연결하면, main에 머지될 때마다 커밋 로그를 스캔해서 다음 버전 번호를 정하고 <code>CHANGELOG.md</code>와 Git 태그, GitHub Release까지 자동으로 만드는 릴리즈 워크플로를 구성할 수 있다. build job 뒤에 release job을 하나 더 추가하는 형태다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>.github/workflows/ci.yml — release job 추가</span></div>
+        <pre><code class="language-yaml">  release:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 커밋 로그 전체를 스캔하려면 전체 히스토리가 필요하다
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn release # semver 계산 + CHANGELOG 갱신 + 태그/릴리즈 생성</code></pre>
+      </div>
+
+      <div class="note note--tip"><span class="note__t">요약</span>Husky + lint-staged는 "커밋하기 전에" 빠르게, GitHub Actions는 "머지하기 전에" 확실하게 검사한다. 로컬 훅은 우회 가능하므로 최종 방어선은 항상 CI다. 커밋 메시지 규칙(§10)을 지키면 릴리즈 자동화까지 자연스럽게 이어진다.</div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-checklist"><span class="h2num">§12</span>이해도 점검</h2>
+
+      <ul class="check">
+        <li><input type="checkbox">테스트가 회귀 방지, 리팩터링 안전망, 실행 가능한 문서 역할을 한다는 것을 설명할 수 있다.</li>
+        <li><input type="checkbox">테스트 피라미드와 테스트 트로피의 차이, 그리고 프론트엔드가 통합 테스트를 더 두껍게 두는 이유를 설명할 수 있다.</li>
+        <li><input type="checkbox"><code>describe</code>/<code>it</code>/<code>expect</code>가 내부적으로 어떻게 동작하는지, AAA 패턴이 왜 필요한지 안다.</li>
+        <li><input type="checkbox">Vite 프로젝트에 Jest 대신 Vitest를 쓰는 이유와 <code>vitest.config.ts</code>의 <code>environment</code>/<code>setupFiles</code> 역할을 안다.</li>
+        <li><input type="checkbox"><code>vi.fn</code>/<code>vi.mock</code>/<code>vi.useFakeTimers</code>가 각각 무엇을 가짜로 만드는지 설명할 수 있다.</li>
+        <li><input type="checkbox">RTL의 "사용자처럼 테스트" 철학과 쿼리 우선순위(getByRole 우선, getByTestId 최후)를 이해한다.</li>
+        <li><input type="checkbox"><code>userEvent</code>와 <code>fireEvent</code>의 차이, <code>findBy</code>를 언제 쓰는지 안다.</li>
+        <li><input type="checkbox">구현 세부사항을 테스트하면 안 되는 이유와, 커버리지 숫자가 왜 목표가 될 수 없는지 설명할 수 있다.</li>
+        <li><input type="checkbox">Playwright의 auto-waiting이 왜 임의의 sleep보다 나은지, E2E를 왜 소수만 유지해야 하는지 안다.</li>
+        <li><input type="checkbox">ESLint flat config의 배열 우선순위 구조와 typescript-eslint/react-hooks/jsx-a11y 각각의 역할을 안다.</li>
+        <li><input type="checkbox">Prettier와 ESLint의 역할 분리, Biome을 도입할 때 고려할 트레이드오프를 설명할 수 있다.</li>
+        <li><input type="checkbox">작업트리·스테이징·커밋의 흐름과 "브랜치는 포인터다"를 그림 없이도 설명할 수 있다.</li>
+        <li><input type="checkbox">merge와 rebase의 결과 히스토리 차이, 그리고 공유 히스토리를 rebase하면 안 되는 이유를 안다.</li>
+        <li><input type="checkbox">reset/revert/restore/stash를 상황별로 골라 쓸 수 있다.</li>
+        <li><input type="checkbox">Conventional Commits의 type이 semver 버전 상승과 어떻게 연결되는지 설명할 수 있다.</li>
+        <li><input type="checkbox">Husky+lint-staged(커밋 전)와 GitHub Actions(머지 전)의 역할 차이를 안다.</li>
+      </ul>
+
+      <section class="refs">
+        <h2 id="s-refs">참고 문헌</h2>
+        <ol>
+          <li id="r1"><span class="src">Testing Library</span> — "Guiding Principles". <a href="https://testing-library.com/docs/guiding-principles/" target="_blank" rel="noopener">testing-library.com</a> (2026-08 확인)</li>
+          <li id="r2"><span class="src">Vitest</span> — "Getting Started". <a href="https://vitest.dev/guide/" target="_blank" rel="noopener">vitest.dev</a> (2026-08 확인)</li>
+          <li id="r3"><span class="src">Vitest</span> — "Configuring Vitest". <a href="https://vitest.dev/config/" target="_blank" rel="noopener">vitest.dev</a> (2026-08 확인)</li>
+          <li id="r4"><span class="src">Vitest</span> — "Mocking". <a href="https://vitest.dev/guide/mocking" target="_blank" rel="noopener">vitest.dev</a> (2026-08 확인)</li>
+          <li id="r5"><span class="src">Vitest</span> — "Snapshot". <a href="https://vitest.dev/guide/snapshot" target="_blank" rel="noopener">vitest.dev</a> (2026-08 확인)</li>
+          <li id="r6"><span class="src">Testing Library</span> — "React Testing Library — Introduction". <a href="https://testing-library.com/docs/react-testing-library/intro/" target="_blank" rel="noopener">testing-library.com</a> (2026-08 확인)</li>
+          <li id="r7"><span class="src">Testing Library</span> — "About Queries — Priority". <a href="https://testing-library.com/docs/queries/about/" target="_blank" rel="noopener">testing-library.com</a> (2026-08 확인)</li>
+          <li id="r8"><span class="src">Testing Library</span> — "user-event — Introduction". <a href="https://testing-library.com/docs/user-event/intro/" target="_blank" rel="noopener">testing-library.com</a> (2026-08 확인)</li>
+          <li id="r9"><span class="src">Playwright</span> — "Getting started". <a href="https://playwright.dev/docs/intro" target="_blank" rel="noopener">playwright.dev</a> (2026-08 확인)</li>
+          <li id="r10"><span class="src">Playwright</span> — "Locators". <a href="https://playwright.dev/docs/locators" target="_blank" rel="noopener">playwright.dev</a> (2026-08 확인)</li>
+          <li id="r11"><span class="src">Playwright</span> — "Trace viewer". <a href="https://playwright.dev/docs/trace-viewer" target="_blank" rel="noopener">playwright.dev</a> (2026-08 확인)</li>
+          <li id="r12"><span class="src">Playwright</span> — "Continuous Integration". <a href="https://playwright.dev/docs/ci" target="_blank" rel="noopener">playwright.dev</a> (2026-08 확인)</li>
+          <li id="r13"><span class="src">ESLint</span> — "Configuration Files (flat config)". <a href="https://eslint.org/docs/latest/use/configure/configuration-files" target="_blank" rel="noopener">eslint.org</a> (2026-08 확인)</li>
+          <li id="r14"><span class="src">Prettier</span> — "Documentation". <a href="https://prettier.io/docs/en/index.html" target="_blank" rel="noopener">prettier.io</a> (2026-08 확인)</li>
+          <li id="r15"><span class="src">Biome</span> — "Getting Started". <a href="https://biomejs.dev/guides/getting-started/" target="_blank" rel="noopener">biomejs.dev</a> (2026-08 확인)</li>
+          <li id="r16"><span class="src">Pro Git Book</span> — "Git Branching — Branches in a Nutshell". <a href="https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell" target="_blank" rel="noopener">git-scm.com</a> (2026-08 확인)</li>
+          <li id="r17"><span class="src">Git</span> — "git-reset Documentation". <a href="https://git-scm.com/docs/git-reset" target="_blank" rel="noopener">git-scm.com</a> (2026-08 확인)</li>
+          <li id="r18"><span class="src">Git</span> — "git-stash Documentation". <a href="https://git-scm.com/docs/git-stash" target="_blank" rel="noopener">git-scm.com</a> (2026-08 확인)</li>
+          <li id="r19"><span class="src">Pro Git Book</span> — "Git Branching — Rebasing". <a href="https://git-scm.com/book/en/v2/Git-Branching-Rebasing" target="_blank" rel="noopener">git-scm.com</a> (2026-08 확인)</li>
+          <li id="r20"><span class="src">Conventional Commits</span> — "Specification v1.0.0". <a href="https://www.conventionalcommits.org/en/v1.0.0/" target="_blank" rel="noopener">conventionalcommits.org</a> (2026-08 확인)</li>
+          <li id="r21"><span class="src">Semantic Versioning</span> — "semver.org". <a href="https://semver.org/" target="_blank" rel="noopener">semver.org</a> (2026-08 확인)</li>
+          <li id="r22"><span class="src">GitHub Docs</span> — "Pull requests". <a href="https://docs.github.com/en/pull-requests" target="_blank" rel="noopener">docs.github.com</a> (2026-08 확인)</li>
+          <li id="r23"><span class="src">GitHub Docs</span> — "GitHub Actions". <a href="https://docs.github.com/en/actions" target="_blank" rel="noopener">docs.github.com</a> (2026-08 확인)</li>
+        </ol>
+      </section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

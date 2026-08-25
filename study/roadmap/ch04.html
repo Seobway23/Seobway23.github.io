@@ -1,0 +1,1328 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH04 · React Hooks 심화 & 렌더링 최적화 — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="04">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">CHAPTER 04</div>
+    <h1>React Hooks 심화 & 렌더링 최적화</h1>
+    <p>훅은 "함수 안에 상태를 저장하는 규칙"이다. 이 챕터는 그 규칙이 왜 그렇게 생겼는지부터, useState/useReducer/useRef/useEffect/useContext의 내부 동작, 리렌더링이 실제로 언제 일어나는지, useMemo·useCallback·React.memo가 언제 효과가 있고 언제 없는지, useTransition 같은 동시성 훅, 그리고 React 19의 새 훅까지 다룬다. 끝나면 "이 컴포넌트가 왜 다시 렌더됐는가"를 스스로 추적할 수 있다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">useState</span>
+      <span class="pill pill--accent">useEffect</span>
+      <span class="pill pill--accent">useMemo / useCallback</span>
+      <span class="pill">React.memo</span>
+      <span class="pill">useTransition</span>
+      <span class="pill">React 19</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+
+<p class="lead">
+이 챕터가 끝나면 답할 수 있는 질문들: 훅은 왜 조건문 안에서 호출하면 안 되는가? <code>useState</code>와 <code>useReducer</code> 중 언제 무엇을 골라야 하는가? <code>useEffect</code>의 의존성 배열은 정확히 무엇을 비교하는가? 컴포넌트가 리렌더링되는 진짜 조건은 무엇이고, <code>useMemo</code>는 그중 무엇을 막아주는가? <code>useTransition</code>은 무거운 렌더링에서 실제로 무엇을 바꾸는가?
+</p>
+
+<!-- ============================================================ -->
+<h2 id="s-what-is-hook"><span class="h2num">§1</span>훅이란 무엇인가</h2>
+
+<p>
+<span class="t" data-tip="Hook: React 16.8부터 도입된 함수. use로 시작하며, 함수형 컴포넌트 안에서 상태·생명주기·컨텍스트 같은 React 기능을 '연결(hook into)'한다.">훅(Hook)</span>은 함수형 컴포넌트 안에서 상태나 생명주기 같은 React 기능을 사용하게 해주는 특별한 함수다. 이름이 전부 <code>use</code>로 시작하는 것은 우연이 아니라 규칙이다 — React가 훅 호출을 정적으로 분석하고, 린터가 규칙 위반을 잡아내려면 이름으로 구분할 수 있어야 한다.
+</p>
+
+<h3 id="s-two-rules">훅의 두 가지 규칙</h3>
+<div class="grid grid--2">
+  <div class="card">
+    <div class="card__title">1. 최상위에서만 호출한다</div>
+    <p>반복문, 조건문, 중첩 함수 안에서 훅을 호출하지 않는다. 컴포넌트가 렌더링될 때마다 훅은 항상 <b>같은 순서</b>로 호출되어야 한다.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">2. React 함수 안에서만 호출한다</div>
+    <p>일반 JavaScript 함수가 아니라 함수형 컴포넌트, 또는 다른 <span class="t" data-tip="커스텀 훅: use로 시작하는 이름을 가진, 직접 만든 함수. 내부에서 다른 훅을 호출해 로직을 재사용한다. §10에서 직접 만든다.">커스텀 훅</span> 안에서만 호출한다.</p>
+  </div>
+</div>
+
+<h3 id="s-why-order">왜 호출 순서가 중요한가</h3>
+<p>
+React는 각 컴포넌트 인스턴스마다 훅들의 상태를 <b>배열(연결 리스트)</b> 형태로 저장한다. 훅을 호출할 때마다 "몇 번째 훅인지"라는 인덱스로 그 저장소를 찾아간다. 훅에는 이름이 없다 — <code>useState("a")</code>든 <code>useState("b")</code>든 React 입장에서는 그냥 "이번 렌더의 3번째 훅 호출"일 뿐이다. 그래서 조건문으로 훅 호출을 건너뛰면, 다음 렌더에서 인덱스가 밀리면서 완전히 엉뚱한 상태를 읽어오게 된다<sup class="ref"><a href="#r1">[1]</a></sup>.
+</p>
+
+<div class="fig">
+<pre class="mermaid">
+flowchart TB
+  subgraph R1["렌더 1회차"]
+    direction LR
+    A1["훅 #0: useState(0)"] --> A2["훅 #1: useEffect(...)"] --> A3["훅 #2: useState('')"]
+  end
+  subgraph R2["렌더 2회차 — 순서 동일"]
+    direction LR
+    B1["훅 #0: useState(0)"] --> B2["훅 #1: useEffect(...)"] --> B3["훅 #2: useState('')"]
+  end
+  A1 -. "같은 슬롯을 가리킴" .-> B1
+  A2 -. "같은 슬롯을 가리킴" .-> B2
+  A3 -. "같은 슬롯을 가리킴" .-> B3
+</pre>
+<div class="fig__cap"><b>그림 1.</b> React는 훅을 이름이 아닌 "호출 순서(인덱스)"로 식별한다. 렌더마다 순서가 같아야 각 훅이 자신의 상태 슬롯을 정확히 찾는다. <span class="muted">출처: react.dev</span></div>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>왼쪽 코드는 규칙을 어긴 예제다. <code>if (name)</code> 조건 안에 <code>useState</code>를 넣었다. 이름을 입력하는 순간 훅 호출 순서가 바뀌면서 상태가 뒤섞인다. 콘솔에 오류가 찍히는 것을 직접 확인해라.</p>
+    <ul>
+      <li><code>useState</code> — 조건부로 호출하면 React가 "Rendered more hooks than during the previous render" 류의 오류를 던진다.</li>
+      <li>고치는 법은 간단하다 — 훅은 항상 최상위에 두고, 조건은 훅 <b>안쪽 로직</b>에서 처리한다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="BrokenRules.jsx" data-height="260">
+<script type="text/plain" class="pg__src">
+const { useState } = React;
+
+function App() {
+  const [name, setName] = useState("");
+  const [count, setCount] = useState(0);
+
+  // 규칙 위반: 조건에 따라 훅 호출 여부가 달라진다.
+  // name이 채워지는 순간 이 useState가 새로 끼어들면서
+  // 아래 count의 훅 슬롯 인덱스가 밀려버린다.
+  if (name) {
+    // eslint-disable-next-line
+    const [extra] = useState("보너스 상태");
+  }
+
+  return (
+    <div>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="아무 글자나 입력해보세요"
+      />
+      <p>count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>+1</button>
+      <p style={{ color: "#c0392b", fontSize: 13 }}>
+        입력창에 글자를 입력한 뒤 콘솔(F12)을 열면 훅 순서 경고를 볼 수 있습니다.
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<div class="note note--warn">
+  <span class="note__t">흔한 실수</span>
+  <code>if</code>, <code>for</code>, 이벤트 핸들러, 조기 <code>return</code> 이후에 훅을 호출하는 것 — 전부 같은 문제를 일으킨다. ESLint의 <code>eslint-plugin-react-hooks</code>가 이런 실수를 빌드 전에 잡아준다<sup class="ref"><a href="#r2">[2]</a></sup>.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-state-hooks"><span class="h2num">§2</span>상태 훅 — useState와 useReducer</h2>
+
+<h3 id="s-usestate-deep">useState 심화</h3>
+<p>
+<a href="ch03.html#s-state">ch03에서 다룬 기본 useState</a> 위에 세 가지를 더 알아야 실무에서 흔들리지 않는다: <span class="t" data-tip="Lazy Initializer: useState(initialValue) 대신 useState(() => 계산)처럼 함수를 넘기는 방식. 이 함수는 최초 렌더에서 딱 한 번만 실행된다.">지연 초기화(lazy initializer)</span>, <span class="t" data-tip="함수형 업데이트: setState(newValue) 대신 setState(prev => prev + 1)처럼 이전 값을 받는 함수를 넘기는 방식. 이전 상태를 기준으로 다음 상태를 정확히 계산할 때 쓴다.">함수형 업데이트</span>, 그리고 <span class="t" data-tip="상태 배치(batching): 같은 이벤트 핸들러 안에서 여러 번 setState를 호출해도 React가 리렌더링을 한 번으로 묶어 처리하는 것. React 18부터는 Promise/setTimeout 안에서도 자동 배치된다.">상태 배치(batching)</span>다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>세 버튼을 비교한다. "일반 초기화"는 <code>expensiveCompute()</code>가 <b>렌더될 때마다</b> 호출된다 — 결과가 버려지더라도 계산 자체는 실행된다. "지연 초기화"는 함수를 넘겨서 <b>최초 1회만</b> 계산한다.</p>
+    <ul>
+      <li><code>useState(expensiveCompute())</code> — 매 렌더마다 함수를 실행하고 결과만 버림. 낭비.</li>
+      <li><code>useState(() =&gt; expensiveCompute())</code> — React가 최초 렌더에서만 이 함수를 호출.</li>
+      <li><code>setCount(c =&gt; c + 1)</code> — 세 번 연속 호출해도 "이전 값 + 1"을 정확히 세 번 누적한다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="LazyAndBatch.jsx" data-height="320">
+<script type="text/plain" class="pg__src">
+const { useState } = React;
+
+function expensiveCompute(label) {
+  console.log(label + ": 무거운 계산 실행됨");
+  let sum = 0;
+  for (let i = 0; i < 1e6; i++) sum += i;
+  return sum % 1000;
+}
+
+function App() {
+  // 일반 초기화: 렌더될 때마다 expensiveCompute가 매번 실행된다.
+  const [eager] = useState(expensiveCompute("eager"));
+  // 지연 초기화: 함수를 넘기면 최초 렌더에서 딱 한 번만 실행된다.
+  const [lazy] = useState(() => expensiveCompute("lazy"));
+
+  const [count, setCount] = useState(0);
+  const [tick, setTick] = useState(0);
+
+  function bumpThreeTimesNaive() {
+    // 클로저가 렌더 시점의 count(고정값)를 캡처하므로 +1만 된다.
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+  }
+  function bumpThreeTimesFunctional() {
+    // 이전 상태를 인자로 받으므로 정확히 +3 된다.
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+    setCount((c) => c + 1);
+  }
+
+  return (
+    <div>
+      <p>eager 결과: {eager} / lazy 결과: {lazy}</p>
+      <p>이 버튼을 눌러 리렌더를 강제하고, 콘솔에 "eager"가 또 찍히는지 확인하세요.</p>
+      <button onClick={() => setTick(tick + 1)}>강제 리렌더 ({tick})</button>
+      <hr />
+      <p>count: {count}</p>
+      <button onClick={bumpThreeTimesNaive}>일반 방식으로 +3 시도</button>{" "}
+      <button onClick={bumpThreeTimesFunctional}>함수형 업데이트로 +3</button>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<div class="note note--info">
+  <span class="note__t">배치(batching)</span>
+  React 18부터는 이벤트 핸들러뿐 아니라 <code>setTimeout</code>, <code>Promise</code>, 네이티브 이벤트 안에서도 여러 <code>setState</code> 호출이 자동으로 하나의 리렌더로 묶인다<sup class="ref"><a href="#r3">[3]</a></sup>. React 17까지는 이벤트 핸들러 안에서만 배치됐다.
+</div>
+
+<h3 id="s-usereducer">useReducer — 언제 useState 대신 쓰는가</h3>
+<p>
+<span class="t" data-tip="useReducer: (state, action) => newState 형태의 리듀서 함수와 dispatch 함수를 반환하는 훅. Redux를 안 써봤어도 '상태 변경 로직을 한곳에 모으는 함수'로 이해하면 된다.">useReducer</span>는 상태 업데이트 로직이 복잡해지고, 다음 상태가 이전 상태와 액션(action)에 의해 결정되는 패턴일 때 쓴다. <code>useState</code> 여러 개가 서로 연관되어 함께 바뀌어야 한다면 신호다<sup class="ref"><a href="#r12">[12]</a></sup>.
+</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>기준</th><th>useState</th><th>useReducer</th></tr></thead>
+<tbody>
+<tr><td>상태 개수</td><td>독립적인 값 1~2개</td><td>서로 연관된 여러 필드</td></tr>
+<tr><td>업데이트 로직</td><td>단순 대입</td><td>이전 상태 기반의 복잡한 분기</td></tr>
+<tr><td>다음 상태 결정 방식</td><td>호출부에서 직접 계산</td><td>reducer 함수 한곳에 집중</td></tr>
+<tr><td>테스트</td><td>컴포넌트와 얽힘</td><td>reducer만 순수 함수로 단위 테스트 가능</td></tr>
+<tr><td>디버깅</td><td>어디서 바뀌었는지 추적 어려움</td><td>action 로그로 추적 쉬움</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>장바구니 상태를 <code>useReducer</code>로 관리한다. <code>reducer</code> 함수 하나가 "무엇이 상태를 바꿀 수 있는가"를 전부 정의한다. 컴포넌트는 <code>dispatch({ type: ... })</code>만 호출할 뿐, 상태를 어떻게 바꿀지는 몰라도 된다.</p>
+    <ul>
+      <li><code>reducer(state, action)</code> — 순수 함수. 같은 입력이면 항상 같은 출력.</li>
+      <li><code>dispatch</code> — "무엇을 하고 싶다"는 의도(action)만 보낸다.</li>
+      <li><code>switch (action.type)</code> — 상태 변경 로직이 이 함수 하나에 모여있다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="CartReducer.jsx" data-height="320">
+<script type="text/plain" class="pg__src">
+const { useReducer } = React;
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "add":
+      return { items: [...state.items, action.item], count: state.count + 1 };
+    case "remove":
+      return {
+        items: state.items.filter((_, i) => i !== action.index),
+        count: state.count - 1,
+      };
+    case "clear":
+      return { items: [], count: 0 };
+    default:
+      throw new Error("알 수 없는 action: " + action.type);
+  }
+}
+
+function App() {
+  const [state, dispatch] = useReducer(reducer, { items: [], count: 0 });
+
+  return (
+    <div>
+      <button onClick={() => dispatch({ type: "add", item: "상품 " + (state.count + 1) })}>
+        담기
+      </button>{" "}
+      <button onClick={() => dispatch({ type: "clear" })}>비우기</button>
+      <p>담긴 개수: {state.count}</p>
+      <ul>
+        {state.items.map((it, i) => (
+          <li key={i}>
+            {it}{" "}
+            <button onClick={() => dispatch({ type: "remove", index: i })}>삭제</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-ref-hooks"><span class="h2num">§3</span>참조 훅 — useRef와 DOM 접근</h2>
+
+<p>
+<span class="t" data-tip="useRef: { current: value } 형태의 변경 가능한 객체를 반환하는 훅. .current를 바꿔도 리렌더링이 일어나지 않는다.">useRef</span>가 반환하는 객체는 딱 하나, <code>{ current: 값 }</code> 형태다. 핵심은 이것 하나다 — <b>ref의 값을 바꿔도 컴포넌트는 리렌더링되지 않는다.</b> <code>useState</code>는 "화면에 보여줄 값"을, <code>useRef</code>는 "화면과 상관없이 기억만 하고 싶은 값"을 담는다<sup class="ref"><a href="#r13">[13]</a></sup>.
+</p>
+
+<h3 id="s-ref-two-uses">두 가지 용도</h3>
+<div class="grid grid--2">
+  <div class="card">
+    <div class="card__title">1. 값 보관 (리렌더 유발 안 함)</div>
+    <p>이전 값 기억, 타이머 ID 저장, 렌더 횟수 카운트처럼 "화면에 반영될 필요는 없지만 함수 재실행 사이에 유지돼야 하는 값".</p>
+  </div>
+  <div class="card">
+    <div class="card__title">2. DOM 요소 참조</div>
+    <p><code>&lt;input ref={inputRef}&gt;</code>처럼 JSX 태그에 넘기면, 렌더링 후 <code>inputRef.current</code>가 실제 DOM 노드를 가리킨다. <code>.focus()</code> 같은 명령형 조작에 쓴다.</p>
+  </div>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>같은 화면 안에서 <code>useState</code> 카운터와 <code>useRef</code> 카운터를 나란히 비교한다. state 카운터는 버튼을 누를 때마다 화면 숫자가 바뀌지만, ref 카운터는 <code>.current</code>만 올라가고 화면은 "리렌더 버튼"을 눌러야 갱신된다 — ref 변경 자체는 리렌더를 유발하지 않기 때문이다.</p>
+    <ul>
+      <li><code>renderCount.current++</code> — 값은 바뀌지만 화면 갱신은 없다.</li>
+      <li><code>inputRef.current.focus()</code> — 실제 DOM 메서드를 직접 호출.</li>
+      <li>리렌더 버튼을 눌러야 렌더 카운트 숫자가 화면에 나타난다 — ref는 "조용히" 값을 들고 있을 뿐이다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="RefVsState.jsx" data-height="300">
+<script type="text/plain" class="pg__src">
+const { useState, useRef, useEffect } = React;
+
+function App() {
+  const [stateCount, setStateCount] = useState(0);
+  const refCount = useRef(0);
+  const [, forceRerender] = useState(0);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    console.log("렌더됨. refCount.current =", refCount.current);
+  });
+
+  return (
+    <div>
+      <p>state 카운터: {stateCount} (버튼 누르면 화면이 바로 바뀜)</p>
+      <button onClick={() => setStateCount((c) => c + 1)}>state +1</button>
+
+      <p style={{ marginTop: 12 }}>
+        ref 카운터 (내부값): {refCount.current} — 이 숫자는 "리렌더" 버튼을 눌러야 갱신됩니다
+      </p>
+      <button onClick={() => { refCount.current++; console.log("ref는 올랐지만 화면은 그대로:", refCount.current); }}>
+        ref +1 (화면 안 바뀜)
+      </button>{" "}
+      <button onClick={() => forceRerender((n) => n + 1)}>리렌더 강제 실행</button>
+
+      <hr />
+      <input ref={inputRef} placeholder="포커스 버튼을 눌러보세요" />
+      <button onClick={() => inputRef.current.focus()}>input에 포커스 주기</button>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-forwardref">forwardRef와 React 19의 ref-as-prop</h3>
+<p>
+함수형 컴포넌트는 기본적으로 <code>ref</code>를 받지 못한다 — <code>ref</code>는 React가 예약한 특수 prop이라 <code>props.ref</code>로 전달되지 않는다. React 18까지는 자식 컴포넌트가 부모의 ref를 전달받으려면 <code>React.forwardRef</code>로 감싸야 했다. React 19부터는 <b>함수형 컴포넌트가 <code>ref</code>를 일반 prop처럼 직접 받을 수 있다</b> — <code>forwardRef</code> 없이도 두 번째 인자 대신 <code>props.ref</code>로 받는다<sup class="ref"><a href="#r4">[4]</a></sup>.
+</p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>components/FancyInput.tsx (React 19)</span></div>
+<pre><code class="language-tsx">// React 19: forwardRef 없이 ref를 일반 prop처럼 받는다.
+function FancyInput({ placeholder, ref }: { placeholder: string; ref: React.Ref&lt;HTMLInputElement&gt; }) {
+  return &lt;input placeholder={placeholder} ref={ref} className="fancy" /&gt;;
+}
+
+// 사용하는 쪽
+function Parent() {
+  const ref = useRef&lt;HTMLInputElement&gt;(null);
+  return &lt;FancyInput placeholder="이름" ref={ref} /&gt;;
+}
+</code></pre>
+</div>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>components/FancyInput.legacy.tsx (React 18 이하)</span></div>
+<pre><code class="language-tsx">// React 18까지는 forwardRef로 감싸야 ref를 전달받을 수 있었다.
+const FancyInput = React.forwardRef&lt;HTMLInputElement, { placeholder: string }&gt;(
+  function FancyInput({ placeholder }, ref) {
+    return &lt;input placeholder={placeholder} ref={ref} className="fancy" /&gt;;
+  }
+);
+</code></pre>
+</div>
+
+<h3 id="s-useimperativehandle">useImperativeHandle</h3>
+<p>
+<span class="t" data-tip="useImperativeHandle: 부모가 ref로 접근했을 때 실제 DOM 노드 대신, 직접 정의한 메서드 객체를 노출하는 훅. forwardRef/ref prop과 함께 쓴다.">useImperativeHandle</span>은 부모 컴포넌트가 ref를 통해 자식의 DOM 전체가 아니라 <b>정해준 메서드만</b> 쓰게 하고 싶을 때 쓴다. 예를 들어 커스텀 모달 컴포넌트가 <code>open()</code>, <code>close()</code>만 노출하고 내부 DOM 구조는 숨기는 식이다. 남용하면 명령형 코드가 늘어나므로, 정말 명령형 제어가 필요한 경우(포커스 이동, 스크롤 위치, 애니메이션 트리거)로 제한한다<sup class="ref"><a href="#r5">[5]</a></sup>.
+</p>
+
+<!-- ============================================================ -->
+<h2 id="s-useeffect"><span class="h2num">§4</span>useEffect 완전 정복</h2>
+
+<h3 id="s-when-need-effect">언제 필요하고, 언제 필요 없는가</h3>
+<p>
+<span class="t" data-tip="Effect(부수 효과): 렌더링 결과를 화면에 그리는 것과 별개로, 외부 시스템(DOM, 네트워크, 타이머, 구독)과 동기화하는 코드. useEffect로 등록한다.">useEffect</span>는 "렌더링 이후에 외부 시스템과 동기화"하기 위한 훅이다. React 공식 문서는 useEffect를 <b>과용하지 말라</b>고 명시한다 — props나 state로부터 값을 계산할 수 있다면 그건 Effect가 아니라 렌더링 중 계산이어야 한다<sup class="ref"><a href="#r6">[6]</a></sup>.
+</p>
+
+<div class="grid grid--2">
+  <div class="card">
+    <div class="card__title">Effect가 필요 없는 경우</div>
+    <ul>
+      <li>props/state로부터 파생되는 값 → 렌더링 중 그냥 계산한다.</li>
+      <li>사용자 이벤트에 대한 반응 → 이벤트 핸들러에서 처리한다.</li>
+      <li>props가 바뀔 때 state를 "리셋"하는 것 → <code>key</code> prop을 바꾸는 게 낫다.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card__title">Effect가 필요한 경우</div>
+    <ul>
+      <li>DOM을 직접 조작해야 할 때 (React가 관리 안 하는 위젯 연동)</li>
+      <li>서버 연결, 구독(subscription) 설정</li>
+      <li>컴포넌트가 화면에 나타났을 때 로깅/분석 전송</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="s-deps-array">의존성 배열의 의미</h3>
+<p>
+두 번째 인자로 넘기는 배열은 "이 값들 중 하나라도 이전 렌더와 <span class="t" data-tip="Object.is 비교: React는 의존성 배열의 각 값을 Object.is()로 비교한다. 원시값은 값 자체를, 객체/배열/함수는 참조(메모리 주소)를 비교한다.">달라졌으면(Object.is 비교)</span> 이 effect를 다시 실행하라"는 뜻이다. 배열을 생략하면 매 렌더마다 실행, 빈 배열이면 마운트 시 1회만 실행된다.
+</p>
+
+<h3 id="s-cleanup">클린업 함수</h3>
+<p>
+effect 함수가 함수를 <code>return</code>하면, React는 그것을 <span class="t" data-tip="클린업 함수: useEffect가 return하는 함수. 컴포넌트가 사라지기 직전, 그리고 effect가 재실행되기 직전에 호출되어 이전 effect가 만든 부작용(타이머, 구독, 이벤트 리스너)을 정리한다.">클린업 함수</span>로 취급한다. 이 함수는 (1) effect가 재실행되기 직전, (2) 컴포넌트가 사라지기 직전 두 시점에 호출된다. 타이머, 이벤트 리스너, 구독을 정리하지 않으면 컴포넌트가 사라진 뒤에도 계속 실행되는 메모리 누수가 생긴다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>1초마다 증가하는 타이머를 <code>useEffect</code>로 구현했다. 컴포넌트를 "끄기" 버튼으로 언마운트하면, 클린업 함수가 <code>clearInterval</code>을 호출해 타이머를 멈춘다. 콘솔에서 "타이머 시작"과 "타이머 정리" 로그 쌍을 확인해라.</p>
+    <ul>
+      <li><code>setInterval</code> — effect 안에서 타이머를 시작.</li>
+      <li><code>return () =&gt; clearInterval(id)</code> — 클린업. 언마운트되거나 의존성이 바뀌면 호출.</li>
+      <li>의존성 배열 <code>[]</code> — 마운트 시 1회만 타이머를 만든다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="TimerCleanup.jsx" data-height="280">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+function Timer() {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    console.log("타이머 시작 (effect 실행)");
+    const id = setInterval(() => {
+      setSeconds((s) => s + 1);
+    }, 1000);
+
+    return () => {
+      console.log("타이머 정리 (cleanup 실행)");
+      clearInterval(id);
+    };
+  }, []); // 빈 배열: 마운트 시 1회만 등록
+
+  return <p>경과 시간: {seconds}초</p>;
+}
+
+function App() {
+  const [mounted, setMounted] = React.useState(true);
+  return (
+    <div>
+      {mounted ? <Timer /> : <p>타이머가 꺼졌습니다 (콘솔에서 정리 로그 확인)</p>}
+      <button onClick={() => setMounted((m) => !m)}>
+        {mounted ? "타이머 끄기 (언마운트)" : "타이머 켜기"}
+      </button>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-strictmode">StrictMode의 이중 실행</h3>
+<p>
+개발 모드에서 <code>&lt;React.StrictMode&gt;</code>는 컴포넌트를 마운트한 직후 <b>즉시 언마운트하고 다시 마운트</b>한다 — effect를 "실행 → 정리 → 실행"으로 한 번 더 돌려본다. 이는 버그가 아니라 의도된 개발 전용 동작으로, 클린업을 제대로 안 짜면 어떤 문제가 생기는지 미리 드러내기 위함이다<sup class="ref"><a href="#r7">[7]</a></sup>. 위 예제의 플레이그라운드도 내부적으로 StrictMode로 마운트되므로, 콘솔에서 "타이머 시작/정리"가 한 쌍 더 찍히는 것을 볼 수 있다.
+</p>
+
+<h3 id="s-infinite-loop">무한 루프의 4가지 원인</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>원인</th><th>증상</th><th>해결</th></tr></thead>
+<tbody>
+<tr><td>의존성 배열 누락</td><td>매 렌더마다 effect 재실행</td><td>실제로 쓰는 값만 배열에 명시</td></tr>
+<tr><td>effect 안에서 의존성으로 쓰는 state를 그대로 setState</td><td>effect → state 변경 → 리렌더 → effect… 반복</td><td>함수형 업데이트(<code>setX(prev =&gt; ...)</code>)로 의존성에서 제외</td></tr>
+<tr><td>객체/배열/함수를 매 렌더마다 새로 만들어 의존성으로 사용</td><td>참조가 매번 달라져 effect가 계속 재실행</td><td><code>useMemo</code>/<code>useCallback</code>으로 참조 고정, 또는 원시값만 의존성에 사용</td></tr>
+<tr><td>effect 안에서 부모로부터 받은 콜백을 호출해 부모 state를 변경 → 그 결과가 다시 자식 props로 내려와 effect 재실행</td><td>부모-자식 사이 무한 핑퐁</td><td>실제로 동기화가 필요한지 재검토, 이벤트 핸들러로 옮길 수 있는지 확인</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>버그 버전과 수정 버전을 비교한다. "버그" 탭 코드는 <code>{ name: query }</code> 객체를 매 렌더마다 새로 만들어 의존성 배열에 넣는다 — 객체는 매번 다른 참조이므로 effect가 끝없이 재실행된다. "수정" 버튼을 눌러 원시값(<code>query</code> 문자열)만 의존성으로 쓰는 버전으로 바꿔볼 수 있다.</p>
+    <ul>
+      <li><code>{ name: query }</code> — 렌더마다 새 객체. <code>Object.is</code> 비교에서 항상 "다름".</li>
+      <li>의존성을 <code>query</code>(문자열)로 바꾸면 값이 실제로 같을 때 effect가 재실행되지 않는다.</li>
+      <li>실행 횟수 카운터로 무한 루프 여부를 눈으로 확인한다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="InfiniteLoopFix.jsx" data-height="320">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+function App() {
+  const [query, setQuery] = useState("react");
+  const [fixed, setFixed] = useState(false);
+  const [runCount, setRunCount] = useState(0);
+
+  // 버그 버전: 매 렌더마다 새 객체가 만들어져 의존성이 항상 "변경됨"으로 인식된다.
+  const params = { name: query };
+
+  useEffect(() => {
+    setRunCount((c) => c + 1);
+    if (runCount > 30) return; // 플레이그라운드 보호용 안전장치
+    // eslint-disable-next-line
+  }, fixed ? [query] : [params]);
+
+  return (
+    <div>
+      <input value={query} onChange={(e) => setQuery(e.target.value)} />
+      <p>effect 실행 횟수: {runCount} {runCount > 15 && "← 계속 증가하면 무한 루프!"}</p>
+      <button onClick={() => { setFixed(true); setRunCount(0); }}>
+        원시값 의존성으로 수정하기
+      </button>
+      <p style={{ fontSize: 13, color: "#8892a6" }}>
+        현재 모드: {fixed ? "수정됨 (query 문자열 의존)" : "버그 (매번 새 객체 의존)"}
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-context"><span class="h2num">§5</span>컨텍스트 — useContext</h2>
+
+<p>
+<span class="t" data-tip="Context: 컴포넌트 트리 깊숙이 값을 전달할 때, 모든 중간 컴포넌트에 props를 일일이 넘기지 않아도 되게 해주는 React 기능. Provider로 값을 공급하고 useContext로 구독한다.">Context</span>는 "props를 여러 단계 아래로 계속 전달하는 것(prop drilling)"을 피하기 위한 기능이다. <code>createContext</code>로 만들고, <code>&lt;Context.Provider value={...}&gt;</code>로 값을 공급하며, 하위 컴포넌트는 <code>useContext(Context)</code>로 구독한다<sup class="ref"><a href="#r14">[14]</a></sup>.
+</p>
+
+<h3 id="s-context-rerender">Context가 리렌더링을 퍼뜨리는 방식</h3>
+<p>
+<code>Provider</code>의 <code>value</code>가 바뀌면, 그 Context를 <code>useContext</code>로 구독하는 <b>모든</b> 하위 컴포넌트가 리렌더링된다 — 트리 구조나 <code>memo</code> 여부와 무관하다. <code>value</code>에 매 렌더마다 새로 만들어지는 객체(<code>{ user, setUser }</code>)를 넘기면, Provider를 감싼 컴포넌트가 렌더될 때마다 구독자 전체가 리렌더링된다.
+</p>
+
+<div class="fig">
+<pre class="mermaid">
+flowchart TB
+  P["Provider value가 변경됨"] --> C1["useContext 구독 컴포넌트 A"]
+  P --> C2["useContext 구독 컴포넌트 B"]
+  P --> C3["useContext 구독 컴포넌트 C"]
+  C1 -.->|"memo로 감싸도 소용없음"| C1r["리렌더 발생"]
+  C2 -.->|"트리 깊이와 무관"| C2r["리렌더 발생"]
+</pre>
+<div class="fig__cap"><b>그림 2.</b> Context 값이 바뀌면 구독하는 모든 컴포넌트가 리렌더링된다. 이는 부모→자식 리렌더링 전파와 별개의 경로다. <span class="muted">출처: react.dev</span></div>
+</div>
+
+<h3 id="s-context-split">state/dispatch 분리 패턴</h3>
+<p>
+Context 하나에 상태와 setter를 같이 담으면, 값을 "읽기만" 하는 컴포넌트도 상태가 바뀔 때마다 리렌더링된다. state Context와 dispatch(또는 setter) Context를 <b>둘로 나누면</b>, dispatch만 쓰는 컴포넌트(예: 버튼)는 state가 바뀌어도 리렌더링되지 않는다 — dispatch 함수 자체는 <code>useReducer</code>가 렌더 사이에 동일한 참조를 유지해주기 때문이다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>state 전용 Context와 dispatch 전용 Context를 나눴다. <code>DisplayCount</code>는 state Context만 구독하고, <code>IncrementButton</code>은 dispatch Context만 구독한다. 렌더 카운터로 두 컴포넌트의 리렌더 횟수를 비교해라 — 버튼을 눌러도 <code>IncrementButton</code> 자신은 다시 렌더되지 않는다.</p>
+    <ul>
+      <li><code>CountContext</code> — 현재 값만 담당. 바뀌면 이 값을 읽는 컴포넌트만 리렌더.</li>
+      <li><code>DispatchContext</code> — <code>dispatch</code> 함수는 리렌더 사이에도 항상 같은 참조.</li>
+      <li>렌더 카운터(<code>useRef</code>)로 각 컴포넌트가 몇 번 렌더됐는지 표시.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="SplitContext.jsx" data-height="320">
+<script type="text/plain" class="pg__src">
+const { createContext, useContext, useReducer, useRef } = React;
+
+const CountContext = createContext(0);
+const DispatchContext = createContext(null);
+
+function reducer(state, action) {
+  if (action.type === "inc") return state + 1;
+  return state;
+}
+
+function useRenderCount() {
+  const ref = useRef(0);
+  ref.current++;
+  return ref.current;
+}
+
+function DisplayCount() {
+  const count = useContext(CountContext);
+  const renders = useRenderCount();
+  return <p>현재 값: {count} (이 컴포넌트 렌더 횟수: {renders})</p>;
+}
+
+function IncrementButton() {
+  const dispatch = useContext(DispatchContext);
+  const renders = useRenderCount();
+  return (
+    <div>
+      <button onClick={() => dispatch({ type: "inc" })}>+1 (dispatch만 구독)</button>
+      <p style={{ fontSize: 13 }}>이 버튼 컴포넌트 렌더 횟수: {renders}</p>
+    </div>
+  );
+}
+
+function App() {
+  const [count, dispatch] = useReducer(reducer, 0);
+  return (
+    <CountContext.Provider value={count}>
+      <DispatchContext.Provider value={dispatch}>
+        <DisplayCount />
+        <IncrementButton />
+      </DispatchContext.Provider>
+    </CountContext.Provider>
+  );
+}
+</script>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-perf-hooks"><span class="h2num">§6</span>성능 훅 — useMemo / useCallback / React.memo</h2>
+
+<h3 id="s-referential-equality">참조 동일성이라는 전제</h3>
+<p>
+<span class="t" data-tip="참조 동일성(referential equality): 두 객체/배열/함수가 내용이 같아도, 메모리상 같은 자리를 가리키지 않으면 '다르다'고 판단하는 비교 방식. JS의 === 연산자가 객체에 적용될 때의 동작.">참조 동일성</span>을 이해해야 세 훅이 왜 필요한지 이해할 수 있다. <code>{} === {}</code>는 항상 <code>false</code>다 — 내용이 같아도 서로 다른 객체이기 때문이다. 함수도 마찬가지다. 컴포넌트가 렌더될 때마다 그 안에서 정의한 객체/배열/함수는 <b>매번 새로 생성</b>된다.
+</p>
+
+<div class="fig">
+<pre class="mermaid">
+flowchart LR
+  R1["렌더 1: const obj = {a:1}"] -->|"메모리 주소 0x001"| M1["obj"]
+  R2["렌더 2: const obj = {a:1}"] -->|"메모리 주소 0x002"| M2["obj"]
+  M1 -.->|"내용은 같지만"| EQ["obj1 === obj2 → false"]
+  M2 -.-> EQ
+</pre>
+<div class="fig__cap"><b>그림 3.</b> 내용이 같은 객체라도 렌더마다 새로 만들어지면 참조가 다르다. <code>useMemo</code>/<code>useCallback</code>은 이 참조를 렌더 사이에 고정하는 도구다.</div>
+</div>
+
+<h3 id="s-usememo">useMemo — 계산 결과 캐시</h3>
+<p>
+<span class="t" data-tip="useMemo(fn, deps): fn의 계산 결과를 deps가 바뀔 때만 다시 계산하고, 그 외에는 이전 결과를 그대로 재사용하는 훅.">useMemo</span>는 "무거운 계산"을 캐시한다. 의존성이 바뀌지 않으면 계산을 건너뛰고 이전 결과(참조까지 동일한)를 그대로 돌려준다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>입력창에 글자를 입력할 때마다 리스트를 필터링한다. <code>useMemo</code> 없이는 관련 없는 state(<code>theme</code>)가 바뀔 때도 필터링이 재실행된다. <code>useMemo</code>로 감싸면 <code>items</code>나 <code>filter</code>가 실제로 바뀔 때만 재계산한다.</p>
+    <ul>
+      <li><code>useMemo(() =&gt; ..., [items, filter])</code> — 이 두 값이 바뀔 때만 재계산.</li>
+      <li>"테마 전환" 버튼을 눌러보면 필터링 로그가 안 찍히는 것을 확인할 수 있다.</li>
+      <li>계산 자체가 가벼우면 <code>useMemo</code>의 비교 비용이 오히려 손해일 수 있다 — 무거운 계산에만 쓴다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="UseMemoDemo.jsx" data-height="340">
+<script type="text/plain" class="pg__src">
+const { useState, useMemo } = React;
+
+const ITEMS = Array.from({ length: 8 }, (_, i) => "항목-" + (i + 1));
+
+function App() {
+  const [filter, setFilter] = useState("");
+  const [theme, setTheme] = useState("light");
+
+  const filtered = useMemo(() => {
+    console.log("필터링 재계산 실행됨 (필터:", filter, ")");
+    return ITEMS.filter((it) => it.includes(filter));
+  }, [filter]); // theme은 의존성에 없으므로 theme만 바뀌면 재계산 안 함
+
+  return (
+    <div style={{ background: theme === "dark" ? "#222" : "#fff", color: theme === "dark" ? "#eee" : "#111", padding: 12, borderRadius: 8 }}>
+      <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="필터" />{" "}
+      <button onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}>
+        테마 전환 ({theme}) — 콘솔에 재계산 로그가 안 찍히는지 확인
+      </button>
+      <ul>{filtered.map((it) => <li key={it}>{it}</li>)}</ul>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-usecallback">useCallback — 함수 참조 고정</h3>
+<p>
+<span class="t" data-tip="useCallback(fn, deps): fn 자체를 deps가 바뀔 때만 새로 만들고, 그 외에는 이전 렌더의 함수 참조를 그대로 재사용하는 훅. useMemo(() => fn, deps)와 동등하다.">useCallback</span>은 함수의 <b>참조</b>를 고정한다. 함수 자체는 가볍게 재생성돼도 상관없지만, 그 함수를 <code>React.memo</code>로 감싼 자식에게 props로 넘기거나, <code>useEffect</code>의 의존성으로 쓸 때 참조가 계속 바뀌면 의미가 없어진다<sup class="ref"><a href="#r15">[15]</a></sup>.
+</p>
+
+<h3 id="s-reactmemo">React.memo — props가 같으면 리렌더 생략</h3>
+<p>
+<span class="t" data-tip="React.memo(Component): props가 이전 렌더와 얕은 비교(shallow compare)로 동일하면, 부모가 리렌더되어도 이 컴포넌트의 리렌더를 건너뛰는 고차 컴포넌트.">React.memo</span>는 컴포넌트를 감싸서, props가 (얕은 비교로) 이전과 같으면 리렌더를 건너뛴다. 단, props로 넘기는 함수/객체가 매 렌더마다 새로 만들어지면 <code>memo</code>는 무용지물이다 — 그래서 <code>useCallback</code>/<code>useMemo</code>와 짝을 이룬다<sup class="ref"><a href="#r16">[16]</a></sup>.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가 — 효과 있는 경우 vs 없는 경우</h4>
+    <p>같은 <code>Child</code> 컴포넌트(<code>React.memo</code>로 감쌈)를 두 부모가 각각 렌더링한다. "일반 콜백" 부모는 매 렌더마다 새 함수를 만들어 넘기므로 <code>memo</code>가 무력화된다. "useCallback 콜백" 부모는 참조를 고정해 자식 렌더를 실제로 건너뛴다. 렌더 카운터 숫자 차이를 직접 확인해라.</p>
+    <ul>
+      <li><code>React.memo(Child)</code> — props 얕은 비교로 리렌더 여부 결정.</li>
+      <li>일반 함수 <code>() =&gt; {}</code> — 렌더마다 새 참조 → memo 무력화 → 자식도 매번 렌더.</li>
+      <li><code>useCallback(() =&gt; {}, [])</code> — 참조 고정 → memo가 실제로 렌더를 막음.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="MemoCallbackDemo.jsx" data-height="380">
+<script type="text/plain" class="pg__src">
+const { useState, useCallback, useRef, memo } = React;
+
+function useRenderCount() {
+  const ref = useRef(0);
+  ref.current++;
+  return ref.current;
+}
+
+const Child = memo(function Child({ onClick, label }) {
+  const renders = useRenderCount();
+  return (
+    <div style={{ border: "1px solid #d6dae4", borderRadius: 8, padding: 8, marginTop: 6 }}>
+      <button onClick={onClick}>{label}</button>
+      <p style={{ fontSize: 13 }}>이 자식의 렌더 횟수: <b>{renders}</b></p>
+    </div>
+  );
+});
+
+function App() {
+  const [tick, setTick] = useState(0);
+  const [count, setCount] = useState(0);
+
+  // 매 렌더마다 새로 만들어지는 함수 — memo를 무력화시킨다.
+  const naiveHandler = () => setCount((c) => c + 1);
+
+  // 참조가 고정된 함수 — memo가 실제로 렌더를 막아준다.
+  const stableHandler = useCallback(() => setCount((c) => c + 1), []);
+
+  return (
+    <div>
+      <button onClick={() => setTick((t) => t + 1)}>
+        부모 강제 리렌더 ({tick}) — 이걸 눌러도 count는 안 바뀜
+      </button>
+      <p>공유 count: {count}</p>
+
+      <h4 style={{ marginBottom: 4 }}>일반 함수 전달 (memo 무력화됨)</h4>
+      <Child onClick={naiveHandler} label="일반 콜백으로 +1" />
+
+      <h4 style={{ marginBottom: 4 }}>useCallback 전달 (memo 실제 작동)</h4>
+      <Child onClick={stableHandler} label="useCallback 콜백으로 +1" />
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<div class="note note--tip">
+  <span class="note__t">판단 기준</span>
+  <code>useMemo</code>/<code>useCallback</code>은 공짜가 아니다 — 의존성 비교 자체에도 비용이 든다. "무거운 계산"이거나 "memo로 감싼 자식에게 넘기는 props"일 때만 쓴다. 가벼운 계산에 습관적으로 씌우면 오히려 코드만 복잡해지고 성능 이득은 없다<sup class="ref"><a href="#r8">[8]</a></sup>.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-rerender-principle"><span class="h2num">§7</span>리렌더링의 원리</h2>
+
+<h3 id="s-when-rerender">언제 리렌더링되는가</h3>
+<div class="grid grid--2">
+  <div class="card">
+    <div class="card__title">1. 상태 변경</div>
+    <p><code>setState</code>(또는 <code>dispatch</code>)를 호출하면 그 컴포넌트가 리렌더링된다.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">2. 부모가 렌더됨</div>
+    <p>부모 컴포넌트가 리렌더링되면, <b>기본적으로</b> 모든 자식도 리렌더링된다 — 자식의 props가 하나도 안 바뀌었어도.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">3. 컨텍스트 값 변경</div>
+    <p>구독 중인 Context의 <code>value</code>가 바뀌면 리렌더링된다 (§5 참고).</p>
+  </div>
+  <div class="card">
+    <div class="card__title">4. 훅 자체의 재실행</div>
+    <p>커스텀 훅 내부에서 <code>useState</code>가 바뀌어도 그 훅을 사용하는 컴포넌트가 리렌더링된다.</p>
+  </div>
+</div>
+
+<h3 id="s-parent-renders-child">"부모가 렌더되면 자식도 렌더된다"의 진짜 의미</h3>
+<p>
+여기서 "렌더된다"는 것은 "화면이 실제로 다시 그려진다(DOM이 바뀐다)"는 뜻이 아니다. React가 그 컴포넌트 함수를 <b>다시 호출</b>하고, 이전 결과와 비교(<span class="t" data-tip="Reconciliation(재조정): React가 새로 계산한 가상 UI 트리를 이전 트리와 비교해, 실제로 바뀐 부분만 진짜 DOM에 반영하는 과정.">재조정, reconciliation</span>)해서 실제 DOM 변경이 필요한 부분만 반영한다는 뜻이다. 함수가 다시 호출되는 것 자체는 비용이지만, 실제 DOM 변경은 최소화된다.
+</p>
+
+<h3 id="s-children-prop-pattern">children prop으로 렌더 차단하기</h3>
+<p>
+부모가 리렌더링될 때 자식까지 함께 리렌더링되는 것을 막는 흔한 패턴은, 자식을 <code>children</code> prop으로 <b>미리 만들어서 넘기는 것</b>이다. React는 <code>children</code>으로 전달된 React 엘리먼트가 이전 렌더와 같은 참조라면, 부모가 리렌더링돼도 그 부분은 다시 계산하지 않는다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>ExpensiveChild</code>를 두 가지 방식으로 렌더링한다. "직접 중첩"은 <code>Counter</code> 내부에서 <code>&lt;ExpensiveChild /&gt;</code>를 직접 쓰므로, <code>Counter</code>가 리렌더될 때마다 같이 렌더된다. "children으로 전달"은 <code>App</code>이 이미 만들어둔 엘리먼트를 <code>Counter</code>가 <code>props.children</code>으로 그대로 통과시키므로, <code>Counter</code>의 리렌더와 무관하게 렌더 횟수가 그대로다.</p>
+    <ul>
+      <li><code>&lt;Counter&gt;&lt;ExpensiveChild /&gt;&lt;/Counter&gt;</code> — App 레벨에서 미리 만든 엘리먼트.</li>
+      <li><code>Counter</code>는 <code>{children}</code>을 그대로 렌더링만 할 뿐, 새로 만들지 않는다.</li>
+      <li>두 렌더 카운터를 비교해 direct 방식만 계속 증가하는 것을 확인.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="ChildrenPattern.jsx" data-height="360">
+<script type="text/plain" class="pg__src">
+const { useState, useRef } = React;
+
+function useRenderCount() {
+  const ref = useRef(0);
+  ref.current++;
+  return ref.current;
+}
+
+function ExpensiveChild({ tag }) {
+  const renders = useRenderCount();
+  return (
+    <div style={{ border: "1px dashed #d6dae4", borderRadius: 8, padding: 8, marginTop: 6 }}>
+      [{tag}] ExpensiveChild 렌더 횟수: <b>{renders}</b>
+    </div>
+  );
+}
+
+// 직접 중첩: count가 바뀔 때마다 CounterDirect 함수가 다시 호출되고,
+// 그 안의 <ExpensiveChild /> JSX도 매번 새로 "계산"된다.
+function CounterDirect() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <button onClick={() => setCount((c) => c + 1)}>direct 카운트: {count}</button>
+      <ExpensiveChild tag="direct" />
+    </div>
+  );
+}
+
+// children으로 전달: App이 이미 만들어둔 엘리먼트를 그대로 통과시킬 뿐이라
+// CounterViaChildren이 리렌더돼도 children 엘리먼트는 재사용된다.
+function CounterViaChildren({ children }) {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <button onClick={() => setCount((c) => c + 1)}>children 카운트: {count}</button>
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <CounterDirect />
+      <CounterViaChildren>
+        <ExpensiveChild tag="children" />
+      </CounterViaChildren>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-concurrent-hooks"><span class="h2num">§8</span>동시성 훅 — useTransition / useDeferredValue</h2>
+
+<p>
+<span class="t" data-tip="Concurrent Feature(동시성 기능): React가 렌더링 작업에 '우선순위'를 매겨, 급한 업데이트(타이핑 반응)를 먼저 처리하고 급하지 않은 업데이트(무거운 리스트 필터링)를 뒤로 미루거나 중단할 수 있게 하는 React 18+의 기능군.">동시성 기능</span>은 "느린 렌더링" 자체를 없애주지 않는다. 대신 급하지 않은 렌더링을 <b>낮은 우선순위</b>로 표시해서, 사용자 입력 같은 급한 업데이트가 먼저 반영되도록 순서를 조정한다.
+</p>
+
+<div class="fig">
+<svg viewBox="0 0 620 190" width="100%" height="190" role="img" aria-label="일반 업데이트와 startTransition 업데이트의 처리 순서 비교" style="max-width:620px">
+  <style>
+    .fig-txt { font-size: 13px; fill: currentColor; font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif; }
+    .fig-line { stroke: currentColor; stroke-opacity: .25; stroke-width: 1; }
+    .fig-urgent { fill: var(--accent, #6c8cff); }
+    .fig-transition { fill: currentColor; fill-opacity: .35; }
+  </style>
+  <text x="10" y="22" class="fig-txt" font-weight="700">일반 setState (모두 같은 우선순위)</text>
+  <line x1="10" y1="40" x2="600" y2="40" class="fig-line" />
+  <rect x="10" y="30" width="90" height="20" class="fig-transition" rx="4"></rect>
+  <text x="15" y="44" class="fig-txt">입력 반영</text>
+  <rect x="100" y="30" width="220" height="20" class="fig-transition" rx="4"></rect>
+  <text x="150" y="44" class="fig-txt">무거운 리스트 필터링 (입력이 막힘)</text>
+
+  <text x="10" y="92" class="fig-txt" font-weight="700">startTransition 적용 (우선순위 분리)</text>
+  <line x1="10" y1="110" x2="600" y2="110" class="fig-line" />
+  <rect x="10" y="100" width="90" height="20" class="fig-urgent" rx="4"></rect>
+  <text x="18" y="114" class="fig-txt" fill="#fff">입력 반영</text>
+  <rect x="110" y="100" width="90" height="20" class="fig-urgent" rx="4"></rect>
+  <text x="118" y="114" class="fig-txt" fill="#fff">입력 반영</text>
+  <rect x="210" y="100" width="380" height="20" class="fig-transition" rx="4"></rect>
+  <text x="220" y="114" class="fig-txt">무거운 리스트 필터링 (낮은 우선순위, 입력 사이사이 진행)</text>
+
+  <text x="10" y="150" class="fig-txt">■ 급한 업데이트(입력) — 항상 먼저 처리</text>
+  <text x="10" y="172" class="fig-txt">▨ transition 업데이트 — 여유가 있을 때 처리, 새 입력이 오면 다시 양보</text>
+</svg>
+<div class="fig__cap"><b>그림 4.</b> 일반 업데이트는 순서대로 처리되어 무거운 렌더링이 입력을 막지만, <code>startTransition</code>으로 감싸면 급한 업데이트가 먼저 처리되고 무거운 렌더링은 낮은 우선순위로 밀린다. <span class="muted">출처: react.dev</span></div>
+</div>
+
+<h3 id="s-usetransition">useTransition</h3>
+<p>
+<span class="t" data-tip="useTransition: [isPending, startTransition]을 반환하는 훅. startTransition으로 감싼 setState는 '급하지 않은 업데이트'로 표시되어, 더 급한 업데이트에 우선순위를 내준다.">useTransition</span>은 특정 상태 업데이트를 "긴급하지 않음(transition)"으로 표시한다. <code>isPending</code>으로 그 업데이트가 아직 처리 중인지 알 수 있다<sup class="ref"><a href="#r17">[17]</a></sup>.
+</p>
+
+<h3 id="s-usedeferredvalue">useDeferredValue</h3>
+<p>
+<span class="t" data-tip="useDeferredValue: 값의 '지연된 버전'을 반환하는 훅. 급한 렌더링이 끝난 뒤 여유가 생기면 최신 값으로 따라잡는다. setState를 감쌀 수 없는 상황(예: 외부에서 내려오는 props)에 쓴다.">useDeferredValue</span>는 <code>startTransition</code>을 직접 호출할 수 없는 상황(예: 이미 부모가 내려준 값)에서, 그 값의 "지연된 사본"을 만들어 같은 효과를 낸다<sup class="ref"><a href="#r18">[18]</a></sup>.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가 — 입력 반응성 체감</h4>
+    <p>일부러 무거운 리스트(2,000개 항목, 각 항목마다 인위적 지연 계산)를 필터링한다. "일반 필터링" 탭에서는 타이핑할 때마다 화면 전체가 멈칫거린다(입력창 반영이 늦다). "useTransition 적용" 탭은 입력창 자체는 즉시 반응하고, 무거운 리스트 갱신만 <code>isPending</code> 표시와 함께 살짝 늦게 따라온다.</p>
+    <ul>
+      <li><code>startTransition(() =&gt; setFilter(v))</code> — 리스트 갱신을 낮은 우선순위로.</li>
+      <li><code>isPending</code> — transition이 진행 중임을 화면에 표시.</li>
+      <li>입력 필드의 <code>value</code>는 별도 state로 즉시 갱신 — 이것이 핵심이다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="TransitionDemo.jsx" data-height="400">
+<script type="text/plain" class="pg__src">
+const { useState, useTransition, useMemo } = React;
+
+const BIG_LIST = Array.from({ length: 2000 }, (_, i) => "항목-" + i);
+
+function slowFilter(list, query) {
+  // 의도적으로 무거운 렌더링을 흉내낸다 (각 항목마다 불필요한 반복 계산).
+  const result = [];
+  for (let i = 0; i < list.length; i++) {
+    let x = 0;
+    for (let j = 0; j < 400; j++) x += j; // 인위적 부하
+    if (list[i].includes(query)) result.push(list[i]);
+  }
+  return result;
+}
+
+function App() {
+  const [useTransitionMode, setUseTransitionMode] = useState(true);
+  const [inputValue, setInputValue] = useState("");
+  const [filterValue, setFilterValue] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const filtered = useMemo(() => slowFilter(BIG_LIST, filterValue), [filterValue]);
+
+  function handleChange(e) {
+    const v = e.target.value;
+    setInputValue(v); // 입력창 자체는 항상 즉시(긴급) 갱신
+    if (useTransitionMode) {
+      startTransition(() => setFilterValue(v)); // 리스트 갱신은 낮은 우선순위
+    } else {
+      setFilterValue(v); // 일반 방식: 입력과 리스트 갱신이 한 렌더에 묶여 같이 느려짐
+    }
+  }
+
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={useTransitionMode}
+          onChange={(e) => setUseTransitionMode(e.target.checked)}
+        />{" "}
+        useTransition 사용 (체크 해제하면 일반 방식)
+      </label>
+      <p>
+        <input value={inputValue} onChange={handleChange} placeholder="빠르게 타이핑해보세요 (예: 항목-12)" />
+        {isPending && <span style={{ marginLeft: 8, color: "#e08a1e" }}>리스트 갱신 중…</span>}
+      </p>
+      <p style={{ fontSize: 13, color: "#8892a6" }}>
+        일치 {filtered.length}개 (2,000개 중, 항목당 인위적 지연 포함)
+      </p>
+      <div style={{ maxHeight: 140, overflow: "auto", border: "1px solid #d6dae4", borderRadius: 8, padding: 6 }}>
+        {filtered.slice(0, 60).map((it) => <div key={it}>{it}</div>)}
+      </div>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<div class="note note--info">
+  <span class="note__t">startTransition 단독 사용</span>
+  <code>useTransition</code>이 반환하는 <code>isPending</code>이 필요 없다면, 훅이 아닌 <code>startTransition</code> 함수를 <code>react</code>에서 직접 import해서 컴포넌트 밖에서도 쓸 수 있다<sup class="ref"><a href="#r9">[9]</a></sup>.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-react19-new"><span class="h2num">§9</span>React 19 신규 훅</h2>
+
+<p>
+아래 네 가지는 React 19에서 새로 추가됐다. 플레이그라운드가 React 18 UMD로 동작하는 관계로 여기서는 <b>정적 코드로 개요만</b> 소개한다 — 실제 프로젝트(React 19 + 번들러 환경)에서 확인해라.
+</p>
+
+<h3 id="s-use-hook"><code>use</code></h3>
+<p>
+<span class="t" data-tip="use: Promise나 Context를 인자로 받아 그 값을 '읽는' React 19의 새 API. 다른 훅과 달리 조건문/반복문 안에서도 호출할 수 있다.">use</span>는 Promise를 "언래핑"하거나 Context를 읽는 함수다. 다른 훅과 달리 <b>조건부로 호출 가능</b>하다는 점이 특이하다 — 훅이 아니라 특수 함수로 분류된다<sup class="ref"><a href="#r10">[10]</a></sup>.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>components/Comments.tsx (React 19, 개념 예시)</span></div>
+<pre><code class="language-tsx">import { use } from "react";
+
+function Comments({ commentsPromise }: { commentsPromise: Promise&lt;Comment[]&gt; }) {
+  // use는 Promise가 처리(resolve)될 때까지 컴포넌트를 Suspense로 일시 중단시킨다.
+  const comments = use(commentsPromise);
+  return &lt;ul&gt;{comments.map((c) =&gt; &lt;li key={c.id}&gt;{c.text}&lt;/li&gt;)}&lt;/ul&gt;;
+}
+</code></pre>
+</div>
+
+<h3 id="s-useoptimistic"><code>useOptimistic</code></h3>
+<p>
+<span class="t" data-tip="useOptimistic: 서버 응답을 기다리기 전에 '낙관적으로' 예상 결과를 먼저 화면에 보여주고, 실제 응답이 오면 진짜 값으로 교체하는 훅.">useOptimistic</span>은 서버 요청이 끝나기 전에 예상되는 결과를 먼저 보여준다 — "좋아요" 버튼을 누르면 응답을 기다리지 않고 즉시 하트가 채워지는 UX가 대표적이다<sup class="ref"><a href="#r10">[10]</a></sup>.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>components/LikeButton.tsx (React 19, 개념 예시)</span></div>
+<pre><code class="language-tsx">import { useOptimistic } from "react";
+
+function LikeButton({ likes, onLike }: { likes: number; onLike: () =&gt; Promise&lt;void&gt; }) {
+  const [optimisticLikes, addOptimisticLike] = useOptimistic(
+    likes,
+    (current) =&gt; current + 1
+  );
+
+  async function handleClick() {
+    addOptimisticLike(); // 서버 응답 전에 즉시 +1 표시
+    await onLike();      // 실패 시 React가 이전 값으로 자동 되돌림
+  }
+
+  return &lt;button onClick={handleClick}&gt;좋아요 {optimisticLikes}&lt;/button&gt;;
+}
+</code></pre>
+</div>
+
+<h3 id="s-useactionstate"><code>useActionState</code></h3>
+<p>
+<span class="t" data-tip="useActionState: form action 함수와 상태를 함께 관리하는 훅. [state, formAction, isPending]을 반환하며, 폼 제출 결과(성공/에러)를 상태로 관리하기 편하게 해준다.">useActionState</span>는 폼 제출 같은 "action 함수"의 결과 상태와 진행 여부를 함께 관리한다<sup class="ref"><a href="#r10">[10]</a></sup>.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>components/SignupForm.tsx (React 19, 개념 예시)</span></div>
+<pre><code class="language-tsx">import { useActionState } from "react";
+
+async function signupAction(prevState: { error: string | null }, formData: FormData) {
+  const email = formData.get("email") as string;
+  if (!email.includes("@")) return { error: "이메일 형식이 아닙니다" };
+  await fetch("/api/signup", { method: "POST", body: formData });
+  return { error: null };
+}
+
+function SignupForm() {
+  const [state, formAction, isPending] = useActionState(signupAction, { error: null });
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="email" /&gt;
+      &lt;button disabled={isPending}&gt;가입&lt;/button&gt;
+      {state.error && &lt;p&gt;{state.error}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}
+</code></pre>
+</div>
+
+<h3 id="s-useformstatus"><code>useFormStatus</code></h3>
+<p>
+<span class="t" data-tip="useFormStatus: 부모 &lt;form&gt;의 제출 진행 상태(pending)를 자식 컴포넌트에서 props 없이 읽을 수 있게 해주는 훅. 반드시 form 내부의 자식 컴포넌트에서 호출해야 한다.">useFormStatus</span>는 상위 <code>&lt;form&gt;</code>의 제출 상태를, props로 내려받지 않고 자식 컴포넌트에서 직접 읽는다. 재사용 가능한 "제출 버튼" 컴포넌트를 만들 때 유용하다<sup class="ref"><a href="#r10">[10]</a></sup>.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>components/SubmitButton.tsx (React 19, 개념 예시)</span></div>
+<pre><code class="language-tsx">import { useFormStatus } from "react-dom";
+
+// form 내부에서만 의미가 있다 — form 밖에서는 pending이 항상 false.
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return &lt;button disabled={pending}&gt;{pending ? "제출 중…" : "제출"}&lt;/button&gt;;
+}
+</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-custom-hooks"><span class="h2num">§10</span>커스텀 훅 만들기</h2>
+
+<p>
+커스텀 훅은 "여러 컴포넌트에서 반복되는, 훅을 사용하는 로직"을 함수로 뽑아낸 것이다. 이름이 <code>use</code>로 시작해야 React가 훅 규칙을 적용한다. 기준은 단순하다 — <b>같은 상태/effect 조합을 두 번째로 복사-붙여넣기 하려는 순간</b>이 커스텀 훅으로 뽑을 신호다.
+</p>
+
+<h3 id="s-usetoggle">useToggle</h3>
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>불리언 상태를 뒤집는 로직을 훅으로 뽑았다. <code>toggle()</code>과 명시적으로 값을 지정하는 <code>setValue()</code>를 둘 다 제공한다.</p>
+    <ul>
+      <li><code>useToggle(initial)</code> — <code>[value, toggle, setValue]</code> 반환.</li>
+      <li>모달, 아코디언, 다크모드 스위치 등에서 반복되는 패턴을 하나로 통합.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="useToggle.jsx" data-height="240">
+<script type="text/plain" class="pg__src">
+const { useState, useCallback } = React;
+
+function useToggle(initial = false) {
+  const [value, setValue] = useState(initial);
+  const toggle = useCallback(() => setValue((v) => !v), []);
+  return [value, toggle, setValue];
+}
+
+function App() {
+  const [isOpen, toggleOpen] = useToggle(false);
+  return (
+    <div>
+      <button onClick={toggleOpen}>{isOpen ? "닫기" : "열기"}</button>
+      {isOpen && <p style={{ marginTop: 8 }}>패널이 열렸습니다.</p>}
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-usedebounce">useDebounce</h3>
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>입력값이 바뀔 때마다 즉시가 아니라, 타이핑이 <b>멈춘 뒤 일정 시간</b>이 지나야 반영되는 값을 만든다. 검색어 자동완성처럼 매 타이핑마다 API를 호출하고 싶지 않을 때 쓴다.</p>
+    <ul>
+      <li><code>useDebounce(value, delay)</code> — 내부에서 <code>useEffect</code> + <code>setTimeout</code> + 클린업을 사용.</li>
+      <li>타이핑을 멈추지 않으면 이전 타이머가 계속 클린업되고 새로 설정된다.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="useDebounce.jsx" data-height="280">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id); // 값이 바뀌면 이전 타이머를 취소
+  }, [value, delay]);
+  return debounced;
+}
+
+function App() {
+  const [text, setText] = useState("");
+  const debouncedText = useDebounce(text, 500);
+
+  return (
+    <div>
+      <input value={text} onChange={(e) => setText(e.target.value)} placeholder="빠르게 타이핑해보세요" />
+      <p>실시간 값: {text}</p>
+      <p>500ms 후 반영된 값: <b>{debouncedText}</b></p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-uselocalstorage">useLocalStorage</h3>
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>useState</code>와 똑같이 쓰지만, 값이 <code>localStorage</code>에도 함께 저장된다. 새로고침해도 값이 유지된다(이 페이지를 실제로 새로고침해서 확인해도 좋다).</p>
+    <ul>
+      <li><code>useLocalStorage(key, initial)</code> — 지연 초기화로 최초 1회만 <code>localStorage</code>를 읽는다.</li>
+      <li>값이 바뀔 때마다 <code>useEffect</code>가 <code>localStorage.setItem</code>을 호출.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="useLocalStorage.jsx" data-height="240">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+function useLocalStorage(key, initial) {
+  const [value, setValue] = useState(() => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved !== null ? JSON.parse(saved) : initial;
+    } catch (e) {
+      return initial;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {}
+  }, [key, value]);
+
+  return [value, setValue];
+}
+
+function App() {
+  const [name, setName] = useLocalStorage("ch04-demo-name", "");
+  return (
+    <div>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="이름 입력 (새로고침해도 유지됨)" />
+      <p>저장된 값: {name || "(비어있음)"}</p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-usefetch">useFetch</h3>
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>네트워크 요청의 로딩/에러/데이터 상태를 하나로 관리한다. 실제 서비스에서는 <a href="ch05.html#s-tanstack-query">TanStack Query</a>가 캐싱까지 포함해 이 역할을 대신하지만, 원리를 보기 위해 <code>fetch</code> 기반으로 20줄 내외로 직접 구현한다. 여기서는 외부 API 대신 타이머로 흉내낸 가짜 요청을 쓴다.</p>
+    <ul>
+      <li><code>AbortController</code> — 컴포넌트가 사라지거나 url이 바뀌면 이전 요청을 취소해 <span class="t" data-tip="레이스 컨디션(race condition): 먼저 보낸 요청의 응답이 나중에 도착해, 최신 요청의 결과를 덮어써버리는 문제.">레이스 컨디션</span>을 막는다.</li>
+      <li><code>cancelled</code> 플래그 — 클린업 이후 도착한 응답을 상태에 반영하지 않도록 방어.</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="useFetch.jsx" data-height="300">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+// 실제 fetch 대신 네트워크 지연을 흉내내는 가짜 API
+function fakeApi(url, signal) {
+  return new Promise((resolve, reject) => {
+    const id = setTimeout(() => resolve({ url, data: "응답: " + url }), 800);
+    signal.addEventListener("abort", () => {
+      clearTimeout(id);
+      reject(new DOMException("Aborted", "AbortError"));
+    });
+  });
+}
+
+function useFetch(url) {
+  const [state, setState] = useState({ loading: true, data: null, error: null });
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+    setState({ loading: true, data: null, error: null });
+
+    fakeApi(url, controller.signal)
+      .then((res) => { if (!cancelled) setState({ loading: false, data: res.data, error: null }); })
+      .catch((err) => {
+        if (!cancelled && err.name !== "AbortError") {
+          setState({ loading: false, data: null, error: err.message });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort(); // 언마운트되거나 url이 바뀌면 이전 요청을 취소
+    };
+  }, [url]);
+
+  return state;
+}
+
+function App() {
+  const [endpoint, setEndpoint] = useState("/api/users");
+  const { loading, data, error } = useFetch(endpoint);
+
+  return (
+    <div>
+      <button onClick={() => setEndpoint("/api/users")}>/api/users 요청</button>{" "}
+      <button onClick={() => setEndpoint("/api/posts")}>/api/posts 요청</button>
+      <p>
+        {loading ? "로딩 중…" : error ? "에러: " + error : "데이터: " + data}
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-react-compiler"><span class="h2num">§11</span>React Compiler</h2>
+
+<p>
+<span class="t" data-tip="React Compiler: 빌드 타임에 컴포넌트 코드를 분석해, useMemo/useCallback/React.memo를 손으로 쓰지 않아도 자동으로 메모이제이션을 적용해주는 컴파일러.">React Compiler</span>는 빌드 단계에서 컴포넌트와 훅 코드를 분석해, 값이 실제로 바뀌지 않으면 재계산을 건너뛰도록 자동으로 메모이제이션 코드를 삽입한다. React 규칙(§1의 두 규칙, 순수 함수로서의 컴포넌트)을 지키는 코드를 전제로 동작한다<sup class="ref"><a href="#r11">[11]</a></sup>.
+</p>
+
+<h3 id="s-compiler-scope">무엇을 자동화하는가</h3>
+<div class="grid grid--2">
+  <div class="card">
+    <div class="card__title">자동화되는 것</div>
+    <p>§6에서 손으로 작성한 <code>useMemo</code>/<code>useCallback</code>/<code>React.memo</code> 패턴을 컴파일러가 정적 분석으로 유추해 자동 삽입한다.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">여전히 손으로 써야 하는 것</div>
+    <p>§4의 <code>useEffect</code>(외부 시스템 동기화), §8의 <code>useTransition</code>/<code>useDeferredValue</code>(렌더 우선순위 제어)는 컴파일러의 대상이 아니다 — "무엇을, 언제" 실행할지는 여전히 개발자가 결정한다.</p>
+  </div>
+</div>
+
+<div class="note note--spec">
+  <span class="note__t">사실 확인</span>
+  React Compiler는 규칙을 위반하는 코드(순수하지 않은 렌더, 조건부 훅 호출)를 감지하면 해당 컴포넌트에는 최적화를 적용하지 않고 건너뛴다. 즉 §1의 훅 규칙을 지키는 것이 컴파일러 최적화의 전제 조건이다<sup class="ref"><a href="#r11">[11]</a></sup>. 이 챕터 작성 시점 기준 공식 문서가 안정적으로 배포되는 최신 상태를 따랐으며, 세부 옵션명은 프로젝트 도입 시 공식 문서로 재확인해라.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s-checklist"><span class="h2num">§12</span>이해도 점검</h2>
+
+<ul class="check">
+  <li><input type="checkbox">훅이 "호출 순서"로 식별된다는 것을 설명하고, 왜 조건문 안에서 호출하면 안 되는지 말할 수 있다.</li>
+  <li><input type="checkbox"><code>useState</code>의 지연 초기화와 함수형 업데이트를 언제 써야 하는지 안다.</li>
+  <li><input type="checkbox"><code>useState</code>와 <code>useReducer</code> 중 어느 것을 쓸지 표(§2)의 기준으로 판단할 수 있다.</li>
+  <li><input type="checkbox"><code>useRef</code>가 리렌더링을 유발하지 않는 이유와, DOM 참조 용도를 구분해 설명할 수 있다.</li>
+  <li><input type="checkbox">React 19의 ref-as-prop과 <code>forwardRef</code>의 차이를 안다.</li>
+  <li><input type="checkbox"><code>useEffect</code>가 필요 없는 상황(react.dev 기준)을 최소 2가지 말할 수 있다.</li>
+  <li><input type="checkbox">클린업 함수가 호출되는 두 시점을 안다.</li>
+  <li><input type="checkbox">무한 루프의 4가지 원인 중 최소 2가지를 원인-해결 짝으로 설명할 수 있다.</li>
+  <li><input type="checkbox">Context 값이 바뀌면 어떤 컴포넌트가 리렌더링되는지, 그리고 state/dispatch 분리가 왜 도움이 되는지 안다.</li>
+  <li><input type="checkbox">참조 동일성 개념으로 <code>useMemo</code>/<code>useCallback</code>/<code>React.memo</code>가 왜 필요한지 설명할 수 있다.</li>
+  <li><input type="checkbox">"부모가 렌더되면 자식도 렌더된다"가 DOM 변경이 아니라 함수 재호출을 의미한다는 것을 안다.</li>
+  <li><input type="checkbox">children prop으로 렌더를 차단하는 패턴을 이해했다.</li>
+  <li><input type="checkbox"><code>useTransition</code>이 실제로 무엇의 우선순위를 조정하는지 설명할 수 있다.</li>
+  <li><input type="checkbox">React 19의 <code>use</code>, <code>useOptimistic</code>, <code>useActionState</code>, <code>useFormStatus</code>를 언제 쓰는지 개요를 안다.</li>
+  <li><input type="checkbox">React Compiler가 자동화하는 범위와, 여전히 손으로 판단해야 하는 부분을 구분할 수 있다.</li>
+</ul>
+
+<!-- ============================================================ -->
+<section class="refs">
+  <h2 id="s-refs">참고 문헌</h2>
+  <ol>
+    <li id="r1"><span class="src">React</span> — "Rules of Hooks". <a href="https://react.dev/reference/rules/rules-of-hooks" target="_blank" rel="noopener">react.dev/reference/rules/rules-of-hooks</a> (2026-08 확인)</li>
+    <li id="r2"><span class="src">React</span> — "Rules of React". <a href="https://react.dev/reference/rules" target="_blank" rel="noopener">react.dev/reference/rules</a> (2026-08 확인)</li>
+    <li id="r3"><span class="src">React</span> — "useState". <a href="https://react.dev/reference/react/useState" target="_blank" rel="noopener">react.dev/reference/react/useState</a> (2026-08 확인)</li>
+    <li id="r4"><span class="src">React</span> — "React 19 Upgrade Guide — ref as a prop". <a href="https://react.dev/blog/2024/04/25/react-19-upgrade-guide" target="_blank" rel="noopener">react.dev/blog/2024/04/25/react-19-upgrade-guide</a> (2026-08 확인)</li>
+    <li id="r5"><span class="src">React</span> — "useImperativeHandle". <a href="https://react.dev/reference/react/useImperativeHandle" target="_blank" rel="noopener">react.dev/reference/react/useImperativeHandle</a> (2026-08 확인)</li>
+    <li id="r6"><span class="src">React</span> — "You Might Not Need an Effect". <a href="https://react.dev/learn/you-might-not-need-an-effect" target="_blank" rel="noopener">react.dev/learn/you-might-not-need-an-effect</a> (2026-08 확인)</li>
+    <li id="r7"><span class="src">React</span> — "useEffect". <a href="https://react.dev/reference/react/useEffect" target="_blank" rel="noopener">react.dev/reference/react/useEffect</a> (2026-08 확인)</li>
+    <li id="r8"><span class="src">React</span> — "useMemo". <a href="https://react.dev/reference/react/useMemo" target="_blank" rel="noopener">react.dev/reference/react/useMemo</a> (2026-08 확인)</li>
+    <li id="r9"><span class="src">React</span> — "startTransition". <a href="https://react.dev/reference/react/startTransition" target="_blank" rel="noopener">react.dev/reference/react/startTransition</a> (2026-08 확인)</li>
+    <li id="r10"><span class="src">React</span> — "React 19 Upgrade Guide — New hooks". <a href="https://react.dev/blog/2024/04/25/react-19-upgrade-guide" target="_blank" rel="noopener">react.dev/blog/2024/04/25/react-19-upgrade-guide</a> (2026-08 확인)</li>
+    <li id="r11"><span class="src">React</span> — "React Compiler". <a href="https://react.dev/learn/react-compiler" target="_blank" rel="noopener">react.dev/learn/react-compiler</a> (2026-08 확인)</li>
+    <li id="r12"><span class="src">React</span> — "useReducer". <a href="https://react.dev/reference/react/useReducer" target="_blank" rel="noopener">react.dev/reference/react/useReducer</a> (2026-08 확인)</li>
+    <li id="r13"><span class="src">React</span> — "useRef". <a href="https://react.dev/reference/react/useRef" target="_blank" rel="noopener">react.dev/reference/react/useRef</a> (2026-08 확인)</li>
+    <li id="r14"><span class="src">React</span> — "useContext". <a href="https://react.dev/reference/react/useContext" target="_blank" rel="noopener">react.dev/reference/react/useContext</a> (2026-08 확인)</li>
+    <li id="r15"><span class="src">React</span> — "useCallback". <a href="https://react.dev/reference/react/useCallback" target="_blank" rel="noopener">react.dev/reference/react/useCallback</a> (2026-08 확인)</li>
+    <li id="r16"><span class="src">React</span> — "memo". <a href="https://react.dev/reference/react/memo" target="_blank" rel="noopener">react.dev/reference/react/memo</a> (2026-08 확인)</li>
+    <li id="r17"><span class="src">React</span> — "useTransition". <a href="https://react.dev/reference/react/useTransition" target="_blank" rel="noopener">react.dev/reference/react/useTransition</a> (2026-08 확인)</li>
+    <li id="r18"><span class="src">React</span> — "useDeferredValue". <a href="https://react.dev/reference/react/useDeferredValue" target="_blank" rel="noopener">react.dev/reference/react/useDeferredValue</a> (2026-08 확인)</li>
+  </ol>
+</section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

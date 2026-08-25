@@ -1,0 +1,1238 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH01 · JavaScript 동작 원리 — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="01">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">CHAPTER 01</div>
+    <h1>JavaScript 동작 원리</h1>
+    <p>브라우저는 HTML을 읽다가 스크립트를 만나면 무슨 일을 하는가. 값을 복사했는데 왜 원본까지 같이 바뀌는가. 클로저는 왜 메모리에 계속 남아있는가. <code>setTimeout(fn, 0)</code>과 <code>Promise.then</code>은 왜 실행 순서가 다른가. 이 챕터는 이후 모든 챕터(React, TypeScript, 상태 관리)가 딛고 서는 바닥을 다진다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">JavaScript 원리</span>
+      <span class="pill">클로저</span>
+      <span class="pill">이벤트 루프</span>
+      <span class="pill">비동기</span>
+      <span class="pill">스코프</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+
+      <p class="lead">이 챕터에서 답할 질문: 브라우저는 HTML을 파싱하다가 <code>&lt;script&gt;</code>를 만나면 무슨 순서로 처리하는가? 원시 타입과 참조 타입은 메모리에 어떻게 다르게 저장되는가? <code>var</code>/<code>let</code>/<code>const</code>는 왜 호이스팅 동작이 다른가? 클로저는 정확히 무엇이고 왜 실무에서 쓰는가? <code>this</code>는 왜 호출할 때마다 값이 바뀌는가? 콜 스택이 비었을 때 브라우저는 어떤 순서로 대기 중인 작업을 처리하는가?</p>
+
+      <!-- ================= §1 ================= -->
+      <h2 id="s-parsing"><span class="h2num">§1</span>브라우저에서 JS가 실행되기까지</h2>
+
+      <h3 id="s-parsing-html">HTML 파싱과 DOM</h3>
+      <p>브라우저는 서버가 보낸 HTML을 <span class="t" data-tip="텍스트를 컴퓨터가 이해할 수 있는 구조(트리)로 분석하는 과정. HTML 파싱은 태그를 읽어 DOM 트리를 만드는 것이다.">파싱</span>하면서 위에서 아래로 순서대로 읽는다. 태그를 만날 때마다 노드를 만들어 <span class="t" data-tip="HTML 문서를 브라우저가 메모리에 트리 구조로 표현한 것. JS로 이 트리를 읽고 바꾸면 화면이 바뀐다.">DOM</span>(Document Object Model) 트리에 붙인다. 이 파서는 기본적으로 <b>동기적</b>이라서, 파싱 도중 무언가가 파서를 멈추게 하면 그 순간부터 화면에 아무것도 더 그려지지 않는다.</p>
+      <p>문제는 <code>&lt;script&gt;</code> 태그다. 스크립트는 <code>document.write</code>로 DOM을 바꿀 수도 있기 때문에, 브라우저는 안전하게 스크립트를 실행할 때까지 파싱을 잠시 멈춰야 한다. 이것이 "스크립트는 렌더링을 막을 수 있다"는 말의 정체다.</p>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart TD
+  A["HTML 응답 도착"] --> B["HTML 파서가 위에서부터 순서대로 읽는다"]
+  B --> C["텍스트를 토큰화해 DOM 노드로 변환"]
+  C --> D{"&lt;script&gt; 태그를 만나면?"}
+  D -->|"속성 없음"| E["파싱을 멈추고 즉시 다운로드 + 실행"]
+  D -->|"defer"| F["파싱은 계속, 실행은 DOM 완성 직후로 예약"]
+  D -->|"async"| G["파싱과 병행 다운로드, 도착 즉시 파싱 중단 후 실행"]
+  E --> H["파싱 재개"]
+  F --> H
+  G --> H
+  H --> I["DOM 트리 완성"]
+  I --> J["defer로 예약된 스크립트를 등록 순서대로 실행"]
+  J --> K["DOMContentLoaded 이벤트 발생"]
+  K --> L["이미지 등 남은 리소스 로딩 완료"]
+  L --> M["load 이벤트 발생"]
+        </pre>
+        <div class="fig__cap"><b>그림 1.</b> HTML 파싱 중 스크립트 종류에 따른 처리 흐름. <span class="muted">출처: WHATWG HTML Standard<sup class="ref"><a href="#r1">[1]</a></sup></span></div>
+      </div>
+
+      <h3 id="s-parsing-script">스크립트 로드: 일반 / defer / async</h3>
+      <p>스크립트 태그에 속성을 어떻게 붙이느냐에 따라 "언제 다운로드하고 언제 실행하는지"가 완전히 달라진다.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>방식</th><th>다운로드 시점</th><th>실행 시점</th><th>파싱을 막는가</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;script src="a.js"&gt;</code></td><td>만나는 즉시</td><td>다운로드 끝나자마자 바로</td><td>다운로드+실행 동안 <b>막는다</b></td></tr>
+            <tr><td><code>&lt;script defer src="a.js"&gt;</code></td><td>파싱과 동시에(병행)</td><td>DOM 파싱이 끝난 직후, <b>문서 등장 순서대로</b></td><td>안 막는다</td></tr>
+            <tr><td><code>&lt;script async src="a.js"&gt;</code></td><td>파싱과 동시에(병행)</td><td>다운로드가 끝나는 즉시(순서 보장 없음)</td><td>실행되는 짧은 순간만 막는다</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="fig">
+        <svg viewBox="0 0 860 306" role="img" aria-labelledby="fig2title fig2desc" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+          <title id="fig2title">일반 script · defer · async 의 실행 타이밍 비교</title>
+          <desc id="fig2desc">가로축은 시간이다. 일반 script는 다운로드와 실행이 끝날 때까지 HTML 파싱을 멈추므로 파싱 완료가 가장 늦다. defer는 파싱과 병렬로 내려받고 파싱이 끝난 뒤 실행한다. async는 병렬로 내려받되 다운로드가 끝나는 즉시 실행하며 그 구간만 파싱을 멈춘다.</desc>
+
+          <!-- 범례 -->
+          <g font-size="11.5" fill="var(--fg-soft)">
+            <rect x="120" y="8" width="12" height="12" rx="2" fill="var(--info)"></rect>
+            <text x="138" y="18">HTML 파싱</text>
+            <rect x="232" y="8" width="12" height="12" rx="2" fill="var(--accent)" opacity="0.55"></rect>
+            <text x="250" y="18">스크립트 다운로드(병렬)</text>
+            <rect x="404" y="8" width="12" height="12" rx="2" fill="var(--danger)"></rect>
+            <text x="422" y="18">실행 — 파싱 멈춤</text>
+            <rect x="540" y="8" width="12" height="12" rx="2" fill="var(--ok)"></rect>
+            <text x="558" y="18">실행 — 파싱 안 멈춤</text>
+          </g>
+
+          <!-- 비교 기준선 ① 파싱 완료(defer·async) / ② 파싱 완료(일반) -->
+          <g stroke="var(--fg-mute)" stroke-dasharray="4 4" opacity="0.45">
+            <line x1="520" y1="44" x2="520" y2="258"></line>
+            <line x1="640" y1="44" x2="640" y2="258"></line>
+          </g>
+
+          <!-- ROW 1 : 일반 script -->
+          <g>
+            <text x="108" y="69" text-anchor="end" font-size="12.5" fill="var(--fg)">일반 &lt;script&gt;</text>
+            <rect x="120" y="54" width="140" height="22" fill="var(--info)"></rect>
+            <rect x="260" y="54" width="170" height="22" fill="var(--danger)"></rect>
+            <rect x="430" y="54" width="210" height="22" fill="var(--info)"></rect>
+            <text x="345" y="69" text-anchor="middle" font-size="10.5" fill="#ffffff">다운로드 + 실행</text>
+            <rect x="260" y="81" width="120" height="7" rx="3" fill="var(--accent)" opacity="0.55"></rect>
+            <text x="648" y="69" font-size="10.5" fill="var(--fg-mute)">② 파싱 완료 (가장 늦다)</text>
+          </g>
+
+          <!-- ROW 2 : defer -->
+          <g>
+            <text x="108" y="149" text-anchor="end" font-size="12.5" fill="var(--fg)">defer</text>
+            <rect x="120" y="134" width="400" height="22" fill="var(--info)"></rect>
+            <rect x="520" y="134" width="70" height="22" fill="var(--ok)"></rect>
+            <text x="555" y="149" text-anchor="middle" font-size="10.5" fill="#05372c">실행</text>
+            <rect x="175" y="161" width="170" height="7" rx="3" fill="var(--accent)" opacity="0.55"></rect>
+            <text x="598" y="146" font-size="10" fill="var(--fg-mute)">① 파싱 완료 → 문서 순서대로 실행</text>
+            <text x="598" y="159" font-size="10" fill="var(--fg-mute)">→ DOMContentLoaded</text>
+          </g>
+
+          <!-- ROW 3 : async -->
+          <g>
+            <text x="108" y="229" text-anchor="end" font-size="12.5" fill="var(--fg)">async</text>
+            <rect x="120" y="214" width="210" height="22" fill="var(--info)"></rect>
+            <rect x="330" y="214" width="60" height="22" fill="var(--danger)"></rect>
+            <text x="360" y="229" text-anchor="middle" font-size="10" fill="#ffffff">실행</text>
+            <rect x="390" y="214" width="130" height="22" fill="var(--info)"></rect>
+            <rect x="150" y="241" width="180" height="7" rx="3" fill="var(--accent)" opacity="0.55"></rect>
+            <text x="528" y="229" font-size="10" fill="var(--fg-mute)">① 파싱 완료 (실행은 이미 끝난 뒤)</text>
+          </g>
+
+          <!-- 시간 축 -->
+          <line x1="120" y1="268" x2="700" y2="268" stroke="var(--line)" stroke-width="1.5"></line>
+          <polygon points="700,264 710,268 700,272" fill="var(--line)"></polygon>
+          <text x="120" y="292" font-size="11" fill="var(--fg-mute)">시간 →</text>
+          <g>
+            <circle cx="520" cy="268" r="9" fill="var(--accent)"></circle>
+            <text x="520" y="271.5" text-anchor="middle" font-size="10.5" fill="#ffffff">1</text>
+            <circle cx="640" cy="268" r="9" fill="var(--danger)"></circle>
+            <text x="640" y="271.5" text-anchor="middle" font-size="10.5" fill="#ffffff">2</text>
+          </g>
+        </svg>
+        <div class="fig__cap"><b>그림 2.</b> 같은 페이지를 세 방식으로 불러왔을 때의 시간 흐름.
+          <b>일반 <code>&lt;script&gt;</code></b>는 태그를 만나는 순간 다운로드와 실행이 끝날 때까지 파싱을 멈추므로, 파싱 완료가 <b>②</b>까지 밀린다.
+          <b>defer</b>는 파싱과 <b>동시에</b> 내려받고 파싱이 끝난 시점 <b>①</b> 이후 문서 등장 순서대로 실행한 뒤 <code>DOMContentLoaded</code>가 발생한다.
+          <b>async</b>도 병렬로 내려받지만 다운로드가 끝나는 <b>즉시</b> 실행되어(순서 보장 없음) 그 짧은 구간만 파싱을 멈춘다.
+          ①과 ②의 간격이 곧 일반 <code>&lt;script&gt;</code>가 만드는 지연이다.
+          <span class="muted">출처: WHATWG HTML Standard<sup class="ref"><a href="#r1">[1]</a></sup></span></div>
+      </div>
+
+      <div class="note note--tip">
+        <span class="note__t">실무 기준</span>
+        Vite/Webpack 같은 번들러가 만드는 <code>&lt;script type="module"&gt;</code>은 기본적으로 <code>defer</code>와 같은 순서 보장을 갖는다. 그래서 최신 프론트엔드 프로젝트에서는 스크립트 로드 순서를 직접 고민할 일이 거의 없다. 다만 원리를 모르면 "왜 내 서드파티 스크립트가 body 태그를 못 찾는지" 같은 문제를 디버깅할 수 없다.
+      </div>
+
+      <h3 id="s-parsing-cssom">CSS가 JS 실행을 막는 경우</h3>
+      <p>HTML 파서는 <code>&lt;link rel="stylesheet"&gt;</code>를 만나도 파싱을 멈추지 않고 계속 진행한다(스타일시트는 화면을 그릴 때만 필요하니까). 하지만 그 뒤에 일반 <code>&lt;script&gt;</code>가 나오면 이야기가 다르다. 스크립트는 <code>getComputedStyle()</code>처럼 스타일 값을 즉시 읽을 수도 있기 때문에, 브라우저는 스크립트를 실행하기 전에 그 앞의 스타일시트가 <span class="t" data-tip="CSS 규칙을 파싱해 브라우저가 이해하는 트리 구조로 만든 것. DOM과 합쳐져 렌더 트리가 된다.">CSSOM</span> 생성을 끝낼 때까지 기다린다. 결과적으로 "스타일시트 로딩이 스크립트 실행을 지연시킬 수 있다"는 것이 실무에서 자주 놓치는 함정이다.</p>
+      <div class="note note--warn">
+        <span class="note__t">실무 함정</span>
+        <code>&lt;head&gt;</code>에 무거운 CSS 파일을 넣고 그 바로 뒤에 일반 <code>&lt;script&gt;</code>를 두면, 스크립트는 CSS 다운로드+파싱이 끝날 때까지 기다렸다가 실행된다. <code>defer</code>를 쓰면 어차피 DOM 파싱이 끝난 뒤 실행되므로 이 문제에서 자유롭다.
+      </div>
+
+      <h3 id="s-parsing-order">정리: DOMContentLoaded와 load</h3>
+      <p><code>DOMContentLoaded</code>는 DOM 트리와 defer 스크립트 실행까지 끝난 시점에 발생하고, <code>load</code>는 이미지·폰트 같은 모든 리소스까지 다 받아온 뒤에 발생한다. React 같은 라이브러리가 "DOM이 준비되면" 마운트를 시작할 수 있는 것도 이 순서 보장 덕분이다.</p>
+
+      <!-- ================= §2 ================= -->
+      <h2 id="s-values-types"><span class="h2num">§2</span>값과 타입</h2>
+
+      <h3 id="s-primitive-reference">원시 타입 vs 참조 타입</h3>
+      <p>JS의 모든 값은 <span class="t" data-tip="값 자체가 변수에 저장되는 타입. string, number, boolean, undefined, null, symbol, bigint 7종이 있다.">원시 타입(primitive)</span> 아니면 <span class="t" data-tip="실제 값은 힙에 저장되고 변수에는 그 위치(주소, 참조)만 저장되는 타입. object, array, function이 여기 속한다.">참조 타입(reference)</span> 둘 중 하나다.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>타입</th><th>예시</th><th><code>typeof</code> 결과</th></tr></thead>
+          <tbody>
+            <tr><td>string</td><td><code>"hi"</code></td><td><code>"string"</code></td></tr>
+            <tr><td>number</td><td><code>42</code>, <code>NaN</code></td><td><code>"number"</code></td></tr>
+            <tr><td>boolean</td><td><code>true</code></td><td><code>"boolean"</code></td></tr>
+            <tr><td>undefined</td><td>값을 할당하지 않은 변수</td><td><code>"undefined"</code></td></tr>
+            <tr><td>null</td><td>"의도적으로 비어있음"</td><td><code>"object"</code> (역사적 버그)</td></tr>
+            <tr><td>symbol</td><td><code>Symbol("id")</code></td><td><code>"symbol"</code></td></tr>
+            <tr><td>bigint</td><td><code>10n</code></td><td><code>"bigint"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>object, array, function은 전부 참조 타입이다. 이 둘의 차이는 눈으로 보이지 않지만, 메모리 구조를 보면 왜 "복사했는데 원본까지 바뀌는" 버그가 생기는지 명확해진다.</p>
+      <div class="note note--info">
+        <span class="note__t">그런데 왜 "hi".length가 되지?</span>
+        문자열은 분명 원시 타입인데 <code>.length</code>나 <code>.toUpperCase()</code> 같은 메서드를 쓸 수 있다. JS 엔진이 <code>"hi".length</code>를 실행하는 순간 잠깐 <code>String</code> 래퍼 객체로 감쌌다가(오토박싱, autoboxing) 메서드 호출이 끝나면 즉시 버린다. 원시값 자체가 객체로 바뀌는 것은 아니다.
+      </div>
+
+      <div class="fig">
+        <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig3title" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+          <title id="fig3title">스택과 힙 메모리 구조</title>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+            </marker>
+          </defs>
+          <rect x="20" y="20" width="280" height="260" rx="14" fill="none" stroke="var(--line)"></rect>
+          <text x="36" y="46" font-size="14" font-weight="700" fill="var(--fg)">콜 스택 (Stack)</text>
+          <text x="40" y="90" font-size="13" fill="var(--fg-soft)">a = 10</text>
+          <text x="40" y="120" font-size="13" fill="var(--fg-soft)">b = 10  (a의 값을 복사)</text>
+          <text x="40" y="160" font-size="13" fill="var(--fg-soft)">user  ──●</text>
+          <text x="40" y="190" font-size="13" fill="var(--fg-soft)">user2 ──●</text>
+          <circle cx="160" cy="156" r="4" fill="var(--accent)"></circle>
+          <circle cx="164" cy="186" r="4" fill="var(--accent)"></circle>
+          <path d="M164,156 C260,156 320,190 380,190" fill="none" stroke="var(--accent)" marker-end="url(#arrow)"></path>
+          <path d="M168,186 C300,186 330,190 380,196" fill="none" stroke="var(--accent)" marker-end="url(#arrow)"></path>
+          <rect x="380" y="150" width="220" height="90" rx="14" fill="var(--accent-weak)" stroke="var(--accent-line)"></rect>
+          <text x="396" y="176" font-size="14" font-weight="700" fill="var(--fg)">힙 (Heap)</text>
+          <text x="396" y="204" font-size="12.5" fill="var(--fg-soft)">{ name: "Kim",</text>
+          <text x="410" y="222" font-size="12.5" fill="var(--fg-soft)">age: 28 }</text>
+        </svg>
+        <div class="fig__cap"><b>그림 3.</b> a, b는 스택에 독립된 값으로 저장되지만, user와 user2는 같은 힙 객체를 가리키는 참조(주소)를 복사한 것이라 하나를 바꾸면 다른 쪽도 바뀐 것처럼 보인다.</div>
+      </div>
+
+      <h3 id="s-value-vs-reference-copy">값 복사 vs 참조 복사</h3>
+      <p>원시 타입을 다른 변수에 대입하면 <b>값 자체</b>가 새로 복사되어 서로 독립적이다. 반면 객체를 대입하면 <b>참조(주소)</b>만 복사되어 두 변수가 같은 객체를 가리키게 된다. "얕은 복사인 줄 알았는데 원본이 바뀌었다"는 버그는 대부분 이 원리를 몰라서 생긴다.</p>
+
+      <h3 id="s-equality">=== vs ==, NaN, null vs undefined</h3>
+      <p><code>===</code>(일치 연산자)는 타입까지 비교하고, <code>==</code>(동등 연산자)는 타입이 다르면 먼저 변환한 뒤 비교한다<sup class="ref"><a href="#r2">[2]</a></sup>. 실무에서는 예측 가능성 때문에 <code>===</code>를 기본으로 쓴다.</p>
+      <p><span class="t" data-tip="Not a Number. 숫자 연산이 실패했을 때 나오는 특수 숫자 값. NaN === NaN은 항상 false다.">NaN</span>은 IEEE 754 스펙상 자기 자신과도 같지 않다. 그래서 <code>NaN === NaN</code>은 <code>false</code>이고, NaN을 검사하려면 <code>Number.isNaN()</code>을 써야 한다<sup class="ref"><a href="#r3">[3]</a></sup>.</p>
+      <p><code>undefined</code>는 "값을 할당한 적이 없음", <code>null</code>은 "의도적으로 비웠음"을 뜻한다. 관례상 <code>null</code>은 개발자가 직접 대입하고, <code>undefined</code>는 JS 엔진이 자동으로 부여한다(선언만 하고 초기화 안 한 변수, 없는 프로퍼티 등).</p>
+      <div class="note note--info">
+        <span class="note__t">참고: Object.is()</span>
+        <code>===</code>도 완벽하진 않다. <code>Object.is(NaN, NaN)</code>은 <code>true</code>(===는 false), <code>Object.is(0, -0)</code>은 <code>false</code>(===는 true)를 반환한다 — 부호 있는 0과 NaN을 정확히 구분해야 하는 드문 경우에만 쓴다. 일반적인 비교는 여전히 <code>===</code>가 기본이다.
+      </div>
+
+      <h3 id="s-copy-deep-shallow">얕은 복사 vs 깊은 복사</h3>
+      <p><span class="t" data-tip="객체의 최상위 속성만 새로 복사하고, 내부에 중첩된 객체는 참조를 그대로 공유하는 복사 방식.">얕은 복사</span>(스프레드 <code>{...obj}</code>, <code>Object.assign</code>)는 1단계 속성만 새로 복사한다. 중첩된 객체가 있으면 그 내부는 여전히 원본과 같은 참조를 공유한다. 완전히 독립된 사본이 필요하면 <span class="t" data-tip="중첩된 객체까지 모두 재귀적으로 새로 복사해 원본과 완전히 독립적으로 만드는 복사 방식.">깊은 복사</span>가 필요하고, 브라우저 내장 <code>structuredClone()</code>이 표준적인 방법이다<sup class="ref"><a href="#r4">[4]</a></sup>.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <p>아래 코드를 왼쪽부터 순서대로 읽으면서 예측한 뒤 ▶ 실행으로 확인한다.</p>
+          <ul>
+            <li><code>b = a</code> — 숫자는 값이 복사되어 서로 독립적이다.</li>
+            <li><code>user2 = user</code> — 객체는 참조가 복사되어 하나를 바꾸면 둘 다 바뀐다.</li>
+            <li><code>Number.isNaN</code> — <code>NaN === NaN</code>이 항상 거짓이기 때문에 필요하다.</li>
+            <li><code>{...original}</code> — 얕은 복사라 중첩 객체(<code>address</code>)는 공유된다.</li>
+            <li><code>structuredClone</code> — 중첩까지 완전히 새로 복사하는 깊은 복사다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="value-vs-reference.js" data-height="320">
+<script type="text/plain" class="pg__src">
+// 1) 원시 타입: 값 자체가 복사된다
+let a = 10;
+let b = a; // b는 a의 '값'을 복사
+b = 20;
+console.log('a:', a, '/ b:', b); // a는 그대로 10
+
+// 2) 참조 타입: 힙 주소(참조)가 복사된다
+let user = { name: 'Kim', age: 28 };
+let user2 = user; // 같은 객체를 가리키는 참조를 복사
+user2.age = 29;
+console.log('user.age:', user.age); // 29 -- user도 같이 바뀐다!
+
+// 3) === vs ==
+console.log(1 === '1', 1 == '1'); // false true
+
+// 4) NaN은 자기 자신과도 다르다
+console.log(NaN === NaN); // false
+console.log(Number.isNaN(NaN)); // true
+
+// 5) null vs undefined
+let notAssigned;
+let emptyOnPurpose = null;
+console.log(typeof notAssigned, typeof emptyOnPurpose);
+console.log(notAssigned == emptyOnPurpose);  // true
+console.log(notAssigned === emptyOnPurpose); // false
+
+// 6) 얕은 복사 vs 깊은 복사
+let original = { name: 'Kim', address: { city: 'Seoul' } };
+let shallow = { ...original };
+shallow.address.city = 'Busan';
+console.log('원본 city (얕은 복사 후):', original.address.city); // 'Busan'!
+
+let deep = structuredClone(original);
+deep.address.city = 'Incheon';
+console.log('원본 city (깊은 복사 후):', original.address.city); // 여전히 'Busan'
+</script>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>const</code>로 선언한 배열/객체를 "상수라서 안전하다"고 착각하는 경우가 많다. <code>const</code>는 <b>재할당</b>만 막을 뿐, 객체 내부 속성 변경은 막지 않는다. 완전히 못 바꾸게 하려면 <code>Object.freeze()</code>가 필요하다(단, 얕은 freeze).
+      </div>
+
+      <h3 id="s-coercion">타입 변환(coercion)</h3>
+      <p>JS는 타입이 맞지 않는 연산을 만나면 조용히 값을 다른 타입으로 바꾼 뒤 계속 진행한다. ECMA-262 스펙은 이 과정을 <code>ToNumber</code>, <code>ToString</code>, <code>ToBoolean</code> 같은 내부 변환 규칙(추상 연산)으로 정의한다<sup class="ref"><a href="#r19">[19]</a></sup>. 실무에서 버그를 만드는 대표적인 규칙 두 가지만 기억하면 된다: <code>+</code>는 피연산자 중 하나라도 문자열이면 <b>문자열 이어붙이기</b>로 동작하고, 그 외 산술 연산자(<code>-</code>, <code>*</code>, <code>/</code>)는 항상 <b>숫자로 변환</b>해서 계산한다.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>표현식</th><th>결과</th><th>이유</th></tr></thead>
+          <tbody>
+            <tr><td><code>1 + '2'</code></td><td><code>'12'</code></td><td><code>+</code>에서 문자열이 하나라도 있으면 이어붙이기</td></tr>
+            <tr><td><code>1 - '2'</code></td><td><code>-1</code></td><td><code>-</code>는 항상 숫자로 변환</td></tr>
+            <tr><td><code>'5' * '2'</code></td><td><code>10</code></td><td>산술 연산자는 숫자로 강제 변환</td></tr>
+            <tr><td><code>[] + []</code></td><td><code>''</code></td><td>배열이 먼저 문자열로 변환된 뒤 이어붙이기</td></tr>
+            <tr><td><code>Boolean('')</code></td><td><code>false</code></td><td>falsy 값</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>falsy 값(<code>Boolean()</code>으로 변환하면 <code>false</code>가 되는 값)은 딱 8개뿐이다: <code>false</code>, <code>0</code>, <code>-0</code>, <code>0n</code>, <code>""</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>. 이 목록 밖의 모든 값(빈 객체 <code>{}</code>, 빈 배열 <code>[]</code> 포함)은 truthy다.</p>
+
+      <h3 id="s-symbol-bigint">symbol과 bigint는 언제 쓰나</h3>
+      <p>나머지 5가지 원시 타입에 비해 <code>symbol</code>과 <code>bigint</code>는 등장 빈도가 낮지만 용도가 뚜렷하다. <code>Symbol()</code>은 호출할 때마다 <b>세상에 단 하나뿐인 값</b>을 만든다 — 객체 프로퍼티 키가 다른 코드와 절대 충돌하지 않아야 할 때(라이브러리 내부 전용 키 등) 쓴다. <code>bigint</code>는 <code>Number.MAX_SAFE_INTEGER</code>(2<sup>53</sup>-1)를 넘는 정수를 오차 없이 다뤄야 할 때 <code>10000000000000000n</code>처럼 끝에 <code>n</code>을 붙여 만든다.</p>
+      <div class="note note--info">
+        <span class="note__t">알아두면 좋음</span>
+        <code>bigint</code>와 <code>number</code>는 서로 다른 타입이라 <code>1n === 1</code>은 <code>false</code>이고, <code>1n + 1</code>처럼 섞어서 연산하면 <code>TypeError</code>가 난다. 반드시 같은 타입끼리만 계산해야 한다.
+      </div>
+
+      <!-- ================= §3 ================= -->
+      <h2 id="s-scope-hoisting"><span class="h2num">§3</span>스코프와 호이스팅</h2>
+
+      <h3 id="s-var-let-const">var / let / const</h3>
+      <p><code>var</code>는 함수 스코프, <code>let</code>/<code>const</code>는 블록 스코프를 갖는다. <code>{ }</code> 블록 안에서 선언한 <code>var</code>는 블록 밖에서도 보이지만, <code>let</code>/<code>const</code>는 그 블록을 벗어나면 접근할 수 없다<sup class="ref"><a href="#r5">[5]</a></sup>.</p>
+
+      <h3 id="s-hoisting-tdz">호이스팅과 TDZ</h3>
+      <p><span class="t" data-tip="변수·함수 선언을 실행 전 해당 스코프 맨 위로 끌어올린 것처럼 동작하는 특성. 초기화까지 끌어올리진 않는다.">호이스팅(hoisting)</span>은 JS 엔진이 코드를 실행하기 전, 스코프 안의 선언들을 미리 등록해두는 동작을 말한다<sup class="ref"><a href="#r6">[6]</a></sup>. <code>var</code>는 선언과 동시에 <code>undefined</code>로 초기화되기 때문에 선언 이전에 읽어도 에러 없이 <code>undefined</code>가 나온다. 반면 <code>let</code>/<code>const</code>는 선언은 끌어올려지지만 초기화되지 않은 상태로 남아있고, 이 구간을 <span class="t" data-tip="let/const로 선언된 변수가 스코프 시작부터 실제 선언문 전까지 접근 불가능한 구간. 접근 시 ReferenceError.">TDZ(Temporal Dead Zone)</span>라 부른다. TDZ에서 변수를 읽으면 <code>ReferenceError</code>가 발생한다<a href="glossary.html#g-tdz">[용어사전: TDZ]</a>.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th></th><th>스코프</th><th>재선언</th><th>재할당</th><th>선언 전 접근</th></tr></thead>
+          <tbody>
+            <tr><td><code>var</code></td><td>함수</td><td>가능</td><td>가능</td><td><code>undefined</code> (에러 없음)</td></tr>
+            <tr><td><code>let</code></td><td>블록</td><td>불가</td><td>가능</td><td><code>ReferenceError</code> (TDZ)</td></tr>
+            <tr><td><code>const</code></td><td>블록</td><td>불가</td><td>불가</td><td><code>ReferenceError</code> (TDZ)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-lexical-scope">렉시컬 스코프와 스코프 체인</h3>
+      <p><span class="t" data-tip="함수가 호출된 위치가 아니라 '정의된 위치'를 기준으로 상위 스코프가 정해지는 규칙.">렉시컬 스코프(lexical scope)</span>는 함수가 어디서 <b>정의</b>되었는지로 상위 스코프가 결정되는 규칙이다(어디서 <b>호출</b>되었는지는 상관없다). 변수를 찾을 때는 현재 스코프 → 바깥 스코프 → 그 바깥 → ... → 전역까지 순서대로 올라가며 찾는데, 이 연결 구조를 <span class="t" data-tip="현재 스코프에서 변수를 못 찾으면 바깥 스코프로 계속 올라가며 찾는 연결 구조.">스코프 체인(scope chain)</span>이라 한다.</p>
+
+      <div class="fig">
+        <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig4title" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+          <title id="fig4title">스코프 체인 — 중첩된 스코프와 변수 탐색 순서</title>
+          <rect x="20" y="20" width="600" height="260" rx="14" fill="none" stroke="var(--line)"></rect>
+          <text x="36" y="46" font-size="13" font-weight="700" fill="var(--fg)">전역 스코프 (Global)  let g = "global"</text>
+          <rect x="60" y="66" width="520" height="196" rx="12" fill="none" stroke="var(--accent-line)"></rect>
+          <text x="76" y="90" font-size="13" font-weight="700" fill="var(--fg)">outer() 스코프  let o = "outer"</text>
+          <rect x="100" y="108" width="440" height="130" rx="12" fill="var(--accent-weak)" stroke="var(--accent-line)"></rect>
+          <text x="116" y="132" font-size="13" font-weight="700" fill="var(--fg)">inner() 스코프  let i = "inner"</text>
+          <text x="116" y="158" font-size="12.5" fill="var(--fg-soft)">console.log(i, o, g)</text>
+          <text x="116" y="182" font-size="11" fill="var(--fg-mute)">① i는 inner 안에서 바로 찾음</text>
+          <text x="116" y="200" font-size="11" fill="var(--fg-mute)">② o는 없어서 outer로 한 단계 위로</text>
+          <text x="116" y="218" font-size="11" fill="var(--fg-mute)">③ g는 없어서 전역까지 올라감</text>
+        </svg>
+        <div class="fig__cap"><b>그림 4.</b> inner() 안에서 변수를 못 찾으면 바깥(outer) → 전역 순서로 스코프 체인을 타고 올라가며 찾는다.</div>
+      </div>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>console.log(varValue)</code>는 <code>var</code>가 호이스팅되며 <code>undefined</code>로 초기화되어 있어 에러가 안 난다.</li>
+            <li><code>console.log(letValue)</code>는 TDZ 구간이라 <code>ReferenceError</code>가 난다.</li>
+            <li><code>if</code> 블록 안 <code>var</code>는 함수 전체에서 보이지만 <code>let</code>은 블록을 못 벗어난다.</li>
+            <li><code>const</code>는 재할당만 금지할 뿐, 배열/객체의 내부 값은 바꿀 수 있다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="hoisting-tdz.js" data-height="300">
+<script type="text/plain" class="pg__src">
+// var는 선언이 끌어올려지고 undefined로 초기화된다
+console.log(varValue); // undefined (에러 아님)
+var varValue = 'var 값';
+
+// let/const도 선언은 끌어올려지지만, TDZ 때문에 접근하면 에러
+try {
+  console.log(letValue);
+} catch (e) {
+  console.log('letValue 접근 에러:', e.message);
+}
+let letValue = 'let 값';
+
+// var는 함수 스코프, let/const는 블록 스코프
+function scopeDemo() {
+  if (true) {
+    var fnScoped = '함수 전체에서 보임';
+    let blockScoped = '이 블록 안에서만 보임';
+  }
+  console.log(fnScoped); // OK
+
+  try {
+    console.log(blockScoped);
+  } catch (e) {
+    console.log('blockScoped 접근 에러:', e.message);
+  }
+}
+scopeDemo();
+
+// const는 재할당만 막는다 (내부 값 변경은 가능)
+const arr = [1, 2, 3];
+arr.push(4);
+console.log('const 배열도 내부 변경 가능:', arr);
+try {
+  arr = [9];
+} catch (e) {
+  console.log('재할당 에러:', e.message);
+}
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-function-decl-expr">함수 선언문 vs 함수 표현식의 호이스팅</h3>
+      <p><code>function foo() {}</code>처럼 쓰는 <b>함수 선언문(function declaration)</b>은 <b>본문 전체가</b> 호이스팅된다 — 그래서 선언보다 위에서 호출해도 정상 동작한다. 반면 <code>const foo = function () {}</code>나 <code>const foo = () =&gt; {}</code>처럼 쓰는 <b>함수 표현식(function expression)</b>은 <code>const</code>/<code>let</code> 변수 규칙을 그대로 따른다 — 선언부(변수)만 호이스팅되고 TDZ에 걸려, 위에서 호출하면 에러가 난다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>function-vs-expression.js</span></div>
+        <pre><code class="language-js">sayHi(); // OK -- 함수 선언문은 본문까지 통째로 호이스팅됨
+
+function sayHi() {
+  console.log("hi");
+}
+
+sayBye(); // TypeError: sayBye is not a function (호이스팅은 되지만 아직 undefined)
+
+var sayBye = function () {
+  console.log("bye");
+};</code></pre>
+      </div>
+
+      <!-- ================= §4 ================= -->
+      <h2 id="s-closure"><span class="h2num">§4</span>클로저</h2>
+
+      <h3 id="s-closure-def">정의: 왜 생기는가</h3>
+      <p><span class="t" data-tip="함수가 자신이 정의될 때의 렉시컬 스코프를 기억해, 외부 함수가 끝나도 그 변수에 계속 접근하는 현상.">클로저(closure)</span>는 함수와, 그 함수가 정의된 렉시컬 스코프의 조합이다<sup class="ref"><a href="#r7">[7]</a></sup>. 함수 안에서 함수를 만들어 반환하면, 안쪽 함수는 바깥 함수의 변수를 계속 "기억"한다. 원래대로면 바깥 함수 실행이 끝나는 순간 그 지역 변수들은 스택에서 사라져야 하지만, 안쪽 함수가 그 변수를 참조하고 있는 한 JS 엔진은 해당 스코프를 힙에 남겨두고 계속 접근할 수 있게 해준다.</p>
+
+      <div class="fig">
+        <svg viewBox="0 0 640 220" role="img" aria-labelledby="fig5title" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+          <title id="fig5title">클로저가 외부 스코프를 붙잡고 있는 구조</title>
+          <defs>
+            <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--ok)"></path>
+            </marker>
+          </defs>
+          <rect x="30" y="30" width="260" height="140" rx="14" fill="none" stroke="var(--line)" stroke-dasharray="5 4"></rect>
+          <text x="46" y="56" font-size="12.5" font-weight="700" fill="var(--fg)">makeCounter() 실행 컨텍스트</text>
+          <text x="46" y="82" font-size="12.5" fill="var(--fg-soft)">let count = 0</text>
+          <text x="46" y="130" font-size="11" fill="var(--fg-mute)">일반 함수라면 실행이</text>
+          <text x="46" y="148" font-size="11" fill="var(--fg-mute)">끝나는 순간 사라져야 함</text>
+          <rect x="380" y="60" width="220" height="80" rx="14" fill="var(--ok-weak)" stroke="var(--ok)"></rect>
+          <text x="400" y="88" font-size="12.5" font-weight="700" fill="var(--fg)">increment (반환된 함수)</text>
+          <text x="400" y="112" font-size="11" fill="var(--fg-soft)">[[Scope]] 내부 참조</text>
+          <path d="M380,100 C340,100 330,100 290,100" fill="none" stroke="var(--ok)" marker-end="url(#arrow2)"></path>
+        </svg>
+        <div class="fig__cap"><b>그림 5.</b> increment 함수가 makeCounter의 스코프를 계속 참조하고 있어, count가 담긴 스코프는 가비지 컬렉션되지 않고 힙에 살아남는다.</div>
+      </div>
+
+      <h3 id="s-closure-usecases">실전 용도</h3>
+      <div class="grid grid--2">
+        <div class="card"><div class="card__title">모듈 패턴</div><p>내부 상태를 <code>private</code>하게 숨기고, 필요한 함수만 공개 API로 노출한다. ESM이 널리 쓰이기 전 가장 흔한 캡슐화 기법이었다.</p></div>
+        <div class="card"><div class="card__title">이벤트 핸들러</div><p>등록 시점의 값(예: 리스트의 id)을 핸들러 함수 안에 "가둬서" 나중에 클릭될 때도 정확한 값을 참조하게 만든다.</p></div>
+        <div class="card"><div class="card__title">디바운스 / 쓰로틀</div><p>타이머 id 같은 상태를 클로저에 저장해두고, 함수가 여러 번 호출돼도 같은 상태를 계속 참조하며 제어한다.</p></div>
+        <div class="card"><div class="card__title">React Hooks</div><p><code>useState</code>, <code>useEffect</code> 콜백이 렌더링 시점의 값을 참조하는 것도 클로저 원리다. <a href="ch04.html#s-usestate">ch04 Hooks 심화</a>에서 이어서 다룬다.</p></div>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>counterModule.js</span></div>
+        <pre><code class="language-js">// counterModule.js -- 클로저로 만드는 간단한 모듈 패턴
+const counterModule = (function () {
+  let count = 0; // 외부에서 직접 접근 불가 (private)
+
+  function increment() {
+    count += 1;
+    return count;
+  }
+
+  function reset() {
+    count = 0;
+  }
+
+  return { increment, reset }; // 필요한 것만 공개
+})();
+
+counterModule.increment(); // 1
+counterModule.increment(); // 2
+console.log(counterModule.count); // undefined -- 클로저 밖에서는 안 보인다</code></pre>
+      </div>
+
+      <p>이벤트 핸들러에서도 같은 원리가 쓰인다. 리스트를 순회하며 버튼을 만들 때, 각 버튼의 클릭 핸들러가 "그 버튼에 해당하는 id"를 클로저로 기억하게 만들면 나중에 어떤 버튼을 눌러도 정확한 id로 동작한다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>renderButtons.js</span></div>
+        <pre><code class="language-js">function renderButtons(items) {
+  items.forEach(function (item) {
+    const btn = document.createElement("button");
+    btn.textContent = item.label;
+    // item.id는 이 클릭 핸들러(클로저) 안에 계속 붙잡혀 있다
+    btn.addEventListener("click", function () {
+      console.log("클릭된 항목 id:", item.id);
+    });
+    document.body.appendChild(btn);
+  });
+}</code></pre>
+      </div>
+
+      <p>클로저는 <b>메모이제이션(memoization)</b>에도 쓰인다 — 이전에 계산한 결과를 클로저 안의 캐시 객체에 저장해두고, 같은 입력이 다시 들어오면 재계산 없이 캐시된 값을 바로 돌려준다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>memoize.js</span></div>
+        <pre><code class="language-js">function memoize(fn) {
+  const cache = new Map(); // 클로저 안에 캐시를 가둬둔다
+  return function (arg) {
+    if (cache.has(arg)) return cache.get(arg);
+    const result = fn(arg);
+    cache.set(arg, result);
+    return result;
+  };
+}
+
+const slowSquare = (n) => { /* 무거운 계산이라고 가정 */ return n * n; };
+const fastSquare = memoize(slowSquare);
+fastSquare(5); // 계산해서 캐시에 저장
+fastSquare(5); // 캐시에서 즉시 반환</code></pre>
+      </div>
+
+      <h3 id="s-closure-loop-trap">반복문 + 클로저 함정</h3>
+      <p>가장 흔한 클로저 버그는 반복문에서 나온다. <code>var</code>는 함수 스코프라서 반복문 전체가 <b>같은 변수 하나</b>를 공유한다. 콜백들이 나중에 실행될 시점엔 반복문이 이미 끝나 변수가 마지막 값으로 고정돼 있다. <code>let</code>은 매 반복마다 <b>새로운 바인딩</b>을 만들기 때문에 이 문제가 생기지 않는다<sup class="ref"><a href="#r5">[5]</a></sup>.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>makeCounter()</code>는 호출될 때마다 새로운 <code>count</code> 스코프를 만든다. <code>counter()</code>를 부를수록 그 스코프의 값이 누적된다.</li>
+            <li><code>var i</code> 루프는 함수 3개가 전부 같은 <code>i</code>를 참조해 <code>[3,3,3]</code>이 나온다.</li>
+            <li><code>let j</code> 루프는 반복마다 새 <code>j</code>가 생겨 <code>[0,1,2]</code>가 나온다.</li>
+            <li><code>debounce</code>는 <code>timerId</code>를 클로저로 기억해, 연속 호출 시 이전 타이머를 계속 취소한다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="closure-loop-trap.js" data-height="340">
+<script type="text/plain" class="pg__src">
+// 1) 클로저 기본: makeCounter는 count를 '기억'한다
+function makeCounter() {
+  let count = 0;
+  return function increment() {
+    count += 1;
+    return count;
+  };
+}
+const counter = makeCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2 -- count가 살아있다
+
+// 2) 흔한 함정: var로 반복문 돌리면 클로저가 같은 변수를 공유한다
+console.log('--- var 함정 ---');
+var fns = [];
+for (var i = 0; i < 3; i++) {
+  fns.push(function () { return i; });
+}
+console.log(fns.map(function (f) { return f(); })); // [3, 3, 3]
+
+// 3) let은 반복마다 새 바인딩을 만들어 함정을 피한다
+console.log('--- let로 해결 ---');
+var fns2 = [];
+for (let j = 0; j < 3; j++) {
+  fns2.push(function () { return j; });
+}
+console.log(fns2.map(function (f) { return f(); })); // [0, 1, 2]
+
+// 4) 실전: 디바운스 -- 클로저로 타이머 id를 계속 기억한다
+function debounce(fn, delay) {
+  let timerId;
+  return function (...args) {
+    clearTimeout(timerId);
+    timerId = setTimeout(function () { fn.apply(null, args); }, delay);
+  };
+}
+const logOnce = debounce(function (msg) { console.log('디바운스 실행:', msg); }, 50);
+logOnce('a'); logOnce('b'); logOnce('c'); // 마지막 c만 50ms 뒤 실행
+</script>
+        </div>
+      </div>
+
+      <!-- ================= §5 ================= -->
+      <h2 id="s-this-function"><span class="h2num">§5</span>this와 함수</h2>
+
+      <h3 id="s-this-rules">일반 함수 vs 화살표 함수</h3>
+      <p><span class="t" data-tip="함수가 '어떻게 호출되었는지'에 따라 동적으로 결정되는 참조값. 화살표 함수는 예외로 정의 시점의 this를 그대로 쓴다.">this</span>는 함수를 <b>어떻게 호출했는지</b>에 따라 런타임에 결정된다<sup class="ref"><a href="#r8">[8]</a></sup>. <code>obj.method()</code>처럼 호출하면 <code>this</code>는 <code>obj</code>가 되고, 그냥 <code>fn()</code>처럼 호출하면 <code>this</code>는 <code>undefined</code>(strict mode 기준)가 된다. 화살표 함수는 이 규칙에서 예외다 — 자신만의 <code>this</code>를 갖지 않고, <b>정의된 위치</b>의 <code>this</code>를 그대로 물려받는다(렉시컬 this).</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>호출 방식</th><th>this가 되는 값</th></tr></thead>
+          <tbody>
+            <tr><td><code>fn()</code> (그냥 호출)</td><td><code>undefined</code> (strict mode)</td></tr>
+            <tr><td><code>obj.method()</code></td><td><code>obj</code></td></tr>
+            <tr><td><code>fn.call(x)</code> / <code>fn.apply(x)</code></td><td><code>x</code> (명시적으로 지정)</td></tr>
+            <tr><td><code>fn.bind(x)()</code></td><td><code>x</code> (영구 고정)</td></tr>
+            <tr><td><code>new Fn()</code></td><td>새로 생성된 인스턴스</td></tr>
+            <tr><td>화살표 함수</td><td>정의된 위치의 this를 그대로 물려받음 (규칙 없음, 상속)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-call-apply-bind">call / apply / bind</h3>
+      <div class="grid grid--3">
+        <div class="card"><div class="card__title"><code>call(thisArg, a, b)</code></div><p>즉시 호출하면서 인자를 <b>하나씩</b> 나열해 전달한다.</p></div>
+        <div class="card"><div class="card__title"><code>apply(thisArg, [a, b])</code></div><p>즉시 호출하면서 인자를 <b>배열</b>로 묶어 전달한다.</p></div>
+        <div class="card"><div class="card__title"><code>bind(thisArg)</code></div><p>즉시 호출하지 않고, <code>this</code>가 고정된 <b>새 함수</b>를 반환한다<sup class="ref"><a href="#r9">[9]</a></sup>.</p></div>
+      </div>
+
+      <h3 id="s-this-lost">메서드 분리 시 this 유실</h3>
+      <p>객체에서 메서드만 꺼내서 다른 변수에 담아 호출하면 <code>this</code> 연결이 끊긴다. React 클래스 컴포넌트에서 <code>onClick={this.handleClick}</code>처럼 메서드를 <b>참조로만</b> 넘기면 실제 호출은 <code>&lt;button&gt;</code>이 하기 때문에 이 문제가 그대로 발생한다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>person.greetNormal()</code>은 <code>person.</code>으로 호출했으므로 <code>this === person</code>.</li>
+            <li><code>person.greetArrow()</code>는 화살표라서 <b>정의 시점</b>(객체 리터럴이 만들어질 때, 즉 전역)의 <code>this</code>를 쓴다 — <code>person</code>이 아니다.</li>
+            <li><code>const detached = person.greetNormal</code>은 함수만 떼어내 <code>this</code> 연결이 끊긴 채 호출된다.</li>
+            <li><code>call</code>/<code>apply</code>/<code>bind</code>로 <code>this</code>를 직접 지정할 수 있다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="this-call-apply-bind.js" data-height="340">
+<script type="text/plain" class="pg__src">
+const person = {
+  name: '민수',
+  greetNormal: function () {
+    console.log('일반 함수 this.name:', this.name);
+  },
+  greetArrow: () => {
+    console.log('화살표 함수 this.name:', this && this.name);
+  }
+};
+person.greetNormal(); // '민수'
+person.greetArrow();  // undefined -- person이 아니다!
+
+// 메서드를 분리해서 호출하면 this를 잃는다
+const detached = person.greetNormal;
+try {
+  detached();
+} catch (e) {
+  console.log('분리 호출 에러:', e.message);
+}
+
+// call / apply / bind로 this를 명시적으로 지정
+function introduce(greeting) {
+  console.log(greeting + ', ' + this.name);
+}
+introduce.call({ name: '지수' }, '안녕');    // call: 인자를 하나씩
+introduce.apply({ name: '유나' }, ['안녕']); // apply: 인자를 배열로
+const boundIntroduce = introduce.bind({ name: '하늘' });
+boundIntroduce('반가워'); // bind: this가 고정된 새 함수
+
+console.log('--- setInterval + 화살표 함수 ---');
+function Timer() {
+  this.seconds = 0;
+  this.tick = () => {
+    // 화살표라서 Timer 인스턴스의 this를 그대로 사용한다
+    this.seconds += 1;
+  };
+}
+const t = new Timer();
+t.tick(); t.tick();
+console.log('t.seconds:', t.seconds); // 2
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-this-new">new 키워드와 생성자 함수의 this</h3>
+      <p>함수를 <code>new</code>와 함께 호출하면 JS 엔진은 빈 객체를 하나 만들고, 그 객체를 <code>this</code>로 삼아 함수를 실행한 뒤, 특별한 반환값이 없으면 그 객체를 돌려준다. <code>class</code> 문법은 이 과정을 더 읽기 쉽게 감싼 문법 설탕(syntactic sugar)이다 — 내부 동작은 생성자 함수와 같다. 화살표 함수는 자신만의 <code>this</code>가 없기 때문에 <code>new</code>로 호출할 수 없다(<code>TypeError</code>).</p>
+      <div class="note note--info">
+        <span class="note__t">strict mode</span>
+        일반 함수를 그냥 <code>fn()</code>처럼 호출하면, strict mode(ESM/class 내부는 항상 strict mode)에서는 <code>this</code>가 <code>undefined</code>가 되고, 그렇지 않은 경우(구식 스크립트)에는 전역 객체(브라우저에서는 <code>window</code>)가 된다. 최신 프론트엔드 코드는 번들러가 항상 ESM으로 다루므로 <code>this</code>가 <code>undefined</code>인 쪽을 기본으로 생각하면 된다.
+      </div>
+
+      <h3 id="s-this-react">React에서 화살표 함수를 쓰는 이유</h3>
+      <p>React 클래스 컴포넌트에서는 이벤트 핸들러를 <code>constructor</code>에서 <code>bind</code>하거나, 클래스 필드에 화살표 함수로 정의해야 했다. 함수 컴포넌트 + Hooks 방식에서는 컴포넌트 자체가 매 렌더링마다 새로 호출되는 <b>함수</b>이고, 그 안의 화살표 함수도 렉시컬 <code>this</code> 규칙을 그대로 따르기 때문에 <code>bind</code>가 필요 없어진다. 이것이 함수 컴포넌트가 <code>this</code> 문제에서 자유로운 이유다.</p>
+
+      <div class="grid grid--2">
+        <div class="codeblock">
+          <div class="codeblock__bar"><span>ClassToggle.tsx</span></div>
+          <pre><code class="language-tsx">class Toggle extends React.Component&lt;{}, { on: boolean }&gt; {
+  constructor(props: {}) {
+    super(props);
+    this.state = { on: false };
+    // this를 고정하지 않으면 onClick에서 this가 undefined가 된다
+    this.handleClick = this.handleClick.bind(this);
+  }
+  handleClick() {
+    this.setState({ on: !this.state.on });
+  }
+  render() {
+    return (
+      &lt;button onClick={this.handleClick}&gt;
+        {this.state.on ? "ON" : "OFF"}
+      &lt;/button&gt;
+    );
+  }
+}</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="codeblock__bar"><span>FunctionToggle.tsx</span></div>
+          <pre><code class="language-tsx">function Toggle() {
+  const [on, setOn] = useState(false);
+  // 화살표 함수라서 별도 bind 없이도 this 문제 자체가 없다
+  const handleClick = () => setOn((prev) => !prev);
+
+  return (
+    &lt;button onClick={handleClick}&gt;
+      {on ? "ON" : "OFF"}
+    &lt;/button&gt;
+  );
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- ================= §6 ================= -->
+      <h2 id="s-event-loop"><span class="h2num">§6</span>이벤트 루프</h2>
+
+      <h3 id="s-event-loop-model">콜 스택 / Web API / 큐 / 렌더링</h3>
+      <p>JS 엔진은 한 번에 하나의 코드만 실행하는 <b>싱글 스레드</b>다. 함수를 호출하면 <span class="t" data-tip="함수 호출 정보가 순서대로 쌓이는 메모리 영역. 원시값과 참조 주소가 여기 저장된다. LIFO 구조다.">콜 스택</span>에 쌓이고, 끝나면 빠진다. <code>setTimeout</code>, <code>fetch</code> 같은 비동기 작업은 JS 엔진이 아니라 브라우저가 제공하는 <b>Web API</b>가 백그라운드에서 처리하고, 끝나면 결과를 콜백과 함께 큐에 넣어둔다. <span class="t" data-tip="콜 스택이 비면 큐에 대기 중인 작업을 하나씩 꺼내 콜 스택으로 옮기는 브라우저의 반복 루틴.">이벤트 루프</span>는 "콜 스택이 비었는지" 계속 확인하다가, 비면 큐에서 작업을 꺼내 콜 스택으로 옮기는 역할을 한다<sup class="ref"><a href="#r10">[10]</a></sup>.</p>
+      <p>큐는 하나가 아니다. <span class="t" data-tip="Promise.then, queueMicrotask 등이 등록되는 큐. 콜 스택이 비면 태스크 큐보다 먼저, 큐가 빌 때까지 전부 처리된다.">마이크로태스크 큐</span>(Promise.then, queueMicrotask)와 <span class="t" data-tip="setTimeout, 이벤트 콜백 등이 등록되는 큐. 마이크로태스크 큐가 다 비워진 뒤 하나씩만 꺼내 실행된다.">태스크 큐(매크로태스크)</span>(setTimeout, 클릭 이벤트)가 따로 있고, <b>우선순위가 다르다</b>: 콜 스택이 비면 마이크로태스크 큐를 <b>전부</b> 비운 뒤에야 태스크 큐에서 <b>하나만</b> 꺼내 실행한다.</p>
+
+      <div class="fig">
+        <pre class="mermaid">
+sequenceDiagram
+  participant Stack as "콜 스택"
+  participant WebAPI as "Web API"
+  participant Micro as "마이크로태스크 큐"
+  participant Macro as "태스크 큐(매크로)"
+  Stack->>Stack: "console.log('1') 실행"
+  Stack->>WebAPI: "setTimeout(fn, 0) 등록"
+  Stack->>Micro: "Promise.resolve().then(fn2) 등록"
+  Stack->>Stack: "console.log('4') 실행"
+  Note over Stack: "동기 코드 끝, 콜 스택이 빈다"
+  Micro->>Stack: "마이크로태스크(fn2) 먼저 실행 -> '3'"
+  WebAPI->>Macro: "타이머 만료, 콜백을 태스크 큐로 이동"
+  Macro->>Stack: "콜 스택이 빌 때 태스크(fn) 실행 -> '2'"
+        </pre>
+        <div class="fig__cap"><b>그림 6.</b> 동기 코드(1, 4)가 먼저 끝나고, 콜 스택이 비면 마이크로태스크(3)가 태스크(2)보다 먼저 실행된다. <span class="muted">출처: MDN, 이벤트 루프<sup class="ref"><a href="#r10">[10]</a></sup></span></div>
+      </div>
+
+      <h3 id="s-event-loop-order">라이브 확인: setTimeout(0) vs Promise.then</h3>
+      <p>직접 예측한 뒤 실행 버튼을 눌러 확인한다. 정답은 <code>1 → 4 → 3 → 2</code>다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>console.log('1')</code>은 동기 코드라 즉시 실행된다.</li>
+            <li><code>setTimeout(fn, 0)</code>은 0ms 뒤에 실행을 "예약"만 할 뿐, 지금 당장 실행되지 않는다. Web API로 넘어가고 타이머가 끝나면 <b>태스크 큐</b>에 들어간다.</li>
+            <li><code>Promise.resolve().then(fn2)</code>은 <b>마이크로태스크 큐</b>에 바로 등록된다.</li>
+            <li><code>console.log('4')</code>까지가 동기 코드 블록이다. 여기까지 끝나야 콜 스택이 빈다.</li>
+            <li>콜 스택이 비면 마이크로태스크 큐(3)를 <b>먼저, 전부</b> 비우고, 그다음에야 태스크 큐(2)에서 하나를 꺼낸다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="event-loop-order.js" data-height="240">
+<script type="text/plain" class="pg__src">
+console.log('1: 동기 코드 시작');
+
+setTimeout(function () {
+  console.log('2: setTimeout(0) 콜백 -- 태스크 큐');
+}, 0);
+
+Promise.resolve().then(function () {
+  console.log('3: Promise.then 콜백 -- 마이크로태스크 큐');
+});
+
+console.log('4: 동기 코드 끝');
+
+// 실행 순서를 먼저 예측해보고 [실행]으로 확인한다.
+// 정답: 1 -> 4 -> 3 -> 2
+// 콜 스택이 완전히 빌 때까지 동기 코드가 먼저 끝나고,
+// 그 다음 마이크로태스크 큐를 전부 비운 뒤에야
+// 태스크 큐(매크로태스크)에서 하나를 꺼내 실행하기 때문이다.
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-event-loop-priority">마이크로태스크가 태스크보다 먼저인 이유</h3>
+      <p>Promise 콜백처럼 "지금 막 끝난 작업의 결과를 최대한 빨리 처리해야 하는" 작업을 마이크로태스크로 분류해, 렌더링이나 다음 매크로태스크보다 먼저 실행되도록 우선순위를 준 것이다. 대신 마이크로태스크 안에서 또 마이크로태스크를 계속 등록하면 태스크 큐와 렌더링이 무한정 밀릴 수 있다는 점은 주의해야 한다.</p>
+
+      <div class="grid grid--2">
+        <div class="card"><div class="card__title">브라우저의 이벤트 루프</div><p>탭(창)마다 독립적인 이벤트 루프를 가지며, 렌더링(스타일/레이아웃/페인트) 단계가 큐 처리 사이사이에 끼어든다. 이 챕터에서 다룬 모델이 이 기준이다.</p></div>
+        <div class="card"><div class="card__title">Node.js의 이벤트 루프</div><p>화면을 그릴 필요가 없어 렌더링 단계가 없는 대신, timers → pending callbacks → poll → check → close callbacks 같은 <b>여러 단계(phase)</b>로 세분화되어 있다. <code>process.nextTick</code>은 마이크로태스크보다도 먼저 처리되는 Node 전용 큐다.</p></div>
+      </div>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart LR
+  A["콜 스택이 빈다"] --> B{"마이크로태스크 큐에 작업이 있나?"}
+  B -->|"있음"| C["하나 꺼내 실행"]
+  C --> B
+  B -->|"없음 (큐가 빌 때까지 반복)"| D{"렌더링이 필요한 타이밍인가?"}
+  D -->|"예"| E["스타일/레이아웃/페인트"]
+  D -->|"아니오"| F["태스크 큐에서 작업 1개만 꺼내 실행"]
+  E --> F
+  F --> A
+        </pre>
+        <div class="fig__cap"><b>그림 7.</b> 마이크로태스크 큐는 매번 완전히 비워지지만, 태스크 큐는 한 번에 하나씩만 처리된다. <span class="muted">출처: MDN, 이벤트 루프<sup class="ref"><a href="#r10">[10]</a></sup></span></div>
+      </div>
+
+      <div class="note note--danger">
+        <span class="note__t">주의</span>
+        JS는 싱글 스레드이므로 콜 스택이 오래 걸리는 동기 작업(무거운 반복문 등)으로 채워져 있으면, 이벤트 루프는 그 작업이 끝날 때까지 아무 큐도 처리할 수 없다. 화면이 멈춘 것처럼 보이는 "프리징"은 대부분 이 현상이다.
+      </div>
+
+      <h3 id="s-chunking">긴 작업을 잘게 쪼개기</h3>
+      <p>배열 10만 개를 한 번에 순회하며 무거운 계산을 하면 그동안 콜 스택이 계속 차 있어 화면이 멈춘다. 해결책은 작업을 작은 덩어리로 나누고, 덩어리 사이사이에 <code>setTimeout(fn, 0)</code>으로 제어권을 잠깐 이벤트 루프에 돌려주는 것이다. <code>setTimeout</code>은 태스크 큐에 들어가므로, 그 사이에 브라우저가 렌더링할 기회(그림 7)를 얻는다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>chunked-processing.js</span></div>
+        <pre><code class="language-js">function processInChunks(items, chunkSize, worker) {
+  let i = 0;
+  function step() {
+    const end = Math.min(i + chunkSize, items.length);
+    for (; i &lt; end; i++) worker(items[i]);
+    if (i &lt; items.length) {
+      setTimeout(step, 0); // 제어권을 이벤트 루프에 잠깐 돌려준다
+    }
+  }
+  step();
+}
+
+processInChunks(hugeArray, 1000, (item) => heavyCompute(item));</code></pre>
+      </div>
+
+      <h3 id="s-raf">requestAnimationFrame과 렌더링 타이밍</h3>
+      <p>렌더링(스타일 계산 → 레이아웃 → 페인트)은 태스크 큐 항목 하나를 처리한 <b>뒤</b>, 다음 태스크를 처리하기 <b>전</b>의 틈에서 일어난다(그림 7). 애니메이션처럼 "다음 화면이 그려지기 직전"에 실행돼야 하는 코드는 <code>setTimeout</code> 대신 <code>requestAnimationFrame</code>을 쓴다. 브라우저가 실제로 화면을 그리기 바로 전에 콜백을 호출해주기 때문에, <code>setTimeout(fn, 16)</code>처럼 프레임 시간을 직접 추측할 필요가 없다.</p>
+
+      <div class="note note--danger">
+        <span class="note__t">마이크로태스크 기아(starvation)</span>
+        그림 7에서 보듯 마이크로태스크 큐는 "완전히 빌 때까지" 반복해서 처리된다. 만약 마이크로태스크 콜백이 실행되는 도중 <b>또 다른 마이크로태스크를 계속 등록</b>하면(예: <code>Promise.resolve().then()</code>을 재귀적으로 반복), 큐가 영원히 안 비워져서 태스크 큐도, 렌더링도 무한정 밀린다. 아래는 실행하지 말고 눈으로만 봐야 하는 안티패턴이다.
+        <pre style="margin-top:10px"><code class="language-js">// 절대 이렇게 쓰지 말 것 -- 태스크 큐와 렌더링을 영원히 굶긴다
+function loop() {
+  Promise.resolve().then(loop);
+}
+loop();</code></pre>
+      </div>
+
+      <!-- ================= §7 ================= -->
+      <h2 id="s-async"><span class="h2num">§7</span>비동기</h2>
+
+      <h3 id="s-callback-hell">콜백 지옥</h3>
+      <p><span class="t" data-tip="비동기 작업을 콜백 안에 콜백으로 중첩해 코드가 오른쪽으로 계속 들여쓰기되는 현상.">콜백지옥(callback hell)</span>은 비동기 작업이 끝난 뒤 할 일을 콜백 함수로 넘기는 방식을 중첩해서 쓸 때 생긴다. "A가 끝나면 B, B가 끝나면 C..."를 계속 중첩하면 코드가 오른쪽으로 계단처럼 밀리고 에러 처리도 각 단계마다 반복해야 한다. 이 문제를 해결하기 위해 <span class="t" data-tip="비동기 작업의 성공/실패를 나중에 알려주겠다는 약속 객체. pending → fulfilled 또는 rejected 상태를 갖는다.">Promise</span>가 등장했다.</p>
+
+      <h3 id="s-promise-basics">Promise: 3가지 상태</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>상태</th><th>의미</th><th>전이 후</th></tr></thead>
+          <tbody>
+            <tr><td><code>pending</code></td><td>아직 끝나지 않음(대기)</td><td>fulfilled 또는 rejected로 <b>한 번만</b> 바뀜</td></tr>
+            <tr><td><code>fulfilled</code></td><td>성공</td><td><code>.then()</code>의 성공 콜백 실행</td></tr>
+            <tr><td><code>rejected</code></td><td>실패</td><td><code>.catch()</code> 또는 <code>.then()</code>의 실패 콜백 실행</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="fig">
+        <pre class="mermaid">
+stateDiagram-v2
+  [*] --> pending
+  pending --> fulfilled : "resolve(value) 호출"
+  pending --> rejected : "reject(error) 호출"
+  fulfilled --> [*] : "then() 성공 콜백"
+  rejected --> [*] : "catch() 또는 then()의 실패 콜백"
+        </pre>
+        <div class="fig__cap"><b>그림 8.</b> Promise는 pending에서 시작해 fulfilled 또는 rejected로 <b>한 번만</b> 전이되고, 이후에는 상태가 다시 바뀌지 않는다. <span class="muted">출처: MDN, Using promises<sup class="ref"><a href="#r11">[11]</a></sup></span></div>
+      </div>
+
+      <p><code>.then()</code>은 성공 시, <code>.catch()</code>는 실패 시, <code>.finally()</code>는 성공/실패와 무관하게 항상 실행된다<sup class="ref"><a href="#r11">[11]</a></sup>. <code>.then()</code>은 항상 새로운 Promise를 반환하기 때문에 계속 이어붙일(체이닝) 수 있고, 중간 어디서 에러가 나든 그 아래 첫 번째 <code>.catch()</code>가 잡아낸다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>promise-chaining.js</span></div>
+        <pre><code class="language-js">fetchUser(id)
+  .then((user) => fetchPosts(user.id)) // 이전 then의 반환값을 다음 then이 이어받는다
+  .then((posts) => posts.filter((p) => p.published))
+  .catch((err) => {
+    // fetchUser든 fetchPosts든, 위 체인 어디서 에러가 나도 여기서 한 번에 잡힌다
+    console.error("실패:", err.message);
+  })
+  .finally(() => {
+    hideLoadingSpinner(); // 성공/실패 상관없이 항상 실행
+  });</code></pre>
+      </div>
+
+      <h3 id="s-promise-combinators">Promise.all / allSettled / race / any</h3>
+      <div class="grid grid--2">
+        <div class="card"><div class="card__title"><code>Promise.all</code></div><p>모두 성공해야 성공. 하나라도 실패하면 즉시 그 실패로 끝난다(fail-fast).</p></div>
+        <div class="card"><div class="card__title"><code>Promise.allSettled</code></div><p>성공/실패 상관없이 <b>전부 끝날 때까지</b> 기다려, 각각의 결과를 상태와 함께 배열로 준다.</p></div>
+        <div class="card"><div class="card__title"><code>Promise.race</code></div><p>가장 먼저 끝나는 것(성공이든 실패든) 하나만 결과로 준다.</p></div>
+        <div class="card"><div class="card__title"><code>Promise.any</code></div><p>가장 먼저 <b>성공</b>하는 것 하나를 준다. 전부 실패해야만 실패로 끝난다.</p></div>
+      </div>
+
+      <h3 id="s-async-await">async/await와 try/catch</h3>
+      <p><code>async</code> 함수는 항상 Promise를 반환하고, 그 안에서 <code>await</code>는 Promise가 끝날 때까지 <b>그 함수 내부의 실행만</b> 일시정지한다(전체 프로그램이 멈추는 게 아니다). 에러 처리는 <code>.catch()</code> 대신 익숙한 <code>try/catch</code>로 할 수 있다<sup class="ref"><a href="#r12">[12]</a></sup>.</p>
+
+      <h3 id="s-async-parallel-serial">병렬 vs 직렬 await</h3>
+      <p><code>await</code>를 한 줄씩 순서대로 쓰면(직렬) 앞의 작업이 끝나야 다음이 시작된다. 서로 의존하지 않는 작업이라면 <code>Promise.all</code>로 동시에 시작(병렬)해서 전체 시간을 크게 줄일 수 있다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>serial()</code>은 A를 다 기다린 뒤 B를 <b>시작</b>한다 — 총 600ms 이상.</li>
+            <li><code>parallel()</code>은 A와 B를 <b>동시에</b> 시작하고 둘 다 끝나길 기다린다 — 총 300ms대.</li>
+            <li><code>Promise.allSettled</code>는 하나가 실패해도 나머지 성공 결과를 잃지 않는다.</li>
+            <li><code>try/catch</code>는 <code>await</code>가 reject된 Promise를 던지는 에러를 그대로 잡아낸다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="async-parallel-vs-serial.js" data-height="360">
+<script type="text/plain" class="pg__src">
+function wait(ms, value) {
+  return new Promise(function (resolve) {
+    setTimeout(function () { resolve(value); }, ms);
+  });
+}
+
+async function serial() {
+  console.time('serial');
+  const a = await wait(300, 'A'); // 300ms 기다림
+  const b = await wait(300, 'B'); // 또 300ms 기다림 (총 600ms+)
+  console.timeEnd('serial');
+  return [a, b];
+}
+
+async function parallel() {
+  console.time('parallel');
+  const [a, b] = await Promise.all([wait(300, 'A'), wait(300, 'B')]); // 동시 시작
+  console.timeEnd('parallel');
+  return [a, b];
+}
+
+async function main() {
+  console.log('--- 직렬(serial) await ---');
+  console.log(await serial());
+  console.log('--- 병렬(parallel) Promise.all ---');
+  console.log(await parallel());
+
+  const settled = await Promise.allSettled([
+    wait(50, 'ok'),
+    Promise.reject(new Error('실패!'))
+  ]);
+  console.log('allSettled:', settled);
+
+  try {
+    await Promise.reject(new Error('의도된 에러'));
+  } catch (e) {
+    console.log('catch에서 잡음:', e.message);
+  }
+}
+main();
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-fetch-abort">fetch와 AbortController</h3>
+      <p><span class="t" data-tip="진행 중인 fetch 같은 비동기 작업을 외부에서 취소할 수 있게 해주는 웹 API 객체.">AbortController</span>는 이미 시작된 <code>fetch</code> 요청을 외부에서 취소할 수 있게 해준다<sup class="ref"><a href="#r13">[13]</a></sup>. 컴포넌트가 언마운트되거나 타임아웃이 필요할 때 실무에서 자주 쓰는 패턴이다. <a href="ch05.html#s-tanstack-query">ch05 상태 관리 &amp; 데이터 페칭</a>에서 TanStack Query가 이 취소 로직을 내부적으로 어떻게 자동화하는지 다룬다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/api/fetchWithTimeout.js</span></div>
+        <pre><code class="language-js">async function fetchWithTimeout(url, timeoutMs = 5000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("요청이 시간 초과로 취소되었습니다.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}</code></pre>
+      </div>
+
+      <!-- ================= §8 ================= -->
+      <h2 id="s-array-object"><span class="h2num">§8</span>배열/객체 실전 메서드</h2>
+
+      <h3 id="s-array-methods">map / filter / reduce / find / some / every / flatMap</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>메서드</th><th>반환</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td><code>map</code></td><td>같은 길이의 새 배열</td><td>각 요소를 변환</td></tr>
+            <tr><td><code>filter</code></td><td>조건에 맞는 요소만의 새 배열</td><td>걸러내기</td></tr>
+            <tr><td><code>reduce</code></td><td>누적된 값(무엇이든)</td><td>합계/그룹핑 등 집계<sup class="ref"><a href="#r14">[14]</a></sup></td></tr>
+            <tr><td><code>find</code></td><td>조건에 맞는 첫 요소(없으면 undefined)</td><td>하나 찾기</td></tr>
+            <tr><td><code>some</code></td><td>boolean</td><td>하나라도 조건 만족하는지</td></tr>
+            <tr><td><code>every</code></td><td>boolean</td><td>전부 조건 만족하는지</td></tr>
+            <tr><td><code>flatMap</code></td><td>1단계 평탄화된 새 배열</td><td>map 후 배열을 펼치기</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-destructure-spread-rest">구조분해, 스프레드/rest</h3>
+      <p><span class="t" data-tip="배열이나 객체에서 값을 꺼내 변수에 바로 나눠 담는 문법. const {a,b} = obj 처럼 쓴다.">구조분해할당(destructuring)</span>은 <code>const { name } = user</code>처럼 값을 바로 꺼내 담는다<sup class="ref"><a href="#r15">[15]</a></sup>. <span class="t" data-tip="배열/객체 요소를 펼쳐서 복사하거나 합칠 때 쓰는 ... 문법.">스프레드(spread)</span>는 <code>{ ...obj }</code>처럼 값을 펼쳐 새 배열/객체를 만들 때, <span class="t" data-tip="함수 인자나 구조분해에서 나머지 값을 배열로 모아 받는 ... 문법.">rest</span>는 <code>const [first, ...rest] = arr</code>처럼 "나머지"를 배열로 모을 때 쓴다. 둘 다 <code>...</code>를 쓰지만 위치가 반대다(펼치기 vs 모으기).</p>
+
+      <h3 id="s-optional-nullish">옵셔널 체이닝과 nullish 병합</h3>
+      <p><span class="t" data-tip="?. 연산자. 중간 값이 null/undefined면 에러 대신 undefined를 반환하고 멈춘다.">옵셔널 체이닝(<code>?.</code>)</span>은 중첩된 값을 읽다가 중간에 <code>null</code>/<code>undefined</code>를 만나면 에러 대신 <code>undefined</code>를 반환한다<sup class="ref"><a href="#r16">[16]</a></sup>. <span class="t" data-tip="?? 연산자. 왼쪽이 null이나 undefined일 때만 오른쪽 기본값을 쓴다. 0이나 빈문자열은 그대로 둔다.">nullish 병합(<code>??</code>)</span>은 왼쪽이 <code>null</code>/<code>undefined</code>일 때만 오른쪽 기본값을 쓴다<sup class="ref"><a href="#r17">[17]</a></sup> — <code>||</code>와 달리 <code>0</code>이나 빈 문자열 같은 falsy 값은 그대로 살려둔다.</p>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>value || 0</code>은 <code>value</code>가 <code>0</code>이어도 오른쪽 기본값으로 덮어써버린다("재고 0개"가 "기본값"으로 둔갑). 숫자 0이나 빈 문자열을 유효한 값으로 다뤄야 한다면 반드시 <code>??</code>를 써야 한다.
+      </div>
+
+      <h3 id="s-object-entries-sort">Object.entries/keys/values와 정렬 주의점</h3>
+      <p>객체를 순회하며 변환해야 할 때는 <code>Object.entries(obj)</code>로 <code>[key, value]</code> 쌍의 배열을 만들어 배열 메서드를 그대로 쓸 수 있다. <code>Object.keys()</code>/<code>Object.values()</code>는 각각 키만, 값만 뽑는다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>object-entries.js</span></div>
+        <pre><code class="language-js">const priceByCity = { Seoul: 1200, Busan: 900, Incheon: 1000 };
+
+const rows = Object.entries(priceByCity).map(([city, price]) => ({
+  city,
+  price,
+  label: `${city}: ${price}원`
+}));
+
+console.log(rows);
+// [{city:"Seoul",...}, {city:"Busan",...}, {city:"Incheon",...}]</code></pre>
+      </div>
+      <p><code>Array.from()</code>은 배열이 아닌 <b>배열 같은 값</b>(유사 배열, iterable)을 진짜 배열로 바꿔준다. <code>document.querySelectorAll()</code>이 반환하는 NodeList나 <code>Set</code>을 배열 메서드로 다루고 싶을 때 자주 쓴다.</p>
+      <div class="note note--danger">
+        <span class="note__t">주의</span>
+        <code>array.sort()</code>는 <b>원본 배열을 직접 변경(mutate)</b>한다 — <code>map</code>/<code>filter</code>와 다르다. React 상태나 원본 데이터를 실수로 정렬해버리지 않으려면 <code>[...array].sort()</code>처럼 복사본을 먼저 만들고 정렬해야 한다. 숫자 배열을 <code>sort()</code>에 비교 함수 없이 넘기면 문자열 기준으로 정렬되어 <code>[10, 2, 1]</code>이 <code>[1, 10, 2]</code>가 되는 것도 흔한 실수다.
+      </div>
+
+      <h3 id="s-transform-practice">실습: API 응답 → 화면용 데이터 변환</h3>
+      <p>실무에서 가장 많이 하는 작업은 서버가 준 원본 데이터를 화면에 맞는 모양으로 바꾸는 것이다. 아래 예제에서 방금 배운 메서드들을 한 번에 조합해본다.</p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>.filter(u =&gt; u.age &gt;= 19)</code>로 성인만 남긴다.</li>
+            <li><code>.map()</code> 안에서 구조분해로 <code>name</code>만 꺼내고, <code>u.address?.city ?? '미상'</code>로 안전하게 도시를 읽는다.</li>
+            <li><code>.reduce()</code>로 도시별 인원수를 객체로 집계한다.</li>
+            <li><code>[first, ...rest]</code>로 첫 요소와 나머지를 분리한다.</li>
+            <li><code>{ ...u, age: u.age + 1 }</code>로 원본을 건드리지 않고 새 객체를 만든다(불변 업데이트).</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="api-transform.js" data-height="380">
+<script type="text/plain" class="pg__src">
+// 서버에서 이런 배열이 왔다고 가정
+const apiResponse = [
+  { id: 1, name: 'Kim', age: 17, address: { city: 'Seoul' } },
+  { id: 2, name: 'Lee', age: 25, address: null },
+  { id: 3, name: 'Park', age: 31, address: { city: 'Busan' } }
+];
+
+// 화면에는 "성인만, 이름과 도시만, 도시 없으면 '미상'"이 필요하다
+const view = apiResponse
+  .filter(function (u) { return u.age >= 19; })
+  .map(function (u) {
+    const { name } = u; // 구조분해로 필요한 값만 꺼내기
+    const city = u.address?.city ?? '미상'; // 옵셔널 체이닝 + nullish 병합
+    return { name, city };
+  });
+console.log('화면용 데이터:', view);
+
+// reduce로 집계: 도시별 인원수
+const byCity = apiResponse.reduce(function (acc, u) {
+  const city = u.address?.city ?? '미상';
+  acc[city] = (acc[city] || 0) + 1;
+  return acc;
+}, {});
+console.log('도시별 인원수:', byCity);
+
+// spread/rest 활용: 첫 번째만 분리하고 나머지는 배열로
+const [first, ...rest] = apiResponse;
+console.log('첫번째:', first.name, '/ 나머지 수:', rest.length);
+
+// 불변 업데이트: 스프레드로 새 배열/객체 생성 (원본 유지)
+const promoted = apiResponse.map(function (u) {
+  return u.id === 1 ? { ...u, age: u.age + 1 } : u;
+});
+console.log('원본 유지:', apiResponse[0].age, '/ 새 배열:', promoted[0].age);
+
+// some / every / find / flatMap
+console.log('한 명이라도 성인?', apiResponse.some(function (u) { return u.age >= 19; }));
+console.log('모두 성인?', apiResponse.every(function (u) { return u.age >= 19; }));
+console.log('id로 찾기:', apiResponse.find(function (u) { return u.id === 2; }));
+console.log('flatMap 예시:', [[1, 2], [3], [4, 5]].flatMap(function (x) { return x; }));
+</script>
+        </div>
+      </div>
+
+      <!-- ================= §9 ================= -->
+      <h2 id="s-modules"><span class="h2num">§9</span>모듈 시스템</h2>
+
+      <h3 id="s-esm-basics">ESM: import/export</h3>
+      <p><span class="t" data-tip="import/export 문법으로 파일 단위 모듈을 정의하는 JS 표준 모듈 시스템.">ESM(ES Modules)</span>은 파일 하나를 독립된 모듈로 취급하고, <code>export</code>로 공개할 것을 정하고 <code>import</code>로 가져다 쓰는 표준 문법이다<sup class="ref"><a href="#r18">[18]</a></sup>. 각 모듈은 자기만의 스코프를 가지므로, 전역 변수 충돌 걱정 없이 파일을 나눠 개발할 수 있다.</p>
+
+      <h3 id="s-named-default">named export vs default export</h3>
+      <p>한 파일에서 <code>export</code>는 여러 개(named) 붙일 수 있고, <code>export default</code>는 파일당 하나만 붙일 수 있다. named export는 가져올 때 <code>{ }</code>로 정확한 이름을 맞춰야 하고, default export는 아무 이름으로나 받을 수 있다.</p>
+
+      <div class="grid grid--2">
+        <div class="codeblock">
+          <div class="codeblock__bar"><span>src/utils/format.js</span></div>
+          <pre><code class="language-js">export function formatDate(date) {
+  return new Intl.DateTimeFormat("ko-KR").format(date);
+}
+
+export const DEFAULT_LOCALE = "ko-KR";
+
+export default function formatCurrency(value) {
+  return new Intl.NumberFormat(DEFAULT_LOCALE, {
+    style: "currency",
+    currency: "KRW"
+  }).format(value);
+}</code></pre>
+        </div>
+        <div class="codeblock">
+          <div class="codeblock__bar"><span>src/App.js</span></div>
+          <pre><code class="language-js">import formatCurrency, { formatDate, DEFAULT_LOCALE } from "./utils/format.js";
+
+console.log(formatCurrency(15000));
+console.log(formatDate(new Date()));
+console.log(DEFAULT_LOCALE);</code></pre>
+        </div>
+      </div>
+
+      <h3 id="s-esm-vs-commonjs">CommonJS와의 차이</h3>
+      <p>Node.js는 오랫동안 <span class="t" data-tip="require/module.exports로 모듈을 다루는 Node.js의 전통적인 모듈 시스템. 동기적으로 로드된다.">CommonJS(CJS)</span>를 기본 모듈 시스템으로 써왔다. 가장 큰 차이는 로딩 방식이다 — CJS의 <code>require()</code>는 실행 중에 동기적으로 파일을 읽어 들이지만, ESM의 <code>import</code>는 실행 전에 정적으로 의존 관계를 분석한다(정적 분석 가능). 이 차이 때문에 ESM에서만 다음 절의 트리셰이킹이 가능하다.</p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>CommonJS 비교</span></div>
+        <pre><code class="language-js">// module.js (CommonJS)
+function add(a, b) {
+  return a + b;
+}
+module.exports = { add };
+
+// main.js (CommonJS)
+const { add } = require("./module.js");
+console.log(add(1, 2));</code></pre>
+      </div>
+
+      <div class="note note--info">
+        <span class="note__t">참고</span>
+        ESM은 브라우저와 최신 Node.js 모두에서 표준으로 지원되고, Vite 같은 번들러도 ESM을 기본 전제로 동작한다. 서로 다른 파일이 서로를 <code>import</code>하는 순환 의존(circular dependency)이 생기면 ESM은 "아직 초기화되지 않은 바인딩"을 참조할 수 있어 예상치 못한 <code>undefined</code>가 나올 수 있다 — 파일 간 의존 방향을 한쪽으로만 흐르게 설계하는 것이 근본적인 해법이다.
+      </div>
+
+      <h3 id="s-tree-shaking-link">트리셰이킹과의 관계</h3>
+      <p><span class="t" data-tip="번들러가 실제로 사용되지 않는 export를 정적 분석으로 찾아내 최종 번들에서 제거하는 최적화.">트리셰이킹(tree shaking)</span>은 번들러가 실제로 import되지 않는 export를 최종 번들에서 잘라내는 최적화다. ESM의 <code>import</code>/<code>export</code>가 <b>실행 전에 정적으로</b> 분석 가능하기 때문에 가능한 최적화이고, 동적으로 모듈을 로드하는 CommonJS에서는 이 분석이 훨씬 어렵다. Vite/Rollup이 이 최적화를 어떻게 수행하는지는 <a href="ch07.html#s-tree-shaking">ch07 빌드 도구 &amp; 패키지 매니저</a>에서 다룬다.</p>
+
+      <div class="note note--spec">
+        <span class="note__t">스펙 노트</span>
+        브라우저는 <code>&lt;script type="module"&gt;</code>로 ESM을 네이티브 실행할 수 있다. 이때 스크립트는 자동으로 <code>defer</code>와 동일한 순서 보장을 갖는다<sup class="ref"><a href="#r1">[1]</a></sup> — §1에서 다룬 파싱/실행 순서 원리가 여기서도 그대로 적용된다.
+      </div>
+
+      <h3 id="s-module-scope-live">라이브로 확인: 모듈은 왜 서로의 변수를 침범하지 못하나</h3>
+      <p>실제 <code>import</code>/<code>export</code>는 이 플레이그라운드(UMD 환경)에서 쓸 수 없지만, §4에서 배운 클로저(IIFE)로 "파일마다 독립된 스코프를 갖는다"는 ESM의 핵심 성질을 그대로 재현할 수 있다. 아래에서 두 모듈이 같은 이름의 변수를 각자 가지고 있어도 서로 충돌하지 않는 것을 확인한다.</p>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>moduleA</code>와 <code>moduleB</code>는 각자의 IIFE 스코프 안에 독립된 <code>count</code>를 갖는다.</li>
+            <li>전역에서는 <code>count</code>라는 변수 자체가 보이지 않는다 — <code>export</code>한 것만 노출되는 것과 같은 효과다.</li>
+            <li>실제 ESM에서는 이 격리가 번들러/브라우저가 파일 단위로 자동으로 해준다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="module-scope-simulation.js" data-height="260">
+<script type="text/plain" class="pg__src">
+// IIFE로 모듈 스코프를 흉내낸다 -- 실제로는 import/export가 이 역할을 대신한다
+const moduleA = (function () {
+  let count = 0;
+  return { increment: function () { return ++count; } };
+})();
+
+const moduleB = (function () {
+  let count = 100; // moduleA의 count와 이름만 같을 뿐 완전히 다른 변수
+  return { increment: function () { return ++count; } };
+})();
+
+console.log('moduleA:', moduleA.increment(), moduleA.increment()); // 1 2
+console.log('moduleB:', moduleB.increment(), moduleB.increment()); // 101 102
+
+// 전역에서는 count 자체가 존재하지 않는다
+console.log('전역에서 count 접근:', typeof count); // 'undefined'
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-dynamic-import">동적 import()와 코드 스플리팅 예고</h3>
+      <p><code>import</code> 문은 파일 맨 위에서만 쓸 수 있지만, 함수 형태의 <code>import()</code>는 코드 어디서나 호출할 수 있고 그 모듈을 담은 Promise를 반환한다. 페이지가 처음 열릴 때 필요 없는 모듈(예: 특정 버튼을 눌러야만 쓰는 무거운 라이브러리)을 이렇게 나중에 불러오면, 초기 번들 크기를 줄일 수 있다. 이 기법을 번들러 레벨에서 자동화한 것이 "코드 스플리팅"이며, <a href="ch07.html#s-code-splitting">ch07 빌드 도구 &amp; 패키지 매니저</a>에서 Vite 기준으로 이어서 다룬다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>dynamic-import.js</span></div>
+        <pre><code class="language-js">button.addEventListener("click", async () => {
+  const { formatCurrency } = await import("./utils/format.js");
+  console.log(formatCurrency(15000));
+});</code></pre>
+      </div>
+
+      <!-- ================= §10 ================= -->
+      <h2 id="s-checklist"><span class="h2num">§10</span>이해도 점검</h2>
+      <p>아래 항목을 스스로 설명할 수 있으면 이 챕터를 넘어가도 좋다. 체크 상태는 브라우저에 저장된다.</p>
+      <ul class="check">
+        <li><input type="checkbox">브라우저가 script/defer/async 태그를 만났을 때 각각 언제 다운로드하고 언제 실행하는지 설명할 수 있다</li>
+        <li><input type="checkbox">원시 타입 7가지를 말할 수 있다</li>
+        <li><input type="checkbox">값 복사와 참조 복사의 차이를, 왜 "복사했는데 원본이 바뀌는지"로 설명할 수 있다</li>
+        <li><input type="checkbox">===와 == 차이, NaN을 비교하는 올바른 방법을 안다</li>
+        <li><input type="checkbox">얕은 복사와 깊은 복사의 차이, structuredClone의 용도를 안다</li>
+        <li><input type="checkbox">var/let/const의 스코프·재선언·재할당 차이와 TDZ를 설명할 수 있다</li>
+        <li><input type="checkbox">호이스팅이 무엇인지, var와 let/const에서 왜 다르게 동작하는지 안다</li>
+        <li><input type="checkbox">클로저의 정의와 실전 활용 사례(모듈 패턴, 디바운스 등)를 2개 이상 말할 수 있다</li>
+        <li><input type="checkbox">반복문에서 var로 인한 클로저 함정을 재현하고 let으로 고칠 수 있다</li>
+        <li><input type="checkbox">this가 호출 방식에 따라 어떻게 달라지는지, 화살표 함수가 왜 예외인지 설명할 수 있다</li>
+        <li><input type="checkbox">call/apply/bind의 차이를 안다</li>
+        <li><input type="checkbox">콜 스택, 마이크로태스크 큐, 태스크 큐의 실행 우선순위를 안다</li>
+        <li><input type="checkbox">setTimeout(0)과 Promise.then 중 무엇이 먼저 실행되는지, 그 이유를 안다</li>
+        <li><input type="checkbox">Promise.all / allSettled / race / any의 차이를 안다</li>
+        <li><input type="checkbox">병렬 await와 직렬 await의 성능 차이를 설명할 수 있다</li>
+        <li><input type="checkbox">옵셔널 체이닝(?.)과 nullish 병합(??)을 실무 코드에 쓸 수 있다</li>
+        <li><input type="checkbox">ESM named/default export의 차이, CommonJS와의 차이를 안다</li>
+        <li><input type="checkbox">falsy 값 8가지를 말할 수 있고, <code>+</code> 연산자의 타입 변환 규칙을 안다</li>
+        <li><input type="checkbox"><code>array.sort()</code>가 원본을 변경한다는 것을 알고, 복사 후 정렬하는 습관이 있다</li>
+      </ul>
+
+      <section class="refs">
+        <h2 id="s-refs">참고 문헌</h2>
+        <ol>
+          <li id="r1"><span class="src">WHATWG</span> — "HTML Standard: Scripting". <a href="https://html.spec.whatwg.org/multipage/scripting.html" target="_blank" rel="noopener">html.spec.whatwg.org</a> (2026-08 확인)</li>
+          <li id="r2"><span class="src">MDN Web Docs</span> — "Equality comparisons and sameness". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Equality_comparisons_and_sameness" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r3"><span class="src">MDN Web Docs</span> — "NaN". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/NaN" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r4"><span class="src">MDN Web Docs</span> — "structuredClone()". <a href="https://developer.mozilla.org/ko/docs/Web/API/Window/structuredClone" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r5"><span class="src">MDN Web Docs</span> — "let". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r6"><span class="src">MDN Web Docs</span> — "Hoisting". <a href="https://developer.mozilla.org/ko/docs/Glossary/Hoisting" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r7"><span class="src">MDN Web Docs</span> — "Closures". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Closures" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r8"><span class="src">MDN Web Docs</span> — "this". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/this" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r9"><span class="src">MDN Web Docs</span> — "Function.prototype.bind()". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Function/bind" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r10"><span class="src">MDN Web Docs</span> — "Event loop". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Event_loop" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r11"><span class="src">MDN Web Docs</span> — "Using promises". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Using_promises" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r12"><span class="src">MDN Web Docs</span> — "async function". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/async_function" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r13"><span class="src">MDN Web Docs</span> — "AbortController". <a href="https://developer.mozilla.org/ko/docs/Web/API/AbortController" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r14"><span class="src">MDN Web Docs</span> — "Array.prototype.reduce()". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r15"><span class="src">MDN Web Docs</span> — "Destructuring assignment". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r16"><span class="src">MDN Web Docs</span> — "Optional chaining (?.)". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Optional_chaining" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r17"><span class="src">MDN Web Docs</span> — "Nullish coalescing operator (??)". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r18"><span class="src">MDN Web Docs</span> — "JavaScript modules". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Modules" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r19"><span class="src">Ecma International</span> — "ECMA-262: ECMAScript Language Specification". <a href="https://www.ecma-international.org/publications-and-standards/standards/ecma-262/" target="_blank" rel="noopener">ecma-international.org</a> (2026-08 확인)</li>
+        </ol>
+      </section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

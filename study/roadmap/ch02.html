@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH02 · TypeScript 타입 시스템 — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="02">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">CHAPTER 02</div>
+    <h1>TypeScript 타입 시스템</h1>
+    <p>TypeScript는 JavaScript 문법 위에 타입 검사기를 얹은 언어다. 이 챕터에서는 기본 타입부터 제네릭, 유틸리티 타입, React와의 결합, 실전 tsconfig까지 실무에서 매일 마주치는 순서로 다룬다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">Narrowing</span>
+      <span class="pill">Generic</span>
+      <span class="pill">Utility Types</span>
+      <span class="pill">tsconfig</span>
+      <span class="pill">React + TS</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+
+      <p class="lead">
+        이 챕터는 다음 질문에 답한다. JavaScript 대신 TypeScript를 쓰면 정확히 무엇이 달라지는가?
+        <code>any</code>, <code>unknown</code>, <code>never</code>는 왜 서로 다른 타입인가?
+        유니온 타입으로 분기할 때 TypeScript는 어떻게 타입을 좁혀나가는가?
+        제네릭은 왜 필요하고 <code>useState&lt;T&gt;</code>는 내부에서 어떻게 동작하는가?
+        마지막으로 <code>tsconfig.json</code>의 <code>strict</code> 계열 옵션들은 각각 무엇을 막아주는가?
+      </p>
+
+      <!-- ============================================================ -->
+      <h2 id="s-why-types"><span class="h2num">§1</span>왜 타입인가</h2>
+
+      <p>
+        JavaScript는 <span class="t" data-tip="변수의 타입을 코드 실행 도중에 결정하는 방식. 같은 변수에 문자열을 넣었다가 숫자를 넣어도 문법 에러가 나지 않는다.">동적 타입</span> 언어다.
+        변수 <code>x</code>가 지금 문자열인지 숫자인지 객체인지는 그 줄이 <b>실행되는 순간</b>에야 정해진다.
+        그래서 <code>user.address.city</code>처럼 중첩된 값을 읽다가 <code>address</code>가 <code>undefined</code>이면,
+        코드를 작성할 때는 아무 문제 없어 보이다가 사용자가 그 버튼을 누르는 순간 화면이 하얗게 멈추는 식의
+        <span class="t" data-tip="프로그램이 실제로 실행되는 시점. 컴파일 타임과 대비되는 개념으로, 이 시점의 에러는 사용자가 직접 마주친다.">런타임</span> 에러가 발생한다.
+      </p>
+      <p>
+        TypeScript는 JavaScript 문법을 그대로 쓰면서, 코드를 실행하기 전 단계인
+        <span class="t" data-tip="소스 코드를 실행 가능한 형태로 변환하는 시점. TypeScript는 이 시점에 타입 규칙을 어긴 코드를 찾아 에러로 표시한다.">컴파일 타임</span>에
+        <span class="t" data-tip="변수/함수/객체가 어떤 형태의 값을 담아야 하는지 코드를 실행하지 않고 미리 검증하는 것. 오타나 잘못된 값 전달을 실행 전에 잡아준다.">정적 타입 검사</span>를
+        수행하는 검사기를 하나 더 붙인 것이다. <code>user.address.city</code>를 쓰기 전에 이미 에디터가 빨간 줄로
+        "address는 undefined일 수 있다"고 알려준다. 버그를 찾는 시점이 "사용자가 발견"에서 "개발자가 타이핑하는 순간"으로 앞당겨지는 것,
+        이것이 타입을 쓰는 근본적인 이유다<sup class="ref"><a href="#r1">[1]</a></sup>.
+      </p>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart LR
+  subgraph JS["JavaScript — 동적 타입"]
+    A1["코드 작성"] --> A2["그대로 실행"] --> A3["사용자 화면에서 TypeError 발생"]
+  end
+  subgraph TS["TypeScript — 정적 타입"]
+    B1["코드 작성"] --> B2["컴파일 타임에 타입 검사"] --> B3["에디터에 즉시 빨간 줄 표시"] --> B4["에러를 고친 뒤에만 실행"]
+  end
+        </pre>
+        <div class="fig__cap"><b>그림 1.</b> 같은 버그라도 JavaScript는 실행 후(런타임)에, TypeScript는 실행 전(컴파일 타임)에 드러난다. <span class="muted">출처: TypeScript Handbook — The Basics</span></div>
+      </div>
+
+      <h3 id="s-type-erasure">타입은 컴파일 후 사라진다 (Type Erasure)</h3>
+      <p>
+        여기서 흔히 오해하는 지점이 있다. TypeScript의 타입은 브라우저나 Node.js가 실행하는 최종 코드에는
+        <b>존재하지 않는다</b>. 컴파일 과정에서 타입 주석과 <code>interface</code> 같은 타입 전용 문법은
+        전부 걷어내지고, 순수한 JavaScript만 남는다. 이 현상을
+        <span class="t" data-tip="컴파일 과정에서 타입 정보가 모두 제거되고 순수 JavaScript만 남는 것. 런타임에는 타입이 존재하지 않으므로, if(typeof x === 'User')처럼 타입 자체로 분기할 수 없다.">타입 소거(type erasure)</span>라고 부른다<sup class="ref"><a href="#r1">[1]</a></sup>.
+      </p>
+
+      <div class="fig">
+        <svg viewBox="0 0 760 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TypeScript 소스가 컴파일되며 타입이 사라지는 과정">
+          <defs>
+            <marker id="arrow02" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+            </marker>
+          </defs>
+          <rect x="20" y="30" width="220" height="120" rx="14" fill="none" stroke="var(--accent)" stroke-width="1.6"></rect>
+          <text x="130" y="70" text-anchor="middle" fill="currentColor" font-size="13" font-weight="700">TypeScript 소스</text>
+          <text x="130" y="94" text-anchor="middle" fill="currentColor" font-size="11.5" opacity="0.8">function f(x: number)</text>
+          <text x="130" y="112" text-anchor="middle" fill="currentColor" font-size="11.5" opacity="0.8">interface User { id: number }</text>
+          <text x="130" y="130" text-anchor="middle" fill="var(--ok)" font-size="11" font-weight="700">타입 정보 있음</text>
+
+          <line x1="248" y1="90" x2="330" y2="90" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#arrow02)"></line>
+          <text x="289" y="76" text-anchor="middle" fill="currentColor" font-size="11">tsc / babel</text>
+          <text x="289" y="106" text-anchor="middle" fill="currentColor" font-size="10.5" opacity="0.75">컴파일</text>
+
+          <rect x="336" y="30" width="220" height="120" rx="14" fill="none" stroke="var(--fg-mute)" stroke-width="1.6"></rect>
+          <text x="446" y="70" text-anchor="middle" fill="currentColor" font-size="13" font-weight="700">JavaScript 출력</text>
+          <text x="446" y="94" text-anchor="middle" fill="currentColor" font-size="11.5" opacity="0.8">function f(x)</text>
+          <text x="446" y="112" text-anchor="middle" fill="currentColor" font-size="11.5" opacity="0.8">// interface는 통째로 삭제됨</text>
+          <text x="446" y="130" text-anchor="middle" fill="var(--danger)" font-size="11" font-weight="700">타입 정보 없음</text>
+
+          <line x1="564" y1="90" x2="646" y2="90" stroke="var(--fg-mute)" stroke-width="1.6" marker-end="url(#arrow02)"></line>
+          <text x="605" y="76" text-anchor="middle" fill="currentColor" font-size="11">실행</text>
+
+          <rect x="652" y="30" width="96" height="120" rx="14" fill="var(--accent-weak)" stroke="var(--accent-line)" stroke-width="1.6"></rect>
+          <text x="700" y="80" text-anchor="middle" fill="currentColor" font-size="12" font-weight="700">브라우저</text>
+          <text x="700" y="98" text-anchor="middle" fill="currentColor" font-size="12" font-weight="700">/ Node.js</text>
+        </svg>
+        <div class="fig__cap"><b>그림 2.</b> 타입은 컴파일 시점의 도구일 뿐, 실행 시점의 JavaScript에는 남지 않는다. <span class="muted">출처: TypeScript Handbook — The Basics</span></div>
+      </div>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <p>오른쪽 코드는 <code>interface User</code>와 타입 주석을 쓴 정상적인 TypeScript다. 이 플레이그라운드는 Babel로 타입만 <b>지우고</b> 실행하기 때문에, 타입을 어긴 <code>bad</code> 값을 넣어도 컴파일 에러 없이 그대로 돈다 — 실제 프로젝트의 에디터/<code>tsc</code>라면 <code>bad</code> 줄에 빨간 줄이 떴을 것이다<sup class="ref"><a href="#r15">[15]</a></sup>.</p>
+          <ul>
+            <li><code>interface User</code> — 객체의 형태를 이름 붙여 정의한다.</li>
+            <li><code>function greet(user: User)</code> — 매개변수가 반드시 <code>User</code> 형태여야 한다고 선언.</li>
+            <li><code>const bad: any = ...</code> — <code>any</code>는 타입 검사를 끄는 탈출구다 (§2에서 다룬다).</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="erasure.ts" data-height="200">
+<script type="text/plain" class="pg__src">
+interface User {
+  id: number;
+  name: string;
+}
+
+function greet(user: User): string {
+  return `안녕하세요, ${user.name}님 (#${user.id})`;
+}
+
+const u: User = { id: 1, name: "지수" };
+console.log(greet(u));
+
+// 이 값은 User 타입 규칙을 어긴다 (id가 문자열, name이 숫자).
+// 실제 프로젝트라면 tsc가 컴파일을 막지만,
+// 이 플레이그라운드(Babel)는 타입을 "지운 뒤" 그대로 실행하므로 에러 없이 동작한다.
+const bad: any = { id: "abc", name: 42 };
+console.log(greet(bad));
+
+console.log("타입은 여기(런타임)에는 존재하지 않는다. 오직 컴파일 타임에만 검사된다.");
+</script>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        타입을 "런타임에 값을 검증해주는 기능"으로 착각하는 것. TypeScript는 컴파일 타임 도구다.
+        외부 API 응답처럼 실제로 런타임에 형태를 확인해야 하는 값은 <code>zod</code> 같은 런타임 검증 라이브러리나
+        수동 검증 함수가 따로 필요하다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        TypeScript는 JavaScript + 정적 타입 검사기다. 버그를 실행 후가 아니라 작성 중에 잡아준다.
+        단, 타입은 컴파일 후 사라지므로(type erasure) 런타임 값 검증과는 별개다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-basic-types"><span class="h2num">§2</span>기본 타입</h2>
+
+      <h3 id="s-primitive-types">Primitive 타입</h3>
+      <p>
+        JavaScript의 원시값 타입은 TypeScript에서도 그대로 소문자로 쓴다: <code>string</code>, <code>number</code>,
+        <code>boolean</code>, <code>null</code>, <code>undefined</code>, <code>symbol</code>, <code>bigint</code><sup class="ref"><a href="#r2">[2]</a></sup>.
+        변수 선언 뒤 <code>: 타입</code>을 붙이는 것을 타입 주석이라 하는데, 초기값만으로 타입을 알 수 있으면
+        TypeScript가 스스로 알아내는 <span class="t" data-tip="변수에 타입 주석을 쓰지 않아도, 초기값을 보고 컴파일러가 타입을 자동으로 결정하는 기능. const n = 3이면 n은 자동으로 number로 추론된다.">타입 추론(type inference)</span>이
+        동작하므로 매번 타입을 적을 필요는 없다.
+      </p>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>primitives.ts</span></div>
+        <pre><code class="language-ts">let id: number = 1;
+let name: string = "지수";
+let done: boolean = false;
+
+// 초기값이 있으면 타입 추론이 동작한다 — 아래 세 줄은 주석이 없어도 타입이 고정된다.
+let inferredId = 1;        // number로 추론
+let inferredName = "지수";  // string으로 추론
+</code></pre>
+      </div>
+
+      <h3 id="s-array-tuple">배열과 튜플</h3>
+      <p>
+        같은 타입이 여러 개 들어가는 배열은 <code>string[]</code> 또는 <code>Array&lt;string&gt;</code>로 쓴다.
+        길이와 각 자리의 타입이 고정된 배열은 <b>튜플(tuple)</b>이라 부르고 <code>[string, number]</code>처럼 쓴다.
+        React의 <code>useState</code>가 <code>[값, setter]</code> 형태의 배열을 반환하는 것이 대표적인 튜플 사용 예다<sup class="ref"><a href="#r17">[17]</a></sup>.
+      </p>
+
+      <h3 id="s-any-unknown-never-void">any · unknown · never · void</h3>
+      <p>이 네 타입은 이름이 비슷해 보이지만 역할이 완전히 다르다. 표로 정리한다.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>타입</th><th>의미</th><th>다른 값 대입</th><th>바로 프로퍼티/메서드 사용</th><th>언제 쓰나</th></tr></thead>
+          <tbody>
+            <tr><td><code>any</code></td><td>타입 검사를 완전히 끈다</td><td>가능 (아무 타입이나)</td><td>가능 (검사 안 함, 위험)</td><td>가급적 쓰지 않는다. 외부 라이브러리 타입이 아예 없을 때 최후 수단</td></tr>
+            <tr><td><code>unknown</code></td><td>"안전한 any" — 뭐든 담을 수 있지만 사용 전 확인 필요</td><td>가능</td><td>불가 (narrowing 후에만)</td><td>외부 입력값(API 응답, JSON.parse 결과)의 초기 타입</td></tr>
+            <tr><td><code>never</code></td><td>절대 발생할 수 없는 값의 타입</td><td>불가 (대입할 값 자체가 없음)</td><td>해당 없음</td><td>무한 루프/항상 예외 던지는 함수, switch의 exhaustive check</td></tr>
+            <tr><td><code>void</code></td><td>함수가 의미 있는 값을 반환하지 않음</td><td><code>undefined</code>만 사실상 가능</td><td>해당 없음</td><td>콜백/이벤트 핸들러처럼 "실행만 하고 끝"인 함수의 반환 타입</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>unknown-vs-any.ts</span></div>
+        <pre><code class="language-ts">function handleAny(v: any) {
+  v.toUpperCase(); // 컴파일 통과 — 하지만 v가 숫자면 런타임에 터진다.
+}
+
+function handleUnknown(v: unknown) {
+  // v.toUpperCase(); // 컴파일 에러: unknown은 바로 메서드를 쓸 수 없다.
+  if (typeof v === "string") {
+    v.toUpperCase(); // 좁혀졌으므로(narrowing) 이제 안전하다.
+  }
+}
+</code></pre>
+      </div>
+
+      <h3 id="s-literal-types">리터럴 타입과 as const</h3>
+      <p>
+        <code>string</code>보다 더 좁게, <b>정확한 값 하나</b>를 타입으로 쓸 수도 있다. 이를
+        <span class="t" data-tip="'up'처럼 특정 값 하나만 허용하는 타입. 여러 리터럴을 |로 묶으면 '가능한 값 목록'을 타입으로 표현할 수 있다.">리터럴 타입(literal type)</span>이라 하고,
+        보통 유니온으로 묶어 "가능한 값의 목록"을 표현한다. <code>as const</code>는 배열/객체 리터럴을 "그 값 그대로"
+        고정해서, 넓은 타입(<code>string[]</code>)이 아니라 좁은 리터럴 튜플 타입으로 추론되게 만든다.
+      </p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <p>오른쪽 코드는 튜플, 리터럴 유니온, <code>as const</code>를 한 번에 보여준다.</p>
+          <ul>
+            <li><code>type Pair = [string, number]</code> — <code>useState</code> 반환값과 같은 형태의 튜플.</li>
+            <li><code>type Direction = "up" | "down" | ...</code> — 이 네 문자열 외에는 컴파일 에러.</li>
+            <li><code>as const</code> — 배열을 <code>string[]</code>이 아니라 <code>readonly ["up","down",...]</code>로 고정한다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="literal-tuple.ts" data-height="240">
+<script type="text/plain" class="pg__src">
+type Pair = [name: string, age: number];
+
+function makePair(name: string, age: number): Pair {
+  return [name, age];
+}
+
+const [name, age] = makePair("민준", 27);
+console.log(`${name} / ${age}세`);
+
+// 리터럴 타입 + 유니온: 이 네 값 외에는 컴파일 에러가 난다.
+type Direction = "up" | "down" | "left" | "right";
+
+function move(dir: Direction, px: number) {
+  console.log(`${dir} 방향으로 ${px}px 이동`);
+}
+move("up", 10);
+
+// as const — 배열을 "정확한 리터럴들의 읽기 전용 튜플"로 고정한다.
+const DIRECTIONS = ["up", "down", "left", "right"] as const;
+console.log(DIRECTIONS);
+console.log("as const 없이 썼다면 타입은 string[]이라 'up' 자리에 아무 문자열이나 허용됐을 것이다.");
+</script>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>as const</code>가 붙은 배열/객체는 <b>읽기 전용</b>이 된다. <code>DIRECTIONS.push(...)</code>나
+        <code>DIRECTIONS[0] = "x"</code>는 컴파일 에러다. 값을 바꿀 배열이라면 <code>as const</code>를 쓰면 안 된다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        <code>any</code>는 검사를 끈다(위험), <code>unknown</code>은 안전한 미확인 값이다, <code>never</code>는 발생 불가능한 값,
+        <code>void</code>는 "반환값 없음"이다. 리터럴 타입 + <code>as const</code>로 정확한 값 목록을 타입으로 표현할 수 있다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-object-types"><span class="h2num">§3</span>객체 타입</h2>
+
+      <h3 id="s-interface-vs-type">interface vs type</h3>
+      <p>
+        객체 형태를 이름 붙여 정의하는 방법은 두 가지다: <code>interface</code>와
+        <code>type</code> <span class="t" data-tip="이미 있는 타입에 새 이름을 붙이는 문법. 객체뿐 아니라 유니온, 함수, 튜플 등 어떤 타입에도 별칭을 붙일 수 있다.">alias</span>.
+        기능이 많이 겹치지만 차이가 있다.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>관점</th><th><code>interface</code></th><th><code>type</code></th></tr></thead>
+          <tbody>
+            <tr><td><span class="t" data-tip="같은 이름의 interface를 여러 번 선언하면 자동으로 합쳐지는 TypeScript 기능. type alias에는 없다.">선언 병합(declaration merging)</span></td><td>가능 — 같은 이름을 여러 번 선언하면 자동 병합</td><td>불가 — 같은 이름 재선언은 에러</td></tr>
+            <tr><td>확장</td><td><code>interface B extends A</code></td><td>교차 타입 <code>type B = A &amp; {...}</code></td></tr>
+            <tr><td>유니온 · 튜플 표현</td><td>불가</td><td>가능 (<code>type T = A | B</code>)</td></tr>
+            <tr><td>객체 형태 표현</td><td>적합, 에러 메시지가 더 읽기 쉬움</td><td>적합</td></tr>
+            <tr><td>일반적 관례</td><td>공개 API, React 컴포넌트 props</td><td>유니온, 매핑드 타입, 함수 시그니처</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>둘 중 하나가 "정답"은 아니다<sup class="ref"><a href="#r4">[4]</a></sup>. 팀 컨벤션을 따르되, 유니온이 필요한 순간에는 <code>type</code>이 필수다.</p>
+
+      <h3 id="s-optional-readonly">선택적 프로퍼티와 readonly</h3>
+      <p>
+        프로퍼티 이름 뒤에 <code>?</code>를 붙이면 있어도 되고 없어도 되는 <b>선택적 프로퍼티</b>가 된다.
+        <span class="t" data-tip="한 번 값이 들어간 뒤에는 재할당을 막는 프로퍼티 수식자. 컴파일 타임에만 강제되고, 런타임에 실제로 값이 바뀌는 것을 막지는 않는다.">readonly</span>는
+        객체가 생성된 뒤 해당 프로퍼티를 재할당하지 못하게 막는다 (컴파일 타임 한정).
+      </p>
+
+      <h3 id="s-index-signature">인덱스 시그니처</h3>
+      <p>
+        객체의 키를 미리 다 알 수 없을 때(예: 색상 팔레트, 다국어 메시지 맵) 쓰는
+        <span class="t" data-tip="객체의 키 이름을 미리 정하지 않고, '어떤 타입의 키에는 어떤 타입의 값이 온다'는 규칙만 정의하는 문법. [key: string]: string 형태로 쓴다.">인덱스 시그니처(index signature)</span>는
+        <code>[key: string]: T</code> 형태로 쓴다. 키가 정해져 있다면 인덱스 시그니처보다
+        <code>Record&lt;Key, T&gt;</code>(§6)가 더 안전하다.
+      </p>
+
+      <h3 id="s-function-types">함수 타입</h3>
+      <p>함수도 하나의 타입으로 표현할 수 있다<sup class="ref"><a href="#r6">[6]</a></sup>. 콜백 prop의 타입을 지정할 때 특히 자주 쓴다.</p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>function-type.ts</span></div>
+        <pre><code class="language-ts">type BinaryOp = (a: number, b: number) => number;
+
+const add: BinaryOp = (a, b) => a + b;
+const multiply: BinaryOp = (a, b) => a * b;
+</code></pre>
+      </div>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <p>선택적 프로퍼티(<code>discount?</code>), <code>readonly</code>, 인덱스 시그니처를 한 예제에서 확인한다.</p>
+          <ul>
+            <li><code>readonly id</code> — 생성 후 <code>item.id = 2</code>는 컴파일 에러 (아래 주석 참고).</li>
+            <li><code>discount?: number</code> — 없어도 되는 값이라 <code>p.discount ?</code>로 먼저 확인한다.</li>
+            <li><code>[key: string]: string</code> — 어떤 문자열 키가 와도 값은 문자열이어야 한다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="object-types.ts" data-height="240">
+<script type="text/plain" class="pg__src">
+interface Product {
+  readonly id: number;
+  name: string;
+  price: number;
+  discount?: number;
+}
+
+function finalPrice(p: Product): number {
+  return p.discount ? p.price * (1 - p.discount) : p.price;
+}
+
+const item: Product = { id: 1, name: "키보드", price: 50000, discount: 0.1 };
+console.log(finalPrice(item), "원");
+
+// item.id = 2; // readonly라서 실제 프로젝트라면 컴파일 에러가 난다.
+
+interface StringMap {
+  [key: string]: string; // 인덱스 시그니처: 어떤 키가 올지 미리 모를 때
+}
+
+const colors: StringMap = { primary: "#3b5bdb", danger: "#d64258" };
+console.log(colors["primary"], colors.danger);
+</script>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        인덱스 시그니처는 존재하지 않는 키에 접근해도 타입 상으로는 값이 있다고 가정한다.
+        <code>colors["존재안함"]</code>은 <code>string</code>으로 추론되지만 실제로는 <code>undefined</code>다.
+        §9의 <code>noUncheckedIndexedAccess</code> 옵션이 이 문제를 막아준다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        <code>interface</code>는 선언 병합이 되고 확장이 쉬워 공개 API/props에 적합, <code>type</code>은 유니온·매핑드 타입까지 표현 가능해 더 범용적이다.
+        <code>?</code>는 선택적, <code>readonly</code>는 재할당 금지, 인덱스 시그니처는 동적인 키를 표현한다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-narrowing"><span class="h2num">§4</span>유니온 · 교차 · 타입 좁히기</h2>
+
+      <p>
+        <span class="t" data-tip="여러 타입 중 하나일 수 있음을 |로 표현하는 타입. string | number는 '문자열이거나 숫자'라는 뜻이다.">유니온 타입(union type)</span>은
+        "이거 아니면 저거"(<code>A | B</code>), <span class="t" data-tip="여러 타입의 조건을 모두 만족해야 함을 &amp;로 표현하는 타입. 보통 여러 객체 타입을 합칠 때 쓴다.">교차 타입(intersection type)</span>은
+        "이것도 저것도 전부"(<code>A &amp; B</code>)를 뜻한다. 실무에서는 유니온을 압도적으로 더 자주 쓴다 —
+        API 응답이 성공/실패 중 하나이거나, prop이 문자열이거나 함수이거나 하는 식이다.
+      </p>
+      <p>
+        문제는 <code>string | number</code> 타입의 값에 <code>.toUpperCase()</code>를 바로 부를 수 없다는 것이다
+        (number에는 그 메서드가 없으므로). 조건문으로 "지금 이 값은 확실히 string이다"를 증명해야 하는데, 이 과정을
+        <span class="t" data-tip="유니온 타입 값을 if/switch 등으로 검사해서, 그 분기 안에서는 더 구체적인 타입으로 확정하는 과정. TypeScript 컴파일러가 조건문을 분석해 자동으로 적용한다.">타입 좁히기(narrowing)</span>라고
+        부른다<sup class="ref"><a href="#r3">[3]</a></sup>.
+      </p>
+
+      <h3 id="s-narrowing-typeof-instanceof-in">typeof · in · instanceof</h3>
+      <p>가장 많이 쓰는 세 가지 좁히기 방법이다.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>연산자</th><th>무엇을 검사하나</th><th>주로 쓰는 상황</th></tr></thead>
+          <tbody>
+            <tr><td><code>typeof v === "string"</code></td><td>primitive 타입 구분</td><td><code>string | number | boolean</code> 좁히기<sup class="ref"><a href="#r20">[20]</a></sup></td></tr>
+            <tr><td><code>"key" in v</code></td><td>객체에 특정 프로퍼티가 있는지</td><td>공통 필드가 없는 객체 유니온 좁히기<sup class="ref"><a href="#r18">[18]</a></sup></td></tr>
+            <tr><td><code>v instanceof Klass</code></td><td>특정 클래스의 인스턴스인지</td><td><code>Error</code> 하위 클래스 구분, DOM 요소 구분<sup class="ref"><a href="#r19">[19]</a></sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-type-guard-function">커스텀 타입 가드 함수</h3>
+      <p>
+        위 세 연산자로 표현이 안 되는 복잡한 조건은 직접
+        <span class="t" data-tip="반환 타입이 'x is Foo' 형태인 함수. true를 반환하면 그 지점 이후로 인자가 Foo 타입으로 좁혀졌다고 컴파일러에 알려준다.">타입 가드(type guard)</span> 함수를
+        만들 수 있다. 반환 타입을 <code>value is Foo</code>로 적으면, 이 함수가 <code>true</code>를 반환한 분기에서
+        TypeScript가 자동으로 타입을 좁혀준다.
+      </p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>typeof id === "string"</code> — 그 블록 안에서 <code>id</code>는 <code>string</code>으로 확정.</li>
+            <li><code>"meow" in animal</code> — <code>Cat</code> 전용 필드 존재 여부로 <code>Cat | Dog</code>를 나눈다.</li>
+            <li><code>e instanceof ApiError</code> — 클래스 상속 관계로 에러 종류를 구분한다.</li>
+            <li><code>function isCat(a): a is Cat</code> — 커스텀 타입 가드. 호출부에서 <code>if (isCat(a))</code>로 쓰면 좁혀진다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="narrowing.ts" data-height="280">
+<script type="text/plain" class="pg__src">
+function printId(id: string | number) {
+  if (typeof id === "string") {
+    console.log("문자열 ID:", id.toUpperCase());
+  } else {
+    console.log("숫자 ID:", id.toFixed(0));
+  }
+}
+printId("abc");
+printId(42);
+
+interface Cat { meow(): void }
+interface Dog { bark(): void }
+
+function speak(animal: Cat | Dog) {
+  if ("meow" in animal) animal.meow();
+  else animal.bark();
+}
+speak({ meow: () => console.log("야옹") });
+speak({ bark: () => console.log("멍멍") });
+
+class ApiError extends Error {}
+
+function handle(e: unknown) {
+  if (e instanceof ApiError) console.log("API 에러:", e.message);
+  else if (e instanceof Error) console.log("일반 에러:", e.message);
+  else console.log("알 수 없는 에러:", e);
+}
+handle(new ApiError("타임아웃"));
+handle(new Error("일반 에러"));
+handle("그냥 문자열");
+
+// 커스텀 타입 가드: 반환 타입이 "a is Cat" 이라 호출부에서 좁혀진다.
+function isCat(a: Cat | Dog): a is Cat {
+  return "meow" in a;
+}
+function describe(a: Cat | Dog) {
+  console.log(isCat(a) ? "고양이입니다" : "고양이가 아닙니다");
+}
+describe({ meow: () => {} });
+</script>
+        </div>
+      </div>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart TD
+  V["값의 타입: string | number | Cat | Dog"] --> Q1{"typeof v === 'string'?"}
+  Q1 -- "예" --> R1["v: string으로 좁혀짐"]
+  Q1 -- "아니오" --> Q2{"'meow' in v?"}
+  Q2 -- "예" --> R2["v: Cat으로 좁혀짐"]
+  Q2 -- "아니오" --> R3["v: number | Dog로 좁혀짐"]
+        </pre>
+        <div class="fig__cap"><b>그림 3.</b> narrowing은 조건문을 통과할 때마다 유니온에서 가능성을 하나씩 제거해 나가는 과정이다. <span class="muted">출처: TypeScript Handbook — Narrowing</span></div>
+      </div>
+
+      <h3 id="s-discriminated-union">판별 유니온으로 API 응답 모델링</h3>
+      <p>
+        실무에서 가장 유용한 패턴은
+        <span class="t" data-tip="유니온을 이루는 각 타입이 공통 리터럴 필드(보통 kind, type, status)를 갖도록 만든 패턴. 그 필드 값만 확인하면 switch/if로 전체 타입이 한 번에 좁혀진다.">판별 유니온(discriminated union)</span>이다.
+        API 요청 상태를 <code>loading</code> / <code>success</code> / <code>error</code> 세 가지 형태의 객체로 표현하고,
+        공통 필드 <code>status</code>의 값으로 나머지 필드가 무엇인지 컴파일러가 스스로 추론하게 만든다.
+        아래는 이 패턴으로 만든 살아있는 예제다 — 버튼을 눌러 상태를 바꿔보면 화면이 그에 맞춰 바뀐다.
+      </p>
+
+      <div class="fig">
+        <pre class="mermaid">
+stateDiagram-v2
+  [*] --> loading
+  loading --> success: 데이터 도착
+  loading --> error: 요청 실패
+  success --> loading: 재요청
+  error --> loading: 재시도
+        </pre>
+        <div class="fig__cap"><b>그림 4.</b> ApiState는 status 필드로 구분되는 세 형태를 오간다. 각 상태에서만 존재하는 필드(data, message)는 그 상태일 때만 접근 가능하다. <span class="muted">출처: TypeScript Handbook — Narrowing</span></div>
+      </div>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>ApiState&lt;T&gt;</code> — status가 "success"일 때만 <code>data</code> 필드가 존재한다는 것을 타입으로 강제한다.</li>
+            <li><code>switch (state.status)</code> — 각 <code>case</code> 블록 안에서 <code>state</code>는 해당 케이스 타입으로 좁혀진다.</li>
+            <li><code>default</code>의 <code>never</code> — 모든 케이스를 다 처리했다면 여기 도달할 값이 없어야 한다. 새 상태를 추가하고 처리를 빼먹으면 여기서 컴파일 에러가 난다 (exhaustive check).</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="ApiState.tsx" data-height="300">
+<script type="text/plain" class="pg__src">
+type ApiState<T> =
+  | { status: "loading" }
+  | { status: "success"; data: T }
+  | { status: "error"; message: string };
+
+function ResultView({ state }: { state: ApiState<string[]> }) {
+  switch (state.status) {
+    case "loading":
+      return <p>불러오는 중...</p>;
+    case "success":
+      return (
+        <ul>
+          {state.data.map((d) => (
+            <li key={d}>{d}</li>
+          ))}
+        </ul>
+      );
+    case "error":
+      return <p style={{ color: "crimson" }}>에러: {state.message}</p>;
+    default: {
+      const exhaustiveCheck: never = state;
+      return exhaustiveCheck;
+    }
+  }
+}
+
+function App() {
+  const [state, setState] = React.useState<ApiState<string[]>>({ status: "loading" });
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <button onClick={() => setState({ status: "loading" })}>loading</button>
+        <button onClick={() => setState({ status: "success", data: ["사과", "바나나"] })}>success</button>
+        <button onClick={() => setState({ status: "error", message: "네트워크 오류" })}>error</button>
+      </div>
+      <ResultView state={state} />
+    </div>
+  );
+}
+</script>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        판별 필드 없이 <code>{ data?: T; message?: string }</code> 처럼 옵셔널 필드로만 상태를 표현하면
+        "data도 message도 없는" 애매한 상태가 타입으로 허용된다. 반드시 <code>status</code> 같은 리터럴 판별 필드를 둔다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        유니온은 narrowing 없이는 좁은 메서드를 못 쓴다. <code>typeof</code>/<code>in</code>/<code>instanceof</code>/커스텀 타입 가드로 좁히고,
+        여러 형태의 상태를 다룰 땐 공통 리터럴 필드를 둔 판별 유니온 + <code>switch</code> + <code>never</code> exhaustive check가 정석이다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-generics"><span class="h2num">§5</span>제네릭</h2>
+
+      <h3 id="s-why-generics">왜 필요한가</h3>
+      <p>
+        "숫자 상자"와 "문자열 상자"를 각각의 <code>interface</code>로 만들면 코드가 중복되고,
+        <code>any</code>로 퉁치면 상자 안에 뭐가 들었는지 타입 정보가 사라진다.
+        <span class="t" data-tip="타입 자체를 함수/타입의 '입력값'처럼 다루는 문법. 함수를 호출할 때 값을 넣듯, 타입을 넣으면 그 타입에 맞춰 결과 타입이 정해진다.">제네릭(generic)</span>은
+        "지금은 어떤 타입인지 모르지만, 넣는 타입과 나오는 타입이 항상 같다"를 표현하는 도구다. 함수의 매개변수가
+        값을 받는 것처럼, 제네릭의
+        <span class="t" data-tip="제네릭 문법에서 <T>처럼 꺾쇠괄호 안에 선언하는 이름. 호출 시점에 실제 타입으로 채워지는 '타입 자리'다.">타입 파라미터(type parameter)</span>는
+        타입을 받는다<sup class="ref"><a href="#r5">[5]</a></sup>.
+      </p>
+
+      <h3 id="s-generic-extends-default">extends 제약과 기본값</h3>
+      <p>
+        <code>&lt;T extends { id: number }&gt;</code>처럼 <code>extends</code>를 쓰면 "아무 타입이나"가 아니라
+        "적어도 이 형태는 갖춘 타입"으로 제약을 걸 수 있다. <code>&lt;T = string&gt;</code>처럼 기본값도 지정할 수 있어,
+        타입 인자를 생략하면 <code>string</code>이 쓰인다.
+      </p>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart TB
+  T["제네릭 정의: Box(T)"] --> S["호출: Box(string)"]
+  T --> N["호출: Box(number)"]
+  T --> U["호출: Box(User)"]
+        </pre>
+        <div class="fig__cap"><b>그림 5.</b> 하나의 제네릭 정의가 호출 시점에 넣는 타입에 따라 여러 구체 타입으로 구체화된다. <span class="muted">출처: TypeScript Handbook — Generics</span></div>
+      </div>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>identity&lt;T&gt;(value: T): T</code> — 넣은 타입 그대로 돌려준다는 것을 타입으로 보장.</li>
+            <li><code>findById&lt;T extends { id: number }&gt;</code> — id 필드가 있는 타입만 허용.</li>
+            <li><code>useMiniState&lt;T&gt;</code> — React의 <a href="ch04.html#s-usestate">useState</a>가 실제로 하는 일을 축소 구현한 것. 초기값의 타입 <code>T</code>가 값과 setter의 타입을 동시에 고정한다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="generics.ts" data-height="300">
+<script type="text/plain" class="pg__src">
+function identity<T>(value: T): T {
+  return value;
+}
+console.log(identity<string>("hello"));
+console.log(identity(42)); // 타입 추론으로 <number> 생략 가능
+
+interface Box<T> {
+  value: T;
+}
+
+function unwrap<T>(box: Box<T>): T {
+  return box.value;
+}
+console.log(unwrap<string>({ value: "상자 안 문자열" }));
+
+// extends 제약: id 프로퍼티를 가진 타입만 허용한다.
+function findById<T extends { id: number }>(list: T[], id: number): T | undefined {
+  return list.find((item) => item.id === id);
+}
+
+const users = [
+  { id: 1, name: "민준" },
+  { id: 2, name: "서연" },
+];
+console.log(findById(users, 2));
+
+// 미니 useState 흉내 — 제네릭 T가 값과 setter의 타입을 함께 고정한다.
+function useMiniState<T>(initial: T): [T, (next: T) => void] {
+  let value = initial;
+  const set = (next: T) => {
+    value = next;
+    console.log("state ->", value);
+  };
+  return [value, set];
+}
+
+const [count, setCount] = useMiniState<number>(0);
+console.log("initial:", count);
+setCount(5);
+</script>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>.tsx</code> 파일에서 화살표 함수로 제네릭 컴포넌트를 선언할 때 <code>const Box = &lt;T&gt;(props: ...) =&gt; ...</code>는
+        JSX 태그로 오인되어 파싱 에러가 난다. <code>&lt;T,&gt;</code>처럼 콤마를 붙이거나 <code>&lt;T extends unknown&gt;</code>로 우회한다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        제네릭은 타입 중복 없이 "입력 타입과 출력 타입의 관계"를 표현한다. <code>extends</code>로 제약을 걸고 기본값을 줄 수 있으며,
+        React의 <code>useState&lt;T&gt;()</code>도 결국 이 메커니즘으로 값과 setter 타입을 함께 고정한다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-utility-types"><span class="h2num">§6</span>유틸리티 타입</h2>
+
+      <p>
+        <span class="t" data-tip="이미 있는 타입을 변형해서 새 타입을 만들어주는 TypeScript 내장 제네릭 타입들의 모음. Partial, Pick, Omit 등이 있으며 직접 만들 필요 없이 바로 쓸 수 있다.">유틸리티 타입(utility type)</span>은
+        기존 타입을 변형해 새 타입을 만드는 내장 도구다. 매번 직접 매핑드 타입을 작성하지 않아도 된다<sup class="ref"><a href="#r7">[7]</a></sup>.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>유틸리티</th><th>하는 일</th><th>실무에서 언제 쓰나</th></tr></thead>
+          <tbody>
+            <tr><td><code>Partial&lt;T&gt;</code></td><td>모든 프로퍼티를 선택적으로</td><td>수정 폼(PATCH) — 일부 필드만 보낼 때</td></tr>
+            <tr><td><code>Required&lt;T&gt;</code></td><td>모든 프로퍼티를 필수로</td><td>기본값 병합 후 "이제 전부 채워졌다"를 표현할 때</td></tr>
+            <tr><td><code>Readonly&lt;T&gt;</code></td><td>모든 프로퍼티를 readonly로</td><td>state, 설정 객체처럼 불변으로 다루고 싶은 값</td></tr>
+            <tr><td><code>Pick&lt;T, K&gt;</code></td><td>지정한 키만 뽑기</td><td>큰 엔티티에서 화면에 필요한 필드만 추릴 때</td></tr>
+            <tr><td><code>Omit&lt;T, K&gt;</code></td><td>지정한 키만 제외</td><td>비밀번호처럼 민감한 필드를 API 응답 타입에서 뺄 때</td></tr>
+            <tr><td><code>Record&lt;K, T&gt;</code></td><td>키 집합 K, 값 타입 T인 객체</td><td>role → label처럼 고정된 키의 맵을 만들 때</td></tr>
+            <tr><td><code>ReturnType&lt;F&gt;</code></td><td>함수의 반환 타입 추출</td><td>타입을 따로 안 적어도 함수 시그니처에서 파생시킬 때</td></tr>
+            <tr><td><code>Parameters&lt;F&gt;</code></td><td>함수의 매개변수 타입들을 튜플로 추출</td><td>래퍼 함수를 만들 때 원본과 동일한 인자 타입을 재사용</td></tr>
+            <tr><td><code>Awaited&lt;P&gt;</code></td><td><code>Promise&lt;T&gt;</code>에서 <code>T</code>만 추출</td><td><code>async</code> 함수의 실제 반환값 타입을 알고 싶을 때</td></tr>
+            <tr><td><code>NonNullable&lt;T&gt;</code></td><td><code>null</code>/<code>undefined</code> 제거</td><td>narrowing 이후 값이 확실히 있다고 확정할 때</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>Omit&lt;User, "password"&gt;</code> — API로 내려보낼 안전한 사용자 타입.</li>
+            <li><code>Partial&lt;Pick&lt;User, "name"|"email"&gt;&gt;</code> — 유틸리티는 이렇게 조합해서 쓸 수 있다.</li>
+            <li><code>Record&lt;Role, string&gt;</code> — role 3종에 대한 라벨 맵, 키를 빠뜨리면 컴파일 에러.</li>
+            <li><code>ReturnType&lt;typeof f&gt;</code> / <code>Parameters&lt;typeof f&gt;</code> — 값이 아니라 함수의 <b>타입</b>에서 추출하므로 <code>typeof</code>가 필요하다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="utility-types.ts" data-height="320">
+<script type="text/plain" class="pg__src">
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+}
+
+// Omit: 민감한 필드 제거 — API 응답용 타입
+type PublicUser = Omit<User, "password">;
+
+function toPublic(u: User): PublicUser {
+  const { password, ...rest } = u;
+  return rest;
+}
+
+const u: User = { id: 1, name: "지수", email: "jisu@test.com", password: "1234" };
+console.log(toPublic(u));
+
+// Partial + Pick: 수정 폼처럼 "일부만 바뀔 수 있는" 값
+type UserPatch = Partial<Pick<User, "name" | "email">>;
+
+function patchUser(base: User, patch: UserPatch): User {
+  return { ...base, ...patch };
+}
+console.log(patchUser(u, { name: "새이름" }));
+
+// Record: 문자열 리터럴 키 -> 고정된 값 타입의 맵
+type Role = "admin" | "editor" | "viewer";
+const roleLabel: Record<Role, string> = {
+  admin: "관리자",
+  editor: "편집자",
+  viewer: "뷰어",
+};
+console.log(roleLabel.admin);
+
+// ReturnType / Parameters — 함수의 "타입"만 추출한다 (값이 아니라 typeof 필요)
+function createUser(name: string, email: string) {
+  return { id: Date.now(), name, email };
+}
+type NewUser = ReturnType<typeof createUser>;
+type CreateArgs = Parameters<typeof createUser>;
+
+const sample: NewUser = createUser("민준", "m@test.com");
+console.log(sample);
+</script>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>ReturnType&lt;createUser&gt;</code>처럼 함수 <b>값</b>을 그대로 넣는 것. 유틸리티 타입은 타입만 받으므로
+        반드시 <code>ReturnType&lt;typeof createUser&gt;</code>처럼 <code>typeof</code>로 먼저 값을 타입으로 바꿔야 한다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        유틸리티 타입은 직접 매핑드 타입을 작성하지 않고도 기존 타입을 변형한다. 조합도 가능하다(<code>Partial&lt;Pick&lt;...&gt;&gt;</code>).
+        함수의 타입을 다룰 때는 <code>typeof</code>가 짝으로 따라온다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-advanced-types"><span class="h2num">§7</span>심화 타입 <span class="pill pill--purple">난이도: 심화</span></h2>
+
+      <div class="note note--info">
+        <span class="note__t">지금 몰라도 된다</span>
+        이 절의 내용은 라이브러리 타입 정의나 고급 유틸리티 타입을 직접 만들 때 필요하다.
+        처음 학습한다면 "이런 게 있다" 정도만 알고 넘어가도 실무 코드를 작성하는 데 지장 없다. 필요할 때 다시 찾아오면 된다.
+      </div>
+
+      <p>
+        아래 여섯 가지는 "타입에서 새로운 타입을 뽑아내는" 도구들이다<sup class="ref"><a href="#r10">[10]</a></sup>. §6의 유틸리티 타입들도
+        내부적으로는 이 도구들의 조합으로 만들어져 있다.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>문법</th><th>하는 일</th></tr></thead>
+          <tbody>
+            <tr><td><code>keyof T</code></td><td>객체 타입 <code>T</code>의 키들을 리터럴 유니온으로 뽑는다<sup class="ref"><a href="#r8">[8]</a></sup></td></tr>
+            <tr><td><code>typeof value</code></td><td>변수/값으로부터 거꾸로 타입을 뽑는다 (타입 위치에서 사용)<sup class="ref"><a href="#r9">[9]</a></sup></td></tr>
+            <tr><td><code>T["key"]</code></td><td>인덱스드 액세스 — 특정 프로퍼티 하나의 타입만 꺼낸다</td></tr>
+            <tr><td><code>A extends B ? X : Y</code></td><td><span class="t" data-tip="타입 레벨의 삼항 연산자. A가 B에 대입 가능하면 X, 아니면 Y 타입이 된다. 조건에 따라 다른 타입을 만들 때 쓴다.">조건부 타입(conditional type)</span><sup class="ref"><a href="#r11">[11]</a></sup></td></tr>
+            <tr><td><code>infer R</code></td><td>조건부 타입 안에서 특정 위치의 타입을 변수처럼 뽑아 <code>R</code>로 이름 붙인다</td></tr>
+            <tr><td><code>{ [K in keyof T]: ... }</code></td><td><span class="t" data-tip="기존 타입의 모든 프로퍼티를 순회하며 새 타입으로 변환하는 문법. Partial/Readonly 같은 유틸리티 타입이 내부적으로 이 방식으로 구현되어 있다.">매핑드 타입(mapped type)</span> — 모든 키를 순회하며 새 타입을 만든다<sup class="ref"><a href="#r12">[12]</a></sup></td></tr>
+            <tr><td><code>`on${Capitalize&lt;E&gt;}`</code></td><td><span class="t" data-tip="문자열 템플릿 리터럴 문법을 타입 레벨로 확장한 것. 'on' + 'Click' 조합처럼 문자열 패턴 자체를 타입으로 검증할 수 있다.">템플릿 리터럴 타입(template literal type)</span> — 문자열 패턴을 타입으로<sup class="ref"><a href="#r13">[13]</a></sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>advanced-types.ts</span></div>
+        <pre><code class="language-ts">interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// keyof: 객체 타입의 키들을 유니온 리터럴 타입으로
+type UserKey = keyof User; // "id" | "name" | "email"
+
+// typeof: 값(변수)으로부터 타입을 역으로 추출
+const config = { host: "localhost", port: 8787 };
+type Config = typeof config; // { host: string; port: number }
+
+// 인덱스드 액세스: 타입의 특정 프로퍼티 타입만 꺼내기
+type UserName = User["name"]; // string
+
+// 조건부 타입 + infer: 함수의 반환 타입을 조건부로 추출
+type ReturnOf&lt;F&gt; = F extends (...args: any[]) =&gt; infer R ? R : never;
+type Result = ReturnOf&lt;() =&gt; number&gt;; // number
+
+// 매핑드 타입: 모든 프로퍼티를 optional + readonly로
+type ReadonlyPartial&lt;T&gt; = { readonly [K in keyof T]?: T[K] };
+
+// 템플릿 리터럴 타입: 문자열 패턴을 타입으로 검증
+type EventName = `on${Capitalize&lt;"click" | "change"&gt;}`; // "onClick" | "onChange"
+</code></pre>
+      </div>
+
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        <code>keyof</code>/<code>typeof</code>/인덱스드 액세스는 "기존 타입에서 조각을 뽑아내고", 조건부 타입 + <code>infer</code>는
+        "조건에 따라 다른 타입을 고르고", 매핑드 타입은 "모든 프로퍼티를 규칙대로 변환"하고, 템플릿 리터럴 타입은
+        "문자열 패턴 자체를 타입으로" 만든다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-react-ts"><span class="h2num">§8</span>React와 TypeScript</h2>
+
+      <h3 id="s-props-types">props 타입</h3>
+      <p>
+        함수 컴포넌트의 <span class="t" data-tip="부모 컴포넌트가 자식 컴포넌트에 전달하는 값들의 묶음. React에서는 함수의 첫 번째 매개변수로 받으며, TypeScript에서는 interface나 type으로 그 형태를 정의한다.">props</span>는
+        보통 컴포넌트 이름 뒤에 <code>Props</code>를 붙인 <code>interface</code>로 정의하고, 구조 분해 매개변수에 바로 타입을 붙인다.
+      </p>
+
+      <h3 id="s-children-reactnode">children과 ReactNode</h3>
+      <p>
+        JSX로 감싼 자식 요소를 받는 prop은 <code>children</code>이고, 타입은
+        <span class="t" data-tip="React가 렌더링할 수 있는 모든 값(문자열, 숫자, JSX 엘리먼트, 배열, null, boolean 등)을 아우르는 타입. children prop의 타입으로 가장 흔히 쓴다.">React.ReactNode</span>다.
+        문자열, 숫자, JSX, 배열, <code>null</code>까지 렌더링 가능한 모든 값을 포괄한다<sup class="ref"><a href="#r16">[16]</a></sup>.
+      </p>
+
+      <h3 id="s-event-types">이벤트 타입</h3>
+      <p>React의 이벤트 핸들러는 브라우저 네이티브 이벤트가 아니라 React가 감싼 합성 이벤트를 받는다. 자주 쓰는 조합을 표로 정리한다.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>이벤트</th><th>타입</th><th>예시</th></tr></thead>
+          <tbody>
+            <tr><td><code>onClick</code></td><td><code>React.MouseEvent&lt;HTMLButtonElement&gt;</code></td><td>버튼 클릭 핸들러</td></tr>
+            <tr><td><code>onChange</code> (input)</td><td><code>React.ChangeEvent&lt;HTMLInputElement&gt;</code></td><td><code>e.target.value</code>로 입력값 읽기</td></tr>
+            <tr><td><code>onSubmit</code></td><td><code>React.FormEvent&lt;HTMLFormElement&gt;</code></td><td><code>e.preventDefault()</code> 후 제출 처리</td></tr>
+            <tr><td><code>onKeyDown</code></td><td><code>React.KeyboardEvent&lt;HTMLInputElement&gt;</code></td><td><code>e.key === "Enter"</code> 분기</td></tr>
+            <tr><td><code>onChange</code> (select)</td><td><code>React.ChangeEvent&lt;HTMLSelectElement&gt;</code></td><td>드롭다운 선택값 읽기</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-useref-types">useRef 타입</h3>
+      <p>
+        DOM 요소를 참조하는 <span class="t" data-tip="렌더링과 무관하게 값을 유지하는 React 훅. DOM 요소를 직접 참조할 때 가장 많이 쓰며, 초기값 null과 함께 제네릭으로 요소 타입을 지정한다.">useRef</span>는
+        <code>useRef&lt;HTMLInputElement&gt;(null)</code>처럼 제네릭으로 요소 타입을 지정한다. 초기값이 <code>null</code>이므로
+        <code>current</code>는 <code>HTMLInputElement | null</code> 타입이 되고, 사용할 때 옵셔널 체이닝(<code>?.</code>)이 필요하다.
+      </p>
+
+      <h3 id="s-generic-component">제네릭 컴포넌트</h3>
+      <p>
+        리스트 컴포넌트처럼 "어떤 타입의 배열이든 받는" 컴포넌트는 컴포넌트 자체를 제네릭으로 만든다.
+        단, <code>.tsx</code> 파일에서는 §5에서 언급한 <code>&lt;T,&gt;</code> 콤마 규칙을 지켜야 JSX와 구분된다.
+      </p>
+
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>CardProps</code> — <code>children: React.ReactNode</code>로 어떤 JSX든 감쌀 수 있게 한다.</li>
+            <li><code>handleChange(e: React.ChangeEvent&lt;HTMLInputElement&gt;)</code> — <code>e.target.value</code>가 <code>string</code>으로 타입 검사된다.</li>
+            <li><code>useRef&lt;HTMLInputElement&gt;(null)</code> — <code>inputRef.current?.focus()</code>로 안전하게 접근.</li>
+            <li><code>handleSubmit(e: React.FormEvent&lt;HTMLFormElement&gt;)</code> — <code>e.preventDefault()</code>로 새로고침 방지.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="ts" data-title="TypedForm.tsx" data-height="300">
+<script type="text/plain" class="pg__src">
+interface CardProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+function Card({ title, children }: CardProps) {
+  return (
+    <div style={{ border: "1px solid #d6dae4", borderRadius: 10, padding: 14 }}>
+      <h3 style={{ margin: "0 0 10px", fontSize: 15 }}>{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function SearchBox() {
+  const [text, setText] = React.useState("");
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setText(e.target.value);
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    inputRef.current?.focus();
+    console.log("검색어:", text);
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input ref={inputRef} value={text} onChange={handleChange} placeholder="검색어 입력" />
+      <button type="submit" style={{ marginLeft: 8 }}>검색</button>
+      <p style={{ fontSize: 13, color: "#7c8598" }}>현재 값: {text || "(비어있음)"}</p>
+    </form>
+  );
+}
+
+function App() {
+  return (
+    <Card title="타입이 붙은 검색 폼">
+      <SearchBox />
+    </Card>
+  );
+}
+</script>
+        </div>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>GenericList.tsx</span></div>
+        <pre><code class="language-tsx">interface ListProps&lt;T&gt; {
+  items: T[];
+  renderItem: (item: T) =&gt; React.ReactNode;
+}
+
+// .tsx 파일에서는 &lt;T,&gt; 처럼 콤마를 붙여야 JSX 태그와 구분된다.
+function List&lt;T,&gt;({ items, renderItem }: ListProps&lt;T&gt;) {
+  return &lt;ul&gt;{items.map((item, i) =&gt; &lt;li key={i}&gt;{renderItem(item)}&lt;/li&gt;)}&lt;/ul&gt;;
+}
+
+// 사용하는 쪽에서 T가 User로 자동 추론된다.
+&lt;List items={users} renderItem={(u) =&gt; u.name} /&gt;
+</code></pre>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>onChange</code> 핸들러의 이벤트 타입을 <code>Event</code>로 적는 것. React의 이벤트는 브라우저 네이티브
+        <code>Event</code>가 아니라 <code>React.ChangeEvent&lt;T&gt;</code> 같은 합성 이벤트 타입이며, 요소 타입 <code>T</code>를 빠뜨리면
+        <code>e.target.value</code>에서 타입 에러가 난다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        props는 <code>interface</code> + 구조 분해, children은 <code>React.ReactNode</code>, 이벤트는 요소 타입을 포함한
+        <code>React.XxxEvent&lt;Element&gt;</code>, DOM 참조는 <code>useRef&lt;Element&gt;(null)</code> 패턴을 따른다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-tsconfig"><span class="h2num">§9</span>tsconfig.json 실전</h2>
+
+      <p>
+        <span class="t" data-tip="TypeScript 컴파일러의 동작을 설정하는 파일. 어떤 문법을 허용할지, 얼마나 엄격하게 검사할지, 모듈을 어떻게 해석할지를 결정한다.">tsconfig.json</span>은
+        타입 검사의 엄격도와 모듈 해석 방식을 결정한다. Vite 기반 React 프로젝트에서 실제로 자주 켜는 옵션 위주로 정리한다<sup class="ref"><a href="#r14">[14]</a></sup>.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>옵션</th><th>효과</th><th>권장값</th></tr></thead>
+          <tbody>
+            <tr><td><code>strict</code></td><td><code>noImplicitAny</code>, <code>strictNullChecks</code> 등 엄격 검사 묶음을 한 번에 켠다</td><td><code>true</code></td></tr>
+            <tr><td><code>noUncheckedIndexedAccess</code></td><td><code>obj[key]</code> 같은 인덱스 접근 결과 타입에 자동으로 <code>| undefined</code>를 더한다</td><td><code>true</code></td></tr>
+            <tr><td><code>moduleResolution: "bundler"</code></td><td>Vite 같은 번들러가 실제로 모듈을 찾는 방식과 TS의 타입 해석 방식을 일치시킨다</td><td><code>"bundler"</code></td></tr>
+            <tr><td><code>paths</code></td><td><code>@/*</code> 같은 임포트 별칭을 TS가 인식하게 한다 (런타임 별칭은 Vite 설정에서 별도로 맞춰야 함)</td><td>프로젝트 구조에 맞게</td></tr>
+            <tr><td><code>isolatedModules</code></td><td>파일 하나만 보고도 안전하게 변환 가능한 문법만 허용한다 (Babel/esbuild처럼 파일 단위로 동작하는 도구와의 호환)</td><td><code>true</code></td></tr>
+            <tr><td><code>verbatimModuleSyntax</code></td><td><code>import</code>/<code>export</code>를 쓴 그대로 남기고, 타입만 가져올 때는 <code>import type</code>을 강제한다</td><td><code>true</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>tsconfig.json</span></div>
+        <pre><code class="language-json">{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src"]
+}
+</code></pre>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>paths</code>에 별칭을 등록하고 <code>vite.config.ts</code>의 <code>resolve.alias</code>를 빠뜨리는 것.
+        <code>tsconfig.json</code>의 <code>paths</code>는 타입 검사와 에디터 자동완성에만 쓰이고, 실제 빌드 시 경로 치환은
+        번들러(Vite)가 따로 해야 한다.
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">요약</span>
+        <code>strict</code>는 기본으로 켠다. <code>noUncheckedIndexedAccess</code>는 인덱스 접근의 숨은 <code>undefined</code>를 잡아준다.
+        <code>moduleResolution: "bundler"</code>는 Vite와의 해석 방식 불일치를 없앤다. <code>isolatedModules</code> +
+        <code>verbatimModuleSyntax</code>는 Babel/esbuild 같은 파일 단위 트랜스파일러와 안전하게 맞물리게 한다.
+      </div>
+
+      <!-- ============================================================ -->
+      <h2 id="s-check"><span class="h2num">§10</span>이해도 점검</h2>
+
+      <p>다음 항목을 스스로 설명할 수 있으면 이 챕터를 이해한 것이다.</p>
+      <ul class="check">
+        <li><input type="checkbox">타입이 "컴파일 타임 도구"이고 런타임에는 사라진다는 것(type erasure)을 예를 들어 설명할 수 있다.</li>
+        <li><input type="checkbox"><code>any</code>, <code>unknown</code>, <code>never</code>, <code>void</code>의 차이를 표 없이도 말할 수 있다.</li>
+        <li><input type="checkbox"><code>as const</code>가 배열/객체의 타입을 어떻게 좁히는지 설명할 수 있다.</li>
+        <li><input type="checkbox"><code>interface</code>와 <code>type</code>을 언제 각각 선택해야 하는지 근거를 댈 수 있다.</li>
+        <li><input type="checkbox">인덱스 시그니처의 위험(존재하지 않는 키도 타입상 값이 있다고 나옴)을 설명할 수 있다.</li>
+        <li><input type="checkbox"><code>typeof</code>/<code>in</code>/<code>instanceof</code>로 유니온 타입을 좁히는 코드를 직접 쓸 수 있다.</li>
+        <li><input type="checkbox">판별 유니온 + <code>switch</code> + <code>never</code> exhaustive check 패턴을 직접 구현할 수 있다.</li>
+        <li><input type="checkbox">제네릭 함수를 하나 직접 만들고 <code>extends</code> 제약을 걸 수 있다.</li>
+        <li><input type="checkbox">언제 <code>Pick</code>, <code>Omit</code>, <code>Partial</code>, <code>Record</code>를 쓸지 실무 상황과 연결지어 말할 수 있다.</li>
+        <li><input type="checkbox"><code>ReturnType</code>/<code>Parameters</code>를 쓸 때 <code>typeof</code>가 왜 필요한지 설명할 수 있다.</li>
+        <li><input type="checkbox">React props에서 <code>children: React.ReactNode</code>가 무엇을 의미하는지 안다.</li>
+        <li><input type="checkbox">이벤트 핸들러 타입을 요소 종류에 맞게 (<code>React.ChangeEvent&lt;HTMLInputElement&gt;</code> 등) 고를 수 있다.</li>
+        <li><input type="checkbox"><code>strict</code>, <code>noUncheckedIndexedAccess</code>, <code>moduleResolution: "bundler"</code>가 각각 무엇을 막아주는지 설명할 수 있다.</li>
+      </ul>
+
+      <!-- ============================================================ -->
+      <section class="refs">
+        <h2 id="s-refs">참고 문헌</h2>
+        <ol>
+          <li id="r1"><span class="src">TypeScript Docs</span> — "The Basics". <a href="https://www.typescriptlang.org/docs/handbook/2/basic-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r2"><span class="src">TypeScript Docs</span> — "Everyday Types". <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r3"><span class="src">TypeScript Docs</span> — "Narrowing". <a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r4"><span class="src">TypeScript Docs</span> — "Object Types". <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r5"><span class="src">TypeScript Docs</span> — "Generics". <a href="https://www.typescriptlang.org/docs/handbook/2/generics.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r6"><span class="src">TypeScript Docs</span> — "Functions". <a href="https://www.typescriptlang.org/docs/handbook/2/functions.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r7"><span class="src">TypeScript Docs</span> — "Utility Types". <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r8"><span class="src">TypeScript Docs</span> — "Keyof Type Operator". <a href="https://www.typescriptlang.org/docs/handbook/2/keyof-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r9"><span class="src">TypeScript Docs</span> — "Typeof Type Operator". <a href="https://www.typescriptlang.org/docs/handbook/2/typeof-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r10"><span class="src">TypeScript Docs</span> — "Indexed Access Types". <a href="https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r11"><span class="src">TypeScript Docs</span> — "Conditional Types". <a href="https://www.typescriptlang.org/docs/handbook/2/conditional-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r12"><span class="src">TypeScript Docs</span> — "Mapped Types". <a href="https://www.typescriptlang.org/docs/handbook/2/mapped-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r13"><span class="src">TypeScript Docs</span> — "Template Literal Types". <a href="https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r14"><span class="src">TypeScript Docs</span> — "TSConfig Reference". <a href="https://www.typescriptlang.org/tsconfig/" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r15"><span class="src">TypeScript</span> — "TS Playground" (타입 에러를 실제로 확인하려면 여기서 실행한다). <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r16"><span class="src">React Docs</span> — "TypeScript". <a href="https://react.dev/learn/typescript" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+          <li id="r17"><span class="src">React Docs</span> — "useState". <a href="https://react.dev/reference/react/useState" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+          <li id="r18"><span class="src">MDN Web Docs</span> — "in operator". <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/in" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r19"><span class="src">MDN Web Docs</span> — "instanceof". <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r20"><span class="src">MDN Web Docs</span> — "typeof". <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+        </ol>
+      </section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

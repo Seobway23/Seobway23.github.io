@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH05 · 상태 관리 & 데이터 페칭 — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="05">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">CHAPTER 05</div>
+    <h1>상태 관리 &amp; 데이터 페칭</h1>
+    <p>화면에 보이는 값 하나하나가 전부 같은 종류의 "상태"는 아니다. 서버에 원본이 있는 값을 <code>useState</code>로 직접 들고 있으면 로딩·에러·캐시·경쟁 조건을 전부 손으로 재발명하게 된다. 이 챕터는 상태를 5가지로 분류하는 법, <span class="t" data-tip="서버 상태(데이터)를 가져오고 캐싱하고 갱신하는 일을 전담하는 React 라이브러리. 로딩/에러/캐시/재요청을 대신 관리해준다.">TanStack Query</span>로 서버 상태를 다루는 법, <span class="t" data-tip="아주 작은 API로 전역 상태를 관리하는 라이브러리. Context 없이 훅 하나로 스토어를 만든다.">Zustand</span>로 클라이언트 전역 상태를 다루는 법, 그리고 URL·폼 상태까지 각자 제자리를 찾아준다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">TanStack Query v5</span>
+      <span class="pill">Zustand</span>
+      <span class="pill">캐시 생명주기</span>
+      <span class="pill">낙관적 업데이트</span>
+      <span class="pill">URL 상태</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+
+<p class="lead">이 챕터가 끝나면 다음 질문에 답할 수 있다. 이 값은 전역 상태로 만들어야 하나, 아니면 그냥 서버에서 다시 받아오면 되나? <code>useEffect</code>로 직접 fetch하면 구체적으로 뭐가 위험한가? <code>staleTime</code>과 <code>gcTime</code>은 뭐가 다른가? 낙관적 업데이트는 실패했을 때 어떻게 원상복구되나? Zustand는 Context와 뭐가 다른가?</p>
+
+<h2 id="s-state-classification"><span class="h2num">§1</span>상태를 분류하라</h2>
+
+<p>"상태 관리 라이브러리 뭐 쓸까요?"라는 질문은 순서가 틀렸다. 먼저 물어야 할 건 "이 값은 어떤 <span class="t" data-tip="시간에 따라 바뀌고, 그 값에 따라 화면이 달라지는 데이터. React에서는 useState/useReducer로 만들거나 외부 스토어에 저장한다.">상태</span>(state)인가?"다. 종류가 다른 상태를 같은 도구로 다루면 코드가 꼬인다. 서버에 원본이 있는 값을 Zustand 전역 스토어에 넣고 새로고침마다 수동으로 동기화하는 코드, 페이지 번호를 <code>useState</code>에만 넣어서 새로고침하면 1페이지로 리셋되는 코드 — 전부 상태 분류를 안 해서 생기는 문제다.</p>
+
+<div class="note note--spec">
+  <span class="note__t">이 챕터의 핵심 문장</span>
+  대부분의 "전역 상태 문제"는 사실 <b>서버 상태 문제</b>다. Redux/Zustand로 전역 스토어를 만들기 전에, 그 값이 애초에 서버에서 오는 데이터는 아닌지부터 확인하라.
+</div>
+
+<h3 id="s-five-types">5가지 상태 분류</h3>
+
+<div class="grid grid--2">
+  <div class="card">
+    <div class="card__title">① 서버 상태 (Server State)</div>
+    <p>원본이 <b>서버 DB</b>에 있고, 프론트는 그 사본을 잠깐 들고 있을 뿐인 값. 유저 정보, 게시글 목록, 주문 내역. 다른 사용자가 바꾸면 내 화면의 사본은 <span class="t" data-tip='캐시된 데이터가 "지금은 오래된 값일 수 있다"고 표시된 상태. 틀렸다는 뜻이 아니라, 확인이 더 필요하다는 뜻이다.'>stale</span>(오래된 값)이 된다. → <b>TanStack Query</b> 등 서버 상태 라이브러리.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">② 클라이언트 전역 상태</div>
+    <p>서버에는 없고 브라우저 안에서만 의미 있는데, 여러 컴포넌트 트리에서 공유해야 하는 값. 다크모드 여부, 로그인 모달 열림 여부, 장바구니 UI 임시 상태. → <b>Zustand</b>, Context 등.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">③ URL 상태</div>
+    <p>새로고침해도 유지되어야 하고, 링크로 <b>공유 가능</b>해야 하는 값. 검색어, 필터, 현재 페이지 번호, 탭 선택. → <code>URLSearchParams</code>, 라우터의 쿼리 파라미터.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">④ 폼 상태</div>
+    <p>사용자가 입력 중이라 아직 제출 전인 값. 유효성 검사, 더티(dirty) 여부, 제출 중 여부까지 딸려온다. → <code>useState</code> 또는 폼 전용 라이브러리.</p>
+  </div>
+  <div class="card">
+    <div class="card__title">⑤ 로컬 UI 상태</div>
+    <p>딱 그 컴포넌트 안에서만 의미 있는 값. 아코디언 열림 여부, 호버 여부, 입력창 포커스 여부. → 그냥 <code>useState</code>.</p>
+  </div>
+</div>
+
+<p>다섯 종류를 표로 정리하면 아래와 같다. "판별 질문"에 스스로 답해보면 어느 칸에 속하는지 대부분 바로 나온다.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>유형</th><th>원본이 있는 곳</th><th>새로고침 시</th><th>판별 질문</th><th>대표 도구</th></tr></thead>
+<tbody>
+<tr><td>서버 상태</td><td>백엔드 DB</td><td>다시 받아와야 함</td><td>"서버에 이 값의 원본이 있는가?"</td><td>TanStack Query</td></tr>
+<tr><td>클라이언트 전역</td><td>브라우저 메모리</td><td>보통 초기화됨(또는 로컬스토리지 복원)</td><td>"여러 트리에서 공유하는데, 서버 것은 아닌가?"</td><td>Zustand</td></tr>
+<tr><td>URL 상태</td><td>주소창</td><td>URL에 있으면 유지됨</td><td>"공유·북마크·뒤로가기가 의미 있는가?"</td><td>URLSearchParams</td></tr>
+<tr><td>폼 상태</td><td>메모리(입력 중)</td><td>초기화됨</td><td>"아직 제출 전인 입력값인가?"</td><td>useState / 폼 라이브러리</td></tr>
+<tr><td>로컬 UI</td><td>메모리</td><td>초기화됨</td><td>"이 컴포넌트 밖에서는 아무도 몰라도 되는가?"</td><td>useState</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s-decision-tree">결정 트리</h3>
+<p>실무에서는 이 순서로 물어보면 빠르다.</p>
+
+<div class="fig">
+<pre class="mermaid">
+flowchart TD
+  A["이 상태는 서버(DB)에 원본이 있는가?"] -->|예| B["서버 상태<br/>TanStack Query"]
+  A -->|아니오| C["URL로 표현되면<br/>공유·새로고침에 의미가 있는가?"]
+  C -->|예| D["URL 상태<br/>URLSearchParams"]
+  C -->|아니오| E["아직 제출하지 않은<br/>입력값인가?"]
+  E -->|예| F["폼 상태<br/>useState / 폼 라이브러리"]
+  E -->|아니오| G["여러 컴포넌트 트리에서<br/>공유해야 하는가?"]
+  G -->|예| H["클라이언트 전역 상태<br/>Zustand"]
+  G -->|아니오| I["로컬 UI 상태<br/>useState"]
+</pre>
+<div class="fig__cap"><b>그림 1.</b> 상태 분류 결정 트리 — 서버 상태인지부터 확인하는 게 핵심이다.</div>
+</div>
+
+<p>이 챕터의 §2~§6은 <b>①서버 상태</b>, §7~§8은 <b>②클라이언트 전역 상태</b>, §9는 <b>③④URL·폼 상태</b>를 다룬다. <b>⑤로컬 UI 상태</b>는 <a href="ch03.html#s-state">ch03의 useState</a>로 이미 충분하다.</p>
+
+<h2 id="s-effect-fetch-problems"><span class="h2num">§2</span>useEffect로 직접 fetch할 때 생기는 문제</h2>
+
+<p><a href="ch04.html#s-useeffect">useEffect</a>로 <code>fetch</code>를 직접 호출하는 코드는 튜토리얼에서 흔히 보이지만, 실무 규모로 가면 아래 5가지 문제가 거의 반드시 터진다<sup class="ref"><a href="#r4">[4]</a></sup>. 아래 라이브 예제는 전부 지연 시간이 있는 가짜 API(<code>setTimeout</code> 기반)로 문제를 실제로 재현한 것이다. 코드를 고쳐서 직접 실행해봐도 된다.</p>
+
+<h3 id="s-problem-boilerplate">문제 1 — 로딩/에러 처리의 반복(보일러플레이트)</h3>
+<p>데이터를 가져오는 컴포넌트마다 <code>loading</code>, <code>error</code>, <code>data</code> 3개의 <code>useState</code>와 <code>try/catch</code>(또는 <code>.then/.catch</code>) 로직을 매번 새로 쓰게 된다. 아래 예제는 사용자 정보와 게시글, 완전히 다른 데이터를 가져오는데도 구조가 토씨 하나 안 다르게 반복된다.</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>UserBox</code>와 <code>PostBox</code>는 서로 다른 데이터를 가져오지만, <b>로딩·에러 처리 골격이 완전히 동일하다.</b> 컴포넌트가 10개, 20개가 되면 이 골격을 20번 복사-붙여넣기 하게 된다.</p>
+    <ul>
+      <li><code>useState(true)</code> — 로딩 상태를 각자 따로 관리</li>
+      <li><code>.finally(() =&gt; setLoading(false))</code> — 성공/실패 모두에서 로딩 해제, 이것도 매번 반복</li>
+      <li>20% 확률로 실패하도록 만들어서 <b>▶ 실행</b>을 몇 번 눌러보면 에러 분기도 볼 수 있다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="DuplicatedFetchers.jsx" data-height="300">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+function fakeFetchUser(id) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (Math.random() < 0.2) reject(new Error("사용자 " + id + " 조회 실패"));
+      else resolve({ id, name: "사용자 " + id });
+    }, 700);
+  });
+}
+
+function fakeFetchPosts(userId) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (Math.random() < 0.2) reject(new Error("userId " + userId + " 게시글 조회 실패"));
+      else resolve([{ id: 1, title: "첫 글" }, { id: 2, title: "둘째 글" }]);
+    }, 900);
+  });
+}
+
+// 1) 사용자 정보를 가져오는 컴포넌트
+function UserBox() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fakeFetchUser(1)
+      .then((data) => setUser(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p>사용자 로딩 중…</p>;
+  if (error) return <p style={{ color: "crimson" }}>에러: {error}</p>;
+  return <p>사용자: {user.name}</p>;
+}
+
+// 2) 게시글을 가져오는 컴포넌트 — 위와 구조가 거의 같은 코드를 또 썼다
+function PostBox() {
+  const [posts, setPosts] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fakeFetchPosts(1)
+      .then((data) => setPosts(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p>게시글 로딩 중…</p>;
+  if (error) return <p style={{ color: "crimson" }}>에러: {error}</p>;
+  return <ul>{posts.map((p) => <li key={p.id}>{p.title}</li>)}</ul>;
+}
+
+function App() {
+  return (
+    <div>
+      <UserBox />
+      <PostBox />
+      <p style={{ color: "#888", fontSize: 13 }}>
+        ▶ 실행을 몇 번 눌러보면 20% 확률로 에러 상태도 볼 수 있다.
+        두 컴포넌트가 loading/error/data용 useState 3개씩, 총 6개를 반복 선언했다.
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-problem-race">문제 2 — 레이스 컨디션(race condition)</h3>
+<p>사용자가 id=1을 선택했다가 재빨리 id=2로 바꾸면, 두 개의 요청이 동시에 날아간다. 만약 id=1의 응답이 <b>더 늦게</b> 도착하면, 이미 id=2를 보고 있는 화면을 id=1의 데이터로 덮어써 버린다. 이건 눈에 보이는 버그다 — 아래에서 직접 재현해보자.</p>
+
+<div class="fig">
+<pre class="mermaid">
+sequenceDiagram
+  participant U as 사용자
+  participant C as 컴포넌트
+  participant API as 서버(가짜)
+  U->>C: 사용자 1 선택 (응답 2.5s 걸림)
+  C->>API: GET /user/1
+  U->>C: 0.5s 뒤 사용자 2 선택 (응답 0.3s)
+  C->>API: GET /user/2
+  API-->>C: user/2 응답 도착 (0.3s 후)
+  C->>C: 화면에 "사용자 2" 표시 (정답)
+  API-->>C: user/1 응답 도착 (2.5s 후, 더 늦게)
+  C->>C: 가드가 없으면 화면을 "사용자 1"로 덮어씀 (오답!)
+</pre>
+<div class="fig__cap"><b>그림 2.</b> 나중에 보낸 요청이 먼저 도착하면, 가드 없는 <code>useEffect</code>는 화면을 잘못된 데이터로 덮어쓴다.</div>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>UserPanel</code>의 <code>useEffect</code>는 응답이 오면 <b>무조건</b> <code>setUser</code>를 호출한다. 응답이 도착했을 때 사용자가 이미 다른 id를 선택했는지는 확인하지 않는다.</p>
+    <ul>
+      <li>id가 작을수록(1) 응답을 일부러 느리게(2.5초) 만들었다</li>
+      <li>"사용자 1" 클릭 후 0.5초 안에 "사용자 2" 클릭 → 화면은 잠깐 2를 보여주다가 2.5초 뒤 다시 1로 바뀐다</li>
+      <li>현재 선택(<code>userId</code>)과 화면에 표시된 데이터(<code>user.id</code>)가 다르면 빨간 글씨로 경고를 표시했다</li>
+      <li>해결책: 클린업 함수에서 "이 요청은 취소됐다" 플래그를 세우거나 <a href="ch01.html#s-promise"><code>AbortController</code></a>로 실제 요청을 취소한다<sup class="ref"><a href="#r3">[3]</a></sup>. TanStack Query는 이걸 자동으로 해준다(§3).</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="RaceCondition.jsx" data-height="320">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+// id가 작을수록 일부러 응답을 오래 걸리게 만든 가짜 API
+function fakeFetchUser(id) {
+  const delay = id === 1 ? 2500 : id === 2 ? 300 : 1200;
+  return new Promise((resolve) => {
+    setTimeout(() => resolve({ id, name: "사용자 " + id, delay }), delay);
+  });
+}
+
+function UserPanel({ userId }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fakeFetchUser(userId).then((data) => {
+      // 가드 없음: 응답이 도착한 시점에 이미 다른 id를 보고 있어도 그냥 덮어쓴다
+      setUser(data);
+    });
+  }, [userId]);
+
+  const mismatch = user && user.id !== userId;
+
+  return (
+    <div>
+      <p>현재 선택: <b>사용자 {userId}</b></p>
+      <p style={{ color: mismatch ? "crimson" : "inherit", fontWeight: mismatch ? 700 : 400 }}>
+        화면 표시: {user ? "사용자 " + user.id + " (" + user.delay + "ms 응답)" : "로딩 중…"}
+        {mismatch && "  ← 선택과 다르다! (레이스 컨디션)"}
+      </p>
+    </div>
+  );
+}
+
+function App() {
+  const [userId, setUserId] = useState(1);
+  return (
+    <div>
+      <button onClick={() => setUserId(1)}>사용자 1 (느림 2.5s)</button>{" "}
+      <button onClick={() => setUserId(2)}>사용자 2 (빠름 0.3s)</button>{" "}
+      <button onClick={() => setUserId(3)}>사용자 3 (보통 1.2s)</button>
+      <hr />
+      <UserPanel userId={userId} />
+      <p style={{ color: "#888", fontSize: 13 }}>
+        "사용자 1" 클릭 직후 0.5초 안에 "사용자 2"를 클릭해보라.
+        2.5초 뒤 사용자 1의 응답이 나중에 도착해 화면을 다시 덮어쓴다.
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-problem-cache">문제 3 &amp; 4 — 중복 요청과 캐시 없음</h3>
+<p>같은 데이터를 필요로 하는 컴포넌트가 화면에 두 번 있으면, <code>useEffect</code>는 그 사실을 모르기 때문에 <b>네트워크 요청도 두 번</b> 나간다<sup class="ref"><a href="#r6">[6]</a></sup>. 그리고 컴포넌트가 언마운트됐다가 다시 마운트되면 방금 받았던 데이터인데도 <b>처음부터 다시</b> 요청한다 — 캐시가 없기 때문이다.</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>배지 A와 배지 B는 <b>같은 사용자 1</b>의 데이터가 필요하지만, 서로의 존재를 모른다. 각자 자기 <code>useEffect</code>에서 fetch를 호출한다.</p>
+    <ul>
+      <li><code>networkCallCount</code>는 실제로 함수가 몇 번 호출됐는지 세는 모듈 전역 카운터(데모 편의상 넣은 것이지 실무 패턴은 아니다)</li>
+      <li>같은 사용자 1인데 요청 번호(<code>callNo</code>)가 배지마다 다르게 찍힌다 — 중복 요청</li>
+      <li>"다시 그리기"를 누르면 이미 받았던 데이터인데도 <code>networkCallCount</code>가 또 올라간다 — 캐시 없음</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="NoCache.jsx" data-height="300">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+let networkCallCount = 0; // 실제로 "서버"까지 나간 요청 수를 센다
+
+function fakeFetchUser(id) {
+  networkCallCount += 1;
+  const myCallNo = networkCallCount;
+  return new Promise((resolve) => {
+    setTimeout(() => resolve({ id, callNo: myCallNo }), 500);
+  });
+}
+
+// 같은 사용자(id=1)를 보여주는 배지. 화면에 두 번 그려서 요청이 중복되는지 본다.
+function UserBadge({ label }) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    fakeFetchUser(1).then(setData);
+  }, []);
+  return (
+    <div style={{ border: "1px solid #ddd", padding: 8, borderRadius: 8, marginBottom: 8 }}>
+      {label}: {data ? "사용자 1 데이터 도착 (요청 #" + data.callNo + ")" : "로딩 중…"}
+    </div>
+  );
+}
+
+function App() {
+  const [key, setKey] = useState(0);
+  return (
+    <div>
+      <button onClick={() => setKey((k) => k + 1)}>같은 화면 다시 그리기(리마운트)</button>
+      <div key={key} style={{ marginTop: 8 }}>
+        <UserBadge label="배지 A" />
+        <UserBadge label="배지 B (같은 사용자 1을 또 요청)" />
+      </div>
+      <p style={{ color: "#888", fontSize: 13 }}>
+        총 실제 네트워크 호출 수: <b>{networkCallCount}</b>회 — 같은 사용자 1인데 요청 번호가 다르다.
+        "다시 그리기"를 누르면 이미 받았던 데이터인데도 처음부터 다시 요청한다(캐시 없음).
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h3 id="s-problem-unmount">문제 5 — 언마운트 후 setState 시도</h3>
+<p>느린 요청이 진행 중인데 사용자가 다른 화면으로 이동해서 컴포넌트가 <span class="t" data-tip="화면(DOM)에서 컴포넌트가 제거되는 것. React는 언마운트된 컴포넌트의 useEffect 클린업 함수를 실행한 뒤 상태를 버린다.">언마운트</span>되면 어떻게 될까? 이미 사라진 컴포넌트를 위해 만들어졌던 콜백은 <b>그래도 실행된다.</b> 가드가 없으면 이미 아무도 안 읽는 상태를 계속 업데이트하려 시도하는 낭비 작업, 혹은 외부 리소스(타이머, 구독)를 정리하지 않는 메모리 누수로 이어질 수 있다.</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>staleCallbackCount</code>는 "컴포넌트가 이미 사라진 뒤에도 실행된 콜백"의 수를 센다. 진짜 앱이었다면 이 콜백이 이미 정리된 타이머를 다시 만들거나, 존재하지 않는 DOM에 접근하려다 에러를 낼 수도 있다.</p>
+    <ul>
+      <li>"지금 언마운트하기" → <code>mounted</code>를 false로, <code>SlowLoader</code>가 화면에서 사라짐</li>
+      <li>2초 뒤 fetch가 resolve되면서 <code>staleCallbackCount</code>가 증가 — 하지만 컴포넌트는 이미 없다</li>
+      <li>클린업으로 "취소됨" 플래그를 두고 <code>if (cancelled) return;</code>으로 막는 게 정석 대응이다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="UnmountSetState.jsx" data-height="300">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+let staleCallbackCount = 0; // 컴포넌트가 이미 사라진 뒤에도 실행된 콜백 수
+
+function fakeFetchSlow() {
+  return new Promise((resolve) => setTimeout(() => resolve({ ok: true }), 2000));
+}
+
+function SlowLoader() {
+  const [status, setStatus] = useState("loading");
+  useEffect(() => {
+    fakeFetchSlow().then(() => {
+      // 이 컴포넌트가 언마운트됐어도 이 콜백은 실행된다.
+      // 가드가 없으면 사라진 컴포넌트의 상태를 계속 바꾸려 시도한다.
+      staleCallbackCount += 1;
+      setStatus("done");
+    });
+  }, []);
+  return <p>상태: {status}</p>;
+}
+
+function App() {
+  const [mounted, setMounted] = useState(true);
+  const [tick, setTick] = useState(0);
+  return (
+    <div>
+      <button onClick={() => setMounted((m) => !m)}>
+        {mounted ? "지금 언마운트하기" : "다시 마운트하기"}
+      </button>{" "}
+      <button onClick={() => setTick((t) => t + 1)}>화면만 다시 그리기</button>
+      <div style={{ marginTop: 8 }}>{mounted && <SlowLoader />}</div>
+      <p style={{ color: "#888", fontSize: 13 }}>
+        "지금 언마운트하기" 클릭 후 2초 기다렸다가 "화면만 다시 그리기"를 눌러보라.
+        컴포넌트가 사라진 뒤에도 실행된 콜백 수: <b>{staleCallbackCount}</b> (틱 {tick})
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<div class="note note--warn">
+  <span class="note__t">그래서</span>
+  이 5가지 문제(반복 코드, 레이스 컨디션, 중복 요청, 캐시 없음, 언마운트 후 콜백)를 전부 손으로 해결하려면 매 컴포넌트마다 <code>AbortController</code>, ref 플래그, 캐시 Map을 직접 짜야 한다. <a href="https://react.dev/learn/you-might-not-need-an-effect" target="_blank" rel="noopener">React 공식 문서도 데이터 페칭에는 프레임워크나 캐싱 라이브러리를 권장한다</a><sup class="ref"><a href="#r5">[5]</a></sup>. 다음 절부터는 TanStack Query가 이 문제들을 어떻게 구조적으로 없애는지 본다.
+</div>
+
+<h2 id="s-tanstack-concepts"><span class="h2num">§2</span>TanStack Query v5 개념</h2>
+
+<p><a href="https://tanstack.com/query/latest" target="_blank" rel="noopener">TanStack Query</a><sup class="ref"><a href="#r10">[10]</a></sup>(구 React Query)는 "서버 상태 전용" 라이브러리다. 클라이언트 전역 상태 도구가 아니다 — 서버에서 받아온 데이터를 <span class="t" data-tip="같은 데이터를 반복 요청하지 않도록 메모리에 잠깐 저장해두는 것. TanStack Query는 queryKey를 기준으로 캐시한다.">캐싱</span>하고, 언제 다시 받아와야 하는지 규칙을 정하고, 로딩/에러 상태를 표준화해준다.</p>
+
+<h3 id="s-queryclient">QueryClient와 useQuery</h3>
+<p><code>QueryClient</code>는 모든 쿼리 캐시를 담는 저장소 하나다. 앱 최상단에서 한 번 만들어 <code>QueryClientProvider</code>로 감싸면, 그 밑의 모든 컴포넌트가 <code>useQuery</code>로 캐시를 공유한다<sup class="ref"><a href="#r11">[11]</a></sup>.</p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/main.tsx</span></div>
+  <pre><code class="language-tsx">import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 30_000 }, // 모든 쿼리의 기본 staleTime
+  },
+});
+
+function Root() {
+  return (
+    &lt;QueryClientProvider client={queryClient}&gt;
+      &lt;App /&gt;
+    &lt;/QueryClientProvider&gt;
+  );
+}</code></pre>
+</div>
+
+<h3 id="s-query-key">queryKey — 캐시의 주소</h3>
+<p><code>queryKey</code>는 배열이다. 같은 키를 쓰는 <code>useQuery</code> 호출은 전부 같은 캐시 항목을 공유한다 — 이게 §2의 "중복 요청" 문제가 구조적으로 사라지는 이유다. 키가 다르면(예: <code>["user", 1]</code> vs <code>["user", 2]</code>) 별개의 캐시로 취급한다<sup class="ref"><a href="#r12">[12]</a></sup>.</p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/hooks/useUser.ts</span></div>
+  <pre><code class="language-tsx">import { useQuery } from "@tanstack/react-query";
+
+function useUser(id: string) {
+  return useQuery({
+    queryKey: ["user", id],       // 이 배열이 캐시의 "주소"다
+    queryFn: async () =&gt; {
+      const res = await fetch(`/api/users/${id}`);
+      if (!res.ok) throw new Error("사용자 조회 실패");
+      return res.json();
+    },
+  });
+}</code></pre>
+</div>
+
+<h3 id="s-staletime-gctime">staleTime vs gcTime</h3>
+<p>이 둘을 헷갈리면 캐시 동작을 예측할 수 없다. 이름이 비슷하지만 하는 일이 완전히 다르다.</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>옵션</th><th>기본값(v5)</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td><code>staleTime</code></td><td>0ms</td><td>데이터가 "신선하다(fresh)"고 간주되는 시간. 이 시간 안에는 재요청하지 않고 캐시를 그대로 보여준다.</td></tr>
+<tr><td><code>gcTime</code></td><td>5분</td><td>구독하는 컴포넌트가 0개가 된 뒤 캐시를 메모리에서 실제로 지우기까지 기다리는 시간(v4의 <code>cacheTime</code>과 같은 개념, v5에서 이름이 바뀌었다).</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>staleTime</code>이 0이라는 기본값은 "항상 최신 상태를 우선한다"는 뜻이다<sup class="ref"><a href="#r13">[13]</a></sup>. 즉 기본 설정에서는 컴포넌트가 마운트되거나 창이 다시 포커스될 때마다 <span class="t" data-tip="이미 화면에 캐시된 값을 먼저 보여주면서, 뒤에서 조용히 최신 데이터를 다시 받아오는 동작.">백그라운드 리페치</span>가 일어날 수 있다 — 화면이 깜빡이며 로딩으로 돌아가지는 않고, 캐시된 값을 계속 보여주면서 뒤에서 갱신한다.</p>
+
+<h3 id="s-cache-lifecycle">캐시 상태 머신</h3>
+<p>쿼리 하나는 시간이 지나며 <code>fresh</code> → <code>stale</code> → (재요청 트리거 시) <code>fetching</code> 을 오간다. 구독자가 없어지면 <code>inactive</code>로 빠지고, <code>gcTime</code>이 지나면 완전히 삭제된다.</p>
+
+<div class="fig">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> fetching : 첫 useQuery 호출
+  fetching --> fresh : 성공, staleTime 동안 유지
+  fetching --> paused : 네트워크 끊김
+  paused --> fetching : 네트워크 복귀
+  fresh --> stale : staleTime 경과
+  stale --> fetching : 리페치 트리거
+  stale --> inactive : 구독 컴포넌트 0개
+  fresh --> inactive : 구독 컴포넌트 0개
+  inactive --> [*] : gcTime 경과, 캐시 삭제
+  inactive --> fetching : gcTime 이내 재구독
+</pre>
+<div class="fig__cap"><b>그림 3.</b> TanStack Query 캐시 생명주기. <span class="muted">출처: TanStack Query 공식 문서의 Important Defaults를 도식화<sup class="ref"><a href="#r13">[13]</a></sup>.</span></div>
+</div>
+
+<h3 id="s-refetch-triggers">리페치가 자동으로 일어나는 시점</h3>
+<p>기본 설정에서 TanStack Query는 아래 상황에 <code>stale</code>한 쿼리를 자동으로 다시 요청한다<sup class="ref"><a href="#r18">[18]</a></sup>. 하나도 손으로 구현할 필요가 없다.</p>
+<ul>
+  <li><b>윈도우 포커스</b> — 다른 탭에 갔다가 이 탭으로 돌아왔을 때(<code>refetchOnWindowFocus</code>)</li>
+  <li><b>네트워크 재연결</b> — 오프라인이었다가 다시 온라인이 됐을 때(<code>refetchOnReconnect</code>)</li>
+  <li><b>컴포넌트 마운트</b> — 같은 <code>queryKey</code>를 쓰는 컴포넌트가 새로 마운트될 때(<code>refetchOnMount</code>)</li>
+</ul>
+
+<h2 id="s-usequery-practice"><span class="h2num">§3</span>useQuery 실전</h2>
+
+<p>실제 라이브러리의 <code>useQuery</code>는 아래처럼 쓴다. 이건 그대로 실행되는 코드가 아니라 <b>정적 예시</b>다 — 이 챕터의 플레이그라운드는 외부 패키지를 import할 수 없으므로, 바로 아래에서 원리를 그대로 옮긴 40줄짜리 미니 버전을 직접 만들어 라이브로 실행해본다.</p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/components/UserCard.tsx</span></div>
+  <pre><code class="language-tsx">import { useQuery } from "@tanstack/react-query";
+
+function UserCard({ id }: { id: string }) {
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ["user", id],
+    queryFn: () =&gt; fetch(`/api/users/${id}`).then((r) =&gt; r.json()),
+    staleTime: 60_000, // 1분간은 신선하다고 간주 — 재요청 안 함
+    gcTime: 5 * 60_000,
+  });
+
+  if (isPending) return &lt;p&gt;로딩 중…&lt;/p&gt;;
+  if (isError) return &lt;p&gt;에러: {error.message}&lt;/p&gt;;
+  return &lt;p&gt;{data.name}&lt;/p&gt;;
+}</code></pre>
+</div>
+
+<div class="note note--info">
+  <span class="note__t">v5에서 바뀐 이름</span>
+  v4의 <code>isLoading</code>은 "데이터가 없고 로딩 중"을 뜻했는데, v5는 이를 <code>isPending</code>으로 이름을 바꾸고 <code>isLoading</code>은 <code>isPending &amp;&amp; isFetching</code>의 파생값으로 재정의했다. 새 코드에서는 <code>isPending</code>을 쓴다.
+</div>
+
+<h3 id="s-mini-usequery">원리 재현 — 미니 useQuery 직접 만들기</h3>
+<p>아래는 <b>캐시 Map + staleTime + 중복 요청 제거(dedupe)</b>만 구현한 학습용 버전이다. 실제 TanStack Query는 이보다 훨씬 많은 기능(재시도, 페이지네이션, 무효화, devtools…)을 갖고 있지만, 핵심 아이디어는 이 40줄 안에 다 있다.</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>queryCache</code>는 <code>key</code> → <code>{ data, error, promise, updatedAt }</code>를 담는 Map이다. 요청 중인 <code>promise</code> 자체를 캐시에 저장해두는 게 중복 요청 제거의 핵심이다.</p>
+    <ul>
+      <li><code>isFresh</code> — <code>Date.now() - updatedAt &lt; staleTime</code>이면 재요청하지 않는다</li>
+      <li><code>alreadyFetching</code> — 이미 같은 key로 요청이 나가 있으면(promise가 있으면) 또 보내지 않는다 → 이게 문제 3(중복 요청)의 해결책</li>
+      <li><code>listeners</code> Map은 같은 key를 구독하는 모든 컴포넌트에게 "데이터 도착"을 알려서 리렌더시킨다</li>
+      <li>패널 A, B 둘 다 같은 <code>key="price"</code>를 쓰지만 네트워크 호출은 1번만 나가는 걸 카운터로 확인한다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="miniUseQuery.jsx" data-height="380">
+<script type="text/plain" class="pg__src">
+const { useState, useEffect } = React;
+
+// ── 미니 useQuery: 캐시 Map + staleTime + 중복 요청 제거만 구현한 학습용 버전 ──
+const queryCache = new Map(); // key -> { data, error, promise, updatedAt }
+const listeners = new Map();  // key -> Set(render 함수)
+
+function notify(key) {
+  (listeners.get(key) || new Set()).forEach((fn) => fn());
+}
+
+function useMiniQuery(key, fetcher, staleTime) {
+  const [, tick] = useState(0);
+
+  useEffect(() => {
+    if (!listeners.has(key)) listeners.set(key, new Set());
+    const set = listeners.get(key);
+    const render = () => tick((n) => n + 1);
+    set.add(render);
+    return () => set.delete(render);
+  }, [key]);
+
+  useEffect(() => {
+    const entry = queryCache.get(key);
+    const isFresh = entry && Date.now() - entry.updatedAt < staleTime;
+    const alreadyFetching = entry && entry.promise;
+    if (isFresh || alreadyFetching) return; // 신선하거나 요청 중이면 아무것도 안 함
+
+    const promise = fetcher()
+      .then((data) => {
+        queryCache.set(key, { data, error: null, promise: null, updatedAt: Date.now() });
+        notify(key);
+      })
+      .catch((error) => {
+        queryCache.set(key, { data: undefined, error, promise: null, updatedAt: Date.now() });
+        notify(key);
+      });
+
+    queryCache.set(key, Object.assign({}, entry, { promise, updatedAt: entry ? entry.updatedAt : 0 }));
+  }, [key]);
+
+  const entry = queryCache.get(key) || {};
+  return { data: entry.data, error: entry.error, isFetching: !!entry.promise };
+}
+
+// ── 데모: 같은 key를 쓰는 두 패널이 실제로 요청을 1번만 보내는지 확인 ──
+let networkCalls = 0;
+function fakeFetchPrice() {
+  networkCalls += 1;
+  return new Promise((resolve) =>
+    setTimeout(() => resolve({ price: (1000 + Math.random() * 100) | 0 }), 600)
+  );
+}
+
+function PriceLabel({ id }) {
+  const { data, isFetching } = useMiniQuery("price", fakeFetchPrice, 3000);
+  return <p>패널 {id}: {isFetching && !data ? "불러오는 중…" : "₩" + (data ? data.price : "-")}</p>;
+}
+
+function App() {
+  const [showBoth, setShowBoth] = useState(true);
+  return (
+    <div>
+      <PriceLabel id="A" />
+      {showBoth && <PriceLabel id="B" />}
+      <button onClick={() => setShowBoth((s) => !s)}>패널 B 토글</button>
+      <p style={{ color: "#888", fontSize: 13 }}>
+        실제 네트워크 호출 수: <b>{networkCalls}</b> — 패널이 2개인데도 같은 key("price")라 1번만 요청한다.
+        3초(staleTime) 안에는 다시 마운트해도 재요청하지 않는다.
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h2 id="s-mutation"><span class="h2num">§4</span>변경(Mutation)</h2>
+
+<p>조회는 <code>useQuery</code>, <b>변경</b>(생성/수정/삭제)은 <code>useMutation</code>이다. <code>useMutation</code>은 자동 캐싱이나 재요청을 하지 않는다 — 대신 성공/실패 콜백에서 <b>캐시를 직접 조작</b>할 수 있는 훅을 제공한다.</p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/hooks/useToggleTodo.ts</span></div>
+  <pre><code class="language-tsx">import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function useToggleTodo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (vars: { id: string; done: boolean }) =&gt;
+      fetch(`/api/todos/${vars.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ done: vars.done }),
+      }),
+
+    // 1. 서버 응답 전에 캐시를 먼저 낙관적으로 바꾼다
+    onMutate: async (vars) =&gt; {
+      await queryClient.cancelQueries({ queryKey: ["todos"] });
+      const previous = queryClient.getQueryData(["todos"]);
+      queryClient.setQueryData(["todos"], (old) =&gt;
+        old?.map((t) =&gt; (t.id === vars.id ? { ...t, done: vars.done } : t))
+      );
+      return { previous }; // onError에서 쓸 롤백용 스냅샷
+    },
+
+    // 2. 실패하면 저장해둔 스냅샷으로 되돌린다
+    onError: (_err, _vars, context) =&gt; {
+      queryClient.setQueryData(["todos"], context?.previous);
+    },
+
+    // 3. 성공/실패 관계없이 서버 진짜 값으로 다시 확인한다
+    onSettled: () =&gt; {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+  });
+}</code></pre>
+</div>
+
+<h3 id="s-invalidate">invalidateQueries</h3>
+<p><code>invalidateQueries({ queryKey: [...] })</code>는 해당 키의 캐시를 <code>stale</code>로 표시하고, 지금 화면에 구독 중이면 즉시 리페치를 트리거한다<sup class="ref"><a href="#r14">[14]</a></sup>. "서버 값이 바뀌었을 테니 확인해라"라는 신호를 보내는 방법이다.</p>
+
+<h3 id="s-optimistic-flow">낙관적 업데이트 흐름</h3>
+<p><span class="t" data-tip="서버 응답을 기다리지 않고, 성공할 거라고 가정하고 화면을 먼저 바꾸는 패턴. 실패하면 되돌린다.">낙관적 업데이트</span>(optimistic update)는 체크박스 클릭처럼 실패 확률이 낮은 작업에서 체감 속도를 크게 올린다. 흐름은 항상 <code>onMutate → (성공|실패) → onSettled</code> 순이다.</p>
+
+<div class="fig">
+<pre class="mermaid">
+sequenceDiagram
+  participant UI as 화면
+  participant M as useMutation
+  participant QC as QueryClient 캐시
+  participant S as 서버
+  UI->>M: mutate(변경값)
+  M->>QC: onMutate — 캐시를 낙관적으로 미리 변경
+  QC-->>UI: 즉시 새 값으로 다시 렌더링
+  M->>S: 실제 요청 전송
+  alt 성공
+    S-->>M: 200 OK
+    M->>QC: onSettled — invalidateQueries로 서버값 재확인
+  else 실패
+    S-->>M: 에러 응답
+    M->>QC: onError — onMutate에서 저장한 스냅샷으로 롤백
+    QC-->>UI: 롤백된 값으로 다시 렌더링
+  end
+</pre>
+<div class="fig__cap"><b>그림 4.</b> 낙관적 업데이트의 표준 흐름 — 성공하든 실패하든 <code>onSettled</code>는 항상 실행된다<sup class="ref"><a href="#r15">[15]</a></sup>.</div>
+</div>
+
+<h3 id="s-mini-optimistic">원리 재현 — 낙관적 업데이트 + 롤백 직접 만들기</h3>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>useMiniMutation</code>은 실제 <code>useMutation</code>과 같은 모양의 <code>onMutate/onError/onSettled</code> 콜백을 받는다. 체크박스를 클릭하면 <b>서버 응답을 기다리지 않고 즉시</b> 화면이 바뀐다.</p>
+    <ul>
+      <li><code>onMutate</code>에서 변경 전 <code>todos</code>를 <code>prevTodos</code>로 스냅샷 떠두고, 낙관적으로 상태를 바꾼다</li>
+      <li>"다음 저장은 실패하게 만들기"를 켜면 <code>fakeSaveTodo</code>가 항상 reject한다</li>
+      <li>실패하면 <code>onError</code>가 <code>ctx.prevTodos</code>로 되돌린다 — 0.9초 뒤 체크가 저절로 풀리는 게 롤백이다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="OptimisticTodo.jsx" data-height="360">
+<script type="text/plain" class="pg__src">
+const { useState } = React;
+
+// 가짜 서버: 이 배열이 "진짜" 데이터라고 가정한다
+let serverTodos = [
+  { id: 1, text: "우유 사기", done: false },
+  { id: 2, text: "보고서 작성", done: false },
+];
+
+function fakeSaveTodo(id, done, shouldFail) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (shouldFail) return reject(new Error("저장 실패"));
+      const t = serverTodos.find((t) => t.id === id);
+      if (t) t.done = done;
+      resolve();
+    }, 900);
+  });
+}
+
+// 미니 useMutation: onMutate로 낙관적 반영, 실패하면 onError로 롤백
+function useMiniMutation({ mutationFn, onMutate, onError, onSettled }) {
+  const [isPending, setPending] = useState(false);
+  function mutate(vars) {
+    setPending(true);
+    const ctx = onMutate ? onMutate(vars) : undefined;
+    mutationFn(vars)
+      .then(() => onSettled && onSettled(null, vars))
+      .catch((err) => {
+        if (onError) onError(err, vars, ctx);
+        onSettled && onSettled(err, vars);
+      })
+      .finally(() => setPending(false));
+  }
+  return { mutate, isPending };
+}
+
+function App() {
+  const [todos, setTodos] = useState(serverTodos.map((t) => Object.assign({}, t)));
+  const [forceFail, setForceFail] = useState(false);
+  const [lastError, setLastError] = useState(null);
+
+  const { mutate, isPending } = useMiniMutation({
+    mutationFn: (vars) => fakeSaveTodo(vars.id, vars.done, forceFail),
+    onMutate: (vars) => {
+      const prevTodos = todos; // 롤백용 스냅샷
+      setLastError(null);
+      setTodos((cur) => cur.map((t) => (t.id === vars.id ? Object.assign({}, t, { done: vars.done }) : t)));
+      return { prevTodos };
+    },
+    onError: (err, vars, ctx) => {
+      setTodos(ctx.prevTodos); // 실패 → 낙관적으로 바꾼 걸 되돌린다
+      setLastError(err.message);
+    },
+  });
+
+  return (
+    <div>
+      <label style={{ display: "block", marginBottom: 8 }}>
+        <input type="checkbox" checked={forceFail} onChange={(e) => setForceFail(e.target.checked)} />
+        {" "}다음 저장은 실패하게 만들기
+      </label>
+      {todos.map((t) => (
+        <div key={t.id}>
+          <label>
+            <input type="checkbox" checked={t.done} onChange={(e) => mutate({ id: t.id, done: e.target.checked })} />
+            {" "}{t.text} {t.done ? "(완료)" : ""}
+          </label>
+        </div>
+      ))}
+      <p style={{ color: "#888", fontSize: 13 }}>
+        {isPending && "저장 중… "}
+        {lastError && <span style={{ color: "crimson" }}>에러: {lastError} (0.9초 뒤 롤백됨)</span>}
+        {!isPending && !lastError && "체크박스를 눌러 낙관적 업데이트를 확인하라."}
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h2 id="s-pagination-infinite"><span class="h2num">§5</span>페이지네이션 &amp; 무한 스크롤</h2>
+
+<p>페이지를 넘길 때 이전 데이터가 사라지고 로딩 스피너가 잠깐 뜨는 깜빡임은 <code>placeholderData</code>로 없앨 수 있다. UI 구현(가상 스크롤, 무한 스크롤 리스트 최적화)의 자세한 내용은 <a href="ch08.html#s-pagination">ch08 성능 최적화</a>에서 다루고, 여기서는 TanStack Query 쪽 API만 짚는다.</p>
+
+<h3 id="s-placeholder-data">placeholderData로 깜빡임 없애기</h3>
+<p>v5는 <code>keepPreviousData</code>를 boolean 옵션이 아니라 <code>placeholderData</code>에 넘기는 함수로 바꿨다. 페이지가 바뀌어도 새 데이터가 도착할 때까지 <b>이전 페이지 데이터를 계속 보여준다<sup class="ref"><a href="#r16">[16]</a></sup>.</b></p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/hooks/usePage.ts</span></div>
+  <pre><code class="language-tsx">import { useQuery, keepPreviousData } from "@tanstack/react-query";
+
+function usePage(page: number) {
+  return useQuery({
+    queryKey: ["items", page],
+    queryFn: () =&gt; fetchItems(page),
+    placeholderData: keepPreviousData, // 새 페이지 로딩 중에도 이전 페이지를 계속 보여준다
+  });
+}</code></pre>
+</div>
+
+<h3 id="s-infinite-query">useInfiniteQuery</h3>
+<p>무한 스크롤은 페이지가 아니라 "다음 페이지를 가리키는 커서"를 계속 쌓아나가는 구조다. v5부터 <code>initialPageParam</code>을 명시적으로 지정해야 한다<sup class="ref"><a href="#r17">[17]</a></sup>.</p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/hooks/useInfiniteItems.ts</span></div>
+  <pre><code class="language-tsx">import { useInfiniteQuery } from "@tanstack/react-query";
+
+function useInfiniteItems() {
+  return useInfiniteQuery({
+    queryKey: ["items"],
+    queryFn: ({ pageParam }) =&gt; fetchItems({ cursor: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =&gt; lastPage.nextCursor ?? undefined,
+  });
+}
+
+// 사용: data.pages는 지금까지 받아온 페이지 배열
+// fetchNextPage()를 호출하면 다음 페이지를 이어붙인다</code></pre>
+</div>
+
+<h3 id="s-cursor-vs-offset">cursor 기반 vs offset 기반</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>항목</th><th>offset 기반 (<code>?page=3</code>)</th><th>cursor 기반 (<code>?after=abc123</code>)</th></tr></thead>
+<tbody>
+<tr><td>구현 난이도</td><td>쉬움 — 페이지 번호만 계산</td><td>서버가 커서를 발급해야 함</td></tr>
+<tr><td>중간에 데이터가 추가/삭제될 때</td><td>항목이 밀리면서 중복/누락 발생 가능</td><td>커서가 특정 행을 가리키므로 안정적</td></tr>
+<tr><td>"몇 번째 페이지인지" UI</td><td>쉽게 표시 가능(1, 2, 3…)</td><td>정확한 페이지 번호를 알기 어려움</td></tr>
+<tr><td>임의 페이지로 점프</td><td>가능(<code>?page=10</code>)</td><td>보통 불가능(앞에서부터 순회해야 함)</td></tr>
+<tr><td>대표 사용처</td><td>관리자 페이지 목록, 검색 결과</td><td>피드, 무한 스크롤, 실시간성 목록</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s-client-global-state"><span class="h2num">§6</span>클라이언트 전역 상태 — Zustand</h2>
+
+<p>§1에서 걸러내고 남은 "서버에는 없지만 여러 트리에서 공유해야 하는" 상태가 진짜 클라이언트 전역 상태다. <a href="https://zustand.docs.pmnd.rs/getting-started/introduction" target="_blank" rel="noopener">Zustand</a><sup class="ref"><a href="#r19">[19]</a></sup>는 Context Provider 없이 훅 하나로 스토어를 만드는 라이브러리다.</p>
+
+<h3 id="s-zustand-basics">store 생성, selector, 불변 업데이트</h3>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/store/cartStore.ts</span></div>
+  <pre><code class="language-ts">import { create } from "zustand";
+
+interface CartItem { id: string; qty: number }
+interface CartState {
+  items: CartItem[];
+  addItem: (item: CartItem) =&gt; void;
+  clear: () =&gt; void;
+}
+
+export const useCartStore = create&lt;CartState&gt;()((set) =&gt; ({
+  items: [],
+  addItem: (item) =&gt;
+    set((state) =&gt; ({ items: [...state.items, item] })), // 불변 업데이트: 새 배열을 만든다
+  clear: () =&gt; set({ items: [] }),
+}));
+
+// 컴포넌트에서: selector로 필요한 값만 구독한다
+function CartBadge() {
+  const count = useCartStore((state) =&gt; state.items.length);
+  return &lt;span&gt;{count}&lt;/span&gt;;
+}</code></pre>
+</div>
+
+<p><b>selector</b>(<code>(state) =&gt; state.items.length</code>)가 핵심이다. 이 컴포넌트는 <code>items.length</code>가 바뀔 때만 리렌더링된다 — 스토어의 다른 값이 바뀌어도 무관하다. Zustand는 기본적으로 selector 결과를 <span class="t" data-tip="객체의 겉모습(참조)만 비교하는 것. 값 하나하나를 뜯어보지 않고 === 로 빠르게 비교한다.">얕은 비교</span>가 아니라 <code>Object.is</code>로 비교하므로, 객체/배열을 새로 만들어 반환하는 selector는 매번 다른 참조라 리렌더링을 유발할 수 있다는 점은 주의한다.</p>
+
+<h3 id="s-zustand-middleware">미들웨어 — persist, devtools</h3>
+<p>Zustand의 미들웨어는 store 생성 함수를 감싸는 함수다. <code>persist</code>는 localStorage에 자동 저장/복원하고, <code>devtools</code>는 Redux DevTools 확장에서 상태 변화를 볼 수 있게 한다<sup class="ref"><a href="#r20">[20]</a></sup><sup class="ref"><a href="#r21">[21]</a></sup>.</p>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/store/cartStore.ts</span></div>
+  <pre><code class="language-ts">import { create } from "zustand";
+import { persist, devtools } from "zustand/middleware";
+
+export const useCartStore = create&lt;CartState&gt;()(
+  devtools(
+    persist(
+      (set) =&gt; ({
+        items: [],
+        addItem: (item) =&gt; set((state) =&gt; ({ items: [...state.items, item] })),
+        clear: () =&gt; set({ items: [] }),
+      }),
+      { name: "cart-storage" } // localStorage 키 이름
+    )
+  )
+);</code></pre>
+</div>
+
+<h3 id="s-zustand-vs-context">Zustand vs Context + useReducer</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>항목</th><th>Context + useReducer</th><th>Zustand</th></tr></thead>
+<tbody>
+<tr><td>Provider 필요 여부</td><td>필요 — 트리를 감싸야 함</td><td>불필요 — 훅 임포트만 하면 어디서나 접근</td></tr>
+<tr><td>리렌더링 범위</td><td>Context 값이 바뀌면 그 Context를 구독하는 모든 컴포넌트가 리렌더링(<a href="https://react.dev/learn/scaling-up-with-reducer-and-context" target="_blank" rel="noopener">공식 문서 참고</a><sup class="ref"><a href="#r9">[9]</a></sup>)</td><td>selector 단위로 필요한 값만 구독 → 세밀한 리렌더 제어</td></tr>
+<tr><td>보일러플레이트</td><td>action type, reducer, dispatch, Provider 다 직접 작성<sup class="ref"><a href="#r8">[8]</a></sup></td><td>store 객체 하나로 끝</td></tr>
+<tr><td>추가 설치</td><td>불필요(React 내장)</td><td>필요(<code>zustand</code> 패키지)</td></tr>
+<tr><td>적합한 규모</td><td>작고 자주 안 바뀌는 상태(테마 등)</td><td>자주 바뀌고 여러 곳에서 읽는 상태</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s-mini-zustand">원리 재현 — 미니 Zustand 직접 만들기</h3>
+<p>Zustand의 핵심은 두 가지뿐이다. ① <span class="t" data-tip='구독자들에게 "값이 바뀌었다"고 알리는 아주 단순한 발행-구독(pub/sub) 객체.'>외부 스토어</span> 하나(구독자 Set + 상태), ② React 18의 <code>useSyncExternalStore</code>로 그 외부 스토어를 리액트 렌더링에 연결하는 것<sup class="ref"><a href="#r7">[7]</a></sup>. 아래는 그 둘만으로 만든 <code>create()</code>다.</p>
+
+<div class="fig">
+<pre class="mermaid">
+flowchart LR
+  Store["Zustand Store<br/>단일 상태 객체 + 구독자 Set"] -->|selector| CompA["CountView<br/>count만 구독"]
+  Store -->|selector| CompB["OtherView<br/>other만 구독"]
+  CompA -->|setState 호출| Store
+  CompB -->|setState 호출| Store
+</pre>
+<div class="fig__cap"><b>그림 5.</b> 스토어 하나를 여러 컴포넌트가 각자 다른 selector로 구독한다.</div>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>create</code>는 <code>listeners</code> <span class="t" data-tip="중복 없는 값들의 모음을 나타내는 자바스크립트 내장 자료구조. add/delete/has가 빠르다.">Set</span>과 <code>state</code> 변수를 <a href="glossary.html#g-closure">클로저</a>로 감싸 반환한다. <code>setState</code>가 호출되면 <code>state</code>를 새 객체로 교체하고(불변 업데이트) 모든 리스너를 호출한다.</p>
+    <ul>
+      <li><code>useSyncExternalStore(subscribe, getSnapshot)</code> — React 스케줄러 밖에서 바뀌는 값을 안전하게 구독하는 공식 API</li>
+      <li><code>useStore(selector)</code>는 매 렌더마다 <code>selector(getState())</code>를 <code>getSnapshot</code>으로 넘긴다</li>
+      <li><code>CountView</code>는 <code>count</code>만, <code>OtherView</code>는 <code>other</code>만 구독 — "other 토글"을 눌러도 <code>CountView</code>의 렌더 횟수는 그대로다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="miniZustand.jsx" data-height="380">
+<script type="text/plain" class="pg__src">
+const { useSyncExternalStore, useRef } = React;
+
+// ── 미니 zustand: create() + useSyncExternalStore만으로 만든 학습용 버전 ──
+function create(initializer) {
+  const listeners = new Set();
+  let state;
+
+  const setState = (partial) => {
+    const next = typeof partial === "function" ? partial(state) : partial;
+    state = Object.assign({}, state, next); // 불변 업데이트: 항상 새 객체를 만든다
+    listeners.forEach((fn) => fn());
+  };
+  const getState = () => state;
+  const subscribe = (fn) => {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
+  };
+
+  state = initializer(setState, getState);
+
+  function useStore(selector) {
+    return useSyncExternalStore(subscribe, () => selector(getState()));
+  }
+  return useStore;
+}
+
+// ── 데모 스토어 ──
+const useCounterStore = create((set) => ({
+  count: 0,
+  other: "A",
+  inc: () => set((s) => ({ count: s.count + 1 })),
+  toggleOther: () => set((s) => ({ other: s.other === "A" ? "B" : "A" })),
+}));
+
+function useRenderCount() {
+  const ref = useRef(0);
+  ref.current += 1;
+  return ref.current;
+}
+
+function CountView() {
+  const count = useCounterStore((s) => s.count); // count만 구독
+  const renders = useRenderCount();
+  return <p>CountView — count: {count} (렌더 {renders}회)</p>;
+}
+
+function OtherView() {
+  const other = useCounterStore((s) => s.other); // other만 구독
+  const renders = useRenderCount();
+  return <p>OtherView — other: {other} (렌더 {renders}회)</p>;
+}
+
+function App() {
+  const inc = useCounterStore((s) => s.inc);
+  const toggleOther = useCounterStore((s) => s.toggleOther);
+  return (
+    <div>
+      <CountView />
+      <OtherView />
+      <button onClick={inc}>count 증가</button>{" "}
+      <button onClick={toggleOther}>other 토글</button>
+      <p style={{ color: "#888", fontSize: 13 }}>
+        "other 토글"을 여러 번 눌러도 CountView의 렌더 횟수는 늘지 않는다 —
+        selector로 필요한 값만 구독했기 때문이다.
+      </p>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<h2 id="s-when-what"><span class="h2num">§7</span>언제 무엇을 쓰나</h2>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>도구</th><th>분류</th><th>언제 쓰나</th><th>장점</th><th>단점</th></tr></thead>
+<tbody>
+<tr><td>TanStack Query</td><td>서버 상태</td><td>서버 데이터를 조회/변경하는 모든 곳</td><td>캐시·재시도·리페치 전부 내장, 보일러플레이트 최소</td><td>서버 상태 전용 — 클라이언트 전역 상태에는 안 맞음</td></tr>
+<tr><td>Zustand</td><td>클라이언트 전역</td><td>여러 트리에서 공유하는 UI/앱 상태가 자주 바뀔 때</td><td>Provider 불필요, selector로 세밀한 리렌더 제어, 작은 번들</td><td>큰 팀에서는 미들웨어/컨벤션을 따로 정해야 함</td></tr>
+<tr><td>Context + useReducer</td><td>클라이언트 전역</td><td>거의 안 바뀌는 값(테마, 로케일), 작은 규모</td><td>추가 설치 불필요, React 표준 패턴</td><td>값이 바뀌면 구독자 전체 리렌더, action/reducer 보일러플레이트</td></tr>
+<tr><td>Redux Toolkit</td><td>클라이언트 전역</td><td>대규모 팀, 엄격한 액션 로깅/시간여행 디버깅이 필요할 때</td><td>미들웨어 생태계, DevTools, 예측 가능한 단방향 흐름</td><td>설정과 개념(slice, thunk 등)이 많음 — 소규모엔 과함</td></tr>
+<tr><td>Jotai</td><td>클라이언트 전역</td><td>상태를 작은 단위(atom)로 잘게 쪼개고 싶을 때</td><td>atom 단위로 자동 리렌더 최적화, 파생 상태 조합이 쉬움</td><td>atom이 많아지면 전체 그림 파악이 어려워질 수 있음</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note note--warn">
+  <span class="note__t">과설계 경고</span>
+  전역 상태 라이브러리부터 고르지 마라. 십중팔구는 §1 결정 트리를 따라가면 "이거 그냥 TanStack Query가 캐싱해줄 서버 데이터잖아" 또는 "이거 그냥 이 컴포넌트 안에서만 쓰는 로컬 상태잖아"로 끝난다. 정말로 여러 트리가 공유하는 <b>클라이언트</b> 상태가 남았을 때만 Zustand/Redux/Jotai를 고려한다.
+</div>
+
+<h2 id="s-form-url-state"><span class="h2num">§8</span>폼 상태와 URL 상태</h2>
+
+<h3 id="s-controlled-limits">제어 컴포넌트의 한계</h3>
+<p><a href="ch03.html#s-state">ch03</a>에서 배운 <span class="t" data-tip="입력값을 React state로 관리해서, state가 바뀔 때마다 화면이 다시 그려지는 input. value와 onChange를 함께 쓴다.">제어 컴포넌트</span>(controlled component) 패턴은 필드 하나짜리 폼엔 충분하다. 하지만 필드가 20개인 회원가입 폼에서 글자 하나 칠 때마다 <code>useState</code> 20개 중 하나가 바뀌고, 그때마다 폼 전체가 리렌더링되면 느려진다. 이건 이 챕터가 아니라 폼 전용 라이브러리(react-hook-form 등)가 다루는 영역이지만, 원인은 알아둘 필요가 있다 — <b>모든 입력값을 React state로 만들면, 모든 키 입력이 리렌더를 유발한다.</b></p>
+
+<h3 id="s-url-state-practice">URLSearchParams로 필터·페이지 상태 관리</h3>
+<p><code>useState</code>로 필터를 관리하면 새로고침 시 다 날아가고, 그 화면 링크를 동료에게 공유해도 필터가 재현되지 않는다. <a href="https://developer.mozilla.org/ko/docs/Web/API/URLSearchParams" target="_blank" rel="noopener">URLSearchParams</a><sup class="ref"><a href="#r1">[1]</a></sup>는 쿼리스트링을 다루는 표준 웹 API고, React Router 같은 라우터의 <code>useSearchParams</code>도 내부적으로 이걸 감싼 것이다.</p>
+
+<div class="note note--tip">
+  <span class="note__t">URL 상태의 이점</span>
+  ① 새로고침해도 필터가 유지된다. ② 링크를 복사해서 공유하면 상대방도 같은 필터/페이지를 본다. ③ 브라우저 <a href="https://developer.mozilla.org/ko/docs/Web/API/History_API" target="_blank" rel="noopener">뒤로가기</a><sup class="ref"><a href="#r2">[2]</a></sup>가 "필터 변경 취소"처럼 자연스럽게 동작한다.
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>이 데모는 실제 브라우저 주소창 대신, 같은 원리를 <code>URLSearchParams</code> + 스택 배열로 재현한 것이다(플레이그라운드가 iframe이라 실제 주소창을 바꿀 수 없다).</p>
+    <ul>
+      <li><code>new URLSearchParams()</code> 뒤 <code>.set(key, value)</code>로 쿼리스트링을 조립한다</li>
+      <li><code>.toString()</code>이 <code>category=notice&amp;page=2</code> 같은 문자열을 만들어준다</li>
+      <li>필터가 바뀔 때마다 히스토리 스택에 쌓이고, "뒤로가기 시뮬레이션"으로 이전 필터 상태를 복원한다 — 실제 브라우저의 popstate와 같은 개념</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="html" data-title="url-state-demo.html" data-height="280">
+<script type="text/plain" class="pg__src">
+<style>
+  .urlbar{font-family:monospace;background:#f2f4f9;border:1px solid #d6dae4;border-radius:8px;padding:8px 10px;margin:10px 0;word-break:break-all}
+  fieldset{border:1px solid #e2e6f0;border-radius:8px;margin-bottom:10px}
+</style>
+<fieldset>
+  <legend>필터 (실제로는 URL 쿼리스트링에 저장될 값)</legend>
+  <label>카테고리
+    <select id="category">
+      <option value="all">전체</option>
+      <option value="notice">공지</option>
+      <option value="qna">질문</option>
+    </select>
+  </label>
+  &nbsp;&nbsp;
+  <label>페이지
+    <input id="page" type="number" min="1" value="1" style="width:60px">
+  </label>
+</fieldset>
+<button id="back" type="button">← 뒤로가기 시뮬레이션</button>
+<div class="urlbar" id="urlbar">현재 URL: ?category=all&amp;page=1</div>
+<div id="log"></div>
+<script>
+  var historyStack = ["category=all&page=1"];
+  var category = document.getElementById("category");
+  var page = document.getElementById("page");
+  var urlbar = document.getElementById("urlbar");
+  var log = document.getElementById("log");
+
+  function render(push) {
+    var params = new URLSearchParams();
+    params.set("category", category.value);
+    params.set("page", page.value);
+    var qs = params.toString();
+    urlbar.textContent = "현재 URL: ?" + qs;
+    if (push && historyStack[historyStack.length - 1] !== qs) {
+      historyStack.push(qs);
+    }
+    log.textContent = "히스토리 스택 길이: " + historyStack.length;
+  }
+
+  category.addEventListener("change", function () { render(true); });
+  page.addEventListener("input", function () { render(true); });
+
+  document.getElementById("back").addEventListener("click", function () {
+    if (historyStack.length <= 1) return;
+    historyStack.pop();
+    var prev = new URLSearchParams(historyStack[historyStack.length - 1]);
+    category.value = prev.get("category");
+    page.value = prev.get("page");
+    render(false);
+    log.textContent = "뒤로가기 → 히스토리 스택 길이: " + historyStack.length;
+  });
+
+  render(false);
+<\/script>
+</script>
+  </div>
+</div>
+
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/hooks/useFilterParams.ts (React Router 예시)</span></div>
+  <pre><code class="language-tsx">import { useSearchParams } from "react-router-dom";
+
+function ProductList() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const category = searchParams.get("category") ?? "all";
+  const page = Number(searchParams.get("page") ?? "1");
+
+  function setCategory(next: string) {
+    setSearchParams((prev) =&gt; {
+      prev.set("category", next);
+      prev.set("page", "1"); // 카테고리 바뀌면 1페이지로
+      return prev;
+    });
+  }
+
+  // category, page를 그대로 useQuery의 queryKey로 넘기면
+  // 서버 상태(§2)와 URL 상태(§8)가 자연스럽게 연결된다
+  // useQuery({ queryKey: ["products", category, page], ... })
+}</code></pre>
+</div>
+
+<h2 id="s-checklist"><span class="h2num">§9</span>이해도 점검</h2>
+
+<ul class="check">
+  <li><input type="checkbox">어떤 값이 주어졌을 때 5가지 상태 분류(서버/클라이언트 전역/URL/폼/로컬 UI) 중 어디에 속하는지 결정 트리를 따라 판단할 수 있다.</li>
+  <li><input type="checkbox"><code>useEffect</code> 직접 fetch에서 레이스 컨디션이 왜 발생하는지, 어떤 조건에서 재현되는지 설명할 수 있다.</li>
+  <li><input type="checkbox"><code>staleTime</code>과 <code>gcTime</code>의 차이를 코드 없이 말로 설명할 수 있다.</li>
+  <li><input type="checkbox"><code>queryKey</code>가 왜 캐시의 "주소" 역할을 하는지, 같은 키를 쓰는 컴포넌트 두 개가 왜 요청을 1번만 보내는지 설명할 수 있다.</li>
+  <li><input type="checkbox">낙관적 업데이트의 <code>onMutate → onError → onSettled</code> 흐름과 각 단계의 역할을 그림 없이 순서대로 말할 수 있다.</li>
+  <li><input type="checkbox">cursor 기반 페이지네이션이 offset 기반보다 나은 상황을 예 하나로 들 수 있다.</li>
+  <li><input type="checkbox">Zustand store에서 selector를 안 쓰고 전체 state를 구독했을 때 생기는 문제를 설명할 수 있다.</li>
+  <li><input type="checkbox">Context+useReducer와 Zustand 중 어느 쪽을 쓸지, 상태가 얼마나 자주 바뀌는지를 기준으로 판단할 수 있다.</li>
+  <li><input type="checkbox">필터/페이지 상태를 <code>useState</code> 대신 URL에 저장했을 때 얻는 구체적인 이점 2가지 이상을 말할 수 있다.</li>
+</ul>
+
+<section class="refs">
+  <h2 id="s-refs">참고 문헌</h2>
+  <ol>
+    <li id="r1"><span class="src">MDN Web Docs</span> — "URLSearchParams". <a href="https://developer.mozilla.org/ko/docs/Web/API/URLSearchParams" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r2"><span class="src">MDN Web Docs</span> — "History API". <a href="https://developer.mozilla.org/ko/docs/Web/API/History_API" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r3"><span class="src">MDN Web Docs</span> — "AbortController". <a href="https://developer.mozilla.org/ko/docs/Web/API/AbortController" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r4"><span class="src">react.dev</span> — "Synchronizing with Effects". <a href="https://react.dev/learn/synchronizing-with-effects" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+    <li id="r5"><span class="src">react.dev</span> — "You Might Not Need an Effect". <a href="https://react.dev/learn/you-might-not-need-an-effect" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+    <li id="r6"><span class="src">react.dev</span> — "useEffect". <a href="https://react.dev/reference/react/useEffect" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+    <li id="r7"><span class="src">react.dev</span> — "useSyncExternalStore". <a href="https://react.dev/reference/react/useSyncExternalStore" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+    <li id="r8"><span class="src">react.dev</span> — "useReducer". <a href="https://react.dev/reference/react/useReducer" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+    <li id="r9"><span class="src">react.dev</span> — "Scaling Up with Reducer and Context". <a href="https://react.dev/learn/scaling-up-with-reducer-and-context" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+    <li id="r10"><span class="src">TanStack</span> — "Query Overview". <a href="https://tanstack.com/query/latest/docs/framework/react/overview" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r11"><span class="src">TanStack</span> — "Queries". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/queries" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r12"><span class="src">TanStack</span> — "Query Keys". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/query-keys" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r13"><span class="src">TanStack</span> — "Important Defaults". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r14"><span class="src">TanStack</span> — "Mutations". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/mutations" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r15"><span class="src">TanStack</span> — "Optimistic Updates". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r16"><span class="src">TanStack</span> — "Paginated Queries". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r17"><span class="src">TanStack</span> — "Infinite Queries". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r18"><span class="src">TanStack</span> — "Window Focus Refetching". <a href="https://tanstack.com/query/latest/docs/framework/react/guides/window-focus-refetching" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+    <li id="r19"><span class="src">Zustand</span> — "Getting Started · Introduction". <a href="https://zustand.docs.pmnd.rs/getting-started/introduction" target="_blank" rel="noopener">zustand.docs.pmnd.rs</a> (2026-08 확인)</li>
+    <li id="r20"><span class="src">Zustand</span> — "Persisting Store Data". <a href="https://zustand.docs.pmnd.rs/integrations/persisting-store-data" target="_blank" rel="noopener">zustand.docs.pmnd.rs</a> (2026-08 확인)</li>
+    <li id="r21"><span class="src">Zustand</span> — "Redux DevTools Middleware". <a href="https://zustand.docs.pmnd.rs/middlewares/devtools" target="_blank" rel="noopener">zustand.docs.pmnd.rs</a> (2026-08 확인)</li>
+  </ol>
+</section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>
