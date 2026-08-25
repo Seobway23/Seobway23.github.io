@@ -87,7 +87,8 @@ const pwa = VitePWA({
     clientsClaim: true,
     // SPA — 모든 네비게이션은 index.html 로. 404.html 은 Pages 자체 폴백이라 제외
     navigateFallback: `${base}index.html`,
-    navigateFallbackDenylist: [/^\/404\.html$/],
+    // public/study/** 는 SPA가 아닌 정적 학습서 — 셸로 폴백하면 안 된다
+    navigateFallbackDenylist: [/^\/404\.html$/, /^\/study\//],
     runtimeCaching: [
       {
         // 레이지 청크(mermaid·three·katex…): 해시 파일명이라 내용이 불변

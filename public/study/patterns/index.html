@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>프론트엔드 실전 패턴 학습서 — 상태·비동기·성능·설계</title>
+<meta name="description" content="React·TypeScript 실무에서 실제로 틀리는 지점만 모은 학습서. 공식 문서 근거 + BAD/GOOD 코드 + 자가 점검 질문.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d11; --bg2:#111419; --bg3:#161a21; --bg4:#1c212a;
+  --line:#232833; --line2:#333a47;
+  --tx:#e7eaf0; --tx2:#9aa3b2; --tx3:#68717f;
+  --red:#ff5f5f; --amber:#ffb224; --green:#3ecf8e; --blue:#5b9dff; --purple:#a78bfa; --cyan:#38bdf8;
+  --mono:ui-monospace,"SFMono-Regular",Consolas,"D2Coding","Cascadia Mono",monospace;
+  --sb:#2d3542; --sbh:#3f4a5c; --sbt:transparent;
+  color-scheme:dark;
+}
+html{scroll-behavior:smooth}
+
+/* scrollbar */
+*{scrollbar-width:thin;scrollbar-color:var(--sb) var(--sbt)}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:var(--sbt)}
+::-webkit-scrollbar-thumb{background:var(--sb);border-radius:99px;border:3px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:var(--sbh)}
+::-webkit-scrollbar-corner{background:var(--sbt)}
+pre::-webkit-scrollbar-thumb{border-color:#07090d}
+pre::-webkit-scrollbar,.tw::-webkit-scrollbar,.nav-in::-webkit-scrollbar{height:9px}
+.toc::-webkit-scrollbar{width:8px}
+.toc::-webkit-scrollbar-thumb{border-width:2px}
+
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  font-size:14.5px;line-height:1.75;letter-spacing:-.01em;padding-bottom:100px;
+}
+.wrap{max-width:1560px;margin:0 auto;padding:0 22px}
+
+.hero{border-bottom:1px solid var(--line);background:radial-gradient(1200px 300px at 20% 0%,#181f2e,#0b0d11);padding:32px 0 26px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--purple);font-weight:700}
+h1{font-size:28px;font-weight:800;letter-spacing:-.035em;margin-top:6px}
+.hero p{color:var(--tx2);font-size:13.5px;margin-top:10px;max-width:920px}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:15px}
+.pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--bg3);border:1px solid var(--line2);color:var(--tx2)}
+.pill.acc{background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.35);color:var(--purple)}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.stat{background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:8px 14px;min-width:100px}
+.stat b{display:block;font-size:19px;font-weight:800;line-height:1.2}
+.stat span{font-size:10.5px;color:var(--tx3)}
+
+nav{position:sticky;top:0;z-index:60;background:rgba(11,13,17,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;gap:3px;overflow-x:auto;padding:8px 0}
+nav a{color:var(--tx2);text-decoration:none;font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;white-space:nowrap}
+nav a:hover{background:var(--bg3);color:var(--tx)}
+
+.layout{display:grid;grid-template-columns:224px 1fr;gap:32px;align-items:start;margin-top:26px}
+.toc{position:sticky;top:56px;max-height:calc(100vh - 76px);overflow-y:auto;padding-right:8px;border-right:1px solid var(--line)}
+.toc h4{font-size:10px;letter-spacing:.12em;color:var(--tx3);font-weight:800;margin:14px 0 6px}
+.toc a{display:block;color:var(--tx2);text-decoration:none;font-size:12px;padding:3px 8px;border-radius:5px;border-left:2px solid transparent}
+.toc a:hover{background:var(--bg3);color:var(--tx)}
+.toc a.on{color:var(--purple);border-left-color:var(--purple);background:rgba(167,139,250,.07)}
+main{min-width:0}
+
+h2{font-size:19.5px;font-weight:800;letter-spacing:-.025em;margin:50px 0 12px;padding-bottom:9px;border-bottom:1px solid var(--line);scroll-margin-top:60px;display:flex;align-items:baseline;gap:10px}
+h2:first-of-type{margin-top:0}
+.hnum{font-family:var(--mono);font-size:12px;color:var(--purple);font-weight:700}
+h3{font-size:15.5px;font-weight:750;margin:28px 0 9px;scroll-margin-top:60px}
+h4{font-size:13.5px;font-weight:700;margin:19px 0 7px}
+p{margin:9px 0;color:var(--tx2)}
+b,strong{color:var(--tx);font-weight:700}
+ul,ol{margin:9px 0 9px 20px;color:var(--tx2)}
+li{margin:4px 0}
+a{color:var(--blue)}
+.lead{font-size:13.5px;background:var(--bg2);border:1px solid var(--line);border-left:2px solid var(--purple);border-radius:9px;padding:13px 16px;margin:14px 0}
+
+code{font-family:var(--mono);font-size:12px;background:var(--bg4);padding:1.5px 5px;border-radius:4px;color:#cbd5e5;white-space:nowrap}
+pre{font-family:var(--mono);font-size:12px;line-height:1.75;background:#07090d;border:1px solid var(--line);border-radius:9px;padding:13px 15px;margin:11px 0;overflow-x:auto;color:#cbd5e5}
+pre code{background:none;padding:0;white-space:pre}
+.cw{position:relative}
+.bad pre{border-left:2px solid var(--red)}
+.good pre{border-left:2px solid var(--green)}
+.tag-bad,.tag-good{font-family:var(--mono);font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:4px;display:inline-block;margin-bottom:-3px}
+.tag-bad{background:rgba(255,95,95,.13);color:var(--red)}
+.tag-good{background:rgba(62,207,142,.13);color:var(--green)}
+.copy{position:absolute;top:7px;right:9px;background:var(--bg4);border:1px solid var(--line2);color:var(--tx2);border-radius:5px;padding:3px 8px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit;z-index:2}
+.copy:hover{color:var(--tx);border-color:#4a5566}
+
+.tw{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:10.5px;color:var(--tx3);font-weight:800;letter-spacing:.05em;padding:8px 11px;border-bottom:1px solid var(--line2);white-space:nowrap;background:var(--bg2)}
+td{padding:9px 11px;border-bottom:1px solid var(--line);color:var(--tx2);vertical-align:top}
+tr:hover td{background:var(--bg2)}
+td.m{font-family:var(--mono);font-size:11.5px;color:var(--tx);white-space:nowrap}
+
+.box{border-radius:9px;padding:11px 14px;margin:11px 0;font-size:12.8px;line-height:1.7;background:var(--bg3);border-left:2px solid var(--line2);color:var(--tx2)}
+.box.r{border-left-color:var(--red);background:rgba(255,95,95,.05)}
+.box.a{border-left-color:var(--amber);background:rgba(255,178,36,.05)}
+.box.g{border-left-color:var(--green);background:rgba(62,207,142,.05)}
+.box.b{border-left-color:var(--blue);background:rgba(91,157,255,.05)}
+.box.p{border-left-color:var(--purple);background:rgba(167,139,250,.05)}
+.box .t{display:block;font-weight:800;color:var(--tx);margin-bottom:3px;font-size:12.5px}
+.no{color:var(--red)} .yes{color:var(--green)}
+
+.grid{display:grid;gap:10px;margin:13px 0}
+.g2{grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card h5{font-size:12.5px;font-weight:750;color:var(--tx);margin-bottom:5px}
+.card p{font-size:12px;margin:4px 0}
+
+/* 자가 점검 */
+.quiz{background:linear-gradient(180deg,rgba(56,189,248,.06),transparent);border:1px solid var(--line);border-left:2px solid var(--cyan);border-radius:9px;padding:12px 15px;margin:16px 0}
+.quiz .qt{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--cyan);margin-bottom:7px}
+.quiz ol{margin:0 0 0 18px;font-size:12.7px}
+.quiz li{margin:5px 0;color:var(--tx)}
+details{margin-top:9px;border-top:1px dashed var(--line2);padding-top:8px}
+summary{cursor:pointer;font-size:11.5px;color:var(--tx3);font-weight:700;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'▸ ';color:var(--cyan)}
+details[open] summary::before{content:'▾ '}
+details .ans{font-size:12.3px;color:var(--tx2);margin-top:7px}
+details .ans li{color:var(--tx2);margin:6px 0}
+
+.chk{display:flex;align-items:flex-start;gap:9px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:5px 0;font-size:12.7px;cursor:pointer}
+.chk input{margin-top:4px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+.chk span{flex:1;color:var(--tx)}
+.chk.done{opacity:.4}
+.chk.done span{text-decoration:line-through}
+.chk .meta{font-size:11px;color:var(--tx3);white-space:nowrap}
+.prog{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin:8px 0}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));width:0;transition:width .3s}
+
+.lv{font-family:var(--mono);font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;margin-right:6px}
+.l1{background:rgba(255,95,95,.15);color:var(--red)}
+.l2{background:rgba(255,178,36,.15);color:var(--amber)}
+.l3{background:rgba(167,139,250,.15);color:var(--purple)}
+
+sup.ref a{color:var(--cyan);text-decoration:none;font-size:9.5px;font-weight:700}
+.foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);font-size:11.5px;color:var(--tx3)}
+
+/* ---------- mobile ---------- */
+.tocbtn,.tocbg{display:none}
+@media(max-width:1000px){
+  .wrap{padding:0 14px}
+  .layout{grid-template-columns:1fr;gap:0;margin-top:18px}
+  .toc{position:fixed;top:0;left:0;bottom:0;width:82%;max-width:330px;z-index:210;
+       background:var(--bg2);border-right:1px solid var(--line2);
+       padding:18px 12px 48px;max-height:none;overflow-y:auto;
+       transform:translateX(-102%);transition:transform .22s ease;display:block}
+  .toc.open{transform:none;box-shadow:0 0 60px rgba(0,0,0,.65)}
+  .tocbg{display:block;position:fixed;inset:0;z-index:205;background:rgba(0,0,0,.55);
+         opacity:0;pointer-events:none;transition:opacity .22s}
+  .tocbg.on{opacity:1;pointer-events:auto}
+  .tocbtn{display:flex;align-items:center;gap:6px;position:fixed;left:12px;bottom:14px;z-index:215;
+          background:var(--bg3);border:1px solid var(--line2);color:var(--tx);
+          border-radius:99px;padding:10px 16px;font-family:inherit;font-size:12.5px;font-weight:700;
+          cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.55)}
+  .toc a{padding:7px 10px;font-size:13px}
+}
+@media(max-width:760px){
+  body{font-size:14px;line-height:1.7;-webkit-text-size-adjust:100%}
+  h1{font-size:21px}
+  h2{font-size:17px;margin:34px 0 10px;flex-wrap:wrap}
+  h3{font-size:14.5px}
+  h4{font-size:13px}
+  .hero{padding:22px 0 20px}
+  .hero p{font-size:12.8px}
+  .stat{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px)}
+  pre{font-size:11px;padding:11px 12px;line-height:1.7}
+  code{font-size:11px}
+  .box{font-size:12.3px;padding:10px 12px}
+  table{font-size:12px}
+  th,td{padding:7px 9px}
+  .g2{grid-template-columns:1fr}
+  .quiz{padding:11px 13px}
+  .quiz ol{margin-left:16px;font-size:12.3px}
+  .chk{font-size:12.2px;flex-wrap:wrap}
+  .chk .meta{width:100%;text-align:right;margin-top:2px}
+  .lead{font-size:12.8px;padding:11px 13px}
+  .copy{top:5px;right:6px;padding:2px 7px;font-size:10px}
+  .lv{margin-left:0!important}
+}
+@media(max-width:420px){
+  .wrap{padding:0 11px}
+  pre{font-size:10.3px;padding:10px}
+  .stat{min-width:100%;flex:1 1 100%}
+}
+@media print{body{background:#fff;color:#000}nav,.toc,.tocbtn,.tocbg{display:none}.layout{grid-template-columns:1fr}details{display:block}details[open]{}}
+</style>
+</head>
+<body>
+
+<button class="tocbtn" id="tocBtn" aria-label="목차 열기">☰ 목차</button>
+<div class="tocbg" id="tocBg"></div>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">FRONTEND · PRACTICAL PATTERNS · REACT + TYPESCRIPT</div>
+  <h1>프론트엔드 실전 패턴 학습서</h1>
+  <p>문법서가 아니다. <b>실무에서 실제로 틀리는 지점</b>만 모았다. 각 항목은 <b>왜 문제인가 → BAD 코드 → GOOD 코드 → 자가 점검 질문</b> 순으로 되어 있다.
+  모든 기술 설명은 <b>1차 공식 문서</b>(react.dev · web.dev · MDN · Martin Fowler · Google Engineering Practices)만 근거로 삼았고 문단 끝 <sup class="ref"><a href="#refs">[n]</a></sup> 으로 표시했다.</p>
+  <div class="pills">
+    <span class="pill acc">React 19</span><span class="pill acc">TypeScript 5</span><span class="pill acc">TanStack Query</span>
+    <span class="pill">비동기 안전성</span><span class="pill">렌더링 성능</span><span class="pill">오프라인</span><span class="pill">Electron</span><span class="pill">설계 원칙</span><span class="pill">코드리뷰</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>12</b><span>챕터</span></div>
+    <div class="stat"><b>60+</b><span>코드 예제</span></div>
+    <div class="stat"><b>36</b><span>자가 점검 질문</span></div>
+    <div class="stat"><b id="pgTxt">0%</b><span>학습 진행</span></div>
+  </div>
+  <div class="prog" style="max-width:420px"><i id="pgBar"></i></div>
+</div></header>
+
+<nav><div class="wrap"><div class="nav-in">
+  <a href="#c1">1 상태설계</a><a href="#c2">2 Effect</a><a href="#c3">3 비동기</a><a href="#c4">4 서버상태</a>
+  <a href="#c5">5 에러</a><a href="#c6">6 렌더링</a><a href="#c7">7 브라우저</a><a href="#c8">8 번들</a>
+  <a href="#c9">9 타입</a><a href="#c10">10 오프라인</a><a href="#c11">11 설계원칙</a><a href="#c12">12 협업</a>
+  <a href="#path">학습순서</a><a href="#refs">출처</a>
+</div></div></nav>
+
+<div class="wrap"><div class="layout">
+<aside class="toc" id="toc"></aside>
+<main>
+
+<p class="lead">
+<b>이 학습서를 읽는 법</b> — 읽지 말고 <b>타이핑하라.</b> 각 GOOD 코드는 복사하지 말고 손으로 다시 친다.
+챕터 끝의 <b>자가 점검</b>은 답을 보기 전에 소리 내어 답해본다. 막히면 그 개념은 아직 내 것이 아니다.<br>
+난이도 표기 — <span class="lv l1">L1</span>필수 <span class="lv l2">L2</span>실무 <span class="lv l3">L3</span>심화
+</p>
+
+<!-- ═══════════ 1 ═══════════ -->
+<h2 id="c1"><span class="hnum">CH 01</span>상태 설계 <span class="lv l1" style="margin-left:auto">L1</span></h2>
+<p>프론트엔드에서 "객체 설계"란 사실상 <b>상태를 어떻게 놓느냐</b>다. 버그의 상당수가 상태 구조에서 시작한다.
+React 공식 결론은 한 줄이다 — <b>"Make your state as simple as it can be — but no simpler."</b><sup class="ref"><a href="#r1">[1]</a></sup></p>
+
+<h3 id="c1-1">1-1. 원칙 ① 관련된 상태는 묶는다</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>const [x, setX] = useState(0);
+const [y, setY] = useState(0);
+// 항상 같이 바뀌는데 따로 관리 → 한쪽만 업데이트하는 실수가 난다</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>const [position, setPosition] = useState({ x: 0, y: 0 });</code></pre></div></div>
+<div class="box b"><b>판단 기준</b> — "이 둘이 따로 바뀌는 순간이 있나?" 없으면 묶는다. 있으면 나눈다.</div>
+
+<h3 id="c1-2">1-2. 원칙 ② 모순되는 상태를 없앤다 ⭐</h3>
+<p>가장 중요한 원칙이다. <b>불가능한 상태를 애초에 만들 수 없게</b> 한다.</p>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>const [isSending, setIsSending] = useState(false);
+const [isSent,    setIsSent]    = useState(false);
+
+// 조합이 4가지인데 그중 (true, true)는 말이 안 된다.
+// 언젠가 누군가 그 상태를 만든다. 그리고 재현이 안 되는 버그가 된다.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>type Status = 'typing' | 'sending' | 'sent';
+const [status, setStatus] = useState&lt;Status&gt;('typing');
+
+const isSending = status === 'sending';   // 파생값은 계산으로</code></pre></div></div>
+
+<h4>타입으로 강제하기 — 판별 유니온(discriminated union)</h4>
+<div class="cw"><span class="tag-bad">BAD — 8가지 조합 중 5개가 불가능</span><div class="bad"><pre><code>interface State {
+  isLoading: boolean;
+  error: Error | null;
+  data: User | null;
+}
+// isLoading:true + data:있음 + error:있음 ← 말이 안 되는데 타입이 허용한다
+// 그래서 화면 코드가 이렇게 된다:
+if (state.isLoading) ...
+else if (state.error) ...
+else if (state.data) ...
+else ...            // ← 이 else는 뭔가? 아무도 모른다</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>type State =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'error';   error: Error }
+  | { status: 'success'; data: User };
+
+function View({ state }: { state: State }) {
+  switch (state.status) {
+    case 'idle':    return &lt;Empty /&gt;;
+    case 'loading': return &lt;Skeleton /&gt;;
+    case 'error':   return &lt;Retry error={state.error} /&gt;;   // error 접근이 타입 안전
+    case 'success': return &lt;Profile user={state.data} /&gt;;   // data 접근이 타입 안전
+  }
+}</code></pre></div></div>
+<div class="box g"><span class="t">이게 왜 강력한가</span>
+<b>① 불가능한 상태가 만들어지지 않는다</b> — 컴파일러가 막는다.<br>
+<b>② 분기마다 필요한 데이터만 존재한다</b> — <code>state.data!</code> 같은 강제 단언이 사라진다.<br>
+<b>③ 케이스를 빠뜨리면 컴파일 에러</b> — 아래 exhaustive 체크와 조합하면 완전해진다.</div>
+
+<h4>빠짐없음 검사 (exhaustiveness check)</h4>
+<pre><code>function assertNever(x: never): never {
+  throw new Error('Unhandled case: ' + JSON.stringify(x));
+}
+
+switch (state.status) {
+  case 'idle':    return &lt;Empty /&gt;;
+  case 'loading': return &lt;Skeleton /&gt;;
+  case 'error':   return &lt;Retry error={state.error} /&gt;;
+  case 'success': return &lt;Profile user={state.data} /&gt;;
+  default:        return assertNever(state);
+  // ↑ 나중에 status에 'cancelled'를 추가하면 여기서 컴파일 에러가 난다.
+  //   "새 상태를 추가했는데 화면 처리를 빠뜨림"이 런타임이 아니라 빌드에서 잡힌다.
+}</code></pre>
+
+<h3 id="c1-3">1-3. 원칙 ③ 중복 상태를 없앤다</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>const [firstName, setFirstName] = useState('');
+const [lastName,  setLastName]  = useState('');
+const [fullName,  setFullName]  = useState('');   // 계산 가능한데 저장했다
+
+useEffect(() =&gt; {
+  setFullName(firstName + ' ' + lastName);
+}, [firstName, lastName]);
+// 렌더 → effect → setState → 렌더. 한 번 더 돈다. 그리고 동기화가 깨질 수 있다.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>const fullName = firstName + ' ' + lastName;   // 렌더링 중 계산</code></pre></div></div>
+<div class="box a"><b>판별 질문</b> — "이 값을 다른 상태로부터 계산할 수 있나?" 있으면 <b>상태가 아니다.</b></div>
+
+<h3 id="c1-4">1-4. 원칙 ④ 복제를 피한다 — 객체 대신 id</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>const [items, setItems] = useState(initial);
+const [selectedItem, setSelectedItem] = useState(initial[0]);
+
+// items의 첫 항목 이름을 수정하면?
+// → items는 새 객체, selectedItem은 옛날 객체. 화면 두 곳이 서로 다른 이름을 보여준다.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>const [items, setItems] = useState(initial);
+const [selectedId, setSelectedId] = useState&lt;string | null&gt;(null);
+
+const selectedItem = items.find(i =&gt; i.id === selectedId) ?? null;
+// 진실의 원천(source of truth)이 items 하나뿐이다</code></pre></div></div>
+
+<h3 id="c1-5">1-5. 원칙 ⑤ 깊은 중첩을 피한다 — 평탄화</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>const [plan, setPlan] = useState({
+  childPlaces: [{ childPlaces: [{ childPlaces: [ /* ... */ ] }] }]
+});
+// 3단계 아래 항목 하나를 지우려면 위 3단계를 전부 복사해서 새로 만들어야 한다</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD — DB 테이블처럼</span><div class="good"><pre><code>type Node = { id: string; title: string; childIds: string[] };
+
+const [nodes, setNodes] = useState&lt;Record&lt;string, Node&gt;&gt;({
+  '0': { id: '0', title: 'Earth',  childIds: ['1', '2'] },
+  '1': { id: '1', title: 'Africa', childIds: [] },
+});
+
+// 삭제 = 부모의 childIds에서 id 하나 빼기. 깊이와 무관하게 한 단계 작업.</code></pre></div></div>
+
+<h3 id="c1-6">1-6. props를 state로 복사하지 마라</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>function Message({ color }) {
+  const [c, setC] = useState(color);
+  // 부모가 color를 바꿔도 c는 첫 값에 고정. "왜 안 바뀌지?" 버그의 단골.
+}</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD — 그냥 쓴다</span><div class="good"><pre><code>function Message({ color }) {
+  return &lt;p style={{ color }}&gt;...&lt;/p&gt;;
+}</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD — 정말 무시하고 싶다면 이름으로 밝힌다</span><div class="good"><pre><code>function Message({ initialColor }) {          // initial / default 접두사
+  const [color, setColor] = useState(initialColor);
+}</code></pre></div></div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH01</div>
+<ol>
+<li><code>isLoading</code>/<code>error</code>/<code>data</code> 세 개를 따로 두면 무엇이 문제인가?</li>
+<li>판별 유니온에서 <code>assertNever</code>는 무엇을 잡아주나?</li>
+<li>상태로 둘지 계산으로 둘지 판단하는 한 문장 기준은?</li>
+<li>목록에서 선택 항목을 객체로 저장하면 언제 깨지나?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>불가능한 조합(로딩 중인데 데이터도 에러도 있음)이 타입상 허용된다. 화면 분기의 마지막 <code>else</code>가 무엇을 뜻하는지 아무도 설명할 수 없게 된다.</li>
+<li>유니온에 새 케이스를 추가했을 때 <b>처리를 빠뜨린 곳을 컴파일 시점에</b> 잡는다. 런타임 버그가 빌드 에러로 앞당겨진다.</li>
+<li>"다른 상태로부터 계산할 수 있나?" — 계산 가능하면 상태가 아니다.</li>
+<li>원본 목록이 갱신되는 순간. 선택 객체는 옛 스냅샷을 들고 있어 두 화면이 다른 값을 보여준다. id만 저장하면 진실의 원천이 하나가 된다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 2 ═══════════ -->
+<h2 id="c2"><span class="hnum">CH 02</span>Effect — 대부분은 필요 없다 <span class="lv l1" style="margin-left:auto">L1</span></h2>
+<div class="box b"><span class="t">공식 판별 질문<sup class="ref"><a href="#r2">[2]</a></sup></span>
+<b>"이 코드는 컴포넌트가 표시되었기 <i>때문에</i> 실행되어야 하는가, 아니면 특정 <i>상호작용 때문에</i> 실행되어야 하는가?"</b><br>
+상호작용 때문 → <b>이벤트 핸들러</b>. 표시 때문 → Effect.<br>
+<b>Effect는 "외부 시스템과 동기화"할 때만 쓴다.</b> React 바깥(DOM API, 네트워크, 타이머, 구독)이 외부 시스템이다.</div>
+
+<div class="tw"><table>
+<tr><th style="width:260px">상황</th><th>해결</th></tr>
+<tr><td>계산 가능한 값</td><td><b>렌더링 중 계산</b></td></tr>
+<tr><td>비용이 큰 계산</td><td><code>useMemo</code></td></tr>
+<tr><td>props 변경 시 <b>전체</b> 리셋</td><td><b><code>key</code></b></td></tr>
+<tr><td>props 변경 시 <b>일부</b> 조정</td><td>렌더 중 조정 또는 <code>key</code></td></tr>
+<tr><td>사용자 이벤트에 대한 반응</td><td><b>이벤트 핸들러</b></td></tr>
+<tr><td>외부 시스템 동기화</td><td>✅ Effect</td></tr>
+<tr><td>데이터 페칭</td><td>✅ Effect (<b>cleanup 필수</b>)</td></tr>
+</table></div>
+
+<h3 id="c2-1">2-1. props 변경 시 상태 리셋 → key</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>function ProfilePage({ userId }) {
+  const [comment, setComment] = useState('');
+  useEffect(() =&gt; { setComment(''); }, [userId]);
+  // userId가 바뀌면: 옛 comment로 한 번 그리고 → effect → 빈 값으로 또 그린다.
+  // 그 사이 사용자에게 이전 사람의 댓글이 잠깐 보인다.
+}</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>export default function ProfilePage({ userId }) {
+  return &lt;Profile userId={userId} key={userId} /&gt;;
+}
+function Profile({ userId }) {
+  const [comment, setComment] = useState('');   // key가 바뀌면 컴포넌트가 새로 만들어짐
+}</code></pre></div></div>
+<div class="box b"><b>원리</b> — React는 <code>key</code>가 다르면 <b>같은 위치라도 다른 컴포넌트</b>로 취급해 상태를 버리고 새로 만든다. "리셋 로직"을 짤 필요가 없다.</div>
+
+<h3 id="c2-2">2-2. 이벤트 반응을 Effect로 만들지 않는다</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>useEffect(() =&gt; {
+  if (product.isInCart) showNotification(`${product.name} 담김!`);
+}, [product]);
+// 새로고침만 해도 알림이 뜬다. 담은 적도 없는데.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>function handleBuyClick() {
+  addToCart(product);
+  showNotification(`${product.name} 담김!`);   // 담았기 "때문에" 뜬다
+}</code></pre></div></div>
+
+<h3 id="c2-3">2-3. Effect 체인 금지</h3>
+<div class="cw"><span class="tag-bad">BAD — 상태가 상태를 깨우는 도미노</span><div class="bad"><pre><code>useEffect(() =&gt; { setGoldCount(...) }, [card]);
+useEffect(() =&gt; { setRound(...) },     [goldCount]);
+useEffect(() =&gt; { setIsOver(...) },    [round]);
+// 카드 한 장 놓을 때마다 렌더가 4번 돈다. 중간 상태가 화면에 노출된다. 디버깅 불가.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>const isGameOver = round &gt; 5;                  // 파생값은 렌더 중 계산
+
+function handlePlaceCard(nextCard) {           // 한 번에 계산
+  setCard(nextCard);
+  if (nextCard.gold) {
+    if (goldCount &lt; 3) setGoldCount(goldCount + 1);
+    else { setGoldCount(0); setRound(round + 1); }
+  }
+}</code></pre></div></div>
+
+<h3 id="c2-4">2-4. cleanup은 선택이 아니다</h3>
+<pre><code>useEffect(() =&gt; {
+  const id = setInterval(tick, 1000);
+  window.addEventListener('resize', onResize);
+  const sub = socket.subscribe(onMessage);
+
+  return () =&gt; {                 // ← 없으면 구독이 쌓이고 메모리가 샌다
+    clearInterval(id);
+    window.removeEventListener('resize', onResize);
+    sub.unsubscribe();
+  };
+}, []);</code></pre>
+<div class="box a"><b>개발 모드에서 Effect가 두 번 실행되는 이유</b> — StrictMode가 <b>cleanup이 제대로 있는지 검사</b>하려고 일부러 mount→unmount→mount 한다.
+두 번 실행돼서 문제가 생긴다면 <b>그건 StrictMode 탓이 아니라 cleanup이 없다는 신호</b>다.</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH02</div>
+<ol>
+<li>Effect가 필요한지 판별하는 공식 질문 한 문장은?</li>
+<li>props가 바뀔 때 상태를 초기화하는 가장 좋은 방법과 그 원리는?</li>
+<li>개발 모드에서 Effect가 두 번 도는 게 왜 유용한가?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>"표시되었기 때문에 실행되어야 하나, 상호작용 때문에 실행되어야 하나." 후자면 이벤트 핸들러다.</li>
+<li><code>key</code>. key가 바뀌면 React가 같은 위치라도 다른 컴포넌트로 보고 상태를 버린 뒤 새로 만든다. 리셋 로직 자체가 없어진다.</li>
+<li>cleanup 누락을 드러내려고 일부러 mount/unmount를 반복한다. 두 번 실행이 문제가 되면 cleanup이 빠졌다는 뜻이다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 3 ═══════════ -->
+<h2 id="c3"><span class="hnum">CH 03</span>비동기 안전성 <span class="lv l1" style="margin-left:auto">L1</span></h2>
+<p>여기가 실무 버그의 진원지다. 해피패스는 누구나 짠다. <b>겹치고, 늦게 오고, 두 번 눌리는 상황</b>이 실력이다.</p>
+
+<h3 id="c3-1">3-1. 경쟁 상태 (race condition) ⭐</h3>
+<div class="box r"><span class="t">언제 터지나</span>
+검색어를 <code>ab</code> → <code>abc</code>로 빠르게 바꾸면 요청이 두 개 나간다.
+<b><code>ab</code>의 응답이 <code>abc</code>보다 늦게 도착하면 화면에는 <code>ab</code>의 결과가 남는다.</b><br>
+사용자는 <code>abc</code>를 입력했는데 <code>ab</code> 결과를 본다. 재현이 어렵고, 느린 네트워크에서만 난다.</div>
+
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>useEffect(() =&gt; {
+  fetchResults(query).then(setResults);   // 응답 순서를 보장하지 않는다
+}, [query]);</code></pre></div></div>
+
+<div class="cw"><span class="tag-good">GOOD ① — 공식 ignore 패턴<sup class="ref"><a href="#r2">[2]</a></sup></span><div class="good"><pre><code>useEffect(() =&gt; {
+  let ignore = false;
+
+  fetchResults(query).then(json =&gt; {
+    if (!ignore) setResults(json);      // 최신 요청만 반영
+  });
+
+  return () =&gt; { ignore = true; };      // 이전 effect의 결과는 버린다
+}, [query]);</code></pre></div></div>
+
+<div class="cw"><span class="tag-good">GOOD ② — AbortController (요청 자체를 취소)</span><div class="good"><pre><code>useEffect(() =&gt; {
+  const ac = new AbortController();
+
+  (async () =&gt; {
+    try {
+      const res  = await fetch(`/api/search?q=${query}`, { signal: ac.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setResults(await res.json());
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return;   // 취소는 에러가 아니다
+      setError(e as Error);
+    }
+  })();
+
+  return () =&gt; ac.abort();
+}, [query]);</code></pre></div></div>
+
+<div class="box g"><span class="t">두 방법의 차이 — 반드시 구분할 것</span>
+<b><code>ignore</code></b> · 응답을 무시만 한다. 네트워크 요청은 끝까지 진행된다. 구현이 단순하다.<br>
+<b><code>AbortController</code></b> · 요청 자체를 끊는다. 서버 부하·대역폭을 아낀다. <b>취소 에러를 걸러내는 처리가 필수</b>(안 그러면 화면에 "실패" 표시가 뜬다).<br>
+<b>선택 기준</b> — UI 정합성만 필요하면 ignore, 요청 비용까지 아껴야 하면 AbortController.</div>
+
+<h3 id="c3-2">3-2. 중복 제출 방지</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>&lt;button onClick={submit}&gt;주문&lt;/button&gt;
+// 더블클릭 → 주문 2건</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>const [status, setStatus] = useState&lt;'idle' | 'submitting'&gt;('idle');
+
+async function submit() {
+  if (status === 'submitting') return;        // ① 가드
+  setStatus('submitting');
+  try   { await createOrder(payload); }
+  finally { setStatus('idle'); }              // ② 실패해도 반드시 푼다
+}
+
+&lt;button onClick={submit} disabled={status === 'submitting'}&gt;
+  {status === 'submitting' ? '처리 중…' : '주문'}
+&lt;/button&gt;</code></pre></div></div>
+<div class="box a"><b>①과 ② 둘 다 필요하다.</b> <code>disabled</code>만 걸면 키보드 연타·프로그램 호출을 못 막고,
+<code>finally</code>가 없으면 에러 한 번에 버튼이 영구히 잠긴다.</div>
+<div class="box b"><b>프론트 가드로는 부족하다</b> — 새로고침 후 재시도, 네트워크 계층의 자동 재시도는 못 막는다.
+서버까지 안전하게 하려면 <b>멱등키</b>가 필요하다 → <a href="#c10-1">CH10-1</a></div>
+
+<h3 id="c3-3">3-3. 디바운스 · 스로틀</h3>
+<pre><code>function useDebounced&lt;T&gt;(value: T, delay = 300): T {
+  const [v, setV] = useState(value);
+  useEffect(() =&gt; {
+    const id = setTimeout(() =&gt; setV(value), delay);
+    return () =&gt; clearTimeout(id);     // 입력이 이어지면 이전 타이머 취소
+  }, [value, delay]);
+  return v;
+}
+
+const [input, setInput] = useState('');
+const query = useDebounced(input, 300);   // query가 바뀔 때만 요청</code></pre>
+<div class="tw"><table>
+<tr><th style="width:100px">기법</th><th>동작</th><th>쓰는 곳</th></tr>
+<tr><td class="m">디바운스</td><td><b>멈춘 뒤 한 번</b> 실행</td><td>검색어 입력, 자동저장, 리사이즈 종료 감지</td></tr>
+<tr><td class="m">스로틀</td><td><b>일정 간격마다</b> 최대 1회</td><td>스크롤 위치 추적, 마우스 이동, 무한스크롤 트리거</td></tr>
+</table></div>
+
+<h3 id="c3-4">3-4. 재시도 — 아무거나 재시도하면 안 된다</h3>
+<pre><code>function isRetryable(e: unknown): boolean {
+  if (e instanceof TypeError) return true;             // 네트워크 단절
+  if (e instanceof HttpError) {
+    if (e.status === 429) return true;                 // 요청 과다
+    if (e.status &gt;= 500)   return true;                // 서버 오류
+    return false;                                      // 4xx는 재시도해도 똑같다
+  }
+  return false;
+}
+
+async function withRetry&lt;T&gt;(fn: () =&gt; Promise&lt;T&gt;, max = 3): Promise&lt;T&gt; {
+  for (let i = 0; i &lt; max; i++) {
+    try { return await fn(); }
+    catch (e) {
+      if (!isRetryable(e) || i === max - 1) throw e;
+      await sleep(2 ** i * 300 + Math.random() * 100); // 지수 백오프 + 지터
+    }
+  }
+  throw new Error('unreachable');
+}</code></pre>
+<div class="box a"><b>지터(jitter)가 왜 필요한가</b> — 백오프만 있으면 동시에 실패한 클라이언트들이 <b>동시에 재시도</b>해서 서버를 다시 죽인다. 랜덤을 섞어 분산시킨다.</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH03</div>
+<ol>
+<li>경쟁 상태를 재현하는 가장 쉬운 방법은?</li>
+<li><code>ignore</code>와 <code>AbortController</code> 중 무엇을 언제 쓰나?</li>
+<li>중복 제출을 막을 때 <code>disabled</code>만으로 부족한 이유 두 가지는?</li>
+<li>4xx 에러를 재시도하면 안 되는 이유는?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>DevTools Network에서 Slow 3G로 낮추고 검색어를 빠르게 바꾼다. 응답 순서가 뒤바뀐다.</li>
+<li>화면 정합성만 필요하면 ignore(단순). 요청 비용·서버 부하까지 줄이려면 AbortController. 후자는 AbortError를 에러 처리에서 걸러내야 한다.</li>
+<li>① 키보드 연타나 코드에서의 직접 호출을 못 막는다 ② 에러 시 <code>finally</code>로 풀지 않으면 영구 잠김이 된다.</li>
+<li>4xx는 요청 자체가 잘못됐다는 뜻이라 같은 요청을 다시 보내도 결과가 같다. 서버 부하만 늘린다. 예외는 429(과다 요청).</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 4 ═══════════ -->
+<h2 id="c4"><span class="hnum">CH 04</span>서버 상태 — TanStack Query <span class="lv l2" style="margin-left:auto">L2</span></h2>
+<div class="box b"><span class="t">핵심 개념</span>
+<b>서버 상태는 클라이언트 상태와 다른 물건이다.</b> 내가 소유하지 않고, 언제든 남이 바꾸고, 항상 낡을 수 있다.
+그래서 <code>useState</code>로 관리하면 캐시·재검증·중복요청·에러 재시도를 전부 직접 짜게 된다.</div>
+
+<h3 id="c4-1">4-1. 쿼리 키 설계</h3>
+<pre><code>// 키는 "이 데이터를 무엇이 결정하는가"를 그대로 적는다
+const itemKeys = {
+  all:    ['items'] as const,
+  lists:  ()                        =&gt; [...itemKeys.all, 'list'] as const,
+  list:   (q: string, page: number) =&gt; [...itemKeys.lists(), { q, page }] as const,
+  detail: (id: string)              =&gt; [...itemKeys.all, 'detail', id] as const,
+};
+
+useQuery({
+  queryKey: itemKeys.list(query, page),
+  queryFn:  () =&gt; fetchItems(query, page),
+});</code></pre>
+<div class="box g"><b>왜 팩토리로 묶나</b> — <code>invalidateQueries({ queryKey: itemKeys.all })</code> 한 줄로 목록·상세를 한꺼번에 무효화할 수 있다.
+키 문자열이 코드 곳곳에 흩어져 있으면 <b>무효화 범위를 통제할 수 없다.</b></div>
+
+<h3 id="c4-2">4-2. staleTime vs gcTime — 반드시 구분</h3>
+<div class="tw"><table>
+<tr><th style="width:110px">옵션</th><th>뜻</th><th>지나면</th></tr>
+<tr><td class="m">staleTime</td><td>이 시간 동안은 데이터가 <b>신선하다</b>고 간주</td><td>다음 트리거(마운트·포커스·재연결) 때 <b>백그라운드 refetch</b></td></tr>
+<tr><td class="m">gcTime</td><td>아무 컴포넌트도 안 쓰는 캐시를 <b>메모리에 두는</b> 시간</td><td>캐시에서 <b>삭제</b></td></tr>
+</table></div>
+<pre><code>useQuery({
+  queryKey: itemKeys.list(query, page),
+  queryFn:  () =&gt; fetchItems(query, page),
+  staleTime: 30_000,      // 30초간 재요청 안 함 (화면 전환해도 즉시 표시)
+  gcTime:  5 * 60_000,    // 안 쓰이면 5분 뒤 메모리에서 제거
+});</code></pre>
+<div class="box a"><b>흔한 오해</b> — "staleTime을 0으로 두면 캐시가 없다"가 아니다. 캐시는 있고 <b>즉시 낡은 것으로 취급</b>할 뿐이다.
+그래서 화면에는 캐시가 먼저 보이고 뒤에서 갱신된다(stale-while-revalidate).</div>
+
+<h3 id="c4-3">4-3. 뮤테이션 후 갱신 3가지</h3>
+<div class="tw"><table>
+<tr><th style="width:190px">방법</th><th>쓸 때</th><th>비용</th></tr>
+<tr><td class="m">invalidateQueries</td><td><b>기본값.</b> 서버가 진실</td><td>요청 1회 추가</td></tr>
+<tr><td class="m">setQueryData</td><td>응답에 갱신된 데이터가 통째로 올 때</td><td>요청 0회</td></tr>
+<tr><td class="m">낙관적 업데이트</td><td>즉각 반응이 중요할 때(좋아요·수량)</td><td>롤백 로직 필요</td></tr>
+</table></div>
+
+<div class="cw"><span class="tag-good">GOOD — 낙관적 업데이트 + 롤백</span><div class="good"><pre><code>const qc = useQueryClient();
+
+useMutation({
+  mutationFn: updateQty,
+
+  onMutate: async (next) =&gt; {
+    await qc.cancelQueries({ queryKey: cartKey });          // ① 진행 중 refetch 취소
+    const prev = qc.getQueryData(cartKey);                  // ② 롤백용 스냅샷
+    qc.setQueryData(cartKey, (old) =&gt; applyQty(old, next)); // ③ 화면 먼저 반영
+    return { prev };                                        // ④ context로 전달
+  },
+
+  onError: (_err, _next, ctx) =&gt; {
+    qc.setQueryData(cartKey, ctx.prev);                     // ⑤ 실패 → 되돌림
+  },
+
+  onSettled: () =&gt; {
+    qc.invalidateQueries({ queryKey: cartKey });            // ⑥ 성공/실패 무관 최종 동기화
+  },
+});</code></pre></div></div>
+<div class="box r"><b>①을 빼먹으면 롤백이 깨진다.</b> 진행 중이던 refetch가 나중에 도착해서 낙관적으로 바꾼 값을 옛 서버 데이터로 덮어쓴다.
+<b>가장 많이 빠뜨리는 줄이다.</b></div>
+
+<h3 id="c4-4">4-4. 로딩 · 에러 · 빈 상태 3종</h3>
+<div class="box r"><span class="t">가장 흔한 미완성 신호</span>이 3개가 없으면 "해피패스만 짰다"로 읽힌다. 기능 개수보다 이게 먼저다.</div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>function ItemList({ query }: { query: string }) {
+  const { data, isPending, isError, error, refetch } = useItems(query);
+
+  if (isPending) return &lt;Skeleton rows={5} /&gt;;                                 // ① 로딩
+  if (isError)   return &lt;ErrorState msg={error.message} onRetry={refetch} /&gt;;  // ② 에러 + 재시도
+  if (data.length === 0) return &lt;EmptyState query={query} /&gt;;                  // ③ 빈 상태
+
+  return &lt;ul&gt;{data.map(i =&gt; &lt;Row key={i.id} item={i} /&gt;)}&lt;/ul&gt;;
+}</code></pre></div></div>
+<div class="box a"><b>빈 상태는 두 가지다.</b> "검색했는데 0건"과 "아직 검색 안 함"은 다른 화면이어야 한다. 같이 처리하면 사용자가 헷갈린다.</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH04</div>
+<ol>
+<li>서버 상태를 <code>useState</code>로 관리하면 무엇을 직접 짜야 하나?</li>
+<li><code>staleTime</code>과 <code>gcTime</code>의 차이를 한 문장씩으로?</li>
+<li>낙관적 업데이트에서 <code>cancelQueries</code>가 없으면 무슨 일이 생기나?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>캐시, 중복 요청 제거, 백그라운드 재검증, 에러 재시도, 포커스 시 갱신, 가비지 컬렉션.</li>
+<li>staleTime = 신선하다고 볼 기간(지나면 백그라운드 refetch). gcTime = 안 쓰이는 캐시를 메모리에 두는 기간(지나면 삭제).</li>
+<li>진행 중이던 refetch 응답이 뒤늦게 도착해 낙관적 값을 옛 데이터로 덮어쓴다. 롤백도 무의미해진다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 5 ═══════════ -->
+<h2 id="c5"><span class="hnum">CH 05</span>에러 처리 <span class="lv l2" style="margin-left:auto">L2</span></h2>
+
+<h3 id="c5-1">5-1. Error Boundary가 못 잡는 것</h3>
+<div class="box r"><span class="t">반드시 외울 것</span>
+❌ <b>이벤트 핸들러</b> · ❌ <b>비동기 코드</b>(<code>setTimeout</code>, <code>fetch</code> 후속) · ❌ <b>SSR</b> · ❌ <b>자기 자신에서 난 에러</b><br>
+✅ 잡는 것: <b>렌더링 중 / 생명주기 / 하위 트리 생성자</b>에서 던져진 에러<br><br>
+그래서 <b>Error Boundary 하나로 모든 에러가 잡히지 않는다.</b> 3층으로 나눠야 한다.</div>
+
+<pre><code>// React에서 class를 쓰는 사실상 유일한 곳
+class ErrorBoundary extends React.Component&lt;Props, { error: Error | null }&gt; {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) { return { error }; }  // 화면 전환
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    reportToServer(error, info.componentStack);                        // 로깅
+  }
+
+  render() {
+    if (this.state.error) {
+      return &lt;Fallback onReset={() =&gt; this.setState({ error: null })} /&gt;;
+    }
+    return this.props.children;
+  }
+}</code></pre>
+
+<h3 id="c5-2">5-2. 3층 에러 처리 설계</h3>
+<div class="grid g2">
+<div class="card"><h5>① 쿼리 · 뮤테이션 레벨</h5><p>재시도 가능한 네트워크 에러. 화면에 <b>재시도 버튼</b>을 준다. 사용자가 복구할 수 있는 에러.</p></div>
+<div class="card"><h5>② 이벤트 핸들러</h5><p>사용자 행동의 실패(폼 제출 등). <code>try/catch</code> + 토스트. <b>Error Boundary가 못 잡는 영역.</b></p></div>
+<div class="card"><h5>③ Error Boundary</h5><p>예상 못 한 렌더링 에러. <b>화면이 하얗게 되는 것을 막는 최후 방어선.</b> 로깅이 주 임무.</p></div>
+</div>
+
+<h3 id="c5-3">5-3. 에러를 삼키지 마라</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>try { await save(); }
+catch (e) { console.log(e); }      // 사용자는 저장된 줄 안다. 최악.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>try {
+  await save();
+  toast.success('저장했습니다');
+} catch (e) {
+  report(e);                                  // 개발자에게
+  toast.error(toUserMessage(e));              // 사용자에게 — 다음 행동을 알려준다
+  throw e;                                    // 상위가 알아야 하면 다시 던진다
+}</code></pre></div></div>
+<div class="box a"><b>사용자용 메시지 원칙</b> — 원인이 아니라 <b>다음에 뭘 해야 하는지</b>를 쓴다.
+<span class="no">✗ "500 Internal Server Error"</span> → <span class="yes">✓ "저장하지 못했습니다. 잠시 후 다시 시도해 주세요."</span></div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH05</div>
+<ol>
+<li>Error Boundary가 못 잡는 4가지는?</li>
+<li>폼 제출 실패는 어느 층에서 처리하나? 왜?</li>
+<li>사용자에게 보여줄 에러 메시지의 원칙은?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>이벤트 핸들러 / 비동기 코드 / SSR / 자기 자신에서 난 에러.</li>
+<li>이벤트 핸들러 층. Error Boundary가 못 잡는 영역이라 <code>try/catch</code>로 직접 잡고 토스트 등으로 알려야 한다.</li>
+<li>원인이 아니라 다음 행동을 알려준다. 기술적 코드·스택은 로깅으로 보내고 화면에는 복구 방법을 쓴다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 6 ═══════════ -->
+<h2 id="c6"><span class="hnum">CH 06</span>렌더링 성능 <span class="lv l2" style="margin-left:auto">L2</span></h2>
+<div class="box r"><span class="t">제1원칙</span><b>측정하지 않은 최적화는 최적화가 아니다.</b>
+"memo를 붙였습니다"는 답이 아니다. <b>"Profiler로 재고, 실제로 느린 커밋이 있을 때 붙였습니다"</b>가 답이다.</div>
+
+<h3 id="c6-1">6-1. 언제 다시 그려지나</h3>
+<div class="tw"><table>
+<tr><th style="width:220px">원인</th><th>범위</th></tr>
+<tr><td>자기 상태 변경</td><td>자신 + 하위 전체</td></tr>
+<tr><td>부모 리렌더</td><td><b>props가 안 바뀌어도 자식은 다시 그려진다</b></td></tr>
+<tr><td>구독 중인 Context 값 변경</td><td>그 Context를 쓰는 모든 컴포넌트</td></tr>
+</table></div>
+<div class="box b"><b>"다시 그려진다" = 함수가 다시 실행된다</b>는 뜻이지 <b>DOM이 바뀐다</b>는 뜻이 아니다.
+React는 결과를 비교해서 <b>실제로 달라진 DOM만</b> 건드린다. 그래서 리렌더 자체가 항상 문제인 건 아니다.</div>
+
+<h3 id="c6-2">6-2. memo보다 먼저 — 상태를 아래로 내린다</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>function Page() {
+  const [text, setText] = useState('');
+  return (&lt;&gt;
+    &lt;input value={text} onChange={e =&gt; setText(e.target.value)} /&gt;
+    &lt;HeavyList /&gt;      {/* 한 글자 칠 때마다 같이 다시 그려진다 */}
+  &lt;/&gt;);
+}</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD — 상태를 쓰는 곳에 가둔다</span><div class="good"><pre><code>function SearchBox() {
+  const [text, setText] = useState('');
+  return &lt;input value={text} onChange={e =&gt; setText(e.target.value)} /&gt;;
+}
+function Page() {
+  return (&lt;&gt;&lt;SearchBox /&gt;&lt;HeavyList /&gt;&lt;/&gt;);   // HeavyList는 이제 무관
+}</code></pre></div></div>
+
+<h4>children으로 넘겨 격리하기</h4>
+<pre><code>function Wrapper({ children }) {
+  const [n, setN] = useState(0);
+  return &lt;div onClick={() =&gt; setN(n + 1)}&gt;{children}&lt;/div&gt;;
+}
+
+// &lt;Wrapper&gt;&lt;Heavy /&gt;&lt;/Wrapper&gt;
+// Heavy 엘리먼트는 부모(Page)에서 이미 만들어져 props로 들어온 값이다.
+// Wrapper가 리렌더돼도 그 엘리먼트 객체는 그대로다 → Heavy는 다시 안 그려진다.</code></pre>
+
+<h3 id="c6-3">6-3. memo / useMemo / useCallback — 안 써야 할 때</h3>
+<div class="tw"><table>
+<tr><th style="width:140px">도구</th><th>쓸 때</th><th>쓰면 안 될 때</th></tr>
+<tr><td class="m">React.memo</td><td>props가 잘 안 바뀌는 <b>무거운</b> 컴포넌트</td><td>props가 매번 바뀜(객체·함수 리터럴) → <b>비교 비용만 추가</b></td></tr>
+<tr><td class="m">useMemo</td><td>계산이 실제로 비쌀 때 / 참조 동일성이 필요할 때</td><td>단순 계산 — <b>메모 비용 &gt; 계산 비용</b></td></tr>
+<tr><td class="m">useCallback</td><td>memo된 자식에 콜백 전달 / effect 의존성</td><td>일반 DOM 핸들러</td></tr>
+</table></div>
+<div class="cw"><span class="tag-bad">BAD — memo가 무력화되는 전형</span><div class="bad"><pre><code>const Row = React.memo(function Row({ item, onSelect }) { /* ... */ });
+
+&lt;Row item={item} onSelect={() =&gt; select(item.id)} /&gt;
+// onSelect가 매 렌더마다 새 함수 → props가 항상 다름 → memo가 아무 일도 안 한다
+// 오히려 비교 비용만 늘었다</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>const handleSelect = useCallback((id: string) =&gt; select(id), [select]);
+
+&lt;Row item={item} onSelect={handleSelect} /&gt;   // 참조가 안정적이라 memo가 작동한다</code></pre></div></div>
+
+<h3 id="c6-4">6-4. 리스트 가상화</h3>
+<pre><code>// 1만 건을 전부 그리면 DOM 노드가 1만 개. 스크롤이 끊긴다.
+// 보이는 것 + 여유분만 그린다.
+&lt;FixedSizeList height={600} itemCount={items.length} itemSize={48} width="100%"&gt;
+  {({ index, style }) =&gt; &lt;div style={style}&gt;{items[index].name}&lt;/div&gt;}
+&lt;/FixedSizeList&gt;</code></pre>
+<div class="box a"><b>도입 조건을 숫자로 말할 수 있어야 한다.</b> 수백 건 이하에서는 과한 최적화다(→ <a href="#c11-2">CH11-2 YAGNI</a>).
+"몇 건부터 프레임이 떨어졌는지" 측정치가 근거다.</div>
+
+<h3 id="c6-5">6-5. Core Web Vitals — 무엇을 재나<sup class="ref"><a href="#r3">[3]</a></sup></h3>
+<div class="tw"><table>
+<tr><th style="width:70px">지표</th><th style="width:150px">측정 대상</th><th>Good</th><th>개선 필요</th><th>Poor</th></tr>
+<tr><td class="m">LCP</td><td>로딩 성능</td><td class="m" style="color:var(--green)">≤ 2.5s</td><td class="m">2.5~4s</td><td class="m" style="color:var(--red)">&gt; 4s</td></tr>
+<tr><td class="m">INP</td><td>상호작용 반응성</td><td class="m" style="color:var(--green)">≤ 200ms</td><td class="m">200~500ms</td><td class="m" style="color:var(--red)">&gt; 500ms</td></tr>
+<tr><td class="m">CLS</td><td>시각적 안정성</td><td class="m" style="color:var(--green)">≤ 0.1</td><td class="m">0.1~0.25</td><td class="m" style="color:var(--red)">&gt; 0.25</td></tr>
+</table></div>
+<p><b>도구</b> — 실사용자(필드): Chrome UX Report · PageSpeed Insights · Search Console / 개발(랩): Chrome DevTools · Lighthouse</p>
+<div class="box a"><b>Lighthouse는 INP를 못 잰다.</b> INP는 실제 상호작용이 있어야 측정되므로 <b>DevTools Performance 탭</b>으로 잰다.</div>
+
+<h3 id="c6-6">6-6. 측정 실습 — 부하를 만들어서 잰다</h3>
+<pre><code>① 데이터 부풀리기       목록 100건 → 10,000건 → 100,000건 생성
+② 기기 조건 낮추기       DevTools → CPU 4x/6x slowdown, Network Fast 3G
+③ 기준 측정(baseline)   같은 조건에서 3회 → 중앙값 기록
+④ 한 번에 하나만 바꾼다   변수를 섞으면 무엇이 효과였는지 모른다
+⑤ 재측정 + 기록          before/after 표로 남긴다</code></pre>
+<div class="cw"><button class="copy" data-copy="perf">복사</button><pre id="perf"><code>조건: 10,000건 · CPU 4x slowdown · 3회 측정 중앙값
+변경: 리스트 가상화 도입
+
+지표                before      after
+──────────────────────────────────────
+스크롤 최장 프레임    [X] ms     [Y] ms
+INP                 [X] ms     [Y] ms
+DOM 노드 수          10,000       ~40
+
+판단: [N]건을 넘어가면서 프레임 드랍이 체감됐다.
+      그 이하에서는 과한 최적화라고 판단해 도입하지 않았다.</code></pre></div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH06</div>
+<ol>
+<li>"리렌더가 일어났다"와 "DOM이 바뀌었다"의 차이는?</li>
+<li>memo를 붙였는데 효과가 없다면 가장 흔한 원인은?</li>
+<li>INP를 Lighthouse로 못 재는 이유는?</li>
+<li>최적화 실험에서 "한 번에 하나만 바꾼다"가 왜 중요한가?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>리렌더는 컴포넌트 함수가 다시 실행된 것. React는 결과를 비교해 실제로 달라진 DOM만 갱신하므로 리렌더가 곧 DOM 변경은 아니다.</li>
+<li>부모가 인라인 객체·함수를 props로 넘겨서 매 렌더마다 참조가 바뀐다. 비교는 항상 "다름"이 되고 비교 비용만 늘어난다.</li>
+<li>INP는 실제 사용자 상호작용을 측정하는 지표라서, 상호작용 없이 페이지만 로드하는 Lighthouse 환경에서는 값이 안 나온다.</li>
+<li>여러 변수를 동시에 바꾸면 개선(또는 악화)의 원인을 특정할 수 없다. 되돌릴 대상도 못 고른다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 7 ═══════════ -->
+<h2 id="c7"><span class="hnum">CH 07</span>브라우저 동작 <span class="lv l2" style="margin-left:auto">L2</span></h2>
+
+<h3 id="c7-1">7-1. 이벤트 루프 — 실행 순서</h3>
+<pre><code>console.log('1');
+setTimeout(() =&gt; console.log('2'), 0);            // 매크로태스크
+Promise.resolve().then(() =&gt; console.log('3'));   // 마이크로태스크
+console.log('4');
+
+// 출력: 1 → 4 → 3 → 2</code></pre>
+<div class="box b"><b>규칙</b> — 콜 스택이 비면 <b>마이크로태스크 큐를 전부 비운 뒤</b> 매크로태스크를 하나 꺼낸다.
+그래서 <code>Promise.then</code>은 <code>setTimeout(…, 0)</code>보다 항상 먼저다.</div>
+<div class="box r"><b>실전 함정</b> — 마이크로태스크에서 또 마이크로태스크를 만들면 <b>큐가 안 비워져서 화면이 멈춘다.</b>
+재귀적인 Promise 체인이 UI를 얼리는 원인이 이것이다.</div>
+
+<h3 id="c7-2">7-2. 렌더링 파이프라인</h3>
+<pre><code>JS 실행 → 스타일 계산 → 레이아웃(Layout) → 페인트(Paint) → 합성(Composite)
+                            ↑ 비쌈           ↑ 중간        ↑ 쌈(GPU)</code></pre>
+<div class="tw"><table>
+<tr><th style="width:180px">바꾸는 속성</th><th>유발되는 단계</th><th>비용</th></tr>
+<tr><td class="m">width, height, top, left, font-size</td><td>레이아웃부터 전부</td><td style="color:var(--red)">비쌈</td></tr>
+<tr><td class="m">color, background, box-shadow</td><td>페인트부터</td><td style="color:var(--amber)">중간</td></tr>
+<tr><td class="m">transform, opacity</td><td><b>합성만</b></td><td style="color:var(--green)">쌈</td></tr>
+</table></div>
+<div class="box g"><b>그래서 애니메이션은 <code>transform</code>·<code>opacity</code>로 한다.</b>
+<code>left</code>를 애니메이션하면 매 프레임 레이아웃이 다시 계산된다.</div>
+
+<h4>강제 동기 레이아웃 (layout thrashing)</h4>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>for (const el of items) {
+  el.style.height = el.offsetHeight + 10 + 'px';
+  // 읽기(offsetHeight) ↔ 쓰기(style)를 번갈아 한다
+  // → 브라우저가 매번 레이아웃을 강제로 다시 계산한다
+}</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD — 읽기와 쓰기를 분리</span><div class="good"><pre><code>const heights = items.map(el =&gt; el.offsetHeight);   // 읽기 전부 먼저
+items.forEach((el, i) =&gt; {
+  el.style.height = heights[i] + 10 + 'px';         // 쓰기 전부 나중
+});</code></pre></div></div>
+
+<h3 id="c7-3">7-3. 이벤트 위임과 전파</h3>
+<pre><code>// 캡처링(위→아래) → 타깃 → 버블링(아래→위)
+parent.addEventListener('click', handler);              // 버블링 단계 (기본)
+parent.addEventListener('click', handler, true);        // 캡처링 단계
+
+// 위임: 자식 1000개에 리스너 1000개 대신, 부모에 1개
+list.addEventListener('click', (e) =&gt; {
+  const row = (e.target as HTMLElement).closest('[data-id]');
+  if (!row) return;
+  select(row.dataset.id!);
+});</code></pre>
+<div class="box a"><code>stopPropagation()</code>은 전파를 끊고, <code>preventDefault()</code>는 기본 동작(링크 이동·폼 제출)을 막는다. <b>서로 다른 일이다.</b></div>
+
+<h3 id="c7-4">7-4. HTTP 캐시</h3>
+<pre><code>Cache-Control: public, max-age=31536000, immutable   # 해시 붙은 정적 자산
+Cache-Control: no-cache                              # index.html — 항상 검증
+ETag: "abc123"                                       # 변경 여부 검증용</code></pre>
+<div class="box b"><b>SPA 배포의 정석</b> — 번들 파일은 이름에 해시를 붙여 <code>immutable</code>로 영구 캐시,
+<code>index.html</code>은 <code>no-cache</code>. 그래야 배포 직후 <b>구버전이 계속 뜨는 문제</b>가 안 생긴다.</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH07</div>
+<ol>
+<li><code>Promise.then</code>이 <code>setTimeout(fn, 0)</code>보다 먼저 실행되는 이유는?</li>
+<li>애니메이션에 <code>transform</code>을 쓰는 이유를 렌더링 파이프라인으로 설명하면?</li>
+<li>배포 후 사용자에게 구버전이 계속 보이는 문제를 캐시 헤더로 어떻게 막나?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>콜 스택이 비면 마이크로태스크 큐를 <b>전부</b> 비운 뒤에야 매크로태스크를 하나 꺼내기 때문이다.</li>
+<li><code>transform</code>·<code>opacity</code>는 합성 단계만 유발한다. <code>left</code>·<code>width</code>는 레이아웃부터 다시 계산돼 매 프레임 비용이 크다.</li>
+<li>해시가 붙은 번들은 <code>immutable</code>로 영구 캐시하고, 진입점인 <code>index.html</code>은 <code>no-cache</code>로 매번 검증하게 한다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 8 ═══════════ -->
+<h2 id="c8"><span class="hnum">CH 08</span>번들 · 빌드 <span class="lv l2" style="margin-left:auto">L2</span></h2>
+
+<h3 id="c8-1">8-1. 코드 스플리팅</h3>
+<pre><code>const Settings = lazy(() =&gt; import('./Settings'));   // 별도 청크로 분리
+
+&lt;Suspense fallback={&lt;Skeleton /&gt;}&gt;
+  &lt;Settings /&gt;
+&lt;/Suspense&gt;</code></pre>
+<div class="tw"><table>
+<tr><th style="width:190px">분리 기준</th><th>예</th></tr>
+<tr><td>라우트 단위</td><td>페이지마다 청크. 가장 기본이고 효과가 크다</td></tr>
+<tr><td>처음에 안 보이는 것</td><td>모달, 드로어, 탭의 두 번째 패널</td></tr>
+<tr><td>무거운 라이브러리</td><td>차트, 리치 에디터, PDF 뷰어, 지도</td></tr>
+</table></div>
+
+<h3 id="c8-2">8-2. tree shaking이 안 먹는 경우</h3>
+<div class="tw"><table>
+<tr><th style="width:250px">원인</th><th>설명</th></tr>
+<tr><td class="m">CommonJS 모듈</td><td><code>require</code> 기반은 정적 분석이 안 된다. ESM이어야 한다</td></tr>
+<tr><td class="m">사이드 이펙트</td><td>import만 해도 전역을 건드리는 모듈은 못 지운다 → <code>sideEffects</code> 필드로 표시</td></tr>
+<tr><td class="m"><code>import * as X</code></td><td>전체를 가져오는 형태. 필요한 것만 named import 한다</td></tr>
+</table></div>
+
+<h3 id="c8-3">8-3. 무엇이 무거운지 확인하는 순서</h3>
+<pre><code>① 번들 분석기로 큰 덩어리를 찾는다 (rollup-plugin-visualizer 등)
+② 그게 정말 필요한 기능인지 본다      ← 대체·제거가 최고의 최적화
+③ 지연 로딩으로 미룰 수 있는지 본다
+④ 더 가벼운 대안이 있는지 본다        (moment → date-fns/dayjs 같은)
+⑤ 그래도 필요하면 캐시 전략으로 다룬다</code></pre>
+<div class="box a"><b>순서가 중요하다.</b> 대부분 ④부터 시작하는데, <b>②(정말 필요한가)</b>가 항상 효과가 가장 크다.</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH08</div>
+<ol>
+<li>코드 스플리팅의 가장 기본 단위는? 왜?</li>
+<li>tree shaking이 안 되는 대표 원인 3가지는?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>라우트. 사용자는 한 번에 한 페이지만 보므로 나머지를 처음부터 받을 이유가 없다.</li>
+<li>CommonJS 모듈, 사이드 이펙트가 있는 모듈, <code>import * as</code> 형태의 전체 가져오기.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 9 ═══════════ -->
+<h2 id="c9"><span class="hnum">CH 09</span>TypeScript 타입 설계 <span class="lv l2" style="margin-left:auto">L2</span></h2>
+<div class="box b"><b>타입은 문법이 아니라 설계다.</b> 목표는 "에러를 없애는 것"이 아니라 <b>"잘못된 코드를 못 쓰게 만드는 것"</b>이다.</div>
+
+<h3 id="c9-1">9-1. any 대신 unknown</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>function handle(e: any) {
+  console.log(e.message.toUpperCase());   // e가 문자열이면 런타임 폭발. 타입 검사 없음.
+}</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>function handle(e: unknown) {
+  if (e instanceof Error) console.log(e.message.toUpperCase());  // 좁힌 뒤에만 접근
+  else console.log('Unknown error', e);
+}</code></pre></div></div>
+<div class="box a"><b><code>any</code>는 타입 검사를 끄는 것이고, <code>unknown</code>은 검사를 강제하는 것이다.</b>
+외부에서 들어오는 값(JSON, catch, 라이브러리 경계)은 전부 <code>unknown</code>에서 시작한다.</div>
+
+<h3 id="c9-2">9-2. 타입 좁히기 (narrowing)</h3>
+<pre><code>function f(x: string | number | null) {
+  if (x === null) return;              // null 제거
+  if (typeof x === 'string') {
+    x.toUpperCase();                   // 여기서 x는 string
+    return;
+  }
+  x.toFixed(2);                        // 여기서 x는 number
+}
+
+// 사용자 정의 타입 가드
+function isUser(v: unknown): v is User {
+  return typeof v === 'object' &amp;&amp; v !== null &amp;&amp; 'id' in v;
+}</code></pre>
+
+<h3 id="c9-3">9-3. 서버 응답 타입과 도메인 타입을 분리한다</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>// 서버 응답을 그대로 화면까지 들고 다닌다
+type User = { user_id: string; created_at: string; is_active: 0 | 1 };
+// 화면 코드가 snake_case와 0/1을 알아야 한다. 서버가 바뀌면 전부 바뀐다.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>// 경계(boundary)에서 변환한다
+type UserDTO    = { user_id: string; created_at: string; is_active: 0 | 1 };
+type User       = { id: string; createdAt: Date; isActive: boolean };
+
+const toUser = (d: UserDTO): User =&gt; ({
+  id: d.user_id,
+  createdAt: new Date(d.created_at),
+  isActive: d.is_active === 1,
+});
+// 서버 스펙 변경의 충격이 이 함수 하나에서 멈춘다</code></pre></div></div>
+
+<h3 id="c9-4">9-4. 자주 쓰는 유틸리티 타입</h3>
+<pre><code>type User = { id: string; name: string; email: string; age: number };
+
+type UserPreview = Pick&lt;User, 'id' | 'name'&gt;;      // 골라 쓰기
+type UserNoId    = Omit&lt;User, 'id'&gt;;               // 빼기
+type UserPatch   = Partial&lt;User&gt;;                  // 전부 옵셔널 (PATCH 요청)
+type UserStrict  = Required&lt;User&gt;;                 // 전부 필수
+type ReadonlyU   = Readonly&lt;User&gt;;                 // 불변
+type ById        = Record&lt;string, User&gt;;           // 사전(dictionary)
+type Name        = User['name'];                   // 인덱스 접근 = string</code></pre>
+
+<h3 id="c9-5">9-5. 옵셔널 남발을 피한다</h3>
+<div class="cw"><span class="tag-bad">BAD</span><div class="bad"><pre><code>type Props = {
+  user?: User;
+  isLoading?: boolean;
+  error?: string;
+};
+// "user도 없고 로딩도 아니고 에러도 아닌" 상태가 가능하다. 그게 뭔지 아무도 모른다.
+// 화면 코드가 user?.name ?? '' 로 도배된다.</code></pre></div></div>
+<div class="cw"><span class="tag-good">GOOD</span><div class="good"><pre><code>type Props =
+  | { state: 'loading' }
+  | { state: 'error';   message: string }
+  | { state: 'ready';   user: User };</code></pre></div></div>
+<div class="box g"><b>옵셔널(<code>?</code>)이 3개 이상 몰려 있으면 유니온으로 바꿀 신호다.</b>
+옵셔널 n개는 조합 2ⁿ개를 허용한다. 대부분은 불가능한 조합이다.</div>
+
+<h3 id="c9-6">9-6. 런타임 경계에서는 타입을 믿지 마라</h3>
+<div class="box r"><b>TypeScript 타입은 컴파일 후 사라진다.</b> 서버가 다른 걸 보내면 타입 선언은 아무것도 막지 못한다.
+API 응답·<code>localStorage</code>·URL 파라미터처럼 <b>바깥에서 오는 값은 런타임 검증</b>이 필요하다(zod 등 스키마 검증).</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH09</div>
+<ol>
+<li><code>any</code>와 <code>unknown</code>의 차이를 한 문장으로?</li>
+<li>서버 DTO와 도메인 타입을 왜 분리하나?</li>
+<li>옵셔널 프로퍼티가 3개 있으면 몇 가지 조합이 가능한가? 그게 왜 문제인가?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li><code>any</code>는 타입 검사를 끄고, <code>unknown</code>은 좁히기 전까지 사용을 막아 검사를 강제한다.</li>
+<li>서버 스펙 변경의 충격을 변환 함수 하나로 가둔다. 화면 코드가 snake_case나 0/1 같은 전송 형식을 몰라도 된다.</li>
+<li>8가지. 대부분은 실제로 존재할 수 없는 조합인데 타입이 허용하므로, 화면 코드가 불가능한 경우까지 방어하게 되고 진짜 버그가 묻힌다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 10 ═══════════ -->
+<h2 id="c10"><span class="hnum">CH 10</span>오프라인 · 신뢰성 <span class="lv l3" style="margin-left:auto">L3</span></h2>
+<p>네트워크가 항상 되는 게 아니고, 응답이 항상 오는 것도 아니다. <b>"끊겨도 안 죽는 앱"</b>의 기본기다.</p>
+
+<h3 id="c10-1">10-1. 멱등키 (idempotency key) ⭐</h3>
+<div class="box r"><span class="t">문제</span>
+결제 요청을 보냈는데 <b>응답이 안 왔다.</b> 성공했는지 실패했는지 클라이언트는 알 수 없다.<br>
+재시도하면 <b>이중 결제</b>, 안 하면 <b>결제 누락</b>. 양쪽 다 사고다.</div>
+<pre><code>function createOrderRequest(cart: Cart): OrderRequest {
+  return {
+    idempotencyKey: crypto.randomUUID(),   // ① 요청 생성 시점에 딱 한 번 발급
+    items: cart.items,
+  };
+}
+
+async function submitOrder(req: OrderRequest, max = 3) {
+  for (let i = 0; i &lt; max; i++) {
+    try {
+      // ② 재시도해도 같은 키를 보낸다
+      //    → 서버는 이미 처리한 키면 새로 처리하지 않고 같은 결과를 돌려준다
+      return await api.post('/orders', req);
+    } catch (e) {
+      if (!isRetryable(e) || i === max - 1) throw e;
+      await sleep(2 ** i * 300);
+    }
+  }
+}</code></pre>
+<div class="box g"><b>핵심은 ①이다.</b> 재시도할 때마다 키를 새로 만들면 서버는 <b>다른 요청</b>으로 보고 또 처리한다.
+<b>"요청 1건 = 키 1개"를 유지하는 것</b>이 멱등성의 전부다.</div>
+
+<h3 id="c10-2">10-2. 오프라인 큐</h3>
+<pre><code>// 단절 감지 → IndexedDB에 적재 → 복구되면 순서대로 전송
+async function enqueue(req: OrderRequest) {
+  await idb.add('outbox', { ...req, createdAt: Date.now() });
+}
+
+async function flush() {
+  const pending = await idb.getAllSorted('outbox', 'createdAt');  // 순서 보장
+  for (const req of pending) {
+    await submitOrder(req);                       // 멱등키 덕분에 중복 전송이 안전
+    await idb.delete('outbox', req.idempotencyKey);
+  }
+}
+
+window.addEventListener('online',  flush);
+window.addEventListener('offline', () =&gt; setMode('offline'));
+
+async function placeOrder(cart: Cart) {
+  const req = createOrderRequest(cart);
+  if (!navigator.onLine) { await enqueue(req); return { queued: true }; }
+  try { return await submitOrder(req); }
+  catch { await enqueue(req); return { queued: true }; }   // 실패해도 유실 없음
+}</code></pre>
+<div class="box a"><b><code>navigator.onLine</code>은 완전하지 않다.</b> "랜선은 꽂혀 있는데 인터넷은 안 되는" 상태를 못 잡는다.
+그래서 <b>실제 요청 실패도 큐로 보내는</b> 위 구조가 필요하다.</div>
+
+<h3 id="c10-3">10-3. 저장소 선택</h3>
+<div class="tw"><table>
+<tr><th style="width:130px">저장소</th><th>특징</th><th>쓸 때</th></tr>
+<tr><td class="m">localStorage</td><td><b>동기</b>(메인 스레드 차단), 문자열만, ~5MB</td><td>작은 설정값, 토글 상태</td></tr>
+<tr><td class="m">sessionStorage</td><td>탭 단위 수명</td><td>일회성 폼 임시 저장</td></tr>
+<tr><td class="m">IndexedDB</td><td><b>비동기</b>, 구조화된 데이터, 인덱스 조회, 대용량</td><td><b>오프라인 큐, 목록 캐시</b></td></tr>
+<tr><td class="m">Cache Storage</td><td>HTTP 응답 단위 캐시</td><td>Service Worker 자산 캐싱</td></tr>
+</table></div>
+
+<h3 id="c10-4">10-4. Web Worker — 장애·부하 격리</h3>
+<pre><code>const worker = new Worker(new URL('./heavy.worker.ts', import.meta.url), { type: 'module' });
+
+worker.postMessage({ type: 'parse', payload });
+worker.onmessage = (e) =&gt; applyResult(e.data);
+worker.onerror   = () =&gt; {
+  worker.terminate();     // 워커가 죽어도
+  fallbackToSimple();     // 메인 스레드의 기본 기능은 살아 있다
+};</code></pre>
+<div class="box b"><b>워커에 넘길 것 / 안 넘길 것</b> — DOM 접근이 필요 없고 CPU를 오래 쓰는 작업(파싱, 압축, 암호화, 대량 계산)은 워커로.
+<b>워커는 DOM에 접근할 수 없다.</b></div>
+
+<h3 id="c10-5">10-5. Electron 기초 <span class="lv l3">L3</span></h3>
+<div class="tw"><table>
+<tr><th style="width:150px">개념</th><th>내용</th></tr>
+<tr><td class="m">프로세스 모델</td><td><b>main</b>(Node 권한 · 창/메뉴/파일/업데이트) · <b>renderer</b>(웹페이지 · 권한 없음) · <b>preload</b>(둘 사이 다리)</td></tr>
+<tr><td class="m">contextIsolation</td><td><b>왜 켜는 게 기본인가 = 보안.</b> 렌더러가 Node API에 직접 닿으면 웹 취약점 하나로 파일시스템이 뚫린다</td></tr>
+<tr><td class="m">경로 분리</td><td>실행파일은 <code>Program Files</code>(<b>쓰기 불가</b>), 데이터·설정·로그는 <code>%APPDATA%</code></td></tr>
+</table></div>
+<pre><code>// preload.ts — 필요한 것만 골라 노출한다
+import { contextBridge, ipcRenderer } from 'electron';
+
+contextBridge.exposeInMainWorld('api', {
+  printReceipt: (data: Receipt) =&gt; ipcRenderer.invoke('print:receipt', data),
+  getVersion:   () =&gt; ipcRenderer.invoke('app:version'),
+});
+// 렌더러는 window.api.printReceipt()만 쓸 수 있다.
+// fs, child_process 같은 건 애초에 닿지 않는다.</code></pre>
+<div class="box r"><b>데스크톱 앱의 진짜 난관은 기능이 아니라 배포다.</b>
+"내 PC에서는 되는데 남의 PC에서 안 켜지는" 문제의 대부분은 <b>실행 권한 · 설치 경로 · 런타임 부재</b>다.</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH10</div>
+<ol>
+<li>재시도할 때마다 멱등키를 새로 만들면 무슨 일이 생기나?</li>
+<li>오프라인 큐에 <code>localStorage</code>를 쓰면 안 되는 이유는?</li>
+<li><code>navigator.onLine</code>만 믿으면 안 되는 이유는?</li>
+<li>Electron에서 <code>contextIsolation</code>을 켜는 이유는?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>서버가 매번 다른 요청으로 인식해 중복 처리한다. 멱등성이 사라진다.</li>
+<li>동기 API라 메인 스레드를 막고, 문자열만 저장되며 용량이 작다(~5MB). 큐는 구조화된 데이터를 순서대로 다뤄야 하므로 IndexedDB가 맞다.</li>
+<li>네트워크 인터페이스 연결 여부만 본다. 랜선은 꽂혀 있지만 인터넷이 안 되는 상황을 못 잡는다. 실제 요청 실패도 큐로 보내야 한다.</li>
+<li>보안. 렌더러(웹 컨텐츠)가 Node API에 직접 접근하면 XSS 하나로 파일시스템·프로세스까지 뚫린다. preload에서 필요한 함수만 노출한다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 11 ═══════════ -->
+<h2 id="c11"><span class="hnum">CH 11</span>설계 원칙 <span class="lv l2" style="margin-left:auto">L2</span></h2>
+
+<h3 id="c11-1">11-1. 언제 추상화하나 — Rule of Three</h3>
+<pre><code>1번째   그냥 짠다
+2번째   중복이 보여도 참는다 (그대로 복사)
+3번째   이제 뽑는다</code></pre>
+<div class="box a"><b>왜 2번째에 안 뽑나</b> — 사례가 2개뿐이면 <b>무엇이 변하는 축인지 알 수 없다.</b>
+잘못된 축으로 자른 추상화는 되돌리는 비용이 처음부터 안 만든 것보다 크다.</div>
+
+<h3 id="c11-2">11-2. YAGNI — 미리 만들면 드는 4가지 비용<sup class="ref"><a href="#r4">[4]</a></sup></h3>
+<div class="grid g2">
+<div class="card"><h5>Cost of build</h5><p>분석·구현·테스트에 들어간 시간</p></div>
+<div class="card"><h5>Cost of delay</h5><p>그거 만드느라 <b>더 중요한 걸 늦게 냈다</b></p></div>
+<div class="card"><h5>Cost of carry</h5><p>코드가 복잡해져서 <b>이후 모든 개발이 느려진다</b></p></div>
+<div class="card"><h5>Cost of repair</h5><p>나중에 실제 필요할 때 <b>방식이 안 맞아 갚아야 하는 빚</b></p></div>
+</div>
+<div class="box b">원문: <b>"yagni only applies when you introduce extra complexity now"</b><br>
+→ <b>복잡도를 늘리지 않는 리팩터링 · 테스트 작성 · 배포 자동화는 YAGNI 대상이 아니다.</b> 이건 오히려 먼저 해야 한다.</div>
+
+<h3 id="c11-3">11-3. SOLID를 프론트엔드 언어로</h3>
+<div class="tw"><table>
+<tr><th style="width:50px"></th><th style="width:120px">원칙</th><th>프론트엔드에서</th></tr>
+<tr><td class="m">S</td><td>단일 책임</td><td>한 컴포넌트가 데이터 로딩 + 표시 + 폼 검증을 다 하면 분리한다</td></tr>
+<tr><td class="m">O</td><td>개방-폐쇄</td><td><b>기능 추가에 기존 코드를 안 고치는 구조.</b> 훅·플러그인·슬롯</td></tr>
+<tr><td class="m">L</td><td>리스코프 치환</td><td>같은 인터페이스면 구현을 바꿔 끼워도 동작해야 한다</td></tr>
+<tr><td class="m">I</td><td>인터페이스 분리</td><td>props 20개짜리 컴포넌트는 여러 역할이 섞인 것이다</td></tr>
+<tr><td class="m">D</td><td>의존성 역전</td><td><code>fetch</code>를 컴포넌트에 직접 박지 말고 주입 → <b>테스트가 가능해진다</b></td></tr>
+</table></div>
+
+<h4>개방-폐쇄의 실전 형태 — 확장점(hook point)</h4>
+<pre><code>type OrderHooks = {
+  beforeOrder?:  (o: Order)   =&gt; Promise&lt;void&gt;;
+  afterOrder?:   (o: Order)   =&gt; Promise&lt;void&gt;;
+  afterPayment?: (p: Payment) =&gt; Promise&lt;void&gt;;
+};
+
+async function runOrder(order: Order, plugins: OrderHooks[]) {
+  for (const p of plugins) await p.beforeOrder?.(order);
+  const payment = await pay(order);                  // ← 코어. 기능이 늘어도 안 바뀐다
+  for (const p of plugins) await p.afterPayment?.(payment);
+  return payment;
+}
+
+// 포인트 적립, 영수증 발행, 알림 — 전부 플러그인으로 붙였다 뗀다</code></pre>
+
+<h3 id="c11-4">11-4. 커스텀 훅 = 프론트엔드의 캡슐화</h3>
+<pre><code>function useOrderForm(initial: Cart) {
+  const [cart, setCart]     = useState(initial);
+  const [status, setStatus] = useState&lt;'idle' | 'submitting'&gt;('idle');
+
+  const total     = useMemo(() =&gt; cart.items.reduce((s, i) =&gt; s + i.price * i.qty, 0), [cart]);
+  const canSubmit = cart.items.length &gt; 0 &amp;&amp; status === 'idle';
+
+  async function submit() { /* ... */ }
+
+  return { cart, total, canSubmit, status, addItem, removeItem, submit };
+  //     ↑ 인터페이스만 노출. 내부 구현이 바뀌어도 쓰는 쪽은 안 바뀐다
+}</code></pre>
+<div class="box g"><b>좋은 훅의 신호</b> — 반환값이 <b>상태 + 파생값 + 행위</b>로 정리되어 있고, 쓰는 쪽이 내부 구현을 몰라도 된다.
+<b>나쁜 신호</b> — <code>setState</code>를 그대로 반환한다(캡슐화가 없다).</div>
+
+<h3 id="c11-5">11-5. 폴더 구조 — 기준을 말할 수 있어야 한다</h3>
+<div class="tw"><table>
+<tr><th style="width:130px">방식</th><th>구조</th><th>적합</th></tr>
+<tr><td class="m">타입 기준</td><td><code>components/ hooks/ utils/</code></td><td>소규모. 커지면 한 기능이 3~4곳에 흩어진다</td></tr>
+<tr><td class="m">도메인 기준</td><td><code>features/order/ features/cart/</code></td><td><b>대부분의 경우.</b> 기능 단위로 삭제·이동이 쉽다</td></tr>
+</table></div>
+<div class="box a"><b>정답은 없지만 "기준 없음"은 오답이다.</b> 어떤 기준을 썼고 왜 그랬는지 한 문장으로 말할 수 있으면 된다.</div>
+
+<div class="quiz"><div class="qt">자가 점검 · CH11</div>
+<ol>
+<li>중복을 두 번째로 봤을 때 바로 추상화하지 않는 이유는?</li>
+<li>YAGNI가 적용되지 <b>않는</b> 작업은 무엇인가?</li>
+<li>"기능을 추가하는데 기존 코드를 안 고친다"를 가능하게 하는 구조는?</li>
+<li>커스텀 훅이 잘못 설계됐다는 신호 하나는?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>사례 2개로는 무엇이 변하는 축인지 판단할 수 없다. 잘못 자른 추상화는 되돌리는 비용이 더 크다.</li>
+<li>지금 복잡도를 늘리지 않는 것 — 리팩터링, 자동 테스트, 배포 자동화. 원문이 "extra complexity를 지금 도입할 때만 적용된다"고 못 박고 있다.</li>
+<li>확장점(훅·플러그인·슬롯)을 코어에 정의하고, 새 기능은 그 확장점에 붙인다. 코어는 안 바뀐다.</li>
+<li><code>setState</code>를 그대로 반환한다. 내부 구현이 밖으로 새어 캡슐화가 없다는 뜻이다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 12 ═══════════ -->
+<h2 id="c12"><span class="hnum">CH 12</span>협업 — 코드리뷰 · 문서 <span class="lv l2" style="margin-left:auto">L2</span></h2>
+
+<h3 id="c12-1">12-1. 코드리뷰 대원칙<sup class="ref"><a href="#r6">[6]</a></sup></h3>
+<div class="box b"><b>"Reviewers should favor approving a CL once it is in a state where it definitely improves the overall code health, even if it isn't perfect."</b><br>
+<b>완벽한 코드는 없다. 더 나은 코드만 있다.</b> 리뷰의 목적은 흠집 찾기가 아니라 코드 건강도를 올리는 것.</div>
+
+<h3 id="c12-2">12-2. 무엇을 어떤 순서로 보나 — 8항목<sup class="ref"><a href="#r5">[5]</a></sup></h3>
+<div class="box a"><b>순서가 곧 중요도다.</b> 초보 리뷰어는 7번(스타일)부터 보고, 실력 있는 리뷰어는 1번(설계)부터 본다.
+설계가 틀렸으면 나머지는 볼 필요가 없다.</div>
+<div class="tw"><table>
+<tr><th style="width:40px">#</th><th style="width:130px">항목</th><th>보는 것</th></tr>
+<tr><td class="m">1</td><td class="m">Design</td><td><b>"가장 중요한 것은 CL 전체의 설계다."</b> 이 변경이 여기 있는 게 맞나</td></tr>
+<tr><td class="m">2</td><td class="m">Functionality</td><td>의도대로 동작하나. <b>엣지케이스·동시성</b></td></tr>
+<tr><td class="m">3</td><td class="m">Complexity</td><td><b>"너무 복잡하다 = 읽는 사람이 빠르게 이해 못 한다"</b></td></tr>
+<tr><td class="m">4</td><td class="m">Tests</td><td>적절한 테스트가 있나. <b>그 테스트가 실제로 오류를 잡나</b></td></tr>
+<tr><td class="m">5</td><td class="m">Naming</td><td>이름이 무엇인지 충분히 말해주나</td></tr>
+<tr><td class="m">6</td><td class="m">Comments</td><td><b>"주석은 코드가 <i>왜</i> 있는지 설명할 때 유용하다"</b></td></tr>
+<tr><td class="m">7</td><td class="m">Style</td><td>스타일 가이드 준수. 취향은 <code>Nit:</code> 접두사</td></tr>
+<tr><td class="m">8</td><td class="m">Documentation</td><td>사용법이 바뀌면 문서도 갱신했나</td></tr>
+</table></div>
+
+<h4>충돌 해결 4원칙</h4>
+<div class="grid g2">
+<div class="card"><h5>Data beats opinion</h5><p>기술적 사실이 개인 취향을 이긴다</p></div>
+<div class="card"><h5>Style guides are authoritative</h5><p>스타일 가이드는 절대적 권위</p></div>
+<div class="card"><h5>Design decisions require justification</h5><p>설계 결정은 취향이 아니라 근거로</p></div>
+<div class="card"><h5>Consistency matters</h5><p>다른 규칙이 없으면 기존 코드베이스에 맞춘다</p></div>
+</div>
+
+<h3 id="c12-3">12-3. 리뷰 코멘트 규약<sup class="ref"><a href="#r7">[7]</a></sup></h3>
+<pre><code>&lt;label&gt; [decorations]: &lt;subject&gt;
+
+[discussion]</code></pre>
+<div class="tw"><table>
+<tr><th style="width:110px">라벨</th><th>뜻</th><th style="width:70px">차단</th></tr>
+<tr><td class="m">issue</td><td>구체적 문제 지적 (<b>제안과 함께</b>)</td><td>✅</td></tr>
+<tr><td class="m">suggestion</td><td>개선 제안 — <b>무엇을 어떻게</b> 명시</td><td>상황</td></tr>
+<tr><td class="m">todo</td><td>작지만 필수인 변경</td><td>✅</td></tr>
+<tr><td class="m">question</td><td>확실치 않은 우려 질의</td><td>상황</td></tr>
+<tr><td class="m">nitpick</td><td>사소한 취향 요청</td><td>❌</td></tr>
+<tr><td class="m">thought</td><td>떠오른 아이디어</td><td>❌</td></tr>
+<tr><td class="m">praise</td><td>좋은 점 (<b>거짓 칭찬 금지</b>)</td><td>❌</td></tr>
+<tr><td class="m">note</td><td>알아둘 것</td><td>❌</td></tr>
+</table></div>
+<pre><code>suggestion (security): DOM 정제를 직접 구현하는 대신 프레임워크 기능을 쓰는 게 어떨까요?
+
+직접 구현하면 우회 케이스를 계속 따라가야 합니다.</code></pre>
+
+<h3 id="c12-4">12-4. PR 설명<sup class="ref"><a href="#r8">[8]</a></sup></h3>
+<ul>
+<li>첫 줄은 <b>명령형</b> — <span class="no">✗ Deleting the RPC</span> / <span class="yes">✓ Delete the FizzBuzz RPC and replace it</span></li>
+<li>한 줄 요약 → <b>빈 줄</b> → 본문</li>
+<li>본문: 문제 배경 · 해결 방식 · <b>이 접근법의 한계</b> · 참고자료</li>
+<li>나쁜 예(원문): <code>Fix bug</code> · <code>Fix build</code> · <code>Moving code from A to B</code></li>
+</ul>
+<div class="cw"><button class="copy" data-copy="pr">복사</button><pre id="pr"><code>## 무엇을
+(한 줄. 명령형)
+
+## 왜
+어떤 문제가 있었나. 안 고치면 무슨 일이 생기나.
+
+## 어떻게
+핵심 접근. 왜 이 방법인가.
+
+## 버린 선택지
+| 대안 | 안 고른 이유 |
+|---|---|
+|  |  |
+
+## 이 접근의 한계
+(스스로 아는 약점을 먼저 적는다)
+
+## 리뷰 포인트
+- 중점적으로 봐주세요: (파일:줄)
+- 확신이 없는 부분: ...
+
+## 테스트
+어떻게 확인했나. 확인 못 한 것은 무엇인가.
+
+## 롤백
+문제 시 되돌리는 방법</code></pre></div>
+
+<h3 id="c12-5">12-5. 커밋 메시지</h3>
+<pre><code>Add offline queue for order sync
+
+네트워크 단절 시 주문이 유실됐다.
+IndexedDB에 적재하고 복구 시 순차 전송한다.
+중복 전송은 멱등키로 막는다.
+
+한계: 큐 용량 상한이 없다. 다음 PR에서 처리.</code></pre>
+
+<div class="quiz"><div class="qt">자가 점검 · CH12</div>
+<ol>
+<li>코드리뷰 8항목의 순서가 왜 중요한가?</li>
+<li>"이건 취향 차이 아닌가요?"라는 반론에 어떤 원칙으로 답하나?</li>
+<li>PR 설명에 "이 접근의 한계"를 쓰는 이유는?</li>
+</ol>
+<details><summary>답 보기</summary><div class="ans"><ol>
+<li>순서가 곧 중요도다. 설계(1번)가 틀렸으면 이름·스타일(5~7번)은 볼 이유가 없다. 스타일부터 지적하는 리뷰는 큰 문제를 놓친다.</li>
+<li><code>Data beats opinion</code> — 기술적 사실이 개인 취향을 이긴다. 측정 가능한 근거로 전환한다.</li>
+<li>리뷰어가 어디를 집중해서 볼지 알려주고, 작성자가 문제를 인지하고 있음을 보여준다. 나중에 그 한계가 드러났을 때 "알고 감수한 것"과 "몰랐던 것"은 완전히 다르다.</li>
+</ol></div></details></div>
+
+<!-- ═══════════ 학습 순서 ═══════════ -->
+<h2 id="path"><span class="hnum">PATH</span>학습 순서와 체크리스트</h2>
+
+<h3 id="path-1">순서 — 의존 관계대로</h3>
+<pre><code>CH01 상태 설계 ──┐
+CH02 Effect     ─┼─→ CH04 서버 상태 ─→ CH05 에러 처리
+CH03 비동기 ────┘                      │
+                                        ↓
+CH09 타입 설계 ─────────────────→ CH06 렌더링 성능 ─→ CH07 브라우저 ─→ CH08 번들
+                                        │
+                                        ↓
+                                  CH10 오프라인 ─→ CH11 설계 원칙 ─→ CH12 협업</code></pre>
+<div class="box b"><b>CH01~03이 토대다.</b> 여기가 흔들리면 나머지를 배워도 코드가 안 좋아진다.
+CH06(성능)은 CH01(상태 위치)을 이해한 뒤에 봐야 의미가 있다 — <b>대부분의 성능 문제는 상태를 잘못 둔 결과</b>이기 때문이다.</div>
+
+<h3 id="path-2">학습 방법</h3>
+<div class="tw"><table>
+<tr><th style="width:100px">단계</th><th>방법</th></tr>
+<tr><td class="m">① 타이핑</td><td>GOOD 코드를 <b>복사하지 말고 손으로</b> 친다. AI 자동완성은 끈다</td></tr>
+<tr><td class="m">② 망가뜨리기</td><td>BAD 코드를 실제로 돌려서 <b>증상을 눈으로 본다</b>. race condition은 Slow 3G로 재현된다</td></tr>
+<tr><td class="m">③ 설명하기</td><td>자가 점검 질문에 <b>소리 내어</b> 답한다. 막히면 그 개념은 아직 내 것이 아니다</td></tr>
+<tr><td class="m">④ 적용</td><td>내 기존 코드에서 같은 패턴을 찾아 고친다. before/after를 기록한다</td></tr>
+</table></div>
+
+<h3 id="path-3">전체 체크리스트</h3>
+<div id="allchk"></div>
+
+<!-- ═══════════ refs ═══════════ -->
+<h2 id="refs"><span class="hnum">REF</span>출처</h2>
+<div class="box a">개인 블로그를 기술 근거로 쓰지 않았다. 전부 1차 출처다.</div>
+<div class="tw"><table>
+<tr><th style="width:40px">#</th><th style="width:220px">주제</th><th>출처</th></tr>
+<tr id="r1"><td class="m">[1]</td><td>상태 구조 5원칙</td><td><a href="https://react.dev/learn/choosing-the-state-structure" target="_blank" rel="noopener">React 공식 — Choosing the State Structure</a></td></tr>
+<tr id="r2"><td class="m">[2]</td><td>Effect 판별 · race condition</td><td><a href="https://react.dev/learn/you-might-not-need-an-effect" target="_blank" rel="noopener">React 공식 — You Might Not Need an Effect</a></td></tr>
+<tr id="r3"><td class="m">[3]</td><td>Core Web Vitals 임계값</td><td><a href="https://web.dev/articles/vitals" target="_blank" rel="noopener">web.dev — Web Vitals</a> (Google)</td></tr>
+<tr id="r4"><td class="m">[4]</td><td>YAGNI 4비용</td><td><a href="https://martinfowler.com/bliki/Yagni.html" target="_blank" rel="noopener">Martin Fowler — Yagni</a></td></tr>
+<tr id="r5"><td class="m">[5]</td><td>코드리뷰 8항목</td><td><a href="https://google.github.io/eng-practices/review/reviewer/looking-for.html" target="_blank" rel="noopener">Google Engineering Practices — What to look for</a></td></tr>
+<tr id="r6"><td class="m">[6]</td><td>리뷰 대원칙 · 충돌 해결</td><td><a href="https://google.github.io/eng-practices/review/reviewer/standard.html" target="_blank" rel="noopener">Google — The Standard of Code Review</a></td></tr>
+<tr id="r7"><td class="m">[7]</td><td>리뷰 코멘트 규약</td><td><a href="https://conventionalcomments.org/" target="_blank" rel="noopener">Conventional Comments</a></td></tr>
+<tr id="r8"><td class="m">[8]</td><td>PR/CL 설명 작성법</td><td><a href="https://google.github.io/eng-practices/review/developer/cl-descriptions.html" target="_blank" rel="noopener">Google — Writing good CL descriptions</a></td></tr>
+<tr id="r9"><td class="m">[9]</td><td>브라우저 API · 렌더링</td><td><a href="https://developer.mozilla.org/ko/docs/Web" target="_blank" rel="noopener">MDN Web Docs</a></td></tr>
+</table></div>
+
+<div class="foot">
+프론트엔드 실전 패턴 학습서 · 단일 파일 자체 완결형 · 외부 의존 없음<br>
+체크 상태는 이 브라우저에만 저장된다.
+</div>
+
+</main>
+</div></div>
+
+<script>
+/* TOC */
+(function(){
+  var toc = document.getElementById('toc'), html = '';
+  document.querySelectorAll('main h2, main h3').forEach(function(h){
+    if(!h.id) return;
+    if(h.tagName === 'H2'){
+      html += '<h4>' + h.textContent.replace(/^(CH \d+|PATH|REF)\s*/,'').replace(/L[123]$/,'') + '</h4>';
+    } else {
+      html += '<a href="#' + h.id + '" data-t="' + h.id + '">' + h.textContent + '</a>';
+    }
+  });
+  toc.innerHTML = html;
+  var links = toc.querySelectorAll('a');
+  var obs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      links.forEach(function(a){ a.classList.toggle('on', a.dataset.t === e.target.id); });
+    });
+  }, { rootMargin: '-60px 0px -75% 0px' });
+  document.querySelectorAll('main h3[id]').forEach(function(h){ obs.observe(h); });
+})();
+
+/* mobile TOC drawer */
+(function(){
+  var btn = document.getElementById('tocBtn'),
+      bg  = document.getElementById('tocBg'),
+      toc = document.getElementById('toc');
+  function set(open){ toc.classList.toggle('open', open); bg.classList.toggle('on', open); }
+  btn.addEventListener('click', function(){ set(!toc.classList.contains('open')); });
+  bg.addEventListener('click',  function(){ set(false); });
+  toc.addEventListener('click', function(e){ if(e.target.tagName === 'A') set(false); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') set(false); });
+})();
+
+/* copy */
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var el = document.getElementById(btn.dataset.copy);
+    if(!el) return;
+    navigator.clipboard.writeText(el.innerText).then(function(){
+      var o = btn.textContent; btn.textContent = '복사됨';
+      setTimeout(function(){ btn.textContent = o; }, 1200);
+    }).catch(function(){ btn.textContent = '실패'; });
+  });
+});
+
+/* checklist */
+var LIST = [
+  ['CH01', '판별 유니온으로 불가능한 상태를 차단하는 코드를 직접 작성했다'],
+  ['CH01', 'assertNever로 빠짐없음 검사를 걸어봤다'],
+  ['CH01', '상태로 둘지 계산으로 둘지 판단 기준을 말할 수 있다'],
+  ['CH01', '선택 항목을 id로 저장하는 이유를 설명할 수 있다'],
+  ['CH02', 'Effect 판별 질문을 외웠다'],
+  ['CH02', 'key로 상태를 리셋하는 원리를 설명할 수 있다'],
+  ['CH02', 'Effect 체인을 이벤트 핸들러로 합쳐봤다'],
+  ['CH02', 'StrictMode 이중 실행이 무엇을 검사하는지 안다'],
+  ['CH03', 'race condition을 Slow 3G로 직접 재현했다'],
+  ['CH03', 'ignore 패턴과 AbortController를 둘 다 손으로 짰다'],
+  ['CH03', '중복 제출 가드를 finally까지 포함해 구현했다'],
+  ['CH03', '디바운스 훅을 직접 만들었다'],
+  ['CH03', '재시도 가능/불가 에러를 구분하는 함수를 짰다'],
+  ['CH04', '쿼리 키 팩토리를 만들어봤다'],
+  ['CH04', 'staleTime과 gcTime을 구분해 설명할 수 있다'],
+  ['CH04', '낙관적 업데이트 + 롤백을 cancelQueries 포함해 구현했다'],
+  ['CH04', '로딩·에러·빈 상태 3종을 자동으로 넣는다'],
+  ['CH05', 'Error Boundary가 못 잡는 4가지를 외웠다'],
+  ['CH05', 'Error Boundary를 직접 작성했다'],
+  ['CH05', '3층 에러 처리 구조를 설명할 수 있다'],
+  ['CH06', 'React Profiler로 실제 측정해봤다'],
+  ['CH06', 'memo가 무력화되는 경우를 재현했다'],
+  ['CH06', '상태를 내려서 리렌더를 줄이는 리팩터링을 했다'],
+  ['CH06', '10,000건 부하를 만들어 측정 기록표를 작성했다'],
+  ['CH06', 'Core Web Vitals 3개 임계값을 외웠다'],
+  ['CH07', '이벤트 루프 출력 순서를 예측하고 확인했다'],
+  ['CH07', 'transform과 left의 차이를 파이프라인으로 설명할 수 있다'],
+  ['CH07', 'layout thrashing을 읽기/쓰기 분리로 고쳐봤다'],
+  ['CH08', '번들 분석기로 큰 덩어리를 찾아봤다'],
+  ['CH08', 'lazy + Suspense로 라우트를 분리했다'],
+  ['CH09', 'unknown으로 받아 좁히는 코드를 짰다'],
+  ['CH09', 'DTO → 도메인 타입 변환 함수를 만들었다'],
+  ['CH09', '옵셔널 3개를 유니온으로 바꿔봤다'],
+  ['CH10', '멱등키를 직접 구현했다'],
+  ['CH10', 'IndexedDB 오프라인 큐를 직접 구현했다'],
+  ['CH10', '저장소 4종의 차이를 설명할 수 있다'],
+  ['CH10', 'Electron 프로세스 모델과 contextIsolation을 설명할 수 있다'],
+  ['CH11', 'YAGNI 4비용을 외웠다'],
+  ['CH11', '확장점(훅) 구조를 직접 작성했다'],
+  ['CH11', '커스텀 훅으로 로직을 캡슐화했다'],
+  ['CH12', '코드리뷰 8항목 순서를 외웠다'],
+  ['CH12', '내 코드를 8항목 순서로 셀프 리뷰했다'],
+  ['CH12', 'Conventional Comments 라벨로 코멘트를 남겨봤다'],
+  ['CH12', 'PR 템플릿을 내 저장소에 적용했다']
+];
+document.getElementById('allchk').innerHTML = LIST.map(function(r, i){
+  return '<label class="chk" data-k="c-' + i + '">' +
+    '<input type="checkbox" data-k="c-' + i + '">' +
+    '<span>' + r[1] + '</span><span class="meta">' + r[0] + '</span></label>';
+}).join('');
+
+/* persist */
+var KEY = 'fe_patterns_v1';
+function load(){ try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){ return {}; } }
+function save(s){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+var state = load();
+var boxes = document.querySelectorAll('input[type=checkbox][data-k]');
+function paint(){
+  var done = 0;
+  boxes.forEach(function(b){
+    var on = !!state[b.dataset.k];
+    b.checked = on;
+    b.closest('.chk').classList.toggle('done', on);
+    if(on) done++;
+  });
+  var pct = boxes.length ? Math.round(done / boxes.length * 100) : 0;
+  document.getElementById('pgBar').style.width = pct + '%';
+  document.getElementById('pgTxt').textContent = pct + '%';
+}
+boxes.forEach(function(b){
+  b.addEventListener('change', function(){ state[b.dataset.k] = b.checked; save(state); paint(); });
+});
+paint();
+</script>
+</body></html>
