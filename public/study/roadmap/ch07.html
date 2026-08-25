@@ -1,0 +1,1309 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH07 · 빌드 도구 & 패키지 매니저 — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="07">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">CHAPTER 07</div>
+    <h1>빌드 도구 & 패키지 매니저</h1>
+    <p>브라우저는 TypeScript도, JSX도, <code>node_modules</code> 경로도 모른다. 소스 코드가 브라우저가 실행 가능한 파일로 바뀌는 전체 파이프라인(트랜스파일 · 번들 · 미니파이 · 코드 스플리팅)을 이해하고, Vite가 왜 빠른지, 그리고 Yarn Berry(PnP · Zero-Install · Workspaces)가 기존 <code>node_modules</code> 방식과 근본적으로 무엇이 다른지를 원리부터 파본다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">Vite</span>
+      <span class="pill">ESM</span>
+      <span class="pill">Yarn Berry</span>
+      <span class="pill">PnP</span>
+      <span class="pill">Zero-Install</span>
+      <span class="pill">Workspaces</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+
+      <p class="lead">
+        이 챕터는 다음 질문에 답한다. 브라우저가 못 읽는 코드를 왜 쓰는가, 그리고 그걸 누가 어떻게 바꿔주는가?
+        번들러는 수백 개 파일을 어떤 원리로 하나(또는 몇 개)로 합치는가? Vite의 개발 서버는 왜 프로젝트 크기와
+        무관하게 즉시 뜨는가? <code>package.json</code>의 <code>^1.2.3</code>은 정확히 어떤 버전까지 허용한다는
+        뜻인가? 그리고 Yarn Berry는 왜 <code>node_modules</code> 폴더 자체를 없애버렸는가?
+      </p>
+
+      <!-- ================================================================ -->
+      <h2 id="s-why-build"><span class="h2num">§1</span>왜 빌드가 필요한가</h2>
+
+      <h3 id="s-what-browser-understands">브라우저가 실제로 이해하는 것</h3>
+      <p>
+        브라우저의 JS 엔진(V8, SpiderMonkey 등)이 실행할 수 있는 건 딱 하나, <b>표준 JavaScript(ECMAScript)</b>다<sup class="ref"><a href="#r1">[1]</a></sup>.
+        그런데 실무에서는 이런 걸 쓴다.
+      </p>
+      <ul>
+        <li><b><span class="t" data-tip="Microsoft가 만든, JS에 정적 타입을 추가한 언어. 컴파일하면 순수 JS로 변환된다. 예: interface User { name: string }">TypeScript</span></b> —
+          <code>interface</code>, <code>: string</code> 같은 타입 문법은 JS 문법이 아니다. 브라우저에 그대로 주면 문법 에러.</li>
+        <li><b><span class="t" data-tip="JavaScript 안에 HTML과 비슷하게 생긴 마크업을 쓸 수 있게 해주는 문법 확장. React에서 UI를 표현할 때 쓴다. 예: <div>Hi</div>는 실제로는 함수 호출로 변환된다.">JSX</span></b> —
+          <code>&lt;div&gt;Hi&lt;/div&gt;</code>는 HTML이 아니라 <code>React.createElement("div", null, "Hi")</code>로 바뀌어야 실행된다.</li>
+        <li><b>최신 문법</b> — 옵셔널 체이닝(<code>?.</code>), 널 병합(<code>??</code>) 같은 최신 ES 문법은 오래된 브라우저 엔진에는 없다.</li>
+        <li><b><code>node_modules</code> 경로</b> — <code>import { useState } from "react"</code> 라고 쓰면, 브라우저는 <code>react</code>라는 이름이 실제로 어느 파일(<code>node_modules/react/index.js</code>)을 가리키는지 알 방법이 없다. 이런 이름을 <span class="t" data-tip="상대/절대 경로가 아니라 패키지 이름만 적은 import 경로. 예: import 'react'. 브라우저는 이걸 해석 못 하고, Node나 번들러가 node_modules를 뒤져서 실제 파일 경로로 바꿔줘야 한다.">bare specifier(베어 스펙파이어)</span>라고 부른다.</li>
+      </ul>
+      <p>
+        즉 "소스 코드"와 "브라우저가 실행 가능한 코드" 사이에는 간극이 있고, 그 간극을 메우는 작업 전체를
+        보통 <b>빌드(build)</b>라고 부른다. 빌드는 한 가지 작업이 아니라 여러 단계의 파이프라인이다.
+      </p>
+
+      <h3 id="s-source-to-browser">소스 코드 → 브라우저 파이프라인</h3>
+      <div class="fig">
+        <pre class="mermaid">
+flowchart LR
+  A["소스 코드<br/>.tsx / .jsx / ESM import"] --> B["트랜스파일<br/>Babel / SWC / esbuild"]
+  B --> C["의존성 그래프 구성<br/>번들러가 import를 따라간다"]
+  C --> D["번들 / 청크 생성"]
+  D --> E["미니파이<br/>변수명 축소 · 공백 제거"]
+  E --> F["브라우저가 실행 가능한<br/>JS / CSS 파일"]
+        </pre>
+        <div class="fig__cap"><b>그림 1.</b> 소스 코드가 브라우저에 도달하기까지의 표준 파이프라인. 각 단계는 서로 다른 도구가 맡을 수 있다(§4, §5 참고). <span class="muted">출처: vitejs.dev 개념 정리</span></div>
+      </div>
+      <div class="grid grid--2">
+        <div class="card">
+          <div class="card__title">트랜스파일(transpile)</div>
+          <p>문법을 바꾼다. TS → JS, JSX → <code>createElement</code> 호출, 최신 ES → 구버전 ES. <a href="#s-transpile-polyfill">§4</a>에서 자세히.</p>
+        </div>
+        <div class="card">
+          <div class="card__title">번들(bundle)</div>
+          <p>수백 개의 <code>import</code>로 얽힌 파일들을 하나(또는 몇 개) 파일로 합친다. <a href="#s-bundler-principle">§3</a>에서 자세히.</p>
+        </div>
+        <div class="card">
+          <div class="card__title">미니파이(minify)</div>
+          <p>변수명을 <code>a</code>, <code>b</code>로 줄이고 공백·주석을 지워 파일 크기를 줄인다. 로직은 그대로 유지된다.</p>
+        </div>
+        <div class="card">
+          <div class="card__title">코드 스플리팅(code splitting)</div>
+          <p>모든 걸 한 파일에 담지 않고, 필요한 시점에만 불러올 청크로 쪼갠다. <a href="#s-bundler-principle">§3</a>에서 자세히.</p>
+        </div>
+      </div>
+
+      <div class="note note--warn">
+        <span class="note__t">흔한 오해</span>
+        "번들러 = 웹팩" 이라고 생각하기 쉽지만, 번들링은 하나의 <i>작업</i>이고 웹팩·Rollup·esbuild·Vite는 그 작업을
+        수행하는 여러 <i>도구</i> 중 일부다. 이 챕터에서는 원리를 먼저 잡고, 실무 표준으로 자리 잡은 Vite를 깊게 다룬다.
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-module-history"><span class="h2num">§2</span>모듈의 역사</h2>
+      <p>
+        "모듈"이란 코드를 파일 단위로 쪼개고, 필요한 부분만 다른 파일에서 가져다 쓰는 단위를 말한다.
+        지금은 <code>import</code>/<code>export</code>가 당연해 보이지만, 여기까지 오는 데 15년 넘게 걸렸다.
+        각 단계가 무엇을 해결하려다 다음 문제를 만들었는지 순서대로 본다.
+      </p>
+
+      <div class="fig">
+        <pre class="mermaid">
+flowchart LR
+  A["전역 스크립트<br/>모든 변수가 window에"] --> B["IIFE<br/>즉시실행함수로 스코프 격리"]
+  B --> C["CommonJS<br/>require / module.exports"]
+  C --> D["AMD<br/>define / require, 비동기 로딩"]
+  D --> E["ESM<br/>import / export, 표준"]
+        </pre>
+        <div class="fig__cap"><b>그림 2.</b> JS 모듈 시스템의 진화. 화살표는 시간 순서이지 "이전 것을 완전히 대체했다"는 뜻은 아니다 — CommonJS는 지금도 Node.js 생태계에서 널리 쓰인다. <span class="muted">출처: nodejs.org, MDN 종합</span></div>
+      </div>
+
+      <h3 id="s-global-script-iife">전역 스크립트와 IIFE</h3>
+      <p>
+        가장 원시적인 방식은 <code>&lt;script src="a.js"&gt;&lt;script src="b.js"&gt;</code>를 순서대로 나열하는 것이다.
+        문제는 <code>a.js</code>에서 선언한 변수가 전부 <b><span class="t" data-tip="브라우저의 최상위 객체. 전역 스크립트에서 var나 함수 선언으로 만든 이름은 모두 이 객체의 프로퍼티가 된다.">전역 객체(window)</span></b>에 붙는다는 것이다.
+        <code>b.js</code>가 실수로 같은 이름의 변수를 선언하면 <code>a.js</code>의 값을 덮어써 버린다. 파일이 10개만
+        넘어가도 이름 충돌을 사람이 손으로 관리해야 했다.
+      </p>
+      <p>
+        이를 해결하려고 나온 패턴이 <b><span class="t" data-tip="Immediately Invoked Function Expression. 함수를 정의하자마자 바로 실행하는 패턴. (function(){ ... })() 형태로 쓰며, 함수 안에서 선언한 변수는 함수 스코프에 갇혀 전역을 오염시키지 않는다.">IIFE</span></b>다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>iife-pattern.js</span></div>
+        <pre><code class="language-js">// 함수로 감싸서 즉시 실행 — 내부 변수가 전역으로 새지 않는다
+var MyModule = (function () {
+  var privateCount = 0; // 밖에서 절대 접근 불가
+
+  function increment() {
+    privateCount += 1;
+    return privateCount;
+  }
+
+  // 외부에 노출할 것만 골라서 return
+  return { increment: increment };
+})();
+
+MyModule.increment(); // 1
+// privateCount는 여기서 보이지 않는다</code></pre>
+      </div>
+      <p>
+        IIFE는 스코프 오염은 막았지만, 여전히 "무엇이 무엇에 의존하는지"는 <code>&lt;script&gt;</code> 태그를 쓰는
+        <b>순서</b>로만 표현됐다. 의존성이 늘어날수록 순서를 맞추는 게 곧 지옥이 됐다.
+      </p>
+
+      <h3 id="s-commonjs-amd">CommonJS와 AMD — 같은 문제, 다른 환경</h3>
+      <p>
+        2009년 Node.js가 등장하면서 서버 환경에서는 <b>CommonJS</b>가 표준이 됐다<sup class="ref"><a href="#r14">[14]</a></sup>.
+        <code>require()</code>로 모듈을 동기적으로 불러오고 <code>module.exports</code>로 내보낸다. 파일 시스템에서
+        즉시 읽을 수 있는 서버 환경에는 동기 로딩이 자연스러웠다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>math.cjs (CommonJS)</span></div>
+        <pre><code class="language-js">// math.cjs
+function add(a, b) { return a + b; }
+module.exports = { add };
+
+// app.cjs
+const { add } = require("./math.cjs");
+console.log(add(1, 2)); // 3</code></pre>
+      </div>
+      <p>
+        문제는 브라우저였다. 브라우저는 파일을 네트워크로 <i>비동기</i>로 받아온다. <code>require()</code>가
+        동기 함수라는 전제 자체가 브라우저 환경과 맞지 않았다. 그래서 브라우저 전용으로 <b>AMD(Asynchronous
+        Module Definition)</b>가 나왔다 — RequireJS가 대표 구현체다. 콜백 기반으로 의존성을 미리 선언해서
+        비동기로 로드했다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>amd-example.js</span></div>
+        <pre><code class="language-js">// AMD: 의존성을 배열로 먼저 선언하고, 콜백에서 사용
+define(["./math"], function (math) {
+  return { run: function () { return math.add(1, 2); } };
+});</code></pre>
+      </div>
+      <p>
+        결과적으로 서버는 CommonJS, 브라우저는 AMD(또는 UMD로 둘 다 지원)를 따로 관리해야 하는 상황이 됐다.
+        같은 언어인데 모듈 시스템이 환경마다 다른 건 명백히 비정상적이었다.
+      </p>
+
+      <h3 id="s-esm-standard">ESM — 언어 표준으로 수렴</h3>
+      <p>
+        2015년 ES2015(ES6)에서 <b><span class="t" data-tip="ECMAScript Modules. JS 언어 명세 자체에 포함된 공식 모듈 시스템. import/export 문법을 쓰고, 브라우저와 Node.js 양쪽에서 네이티브로 지원한다.">ESM(ECMAScript Modules)</span></b>이
+        언어 명세에 정식으로 포함됐다<sup class="ref"><a href="#r2">[2]</a></sup>. CommonJS/AMD는 라이브러리 차원의 관례였지만,
+        ESM은 JS 엔진 자체가 이해하는 문법이다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>esm-example.js</span></div>
+        <pre><code class="language-js">// math.js
+export function add(a, b) { return a + b; }
+export const PI = 3.14159;
+
+// app.js
+import { add, PI } from "./math.js";
+console.log(add(1, 2), PI);</code></pre>
+      </div>
+      <p>
+        ESM이 CommonJS보다 우월한 지점은 단순히 문법 통일이 아니다. <code>import</code>/<code>export</code>는
+        <b>정적(static)</b>이다 — 즉 코드를 실행하지 않고도 "이 파일이 무엇을 가져오고 무엇을 내보내는지"를
+        파일을 읽는 것만으로 100% 알 수 있다. <code>require()</code>는 함수 호출이라 <code>if (cond) require("a")</code>처럼
+        런타임에만 결정될 수 있어 정적 분석이 불가능하다. 이 차이가 <a href="#s-tree-shaking">트리셰이킹</a>을
+        가능하게 만든 핵심 조건이다.
+      </p>
+
+      <h3 id="s-script-type-module">script type=module 실제 동작 확인</h3>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <p>
+            브라우저는 이미 오래전부터 <code>&lt;script type="module"&gt;</code>을 네이티브로 지원한다<sup class="ref"><a href="#r3">[3]</a></sup>.
+            일반 <code>&lt;script&gt;</code>와 다른 점 세 가지를 직접 확인한다.
+          </p>
+          <ul>
+            <li>일반 스크립트의 최상위 변수는 <code>window</code>에 붙지만, 모듈 스크립트의 최상위 변수는 <b>모듈 스코프</b>에 갇힌다.</li>
+            <li>모듈 스크립트는 항상 <b><span class="t" data-tip="script 실행을 문서 파싱이 끝날 때까지 미루는 것. defer 속성을 준 것과 비슷하게 동작해서, 이후에 나온 일반 스크립트보다 나중에 실행될 수 있다.">defer</span></b>된 것처럼 동작한다 — 문서 파싱이 끝난 뒤에 실행된다.</li>
+            <li>모듈 최상위는 항상 <b>strict mode</b>이고, 최상위 <code>this</code>는 <code>undefined</code>다.</li>
+          </ul>
+          <p>오른쪽 콘솔에서 <b>순서</b>를 눈여겨봐라. 아래에 있는 일반 스크립트가 위의 모듈 스크립트보다 먼저 로그를 찍을 수도 있다 — 그게 바로 "모듈은 defer된다"는 증거다.</p>
+        </div>
+        <div class="pg" data-pg="html" data-title="module-scope.html" data-height="260">
+<script type="text/plain" class="pg__src">
+<script>
+  var globalLeak = "classic script: window에 붙는다";
+  console.log("① classic 스크립트 실행 (파싱 중 즉시)");
+<\/script>
+
+<script type="module">
+  // 모듈 스코프: 여기서 선언한 변수는 window로 새지 않는다
+  const moduleScoped = "type=module: 모듈 스코프 안에 갇힌다";
+
+  console.log("③ module 스크립트 실행 (defer되어 가장 나중에)");
+  console.log("window.globalLeak =", window.globalLeak);      // 문자열 (classic이 붙임)
+  console.log("window.moduleScoped =", window.moduleScoped);  // undefined (안 새어나감)
+  console.log("모듈 top-level this =", this);                  // undefined
+<\/script>
+
+<script>
+  console.log("② 두 번째 classic 스크립트 실행 (여전히 즉시)");
+<\/script>
+
+<p>①②는 즉시, ③은 문서 파싱이 끝난 뒤 실행된다. 콘솔에서 순서를 확인해보자.</p>
+</script>
+        </div>
+      </div>
+
+      <div class="note note--tip">
+        <span class="note__t">핵심</span>
+        ESM은 브라우저와 Node.js 양쪽의 표준 모듈 시스템이지만, 실무에서는 여전히 트랜스파일과 번들이 필요하다.
+        이유는 (1) 구형 브라우저 지원, (2) 수백 개 파일을 각각 네트워크 요청하면 느리다는 성능 문제, (3) TS/JSX처럼
+        ESM 문법이 아닌 것도 함께 처리해야 하기 때문이다.
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-bundler-principle"><span class="h2num">§3</span>번들러의 원리</h2>
+
+      <h3 id="s-entry-dependency-graph">엔트리와 의존성 그래프</h3>
+      <p>
+        번들러는 사람이 "이 파일부터 시작해"라고 지정한 <b>엔트리(entry)</b> 파일 하나에서 출발한다. 그 파일의
+        <code>import</code>문을 전부 읽어서 연결된 파일을 찾고, 그 파일들의 <code>import</code>도 또 읽는다.
+        이 과정을 재귀적으로 반복하면 프로젝트 전체가 하나의 <b>의존성 그래프(dependency graph)</b>로 그려진다.
+      </p>
+      <div class="fig">
+        <pre class="mermaid">
+flowchart TD
+  Entry["entry: main.tsx"] --> App["App.tsx"]
+  App --> Header["Header.tsx"]
+  App --> Router["Router.tsx"]
+  Router --> Home["Home.tsx"]
+  Router -->|"동적 import()"| Settings["Settings.tsx<br/>별도 청크로 분리"]
+  Header --> Fmt["utils/format.ts"]
+  Home --> Fmt
+        </pre>
+        <div class="fig__cap"><b>그림 3.</b> 엔트리에서 시작해 정적 <code>import</code>를 따라가며 만들어지는 의존성 그래프. 정적으로 연결된 노드는 같은 청크에, 동적 <code>import()</code>로 연결된 노드는 별도 청크가 된다.</div>
+      </div>
+      <p>
+        그래프가 완성되면 번들러는 이걸 하나 이상의 출력 파일(청크)로 "평평하게" 펼친다. 이때 그래프 구조를 알고
+        있기 때문에 "이 파일이 실제로 쓰이는가"를 판단할 수 있고, 그게 다음 절의 트리셰이킹이다.
+      </p>
+
+      <h3 id="s-tree-shaking">트리셰이킹이 되는 조건</h3>
+      <p>
+        <b><span class="t" data-tip="번들에 포함은 됐지만 실제로 쓰이지 않는 export를 정적 분석으로 찾아내 최종 번들에서 제거하는 최적화. 나무를 흔들어 죽은 잎을 떨어뜨리는 것에 비유한 이름이다.">트리셰이킹(tree shaking)</span></b><sup class="ref"><a href="#r4">[4]</a></sup>은
+        "엔트리에서 도달 가능한 export만 남기고 나머지는 버리는" 최적화다. 아래 미니 시뮬레이터로 원리를 직접 확인한다 —
+        실제 번들러(Rollup/esbuild)도 결국 이 "도달 가능성 분석(reachability analysis)"을 훨씬 정교하게 수행한다.
+      </p>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>moduleGraph</code> — 어떤 export가 어떤 export를 참조하는지 기록한 표. 실제 번들러 내부의 그래프를 단순화한 것.</li>
+            <li><code>treeShake()</code> — 엔트리(<code>app.js:entry</code>)에서 시작해 참조를 재귀적으로 따라가며 <code>Set</code>에 도달한 것만 쌓는다.</li>
+            <li>결과적으로 <code>subtract</code>, <code>multiplyUnused</code>는 어디서도 참조되지 않으므로 <code>reachable</code>에 들어가지 않는다 — 이게 곧 "제거 대상"이라는 뜻.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="tree-shaking-sim.js" data-height="240">
+<script type="text/plain" class="pg__src">
+// 미니 트리셰이킹 시뮬레이터: 실제 번들러는 "엔트리에서 도달 가능한 export만" 남긴다.
+const moduleGraph = {
+  "math.js": {
+    uses: { add: [], subtract: [], multiplyUnused: [] },
+  },
+  "app.js": {
+    uses: { entry: ["math.js:add"] }, // entry는 math.js의 add만 참조
+  },
+};
+
+function treeShake(graph, entryModule, entryExport) {
+  const reachable = new Set();
+  const visit = (moduleId, exportName) => {
+    const key = moduleId + ":" + exportName;
+    if (reachable.has(key)) return;
+    reachable.add(key);
+    const deps = (graph[moduleId] && graph[moduleId].uses[exportName]) || [];
+    deps.forEach((dep) => {
+      const [depMod, depExport] = dep.split(":");
+      visit(depMod, depExport);
+    });
+  };
+  visit(entryModule, entryExport);
+  return reachable;
+}
+
+const used = treeShake(moduleGraph, "app.js", "entry");
+console.log("번들에 남는 것:", [...used]);
+console.log("math.js의 subtract / multiplyUnused는 참조되지 않으므로 제거 대상");
+</script>
+        </div>
+      </div>
+      <p>트리셰이킹이 실제로 동작하려면 두 조건이 맞아야 한다.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>조건</th><th>이유</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>ESM 문법 사용</td>
+              <td><code>import</code>/<code>export</code>는 정적이라 실행 없이 분석 가능하다. <code>require()</code>로 작성된 CommonJS 코드는 동적 호출이라 분석이 어렵다.</td>
+            </tr>
+            <tr>
+              <td><code>sideEffects</code> 필드</td>
+              <td><code>package.json</code>의 <code>"sideEffects": false</code>는 "이 패키지의 모듈은 import만 해도 부작용(전역 변수 설정, polyfill 등)이 없다"는 선언이다. 이게 있어야 번들러가 안심하고 미사용 export를 통째로 제거한다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note note--warn">
+        <span class="note__t">흔한 실수</span>
+        <code>import * as _ from "lodash"</code>처럼 통째로 가져오면 트리셰이킹이 거의 불가능하다. <code>import { debounce } from "lodash-es"</code>처럼 named import를 쓰고, ESM 빌드(<code>-es</code> 접미사)를 제공하는 패키지를 골라야 한다.
+      </div>
+
+      <h3 id="s-code-splitting">코드 스플리팅과 동적 import</h3>
+      <p>
+        모든 페이지의 코드를 한 파일에 담으면, 사용자가 로그인 페이지만 볼 때도 관리자 대시보드 코드까지
+        다운로드해야 한다. <b>코드 스플리팅</b>은 <code>import()</code> 함수 형태(동적 import)로 표시한 지점을
+        기준으로 번들을 여러 청크로 쪼갠다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>router.tsx</span></div>
+        <pre><code class="language-tsx">// 정적 import: 항상 초기 번들에 포함
+import Home from "./pages/Home";
+
+// 동적 import: 이 경로로 이동할 때만 별도 청크를 네트워크로 가져온다
+const Settings = React.lazy(() =&gt; import("./pages/Settings"));
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;p&gt;로딩 중...&lt;/p&gt;}&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+        &lt;Route path="/settings" element={&lt;Settings /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+      </div>
+      <p>
+        번들러는 <code>import()</code>를 만나면 "여기가 청크 경계다"라고 판단하고, 그 시점부터 도달 가능한
+        모듈들을 별도 파일로 뽑아낸다. 성능 관점의 예산 잡기는 <a href="ch08.html">CH08 성능 최적화</a>에서 더 다룬다.
+      </p>
+
+      <h3 id="s-chunk-hash">청크와 해시 파일명</h3>
+      <p>
+        빌드 결과 파일명이 <code>index-B3f8xk2A.js</code>처럼 생긴 이유가 있다. 뒤의 무작위 문자열은 파일
+        <b>내용의 해시</b>다. 내용이 하나도 안 바뀌면 해시도 그대로라서, 브라우저는 캐시된 파일을 재사용한다.
+        내용이 1바이트라도 바뀌면 해시가 바뀌어 새 파일명이 되고, 브라우저는 새로 받는다. 이 방식 덕분에
+        "영구 캐시(<code>Cache-Control: max-age=31536000, immutable</code>)"를 걸어도 배포할 때마다 안전하게
+        캐시를 무효화할 수 있다.
+      </p>
+
+      <!-- ================================================================ -->
+      <h2 id="s-transpile-polyfill"><span class="h2num">§4</span>트랜스파일 vs 폴리필</h2>
+      <p>
+        둘 다 "구형 환경 지원"을 위한 것이지만 layer가 다르다. <b>트랜스파일은 문법(syntax)</b>을, <b>폴리필은
+        런타임 기능(API)</b>을 다룬다. 화살표 함수(<code>=&gt;</code>)는 문법이라 트랜스파일로 바꿀 수 있지만,
+        <code>Array.prototype.flat</code> 같은 <i>메서드</i>는 문법이 아니라 런타임에 존재해야 하는 함수이므로
+        트랜스파일로는 만들어낼 수 없다 — 이건 폴리필의 일이다.
+      </p>
+
+      <h3 id="s-transpile-tools">Babel / SWC / esbuild 역할 구분</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>도구</th><th>구현 언어</th><th>주 역할</th><th>특징</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><b>Babel</b></td>
+              <td>JavaScript</td>
+              <td>트랜스파일(문법 변환), 플러그인 기반 커스텀 변환</td>
+              <td>가장 오래됐고 가장 유연하다. 플러그인 생태계가 방대하지만 상대적으로 느리다. 이 학습서의 라이브 플레이그라운드도 Babel Standalone으로 동작한다.</td>
+            </tr>
+            <tr>
+              <td><b>SWC</b></td>
+              <td>Rust</td>
+              <td>트랜스파일, 제한적 번들</td>
+              <td>Babel과 대부분 호환되는 변환을 훨씬 빠르게 수행한다. Next.js가 기본 컴파일러로 채택했다.</td>
+            </tr>
+            <tr>
+              <td><b>esbuild</b></td>
+              <td>Go</td>
+              <td>트랜스파일 + 번들 + 미니파이</td>
+              <td>극단적으로 빠르다. Vite가 dev 서버의 의존성 사전 번들과 prod 빌드의 미니파이에 사용한다<sup class="ref"><a href="#r5">[5]</a></sup>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-browserslist">browserslist — "어디까지 지원할지"의 단일 진실 공급원</h3>
+      <p>
+        Babel, autoprefixer(CSS), core-js 같은 도구들이 "어떤 브라우저까지 지원해야 하는지"를 각자 따로
+        설정하면 기준이 어긋난다. <code>package.json</code>의 <code>browserslist</code> 필드(또는
+        <code>.browserslistrc</code>)에 쿼리를 한 번 적어두면, 이걸 지원하는 모든 도구가 같은 기준을 공유한다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>package.json</span></div>
+        <pre><code class="language-json">{
+  "browserslist": [
+    "&gt; 0.5%",
+    "last 2 versions",
+    "not dead",
+    "not IE 11"
+  ]
+}</code></pre>
+      </div>
+
+      <h3 id="s-polyfill-corejs">폴리필과 core-js</h3>
+      <p>
+        <b><span class="t" data-tip="특정 브라우저에 없는 표준 API를 구현해서 채워 넣는 코드. 트랜스파일과 달리 문법이 아니라 런타임 함수/객체를 추가한다. 예: Array.prototype.flat이 없는 환경에 직접 구현해서 붙여준다.">폴리필(polyfill)</span></b>은
+        "이 함수가 없으면 내가 대신 구현해서 붙여준다"는 방식이다. <code>core-js</code>는 이런 폴리필을 모아둔
+        표준 라이브러리이고, Babel의 <code>preset-env</code>가 <code>browserslist</code> 기준을 보고 필요한
+        폴리필만 자동으로 골라 넣어준다.
+      </p>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>myFlat()</code> — <code>Array.prototype.flat</code>이 없다고 가정하고 재귀로 직접 구현한 것. core-js가 내부적으로 하는 일과 원리는 같다.</li>
+            <li><code>if (!Array.prototype.flat)</code> — 실제 폴리필들도 "이미 있으면 건드리지 않는다"는 방어 코드를 꼭 넣는다.</li>
+            <li>중요한 점: 이 코드는 <b>문법</b>을 바꾸는 게 아니라 <b>없는 메서드</b>를 채워 넣는다 — 그래서 폴리필이다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="flat-polyfill.js" data-height="240">
+<script type="text/plain" class="pg__src">
+// 폴리필 예시: 이 엔진에 Array.prototype.flat이 없다고 가정하고 직접 구현
+function myFlat(arr, depth = 1) {
+  return depth > 0
+    ? arr.reduce(
+        (acc, v) => acc.concat(Array.isArray(v) ? myFlat(v, depth - 1) : v),
+        []
+      )
+    : arr.slice();
+}
+
+if (!Array.prototype.flat) {
+  Array.prototype.flat = function (depth) { return myFlat(this, depth); };
+  console.log("polyfill 적용됨 (이 엔진엔 원래 flat이 없었다고 가정)");
+} else {
+  console.log("이 브라우저는 flat을 네이티브 지원 — 그래도 myFlat으로 직접 확인");
+}
+
+console.log(myFlat([1, [2, 3], [4, [5, 6]]], 1)); // [1,2,3,4,[5,6]]
+console.log(myFlat([1, [2, 3], [4, [5, 6]]], 2)); // [1,2,3,4,5,6]
+console.log("→ 트랜스파일은 '문법'을, 폴리필은 '런타임 기능'을 다룬다");
+</script>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-vite"><span class="h2num">§5</span>Vite</h2>
+      <p>
+        Vite는 "dev 서버"와 "prod 빌드"에서 서로 <b>다른 전략</b>을 쓰는 도구다<sup class="ref"><a href="#r6">[6]</a></sup>.
+        이걸 헷갈리면 "Vite가 빠르다"는 말의 절반만 이해하게 된다.
+      </p>
+
+      <h3 id="s-vite-dev-server">dev: 브라우저 네이티브 ESM + esbuild 사전번들</h3>
+      <p>
+        예전 방식(webpack dev server 등)은 개발 서버를 켤 때 프로젝트 전체를 한 번 번들링했다. 파일이
+        1000개면 서버가 뜨기 전에 1000개를 다 번들링해야 했다 — 프로젝트가 커질수록 dev 서버 기동 시간이
+        길어졌다.
+      </p>
+      <p>
+        Vite는 정반대로 접근한다. 브라우저가 이미 ESM을 네이티브로 지원한다는 점을 이용해서, <b>번들링을 거의
+        하지 않는다.</b> 브라우저가 <code>import "./Header.tsx"</code>를 요청하면, 그 순간 Vite 서버가
+        <i>그 파일 하나만</i> 즉석에서 트랜스파일해서 응답한다. 즉 "요청받은 파일만 그때그때 변환"하는 온디맨드
+        방식이라 프로젝트 크기와 서버 기동 시간이 거의 무관하다.
+      </p>
+      <p>
+        단, <code>node_modules</code>의 라이브러리(예: lodash가 CommonJS로 수백 개 파일을 export하는 경우)는
+        예외다. 이런 건 브라우저가 요청할 때마다 수백 번 네트워크 요청을 하게 되므로, Vite는 시작 시점에
+        <b>esbuild</b>로 이런 의존성만 미리 하나의 ESM 파일로 사전 번들(pre-bundle)한다. esbuild는 Go로 만들어져
+        Babel/webpack보다 수십~수백 배 빠르기 때문에 이 사전 작업이 체감상 순식간에 끝난다.
+      </p>
+
+      <h3 id="s-vite-build">build: Rollup</h3>
+      <p>
+        반면 프로덕션 빌드는 다르다. 네이티브 ESM을 그대로 배포하면 파일이 너무 많아 네트워크 요청 수가
+        폭발하고(HTTP/2라도 무시할 수 없는 오버헤드), 트리셰이킹·코드 스플리팅 같은 최적화도 못 받는다.
+        그래서 <code>vite build</code>는 <b>Rollup</b>을 사용해 실제로 번들링·트리셰이킹·미니파이를 수행한다<sup class="ref"><a href="#r6">[6]</a></sup>.
+      </p>
+      <div class="fig">
+        <pre class="mermaid">
+flowchart TB
+  subgraph DEV["개발 서버: vite dev"]
+    direction LR
+    Browser1["브라우저"] -->|"import 요청 (native ESM)"| DevServer["Vite Dev Server"]
+    DevServer -->|"esbuild로 사전 번들 (1회)"| PreBundle["node_modules 의존성"]
+    DevServer -->|"요청 시에만 온디맨드 변환"| SourceFiles["소스 파일 (.tsx 등)"]
+  end
+  subgraph BUILD["프로덕션 빌드: vite build"]
+    direction LR
+    Rollup["Rollup"] --> Chunks["해시된 청크 파일<br/>.js / .css"]
+    Chunks --> Browser2["브라우저"]
+  end
+        </pre>
+        <div class="fig__cap"><b>그림 4.</b> dev 서버는 번들링을 최소화하고 esbuild로 의존성만 사전 처리한다. prod 빌드는 Rollup으로 실제 번들·트리셰이킹·코드 스플리팅을 수행한다. <span class="muted">출처: vitejs.dev/guide/why</span></div>
+      </div>
+      <div class="note note--info">
+        <span class="note__t">그래서 dev와 build가 "다른" 이유</span>
+        dev의 목표는 "서버 기동 속도"와 "저장 즉시 반영"이고, build의 목표는 "최종 번들 크기와 캐시 효율"이다.
+        두 목표가 요구하는 최적화 전략이 근본적으로 다르기 때문에 Vite는 도구를 다르게 골랐다.
+      </div>
+
+      <h3 id="s-vite-hmr">HMR(Hot Module Replacement) 원리</h3>
+      <p>
+        <b><span class="t" data-tip="Hot Module Replacement. 코드를 수정했을 때 페이지를 새로고침하지 않고, 바뀐 모듈만 교체해서 화면에 반영하는 기술. 입력 중이던 폼 값이나 컴포넌트 상태가 유지된다는 게 핵심 장점이다.">HMR</span></b>은
+        파일을 저장했을 때 브라우저를 새로고침하지 않고 바뀐 모듈만 교체하는 기술이다. Vite는 파일 변경을 감지하면
+        WebSocket으로 브라우저에 "이 모듈이 바뀌었다"고 알리고, 브라우저는 해당 모듈만 다시 <code>import</code>해서
+        교체한다<sup class="ref"><a href="#r7">[7]</a></sup>.
+      </p>
+      <div class="fig">
+        <pre class="mermaid">
+sequenceDiagram
+  participant F as 파일시스템
+  participant D as Vite Dev Server
+  participant B as 브라우저
+
+  F->>D: 파일 변경 감지 (watcher)
+  D->>D: 변경된 모듈만 재컴파일
+  D-->>B: WebSocket으로 업데이트 신호 전송
+  B->>B: import.meta.hot.accept 콜백 실행
+  B->>D: 새 모듈 코드 fetch (import)
+  B->>B: DOM 갱신, 컴포넌트 상태(state)는 유지
+        </pre>
+        <div class="fig__cap"><b>그림 5.</b> Vite HMR의 흐름. 페이지 전체를 새로고침하지 않으므로 입력값·스크롤 위치·컴포넌트 상태가 그대로 유지된다.</div>
+      </div>
+      <p>
+        Vite는 <code>import.meta.hot.accept()</code>, <code>import.meta.hot.dispose()</code>, <code>import.meta.hot.data</code>
+        같은 API를 제공한다<sup class="ref"><a href="#r7">[7]</a></sup>. 아래는 그 개념을 직접 구현한 미니 시뮬레이터다 — "상태를
+        유지한 채 코드만 교체한다"는 핵심 아이디어를 확인할 수 있다.
+      </p>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>moduleRegistry</code> — 모듈 id별로 exports와 state를 저장해두는 표. Vite 내부의 모듈 그래프를 단순화한 것.</li>
+            <li><code>defineModule()</code> — 이전에 등록된 state가 있으면 그걸 이어받는다(<code>prev ? prev.state : {}</code>). 이게 "상태 유지"의 핵심.</li>
+            <li><code>hotUpdate()</code> — 실제 파일 저장 시 Vite가 하는 일을 흉내낸 것. 새 factory로 다시 정의하되 state 객체는 그대로 넘긴다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="hmr-sim.js" data-height="260">
+<script type="text/plain" class="pg__src">
+// 미니 HMR 시뮬레이터: 실제 Vite는 WebSocket으로 "이 모듈이 바뀌었다"는 신호를 보내고,
+// 브라우저는 페이지 전체를 새로고침하지 않고 해당 모듈만 다시 실행한다.
+const moduleRegistry = new Map(); // id -> { exports, state, disposeCallbacks }
+
+function defineModule(id, factory) {
+  const prev = moduleRegistry.get(id);
+  const state = prev ? prev.state : {}; // 이전 상태를 이어받는다 (HMR의 핵심)
+  const disposeCallbacks = [];
+  const hot = { data: state, dispose(cb) { disposeCallbacks.push(cb); } };
+  const exports = factory(hot);
+  moduleRegistry.set(id, { exports, state, disposeCallbacks });
+  return exports;
+}
+
+function hotUpdate(id, factory) {
+  const prev = moduleRegistry.get(id);
+  if (prev) prev.disposeCallbacks.forEach((cb) => cb(prev.state));
+  console.log(`[HMR] ${id} 교체됨 — 상태는 유지된 채 코드만 갱신`);
+  return defineModule(id, factory);
+}
+
+// 최초 로드: 카운터 값 3으로 시작
+let counterApp = defineModule("Counter.jsx", (hot) => {
+  hot.data.count = hot.data.count ?? 3;
+  return { render: () => `count = ${hot.data.count}` };
+});
+console.log("최초:", counterApp.render());
+
+// 코드만 바뀐 상황(예: 렌더 문구 수정)을 흉내낸 hotUpdate — state는 그대로 유지
+counterApp = hotUpdate("Counter.jsx", (hot) => {
+  return { render: () => `[새 코드] count = ${hot.data.count}` };
+});
+console.log("HMR 이후:", counterApp.render()); // count는 3 그대로
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-import-meta-env">import.meta.env</h3>
+      <p>
+        Vite는 <code>.env</code> 파일의 값을 <code>import.meta.env</code> 객체로 클라이언트 코드에 주입한다<sup class="ref"><a href="#r8">[8]</a></sup>.
+        보안을 위해 기본적으로 <code>VITE_</code> 접두사가 붙은 변수만 노출한다 — <code>DB_PASSWORD</code> 같은 서버
+        전용 값이 실수로 번들에 박혀버리는 걸 막기 위한 장치다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>.env</span></div>
+        <pre><code class="language-bash">VITE_API_BASE=http://127.0.0.1:8787
+DB_PASSWORD=secret   # VITE_ 접두사가 없으므로 클라이언트에 노출되지 않는다</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>src/api.ts</span></div>
+        <pre><code class="language-ts">const apiBase = import.meta.env.VITE_API_BASE;
+console.log(import.meta.env.MODE);  // "development" | "production"
+console.log(import.meta.env.DEV);   // boolean
+console.log(import.meta.env.PROD);  // boolean</code></pre>
+      </div>
+
+      <h3 id="s-static-assets">정적 자산 처리</h3>
+      <p>
+        이미지·폰트 같은 정적 파일을 <code>import</code>하면 Vite는 개발 중엔 경로를 그대로 서빙하고, 빌드 시엔
+        해시가 붙은 파일명으로 <code>dist/assets/</code>에 복사한 뒤 그 최종 경로를 문자열로 돌려준다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>Logo.tsx</span></div>
+        <pre><code class="language-tsx">import logoUrl from "./logo.png"; // 문자열 URL로 import된다
+
+function Logo() {
+  return &lt;img src={logoUrl} alt="logo" /&gt;;
+}</code></pre>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-vite-config"><span class="h2num">§6</span>실전 vite.config.ts 전문</h2>
+
+      <h3 id="s-vite-config-full">React + TS + alias + proxy + 청크 분할</h3>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>vite.config.ts</span></div>
+        <pre><code class="language-ts">import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "node:path";
+
+export default defineConfig({
+  // React 컴포넌트를 트랜스파일하는 공식 플러그인 (내부적으로 Babel 또는 SWC 사용)
+  plugins: [react()],
+
+  resolve: {
+    // import "@/components/Button" 처럼 상대경로 대신 별칭을 쓸 수 있게 한다
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@components": path.resolve(__dirname, "src/components"),
+    },
+  },
+
+  // dev 서버 전용 설정
+  server: {
+    port: 5174,
+    // /api로 시작하는 요청을 백엔드로 우회(프록시)한다.
+    // 프론트는 그냥 fetch("/api/...")만 호출하면 되고, CORS 설정 없이 8787로 전달된다.
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+    },
+  },
+
+  // import.meta.env로 노출할 환경변수 접두사. 기본값은 "VITE_"이며 배열로 확장 가능
+  envPrefix: ["VITE_"],
+
+  build: {
+    rollupOptions: {
+      output: {
+        // 자주 안 바뀌는 라이브러리를 별도 청크로 묶어 캐시 적중률을 높인다
+        manualChunks: {
+          "react-vendor": ["react", "react-dom"],
+          "query-vendor": ["@tanstack/react-query"],
+        },
+      },
+    },
+    // 청크 크기 경고 기준(KB). 넘으면 vite build가 경고를 출력한다
+    chunkSizeWarningLimit: 600,
+  },
+});</code></pre>
+      </div>
+
+      <h3 id="s-vite-config-fields">필드별 설명</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>필드</th><th>역할</th></tr></thead>
+          <tbody>
+            <tr><td><code>plugins</code></td><td>빌드 파이프라인에 훅을 거는 플러그인 배열. React, SVG 처리, PWA 등을 여기 추가한다.</td></tr>
+            <tr><td><code>resolve.alias</code></td><td>import 경로 별칭. <code>../../../components</code> 같은 상대경로 지옥을 없앤다.</td></tr>
+            <tr><td><code>server.proxy</code></td><td>dev 서버에서만 동작하는 요청 우회. 백엔드 CORS 설정을 프론트가 대신 회피한다.</td></tr>
+            <tr><td><code>build.rollupOptions</code></td><td>prod 빌드에 쓰이는 Rollup에 직접 옵션을 전달하는 통로. <code>manualChunks</code>로 청크 분할을 제어한다.</td></tr>
+            <tr><td><code>envPrefix</code></td><td>클라이언트에 노출할 환경변수 접두사. 넓히면 노출 범위가 커지므로 신중히.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note note--spec">
+        <span class="note__t">이 프로젝트 규칙</span>
+        <a href="ch05.html">CH05</a>에서 다루는 <code>apiBase</code> 하드코딩 금지 규칙은 바로 이 <code>server.proxy</code> 설정과
+        <code>import.meta.env.VITE_API_BASE</code>를 함께 쓰라는 뜻이다 — URL을 코드에 직접 박지 않는다.
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-package-manager"><span class="h2num">§7</span>패키지 매니저 기초</h2>
+
+      <h3 id="s-package-json-fields">package.json 필드 전부</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>필드</th><th>의미</th></tr></thead>
+          <tbody>
+            <tr><td><code>name</code></td><td>패키지 이름. 레지스트리에 배포할 게 아니면 임의 문자열도 가능.</td></tr>
+            <tr><td><code>version</code></td><td>semver 형식 버전 (<a href="#s-semver">§7</a> 참고).</td></tr>
+            <tr><td><code>type</code></td><td><code>"module"</code>이면 <code>.js</code> 파일을 ESM으로, 없거나 <code>"commonjs"</code>면 CJS로 해석<sup class="ref"><a href="#r15">[15]</a></sup>.</td></tr>
+            <tr><td><code>scripts</code></td><td><code>yarn dev</code>, <code>yarn build</code>처럼 실행할 커맨드 모음.</td></tr>
+            <tr><td><code>dependencies</code></td><td>런타임에 실제로 필요한 패키지(React, axios 등).</td></tr>
+            <tr><td><code>devDependencies</code></td><td>개발/빌드 시에만 필요한 패키지(Vite, TypeScript, ESLint 등). 최종 번들에는 안 들어간다.</td></tr>
+            <tr><td><code>peerDependencies</code></td><td>"내가 아니라 이 패키지를 쓰는 앱이 직접 설치해야 하는" 의존성. 예: React 컴포넌트 라이브러리가 <code>react</code>를 peer로 선언.</td></tr>
+            <tr><td><code>engines</code></td><td><code>{ "node": "&gt;=20" }</code>처럼 요구하는 런타임 버전 범위. 강제는 안 되지만 도구들이 경고를 띄운다.</td></tr>
+            <tr><td><code>packageManager</code></td><td><code>"yarn@4.5.0"</code>처럼 이 프로젝트가 쓸 패키지 매니저와 버전을 못박는 필드. Corepack이 이 값을 읽는다<sup class="ref"><a href="#r16">[16]</a></sup>.</td></tr>
+            <tr><td><code>exports</code></td><td>패키지 바깥에서 어떤 서브 경로까지 import 가능한지 명시적으로 제한하는 필드. 선언 안 된 내부 파일은 import 시도 시 에러가 난다<sup class="ref"><a href="#r15">[15]</a></sup>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>package.json</span></div>
+        <pre><code class="language-json">{
+  "name": "my-app",
+  "version": "0.4.0",
+  "type": "module",
+  "packageManager": "yarn@4.5.0",
+  "engines": { "node": "&gt;=20" },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b &amp;&amp; vite build",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "typescript": "^5.6.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./styles.css": "./dist/styles.css"
+  }
+}</code></pre>
+      </div>
+
+      <h3 id="s-semver">semver: <code>^</code> <code>~</code> 정확한 버전</h3>
+      <p>
+        버전은 <b><span class="t" data-tip="Semantic Versioning. MAJOR.MINOR.PATCH 형태로 버전을 관리하는 규칙. MAJOR는 호환 안 되는 변경, MINOR는 하위호환 기능 추가, PATCH는 버그 수정을 의미한다.">semver</span></b>(<code>MAJOR.MINOR.PATCH</code>) 규칙을 따른다<sup class="ref"><a href="#r13">[13]</a></sup>.
+        MAJOR가 바뀌면 호환이 깨질 수 있고, MINOR는 하위호환 기능 추가, PATCH는 버그 수정이다.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>표기</th><th>의미</th><th>허용 범위 예시(<code>1.2.3</code> 기준)</th></tr></thead>
+          <tbody>
+            <tr><td><code>^1.2.3</code></td><td>가장 왼쪽 0이 아닌 자리를 고정, 그 이상은 자유</td><td><code>1.2.3</code> ~ <code>&lt;2.0.0</code></td></tr>
+            <tr><td><code>~1.2.3</code></td><td>MINOR까지 고정, PATCH만 자유</td><td><code>1.2.3</code> ~ <code>&lt;1.3.0</code></td></tr>
+            <tr><td><code>1.2.3</code></td><td>정확히 이 버전만</td><td><code>1.2.3</code></td></tr>
+            <tr><td><code>^0.2.3</code></td><td>MAJOR가 0일 땐 MINOR가 고정 자리가 된다(0.x는 아직 불안정하다는 semver 관례)</td><td><code>0.2.3</code> ~ <code>&lt;0.3.0</code></td></tr>
+            <tr><td><code>*</code> / <code>latest</code></td><td>아무 버전이나 허용 — lockfile 없이는 위험</td><td>전체 범위</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>satisfies()</code> — 실제 npm/yarn이 내부적으로 하는 범위 판정을 단순화해서 직접 구현.</li>
+            <li><code>^</code> 분기 — MAJOR가 0보다 크면 "MAJOR 고정, 나머지는 그 이상"으로 판정한다.</li>
+            <li><code>~</code> 분기 — MAJOR·MINOR를 모두 고정하고 PATCH만 그 이상 허용한다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="semver-range.js" data-height="260">
+<script type="text/plain" class="pg__src">
+// 미니 semver 매처: ^, ~, 정확한 버전만 지원하는 단순화 버전
+function parse(v) {
+  const [major, minor, patch] = v.split(".").map(Number);
+  return { major, minor, patch };
+}
+
+function satisfies(version, range) {
+  const v = parse(version);
+  if (range.startsWith("^")) {
+    const r = parse(range.slice(1));
+    if (r.major > 0) {
+      return v.major === r.major &&
+        (v.minor > r.minor || (v.minor === r.minor && v.patch >= r.patch));
+    }
+    return v.major === 0 && v.minor === r.minor && v.patch >= r.patch;
+  }
+  if (range.startsWith("~")) {
+    const r = parse(range.slice(1));
+    return v.major === r.major && v.minor === r.minor && v.patch >= r.patch;
+  }
+  const r = parse(range);
+  return v.major === r.major && v.minor === r.minor && v.patch === r.patch;
+}
+
+console.log("^1.2.3 satisfies 1.9.0 ?", satisfies("1.9.0", "^1.2.3")); // true
+console.log("^1.2.3 satisfies 2.0.0 ?", satisfies("2.0.0", "^1.2.3")); // false
+console.log("~1.2.3 satisfies 1.2.9 ?", satisfies("1.2.9", "~1.2.3")); // true
+console.log("~1.2.3 satisfies 1.3.0 ?", satisfies("1.3.0", "~1.2.3")); // false
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-lockfile">lockfile이 존재하는 이유</h3>
+      <p>
+        <code>package.json</code>의 <code>^1.2.3</code>은 "범위"이지 "정확한 값"이 아니다. 같은
+        <code>package.json</code>으로 오늘 설치한 사람과 한 달 뒤 설치한 사람이 서로 다른 PATCH 버전을 받을 수
+        있다. <b>lockfile</b>(<code>yarn.lock</code>, <code>package-lock.json</code>, <code>pnpm-lock.yaml</code>)은
+        실제로 설치된 <i>정확한</i> 버전과 의존성 트리 전체를 기록해서, 언제 누가 설치하든 완전히 동일한 결과를
+        보장한다. lockfile은 반드시 Git에 커밋해야 한다.
+      </p>
+
+      <h3 id="s-hoisting-phantom">node_modules 호이스팅과 유령 의존성</h3>
+      <p>
+        npm/yarn classic은 중첩된 의존성을 최대한 <b>평평하게(flat)</b> 끌어올린다 — 이걸 <span class="t" data-tip="깊게 중첩된 의존성 트리를 최대한 최상위 node_modules로 끌어올려 평평하게 만드는 것. 디스크 중복을 줄이지만, 직접 설치하지 않은 패키지도 우연히 접근 가능해지는 부작용이 있다.">호이스팅(hoisting)</span>이라 한다.
+        예를 들어 내가 설치한 A가 내부적으로 B를 쓰면, B도 최상위 <code>node_modules/</code>에 끌어올려진다.
+        문제는 이렇게 되면 내가 <code>package.json</code>에 선언하지도 않은 B를 <code>import "B"</code>로
+        <i>우연히</i> 쓸 수 있게 된다는 것이다 — 이걸 <b><span class="t" data-tip="package.json에 직접 선언하지 않았지만 호이스팅 때문에 우연히 node_modules 최상위에 존재해서 import가 되어버리는 패키지. A가 다른 사람 환경에서 설치 순서가 달라지면 갑자기 사라져 에러가 날 수 있다.">유령 의존성(phantom dependency)</span></b>이라 부른다<sup class="ref"><a href="#r9">[9]</a></sup>.
+      </p>
+      <div class="fig">
+        <pre class="mermaid">
+flowchart TD
+  App["my-app/package.json<br/>dependencies: A"] --> A["A (직접 의존성)"]
+  A --> B["B (A가 내부적으로 사용)"]
+  Hoist["최상위 node_modules/"] -.-> A
+  Hoist -.-> B
+  App -.->|"import B (선언 안 했지만 우연히 동작)"| B
+  style B stroke-dasharray: 5,5
+        </pre>
+        <div class="fig__cap"><b>그림 6.</b> B는 <code>package.json</code>에 선언되지 않았지만, A의 의존성으로 호이스팅되어 최상위에 존재하기 때문에 <code>import "B"</code>가 우연히 성공한다. A가 나중에 B를 안 쓰게 바뀌면 이 import는 아무 경고 없이 깨진다.</div>
+      </div>
+      <div class="note note--danger">
+        <span class="note__t">왜 위험한가</span>
+        유령 의존성은 로컬에서는 잘 동작하다가, 다른 사람의 환경(설치 순서·다른 패키지 버전 조합에 따라 호이스팅
+        결과가 달라짐)이나 CI에서 갑자기 "Cannot find module"로 깨진다. Yarn Berry의 PnP는 이 문제를 구조적으로
+        차단한다(<a href="#s-pnp">§8</a>).
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-yarn-berry"><span class="h2num">§8</span>Yarn Berry(Yarn 4) 심화</h2>
+
+      <h3 id="s-classic-vs-berry">Classic(v1)과 Berry의 차이</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th></th><th>Yarn Classic (v1)</th><th>Yarn Berry (v2~4)</th></tr></thead>
+          <tbody>
+            <tr><td>기본 설치 방식</td><td><code>node_modules</code> (npm과 동일 구조)</td><td><code>nodeLinker</code>로 선택 (기본값 <code>pnp</code>)</td></tr>
+            <tr><td>설정 파일</td><td><code>.yarnrc</code></td><td><code>.yarnrc.yml</code></td></tr>
+            <tr><td>실행 방식</td><td>전역 설치된 바이너리 하나</td><td>프로젝트별 <code>.yarn/releases/</code>에 버전 고정, Corepack으로 관리</td></tr>
+            <tr><td>Workspaces</td><td>지원</td><td>더 강력한 <code>foreach</code>, <code>workspace:*</code> 프로토콜 지원</td></tr>
+            <tr><td>유지보수</td><td>사실상 종료</td><td>활발히 개발 중, 현재 v4가 stable<sup class="ref"><a href="#r10">[10]</a></sup></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="s-pnp">Plug'n'Play(PnP) — node_modules 없이 모듈을 찾는 법</h3>
+      <p>
+        <b><span class="t" data-tip="Yarn Berry의 기본 설치 전략. node_modules 폴더를 만드는 대신, 모든 패키지의 정확한 위치를 담은 .pnp.cjs 파일 하나로 모듈 해석을 대신한다.">Plug'n'Play(PnP)</span></b>는
+        <code>node_modules</code>를 아예 만들지 않는다<sup class="ref"><a href="#r11">[11]</a></sup>. 대신 모든 패키지가 정확히
+        어디에 있는지(대부분 <code>.yarn/cache/</code> 안의 zip 파일 내부 경로) 기록한 <b><code>.pnp.cjs</code></b> 파일
+        하나를 만들고, Node의 모듈 해석(require/resolve) 과정에 이 파일을 끼워 넣는다.
+      </p>
+      <div class="fig">
+        <pre class="mermaid">
+flowchart LR
+  subgraph NM["기존 node_modules 방식"]
+    R1["require('react')"] --> W1["상위 디렉터리를 계속 훑으며<br/>node_modules 탐색 (I/O 다수)"]
+    W1 --> F1["파일 발견<br/>(호이스팅으로 우연히 찾을 수도)"]
+  end
+  subgraph PNP["Yarn PnP 방식"]
+    R2["require('react')"] --> M[".pnp.cjs 조회 맵<br/>메모리 내 lookup"]
+    M --> F2["정확한 zip 경로로 즉시 resolve<br/>선언 안 했으면 즉시 에러"]
+  end
+        </pre>
+        <div class="fig__cap"><b>그림 7.</b> node_modules 방식은 디스크를 탐색하며 우연히 유령 의존성을 찾아낼 수 있지만, PnP는 미리 계산된 맵을 한 번 조회할 뿐이라 더 빠르고, 선언 안 된 의존성은 구조적으로 접근이 막힌다.</div>
+      </div>
+      <p>PnP가 주는 세 가지 이점은 다음과 같다.</p>
+      <ul>
+        <li><b>설치 속도</b> — 디스크에 수만 개의 작은 파일을 복사/링크할 필요가 없다. zip 안의 내용을 그대로 둔 채 맵만 만든다.</li>
+        <li><b>디스크 사용량</b> — 같은 버전의 패키지를 여러 프로젝트가 쓸 때 전역 캐시를 공유해서 중복 저장을 줄인다.</li>
+        <li><b>엄격성</b> — <a href="#s-hoisting-phantom">유령 의존성</a>이 구조적으로 불가능하다. <code>package.json</code>에
+          선언하지 않은 패키지를 import하면 <b>즉시</b> 명확한 에러가 난다.</li>
+      </ul>
+      <p>PnP가 차단하는 상황을 직접 시뮬레이션해본다 — 실제 Yarn PnP가 내는 에러 메시지 형식과 동일하다<sup class="ref"><a href="#r11">[11]</a></sup>.</p>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>pnpMap</code> — <code>.pnp.cjs</code>가 실제로 갖고 있는 "패키지 이름 → zip 내부 경로" 맵을 단순화한 것.</li>
+            <li><code>dependencyTree</code> — <code>package.json</code>에 실제 선언된 의존성만 기록.</li>
+            <li><code>pnpResolve()</code> — 선언되지 않은 패키지를 요청하면 Yarn PnP와 동일한 형식의 에러를 던진다.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="pnp-resolve-sim.js" data-height="260">
+<script type="text/plain" class="pg__src">
+// 미니 PnP 리졸버 시뮬레이터: 실제로는 .pnp.cjs가 이 맵을 갖고 있고,
+// Node의 require/resolve 훅에 끼어들어 node_modules 없이 바로 위치를 찾아준다.
+const pnpMap = {
+  "left-pad": { location: ".yarn/cache/left-pad-npm-1.3.0-abc.zip/node_modules/left-pad/" },
+  "react":    { location: ".yarn/cache/react-npm-19.0.0-def.zip/node_modules/react/" },
+};
+
+// package.json에 react만 선언했다고 가정
+const dependencyTree = { "my-app": ["react"] };
+
+function pnpResolve(requester, request) {
+  const allowed = dependencyTree[requester] || [];
+  if (!allowed.includes(request)) {
+    throw new Error(
+      `${requester} tried to access ${request}, but it isn't declared in its dependencies`
+    );
+  }
+  return pnpMap[request].location;
+}
+
+console.log("react 조회:", pnpResolve("my-app", "react"));
+try {
+  // package.json에 선언 안 한 left-pad를 몰래 쓰려는 상황 (유령 의존성 시도)
+  pnpResolve("my-app", "left-pad");
+} catch (e) {
+  console.log("차단됨:", e.message);
+}
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-zero-install">Zero-Install</h3>
+      <p>
+        <b>Zero-Install</b>은 <code>.yarn/cache/</code> 안의 압축된 패키지 zip 파일들을 <b>Git에 커밋</b>하는
+        전략이다<sup class="ref"><a href="#r12">[12]</a></sup>. 이렇게 하면 저장소를 clone한 직후 <code>yarn install</code>을
+        아예 실행하지 않고도 바로 실행 가능한 상태가 된다 — CI에서도 설치 단계가 사실상 사라진다.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th></th><th>장점</th><th>단점</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Zero-Install</td>
+              <td>clone 직후 즉시 실행, CI에서 설치 시간 제거, 오프라인에서도 동작</td>
+              <td>레포 용량 증가(zip 파일들이 Git 히스토리에 쌓임), PR diff에 바이너리 변경이 섞임</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note note--warn">
+        <span class="note__t">트레이드오프</span>
+        레포 용량이 민감한 프로젝트라면 Zero-Install 없이 <code>.yarn/cache/</code>를 <code>.gitignore</code>하고
+        CI에서 <code>yarn install --immutable</code>만 돌리는 일반 구성도 충분히 합리적이다. 이 프로젝트는
+        후자를 기본으로 한다.
+      </div>
+
+      <h3 id="s-node-linker">nodeLinker 옵션 3종</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>옵션</th><th>node_modules 생성?</th><th>설치 속도</th><th>선택 기준</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>pnp</code> (기본값)</td>
+              <td>없음 — <code>.pnp.cjs</code>로 대체</td>
+              <td>가장 빠름</td>
+              <td>새 프로젝트, 유령 의존성을 원천 차단하고 싶을 때. 일부 구형 도구가 PnP를 모를 수 있음(에디터 SDK 설정 필요).</td>
+            </tr>
+            <tr>
+              <td><code>node-modules</code></td>
+              <td>있음 — 표준 트리 구조</td>
+              <td>보통</td>
+              <td>PnP와 호환 안 되는 레거시 도구가 있을 때, npm/yarn classic과 동일한 구조가 필요할 때.</td>
+            </tr>
+            <tr>
+              <td><code>pnpm</code></td>
+              <td>있음 — 심볼릭 링크 기반</td>
+              <td>빠름, 디스크 절약</td>
+              <td>pnpm 스타일의 엄격한 심볼릭 링크 구조를 Yarn CLI로 그대로 쓰고 싶을 때.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>.yarnrc.yml</span></div>
+        <pre><code class="language-yaml">nodeLinker: node-modules   # pnp | node-modules | pnpm 중 선택
+yarnPath: .yarn/releases/yarn-4.5.0.cjs
+enableGlobalCache: true</code></pre>
+      </div>
+
+      <h3 id="s-migration">마이그레이션 절차</h3>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>terminal</span></div>
+        <pre><code class="language-bash"># 1) Node.js에 내장된 패키지 매니저 관리자를 켠다
+corepack enable
+
+# 2) 이 프로젝트에서 쓸 Yarn을 Berry(stable)로 고정한다
+#    .yarnrc.yml과 .yarn/releases/에 버전이 기록된다
+yarn set version stable
+
+# 3) .yarnrc.yml에 nodeLinker 등 옵션 작성 (위 예시 참고)
+
+# 4) 의존성 설치 — 이 시점에 .pnp.cjs 또는 node_modules가 생성된다
+yarn install
+
+# 5) VSCode 등 에디터가 PnP 안의 TypeScript를 못 찾는 문제 해결
+#    (에디터가 .yarn/cache/... 안의 zip 경로를 이해 못 하기 때문)
+yarn dlx @yarnpkg/sdks vscode</code></pre>
+      </div>
+      <div class="note note--tip">
+        <span class="note__t">5번을 꼭 해야 하는 이유</span>
+        PnP를 쓰면 실제 <code>typescript</code> 패키지가 <code>.yarn/cache/typescript-npm-...zip</code> 안에 있다.
+        VSCode의 내장 TS 서버는 이 경로를 모르기 때문에 "타입을 못 찾음" 오류를 낸다. <code>yarn dlx @yarnpkg/sdks vscode</code>는
+        <code>.vscode/settings.json</code>에 워크스페이스 전용 TS 버전 경로를 자동으로 등록해준다<sup class="ref"><a href="#r17">[17]</a></sup>.
+      </div>
+
+      <h3 id="s-gitignore-yarn">.gitignore 설정</h3>
+      <div class="grid grid--2">
+        <div class="card">
+          <div class="card__title">일반 구성 (Zero-Install 미사용)</div>
+          <div class="codeblock">
+            <div class="codeblock__bar"><span>.gitignore</span></div>
+            <pre><code class="language-bash">.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+.pnp.*</code></pre>
+          </div>
+          <p>캐시(<code>.yarn/cache/</code>)와 <code>.pnp.cjs</code>는 커밋하지 않고, CI/로컬에서 <code>yarn install</code>로 매번 생성한다.</p>
+        </div>
+        <div class="card">
+          <div class="card__title">Zero-Install 구성</div>
+          <div class="codeblock">
+            <div class="codeblock__bar"><span>.gitignore</span></div>
+            <pre><code class="language-bash"># 캐시와 .pnp.cjs를 커밋하므로 무시하지 않는다
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz</code></pre>
+          </div>
+          <p><code>.yarn/cache/</code>와 <code>.pnp.cjs</code>는 Git에 그대로 커밋한다 — 이게 Zero-Install의 핵심이다.</p>
+        </div>
+      </div>
+
+      <h3 id="s-workspaces">Workspaces(모노레포)</h3>
+      <p>
+        하나의 Git 레포 안에 여러 패키지(예: <code>packages/ui</code>, <code>packages/api-client</code>,
+        <code>apps/web</code>)를 두고, 서로를 <code>node_modules</code> 재설치 없이 참조하게 하는 구조를
+        <b><span class="t" data-tip="여러 개의 독립된 패키지를 하나의 Git 저장소에서 함께 관리하는 방식. 패키지 간 의존성을 로컬 심볼릭 링크로 연결해서, 배포하지 않고도 서로를 즉시 참조할 수 있다.">모노레포(monorepo)</span></b>라 한다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>package.json (루트)</span></div>
+        <pre><code class="language-json">{
+  "name": "my-workspace",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"]
+}</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>apps/web/package.json</span></div>
+        <pre><code class="language-json">{
+  "dependencies": {
+    "@ops/ui": "workspace:*"
+  }
+}</code></pre>
+      </div>
+      <p>
+        <code>workspace:*</code> 프로토콜은 "이 의존성은 레지스트리에서 받지 말고, 같은 레포 안의 워크스페이스를
+        심볼릭 링크로 연결해라"는 뜻이다<sup class="ref"><a href="#r18">[18]</a></sup>. <code>@ops/ui</code>를 수정하면
+        <code>apps/web</code>에서 다시 설치할 필요 없이 즉시 반영된다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>terminal</span></div>
+        <pre><code class="language-bash"># 모든 워크스페이스에서 순서대로(의존성 그래프 순서) build 스크립트 실행
+yarn workspaces foreach --all run build
+
+# 특정 워크스페이스에만 의존성 추가
+yarn workspace @ops/ui add lodash-es</code></pre>
+      </div>
+
+      <h3 id="s-yarn-errors">자주 만나는 에러와 해결</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>에러/증상</th><th>원인</th><th>해결</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>X tried to access Y, but it isn't declared in its dependencies</code></td>
+              <td>유령 의존성 — <code>package.json</code>에 선언 안 한 패키지를 import함</td>
+              <td>실제로 쓰는 패키지를 <code>dependencies</code>에 직접 추가한다.</td>
+            </tr>
+            <tr>
+              <td>ESLint/Prettier 플러그인이 에디터에서 "모듈을 찾을 수 없음"</td>
+              <td>에디터가 PnP의 <code>.pnp.cjs</code> 경로 해석 방식을 모름</td>
+              <td><code>yarn dlx @yarnpkg/sdks vscode</code> 재실행, 또는 해당 에디터 확장의 PnP 지원 확인.</td>
+            </tr>
+            <tr>
+              <td>어떤 패키지가 잘못된(비공식) peer dependency를 요구해서 경고/에러</td>
+              <td>패키지 저자가 <code>peerDependencies</code>를 실제보다 좁게/느슨하게 선언함</td>
+              <td><code>.yarnrc.yml</code>의 <code>packageExtensions</code>로 해당 패키지의 peer 선언을 보정한다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>.yarnrc.yml — packageExtensions 예시</span></div>
+        <pre><code class="language-yaml">packageExtensions:
+  "some-legacy-package@*":
+    peerDependencies:
+      react: "*"   # 저자가 누락한 peer dependency를 직접 보정</code></pre>
+      </div>
+
+      <h3 id="s-npm-yarn-cli">명령어 치환표 (npm ↔ Yarn Berry)</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>작업</th><th>npm</th><th>Yarn Berry</th></tr></thead>
+          <tbody>
+            <tr><td>설치</td><td><code>npm install</code></td><td><code>yarn install</code></td></tr>
+            <tr><td>패키지 추가</td><td><code>npm install axios</code></td><td><code>yarn add axios</code></td></tr>
+            <tr><td>개발 의존성 추가</td><td><code>npm install -D vite</code></td><td><code>yarn add -D vite</code></td></tr>
+            <tr><td>패키지 제거</td><td><code>npm uninstall axios</code></td><td><code>yarn remove axios</code></td></tr>
+            <tr><td>스크립트 실행</td><td><code>npm run dev</code></td><td><code>yarn dev</code> (run 생략 가능)</td></tr>
+            <tr><td>1회성 바이너리 실행</td><td><code>npx create-vite</code></td><td><code>yarn dlx create-vite</code></td></tr>
+            <tr><td>lockfile 고정 설치(CI)</td><td><code>npm ci</code></td><td><code>yarn install --immutable</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-pm-compare"><span class="h2num">§9</span>npm / pnpm / Yarn 비교</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th></th><th>npm</th><th>pnpm</th><th>Yarn Berry</th></tr></thead>
+          <tbody>
+            <tr><td>설치 방식</td><td>평평한 <code>node_modules</code></td><td>심볼릭 링크 + 전역 콘텐츠 저장소</td><td>PnP(기본) 또는 nodeLinker 선택</td></tr>
+            <tr><td>속도</td><td>보통</td><td>빠름</td><td>PnP일 때 가장 빠름</td></tr>
+            <tr><td>디스크 사용량</td><td>프로젝트마다 중복 설치</td><td>하드링크로 중복 최소화, 가장 절약적</td><td>PnP는 zip 캐시 공유로 절약, node-modules 모드는 npm과 유사</td></tr>
+            <tr><td>유령 의존성 방지</td><td>기본적으로 방지 안 됨(호이스팅)</td><td>엄격 — 심볼릭 링크 구조상 방지됨</td><td>PnP는 구조적으로 완전 차단</td></tr>
+            <tr><td>모노레포(Workspaces)</td><td>지원(기본 기능은 단순)</td><td>강력한 지원</td><td>강력한 지원(<code>foreach</code>, <code>workspace:*</code>)</td></tr>
+            <tr><td>생태계 호환성</td><td>가장 넓음(사실상 기준)</td><td>대부분 호환, 드물게 심볼릭 링크 이슈</td><td>PnP 모드는 일부 구형 도구와 마찰 가능, node-modules 모드는 npm과 동등</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid grid--3">
+        <div class="card">
+          <div class="card__title">npm을 고를 때</div>
+          <p>추가 설치 없이 Node.js에 내장돼 있다. 팀이 도구 학습 비용을 최소화하고 싶거나, 극단적인 생태계 호환성이 최우선일 때.</p>
+        </div>
+        <div class="card">
+          <div class="card__title">pnpm을 고를 때</div>
+          <p>디스크 용량과 설치 속도가 중요한 대규모 모노레포. 유령 의존성을 막고 싶지만 PnP까지는 부담스러울 때<sup class="ref"><a href="#r19">[19]</a></sup>.</p>
+        </div>
+        <div class="card">
+          <div class="card__title">Yarn Berry를 고를 때</div>
+          <p>의존성 무결성을 가장 엄격하게 강제하고 싶을 때, Workspaces 기반 모노레포를 적극 운영할 때, Zero-Install로 CI 설치 시간을 없애고 싶을 때.</p>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <h2 id="s-build-analysis"><span class="h2num">§10</span>빌드 결과 분석</h2>
+
+      <h3 id="s-vite-build-output">vite build 출력 읽는 법</h3>
+      <p>
+        <code>vite build</code>를 실행하면 각 청크의 원본 크기와 gzip 압축 후 크기가 함께 출력된다. 실제
+        네트워크로 전송되는 크기는 gzip(또는 brotli) 쪽에 가깝다는 걸 기억해야 한다.
+      </p>
+      <div class="split">
+        <div class="split__note">
+          <h4>무슨 일이 일어나는가</h4>
+          <ul>
+            <li><code>buildOutput</code> — <code>vite build</code>가 실제로 찍는 출력 형식을 흉내낸 문자열.</li>
+            <li><code>parseBuildOutput()</code> — 정규식으로 파일명·원본 크기·gzip 크기를 뽑아낸다.</li>
+            <li>JS 합계가 예산(여기선 임의로 170KB)을 넘으면 "코드 스플리팅 검토" 경고를 낸다 — 실무에서 CI에 넣는 번들 크기 체크의 축소판.</li>
+          </ul>
+        </div>
+        <div class="pg" data-pg="js" data-title="build-output-parser.js" data-height="260">
+<script type="text/plain" class="pg__src">
+// vite build 출력 예시를 문자열로 흉내내어, 파일 타입별 gzip 합계를 집계하는 미니 분석기
+const buildOutput = `
+dist/assets/index-B3f8xk2A.js     142.31 kB | gzip: 45.67 kB
+dist/assets/vendor-C9k2Lm1z.js    210.55 kB | gzip: 68.12 kB
+dist/assets/index-DkQ7pR3s.css     18.42 kB | gzip:  4.90 kB
+dist/index.html                     0.61 kB | gzip:  0.38 kB
+`.trim();
+
+function parseBuildOutput(text) {
+  return text.split("\n").map((line) => {
+    const m = line.match(/(\S+)\s+([\d.]+)\s*kB\s*\|\s*gzip:\s*([\d.]+)\s*kB/);
+    return m ? { file: m[1], rawKb: Number(m[2]), gzipKb: Number(m[3]) } : null;
+  }).filter(Boolean);
+}
+
+const entries = parseBuildOutput(buildOutput);
+const jsTotal = entries.filter((e) => e.file.endsWith(".js")).reduce((s, e) => s + e.gzipKb, 0);
+const cssTotal = entries.filter((e) => e.file.endsWith(".css")).reduce((s, e) => s + e.gzipKb, 0);
+
+console.log("파일별 gzip 크기:", entries.map((e) => `${e.file}: ${e.gzipKb}kB`).join(", "));
+console.log("JS gzip 합계:", jsTotal.toFixed(2), "kB");
+console.log("CSS gzip 합계:", cssTotal.toFixed(2), "kB");
+console.log(jsTotal > 170 ? "예산(170kB) 초과 — 코드 스플리팅 검토" : "예산 내");
+</script>
+        </div>
+      </div>
+
+      <h3 id="s-bundle-visualizer">rollup-plugin-visualizer</h3>
+      <p>
+        어떤 패키지가 번들 크기를 얼마나 차지하는지 트리맵으로 시각화하는 플러그인이다. <code>vite build</code>가
+        내부적으로 Rollup을 쓰기 때문에 Rollup 플러그인을 그대로 <code>vite.config.ts</code>의 <code>plugins</code>에
+        추가해서 쓸 수 있다.
+      </p>
+      <div class="codeblock">
+        <div class="codeblock__bar"><span>vite.config.ts (분석용 부분)</span></div>
+        <pre><code class="language-ts">import { visualizer } from "rollup-plugin-visualizer";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    // build 후 stats.html이 생성되어, 각 패키지가 번들에서 차지하는 비중을 트리맵으로 보여준다
+    visualizer({ filename: "stats.html", gzipSize: true }),
+  ],
+});</code></pre>
+      </div>
+
+      <h3 id="s-bundle-budget">번들 크기 예산 잡기</h3>
+      <p>
+        "일단 만들고 나중에 최적화"는 번들 크기에서 특히 잘 안 통한다. 처음부터 청크별 gzip 크기 상한을 정해두고
+        <code>build.chunkSizeWarningLimit</code>(§6)로 경고를 받거나, CI에서 <a href="#s-vite-build-output">위 미니
+        분석기</a>와 같은 로직으로 예산 초과를 자동 체크하는 걸 권장한다. Web Vitals와 연결된 실제 성능 영향은
+        <a href="ch08.html">CH08 성능 최적화</a>에서 이어서 다룬다.
+      </p>
+
+      <!-- ================================================================ -->
+      <section class="refs">
+        <h2 id="s-refs">참고 문헌</h2>
+        <ol>
+          <li id="r1"><span class="src">MDN Web Docs</span> — "JavaScript". <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r2"><span class="src">MDN Web Docs</span> — "JavaScript modules". <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r3"><span class="src">MDN Web Docs</span> — "&lt;script&gt;: The Script element". <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r4"><span class="src">MDN Web Docs</span> — "Tree shaking". <a href="https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r5"><span class="src">Vite</span> — "Why Vite". <a href="https://vitejs.dev/guide/why" target="_blank" rel="noopener">vitejs.dev</a> (2026-08 확인)</li>
+          <li id="r6"><span class="src">Vite</span> — "Features". <a href="https://vitejs.dev/guide/features" target="_blank" rel="noopener">vitejs.dev</a> (2026-08 확인)</li>
+          <li id="r7"><span class="src">Vite</span> — "HMR API". <a href="https://vitejs.dev/guide/api-hmr" target="_blank" rel="noopener">vitejs.dev</a> (2026-08 확인)</li>
+          <li id="r8"><span class="src">Vite</span> — "Env Variables and Modes". <a href="https://vitejs.dev/guide/env-and-mode" target="_blank" rel="noopener">vitejs.dev</a> (2026-08 확인)</li>
+          <li id="r9"><span class="src">Yarn</span> — "Plug'n'Play". <a href="https://yarnpkg.com/features/pnp" target="_blank" rel="noopener">yarnpkg.com</a> (2026-08 확인)</li>
+          <li id="r10"><span class="src">Yarn</span> — "Installation / Getting Started". <a href="https://yarnpkg.com/getting-started/install" target="_blank" rel="noopener">yarnpkg.com</a> (2026-08 확인)</li>
+          <li id="r11"><span class="src">Yarn</span> — "Plug'n'Play — 상세". <a href="https://yarnpkg.com/features/pnp" target="_blank" rel="noopener">yarnpkg.com</a> (2026-08 확인)</li>
+          <li id="r12"><span class="src">Yarn</span> — "Zero-Installs". <a href="https://yarnpkg.com/features/zero-installs" target="_blank" rel="noopener">yarnpkg.com</a> (2026-08 확인)</li>
+          <li id="r13"><span class="src">npm Docs</span> — "About semantic versioning". <a href="https://docs.npmjs.com/about-semantic-versioning" target="_blank" rel="noopener">docs.npmjs.com</a> (2026-08 확인)</li>
+          <li id="r14"><span class="src">Node.js</span> — "Modules: CommonJS modules". <a href="https://nodejs.org/api/modules.html" target="_blank" rel="noopener">nodejs.org</a> (2026-08 확인)</li>
+          <li id="r15"><span class="src">Node.js</span> — "Modules: Packages". <a href="https://nodejs.org/api/packages.html" target="_blank" rel="noopener">nodejs.org</a> (2026-08 확인)</li>
+          <li id="r16"><span class="src">Node.js</span> — "Corepack". <a href="https://nodejs.org/api/corepack.html" target="_blank" rel="noopener">nodejs.org</a> (2026-08 확인)</li>
+          <li id="r17"><span class="src">Yarn</span> — "Editor SDKs". <a href="https://yarnpkg.com/getting-started/editor-sdks" target="_blank" rel="noopener">yarnpkg.com</a> (2026-08 확인)</li>
+          <li id="r18"><span class="src">Yarn</span> — "Workspaces". <a href="https://yarnpkg.com/features/workspaces" target="_blank" rel="noopener">yarnpkg.com</a> (2026-08 확인)</li>
+          <li id="r19"><span class="src">pnpm</span> — "Motivation". <a href="https://pnpm.io/motivation" target="_blank" rel="noopener">pnpm.io</a> (2026-08 확인)</li>
+        </ol>
+      </section>
+
+      <h2 id="s-check">이해도 점검</h2>
+      <ul class="check">
+        <li><input type="checkbox">브라우저가 이해하지 못하는 것 4가지(TS 타입, JSX, 최신 문법, bare specifier)를 설명할 수 있다.</li>
+        <li><input type="checkbox">전역 스크립트 → IIFE → CommonJS → AMD → ESM 순서와 각 단계가 해결한 문제를 설명할 수 있다.</li>
+        <li><input type="checkbox"><code>&lt;script type="module"&gt;</code>이 defer되고, 최상위 변수가 window로 새지 않는다는 걸 실습으로 확인했다.</li>
+        <li><input type="checkbox">트리셰이킹이 되려면 ESM 문법 + <code>sideEffects</code> 필드가 필요한 이유를 설명할 수 있다.</li>
+        <li><input type="checkbox">코드 스플리팅과 청크 해시 파일명이 캐시 전략과 어떻게 연결되는지 안다.</li>
+        <li><input type="checkbox">Babel/SWC/esbuild의 역할 차이를 표 없이도 말할 수 있다.</li>
+        <li><input type="checkbox">트랜스파일(문법)과 폴리필(런타임 기능)의 차이를 예시와 함께 설명할 수 있다.</li>
+        <li><input type="checkbox">Vite dev 서버가 esbuild 사전번들 + 네이티브 ESM으로 빠른 이유, build가 Rollup을 쓰는 이유를 안다.</li>
+        <li><input type="checkbox">Vite HMR이 WebSocket + <code>import.meta.hot</code>로 상태를 유지한 채 모듈만 교체하는 흐름을 안다.</li>
+        <li><input type="checkbox">vite.config.ts의 alias/proxy/rollupOptions/envPrefix가 각각 무슨 문제를 푸는지 안다.</li>
+        <li><input type="checkbox"><code>^</code>와 <code>~</code>의 허용 범위 차이를 예시 버전으로 계산할 수 있다.</li>
+        <li><input type="checkbox">호이스팅이 만드는 유령 의존성 문제를 그림으로 설명할 수 있다.</li>
+        <li><input type="checkbox">Yarn PnP가 <code>.pnp.cjs</code>로 유령 의존성을 원천 차단하는 원리를 안다.</li>
+        <li><input type="checkbox">Zero-Install의 장단점(설치시간 제거 vs 레포 용량)을 설명할 수 있다.</li>
+        <li><input type="checkbox">nodeLinker 3종(pnp/node-modules/pnpm)의 선택 기준을 안다.</li>
+        <li><input type="checkbox">Yarn Berry 마이그레이션 절차(corepack enable → set version stable → install → sdks)를 순서대로 안다.</li>
+        <li><input type="checkbox">npm/pnpm/Yarn Berry를 언제 골라야 하는지 상황별로 말할 수 있다.</li>
+      </ul>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CH06 · UI & 스타일링 — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="06">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">CHAPTER 06</div>
+    <h1>UI & 스타일링</h1>
+    <p>CSS 선택자와 명시도부터 시작해서 박스 모델, Flexbox/Grid, 반응형, 다크모드, Tailwind CSS, shadcn/ui 컴포넌트 패턴, 디자인 토큰까지 — 화면을 "예쁘게"가 아니라 "논리적으로 예측 가능하게" 만드는 법을 다룬다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">CSS</span>
+      <span class="pill pill--accent">Flexbox / Grid</span>
+      <span class="pill">반응형</span>
+      <span class="pill">Tailwind CSS</span>
+      <span class="pill">shadcn/ui</span>
+      <span class="pill">Design Token</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+
+<p class="lead">
+브라우저가 같은 요소에 걸린 여러 CSS 규칙 중 하나를 고를 때 기준은 무엇인가?
+Flexbox와 Grid 중 언제 무엇을 써야 하는가? <code>position: absolute</code>는 정확히 무엇을 기준으로 움직이는가?
+다크모드는 어떻게 CSS 변수만으로 전환하는가? Tailwind 같은 유틸리티 클래스는 왜 쓰고 언제 쓰지 말아야 하는가?
+shadcn/ui가 "라이브러리 설치"가 아니라 "코드 복사"라는 말은 무슨 뜻인가? 이 챕터를 끝내면 이 질문 전부에 코드로 답할 수 있다.
+</p>
+
+<!-- ================================================================ -->
+<h2 id="s-css-basics"><span class="h2num">§1</span>CSS 기본기</h2>
+
+<p>
+<span class="t" data-tip="CSS(Cascading Style Sheets)는 HTML 요소가 화면에 어떻게 보일지(색, 크기, 배치 등)를 정의하는 언어다. 예: p { color: red; }">CSS</span>는
+"어떤 요소에 어떤 스타일을 적용할지"를 <span class="t" data-tip="선택자(selector)는 스타일을 적용할 HTML 요소를 고르는 문법이다. 예: .card는 class='card'인 모든 요소를 고른다.">선택자(selector)</span>로 지정하는 규칙의 나열이다.
+문제는 같은 요소에 서로 다른 값을 주는 규칙이 동시에 걸릴 때다. 이때 브라우저는 정해진 순서대로 승자를 가린다.
+</p>
+
+<h3 id="s-selectors">선택자 종류</h3>
+<p>선택자는 조합해서 쓸 수 있고, 조합할수록 더 구체적인 요소를 가리킨다.</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>종류</th><th>문법</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td>전체</td><td><code>*</code></td><td>모든 요소</td></tr>
+<tr><td>타입</td><td><code>p</code>, <code>div</code></td><td>해당 태그를 쓰는 모든 요소</td></tr>
+<tr><td>클래스</td><td><code>.card</code></td><td><code>class="card"</code>를 가진 요소</td></tr>
+<tr><td>id</td><td><code>#header</code></td><td><code>id="header"</code>인 요소(문서에 하나만 있어야 한다)</td></tr>
+<tr><td>속성</td><td><code>[type="text"]</code></td><td>속성값이 일치하는 요소</td></tr>
+<tr><td><span class="t" data-tip="가상 클래스(pseudo-class)는 요소의 '상태'에 따라 스타일을 거는 선택자다. 예: :hover는 마우스가 올라갔을 때만 적용된다.">가상 클래스</span></td><td><code>:hover</code>, <code>:first-child</code></td><td>상태·위치 기반 선택</td></tr>
+<tr><td><span class="t" data-tip="가상 요소(pseudo-element)는 실제로 존재하지 않는 요소를 CSS로 만들어내는 문법이다. 예: ::before는 요소 앞에 콘텐츠를 삽입한다.">가상 요소</span></td><td><code>::before</code>, <code>::after</code></td><td>요소 앞/뒤에 콘텐츠 삽입</td></tr>
+<tr><td>자손 결합자</td><td><code>.card p</code></td><td><code>.card</code> 내부 어딘가에 있는 모든 <code>p</code></td></tr>
+<tr><td>자식 결합자</td><td><code>.card &gt; p</code></td><td><code>.card</code>의 바로 아래 자식인 <code>p</code>만</td></tr>
+<tr><td>인접 형제</td><td><code>h2 + p</code></td><td><code>h2</code> 바로 다음에 오는 <code>p</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s-specificity"><span class="t" data-tip="명시도(specificity)는 같은 요소에 걸린 여러 CSS 규칙 중 어느 것이 이길지 결정하는 점수 체계다. id > class > 태그 순으로 강하다.">명시도</span> 계산 규칙</h3>
+<p>
+같은 <span class="t" data-tip="origin(출처)이 같다는 뜻은, 두 규칙 모두 내가 작성한 CSS 파일(author stylesheet)에서 왔다는 뜻이다. 브라우저 기본 스타일이나 사용자 설정 스타일과는 출처가 다르다.">출처(origin)</span>에서 온 규칙끼리는 명시도로 승부를 가린다.
+명시도는 4자리 숫자 <code>(a, b, c, d)</code>로 표현하고, 왼쪽 자리가 더 무겁다<sup class="ref"><a href="#r1">[1]</a></sup>.
+</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>자리</th><th>포함 항목</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><b>a</b></td><td>인라인 스타일 (<code>style="..."</code>)</td><td>+1</td></tr>
+<tr><td><b>b</b></td><td>id 선택자</td><td><code>#header</code> → +1</td></tr>
+<tr><td><b>c</b></td><td>클래스, 속성, 가상 클래스</td><td><code>.card</code>, <code>[type]</code>, <code>:hover</code> → 각 +1</td></tr>
+<tr><td><b>d</b></td><td>타입 선택자, 가상 요소</td><td><code>div</code>, <code>::before</code> → 각 +1</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+전역 선택자(<code>*</code>)와 결합자(<code>&gt;</code>, <code>+</code>, 공백)는 명시도에 영향을 주지 않는다.
+예를 들어 <code>p.note#target</code>은 (0, 1, 1, 1) — id 1개, 클래스 1개, 태그 1개다. (0,1,0,0)인 <code>#target</code>보다 이 값이 더 크므로 이긴다.
+<code>!important</code>는 명시도 계산 자체를 건너뛰고 별도로 최우선 취급되는데, 남용하면 나중에 그 무엇으로도 못 이기는 규칙이 쌓여 유지보수가 힘들어진다.
+</p>
+
+<div class="fig">
+<pre class="mermaid">
+flowchart TD
+  A["같은 요소에 여러 규칙이 걸림"] --> B{"출처(origin)가 다른가?"}
+  B -- "다르다" --> C["author가 user보다 우선 (단, !important는 정반대 순서)"]
+  B -- "같다" --> D{"명시도가 다른가?"}
+  D -- "다르다" --> E["명시도 높은 규칙이 이긴다"]
+  D -- "같다" --> F["소스 코드에서 나중에 나온 규칙이 이긴다"]
+</pre>
+<div class="fig__cap"><b>그림 1.</b> 캐스케이드(cascade) 결정 순서 — 출처와 중요도, 명시도, 소스 순서 순으로 승자를 가린다<sup class="ref"><a href="#r20">[20]</a></sup>. <span class="muted">출처: W3C CSS Cascading and Inheritance</span></div>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>같은 문단에 명시도가 다른 4개의 규칙이 걸려 있다. 코드를 고쳐서 어떤 규칙이 이기는지 직접 확인해보자.</p>
+    <ul>
+      <li><code>p</code> — 명시도 (0,0,0,1), 가장 약함</li>
+      <li><code>.note</code> — (0,0,1,0)</li>
+      <li><code>#target</code> — (0,1,0,0), id라서 클래스보다 강함</li>
+      <li><code>p.note#target</code> — (0,1,1,1), 셋을 다 합쳐서 가장 강함</li>
+      <li>버튼을 누르면 <code>getComputedStyle</code>로 실제 적용된 색을 읽어온다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="html" data-title="specificity.html" data-height="220">
+<script type="text/plain" class="pg__src">
+<style>
+  body{ padding:8px }
+  p        { color: gray;  }  /* (0,0,0,1) */
+  .note    { color: blue;  }  /* (0,0,1,0) */
+  #target  { color: green; }  /* (0,1,0,0) */
+  p.note#target { color: red; } /* (0,1,1,1) */
+</style>
+<p id="target" class="note">이 문단은 무슨 색일까? 규칙 순서를 바꿔보거나 지워보자.</p>
+<button id="btn">계산된 색 확인</button>
+<div id="result" style="margin-top:10px;font-family:monospace;font-size:13px"></div>
+<script>
+  document.getElementById('btn').addEventListener('click', function () {
+    var el = document.getElementById('target');
+    var color = getComputedStyle(el).color;
+    document.getElementById('result').textContent = 'computed color: ' + color;
+  });
+<\/script>
+</script>
+  </div>
+</div>
+
+<h3 id="s-inheritance-cascade"><span class="t" data-tip="상속(inheritance)은 부모 요소의 일부 CSS 속성값이 자식 요소에게 자동으로 전달되는 것이다. 예: 부모에 color:red를 주면 자식 텍스트도 빨갛게 된다.">상속</span>과 <span class="t" data-tip="캐스케이드(cascade)는 '계단식'이라는 뜻으로, 여러 스타일 규칙이 충돌할 때 브라우저가 출처·중요도·명시도·순서를 단계적으로 따져 최종값 하나를 결정하는 알고리즘 전체를 말한다.">캐스케이드</span></h3>
+<p>
+모든 속성이 상속되지는 않는다. <code>color</code>, <code>font-family</code>, <code>font-size</code>, <code>line-height</code> 같은 텍스트 관련 속성은 기본적으로 상속되고,
+<code>margin</code>, <code>padding</code>, <code>border</code>, <code>width</code> 같은 박스 관련 속성은 상속되지 않는다.
+강제로 상속시키려면 값에 <code>inherit</code>을, 반대로 브라우저 기본값으로 되돌리려면 <code>initial</code>을, 상속된 값을 명시적으로 지우려면 <code>unset</code>을 쓴다.
+</p>
+<div class="note note--warn"><span class="note__t">흔한 실수</span>
+명시도를 이기려고 <code>!important</code>를 계속 추가하는 것. 근본 원인은 대개 선택자 설계가 너무 강하거나(id 남용), CSS 로딩 순서가 꼬여 있는 것이다. 구조를 고치는 게 먼저다.</div>
+
+<!-- ================================================================ -->
+<h2 id="s-box-model"><span class="h2num">§2</span>박스 모델과 단위</h2>
+
+<p>
+브라우저는 모든 요소를 사각형 상자로 취급한다. 이 상자를 <span class="t" data-tip="박스 모델(box model)은 모든 HTML 요소가 content-padding-border-margin 네 겹의 사각형으로 이루어진다는 CSS의 기본 규칙이다.">박스 모델(box model)</span>이라고 부른다<sup class="ref"><a href="#r2">[2]</a></sup>.
+액자에 비유하면 그림(content) 주변에 여백(padding), 액자 틀(border), 벽과의 간격(margin)이 순서대로 감싸는 구조다.
+</p>
+
+<h3 id="s-box-parts">content / padding / border / margin</h3>
+<div class="fig">
+<svg viewBox="0 0 420 260" role="img" aria-label="박스 모델 구조: 바깥부터 margin, border, padding, content 순서">
+  <rect x="10" y="10" width="400" height="240" fill="none" stroke="var(--fg-mute)" stroke-width="1.5" stroke-dasharray="6 5" rx="4"/>
+  <text x="20" y="28" font-size="12" fill="var(--fg-mute)">margin</text>
+  <rect x="55" y="45" width="310" height="175" fill="none" stroke="var(--warn)" stroke-width="3" rx="3"/>
+  <text x="65" y="62" font-size="12" fill="var(--warn)">border</text>
+  <rect x="80" y="70" width="260" height="125" fill="var(--accent-weak)" stroke="none"/>
+  <text x="90" y="87" font-size="12" fill="var(--accent)">padding</text>
+  <rect x="120" y="100" width="180" height="65" fill="var(--accent)" rx="3"/>
+  <text x="210" y="137" font-size="13" fill="#fff" text-anchor="middle" font-weight="700">content</text>
+  <text x="210" y="153" font-size="10.5" fill="#fff" text-anchor="middle" opacity="0.85">width × height</text>
+</svg>
+<div class="fig__cap"><b>그림 2.</b> 박스 모델 4겹 구조. <code>width</code>/<code>height</code>는 기본적으로 content 영역만을 가리킨다. <span class="muted">출처: MDN Box Model</span></div>
+</div>
+
+<h3 id="s-box-sizing"><span class="t" data-tip="box-sizing은 width/height 값이 content만 포함할지(content-box), padding+border까지 포함할지(border-box) 정하는 속성이다.">box-sizing</span> — content-box vs border-box</h3>
+<p>
+기본값 <code>content-box</code>에서는 <code>width: 200px</code>에 <code>padding: 16px</code>, <code>border: 4px</code>를 더하면 실제 렌더링 너비는 240px가 된다<sup class="ref"><a href="#r3">[3]</a></sup>.
+레이아웃 계산이 매번 덧셈이 되는 게 번거로워서, 실무에서는 거의 항상 아래처럼 전역으로 <code>border-box</code>를 켠다.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>reset.css</span></div>
+  <pre><code class="language-css">*, *::before, *::after {
+  box-sizing: border-box; /* width에 padding·border가 이미 포함됨 */
+}</code></pre>
+</div>
+
+<h3 id="s-margin-collapse"><span class="t" data-tip="마진 상쇄(margin collapsing)는 세로 방향으로 인접한 두 블록 요소의 margin이 더해지지 않고, 둘 중 더 큰 값 하나로 합쳐지는 현상이다.">마진 상쇄</span></h3>
+<ul>
+<li>인접한 형제 블록 요소의 위/아래 마진은 <b>합이 아니라 더 큰 값 하나</b>로 합쳐진다<sup class="ref"><a href="#r4">[4]</a></sup>.</li>
+<li>부모·자식 사이에도 부모에 border/padding/inline 콘텐츠가 없으면 마진이 부모 밖으로 새어 나가며 합쳐진다.</li>
+<li><b>Flex/Grid 컨테이너의 자식 사이에서는 마진 상쇄가 일어나지 않는다.</b> 이 차이 때문에 레이아웃을 Flex/Grid로 바꾸면 간격이 달라 보이는 경우가 흔하다.</li>
+</ul>
+
+<h3 id="s-units">단위 — px / rem / em / % / vh·vw / ch / clamp()</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>단위</th><th>기준</th><th>주로 쓰는 곳</th></tr></thead>
+<tbody>
+<tr><td><code>px</code></td><td>절대값(고정 픽셀)</td><td>테두리 두께처럼 확대해도 안 커져야 하는 값</td></tr>
+<tr><td><code>rem</code></td><td>루트(<code>html</code>)의 <code>font-size</code> 기준 (보통 16px)</td><td>폰트 크기, 간격 — 사용자 브라우저 설정을 존중해야 할 때</td></tr>
+<tr><td><code>em</code></td><td>자기 자신(또는 부모)의 <code>font-size</code> 기준</td><td>글자에 종속적인 간격(아이콘 크기 등), 중첩 시 값이 누적되니 주의</td></tr>
+<tr><td><code>%</code></td><td>부모 요소의 해당 값 기준</td><td>부모에 맞춰 늘어나야 하는 너비</td></tr>
+<tr><td><code>vh</code> / <code>vw</code></td><td>뷰포트(viewport) 높이/너비의 1%</td><td>전체 화면을 채우는 히어로 섹션</td></tr>
+<tr><td><code>ch</code></td><td>현재 폰트의 숫자 "0" 한 글자 너비</td><td>가독성 좋은 본문 줄 길이 제한(<code>max-width: 65ch</code>)</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+<code><span class="t" data-tip="clamp(최소값, 선호값, 최대값)은 값이 최소-최대 범위 안에서 뷰포트 크기에 따라 유동적으로 변하게 하는 CSS 함수다. 미디어 쿼리 없이 반응형 값을 만들 수 있다.">clamp()</span></code>는 최소·선호·최대 세 값을 받아 뷰포트 크기에 따라 유동적으로 값을 계산한다<sup class="ref"><a href="#r5">[5]</a></sup>. <code>font-size: clamp(1rem, 0.8rem + 1vw, 1.8rem)</code>처럼 쓰면 미디어 쿼리 없이도 화면 크기에 비례해 커지는 타이포그래피를 만들 수 있다. §5에서 라이브로 다룬다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>같은 <code>width: 200px; padding: 16px; border: 4px solid</code>를 가진 두 박스를 <code>box-sizing</code>만 다르게 렌더링한다.</p>
+    <ul>
+      <li>왼쪽(<code>content-box</code>) — 실제 너비 200+32+8=240px</li>
+      <li>오른쪽(<code>border-box</code>) — 실제 너비 그대로 200px</li>
+      <li>JS로 <code>getBoundingClientRect().width</code>를 읽어 실측값을 보여준다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="html" data-title="box-sizing.html" data-height="260">
+<script type="text/plain" class="pg__src">
+<style>
+  .box{ width:200px; padding:16px; border:4px solid #3b5bdb; margin:14px 0;
+        background:#eef2ff; border-radius:8px; font-size:13px; }
+  .content-box{ box-sizing: content-box; }
+  .border-box{ box-sizing: border-box; }
+</style>
+<div class="box content-box" id="a">content-box</div>
+<div class="box border-box" id="b">border-box</div>
+<script>
+  ['a','b'].forEach(function (id) {
+    var el = document.getElementById(id);
+    var w = el.getBoundingClientRect().width;
+    el.textContent += ' → 실제 렌더링 너비: ' + w.toFixed(0) + 'px';
+  });
+<\/script>
+</script>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s-layout"><span class="h2num">§3</span>레이아웃 — Flexbox & Grid</h2>
+
+<h3 id="s-flexbox"><span class="t" data-tip="Flexbox(Flexible Box)는 한 방향(가로 또는 세로)으로 요소를 정렬·분배하는 1차원 레이아웃 모델이다.">Flexbox</span></h3>
+<p>
+Flexbox는 컨테이너에 <code>display: flex</code>를 주는 순간, 그 안의 자식들이 한 줄(또는 한 열)로 배치되는 1차원 레이아웃이다<sup class="ref"><a href="#r6">[6]</a></sup>.
+자식이 나열되는 방향을 <span class="t" data-tip="주축(main axis)은 flex-direction이 가리키는 방향이다. row면 가로, column이면 세로가 주축이 된다.">주축(main axis)</span>, 그에 수직인 방향을 <span class="t" data-tip="교차축(cross axis)은 주축에 수직인 방향이다. 주축이 가로면 교차축은 세로다.">교차축(cross axis)</span>이라 부른다. 정렬 속성은 어느 축을 조정하는지에 따라 이름이 다르다.
+</p>
+<div class="fig">
+<svg viewBox="0 0 460 200" role="img" aria-label="Flexbox 주축과 교차축, justify-content와 align-items의 방향">
+  <rect x="20" y="30" width="420" height="140" fill="none" stroke="var(--line)" stroke-width="1.5" rx="8"/>
+  <line x1="40" y1="100" x2="420" y2="100" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow-a)"/>
+  <text x="230" y="90" font-size="12" fill="var(--accent)" text-anchor="middle">주축(main axis) — justify-content가 조정</text>
+  <line x1="70" y1="45" x2="70" y2="155" stroke="var(--purple)" stroke-width="2" marker-end="url(#arrow-p)"/>
+  <text x="90" y="52" font-size="12" fill="var(--purple)">교차축(cross axis) — align-items가 조정</text>
+  <rect x="150" y="70" width="50" height="60" fill="var(--accent)" opacity="0.85" rx="4"/>
+  <rect x="215" y="80" width="50" height="45" fill="var(--accent)" opacity="0.65" rx="4"/>
+  <rect x="280" y="60" width="50" height="70" fill="var(--accent)" opacity="0.45" rx="4"/>
+  <defs>
+    <marker id="arrow-a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--accent)"/></marker>
+    <marker id="arrow-p" markerWidth="8" markerHeight="8" refX="4" refY="6" orient="auto"><path d="M0,0 L8,0 L4,8 Z" fill="var(--purple)"/></marker>
+  </defs>
+</svg>
+<div class="fig__cap"><b>그림 3.</b> <code>flex-direction: row</code>일 때 주축은 가로, 교차축은 세로. <code>column</code>이면 정반대가 된다. <span class="muted">출처: MDN Flexbox</span></div>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>속성 (컨테이너)</th><th>역할</th></tr></thead>
+<tbody>
+<tr><td><code>flex-direction</code></td><td><code>row</code> / <code>row-reverse</code> / <code>column</code> / <code>column-reverse</code> — 주축 방향</td></tr>
+<tr><td><code>flex-wrap</code></td><td><code>nowrap</code>(기본) / <code>wrap</code> — 한 줄이 넘치면 다음 줄로 넘길지</td></tr>
+<tr><td><code>justify-content</code></td><td>주축 방향 정렬: <code>flex-start</code>/<code>center</code>/<code>space-between</code>/<code>space-around</code>/<code>space-evenly</code></td></tr>
+<tr><td><code>align-items</code></td><td>교차축 방향 정렬(한 줄 기준): <code>stretch</code>/<code>flex-start</code>/<code>center</code>/<code>flex-end</code></td></tr>
+<tr><td><code>align-content</code></td><td>여러 줄일 때 줄 전체의 교차축 정렬 (<code>flex-wrap: wrap</code> 필요)</td></tr>
+<tr><td><code>gap</code></td><td>아이템 사이 간격 (margin과 달리 상쇄되지 않고, 바깥 여백에는 영향 없음)</td></tr>
+</tbody>
+</table>
+<table>
+<thead><tr><th>속성 (아이템)</th><th>역할</th></tr></thead>
+<tbody>
+<tr><td><code>flex-grow</code></td><td>남는 공간을 얼마의 비율로 나눠 가질지 (기본 0 = 안 늘어남)</td></tr>
+<tr><td><code>flex-shrink</code></td><td>공간이 부족할 때 얼마나 줄어들지 (기본 1)</td></tr>
+<tr><td><code>flex-basis</code></td><td>늘어나거나 줄기 전의 기준 크기</td></tr>
+<tr><td><code>flex</code></td><td><code>grow shrink basis</code> 축약형. <code>flex: 1</code>은 <code>1 1 0%</code>와 같다</td></tr>
+<tr><td><code>align-self</code></td><td>해당 아이템만 <code>align-items</code>를 개별적으로 덮어씀</td></tr>
+<tr><td><code>order</code></td><td>DOM 순서와 무관하게 시각적 배치 순서를 바꿈 (기본 0)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>셀렉트 박스를 바꾸면 JS가 컨테이너의 <code>style.justifyContent</code>/<code>alignItems</code>/<code>flexDirection</code>을 직접 갱신한다. 세 번째 아이템만 높이를 다르게 줘서 교차축 정렬 차이가 잘 보이게 했다.</p>
+    <ul><li><code>flex-direction: column</code>으로 바꾸면 주축/교차축이 서로 뒤바뀌는 것도 확인해보자</li></ul>
+  </div>
+  <div class="pg" data-pg="html" data-title="flexbox.html" data-height="300">
+<script type="text/plain" class="pg__src">
+<style>
+  .controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; font-size:12.5px; }
+  select{ padding:5px 8px; border-radius:8px; border:1px solid #d6dae4; }
+  .box{ display:flex; gap:10px; padding:14px; min-height:160px;
+        border:2px dashed #94a3c9; border-radius:10px; background:#f8faff; }
+  .item{ background:#3b5bdb; color:#fff; border-radius:8px; font-weight:700;
+         display:flex; align-items:center; justify-content:center; width:64px; }
+</style>
+<div class="controls">
+  <label>justify-content
+    <select id="jc">
+      <option>flex-start</option><option>center</option><option>space-between</option>
+      <option>space-around</option><option>space-evenly</option>
+    </select>
+  </label>
+  <label>align-items
+    <select id="ai">
+      <option>stretch</option><option>flex-start</option><option>center</option><option>flex-end</option>
+    </select>
+  </label>
+  <label>flex-direction
+    <select id="fd">
+      <option>row</option><option>row-reverse</option><option>column</option><option>column-reverse</option>
+    </select>
+  </label>
+</div>
+<div class="box" id="box">
+  <div class="item" style="height:50px">1</div>
+  <div class="item" style="height:50px">2</div>
+  <div class="item" style="height:90px">3</div>
+</div>
+<script>
+  function update() {
+    var box = document.getElementById('box');
+    box.style.justifyContent = document.getElementById('jc').value;
+    box.style.alignItems = document.getElementById('ai').value;
+    box.style.flexDirection = document.getElementById('fd').value;
+  }
+  ['jc', 'ai', 'fd'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', update);
+  });
+  update();
+<\/script>
+</script>
+  </div>
+</div>
+
+<h3 id="s-grid"><span class="t" data-tip="CSS Grid는 행과 열을 동시에 정의해서 요소를 2차원으로 배치하는 레이아웃 모델이다.">Grid</span></h3>
+<p>
+Grid는 <code>grid-template-columns</code>/<code>grid-template-rows</code>로 행과 열의 "트랙"을 먼저 정의하고, 그 위에 아이템을 배치하는 2차원 레이아웃이다<sup class="ref"><a href="#r7">[7]</a></sup>. 정식 스펙은 W3C의 CSS Flexible Box Layout<sup class="ref"><a href="#r8">[8]</a></sup>과 CSS Grid Layout Module Level 2<sup class="ref"><a href="#r9">[9]</a></sup>다.
+</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>표현</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td><code>grid-template-columns: repeat(3, 1fr)</code></td><td><code>1fr</code> 너비 열을 3개 반복 생성</td></tr>
+<tr><td><code>repeat(auto-fit, minmax(160px, 1fr))</code></td><td>최소 160px, 남으면 균등 확장(<code>1fr</code>)하는 열을 컨테이너 너비가 허용하는 만큼 자동 생성</td></tr>
+<tr><td><code>grid-template-areas</code></td><td>문자열로 레이아웃 이름을 그려서 지정</td></tr>
+<tr><td><code>grid-area: nav</code></td><td>해당 아이템을 <code>nav</code>라는 이름의 영역에 배치</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note note--tip"><span class="note__t">auto-fit vs auto-fill</span><code>auto-fit</code>은 남는 빈 트랙을 접어서 콘텐츠가 있는 열을 늘리고, <code>auto-fill</code>은 빈 트랙도 자리를 유지한다. 카드 갤러리처럼 아이템 개수가 적을 때 화면 전체로 늘어나길 원하면 <code>auto-fit</code>을 쓴다.</div>
+
+<div class="fig">
+<svg viewBox="0 0 460 210" role="img" aria-label="grid-template-areas로 nav header main footer를 배치한 예">
+  <rect x="20" y="20" width="90" height="170" fill="var(--ok)" opacity="0.85" rx="6"/>
+  <text x="65" y="110" font-size="13" fill="#fff" text-anchor="middle" font-weight="700">nav</text>
+  <rect x="120" y="20" width="320" height="45" fill="var(--accent)" opacity="0.85" rx="6"/>
+  <text x="280" y="47" font-size="13" fill="#fff" text-anchor="middle" font-weight="700">header</text>
+  <rect x="120" y="75" width="320" height="80" fill="var(--warn)" opacity="0.85" rx="6"/>
+  <text x="280" y="119" font-size="13" fill="#fff" text-anchor="middle" font-weight="700">main</text>
+  <rect x="120" y="165" width="320" height="25" fill="var(--danger)" opacity="0.85" rx="6"/>
+  <text x="280" y="182" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">footer</text>
+</svg>
+<div class="fig__cap"><b>그림 4.</b> <code>grid-template-areas: "nav header" "nav main" "nav footer"</code>로 만든 앱 셸(app shell) 레이아웃. <span class="muted">출처: MDN CSS Grid</span></div>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>위쪽 그리드는 <code>repeat(auto-fit, minmax(120px, 1fr))</code> — 브라우저 창을 좁혀보면 열 개수가 자동으로 줄어든다. 아래쪽은 <code>grid-template-areas</code>로 그림 4와 동일한 레이아웃을 코드로 재현한 것이다.</p>
+  </div>
+  <div class="pg" data-pg="html" data-title="grid.html" data-height="320">
+<script type="text/plain" class="pg__src">
+<style>
+  .grid{ display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+         padding:10px; border:2px dashed #94a3c9; border-radius:10px; }
+  .cell{ background:#7b3fd1; color:#fff; padding:20px; border-radius:8px; text-align:center; font-weight:700; }
+  .layout{ display:grid; gap:8px; margin-top:18px;
+           grid-template-columns:90px 1fr; grid-template-rows:44px 1fr 34px;
+           grid-template-areas:"nav header" "nav main" "nav footer"; }
+  .area{ color:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+  .a-nav{ grid-area:nav; background:#0f9d76; }
+  .a-header{ grid-area:header; background:#3b5bdb; }
+  .a-main{ grid-area:main; background:#b56a09; }
+  .a-footer{ grid-area:footer; background:#d64258; }
+</style>
+<p style="font-size:12.5px;color:#666;margin:0 0 6px">repeat(auto-fit, minmax(120px, 1fr)) — 창 너비를 줄여보자</p>
+<div class="grid"><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div></div>
+<p style="font-size:12.5px;color:#666;margin:16px 0 6px">grid-template-areas</p>
+<div class="layout">
+  <div class="area a-nav">nav</div>
+  <div class="area a-header">header</div>
+  <div class="area a-main">main</div>
+  <div class="area a-footer">footer</div>
+</div>
+</script>
+  </div>
+</div>
+
+<h3 id="s-flex-vs-grid">Flex vs Grid 선택 기준</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>기준</th><th>Flexbox</th><th>Grid</th></tr></thead>
+<tbody>
+<tr><td>차원</td><td>1차원 (행 또는 열 하나)</td><td>2차원 (행+열 동시)</td></tr>
+<tr><td>기준점</td><td>콘텐츠 크기가 레이아웃을 주도</td><td>미리 정의한 트랙(그리드)이 레이아웃을 주도</td></tr>
+<tr><td>전형적 용도</td><td>네비게이션 바, 버튼 그룹, 카드 내부 정렬</td><td>페이지 전체 골격, 카드 갤러리, 대시보드</td></tr>
+<tr><td>같이 쓰기</td><td colspan="2">Grid로 페이지 전체 골격을 잡고, 각 영역 내부 정렬은 Flex로 하는 조합이 실무에서 가장 흔하다.</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s-position"><span class="h2num">§4</span>포지셔닝과 쌓임 맥락</h2>
+
+<h3 id="s-position-values"><span class="t" data-tip="position 속성은 요소를 문서의 일반 흐름에 그대로 둘지, 특정 기준점을 기준으로 빼내 배치할지 정한다.">position</span> 값</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>값</th><th>기준(<code>top</code>/<code>left</code> 등)</th><th>문서 흐름</th></tr></thead>
+<tbody>
+<tr><td><code>static</code></td><td>없음(기본값)</td><td>흐름 유지, <code>top</code>/<code>z-index</code> 무시됨</td></tr>
+<tr><td><code>relative</code></td><td>자기 자신의 원래 위치</td><td>흐름 유지(원래 자리를 계속 차지), 시각적으로만 이동</td></tr>
+<tr><td><code>absolute</code></td><td>가장 가까운 <code>static</code>이 아닌 조상</td><td>흐름에서 빠짐(원래 자리를 차지 안 함)</td></tr>
+<tr><td><code>fixed</code></td><td>뷰포트</td><td>흐름에서 빠짐, 스크롤해도 화면에 고정</td></tr>
+<tr><td><code>sticky</code></td><td>가장 가까운 스크롤 컨테이너 + 지정한 임계값(<code>top</code> 등)</td><td><code>relative</code>처럼 있다가 임계값을 지나면 <code>fixed</code>처럼 고정</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+실무에서 가장 많이 하는 실수는 <code>absolute</code> 자식의 기준이 될 부모에 <code>position: relative</code>를 깜빡하는 것이다<sup class="ref"><a href="#r10">[10]</a></sup>. 그러면 기준점이 조상을 타고 올라가 문서 전체(<code>&lt;html&gt;</code>) 기준으로 배치되어 버린다.
+</p>
+
+<h3 id="s-stacking-context"><code>z-index</code>와 <span class="t" data-tip="쌓임 맥락(stacking context)은 요소들이 z축(화면 안쪽/바깥쪽) 순서로 쌓이는 독립된 그룹이다. 한 쌓임 맥락 안의 z-index는 그 맥락 밖의 요소와 직접 비교되지 않는다.">쌓임 맥락(stacking context)</span></h3>
+<p>
+<code>z-index</code>는 아무 요소에나 적용되지 않는다. <code>position</code>이 <code>static</code>이 아니어야 값이 의미를 가진다. 그리고 그 비교는 전역이 아니라 "같은 쌓임 맥락 안"에서만 이루어진다<sup class="ref"><a href="#r11">[11]</a></sup>.
+</p>
+<div class="note note--warn"><span class="note__t">쌓임 맥락이 새로 생기는 조건</span>
+<ul style="margin:6px 0 0">
+<li>문서의 root 요소(<code>&lt;html&gt;</code>)</li>
+<li><code>position: fixed</code> 또는 <code>sticky</code></li>
+<li><code>position: absolute/relative</code> + <code>z-index</code>가 <code>auto</code>가 아님</li>
+<li><code>opacity</code> 값이 1 미만</li>
+<li><code>transform</code>, <code>filter</code>, <code>perspective</code>, <code>clip-path</code>, <code>mask</code> 중 하나라도 <code>none</code>이 아님</li>
+<li>해당 속성을 예고하는 <code>will-change</code></li>
+<li><code>isolation: isolate</code></li>
+<li><code>mix-blend-mode</code>가 <code>normal</code>이 아님</li>
+<li>flex/grid 아이템이면서 <code>z-index</code>가 <code>auto</code>가 아님</li>
+</ul>
+</div>
+<p>부모가 새 쌓임 맥락을 만들면, 그 자식이 아무리 <code>z-index: 9999</code>를 줘도 부모 바깥의 형제 요소를 절대 넘어설 수 없다 — 자식은 부모가 만든 "그룹 안"에 갇힌다.</p>
+
+<div class="fig">
+<svg viewBox="0 0 420 190" role="img" aria-label="쌓임 맥락 예시: 부모가 새 쌓임 맥락을 만들면 자식은 그 안에 갇힌다">
+  <rect x="20" y="20" width="180" height="150" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4" rx="8"/>
+  <text x="26" y="14" font-size="11" fill="var(--accent)">쌓임 맥락 A (position:relative)</text>
+  <rect x="40" y="45" width="100" height="60" fill="var(--accent)" opacity="0.55" rx="6"/>
+  <text x="90" y="79" font-size="11" fill="#fff" text-anchor="middle">z-index:9999</text>
+  <rect x="230" y="60" width="120" height="80" fill="var(--danger)" opacity="0.85" rx="6"/>
+  <text x="290" y="104" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">z-index: 2</text>
+  <text x="290" y="150" font-size="10.5" fill="var(--fg-mute)" text-anchor="middle">쌓임 맥락 A 바깥의 형제 요소</text>
+</svg>
+<div class="fig__cap"><b>그림 5.</b> 왼쪽 박스의 <code>z-index: 9999</code>는 자기 부모(쌓임 맥락 A) 안에서만 유효하다. 바깥의 <code>z-index: 2</code>짜리 형제를 절대 덮지 못한다. <span class="muted">출처: MDN Stacking Context</span></div>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>position: sticky</code> 헤더는 스크롤해도 컨테이너 안에서 상단에 붙어있다. 두 카드 위의 배지는 <code>position: absolute</code>이고, <code>z-index</code>가 다르게 겹치도록 만들었다.</p>
+  </div>
+  <div class="pg" data-pg="html" data-title="position.html" data-height="260">
+<script type="text/plain" class="pg__src">
+<style>
+  .scrollbox{ height:210px; overflow:auto; border:1px solid #d6dae4; border-radius:10px; position:relative; }
+  .sticky-head{ position:sticky; top:0; background:#3b5bdb; color:#fff; padding:8px 12px; font-weight:700; z-index:5; }
+  .content{ padding:16px; }
+  .card{ position:relative; height:64px; margin:34px 0 0; background:#eef2ff; border-radius:8px; }
+  .badge{ position:absolute; top:-12px; right:12px; color:#fff; padding:5px 10px; border-radius:20px; font-size:11px; }
+</style>
+<div class="scrollbox">
+  <div class="sticky-head">스크롤해도 붙어있는 헤더 (position: sticky)</div>
+  <div class="content">
+    <div class="card">카드 1 <span class="badge" style="background:#94a3c9;z-index:1">z-index: 1</span></div>
+    <div class="card">카드 2 <span class="badge" style="background:#d64258;z-index:10">z-index: 10</span></div>
+    <p style="font-size:13px;color:#666">아래로 스크롤 →</p>
+    <p style="font-size:13px;color:#666">계속 스크롤...</p>
+    <p style="font-size:13px;color:#666">헤더가 계속 붙어있는지 확인</p>
+    <p style="font-size:13px;color:#666">끝까지 스크롤해보자</p>
+  </div>
+</div>
+</script>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s-responsive"><span class="h2num">§5</span>반응형</h2>
+
+<h3 id="s-media-queries"><span class="t" data-tip="미디어 쿼리(media query)는 화면 너비/높이/방향 같은 조건에 따라 다른 CSS 규칙을 적용하는 문법이다. 예: @media (min-width: 768px) { ... }">미디어 쿼리</span>와 <span class="t" data-tip="모바일 퍼스트(mobile-first)는 기본 CSS를 가장 작은 화면 기준으로 작성하고, min-width 미디어 쿼리로 화면이 커질수록 스타일을 '추가'하는 설계 방식이다.">모바일 퍼스트</span></h3>
+<p>
+<code>@media</code>는 뷰포트 조건에 따라 다른 스타일을 적용한다<sup class="ref"><a href="#r12">[12]</a></sup>. 실무 관례는 <b>모바일 퍼스트</b> — 기본 CSS는 가장 작은 화면을 가정하고, <code>min-width</code> 쿼리로 화면이 커질 때마다 스타일을 "추가"한다. 반대로 <code>max-width</code>로 큰 화면을 기본으로 잡고 깎아나가면 미디어 쿼리 우선순위가 꼬이기 쉽다.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>responsive.css</span></div>
+  <pre><code class="language-css">.card { display: block; } /* 기본값: 모바일 */
+
+@media (min-width: 640px) {
+  .card { display: flex; } /* 태블릿 이상부터 가로 배치 */
+}
+
+@media (min-width: 1024px) {
+  .card { gap: 24px; } /* 데스크톱에서 간격 확대 */
+}</code></pre>
+</div>
+
+<h3 id="s-container-queries"><span class="t" data-tip="컨테이너 쿼리(@container)는 뷰포트가 아니라 '부모 요소의 크기'를 기준으로 스타일을 바꾸는 문법이다. 같은 카드 컴포넌트가 넓은 곳에 놓이든 좁은 사이드바에 놓이든 알아서 반응한다.">컨테이너 쿼리</span> (<code>@container</code>)</h3>
+<p>
+미디어 쿼리는 뷰포트 전체 크기만 본다. 그런데 같은 카드 컴포넌트가 넓은 본문에도, 좁은 사이드바에도 들어갈 수 있다면 뷰포트 크기만으로는 판단할 수 없다. 컨테이너 쿼리는 부모에 <code>container-type: inline-size</code>를 선언해두면, 자식이 그 부모의 실제 너비를 기준으로 스타일을 바꿀 수 있게 한다<sup class="ref"><a href="#r13">[13]</a></sup>.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>card.css</span></div>
+  <pre><code class="language-css">.card-wrap { container-type: inline-size; }
+
+@container (min-width: 420px) {
+  .card { flex-direction: row; } /* 부모가 420px 넘으면 가로 배치 */
+}</code></pre>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>박스 우측 하단 모서리를 드래그해서 너비를 늘려보자(<code>resize: horizontal</code>). 부모 너비가 420px를 넘는 순간 <code>@container</code> 쿼리가 발동해 세로 배치가 가로 배치로 바뀐다. 제목 글자 크기는 <code>clamp()</code>로 뷰포트 너비에 비례해 유동적으로 변한다.</p>
+  </div>
+  <div class="pg" data-pg="html" data-title="container-query.html" data-height="260">
+<script type="text/plain" class="pg__src">
+<style>
+  .resizer{ resize:horizontal; overflow:auto; border:2px dashed #94a3c9; padding:10px;
+            width:320px; max-width:100%; container-type:inline-size; container-name:card; border-radius:8px; }
+  .box{ background:#eef2ff; border-radius:10px; padding:14px; display:flex; gap:12px; flex-direction:column; }
+  @container card (min-width: 420px){
+    .box{ flex-direction:row; align-items:center; }
+  }
+  .thumb{ width:60px; height:60px; background:#3b5bdb; border-radius:8px; flex:none; }
+  .fluid-title{ font-size:clamp(14px, 4vw, 22px); font-weight:800; margin:0; }
+</style>
+<p style="font-size:12.5px;color:#555;margin:0 0 8px">박스 우측 하단 모서리를 드래그해서 너비를 늘려보자</p>
+<div class="resizer">
+  <div class="box">
+    <div class="thumb"></div>
+    <div>
+      <p class="fluid-title">카드 제목</p>
+      <p style="margin:4px 0 0;font-size:12.5px;color:#666">부모 너비가 420px를 넘으면 가로 배치로 바뀐다.</p>
+    </div>
+  </div>
+</div>
+</script>
+  </div>
+</div>
+
+<h3 id="s-fluid-typography">clamp()로 유동 타이포그래피</h3>
+<p>
+<code>clamp(최소, 선호, 최대)</code>의 선호값에 <code>vw</code>를 섞으면(<code>clamp(1rem, 0.8rem + 1vw, 2rem)</code>) 미디어 쿼리 여러 개 없이도 화면 크기와 함께 부드럽게 변하는 값을 만들 수 있다. 위 놀이터의 <code>.fluid-title</code>이 그 예시다.
+</p>
+
+<!-- ================================================================ -->
+<h2 id="s-modern-css"><span class="h2num">§6</span>모던 CSS</h2>
+
+<h3 id="s-nesting"><span class="t" data-tip="네이티브 CSS 중첩(Nesting)은 전처리기(Sass 등) 없이도 순수 CSS 안에서 선택자를 부모 규칙 안에 중첩해서 쓸 수 있게 하는 최신 CSS 기능이다.">네이티브 CSS 중첩</span></h3>
+<p>Sass 같은 전처리기 없이도 <code>&amp;</code>로 부모 선택자를 참조하며 중첩할 수 있다<sup class="ref"><a href="#r14">[14]</a></sup>.</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>nesting.css</span></div>
+  <pre><code class="language-css">.card {
+  padding: 16px;
+  border: 1px solid #e2e6f0;
+
+  &:hover {
+    border-color: #3b5bdb;
+  }
+
+  & .title {
+    font-weight: 700;
+  }
+
+  @media (min-width: 768px) {
+    padding: 24px;
+  }
+}</code></pre>
+</div>
+
+<h3 id="s-custom-properties"><span class="t" data-tip="CSS 커스텀 프로퍼티(custom property, 흔히 'CSS 변수')는 --이름: 값; 형태로 선언하고 var(--이름)으로 참조하는 재사용 가능한 값이다. 자바스크립트로 실시간으로 값을 바꿀 수 있다는 점이 Sass 변수와 다르다.">커스텀 프로퍼티(CSS 변수)</span>와 다크모드</h3>
+<p>
+<code>--이름: 값</code>으로 선언하고 <code>var(--이름)</code>으로 쓴다. Sass 변수와 달리 브라우저가 런타임에 값을 들고 있어서, <code>data-theme</code> 속성 하나만 바꿔도 그 속성을 참조하는 모든 요소가 즉시 재계산된다 — 이 페이지 우상단 테마 버튼도 정확히 이 방식으로 동작한다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>:root</code>에 라이트 모드 변수를, <code>[data-theme="dark"]</code>에 다크 모드 변수를 다시 선언해뒀다. 버튼을 누르면 JS가 <code>&lt;html&gt;</code>의 <code>data-theme</code> 속성만 토글하고, CSS는 그 값을 보고 자동으로 다시 그린다.</p>
+    <ul>
+      <li><code>document.documentElement.setAttribute('data-theme', ...)</code> 한 줄이 전부다</li>
+      <li>색을 계산하는 JS 로직은 없다 — 브라우저가 <code>var()</code> 참조를 알아서 다시 푼다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="html" data-title="dark-mode.html" data-height="220">
+<script type="text/plain" class="pg__src">
+<style>
+  :root{
+    --bg:#f6f7fb; --fg:#171a21; --card:#ffffff; --accent:#3b5bdb; --line:#e2e6f0;
+  }
+  [data-theme="dark"]{
+    --bg:#0b0d12; --fg:#e6e9f0; --card:#151923; --accent:#6c8cff; --line:#232a38;
+  }
+  body{ background:var(--bg); color:var(--fg); transition:background .2s, color .2s; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; max-width:280px; }
+  button{ background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; cursor:pointer; font-weight:700; }
+</style>
+<div class="card">
+  <p>현재 테마: <b id="label">light</b></p>
+  <button id="toggle">테마 전환</button>
+</div>
+<script>
+  var root = document.documentElement;
+  document.getElementById('toggle').addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    document.getElementById('label').textContent = next;
+  });
+<\/script>
+</script>
+  </div>
+</div>
+
+<h3 id="s-selectors-modern"><code>:has()</code> / <code>:is()</code> · <code>:where()</code></h3>
+<p>
+<code><span class="t" data-tip=":has()는 CSS에서 오랫동안 없었던 '부모 선택자'다. 자식의 상태를 보고 부모 스타일을 바꿀 수 있다. 예: li:has(input:checked) { background: green; }">:has()</span></code>는 자식(또는 형제)의 상태를 보고 조상 스타일을 바꿀 수 있게 한다 — CSS에 없던 "부모 선택자"다<sup class="ref"><a href="#r15">[15]</a></sup>.
+<code><span class="t" data-tip=":is()와 :where()는 여러 선택자를 괄호 안에 묶어서 반복을 줄이는 문법이다. 차이는 명시도: :is()는 안의 가장 강한 선택자의 명시도를 갖고, :where()는 명시도가 항상 0이다.">:is()</span></code>와 <code>:where()</code>는 여러 선택자를 하나로 묶어 반복을 줄인다<sup class="ref"><a href="#r16">[16]</a></sup>. 둘의 차이는 명시도뿐이다 — <code>:is()</code>는 괄호 안에서 가장 강한 선택자의 명시도를 그대로 가져가고, <code>:where()</code>는 명시도가 항상 0이라 나중에 덮어쓰기 쉽다.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>selectors.css</span></div>
+  <pre><code class="language-css">/* h2, h3, h4를 매번 나열하지 않아도 됨 */
+:is(h2, h3, h4) { font-weight: 800; }
+
+/* 명시도 0 — 나중에 컴포넌트 스타일이 쉽게 덮어씀 */
+:where(article) p { line-height: 1.7; }</code></pre>
+</div>
+
+<h3 id="s-color-functions"><span class="t" data-tip="color-mix()는 두 색을 지정한 비율로 섞은 새 색을 계산해주는 CSS 함수다. Sass의 mix() 함수를 대체한다.">color-mix()</span>와 <span class="t" data-tip="light-dark()는 라이트/다크 두 색상값을 한 번에 지정해서, prefers-color-scheme에 따라 브라우저가 알아서 골라 쓰게 하는 CSS 함수다.">light-dark()</span></h3>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>colors.css</span></div>
+  <pre><code class="language-css">/* 파란색에 흰색을 15% 섞은 연한 파랑 계산 */
+.selected { background: color-mix(in srgb, #3b5bdb 15%, white); }
+
+/* color-scheme이 dark면 두 번째 값, light면 첫 번째 값 자동 선택 */
+:root {
+  color-scheme: light dark;
+  --fg: light-dark(#171a21, #e6e9f0);
+}</code></pre>
+</div>
+<p><code>color-mix()</code><sup class="ref"><a href="#r17">[17]</a></sup>는 hover/선택 상태처럼 원색에서 살짝 변형된 색이 필요할 때 별도 색상값을 하드코딩하지 않아도 되게 해준다. <code>light-dark()</code><sup class="ref"><a href="#r18">[18]</a></sup>는 <code>[data-theme]</code> 토글 없이 OS 설정만으로 다크모드를 지원할 때 코드량을 줄여준다.</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>체크박스를 누르면 <code>:has(input:checked)</code>가 부모 <code>&lt;li&gt;</code>의 배경을 <code>color-mix()</code>로 계산한 연한 파랑으로 바꾼다. 자바스크립트 코드는 단 한 줄도 없다 — 순수 CSS 선택자만으로 동작한다.</p>
+  </div>
+  <div class="pg" data-pg="html" data-title="has-colormix.html" data-height="220">
+<script type="text/plain" class="pg__src">
+<style>
+  .list{ list-style:none; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .row{ padding:10px 14px; border:1px solid #e2e6f0; border-radius:8px;
+        display:flex; justify-content:space-between; align-items:center; transition:background .15s, border-color .15s; }
+  .row:has(input:checked){
+    background: color-mix(in srgb, #3b5bdb 15%, white);
+    border-color:#3b5bdb;
+  }
+</style>
+<ul class="list">
+  <li class="row"><label><input type="checkbox"> :has() 이해하기</label></li>
+  <li class="row"><label><input type="checkbox"> color-mix() 이해하기</label></li>
+  <li class="row"><label><input type="checkbox"> 다크모드에 적용해보기</label></li>
+</ul>
+<p style="font-size:12px;color:#666;margin-top:10px">체크박스를 눌러보자. CSS만으로 부모 li의 배경이 바뀐다.</p>
+</script>
+  </div>
+</div>
+
+<h3 id="s-layers-misc"><span class="t" data-tip="@layer는 CSS 규칙들을 이름 붙인 '층'으로 묶어서, 명시도와 무관하게 층 선언 순서로 우선순위를 정하는 기능이다. 예: reset 층은 항상 components 층보다 낮은 우선순위를 갖는다.">@layer</span>, aspect-ratio, gap</h3>
+<p>
+<code>@layer</code>는 CSS 규칙을 이름 있는 "층"으로 묶어, 명시도와 무관하게 층 선언 순서로 우선순위를 정한다<sup class="ref"><a href="#r19">[19]</a></sup>. reset → base → components → utilities 순으로 층을 쌓아두면, 나중에 로드된 유틸리티 클래스가 명시도 계산 없이도 항상 이긴다 — Tailwind가 내부적으로 쓰는 방식이기도 하다.
+</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>layers.css</span></div>
+  <pre><code class="language-css">@layer reset, base, components, utilities;
+
+@layer reset {
+  * { margin: 0; padding: 0; }
+}
+@layer utilities {
+  .text-center { text-align: center; } /* 명시도가 낮아도 항상 이김 */
+}</code></pre>
+</div>
+<p><code>aspect-ratio: 16 / 9</code>는 <code>padding-top</code> 트릭 없이 요소의 가로세로 비율을 고정한다. <code>gap</code>은 이미 §3에서 다뤘듯 Flex/Grid 모두에서 아이템 사이 간격을 마진 상쇄 없이 지정한다.</p>
+
+<!-- ================================================================ -->
+<h2 id="s-animation"><span class="h2num">§7</span>애니메이션</h2>
+
+<h3 id="s-transition-transform"><code>transition</code>과 <code>transform</code></h3>
+<p>
+<code>transition</code>은 속성값이 바뀔 때(예: <code>:hover</code> 진입) 그 변화를 지정한 시간에 걸쳐 부드럽게 보간한다. <code>transform</code>은 요소를 이동/확대/회전시키는데, <code>top</code>/<code>left</code>/<code>width</code>를 직접 바꾸는 것과 시각적 결과는 비슷해도 성능이 다르다 — 아래에서 이유를 설명한다.
+</p>
+
+<h3 id="s-keyframes"><code>@keyframes</code></h3>
+<p>시작~끝 사이 중간 지점들을 퍼센트로 지정해서 반복 재생 가능한 애니메이션을 만든다.</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>spin.css</span></div>
+  <pre><code class="language-css">@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  animation: spin 1s linear infinite;
+}</code></pre>
+</div>
+
+<h3 id="s-performance-motion">왜 transform/opacity만 애니메이션해야 하는가</h3>
+<p>
+브라우저는 화면을 그릴 때 레이아웃(layout) → 페인트(paint) → <span class="t" data-tip="합성(compositing)은 이미 그려진 레이어 이미지들을 GPU에서 겹쳐 화면에 최종 출력하는 마지막 단계다. transform과 opacity 변경은 이 단계만 다시 하면 되므로 CPU의 레이아웃/페인트 재계산을 건너뛸 수 있다.">합성(compositing)</span> 3단계를 거친다. <code>width</code>, <code>top</code>, <code>margin</code> 같은 속성을 바꾸면 레이아웃부터 다시 계산해야 하지만, <code>transform</code>과 <code>opacity</code>는 별도의 <span class="t" data-tip="합성 레이어(compositing layer)는 GPU가 독립적으로 다룰 수 있는 화면의 한 조각이다. 이 레이어의 위치/투명도만 바꾸는 건 CPU의 레이아웃 재계산 없이 GPU에서 빠르게 처리된다.">합성 레이어</span>에서 GPU가 처리해 레이아웃·페인트를 건너뛴다<sup class="ref"><a href="#r23">[23]</a></sup>. 그래서 60fps를 유지하려면 애니메이션 대상은 최대한 <code>transform</code>/<code>opacity</code>로 제한해야 한다.
+</p>
+<p>
+<code>will-change: transform</code>은 브라우저에게 "이 요소는 곧 움직일 것"이라 미리 알려 합성 레이어를 미리 준비시킨다<sup class="ref"><a href="#r21">[21]</a></sup>. 다만 남용하면 메모리를 불필요하게 점유하므로, 실제로 애니메이션 직전에만 붙였다가 끝나면 제거하는 게 정석이다.
+</p>
+<div class="note note--info"><span class="note__t">접근성</span><code>prefers-reduced-motion: reduce</code>는 OS에서 "동작 줄이기"를 켠 사용자를 위한 미디어 쿼리다<sup class="ref"><a href="#r22">[22]</a></sup>. 전정기관(vestibular) 문제가 있는 사용자에게 큰 움직임은 어지러움을 유발할 수 있으므로, 장식용 애니메이션은 이 쿼리 안에서 꺼주는 게 좋다. 포커스 링·대비 등 접근성 스타일링 전반은 <a href="ch09.html#s-a11y">ch09</a>에서 이어서 다룬다.</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>카드는 <code>transform</code>과 <code>box-shadow</code>만 <code>transition</code>시킨다(레이아웃에 영향 없음). 스피너는 <code>@keyframes</code>로 무한 회전한다. <code>@media (prefers-reduced-motion: reduce)</code> 블록이 두 애니메이션을 모두 끄는 패턴도 포함했다.</p>
+  </div>
+  <div class="pg" data-pg="html" data-title="animation.html" data-height="220">
+<script type="text/plain" class="pg__src">
+<style>
+  .card{ width:140px; height:86px; background:#3b5bdb; border-radius:12px;
+         display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700;
+         transition:transform .25s ease, box-shadow .25s ease; cursor:pointer; }
+  .card:hover{ transform:translateY(-6px) scale(1.04); box-shadow:0 12px 24px rgba(59,91,219,.35); }
+  .spinner{ width:34px; height:34px; border:4px solid #e2e6f0; border-top-color:#3b5bdb;
+            border-radius:50%; animation:spin 1s linear infinite; margin-top:20px; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){
+    .card{ transition:none; }
+    .spinner{ animation:none; }
+  }
+</style>
+<div class="card">호버해보세요</div>
+<div class="spinner"></div>
+<p style="font-size:12px;color:#666;margin-top:12px">OS의 "동작 줄이기" 설정이 켜져 있으면 두 애니메이션이 모두 꺼진다.</p>
+</script>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s-tailwind"><span class="h2num">§8</span>Tailwind CSS</h2>
+
+<h3 id="s-tailwind-philosophy">유틸리티 퍼스트 철학</h3>
+<p>
+<span class="t" data-tip="유틸리티 퍼스트(utility-first)는 '.card'처럼 의미 있는 이름의 CSS 클래스를 새로 만드는 대신, p-4 / flex / text-lg처럼 한 가지 스타일만 하는 저수준 클래스를 마크업에 직접 조합해서 쓰는 방식이다.">Tailwind CSS</span>는 <code>.card</code> 같은 의미 있는 클래스명을 새로 만드는 대신, <code>p-4</code>/<code>flex</code>/<code>text-lg</code>처럼 한 가지 CSS 속성만 담당하는 저수준 클래스를 마크업에 직접 조합하는 <b>유틸리티 퍼스트</b> 프레임워크다<sup class="ref"><a href="#r25">[25]</a></sup>.
+</p>
+<div class="grid grid--2">
+<div class="card"><div class="card__title">장점</div><p>클래스명을 새로 짓는 고민이 사라진다. CSS 파일과 마크업을 오가며 컨텍스트를 전환할 필요가 없다. 설정 파일의 디자인 토큰(spacing/color 스케일)만 따르면 임의의 값 남발을 막아 자연스럽게 일관성이 생긴다. 실제 쓰이는 클래스만 스캔해서 CSS를 생성하므로 번들에 죽은 CSS가 쌓이지 않는다.</p></div>
+<div class="card"><div class="card__title">단점</div><p>마크업의 <code>className</code>이 매우 길어져 가독성이 떨어질 수 있다. 유틸리티 이름 자체를 외워야 하는 학습 비용이 있다. 디자인 시스템에서 크게 벗어나는 완전히 독특한 스타일은 결국 커스텀 CSS로 빠져나가야 한다.</p></div>
+</div>
+
+<h3 id="s-tailwind-setup">설치 (Vite 기준, Tailwind v4)</h3>
+<p>v4부터는 <code>tailwind.config.js</code> 없이 CSS 파일 안에서 바로 설정하는 방식이 기본이다<sup class="ref"><a href="#r24">[24]</a></sup>.</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>터미널</span></div>
+  <pre><code class="language-bash">yarn add -D tailwindcss @tailwindcss/vite</code></pre>
+</div>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>vite.config.ts</span></div>
+  <pre><code class="language-ts">import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  plugins: [tailwindcss()],
+});</code></pre>
+</div>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/index.css</span></div>
+  <pre><code class="language-css">@import "tailwindcss";
+
+@theme {
+  --color-brand: #3b5bdb; /* 커스텀 토큰 → 자동으로 bg-brand, text-brand 클래스 생성 */
+}</code></pre>
+</div>
+
+<h3 id="s-tailwind-cheatsheet">자주 쓰는 클래스 치트시트</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>범주</th><th>클래스 예시</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td>간격</td><td><code>p-4</code> <code>px-6</code> <code>py-2</code> <code>m-2</code> <code>mx-auto</code> <code>gap-4</code></td><td>padding/margin/gap (숫자 × 0.25rem)</td></tr>
+<tr><td>크기</td><td><code>w-full</code> <code>h-screen</code> <code>max-w-md</code> <code>min-h-0</code></td><td>너비/높이</td></tr>
+<tr><td>Flexbox</td><td><code>flex</code> <code>flex-col</code> <code>items-center</code> <code>justify-between</code> <code>flex-1</code></td><td>flex 컨테이너와 정렬</td></tr>
+<tr><td>Grid</td><td><code>grid</code> <code>grid-cols-3</code> <code>col-span-2</code> <code>place-items-center</code></td><td>grid 레이아웃</td></tr>
+<tr><td>타이포</td><td><code>text-lg</code> <code>font-bold</code> <code>leading-tight</code> <code>tracking-tight</code></td><td>글자 크기·굵기·행간·자간</td></tr>
+<tr><td>색상</td><td><code>bg-blue-500</code> <code>text-white</code> <code>border-gray-200</code></td><td>배경·글자·테두리 색</td></tr>
+<tr><td>테두리/그림자</td><td><code>rounded-lg</code> <code>border</code> <code>border-2</code> <code>shadow-sm</code></td><td>모서리 반경·테두리·그림자</td></tr>
+<tr><td>반응형 접두사</td><td><code>sm:</code> <code>md:</code> <code>lg:</code> <code>xl:</code> <code>2xl:</code></td><td>해당 최소 너비부터 적용 (모바일 퍼스트)</td></tr>
+<tr><td>상태 접두사</td><td><code>hover:</code> <code>focus:</code> <code>active:</code> <code>disabled:</code></td><td>가상 클래스 상태별 스타일</td></tr>
+<tr><td>다크모드</td><td><code>dark:bg-gray-900</code></td><td><code>prefers-color-scheme</code> 또는 클래스 기반 다크모드</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>이 놀이터는 Tailwind CDN을 쓸 수 없어서, 순수 CSS로 <b>같은 결과</b>를 재현했다. 아래 코드블록에 실제로 쓰였을 Tailwind 클래스를 병기했으니 대응 관계를 비교해보자.</p>
+    <ul>
+      <li><code>rounded-xl border p-6 shadow-sm</code> → <code>border-radius, border, padding, box-shadow</code> 각각의 유틸리티 조합</li>
+      <li><code>flex flex-col gap-3</code> → <code>display:flex; flex-direction:column; gap:12px</code></li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="html" data-title="tailwind-equivalent.html" data-height="240">
+<script type="text/plain" class="pg__src">
+<style>
+  /* Tailwind: rounded-xl border p-6 shadow-sm flex flex-col gap-3 */
+  .card{
+    border-radius:12px; border:1px solid #e2e6f0; padding:24px;
+    box-shadow:0 1px 2px rgba(0,0,0,.06), 0 8px 20px rgba(0,0,0,.06);
+    display:flex; flex-direction:column; gap:12px; max-width:280px;
+  }
+  /* Tailwind: text-lg font-bold */
+  .card h3{ font-size:18px; font-weight:700; margin:0; }
+  /* Tailwind: text-sm text-gray-500 */
+  .card p{ font-size:13px; color:#7c8598; margin:0; }
+  /* Tailwind: inline-flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 */
+  .btn{ display:inline-flex; align-items:center; gap:6px; border-radius:8px; background:#3b5bdb;
+        padding:8px 16px; color:#fff; border:0; font-weight:700; cursor:pointer; width:fit-content; }
+  .btn:hover{ background:#2f4bc0; }
+</style>
+<div class="card">
+  <h3>플랜 이름</h3>
+  <p>순수 CSS로 재현한 Tailwind 카드 — 클래스 조합이 곧 스타일이다.</p>
+  <button class="btn">선택하기</button>
+</div>
+</script>
+  </div>
+</div>
+
+<h3 id="s-tailwind-apply"><code>@apply</code> 남용 경고</h3>
+<p><code>@apply</code>는 유틸리티 클래스 여러 개를 커스텀 CSS 클래스 하나로 묶어준다.</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>button.css</span></div>
+  <pre><code class="language-css">.btn-primary {
+  @apply inline-flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-white;
+}</code></pre>
+</div>
+<div class="note note--warn"><span class="note__t">함정</span>
+<code>@apply</code><sup class="ref"><a href="#r26">[26]</a></sup>를 여기저기 남용하면 결국 "긴 유틸리티 조합을 클래스명 뒤에 숨긴" 옛날 방식 CSS로 되돌아간다 — Tailwind가 애초에 피하려던 문제(클래스명 짓기, CSS 파일과 마크업 사이 컨텍스트 전환)가 그대로 재발한다. 반복되는 조합은 <code>@apply</code>보다 React 컴포넌트(<code>&lt;Button&gt;</code>)로 추출하는 편이 대부분 더 낫다.</div>
+
+<h3 id="s-tailwind-clsx"><span class="t" data-tip="clsx는 조건에 따라 CSS 클래스 문자열을 조합해주는 아주 작은 유틸리티 함수다. 예: clsx('btn', isActive && 'btn-active')">clsx</span> / <span class="t" data-tip="tailwind-merge는 충돌하는 Tailwind 클래스(예: px-2와 px-4)가 한 문자열에 같이 있을 때, 나중 것이 이기도록 앞의 것을 제거해주는 유틸리티다. clsx만으로는 두 값이 그대로 공존해서 CSS 우선순위 문제가 생긴다.">tailwind-merge</span> 패턴</h3>
+<p>
+조건부로 클래스를 조합하다 보면 두 가지 문제가 생긴다. 첫째, <code>isActive && 'bg-blue-500'</code> 같은 표현식을 문자열로 안전하게 이어 붙이는 게 번거롭다(<code>clsx</code>가 해결). 둘째, 기본 클래스에 <code>px-2</code>가 있는데 prop으로 <code>px-4</code>를 덮어쓰려 하면, 클래스 문자열에 둘 다 남아 CSS 소스 순서에 따라 승자가 정해져버린다(<code>tailwind-merge</code>가 해결).
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>clsx</code>와 <code>tailwind-merge</code>를 각각 20~30줄로 원리만 재구현했다. 콘솔에서 실제 라이브러리와 같은 방식의 출력을 확인할 수 있다.</p>
+    <ul>
+      <li><code>clsx</code> 미니 구현 — 문자열/배열/객체를 받아 <code>true</code>인 값만 이어 붙인다</li>
+      <li><code>twMerge</code> 미니 구현 — 같은 접두사(<code>px-</code> 등)를 가진 클래스가 뒤에 또 나오면 앞의 것을 제거한다(실제 라이브러리는 Tailwind의 전체 클래스 규칙을 인식하는 훨씬 정교한 버전)</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="js" data-title="clsx-mini.js" data-height="180">
+<script type="text/plain" class="pg__src">
+function clsx() {
+  var args = Array.prototype.slice.call(arguments);
+  return args
+    .flat(Infinity)
+    .filter(Boolean)
+    .map(function (a) {
+      if (typeof a === 'object') {
+        return Object.keys(a).filter(function (k) { return a[k]; }).join(' ');
+      }
+      return a;
+    })
+    .filter(Boolean)
+    .join(' ');
+}
+
+console.log(clsx('px-4 py-2 rounded', { 'bg-blue-500': true, 'bg-gray-300': false }, ['text-white']));
+
+// 같은 계열(px-) 접두사가 충돌하면 나중 값이 이기도록 앞의 것을 제거
+function twMerge(base, override) {
+  var prefixOf = function (cls) {
+    var m = cls.match(/^[a-z]+-/);
+    return m ? m[0] : cls;
+  };
+  var overridePrefixes = {};
+  override.split(' ').forEach(function (c) { overridePrefixes[prefixOf(c)] = true; });
+  var kept = base.split(' ').filter(function (c) { return !overridePrefixes[prefixOf(c)]; });
+  return kept.concat(override.split(' ')).join(' ');
+}
+
+console.log(twMerge('px-2 py-1 bg-red-500', 'px-4 bg-blue-500'));
+</script>
+  </div>
+</div>
+
+<p>실제로는 두 라이브러리를 합쳐 <code>cn()</code> 헬퍼 하나로 쓰는 게 shadcn/ui를 포함한 실무 표준 패턴이다.</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>src/lib/utils.ts</span></div>
+  <pre><code class="language-ts">import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// 사용: cn('px-2', isWide && 'px-4') → 'px-4' (충돌 자동 해결)</code></pre>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s-components"><span class="h2num">§9</span>컴포넌트 시스템</h2>
+
+<h3 id="s-shadcn"><span class="t" data-tip="shadcn/ui는 npm 패키지를 설치하는 컴포넌트 라이브러리가 아니라, CLI로 컴포넌트의 소스 코드 자체를 내 프로젝트 안에 복사해오는 방식의 컴포넌트 모음이다.">shadcn/ui</span> — "설치"가 아니라 "복사"</h3>
+<p>
+일반적인 UI 라이브러리는 <code>npm install</code>로 <code>node_modules</code>에 들어가는 블랙박스다. 커스터마이징은 라이브러리가 제공하는 <code>props</code>나 테마 API 범위 안에서만 가능하다.
+shadcn/ui는 다르게 동작한다 — <code>npx shadcn add button</code>을 실행하면 <code>Button</code> 컴포넌트의 <b>소스 코드 자체</b>가 <code>components/ui/button.tsx</code>로 복사되어 들어온다<sup class="ref"><a href="#r27">[27]</a></sup>. 그 순간부터 그 코드는 라이브러리 코드가 아니라 <b>내 코드</b>다. 자유롭게 고칠 수 있고, 버전 업그레이드에 깨질 걱정도 없다 — 애초에 의존성으로 물려있지 않기 때문이다. 대신 업스트림 버그 수정이나 개선을 자동으로 받지는 못하므로, 그 책임도 내가 진다.
+</p>
+
+<div class="fig">
+<pre class="mermaid">
+flowchart LR
+  subgraph npm["일반 UI 라이브러리"]
+    A1["npm install"] --> A2["node_modules 안의 블랙박스"]
+    A2 --> A3["props/테마 API 범위 안에서만 커스터마이징"]
+  end
+  subgraph shadcn["shadcn/ui"]
+    B1["npx shadcn add button"] --> B2["소스 코드가 내 저장소로 복사됨"]
+    B2 --> B3["components/ui/button.tsx — 내 코드처럼 자유롭게 수정"]
+  end
+</pre>
+<div class="fig__cap"><b>그림 6.</b> npm 설치형 라이브러리와 shadcn/ui의 근본적인 차이 — 의존성이냐 소유권이냐. <span class="muted">출처: ui.shadcn.com</span></div>
+</div>
+
+<h3 id="s-radix"><span class="t" data-tip="headless 컴포넌트는 접근성(포커스 관리, 키보드 내비게이션, ARIA 속성)과 상태 로직만 제공하고, 시각적 스타일은 전혀 강요하지 않는 컴포넌트다. Radix UI가 대표적이다.">Radix UI</span>와 headless 컴포넌트</h3>
+<p>
+shadcn/ui가 복사해오는 코드 상당수는 내부적으로 Radix UI 원시(primitive) 컴포넌트를 감싼다. Radix는 <b>headless</b> — 드롭다운의 포커스 트랩, 다이얼로그의 ESC 닫기, 콤보박스의 키보드 화살표 탐색 같은 "접근성 로직"만 제공하고 시각적 스타일은 한 줄도 강요하지 않는다. 스타일은 100% Tailwind 클래스로 shadcn 쪽에서 입힌다. 즉 "어떻게 동작해야 하는가"는 Radix가, "어떻게 보여야 하는가"는 내가(또는 shadcn 템플릿이) 책임지는 분업이다.
+</p>
+
+<h3 id="s-cva"><span class="t" data-tip="CVA(class-variance-authority)는 컴포넌트의 variant(색상 테마)와 size 같은 props를 받아, 그에 맞는 CSS 클래스 조합 문자열을 반환해주는 라이브러리다.">CVA</span> (class-variance-authority) 패턴</h3>
+<p>
+버튼 하나에도 <code>variant</code>(primary/secondary/danger/ghost)와 <code>size</code>(sm/md/lg) 같은 여러 축의 변형이 필요하다. CVA는 이 조합을 선언적으로 정의하고, props만 넘기면 알맞은 클래스 문자열을 계산해준다.
+</p>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p><code>class-variance-authority</code> 패키지를 import할 수 없으므로, 그 핵심 아이디어만 20여 줄의 <code>cva()</code> 함수로 재구현했다. <code>base</code> 클래스 + <code>variants</code> 맵 + <code>defaultVariants</code>를 받아 클래스 문자열을 조합하는 게 전부다.</p>
+    <ul>
+      <li>위쪽 버튼들로 <code>variant</code>를 바꾸고, 아래쪽 버튼들로 <code>size</code>를 바꾼다</li>
+      <li><code>Button</code> 컴포넌트는 실제 렌더링 로직만 담당하고, 클래스 계산은 전부 <code>buttonVariants()</code>에 위임한다</li>
+    </ul>
+  </div>
+  <div class="pg" data-pg="react" data-title="Button.jsx" data-height="260">
+<script type="text/plain" class="pg__src">
+const { useState } = React;
+
+// class-variance-authority의 핵심 아이디어를 20줄로 재구현
+function cva(base, config) {
+  return function (props) {
+    props = props || {};
+    var classes = [base];
+    for (var key in config.variants) {
+      var value = props[key] || config.defaultVariants[key];
+      var cls = config.variants[key][value];
+      if (cls) classes.push(cls);
+    }
+    return classes.join(' ');
+  };
+}
+
+const buttonVariants = cva('btn-base', {
+  variants: {
+    variant: {
+      primary: 'btn-primary',
+      secondary: 'btn-secondary',
+      danger: 'btn-danger',
+      ghost: 'btn-ghost',
+    },
+    size: { sm: 'btn-sm', md: 'btn-md', lg: 'btn-lg' },
+  },
+  defaultVariants: { variant: 'primary', size: 'md' },
+});
+
+function Button({ variant, size, children }) {
+  return <button className={buttonVariants({ variant: variant, size: size })}>{children}</button>;
+}
+
+function App() {
+  const [variant, setVariant] = useState('primary');
+  const [size, setSize] = useState('md');
+  return (
+    <div>
+      <style>{`
+        .btn-base{border:0;border-radius:8px;cursor:pointer;font-weight:700}
+        .btn-primary{background:#3b5bdb;color:#fff}
+        .btn-secondary{background:#e2e6f0;color:#171a21}
+        .btn-danger{background:#d64258;color:#fff}
+        .btn-ghost{background:transparent;color:#3b5bdb;border:1px solid #3b5bdb}
+        .btn-sm{padding:5px 10px;font-size:12px}
+        .btn-md{padding:8px 16px;font-size:14px}
+        .btn-lg{padding:12px 22px;font-size:16px}
+        .pick{font-size:11.5px;padding:4px 8px;margin-right:4px;border-radius:6px;border:1px solid #d6dae4;background:#fff;cursor:pointer}
+      `}</style>
+      <div style={{ marginBottom: 8 }}>
+        {['primary', 'secondary', 'danger', 'ghost'].map(function (v) {
+          return <button key={v} className="pick" onClick={() => setVariant(v)}>{v}</button>;
+        })}
+      </div>
+      <div style={{ marginBottom: 14 }}>
+        {['sm', 'md', 'lg'].map(function (s) {
+          return <button key={s} className="pick" onClick={() => setSize(s)}>{s}</button>;
+        })}
+      </div>
+      <Button variant={variant} size={size}>버튼 예시</Button>
+    </div>
+  );
+}
+</script>
+  </div>
+</div>
+
+<p>실제 shadcn/ui가 복사해주는 <code>button.tsx</code>는 이 원리를 그대로 쓰되, 진짜 <code>cva</code> 패키지와 Radix의 <code>Slot</code>(자식 요소에 props를 그대로 전달하는 패턴)을 함께 쓴다.</p>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>components/ui/button.tsx (발췌)</span></div>
+  <pre><code class="language-tsx">import { cva, type VariantProps } from 'class-variance-authority';
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md font-medium transition-colors',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive: 'bg-destructive text-white hover:bg-destructive/90',
+        outline: 'border bg-background hover:bg-accent',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+      },
+      size: {
+        default: 'h-9 px-4 py-2',
+        sm: 'h-8 px-3',
+        lg: 'h-10 px-6',
+      },
+    },
+    defaultVariants: { variant: 'default', size: 'default' },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt;,
+    VariantProps&lt;typeof buttonVariants&gt; {}
+
+export function Button({ className, variant, size, ...props }: ButtonProps) {
+  return (
+    &lt;button className={cn(buttonVariants({ variant, size }), className)} {...props} /&gt;
+  );
+}</code></pre>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s-tokens"><span class="h2num">§10</span>디자인 토큰과 일관성</h2>
+
+<h3 id="s-token-scales">색 · 간격 · 타이포 스케일</h3>
+<p>
+<span class="t" data-tip="디자인 토큰(design token)은 색상, 간격, 폰트 크기 같은 디자인 값을 '이름 붙은 상수'로 관리하는 것이다. 코드 전역에서 하드코딩된 값 대신 토큰을 참조하면, 값 하나만 바꿔도 전체 화면이 일관되게 바뀐다.">디자인 토큰</span>은 색상·간격·폰트 크기 같은 값을 하드코딩하지 않고 이름 붙은 상수로 관리하는 것이다.
+간격은 보통 <span class="t" data-tip="8pt 그리드는 모든 간격 값을 8의 배수(또는 4의 배수)로만 쓰는 디자인 규칙이다. 4, 8, 12, 16, 24, 32, 48, 64처럼 값 후보를 제한하면 화면 전체의 여백이 시각적으로 정렬되어 보인다.">8pt 그리드</span> — 4, 8, 12, 16, 24, 32, 48, 64px처럼 8(또는 4)의 배수만 후보로 남겨 임의의 여백 값이 화면 곳곳에 흩어지는 걸 막는다. 실제로 이 학습서의 <code>style.css</code>도 <code>--radius</code>, 헤더 높이 등에서 같은 원칙을 쓴다.
+</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>스케일</th><th>값</th></tr></thead>
+<tbody>
+<tr><td>간격 (8pt)</td><td>4 · 8 · 12 · 16 · 24 · 32 · 48 · 64px</td></tr>
+<tr><td>타이포</td><td>12 · 14 · 16 · 18 · 20 · 24 · 30 · 36 · 48px</td></tr>
+<tr><td>모서리 반경</td><td>4 · 8 · 12 · 16 · 9999px(pill)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="s-8pt-grid">시맨틱 토큰 vs 프리미티브 토큰</h3>
+<p>
+<code>--gray-100</code> 같은 이름은 <b>프리미티브(원시) 토큰</b> — "이 색이 어디에 쓰이는지"는 말하지 않는다. <code>--color-bg</code> 같은 <span class="t" data-tip="시맨틱 토큰(semantic token)은 '무엇에 쓰이는지'를 이름에 담은 토큰이다. --gray-900이 아니라 --color-fg처럼 짓고, 실제 값은 프리미티브 토큰을 참조한다. 다크모드 전환 시 시맨틱 토큰의 참조 대상만 바꾸면 컴포넌트 코드는 손댈 필요가 없다.">시맨틱 토큰</span>은 "용도"를 이름에 담고, 실제 값은 프리미티브 토큰을 참조한다. 컴포넌트는 항상 시맨틱 토큰만 참조해야 다크모드 전환 시 프리미티브 값의 매핑만 바꾸면 되고, 컴포넌트 코드는 한 줄도 안 건드려도 된다 — §6의 다크모드 놀이터가 바로 이 패턴이다.
+</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>프리미티브 토큰</th><th>시맨틱 토큰</th><th>용도</th></tr></thead>
+<tbody>
+<tr><td><code>--gray-900</code></td><td><code>--color-fg</code></td><td>기본 텍스트 색</td></tr>
+<tr><td><code>--gray-50</code></td><td><code>--color-bg</code></td><td>배경색</td></tr>
+<tr><td><code>--blue-500</code></td><td><code>--color-accent</code></td><td>강조·링크·버튼</td></tr>
+<tr><td><code>--gray-200</code></td><td><code>--color-border</code></td><td>구분선·테두리</td></tr>
+</tbody>
+</table>
+</div>
+<div class="codeblock">
+  <div class="codeblock__bar"><span>tokens.css</span></div>
+  <pre><code class="language-css">:root {
+  /* 1. 프리미티브: 값 그 자체 */
+  --gray-50: #f8fafc;
+  --gray-900: #171a21;
+  --blue-500: #3b5bdb;
+
+  /* 2. 시맨틱: 용도를 이름에 담고 프리미티브를 참조 */
+  --color-bg: var(--gray-50);
+  --color-fg: var(--gray-900);
+  --color-accent: var(--blue-500);
+}
+
+[data-theme="dark"] {
+  /* 다크모드에서는 시맨틱 토큰의 참조 대상만 바꾼다 */
+  --color-bg: var(--gray-900);
+  --color-fg: var(--gray-50);
+}
+
+.card { background: var(--color-bg); color: var(--color-fg); } /* 절대 --gray-* 직접 참조 금지 */</code></pre>
+</div>
+
+<div class="split">
+  <div class="split__note">
+    <h4>무슨 일이 일어나는가</h4>
+    <p>JS로 <code>getComputedStyle(document.documentElement).getPropertyValue('--space-4')</code>처럼 CSS 변수값을 직접 읽어와서, 8pt 간격 스케일과 회색 스케일을 화면에 시각화했다.</p>
+  </div>
+  <div class="pg" data-pg="html" data-title="tokens.html" data-height="220">
+<script type="text/plain" class="pg__src">
+<style>
+  :root{
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+    --space-6:24px; --space-8:32px; --space-12:48px; --space-16:64px;
+    --gray-50:#f8fafc; --gray-100:#eef1f6; --gray-300:#c7cfdf;
+    --gray-500:#8b93a7; --gray-700:#454b5c; --gray-900:#171a21;
+    --blue-500:#3b5bdb;
+  }
+  .row{ display:flex; align-items:flex-end; gap:6px; margin-bottom:18px; height:70px; }
+  .bar{ background:var(--blue-500); width:22px; border-radius:3px 3px 0 0; }
+  .swatches{ display:flex; gap:8px; flex-wrap:wrap; }
+  .sw{ width:56px; height:56px; border-radius:8px; display:flex; align-items:flex-end;
+       justify-content:center; font-size:9.5px; padding-bottom:4px; color:#fff; }
+</style>
+<p style="font-size:12.5px;color:#555;margin:0 0 6px">8pt 간격 스케일</p>
+<div class="row" id="spacing"></div>
+<p style="font-size:12.5px;color:#555;margin:0 0 6px">회색 스케일 (프리미티브 토큰)</p>
+<div class="swatches" id="colors"></div>
+<script>
+  var spaces = ['space-1','space-2','space-3','space-4','space-6','space-8','space-12','space-16'];
+  var sEl = document.getElementById('spacing');
+  spaces.forEach(function (name) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--' + name);
+    var bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = v;
+    bar.title = name + ': ' + v;
+    sEl.appendChild(bar);
+  });
+  var grays = ['gray-50','gray-100','gray-300','gray-500','gray-700','gray-900'];
+  var cEl = document.getElementById('colors');
+  grays.forEach(function (name) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--' + name).trim();
+    var sw = document.createElement('div');
+    sw.className = 'sw';
+    sw.style.background = v;
+    sw.textContent = name;
+    if (name === 'gray-50' || name === 'gray-100') sw.style.color = '#171a21';
+    cEl.appendChild(sw);
+  });
+<\/script>
+</script>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="s-checklist"><span class="h2num">§11</span>이해도 점검</h2>
+<ul class="check">
+<li><input type="checkbox"> 명시도 (a,b,c,d) 네 자리가 각각 무엇을 세는지 설명할 수 있다</li>
+<li><input type="checkbox"> <code>box-sizing: border-box</code>가 <code>content-box</code>와 실제 렌더링 너비를 어떻게 다르게 만드는지 설명할 수 있다</li>
+<li><input type="checkbox"> 마진 상쇄가 언제 일어나고, Flex/Grid 아이템 사이에서는 왜 안 일어나는지 설명할 수 있다</li>
+<li><input type="checkbox"> Flexbox의 주축/교차축과 justify-content/align-items의 대응 관계를 설명할 수 있다</li>
+<li><input type="checkbox"> <code>repeat(auto-fit, minmax(...))</code>이 하는 일을 설명할 수 있다</li>
+<li><input type="checkbox"> Flexbox와 Grid 중 언제 무엇을 쓸지 스스로 판단할 수 있다</li>
+<li><input type="checkbox"> <code>position: absolute</code>의 기준이 어떻게 정해지는지 설명할 수 있다</li>
+<li><input type="checkbox"> 쌓임 맥락이 새로 생기는 조건을 3개 이상 말할 수 있다</li>
+<li><input type="checkbox"> 모바일 퍼스트 미디어 쿼리와 컨테이너 쿼리의 차이를 설명할 수 있다</li>
+<li><input type="checkbox"> CSS 변수 하나로 다크모드를 전환하는 원리를 직접 구현할 수 있다</li>
+<li><input type="checkbox"> transform/opacity만 애니메이션해야 하는 성능상의 이유를 설명할 수 있다</li>
+<li><input type="checkbox"> Tailwind의 장단점을 최소 하나씩 스스로 설명할 수 있다</li>
+<li><input type="checkbox"> shadcn/ui가 npm 라이브러리와 근본적으로 다른 점을 설명할 수 있다</li>
+<li><input type="checkbox"> 프리미티브 토큰과 시맨틱 토큰의 차이와, 왜 컴포넌트는 시맨틱 토큰만 참조해야 하는지 설명할 수 있다</li>
+</ul>
+
+<section class="refs">
+  <h2 id="s-refs">참고 문헌</h2>
+  <ol>
+    <li id="r1"><span class="src">MDN Web Docs</span> — "CSS cascade and specificity". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Specificity" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r2"><span class="src">MDN Web Docs</span> — "Introduction to the CSS box model". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_model/Introduction_to_the_CSS_box_model" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r3"><span class="src">MDN Web Docs</span> — "box-sizing". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r4"><span class="src">MDN Web Docs</span> — "Mastering margin collapsing". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_model/Mastering_margin_collapsing" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r5"><span class="src">MDN Web Docs</span> — "clamp()". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/clamp" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r6"><span class="src">MDN Web Docs</span> — "Basic concepts of flexbox". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout/Basic_concepts_of_flexbox" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r7"><span class="src">MDN Web Docs</span> — "Basic concepts of grid layout". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout/Basic_concepts_of_grid_layout" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r8"><span class="src">W3C</span> — "CSS Flexible Box Layout Module Level 1". <a href="https://www.w3.org/TR/css-flexbox-1/" target="_blank" rel="noopener">w3.org</a> (2026-08 확인)</li>
+    <li id="r9"><span class="src">W3C</span> — "CSS Grid Layout Module Level 2". <a href="https://www.w3.org/TR/css-grid-2/" target="_blank" rel="noopener">w3.org</a> (2026-08 확인)</li>
+    <li id="r10"><span class="src">MDN Web Docs</span> — "position". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/position" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r11"><span class="src">MDN Web Docs</span> — "Stacking context". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r12"><span class="src">MDN Web Docs</span> — "Using media queries". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r13"><span class="src">MDN Web Docs</span> — "CSS containment: Container queries". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r14"><span class="src">MDN Web Docs</span> — "CSS nesting". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r15"><span class="src">MDN Web Docs</span> — ":has()". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/:has" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r16"><span class="src">MDN Web Docs</span> — ":is()". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/:is" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r17"><span class="src">MDN Web Docs</span> — "color-mix()". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color-mix" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r18"><span class="src">MDN Web Docs</span> — "light-dark()". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/light-dark" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r19"><span class="src">MDN Web Docs</span> — "@layer". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@layer" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r20"><span class="src">W3C</span> — "CSS Cascading and Inheritance Level 5". <a href="https://www.w3.org/TR/css-cascade-5/" target="_blank" rel="noopener">w3.org</a> (2026-08 확인)</li>
+    <li id="r21"><span class="src">MDN Web Docs</span> — "will-change". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/will-change" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r22"><span class="src">MDN Web Docs</span> — "prefers-reduced-motion". <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+    <li id="r23"><span class="src">web.dev</span> — "Animations guide". <a href="https://web.dev/articles/animations-guide" target="_blank" rel="noopener">web.dev</a> (2026-08 확인)</li>
+    <li id="r24"><span class="src">Tailwind CSS</span> — "Installation: Using Vite". <a href="https://tailwindcss.com/docs/installation/using-vite" target="_blank" rel="noopener">tailwindcss.com</a> (2026-08 확인)</li>
+    <li id="r25"><span class="src">Tailwind CSS</span> — "Styling with utility classes". <a href="https://tailwindcss.com/docs/styling-with-utility-classes" target="_blank" rel="noopener">tailwindcss.com</a> (2026-08 확인)</li>
+    <li id="r26"><span class="src">Tailwind CSS</span> — "Functions and directives (@apply)". <a href="https://tailwindcss.com/docs/functions-and-directives" target="_blank" rel="noopener">tailwindcss.com</a> (2026-08 확인)</li>
+    <li id="r27"><span class="src">shadcn/ui</span> — "Introduction". <a href="https://ui.shadcn.com/docs" target="_blank" rel="noopener">ui.shadcn.com</a> (2026-08 확인)</li>
+  </ol>
+</section>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

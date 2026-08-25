@@ -1,0 +1,2114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>용어 사전 — 프론트엔드 로드맵 학습서</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body data-chapter="99">
+<div id="hdr"></div>
+<div id="tabbar"></div>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero__eyebrow">GLOSSARY</div>
+    <h1>용어 사전</h1>
+    <p>본문 어딘가에서 낯선 단어를 만나면 여기로 온다. JavaScript부터 Git까지, 챕터 전체에 나온 251개 용어를 정의·중요성·한 줄 예시로 정리했다.</p>
+    <div class="hero__tags">
+      <span class="pill pill--accent">JavaScript</span>
+      <span class="pill">TypeScript</span>
+      <span class="pill">React</span>
+      <span class="pill">CSS</span>
+      <span class="pill">빌드</span>
+      <span class="pill">성능</span>
+      <span class="pill">접근성</span>
+      <span class="pill">테스트 · Git</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="toc" id="toc"></aside>
+    <main class="content">
+      <input id="gsearch" class="gsearch" type="search" placeholder="용어 검색 (한글/영문 모두 가능) — 예: 클로저, hydration, PnP">
+      <p class="muted small"><span id="gcount">251개 용어</span> · 모르는 단어는 여기서 찾고, 본문으로 돌아가라.</p>
+
+      <section class="gsection">
+        <h2 id="s-js"><span class="h2num">§1</span>JavaScript · 언어</h2>
+
+        <div class="gitem" id="g-primitive-type">
+          <h3>원시타입 <span class="en">Primitive Type</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>문자열·숫자·불리언·null·undefined·bigint·symbol처럼 값 자체가 그대로 저장되고 복사되는 타입이다. 변수에 담긴 원시값은 서로 독립적이라 하나를 바꿔도 다른 변수에 영향을 주지 않는다.</p>
+          <p><b>왜 중요한가</b> — 참조타입과 구분하지 못하면 "복사했는데 같이 바뀐다" 류의 버그를 이해할 수 없다.</p>
+          <p><b>한 줄 예</b> — <code>let a = 1; let b = a; b = 2; // a는 그대로 1</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Data_structures" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-reference-type">
+          <h3>참조타입 <span class="en">Reference Type</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>객체, 배열, 함수처럼 변수에 값이 아니라 메모리 주소(참조)가 저장되는 타입이다. 같은 참조를 가진 두 변수는 한쪽을 수정하면 다른 쪽도 함께 바뀐다.</p>
+          <p><b>왜 중요한가</b> — React에서 "state가 안 바뀐다"는 버그 대부분이 참조타입을 직접 변형해서 생긴다.</p>
+          <p><b>한 줄 예</b> — <code>const a = { n: 1 }; const b = a; b.n = 2; // a.n도 2</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-scope">
+          <h3>스코프 <span class="en">Scope</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>변수와 함수가 어디서 접근 가능한지를 정하는 범위다. 전역 스코프, 함수 스코프, 블록 스코프로 나뉜다.</p>
+          <p><b>왜 중요한가</b> — 스코프를 알아야 변수 충돌과 클로저 동작을 예측할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>if (true) { let x = 1; } // x는 여기서 접근 불가</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-lexical-scope">
+          <h3>렉시컬 스코프 <span class="en">Lexical Scope</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>함수가 호출된 위치가 아니라 코드가 작성된 위치를 기준으로 상위 스코프가 정해지는 규칙이다. JS는 실행 시점이 아니라 정의 시점의 스코프 체인을 따른다.</p>
+          <p><b>왜 중요한가</b> — 클로저가 왜 바깥 변수를 계속 기억하는지 설명하는 근거다.</p>
+          <p><b>한 줄 예</b> — <code>function outer() { let x = 1; return function () { return x; }; }</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-hoisting">
+          <h3>호이스팅 <span class="en">Hoisting</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>var 선언과 함수 선언이 실행 전에 스코프 최상단으로 끌어올려지는 것처럼 동작하는 현상이다. let/const도 선언 자체는 끌어올려지지만 초기화 전까지는 접근할 수 없다.</p>
+          <p><b>왜 중요한가</b> — "선언 전에 썼는데 에러가 안 나고 undefined가 나온다" 같은 동작을 이해하는 데 필요하다.</p>
+          <p><b>한 줄 예</b> — <code>console.log(x); var x = 1; // undefined, 에러 아님</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Glossary/Hoisting" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-tdz">
+          <h3>TDZ <span class="en">Temporal Dead Zone</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>let/const로 선언된 변수가 스코프 시작부터 실제 선언문까지 접근이 금지되는 구간이다. 이 구간에서 변수를 참조하면 ReferenceError가 발생한다.</p>
+          <p><b>왜 중요한가</b> — var와 달리 let/const가 왜 더 안전한지 설명하는 핵심 개념이다.</p>
+          <p><b>한 줄 예</b> — <code>console.log(y); let y = 1; // ReferenceError</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-closure">
+          <h3>클로저 <span class="en">Closure</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>함수가 자기 바깥 스코프의 변수를 기억한 채로 살아 있는 상태다. 외부 함수 실행이 끝나도 내부 함수가 그 변수를 참조하고 있으면 가비지 컬렉션되지 않는다.</p>
+          <p><b>왜 중요한가</b> — 카운터, 캐시, 프라이빗 변수 흉내 등 상태를 함수 안에 안전하게 가두는 패턴의 기반이다.</p>
+          <p><b>한 줄 예</b> — <code>const counter = (() =&gt; { let n = 0; return () =&gt; ++n; })();</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Closures" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-this">
+          <h3>this <span class="pill pill--accent">CH01</span></h3>
+          <p>함수가 호출되는 방식에 따라 값이 결정되는 특수 키워드다. 일반 함수는 호출한 객체를, 화살표 함수는 자신을 감싼 스코프의 this를 그대로 물려받는다.</p>
+          <p><b>왜 중요한가</b> — 이벤트 핸들러나 콜백 안에서 this가 undefined가 되는 흔한 버그의 원인이다.</p>
+          <p><b>한 줄 예</b> — <code>const obj = { n: 1, get() { return this.n; } };</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/this" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-arrow-function">
+          <h3>화살표 함수 <span class="en">Arrow Function</span> <span class="pill pill--accent">CH01</span></h3>
+          <p><code>=&gt;</code> 문법으로 정의하며 자체 this, arguments, prototype을 갖지 않는 함수다. 정의된 위치의 this를 그대로 사용한다.</p>
+          <p><b>왜 중요한가</b> — 콜백 안에서 this를 따로 bind하지 않아도 되게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>const add = (a, b) =&gt; a + b;</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-prototype">
+          <h3>프로토타입 <span class="en">Prototype</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>객체가 다른 객체(프로토타입)를 참조해 속성과 메서드를 상속받는 JS의 상속 메커니즘이다. 값을 찾을 때까지 프로토타입 체인을 따라 위로 탐색한다.</p>
+          <p><b>왜 중요한가</b> — class 문법도 결국 프로토타입 기반으로 동작하므로 원리를 알아야 상속 버그를 디버깅할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>Array.prototype.last = function () { return this[this.length - 1]; };</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Inheritance_and_the_prototype_chain" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-event-loop">
+          <h3>이벤트 루프 <span class="en">Event Loop</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>콜스택이 비었을 때 태스크 큐와 마이크로태스크 큐에서 실행할 작업을 꺼내 콜스택에 넣는 런타임 메커니즘이다. JS가 싱글 스레드인데도 비동기를 처리할 수 있는 이유다.</p>
+          <p><b>왜 중요한가</b> — setTimeout과 Promise의 실행 순서를 예측하려면 반드시 알아야 한다.</p>
+          <p><b>한 줄 예</b> — <code>console.log(1); setTimeout(() =&gt; console.log(2)); Promise.resolve().then(() =&gt; console.log(3)); // 1, 3, 2</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Event_loop" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-call-stack">
+          <h3>콜스택 <span class="en">Call Stack</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>현재 실행 중인 함수 호출을 순서대로 쌓아두는 후입선출(LIFO) 자료구조다. 함수가 호출되면 쌓이고 반환되면 제거된다.</p>
+          <p><b>왜 중요한가</b> — 스택이 너무 깊어지면 "Maximum call stack size exceeded" 에러가 발생한다(무한 재귀 등).</p>
+          <p><b>한 줄 예</b> — <code>function f() { f(); } f(); // stack overflow</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-task-queue">
+          <h3>태스크 큐 <span class="en">Task Queue</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>setTimeout, setInterval, DOM 이벤트 콜백처럼 브라우저가 처리하는 비동기 작업이 대기하는 큐(매크로태스크)다. 이벤트 루프는 콜스택과 마이크로태스크 큐가 모두 비었을 때 여기서 하나씩 꺼낸다.</p>
+          <p><b>왜 중요한가</b> — 마이크로태스크보다 항상 나중에 실행된다는 순서 규칙을 알아야 한다.</p>
+          <p><b>한 줄 예</b> — <code>setTimeout(() =&gt; console.log("macro"), 0);</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-microtask">
+          <h3>마이크로태스크 <span class="en">Microtask</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>Promise.then, queueMicrotask처럼 현재 실행 중인 코드가 끝나자마자 태스크 큐보다 먼저 실행되는 작업이다.</p>
+          <p><b>왜 중요한가</b> — async/await 뒤의 코드가 setTimeout보다 먼저 실행되는 이유가 여기에 있다.</p>
+          <p><b>한 줄 예</b> — <code>Promise.resolve().then(() =&gt; console.log("micro"));</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-promise">
+          <h3>Promise <span class="pill pill--accent">CH01</span></h3>
+          <p>비동기 작업의 성공(resolve) 또는 실패(reject) 결과를 나중에 다룰 수 있게 감싸는 객체다. pending → fulfilled/rejected 세 상태를 가진다.</p>
+          <p><b>왜 중요한가</b> — 콜백 지옥 없이 비동기 흐름을 체이닝(.then/.catch)하거나 async/await로 다룰 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>fetch("/api").then(r =&gt; r.json());</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Using_promises" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-async-await">
+          <h3>async/await <span class="pill pill--accent">CH01</span></h3>
+          <p>Promise를 동기 코드처럼 순서대로 작성하게 해주는 문법이다. async 함수는 항상 Promise를 반환하고, await는 Promise가 처리될 때까지 함수 실행을 일시 중단한다.</p>
+          <p><b>왜 중요한가</b> — .then 체이닝보다 가독성이 좋고 try/catch로 에러 처리가 자연스럽다.</p>
+          <p><b>한 줄 예</b> — <code>async function load() { const r = await fetch("/api"); return r.json(); }</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-iterable">
+          <h3>이터러블 <span class="en">Iterable</span> <span class="pill pill--accent">CH01</span></h3>
+          <p><code>Symbol.iterator</code>를 구현해 for...of나 스프레드로 순회할 수 있는 객체다. 배열, 문자열, Map, Set이 기본적으로 이터러블이다.</p>
+          <p><b>왜 중요한가</b> — 커스텀 자료구조를 for...of로 순회 가능하게 만들 때 필요하다.</p>
+          <p><b>한 줄 예</b> — <code>for (const c of "abc") console.log(c);</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-destructuring">
+          <h3>구조분해 <span class="en">Destructuring</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>배열이나 객체의 값을 변수로 한 번에 꺼내는 문법이다.</p>
+          <p><b>왜 중요한가</b> — props나 API 응답에서 필요한 값만 짧게 꺼낼 때 널리 쓰인다.</p>
+          <p><b>한 줄 예</b> — <code>const { name, age } = user;</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-spread">
+          <h3>스프레드 <span class="en">Spread</span> <span class="pill pill--accent">CH01</span></h3>
+          <p><code>...</code> 문법으로 배열이나 객체의 요소를 펼쳐서 복사하거나 합치는 문법이다.</p>
+          <p><b>왜 중요한가</b> — 불변성을 지키며 새 배열/객체를 만들 때(예: state 업데이트) 표준 패턴이다.</p>
+          <p><b>한 줄 예</b> — <code>const next = { ...state, done: true };</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Spread_syntax" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-optional-chaining">
+          <h3>옵셔널 체이닝 <span class="en">Optional Chaining</span> <span class="pill pill--accent">CH01</span></h3>
+          <p><code>?.</code> 연산자로, 중간 값이 null/undefined면 에러 없이 undefined를 반환하고 평가를 멈춘다.</p>
+          <p><b>왜 중요한가</b> — <code>user &amp;&amp; user.address &amp;&amp; user.address.city</code> 같은 방어 코드를 한 줄로 줄여준다.</p>
+          <p><b>한 줄 예</b> — <code>const city = user?.address?.city;</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Optional_chaining" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-nullish-coalescing">
+          <h3>nullish 병합 <span class="en">Nullish Coalescing</span> <span class="pill pill--accent">CH01</span></h3>
+          <p><code>??</code> 연산자로, 왼쪽 값이 null 또는 undefined일 때만 오른쪽 값을 사용한다. <code>||</code>와 달리 0이나 빈 문자열은 그대로 둔다.</p>
+          <p><b>왜 중요한가</b> — <code>count || 10</code>이 count가 0일 때 의도치 않게 10이 되는 버그를 막는다.</p>
+          <p><b>한 줄 예</b> — <code>const limit = count ?? 10;</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-shallow-deep-copy">
+          <h3>얕은 복사 / 깊은 복사 <span class="en">Shallow/Deep Copy</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>얕은 복사는 최상위 속성만 새로 복사하고 중첩된 객체는 참조를 그대로 공유한다. 깊은 복사는 중첩된 값까지 재귀적으로 모두 새로 만든다.</p>
+          <p><b>왜 중요한가</b> — 스프레드(<code>{ ...obj }</code>)는 얕은 복사라서 중첩 객체를 수정하면 원본도 함께 바뀔 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>const deep = structuredClone(obj);</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-pure-function">
+          <h3>순수 함수 <span class="en">Pure Function</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>같은 입력이면 항상 같은 출력을 반환하고, 외부 상태를 변경하지 않는 함수다.</p>
+          <p><b>왜 중요한가</b> — 예측 가능하고 테스트하기 쉬우며 React 컴포넌트 렌더링의 기본 전제다.</p>
+          <p><b>한 줄 예</b> — <code>const add = (a, b) =&gt; a + b; // 순수</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-immutability">
+          <h3>불변성 <span class="en">Immutability</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>데이터를 직접 수정하지 않고 변경된 새 데이터를 만들어 교체하는 원칙이다.</p>
+          <p><b>왜 중요한가</b> — React state를 직접 mutate하면 리렌더링이 감지되지 않으므로 불변성 유지가 필수다.</p>
+          <p><b>한 줄 예</b> — <code>setList(prev =&gt; [...prev, item]);</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-higher-order-function">
+          <h3>고차 함수 <span class="en">Higher-Order Function</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>함수를 인자로 받거나 함수를 반환하는 함수다. map, filter, reduce가 대표적이다.</p>
+          <p><b>왜 중요한가</b> — 반복 로직을 재사용 가능한 조각으로 추상화한다.</p>
+          <p><b>한 줄 예</b> — <code>const doubled = [1, 2, 3].map(n =&gt; n * 2);</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-currying">
+          <h3>커링 <span class="en">Currying</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>여러 인자를 받는 함수를 인자 하나씩 받는 함수의 연쇄로 바꾸는 기법이다.</p>
+          <p><b>왜 중요한가</b> — 부분 적용으로 재사용 가능한 함수를 미리 만들어 둘 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>const add = a =&gt; b =&gt; a + b; add(1)(2); // 3</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-iife">
+          <h3>IIFE <span class="en">Immediately Invoked Function Expression</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>정의되자마자 즉시 실행되는 함수 표현식이다.</p>
+          <p><b>왜 중요한가</b> — 변수를 전역에 노출하지 않고 독립된 스코프를 만들 때, 모듈 시스템 이전부터 쓰이던 패턴이다.</p>
+          <p><b>한 줄 예</b> — <code>(function () { console.log("run"); })();</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-module">
+          <h3>모듈 <span class="en">Module</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>코드를 파일 단위로 나누고 필요한 부분만 export/import로 주고받는 단위다.</p>
+          <p><b>왜 중요한가</b> — 전역 변수 오염을 막고 재사용과 의존성 관리를 가능하게 한다.</p>
+          <p><b>한 줄 예</b> — <code>export function sum(a, b) { return a + b; }</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-esm">
+          <h3>ESM <span class="en">ECMAScript Modules</span> <span class="pill pill--accent">CH01</span></h3>
+          <p><code>import</code>/<code>export</code> 문법을 쓰는 JS 표준 모듈 시스템이다. 정적으로 분석 가능해 트리 셰이킹을 지원한다.</p>
+          <p><b>왜 중요한가</b> — Vite 같은 최신 빌드 도구는 ESM을 기본 전제로 동작한다.</p>
+          <p><b>한 줄 예</b> — <code>import { sum } from "./math.js";</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-commonjs">
+          <h3>CommonJS <span class="pill pill--accent">CH01</span></h3>
+          <p><code>require</code>/<code>module.exports</code>를 쓰는 Node.js의 전통적 모듈 시스템이다. 런타임에 동적으로 로드된다.</p>
+          <p><b>왜 중요한가</b> — 오래된 npm 패키지나 Node 스크립트에서 여전히 쓰여 ESM과의 상호운용을 알아야 한다.</p>
+          <p><b>한 줄 예</b> — <code>const { sum } = require("./math");</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://nodejs.org/api/modules.html" target="_blank" rel="noopener">Node.js</a></div>
+        </div>
+
+        <div class="gitem" id="g-transpile">
+          <h3>트랜스파일 <span class="en">Transpile</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>최신 문법으로 쓰인 코드를 구형 브라우저도 이해할 수 있는 문법으로 변환하는 것이다(Babel, SWC).</p>
+          <p><b>왜 중요한가</b> — 최신 문법을 자유롭게 쓰면서도 넓은 브라우저 호환성을 유지할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// 화살표 함수 → function 표현식으로 변환</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-polyfill">
+          <h3>폴리필 <span class="en">Polyfill</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>브라우저가 아직 지원하지 않는 API를 표준과 동일하게 동작하도록 미리 구현해 채워 넣는 코드다.</p>
+          <p><b>왜 중요한가</b> — <code>Array.prototype.at</code> 같은 최신 API를 구형 환경에서도 쓸 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>if (!Array.prototype.at) { /* 구현 채우기 */ }</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-strict-mode">
+          <h3>strict mode <span class="pill pill--accent">CH01</span></h3>
+          <p><code>"use strict"</code>로 활성화하며 암묵적 전역 변수 생성 등 위험한 JS 동작을 에러로 바꾸는 모드다. ESM은 기본적으로 strict mode다.</p>
+          <p><b>왜 중요한가</b> — 실수를 조기에 에러로 드러내 디버깅 시간을 줄인다.</p>
+          <p><b>한 줄 예</b> — <code>"use strict"; x = 1; // ReferenceError</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Strict_mode" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-garbage-collection">
+          <h3>가비지 컬렉션 <span class="en">Garbage Collection</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>더 이상 어디서도 참조되지 않는 메모리를 JS 엔진이 자동으로 회수하는 과정이다.</p>
+          <p><b>왜 중요한가</b> — 수동 메모리 해제는 없지만, 참조를 남겨두면 회수되지 않는다는 점을 알아야 한다.</p>
+          <p><b>한 줄 예</b> — <code>let obj = { big: new Array(1e6) }; obj = null; // 회수 대상</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Memory_management" target="_blank" rel="noopener">MDN</a></div>
+        </div>
+
+        <div class="gitem" id="g-memory-leak">
+          <h3>메모리 누수 <span class="en">Memory Leak</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>더 이상 필요 없는 객체가 어딘가에서 계속 참조되어 가비지 컬렉션되지 못하고 메모리를 점유하는 현상이다.</p>
+          <p><b>왜 중요한가</b> — 해제하지 않은 이벤트 리스너, cleanup 없는 useEffect가 흔한 원인이다.</p>
+          <p><b>한 줄 예</b> — <code>useEffect(() =&gt; { const id = setInterval(fn, 1000); return () =&gt; clearInterval(id); }, []);</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-event-delegation">
+          <h3>이벤트 위임 <span class="en">Event Delegation</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>각 자식 요소에 리스너를 달지 않고 부모 요소 하나에만 리스너를 달아 버블링을 이용해 처리하는 패턴이다.</p>
+          <p><b>왜 중요한가</b> — 리스트 항목이 동적으로 늘어나도 리스너를 매번 추가/제거할 필요가 없다.</p>
+          <p><b>한 줄 예</b> — <code>list.addEventListener("click", e =&gt; { if (e.target.matches("li")) {} });</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-bubbling-capturing">
+          <h3>버블링/캡처링 <span class="en">Bubbling/Capturing</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>이벤트가 전파되는 두 방향이다. 캡처링은 최상위에서 target까지 내려오고, 버블링은 target에서 최상위로 올라간다.</p>
+          <p><b>왜 중요한가</b> — <code>stopPropagation</code>으로 전파를 막는 위치를 정확히 이해하려면 필요하다.</p>
+          <p><b>한 줄 예</b> — <code>el.addEventListener("click", fn, { capture: true });</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-debounce">
+          <h3>디바운스 <span class="en">Debounce</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>연속으로 발생하는 이벤트에서 마지막 호출 후 일정 시간이 지나야 함수를 실행하는 기법이다.</p>
+          <p><b>왜 중요한가</b> — 검색창 입력마다 API를 호출하지 않고 타이핑이 멈췄을 때만 호출하게 한다.</p>
+          <p><b>한 줄 예</b> — <code>let t; const debounced = () =&gt; { clearTimeout(t); t = setTimeout(fn, 300); };</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-throttle">
+          <h3>스로틀 <span class="en">Throttle</span> <span class="pill pill--accent">CH01</span></h3>
+          <p>일정 시간 간격마다 최대 한 번만 함수가 실행되도록 제한하는 기법이다.</p>
+          <p><b>왜 중요한가</b> — 스크롤, 리사이즈처럼 매우 자주 발생하는 이벤트의 처리 빈도를 낮춘다.</p>
+          <p><b>한 줄 예</b> — <code>let ok = true; const throttled = () =&gt; { if (!ok) return; ok = false; fn(); setTimeout(() =&gt; ok = true, 300); };</code></p>
+          <div class="links"><a href="ch01.html">→ CH01에서 자세히</a> · <a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-ts"><span class="h2num">§2</span>TypeScript</h2>
+
+        <div class="gitem" id="g-static-typing">
+          <h3>정적 타입 <span class="en">Static Typing</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>코드를 실행하기 전, 컴파일(트랜스파일) 단계에서 변수와 함수의 타입을 검사하는 방식이다. JS는 런타임에만 타입을 확인하는 동적 타입 언어지만, TypeScript는 이를 정적으로 앞당긴다.</p>
+          <p><b>왜 중요한가</b> — 오타나 잘못된 타입 전달을 배포 전에 에디터에서 바로 잡아낸다.</p>
+          <p><b>한 줄 예</b> — <code>let age: number = "스물"; // 컴파일 에러</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/intro.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-type-inference">
+          <h3>타입 추론 <span class="en">Type Inference</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>타입을 명시하지 않아도 TypeScript가 초기값이나 문맥으로부터 타입을 자동으로 판단하는 기능이다.</p>
+          <p><b>왜 중요한가</b> — 모든 변수에 타입을 일일이 쓰지 않아도 안전성을 얻을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>let n = 1; // number로 추론됨</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-narrowing">
+          <h3>타입 좁히기 <span class="en">Narrowing</span> <span class="pill pill--accent">CH02</span></h3>
+          <p><code>typeof</code>, <code>instanceof</code>, 조건문 등으로 넓은 타입(유니온 등)을 특정 분기 안에서 더 구체적인 타입으로 줄여가는 과정이다.</p>
+          <p><b>왜 중요한가</b> — 유니온 타입에서 각 타입 전용 속성/메서드를 안전하게 쓸 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>if (typeof v === "string") v.toUpperCase();</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-type-guard">
+          <h3>타입 가드 <span class="en">Type Guard</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>함수의 반환 타입을 <code>value is Type</code> 형태로 선언해, 호출한 곳에서 타입이 좁혀지도록 만드는 함수다.</p>
+          <p><b>왜 중요한가</b> — 반복되는 타입 좁히기 로직을 재사용 가능한 함수로 뽑아낼 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>function isString(v: unknown): v is string { return typeof v === "string"; }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-discriminated-union">
+          <h3>판별 유니온 <span class="en">Discriminated Union</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>공통된 리터럴 타입 필드(태그)를 가진 여러 타입의 유니온이다. 그 필드 값으로 어떤 타입인지 안전하게 구분한다.</p>
+          <p><b>왜 중요한가</b> — switch/if로 태그를 검사하면 각 분기에서 타입이 정확히 좁혀져 런타임 에러를 막는다.</p>
+          <p><b>한 줄 예</b> — <code>type Shape = { kind: "circle"; r: number } | { kind: "square"; s: number };</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-union-intersection">
+          <h3>유니온/교차 타입 <span class="en">Union/Intersection Types</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>유니온(<code>|</code>)은 "A 또는 B" 중 하나, 교차(<code>&amp;</code>)는 "A이면서 B"인 타입을 만든다.</p>
+          <p><b>왜 중요한가</b> — 여러 형태를 허용하거나 여러 타입을 합성해 재사용할 때 기본 도구다.</p>
+          <p><b>한 줄 예</b> — <code>type Id = string | number; type Named = { name: string } &amp; { age: number };</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-literal-type">
+          <h3>리터럴 타입 <span class="en">Literal Type</span> <span class="pill pill--accent">CH02</span></h3>
+          <p><code>"a"</code>, <code>1</code>, <code>true</code>처럼 구체적인 값 하나만을 타입으로 쓰는 것이다.</p>
+          <p><b>왜 중요한가</b> — 문자열 아무거나가 아니라 정해진 값만 허용하도록 API를 제한할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>type Direction = "up" | "down";</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-as-const">
+          <h3>as const <span class="pill pill--accent">CH02</span></h3>
+          <p>객체·배열 리터럴을 가장 좁은 리터럴 타입, 읽기 전용으로 고정하는 단언이다.</p>
+          <p><b>왜 중요한가</b> — 배열을 유니온 타입의 소스로 쓰거나 값이 바뀌지 않음을 타입 레벨에서 보장할 때 쓴다.</p>
+          <p><b>한 줄 예</b> — <code>const dirs = ["up", "down"] as const;</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-any">
+          <h3>any <span class="pill pill--accent">CH02</span></h3>
+          <p>타입 검사를 완전히 꺼버리는 타입이다. any에 대입된 값은 어떤 연산도 컴파일 타임에 체크되지 않는다.</p>
+          <p><b>왜 중요한가</b> — 남용하면 TypeScript를 쓰는 의미가 사라지므로 최후의 수단으로만 써야 한다.</p>
+          <p><b>한 줄 예</b> — <code>let v: any = 1; v.toUpperCase(); // 컴파일은 통과, 런타임 에러</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-unknown">
+          <h3>unknown <span class="pill pill--accent">CH02</span></h3>
+          <p>any처럼 어떤 값이든 담을 수 있지만, 실제로 사용하기 전에 반드시 타입을 좁혀야 하는 안전한 타입이다.</p>
+          <p><b>왜 중요한가</b> — 외부에서 들어오는 값(API 응답 등)의 타입을 검증 없이 함부로 쓰지 못하게 막는다.</p>
+          <p><b>한 줄 예</b> — <code>let v: unknown = 1; if (typeof v === "number") v + 1;</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-never">
+          <h3>never <span class="pill pill--accent">CH02</span></h3>
+          <p>절대 발생하지 않는 값의 타입이다. 항상 예외를 던지는 함수의 반환 타입이나, switch에서 모든 분기를 다뤘음을 검증할 때 쓴다.</p>
+          <p><b>왜 중요한가</b> — "모든 케이스를 처리했는지"를 컴파일 타임에 강제로 검사하게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>function fail(): never { throw new Error(); }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-void">
+          <h3>void <span class="pill pill--accent">CH02</span></h3>
+          <p>함수가 의미 있는 값을 반환하지 않을 때 쓰는 반환 타입이다.</p>
+          <p><b>왜 중요한가</b> — 반환값을 쓰지 않을 함수임을 타입으로 명시해 실수로 반환값을 사용하는 걸 막는다.</p>
+          <p><b>한 줄 예</b> — <code>function log(msg: string): void { console.log(msg); }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-generic">
+          <h3>제네릭 <span class="en">Generic</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>타입을 함수/타입의 매개변수처럼 받아, 호출 시점에 구체적인 타입이 정해지도록 하는 기능이다.</p>
+          <p><b>왜 중요한가</b> — any 없이도 다양한 타입에 재사용 가능한 함수·컴포넌트를 만들 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>function first&lt;T&gt;(arr: T[]): T { return arr[0]; }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/2/generics.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-extends-constraint">
+          <h3>제약 (extends) <span class="en">Generic Constraint</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>제네릭 타입 매개변수가 특정 형태를 반드시 만족하도록 <code>extends</code>로 제한하는 것이다.</p>
+          <p><b>왜 중요한가</b> — 제네릭 안에서 특정 속성에 안전하게 접근하려면 그 속성이 있다는 것을 타입에 알려야 한다.</p>
+          <p><b>한 줄 예</b> — <code>function getId&lt;T extends { id: number }&gt;(v: T) { return v.id; }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-utility-types">
+          <h3>유틸리티 타입 <span class="en">Utility Types</span> <span class="pill pill--accent">CH02</span></h3>
+          <p><code>Partial</code>, <code>Pick</code>, <code>Omit</code>, <code>Record</code>처럼 기존 타입을 변형해 새 타입을 만드는 TypeScript 내장 타입 모음이다.</p>
+          <p><b>왜 중요한가</b> — 매번 새 타입을 손으로 쓰지 않고 기존 타입을 조합해 재사용할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>type DraftUser = Partial&lt;User&gt;;</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-keyof">
+          <h3>keyof <span class="pill pill--accent">CH02</span></h3>
+          <p>객체 타입의 모든 속성 이름을 리터럴 유니온 타입으로 뽑아내는 연산자다.</p>
+          <p><b>왜 중요한가</b> — 객체의 키만 허용하는 함수를 만들 때(예: <code>get(obj, key)</code>) 타입 안전을 보장한다.</p>
+          <p><b>한 줄 예</b> — <code>type Keys = keyof User; // "id" | "name"</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/2/keyof-types.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-typeof-type">
+          <h3>typeof (타입 연산자) <span class="pill pill--accent">CH02</span></h3>
+          <p>변수나 객체의 타입을 그대로 가져와 타입으로 재사용하는 연산자다. JS의 런타임 <code>typeof</code>와 이름은 같지만 타입 위치에서 쓰인다.</p>
+          <p><b>왜 중요한가</b> — 값을 먼저 정의하고 그 타입을 재사용하고 싶을 때(스키마 등) 중복 선언을 피한다.</p>
+          <p><b>한 줄 예</b> — <code>const config = { mode: "dark" }; type Config = typeof config;</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/2/typeof-types.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-conditional-types">
+          <h3>조건부 타입 <span class="en">Conditional Types</span> <span class="pill pill--accent">CH02</span></h3>
+          <p><code>T extends U ? X : Y</code> 형태로, 타입 레벨에서 조건 분기를 하는 문법이다.</p>
+          <p><b>왜 중요한가</b> — 입력 타입에 따라 다른 타입을 반환하는 제네릭 유틸리티를 만들 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>type IsString&lt;T&gt; = T extends string ? true : false;</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/2/conditional-types.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-infer">
+          <h3>infer <span class="pill pill--accent">CH02</span></h3>
+          <p>조건부 타입 안에서 특정 위치의 타입을 변수처럼 추출하는 키워드다.</p>
+          <p><b>왜 중요한가</b> — 함수의 반환 타입이나 배열 요소 타입처럼 안에 숨은 타입을 꺼낼 때 쓴다.</p>
+          <p><b>한 줄 예</b> — <code>type ReturnOf&lt;T&gt; = T extends (...a: any[]) =&gt; infer R ? R : never;</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-mapped-types">
+          <h3>매핑드 타입 <span class="en">Mapped Types</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>기존 타입의 모든 속성을 순회하며 새로운 속성 집합을 만드는 타입이다(Partial, Readonly가 내부적으로 이 방식이다).</p>
+          <p><b>왜 중요한가</b> — 속성이 몇 개든 자동으로 대응하는 변형 타입을 직접 만들 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>type ReadonlyUser = { readonly [K in keyof User]: User[K] };</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="https://www.typescriptlang.org/docs/handbook/2/mapped-types.html" target="_blank" rel="noopener">TypeScript</a></div>
+        </div>
+
+        <div class="gitem" id="g-declaration-file">
+          <h3>선언 파일 (d.ts) <span class="en">Declaration File</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>구현 없이 타입 정보만 담은 <code>.d.ts</code> 파일이다. JS로 작성된 라이브러리에 타입을 붙일 때 쓴다.</p>
+          <p><b>왜 중요한가</b> — TypeScript가 아닌 라이브러리를 타입 안전하게 사용할 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>declare module "some-js-lib" { export function run(): void; }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-structural-typing">
+          <h3>구조적 타이핑 <span class="en">Structural Typing</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>타입 이름이 아니라 실제로 가진 속성의 형태(구조)가 같으면 호환된다고 보는 TypeScript의 타입 비교 방식이다.</p>
+          <p><b>왜 중요한가</b> — 클래스 상속 없이도 같은 모양의 객체면 서로 호환된다는 걸 이해해야 타입 에러 메시지를 읽을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>type A = { x: number }; type B = { x: number }; const a: A = { x: 1 };</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-type-erasure">
+          <h3>타입 소거 <span class="en">Type Erasure</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>TypeScript 코드가 JS로 변환될 때 타입 관련 문법이 모두 제거되는 것이다. 런타임에는 타입 정보가 전혀 남지 않는다.</p>
+          <p><b>왜 중요한가</b> — 런타임에 typeof로 TS 타입을 검사할 수 없다는 걸 알아야 한다(값과 타입은 별개다).</p>
+          <p><b>한 줄 예</b> — <code>interface User { id: number } // 컴파일 후 완전히 사라짐</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-ambient">
+          <h3>앰비언트 <span class="en">Ambient</span> <span class="pill pill--accent">CH02</span></h3>
+          <p>실제 구현 없이 "이런 타입/전역 변수가 존재한다"고 컴파일러에 알려주는 선언(<code>declare</code>)이다.</p>
+          <p><b>왜 중요한가</b> — 전역 스크립트나 외부에서 주입되는 변수의 타입을 안전하게 쓸 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>declare const __APP_VERSION__: string;</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-strict-tsconfig">
+          <h3>strict (tsconfig) <span class="pill pill--accent">CH02</span></h3>
+          <p><code>noImplicitAny</code>, <code>strictNullChecks</code> 등 여러 엄격 검사 옵션을 한 번에 켜는 tsconfig 플래그다.</p>
+          <p><b>왜 중요한가</b> — 새 프로젝트는 대부분 <code>strict: true</code>를 기본값으로 시작해 타입 구멍을 줄인다.</p>
+          <p><b>한 줄 예</b> — <code>{ "compilerOptions": { "strict": true } }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-module-resolution">
+          <h3>모듈 해석 <span class="en">Module Resolution</span> <span class="pill pill--accent">CH02</span></h3>
+          <p><code>import "./foo"</code> 같은 경로를 실제 어느 파일로 연결할지 TypeScript/번들러가 찾아가는 규칙이다.</p>
+          <p><b>왜 중요한가</b> — paths, baseUrl, node 방식 등 설정에 따라 같은 import문도 다른 파일을 가리킬 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>{ "compilerOptions": { "moduleResolution": "bundler" } }</code></p>
+          <div class="links"><a href="ch02.html">→ CH02에서 자세히</a> · <a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-react"><span class="h2num">§3</span>React</h2>
+
+        <div class="gitem" id="g-component">
+          <h3>컴포넌트 <span class="en">Component</span> <span class="pill pill--accent">CH03</span></h3>
+          <p>UI의 한 조각을 독립적으로 정의하는 함수(또는 클래스)다. props를 받아 화면에 그릴 내용을 반환한다.</p>
+          <p><b>왜 중요한가</b> — 반복되는 UI를 재사용 가능한 단위로 쪼개는 React의 기본 구성 단위다.</p>
+          <p><b>한 줄 예</b> — <code>function Button({ label }) { return &lt;button&gt;{label}&lt;/button&gt;; }</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a> · <a href="https://react.dev/learn" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-jsx">
+          <h3>JSX <span class="pill pill--accent">CH03</span></h3>
+          <p>JS 안에서 HTML과 비슷한 문법으로 UI를 표현하게 해주는 문법 확장이다. 실제로는 <code>React.createElement</code> 호출로 변환된다.</p>
+          <p><b>왜 중요한가</b> — 마크업과 로직을 한 파일에서 같이 볼 수 있어 컴포넌트 단위 사고가 쉬워진다.</p>
+          <p><b>한 줄 예</b> — <code>const el = &lt;h1&gt;안녕&lt;/h1&gt;;</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-props">
+          <h3>props <span class="pill pill--accent">CH03</span></h3>
+          <p>부모 컴포넌트가 자식 컴포넌트에 전달하는 읽기 전용 데이터다.</p>
+          <p><b>왜 중요한가</b> — 컴포넌트를 재사용 가능하게 만드는 유일한 입력 통로다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;Button label="저장" /&gt;</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-state">
+          <h3>state <span class="pill pill--accent">CH03</span></h3>
+          <p>컴포넌트가 시간에 따라 변할 수 있는, 그 컴포넌트가 직접 관리하는 데이터다. state가 바뀌면 리렌더링이 트리거된다.</p>
+          <p><b>왜 중요한가</b> — props와 달리 컴포넌트 스스로 값을 바꿀 수 있는 유일한 방법이다.</p>
+          <p><b>한 줄 예</b> — <code>const [count, setCount] = useState(0);</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-re-render">
+          <h3>리렌더링 <span class="en">Re-render</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>state나 props가 바뀌었을 때 컴포넌트 함수가 다시 실행되어 새 화면 트리를 계산하는 과정이다.</p>
+          <p><b>왜 중요한가</b> — 언제 리렌더링이 일어나는지 모르면 성능 문제와 무한 루프를 디버깅할 수 없다.</p>
+          <p><b>한 줄 예</b> — <code>setCount(c =&gt; c + 1); // 이 컴포넌트 리렌더링 트리거</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-reconciliation">
+          <h3>재조정 <span class="en">Reconciliation</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>리렌더링으로 새로 계산된 가상 DOM을 이전 것과 비교해 실제 DOM에서 바뀐 부분만 반영하는 React의 알고리즘이다.</p>
+          <p><b>왜 중요한가</b> — 매번 DOM 전체를 새로 그리지 않고 최소한만 갱신해 성능을 지킨다.</p>
+          <p><b>한 줄 예</b> — <code>// key가 같으면 같은 DOM 노드로 간주하고 재사용한다</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-virtual-dom">
+          <h3>가상 DOM <span class="en">Virtual DOM</span> <span class="pill pill--accent">CH03</span></h3>
+          <p>실제 DOM을 JS 객체로 가볍게 표현한 트리다. React는 실제 DOM 대신 이 트리를 먼저 비교한다.</p>
+          <p><b>왜 중요한가</b> — DOM 조작은 비용이 크므로, 메모리상의 객체 비교로 갱신량을 최소화한다.</p>
+          <p><b>한 줄 예</b> — <code>{ type: "button", props: { children: "클릭" } }</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-key">
+          <h3>key <span class="pill pill--accent">CH03</span></h3>
+          <p>리스트를 렌더링할 때 각 항목을 식별하기 위해 부여하는 고유한 값이다.</p>
+          <p><b>왜 중요한가</b> — key가 없거나 index를 쓰면 재조정 시 잘못된 항목이 재사용되어 상태가 꼬일 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>items.map(item =&gt; &lt;li key={item.id}&gt;{item.name}&lt;/li&gt;)</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-hook">
+          <h3>훅 <span class="en">Hook</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>함수 컴포넌트에서 state, 생명주기, context 같은 React 기능을 사용할 수 있게 해주는 함수들이다. 이름이 <code>use</code>로 시작한다.</p>
+          <p><b>왜 중요한가</b> — 클래스 컴포넌트 없이도 상태와 부수 효과를 다룰 수 있게 해 컴포넌트를 더 작게 나눌 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>const [n, setN] = useState(0);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usestate">
+          <h3>useState <span class="pill pill--accent">CH03</span></h3>
+          <p>컴포넌트에 상태 하나를 추가하는 훅이다. 현재 값과 값을 바꾸는 함수를 튜플로 반환한다.</p>
+          <p><b>왜 중요한가</b> — 함수 컴포넌트가 값을 "기억"하게 만드는 가장 기본적인 방법이다.</p>
+          <p><b>한 줄 예</b> — <code>const [open, setOpen] = useState(false);</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a> · <a href="https://react.dev/reference/react/useState" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-useeffect">
+          <h3>useEffect <span class="pill pill--accent">CH04</span></h3>
+          <p>렌더링 이후에 실행되는 부수 효과(데이터 fetch, 구독, DOM 조작 등)를 등록하는 훅이다. 의존성 배열이 바뀔 때만 다시 실행된다.</p>
+          <p><b>왜 중요한가</b> — 렌더링 로직과 외부 세계와의 동기화 로직을 분리해준다.</p>
+          <p><b>한 줄 예</b> — <code>useEffect(() =&gt; { document.title = name; }, [name]);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useEffect" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-useref">
+          <h3>useRef <span class="pill pill--accent">CH04</span></h3>
+          <p>리렌더링을 유발하지 않으면서 값을 기억하거나 DOM 요소에 직접 접근하게 해주는 훅이다.</p>
+          <p><b>왜 중요한가</b> — 타이머 id, 이전 값, DOM 노드처럼 화면에 안 보이는 값을 저장할 때 쓴다.</p>
+          <p><b>한 줄 예</b> — <code>const inputRef = useRef(null); inputRef.current?.focus();</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useRef" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usememo">
+          <h3>useMemo <span class="pill pill--accent">CH04</span></h3>
+          <p>의존성이 바뀌지 않으면 이전에 계산한 값을 재사용해 비싼 연산을 매 렌더링마다 다시 하지 않게 해주는 훅이다.</p>
+          <p><b>왜 중요한가</b> — 무거운 계산을 불필요하게 반복하지 않도록 성능을 최적화한다.</p>
+          <p><b>한 줄 예</b> — <code>const sorted = useMemo(() =&gt; [...list].sort(), [list]);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useMemo" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usecallback">
+          <h3>useCallback <span class="pill pill--accent">CH04</span></h3>
+          <p>의존성이 바뀌지 않으면 같은 함수 참조를 재사용해주는 훅이다.</p>
+          <p><b>왜 중요한가</b> — memo로 감싼 자식 컴포넌트에 함수를 props로 넘길 때 불필요한 리렌더링을 막는다.</p>
+          <p><b>한 줄 예</b> — <code>const onClick = useCallback(() =&gt; setN(n + 1), [n]);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useCallback" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usereducer">
+          <h3>useReducer <span class="pill pill--accent">CH04</span></h3>
+          <p>state 업데이트 로직을 action과 reducer 함수로 분리해서 관리하는 훅이다. useState의 대안으로, 복잡한 상태 전이에 적합하다.</p>
+          <p><b>왜 중요한가</b> — 여러 state가 서로 얽혀 바뀌는 경우 업데이트 로직을 한곳에 모아 예측 가능하게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>const [state, dispatch] = useReducer(reducer, initial);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useReducer" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usecontext">
+          <h3>useContext <span class="pill pill--accent">CH04</span></h3>
+          <p>Context Provider가 제공하는 값을 props 전달 없이 하위 컴포넌트에서 바로 읽는 훅이다.</p>
+          <p><b>왜 중요한가</b> — 테마, 로그인 사용자 정보처럼 트리 깊은 곳까지 전달해야 하는 값의 props drilling을 없앤다.</p>
+          <p><b>한 줄 예</b> — <code>const theme = useContext(ThemeContext);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useContext" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usetransition">
+          <h3>useTransition <span class="pill pill--accent">CH04</span></h3>
+          <p>상태 업데이트를 긴급하지 않은(non-urgent) 것으로 표시해, 무거운 리렌더링이 입력 같은 긴급 업데이트를 막지 않게 해주는 훅이다.</p>
+          <p><b>왜 중요한가</b> — 큰 리스트 필터링 등으로 타이핑이 버벅이는 문제를 UI를 블로킹하지 않고 완화한다.</p>
+          <p><b>한 줄 예</b> — <code>const [isPending, startTransition] = useTransition();</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useTransition" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usedeferredvalue">
+          <h3>useDeferredValue <span class="pill pill--accent">CH04</span></h3>
+          <p>값의 업데이트를 지연시켜, 급하지 않은 리렌더링을 뒤로 미루게 해주는 훅이다.</p>
+          <p><b>왜 중요한가</b> — useTransition을 쓸 수 없는 상황(외부에서 오는 값)에서 비슷한 효과를 낸다.</p>
+          <p><b>한 줄 예</b> — <code>const deferredQuery = useDeferredValue(query);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useDeferredValue" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-usesyncexternalstore">
+          <h3>useSyncExternalStore <span class="pill pill--accent">CH04</span></h3>
+          <p>React 외부 store(Zustand 등)를 구독해 안전하게 리렌더링을 트리거하는 훅이다.</p>
+          <p><b>왜 중요한가</b> — 외부 상태를 직접 구독하면서도 concurrent 렌더링에서 데이터 불일치가 생기지 않게 보장한다.</p>
+          <p><b>한 줄 예</b> — <code>const state = useSyncExternalStore(store.subscribe, store.getState);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/useSyncExternalStore" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-custom-hook">
+          <h3>커스텀 훅 <span class="en">Custom Hook</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>여러 훅을 조합해 반복되는 로직을 재사용 가능한 함수로 뽑아낸, 이름이 <code>use</code>로 시작하는 함수다.</p>
+          <p><b>왜 중요한가</b> — 컴포넌트 간에 상태 로직(UI 없이)을 공유하는 표준 방법이다.</p>
+          <p><b>한 줄 예</b> — <code>function useToggle(init) { const [v, setV] = useState(init); return [v, () =&gt; setV(x =&gt; !x)]; }</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-memo">
+          <h3>memo <span class="pill pill--accent">CH04</span></h3>
+          <p>props가 바뀌지 않으면 컴포넌트를 다시 렌더링하지 않도록 감싸는 고차 컴포넌트다.</p>
+          <p><b>왜 중요한가</b> — 부모가 리렌더링돼도 관련 없는 자식까지 매번 다시 그리는 걸 막는다.</p>
+          <p><b>한 줄 예</b> — <code>const Row = memo(function Row({ item }) { return &lt;li&gt;{item.name}&lt;/li&gt;; });</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/memo" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-pure-component">
+          <h3>순수 컴포넌트 <span class="en">Pure Component</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>같은 props와 state에서 항상 같은 결과를 렌더링하고, 렌더링 중 외부 상태를 바꾸지 않는 컴포넌트다.</p>
+          <p><b>왜 중요한가</b> — React의 최적화(memo, StrictMode의 이중 렌더링 등)가 컴포넌트가 순수하다는 전제로 동작한다.</p>
+          <p><b>한 줄 예</b> — <code>function Sum({ a, b }) { return &lt;span&gt;{a + b}&lt;/span&gt;; }</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-side-effect">
+          <h3>부수 효과 <span class="en">Side Effect</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>렌더링 자체와 무관하게 외부 세계(네트워크, DOM, 타이머, 로그)에 영향을 주는 동작이다.</p>
+          <p><b>왜 중요한가</b> — 렌더링 함수 안에서 직접 실행하면 안 되고 useEffect 등으로 분리해야 한다.</p>
+          <p><b>한 줄 예</b> — <code>useEffect(() =&gt; { fetch("/api"); }, []);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-cleanup">
+          <h3>클린업 <span class="en">Cleanup</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>useEffect가 다시 실행되기 전이나 컴포넌트가 언마운트될 때 실행되는, effect가 반환하는 함수다.</p>
+          <p><b>왜 중요한가</b> — 구독 해제, 타이머 제거를 하지 않으면 메모리 누수나 중복 실행이 발생한다.</p>
+          <p><b>한 줄 예</b> — <code>useEffect(() =&gt; { const id = setInterval(fn, 1000); return () =&gt; clearInterval(id); }, []);</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="ch01.html">→ CH01에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-strictmode">
+          <h3>StrictMode <span class="pill pill--accent">CH04</span></h3>
+          <p>개발 모드에서 컴포넌트를 의도적으로 두 번 렌더링/실행해 순수하지 않은 코드를 조기에 드러내주는 React 도구다.</p>
+          <p><b>왜 중요한가</b> — 프로덕션에서만 터지는 부수 효과 버그를 개발 중에 미리 잡을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;StrictMode&gt;&lt;App /&gt;&lt;/StrictMode&gt;</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-referential-equality">
+          <h3>참조 동일성 <span class="en">Referential Equality</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>두 값이 <code>===</code>로 비교했을 때 같은 메모리 참조를 가리키는지 여부다. 객체/배열/함수는 내용이 같아도 매번 새로 만들면 다른 참조다.</p>
+          <p><b>왜 중요한가</b> — useEffect 의존성 배열, memo 비교가 모두 참조 동일성을 기준으로 동작한다.</p>
+          <p><b>한 줄 예</b> — <code>({} === {}); // false</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-lifting-state-up">
+          <h3>상태 끌어올리기 <span class="en">Lifting State Up</span> <span class="pill pill--accent">CH03</span></h3>
+          <p>두 형제 컴포넌트가 같은 state를 공유해야 할 때, 그 state를 공통 부모로 옮기고 props로 내려주는 패턴이다.</p>
+          <p><b>왜 중요한가</b> — 형제 컴포넌트끼리 직접 통신할 방법이 없는 React에서 상태를 동기화하는 표준 해법이다.</p>
+          <p><b>한 줄 예</b> — <code>// 부모가 value와 onChange를 두 자식 모두에 전달한다</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-controlled-uncontrolled">
+          <h3>제어/비제어 컴포넌트 <span class="en">Controlled/Uncontrolled</span> <span class="pill pill--accent">CH03</span></h3>
+          <p>제어 컴포넌트는 폼 값을 React state로 관리하고, 비제어 컴포넌트는 DOM 자체가 값을 들고 있어 ref로 필요할 때만 읽는다.</p>
+          <p><b>왜 중요한가</b> — 실시간 유효성 검사가 필요하면 제어, 단순 제출이면 비제어가 코드가 더 간단하다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;input value={v} onChange={e =&gt; setV(e.target.value)} /&gt; // 제어</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-portal">
+          <h3>포털 <span class="en">Portal</span> <span class="pill pill--accent">CH03</span></h3>
+          <p>컴포넌트 트리상의 위치와 다르게, 실제 DOM의 다른 위치에 자식을 렌더링하는 React 기능이다.</p>
+          <p><b>왜 중요한가</b> — 모달, 툴팁처럼 부모의 overflow나 z-index에 갇히면 안 되는 UI에 쓴다.</p>
+          <p><b>한 줄 예</b> — <code>createPortal(&lt;Modal /&gt;, document.body)</code></p>
+          <div class="links"><a href="ch03.html">→ CH03에서 자세히</a> · <a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-suspense">
+          <h3>Suspense <span class="pill pill--accent">CH04</span></h3>
+          <p>자식이 아직 준비되지 않았을 때(데이터 로딩, lazy 컴포넌트) fallback UI를 대신 보여주는 컴포넌트다.</p>
+          <p><b>왜 중요한가</b> — 로딩 상태를 각 컴포넌트가 따로 관리하지 않고 선언적으로 상위에서 처리할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;Suspense fallback={&lt;Spinner /&gt;}&gt;&lt;Profile /&gt;&lt;/Suspense&gt;</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a> · <a href="https://react.dev/reference/react/Suspense" target="_blank" rel="noopener">react.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-errorboundary">
+          <h3>ErrorBoundary <span class="pill pill--accent">CH04</span></h3>
+          <p>하위 트리에서 발생한 렌더링 에러를 잡아 전체 앱이 하얗게 죽는 대신 대체 UI를 보여주는 컴포넌트다.</p>
+          <p><b>왜 중요한가</b> — 한 컴포넌트의 에러가 앱 전체를 무너뜨리지 않도록 장애를 격리한다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;ErrorBoundary fallback={&lt;p&gt;문제가 발생했다&lt;/p&gt;}&gt;&lt;Widget /&gt;&lt;/ErrorBoundary&gt;</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-server-component">
+          <h3>서버 컴포넌트 <span class="en">React Server Components</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>브라우저가 아니라 서버에서 렌더링되고 결과만 클라이언트로 전송되는, JS 번들에 포함되지 않는 컴포넌트다.</p>
+          <p><b>왜 중요한가</b> — 클라이언트로 보낼 JS 양을 줄이고 서버 자원(DB 등)에 직접 접근하는 컴포넌트를 만들 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// 프레임워크에 따라 기본적으로 모든 컴포넌트가 서버 컴포넌트다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-use-client">
+          <h3>'use client' <span class="pill pill--accent">CH09</span></h3>
+          <p>파일 상단에 써서 이 컴포넌트(와 하위 트리)가 브라우저에서 실행되는 클라이언트 컴포넌트임을 표시하는 지시어다.</p>
+          <p><b>왜 중요한가</b> — state, 이벤트 핸들러, 브라우저 API는 클라이언트 컴포넌트에서만 쓸 수 있어 경계를 명시해야 한다.</p>
+          <p><b>한 줄 예</b> — <code>"use client"; export default function Counter() {}</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-react-compiler">
+          <h3>React Compiler <span class="pill pill--accent">CH04</span></h3>
+          <p>컴포넌트 코드를 분석해 useMemo/useCallback 없이도 자동으로 불필요한 리렌더링을 줄여주는 React의 빌드 타임 최적화 도구다.</p>
+          <p><b>왜 중요한가</b> — 수동 메모이제이션 없이도 성능을 챙길 수 있는 방향으로 React가 진화하고 있음을 보여준다.</p>
+          <p><b>한 줄 예</b> — <code>// 코드는 그대로, 빌드 시 컴파일러가 메모이제이션을 자동 삽입한다</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-batching">
+          <h3>배칭 <span class="en">Batching</span> <span class="pill pill--accent">CH04</span></h3>
+          <p>같은 이벤트 핸들러 안에서 발생한 여러 state 업데이트를 하나의 리렌더링으로 묶어 처리하는 React의 최적화다.</p>
+          <p><b>왜 중요한가</b> — <code>setA(1); setB(2);</code>를 호출해도 렌더링이 두 번이 아니라 한 번만 일어나는 이유다.</p>
+          <p><b>한 줄 예</b> — <code>onClick={() =&gt; { setA(1); setB(2); }} // 렌더링 1회</code></p>
+          <div class="links"><a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-state"><span class="h2num">§4</span>상태 · 데이터</h2>
+
+        <div class="gitem" id="g-server-state">
+          <h3>서버 상태 <span class="en">Server State</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>API 등 외부 서버가 소유한, 클라이언트는 캐싱해서 보여줄 뿐인 데이터다. 언제든 서버 쪽에서 값이 바뀔 수 있다.</p>
+          <p><b>왜 중요한가</b> — state처럼 다루면 fetch, 캐시, 재검증, 로딩/에러를 전부 손으로 관리해야 해 TanStack Query 같은 전용 도구가 필요하다.</p>
+          <p><b>한 줄 예</b> — <code>useQuery({ queryKey: ["users"], queryFn: fetchUsers });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a> · <a href="https://tanstack.com/query/latest" target="_blank" rel="noopener">TanStack</a></div>
+        </div>
+
+        <div class="gitem" id="g-client-state">
+          <h3>클라이언트 상태 <span class="en">Client State</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>모달 열림 여부, 폼 입력값처럼 오직 브라우저 안에서만 존재하고 서버와 무관한 상태다.</p>
+          <p><b>왜 중요한가</b> — 서버 상태와 성격이 달라 Zustand 같은 별도 스토어로 분리해 관리하는 게 일반적이다.</p>
+          <p><b>한 줄 예</b> — <code>const useUiStore = create(set =&gt; ({ open: false }));</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a> · <a href="https://zustand.docs.pmnd.rs/" target="_blank" rel="noopener">Zustand</a></div>
+        </div>
+
+        <div class="gitem" id="g-url-state">
+          <h3>URL 상태 <span class="en">URL State</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>검색어, 페이지 번호처럼 URL의 쿼리스트링이나 경로에 저장되는 상태다.</p>
+          <p><b>왜 중요한가</b> — 새로고침해도 유지되고 링크로 공유할 수 있다는 게 일반 state와 다른 점이다.</p>
+          <p><b>한 줄 예</b> — <code>?page=2&amp;sort=latest</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-cache">
+          <h3>캐시 <span class="en">Cache</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>한 번 받아온 서버 데이터를 메모리에 저장해두고, 같은 요청이 다시 오면 네트워크 없이 재사용하는 저장소다.</p>
+          <p><b>왜 중요한가</b> — 화면 전환마다 같은 데이터를 다시 fetch하지 않아 체감 속도가 빨라진다.</p>
+          <p><b>한 줄 예</b> — <code>queryClient.getQueryData(["users"]);</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a> · <a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-staletime">
+          <h3>staleTime <span class="pill pill--accent">CH05</span></h3>
+          <p>캐시된 데이터를 "신선하다"고 간주하는 시간이다. 이 시간 동안은 같은 쿼리를 다시 호출해도 refetch하지 않는다.</p>
+          <p><b>왜 중요한가</b> — 너무 잦은 네트워크 요청과 너무 오래된 데이터 사이의 균형을 조절하는 핵심 옵션이다.</p>
+          <p><b>한 줄 예</b> — <code>useQuery({ queryKey: ["u"], queryFn, staleTime: 60000 });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-gctime">
+          <h3>gcTime <span class="pill pill--accent">CH05</span></h3>
+          <p>아무도 구독하지 않는 캐시 데이터를 메모리에서 완전히 제거하기까지 기다리는 시간이다(구 cacheTime).</p>
+          <p><b>왜 중요한가</b> — 너무 짧으면 캐시 효과가 사라지고, 너무 길면 메모리를 계속 점유한다.</p>
+          <p><b>한 줄 예</b> — <code>useQuery({ queryKey: ["u"], queryFn, gcTime: 300000 });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-invalidate">
+          <h3>무효화 <span class="en">Invalidate</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>특정 쿼리 키의 캐시를 낡음(stale)으로 표시해 다음 접근 시 강제로 다시 fetch하게 만드는 것이다.</p>
+          <p><b>왜 중요한가</b> — 뮤테이션(생성/수정/삭제) 후 화면에 최신 데이터를 반영하는 표준 패턴이다.</p>
+          <p><b>한 줄 예</b> — <code>queryClient.invalidateQueries({ queryKey: ["users"] });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-optimistic-update">
+          <h3>낙관적 업데이트 <span class="en">Optimistic Update</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>서버 응답을 기다리지 않고 요청이 성공할 거라 가정해 화면을 먼저 바꾸고, 실패하면 롤백하는 패턴이다.</p>
+          <p><b>왜 중요한가</b> — 네트워크 지연이 있어도 사용자에게는 즉각 반응하는 것처럼 느껴지게 한다.</p>
+          <p><b>한 줄 예</b> — <code>onMutate: async () =&gt; { /* 캐시 미리 수정 */ }</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-race-condition">
+          <h3>레이스 컨디션 <span class="en">Race Condition</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>여러 비동기 요청이 동시에 실행되어, 늦게 시작한 요청이 먼저 끝나면서 오래된 응답이 최신 응답을 덮어써 버리는 상황이다.</p>
+          <p><b>왜 중요한가</b> — 검색어를 빠르게 바꿀 때 이전 검색 결과가 최신 결과를 덮어쓰는 버그의 원인이다.</p>
+          <p><b>한 줄 예</b> — <code>// 요청마다 순번을 매기고 최신 순번의 응답만 반영한다</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-polling">
+          <h3>폴링 <span class="en">Polling</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>일정 주기마다 서버에 반복해서 요청을 보내 데이터가 바뀌었는지 확인하는 방식이다.</p>
+          <p><b>왜 중요한가</b> — 실시간처럼 보이지만 실제로는 WebSocket 없이 "주기적으로 다시 물어보는" 단순한 구현이다.</p>
+          <p><b>한 줄 예</b> — <code>useQuery({ queryKey: ["status"], queryFn, refetchInterval: 3000 });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-refetch">
+          <h3>리페치 <span class="en">Refetch</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>이미 가진 캐시를 무시하고 서버에 데이터를 다시 요청하는 동작이다.</p>
+          <p><b>왜 중요한가</b> — 사용자가 새로고침 버튼을 눌렀을 때처럼 명시적으로 최신 데이터를 원할 때 쓴다.</p>
+          <p><b>한 줄 예</b> — <code>const { refetch } = useQuery(opts); refetch();</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-query-key">
+          <h3>쿼리 키 <span class="en">Query Key</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>캐시를 식별하는 고유한 키다. 배열 형태로 쓰며 이 키가 같으면 같은 캐시를 공유한다.</p>
+          <p><b>왜 중요한가</b> — 키에 의존하는 값(id, 필터 등)을 빠뜨리면 잘못된 캐시를 재사용하는 버그가 생긴다.</p>
+          <p><b>한 줄 예</b> — <code>useQuery({ queryKey: ["user", userId], queryFn });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-mutation">
+          <h3>뮤테이션 <span class="en">Mutation</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>서버 데이터를 생성·수정·삭제하는 비동기 작업을 다루는 개념이다. 조회(query)와 구분된다.</p>
+          <p><b>왜 중요한가</b> — 성공/실패에 따라 캐시 무효화나 롤백 같은 후속 동작을 훅으로 다룰 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>useMutation({ mutationFn: updateUser, onSuccess: invalidate });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-store">
+          <h3>스토어 <span class="en">Store</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>여러 컴포넌트가 공유하는 클라이언트 상태를 한곳에 모아두는 저장소다(Zustand, Redux 등).</p>
+          <p><b>왜 중요한가</b> — props를 여러 단계로 내려주지 않고도 상태를 공유할 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>const useStore = create(set =&gt; ({ count: 0 }));</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-selector">
+          <h3>셀렉터 <span class="en">Selector</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>스토어 전체가 아니라 필요한 조각만 골라 구독하는 함수다.</p>
+          <p><b>왜 중요한가</b> — 스토어의 관련 없는 값이 바뀔 때도 컴포넌트가 리렌더링되는 걸 막는다.</p>
+          <p><b>한 줄 예</b> — <code>const count = useStore(s =&gt; s.count);</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-action">
+          <h3>액션 <span class="en">Action</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>상태를 어떻게 바꿀지 서술하는 객체 또는 그 변경을 일으키는 함수다.</p>
+          <p><b>왜 중요한가</b> — "무엇을 왜 바꾸는지"를 명시적으로 남겨 상태 변화를 추적하기 쉽게 한다.</p>
+          <p><b>한 줄 예</b> — <code>dispatch({ type: "increment" });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-reducer">
+          <h3>리듀서 <span class="en">Reducer</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>이전 상태와 액션을 받아 다음 상태를 계산해 반환하는 순수 함수다.</p>
+          <p><b>왜 중요한가</b> — 상태 전이 로직을 한곳에 모아 예측 가능하고 테스트하기 쉽게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>function reducer(state, action) { if (action.type === "inc") return state + 1; return state; }</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a> · <a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-middleware">
+          <h3>미들웨어 <span class="en">Middleware</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>액션이 리듀서에 도달하기 전이나 상태가 바뀐 후 가로채서 로깅, 비동기 처리 등을 끼워 넣는 함수다.</p>
+          <p><b>왜 중요한가</b> — 스토어 코드를 건드리지 않고 로깅, persist 같은 기능을 조합해 붙일 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>create(persist(storeFn, { name: "app" }));</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-persist">
+          <h3>퍼시스트 <span class="en">Persist</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>클라이언트 상태를 localStorage 등에 저장해 새로고침해도 유지되게 만드는 것이다.</p>
+          <p><b>왜 중요한가</b> — 로그인 정보, 테마 설정처럼 세션 간 유지돼야 하는 값에 쓴다.</p>
+          <p><b>한 줄 예</b> — <code>persist(storeFn, { name: "app-state" });</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-normalization">
+          <h3>정규화 <span class="en">Normalization</span> <span class="pill pill--accent">CH05</span></h3>
+          <p>중첩된 객체 구조의 데이터를 id 기준의 평평한(flat) 테이블 형태로 바꿔 저장하는 방식이다.</p>
+          <p><b>왜 중요한가</b> — 같은 데이터가 여러 곳에 중복되는 것을 막고, 하나만 업데이트해도 모든 화면에 반영되게 한다.</p>
+          <p><b>한 줄 예</b> — <code>{ users: { "1": { id: 1, name: "a" } } }</code></p>
+          <div class="links"><a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-css"><span class="h2num">§5</span>CSS · UI</h2>
+
+        <div class="gitem" id="g-cascade">
+          <h3>캐스케이드 <span class="en">Cascade</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>같은 요소에 여러 CSS 규칙이 겹칠 때 어떤 규칙이 최종 적용될지 정하는 우선순위 알고리즘이다. 출처, 명시도, 작성 순서를 순서대로 따진다.</p>
+          <p><b>왜 중요한가</b> — "분명히 CSS를 썼는데 안 먹힌다"는 문제 대부분이 캐스케이드 규칙을 오해해서 생긴다.</p>
+          <p><b>한 줄 예</b> — <code>/* 나중에 선언된 동일 명시도 규칙이 이긴다 */</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-specificity">
+          <h3>명시도 <span class="en">Specificity</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>선택자의 강도를 점수로 매겨 어떤 규칙이 우선 적용될지 정하는 기준이다. id > class > 태그 순으로 강하다.</p>
+          <p><b>왜 중요한가</b> — <code>!important</code> 남용 없이 스타일 충돌을 예측하고 해결하려면 필수다.</p>
+          <p><b>한 줄 예</b> — <code>#app .btn {} /* class보다 명시도가 높다 */</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-inheritance-css">
+          <h3>상속 <span class="en">Inheritance</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>부모 요소의 일부 CSS 속성(색상, 폰트 등)이 자식 요소에 자동으로 전달되는 것이다. 박스 모델 속성은 상속되지 않는다.</p>
+          <p><b>왜 중요한가</b> — 폰트나 색을 최상위에서 한 번만 지정해도 전체에 적용되는 이유다.</p>
+          <p><b>한 줄 예</b> — <code>body { color: #222; } /* 하위 텍스트에 상속된다 */</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-box-model">
+          <h3>박스 모델 <span class="en">Box Model</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>모든 요소를 content, padding, border, margin의 4겹 상자로 계산하는 CSS의 레이아웃 기본 모델이다.</p>
+          <p><b>왜 중요한가</b> — 요소의 실제 차지 크기를 계산하려면 이 네 겹을 모두 더해야 한다.</p>
+          <p><b>한 줄 예</b> — <code>/* 너비 = content + padding*2 + border*2 (기본값) */</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-box-sizing">
+          <h3>box-sizing <span class="pill pill--accent">CH06</span></h3>
+          <p>width/height가 content만 기준인지(content-box), border까지 포함하는지(border-box) 정하는 속성이다.</p>
+          <p><b>왜 중요한가</b> — border-box로 통일하면 padding을 더해도 지정한 너비가 유지돼 레이아웃 계산이 쉬워진다.</p>
+          <p><b>한 줄 예</b> — <code>* { box-sizing: border-box; }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-margin-collapsing">
+          <h3>마진 상쇄 <span class="en">Margin Collapsing</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>세로로 인접한 두 블록 요소의 margin이 더해지지 않고 더 큰 값 하나로 합쳐지는 현상이다.</p>
+          <p><b>왜 중요한가</b> — margin-bottom과 margin-top을 더했는데 간격이 그만큼 안 벌어지는 혼란의 원인이다.</p>
+          <p><b>한 줄 예</b> — <code>/* margin-bottom: 20px 다음 margin-top: 10px → 간격은 20px */</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-flexbox">
+          <h3>Flexbox <span class="pill pill--accent">CH06</span></h3>
+          <p>한 축(가로 또는 세로)을 따라 요소를 정렬·분배하는 1차원 레이아웃 시스템이다.</p>
+          <p><b>왜 중요한가</b> — 세로 중앙 정렬처럼 예전엔 까다롭던 정렬을 몇 줄로 해결한다.</p>
+          <p><b>한 줄 예</b> — <code>.row { display: flex; align-items: center; gap: 8px; }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-grid">
+          <h3>Grid <span class="pill pill--accent">CH06</span></h3>
+          <p>행과 열을 동시에 정의해 요소를 2차원으로 배치하는 레이아웃 시스템이다.</p>
+          <p><b>왜 중요한가</b> — 대시보드, 카드 그리드처럼 행/열이 모두 중요한 레이아웃에 Flexbox보다 적합하다.</p>
+          <p><b>한 줄 예</b> — <code>.grid { display: grid; grid-template-columns: repeat(3, 1fr); }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-positioning">
+          <h3>포지셔닝 <span class="en">Positioning</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>static, relative, absolute, fixed, sticky로 요소가 문서 흐름 안/밖에서 어떻게 배치될지 정하는 속성이다.</p>
+          <p><b>왜 중요한가</b> — absolute 요소는 가장 가까운 relative 조상을 기준으로 배치된다는 규칙을 모르면 위치가 엉뚱하게 잡힌다.</p>
+          <p><b>한 줄 예</b> — <code>.wrap { position: relative; } .badge { position: absolute; top: 0; right: 0; }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-stacking-context">
+          <h3>쌓임 맥락 <span class="en">Stacking Context</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>z-index 값이 서로 비교되는 독립된 그룹이다. 새 쌓임 맥락 안의 z-index는 바깥 맥락과 직접 비교되지 않는다.</p>
+          <p><b>왜 중요한가</b> — "z-index를 9999로 올렸는데도 안 보인다"는 문제의 원인이 대부분 여기 있다.</p>
+          <p><b>한 줄 예</b> — <code>.parent { opacity: .99; } /* 새 쌓임 맥락 생성 */</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-z-index">
+          <h3>z-index <span class="pill pill--accent">CH06</span></h3>
+          <p>같은 쌓임 맥락 안에서 요소가 쌓이는 순서(위/아래)를 정하는 속성이다. position이 static이 아닌 요소에만 적용된다.</p>
+          <p><b>왜 중요한가</b> — 모달, 드롭다운처럼 다른 요소 위에 떠야 하는 UI에 필수다.</p>
+          <p><b>한 줄 예</b> — <code>.modal { position: fixed; z-index: 50; }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-media-query">
+          <h3>미디어 쿼리 <span class="en">Media Query</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>화면 너비, 해상도 등 뷰포트 조건에 따라 다른 CSS를 적용하는 문법이다.</p>
+          <p><b>왜 중요한가</b> — 반응형 디자인의 가장 기본적인 도구다.</p>
+          <p><b>한 줄 예</b> — <code>@media (max-width: 768px) { .sidebar { display: none; } }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-container-query">
+          <h3>컨테이너 쿼리 <span class="en">Container Query</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>뷰포트 크기가 아니라 요소를 감싸는 컨테이너의 크기를 기준으로 스타일을 바꾸는 문법이다.</p>
+          <p><b>왜 중요한가</b> — 같은 컴포넌트가 사이드바에도, 넓은 본문에도 들어갈 때 컨테이너 기준으로 반응하게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>@container (min-width: 400px) { .card { flex-direction: row; } }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-custom-property">
+          <h3>CSS 변수 <span class="en">Custom Property</span> <span class="pill pill--accent">CH06</span></h3>
+          <p><code>--이름</code> 형태로 정의하고 <code>var()</code>로 읽는, 값을 재사용하고 런타임에 바꿀 수 있는 CSS 변수다.</p>
+          <p><b>왜 중요한가</b> — 다크모드 전환처럼 JS 없이 CSS 값만 바꿔 테마를 전환할 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>:root { --accent: #6d5efc; } .btn { color: var(--accent); }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-nesting">
+          <h3>네스팅 <span class="en">Nesting</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>CSS 안에 선택자를 중첩해서 쓸 수 있는 문법이다(Sass 없이도 네이티브 CSS에서 지원한다).</p>
+          <p><b>왜 중요한가</b> — 관련된 스타일을 시각적으로 묶어 파일을 뒤지지 않고도 컴포넌트 구조를 읽을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>.card { &amp; .title { font-weight: 700; } }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-has">
+          <h3>:has() <span class="pill pill--accent">CH06</span></h3>
+          <p>특정 자식/형제를 포함하는 요소를 선택하는 CSS의 "부모 선택자"다.</p>
+          <p><b>왜 중요한가</b> — 지금까지 JS로만 가능했던 "자식 상태에 따른 부모 스타일링"을 순수 CSS로 할 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>.card:has(img) { padding-top: 0; }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-utility-first">
+          <h3>유틸리티 퍼스트 <span class="en">Utility-First</span> <span class="pill pill--accent">CH06</span></h3>
+          <p><code>.btn</code>처럼 의미 있는 이름의 큰 클래스를 만드는 대신, <code>p-4 flex items-center</code>처럼 한 가지 스타일만 하는 작은 클래스를 조합하는 CSS 작성 방식이다.</p>
+          <p><b>왜 중요한가</b> — CSS 파일을 계속 늘리지 않고 클래스 조합만으로 대부분의 UI를 만들 수 있다(Tailwind가 대표적이다).</p>
+          <p><b>한 줄 예</b> — <code>&lt;button class="px-4 py-2 rounded bg-blue-500"&gt;저장&lt;/button&gt;</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-tailwind">
+          <h3>Tailwind <span class="pill pill--accent">CH06</span></h3>
+          <p>유틸리티 퍼스트 방식의 대표적인 CSS 프레임워크다. 클래스 이름 조합으로 스타일을 완성한다.</p>
+          <p><b>왜 중요한가</b> — 별도 CSS 파일을 오가지 않고 마크업 안에서 스타일을 바로 확인·수정할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;div class="flex gap-2"&gt;...&lt;/div&gt;</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a> · <a href="https://tailwindcss.com/docs" target="_blank" rel="noopener">Tailwind CSS</a></div>
+        </div>
+
+        <div class="gitem" id="g-headless-ui">
+          <h3>headless UI <span class="pill pill--accent">CH06</span></h3>
+          <p>시각적 스타일 없이 동작(키보드 접근성, 열림/닫힘 상태 관리 등)만 제공하는 UI 컴포넌트 라이브러리다.</p>
+          <p><b>왜 중요한가</b> — 디자인은 자유롭게 입히면서 접근성이 까다로운 동작 로직(콤보박스, 다이얼로그 등)은 재사용할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// Radix UI, Headless UI 등이 이 범주에 속한다</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a> · <a href="https://ui.shadcn.com/docs" target="_blank" rel="noopener">shadcn/ui</a></div>
+        </div>
+
+        <div class="gitem" id="g-design-token">
+          <h3>디자인 토큰 <span class="en">Design Token</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>색상, 간격, 폰트 크기처럼 디자인 값을 이름 붙인 변수로 관리하는 단위다.</p>
+          <p><b>왜 중요한가</b> — 디자인과 코드가 같은 이름(예: --accent)을 공유해 일관성을 유지한다.</p>
+          <p><b>한 줄 예</b> — <code>--space-2: 8px; --space-4: 16px;</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-reflow">
+          <h3>리플로우 <span class="en">Reflow</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>요소의 크기나 위치가 바뀌어 브라우저가 레이아웃을 다시 계산하는 과정이다.</p>
+          <p><b>왜 중요한가</b> — 레이아웃에 영향을 주는 속성(width, top 등)을 애니메이션에 쓰면 매 프레임 리플로우가 일어나 성능이 떨어진다.</p>
+          <p><b>한 줄 예</b> — <code>el.style.width = "200px"; // 리플로우 유발</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a> · <a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-repaint">
+          <h3>리페인트 <span class="en">Repaint</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>레이아웃은 그대로인데 색, 배경처럼 화면에 그려지는 픽셀만 다시 계산하는 과정이다. 리플로우보다는 가볍다.</p>
+          <p><b>왜 중요한가</b> — transform/opacity 변경은 리플로우 없이 합성 단계에서 처리돼 리페인트보다도 저렴하다.</p>
+          <p><b>한 줄 예</b> — <code>el.style.background = "red"; // 리페인트만 발생</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-composite">
+          <h3>합성 <span class="en">Composite</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>이미 그려진 레이어들을 GPU가 겹쳐서 최종 화면을 만드는 마지막 단계다. transform, opacity 애니메이션은 이 단계만 거친다.</p>
+          <p><b>왜 중요한가</b> — 리플로우/리페인트를 건너뛰므로 애니메이션을 부드럽게(60fps) 만드는 핵심 기법이다.</p>
+          <p><b>한 줄 예</b> — <code>.box:hover { transform: scale(1.05); }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-prefers-reduced-motion">
+          <h3>prefers-reduced-motion <span class="pill pill--accent">CH06</span></h3>
+          <p>사용자가 OS 설정에서 모션 최소화를 켰는지 감지하는 미디어 쿼리다.</p>
+          <p><b>왜 중요한가</b> — 전정 장애가 있는 사용자를 위해 불필요한 애니메이션을 줄여주는 접근성 배려다.</p>
+          <p><b>한 줄 예</b> — <code>@media (prefers-reduced-motion: reduce) { * { animation: none; } }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a> · <a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-responsive">
+          <h3>반응형 <span class="en">Responsive</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>화면 크기에 따라 레이아웃이 유연하게 바뀌는 디자인 방식이다.</p>
+          <p><b>왜 중요한가</b> — 모바일부터 대형 모니터까지 하나의 코드베이스로 대응해야 하는 웹의 기본 전제다.</p>
+          <p><b>한 줄 예</b> — <code>.grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-viewport">
+          <h3>뷰포트 <span class="en">Viewport</span> <span class="pill pill--accent">CH06</span></h3>
+          <p>브라우저에서 실제로 콘텐츠가 보이는 영역이다. 모바일에서는 meta 태그로 뷰포트 배율을 명시해야 한다.</p>
+          <p><b>왜 중요한가</b> — viewport meta 태그가 없으면 모바일 브라우저가 데스크톱 폭으로 렌더링해 글자가 작게 보인다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-rem-em">
+          <h3>rem/em <span class="pill pill--accent">CH06</span></h3>
+          <p>em은 부모 요소의 폰트 크기, rem은 root(html) 요소의 폰트 크기를 기준으로 하는 상대 단위다.</p>
+          <p><b>왜 중요한가</b> — px 고정값과 달리 사용자의 브라우저 폰트 설정에 따라 함께 조정돼 접근성에 유리하다.</p>
+          <p><b>한 줄 예</b> — <code>html { font-size: 16px; } .title { font-size: 1.5rem; } /* 24px */</code></p>
+          <div class="links"><a href="ch06.html">→ CH06에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-build"><span class="h2num">§6</span>빌드 · 패키지</h2>
+
+        <div class="gitem" id="g-bundler">
+          <h3>번들러 <span class="en">Bundler</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>여러 개의 JS/CSS/자산 파일을 의존성 그래프를 따라가며 하나(또는 몇 개)의 결과물로 합쳐주는 도구다(Rollup, esbuild, Webpack 등).</p>
+          <p><b>왜 중요한가</b> — 브라우저가 수백 개의 import를 각각 요청하지 않고 최적화된 소수의 파일만 받게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>// vite build → dist/assets/index-[hash].js</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a> · <a href="https://vitejs.dev/guide/" target="_blank" rel="noopener">Vite</a></div>
+        </div>
+
+        <div class="gitem" id="g-entry">
+          <h3>엔트리 <span class="en">Entry</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>번들링을 시작하는 진입점 파일이다. 여기서부터 import를 따라가며 의존성 그래프를 만든다.</p>
+          <p><b>왜 중요한가</b> — 엔트리를 잘못 지정하면 필요한 코드가 번들에서 빠지거나 불필요한 코드가 포함된다.</p>
+          <p><b>한 줄 예</b> — <code>// vite.config: build.rollupOptions.input</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-chunk">
+          <h3>청크 <span class="en">Chunk</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>번들러가 코드를 하나의 파일이 아니라 여러 개로 쪼갠 결과물 단위다.</p>
+          <p><b>왜 중요한가</b> — 라우트별로 청크를 나누면 첫 화면에 필요 없는 코드를 나중에 불러올 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// 라우트별 lazy import → 별도 청크로 분리</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-code-splitting">
+          <h3>코드 스플리팅 <span class="en">Code Splitting</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>앱 전체 코드를 한 번에 내려받지 않고, 필요한 시점에 필요한 조각(청크)만 불러오도록 나누는 기법이다.</p>
+          <p><b>왜 중요한가</b> — 초기 로딩 시간을 줄여 Core Web Vitals(LCP 등)을 개선한다.</p>
+          <p><b>한 줄 예</b> — <code>const Page = React.lazy(() =&gt; import("./Page"));</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a> · <a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-tree-shaking">
+          <h3>트리 셰이킹 <span class="en">Tree Shaking</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>실제로 사용되지 않는 export를 정적 분석으로 찾아내 최종 번들에서 제거하는 최적화다.</p>
+          <p><b>왜 중요한가</b> — 라이브러리 전체가 아니라 실제 쓰는 함수만 번들에 남겨 크기를 줄인다.</p>
+          <p><b>한 줄 예</b> — <code>import { debounce } from "lodash-es"; // 나머지는 제거 대상</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-minify">
+          <h3>미니파이 <span class="en">Minify</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>공백, 주석, 긴 변수명을 제거·압축해 파일 용량을 줄이는 과정이다.</p>
+          <p><b>왜 중요한가</b> — 네트워크 전송량을 줄여 로딩 속도를 개선한다.</p>
+          <p><b>한 줄 예</b> — <code>function a(b,c){return b+c} // 미니파이된 형태</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-source-map">
+          <h3>소스맵 <span class="en">Source Map</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>미니파이/트랜스파일된 결과 코드와 원본 코드를 매핑해주는 파일이다.</p>
+          <p><b>왜 중요한가</b> — 배포된 압축 코드에서 에러가 나도 원본 파일의 정확한 줄을 디버깅할 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>//# sourceMappingURL=index.js.map</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-hmr">
+          <h3>HMR <span class="en">Hot Module Replacement</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>코드를 수정했을 때 전체 페이지를 새로고침하지 않고 바뀐 모듈만 즉시 교체하는 개발 서버 기능이다.</p>
+          <p><b>왜 중요한가</b> — state를 유지한 채로 UI 변경 결과를 바로 확인할 수 있어 개발 속도가 크게 빨라진다.</p>
+          <p><b>한 줄 예</b> — <code>// Vite dev server가 파일 저장 즉시 브라우저에 반영한다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-dev-server">
+          <h3>개발 서버 <span class="en">Dev Server</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>로컬에서 소스 파일을 즉석으로 변환해 제공하고 HMR을 지원하는 서버다(Vite dev server 등).</p>
+          <p><b>왜 중요한가</b> — 매번 전체를 번들링하지 않고도 즉시 변경사항을 볼 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>yarn dev // localhost:5173</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-esbuild">
+          <h3>esbuild <span class="pill pill--accent">CH07</span></h3>
+          <p>Go로 작성돼 매우 빠른 번들러 겸 트랜스파일러다. Vite가 개발 모드 의존성 사전 번들링에 사용한다.</p>
+          <p><b>왜 중요한가</b> — 기존 JS 기반 도구보다 훨씬 빠른 빌드 속도를 제공한다.</p>
+          <p><b>한 줄 예</b> — <code>// vite optimizeDeps는 내부적으로 esbuild를 사용한다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-rollup">
+          <h3>Rollup <span class="pill pill--accent">CH07</span></h3>
+          <p>ESM에 특화된 번들러로, 트리 셰이킹을 초기부터 잘 지원했다. Vite가 프로덕션 빌드에 사용한다.</p>
+          <p><b>왜 중요한가</b> — 라이브러리 배포용 번들처럼 결과물이 깔끔해야 하는 곳에 강하다.</p>
+          <p><b>한 줄 예</b> — <code>// vite build (프로덕션)는 내부적으로 Rollup을 사용한다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-swc">
+          <h3>SWC <span class="pill pill--accent">CH07</span></h3>
+          <p>Rust로 작성된 고속 JS/TS 트랜스파일러다. Babel의 대체재로 쓰인다.</p>
+          <p><b>왜 중요한가</b> — 대규모 코드베이스에서 Babel보다 훨씬 빠른 트랜스파일 속도를 제공한다.</p>
+          <p><b>한 줄 예</b> — <code>// Next.js 등 여러 도구가 내부적으로 SWC를 사용한다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-babel">
+          <h3>Babel <span class="pill pill--accent">CH07</span></h3>
+          <p>JS 문법을 다른 문법(구버전 또는 JSX 등)으로 변환하는 트랜스파일러다. 플러그인 기반으로 확장한다.</p>
+          <p><b>왜 중요한가</b> — 최신 문법과 JSX를 브라우저가 이해할 수 있는 코드로 바꿔주는 오래된 표준 도구다.</p>
+          <p><b>한 줄 예</b> — <code>// .babelrc에 @babel/preset-react 등록</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-browserslist">
+          <h3>browserslist <span class="pill pill--accent">CH07</span></h3>
+          <p>프로젝트가 지원해야 할 브라우저 범위를 하나의 설정으로 정의해 여러 도구(Babel, Autoprefixer 등)가 공유하는 설정이다.</p>
+          <p><b>왜 중요한가</b> — 트랜스파일/폴리필/CSS 접두사 범위를 도구마다 따로 설정하지 않아도 된다.</p>
+          <p><b>한 줄 예</b> — <code>"browserslist": ["&gt; 0.5%", "not dead"]</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-semver">
+          <h3>semver <span class="pill pill--accent">CH07</span></h3>
+          <p><code>주.부.수(major.minor.patch)</code> 형식으로 버전을 표기하고, 변경 범위를 숫자로 약속하는 버전 관리 규칙이다.</p>
+          <p><b>왜 중요한가</b> — <code>^1.2.3</code> 같은 범위 표기가 무엇을 허용하는지 알아야 의존성 업데이트 위험을 판단할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>"react": "^19.0.0" // 19.x 범위 내 최신 허용</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a> · <a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-lockfile">
+          <h3>lockfile <span class="pill pill--accent">CH07</span></h3>
+          <p>실제로 설치된 모든 패키지의 정확한 버전을 기록해두는 파일이다(yarn.lock 등).</p>
+          <p><b>왜 중요한가</b> — 같은 package.json이라도 lockfile이 없으면 팀원마다 미묘하게 다른 버전이 설치될 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>yarn.lock // 정확한 버전 트리를 고정</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-node-modules-hoisting">
+          <h3>node_modules 호이스팅 <span class="pill pill--accent">CH07</span></h3>
+          <p>여러 패키지가 공통으로 의존하는 라이브러리를 각자 폴더가 아니라 최상위 node_modules로 끌어올려 중복 설치를 줄이는 npm/yarn classic의 동작이다.</p>
+          <p><b>왜 중요한가</b> — 디스크 용량을 절약하지만, 명시하지 않은 패키지를 우연히 import할 수 있는 유령 의존성 문제를 만든다.</p>
+          <p><b>한 줄 예</b> — <code>// A가 의존하는 lodash가 최상위 node_modules로 끌어올려진다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-phantom-dependency">
+          <h3>유령 의존성 <span class="en">Phantom Dependency</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>package.json에 직접 선언하지 않았는데도 호이스팅 덕분에 우연히 import에 성공하는 패키지다.</p>
+          <p><b>왜 중요한가</b> — 다른 패키지가 그 의존성을 제거하면 예고 없이 빌드가 깨진다.</p>
+          <p><b>한 줄 예</b> — <code>import _ from "lodash"; // package.json엔 없는데 동작한다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-peer-dependency">
+          <h3>peerDependency <span class="pill pill--accent">CH07</span></h3>
+          <p>"이 패키지를 쓰려면 호스트 프로젝트가 이 버전의 다른 패키지를 이미 갖고 있어야 한다"고 선언하는 의존성이다.</p>
+          <p><b>왜 중요한가</b> — React 플러그인이 자체 React를 설치하지 않고 호스트의 React를 공유하게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>"peerDependencies": { "react": "^19.0.0" }</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-yarn-berry">
+          <h3>Yarn Berry <span class="pill pill--accent">CH07</span></h3>
+          <p>Yarn 2 이상 버전을 부르는 이름이다. PnP, Zero-Install, Workspaces 등 새로운 패키지 관리 모델을 도입했다.</p>
+          <p><b>왜 중요한가</b> — node_modules 기반의 느린 설치와 유령 의존성 문제를 근본적으로 다르게 해결하려는 시도다.</p>
+          <p><b>한 줄 예</b> — <code>yarn set version berry</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a> · <a href="https://yarnpkg.com/" target="_blank" rel="noopener">yarnpkg.com</a></div>
+        </div>
+
+        <div class="gitem" id="g-pnp">
+          <h3>Plug'n'Play <span class="en">PnP</span> <span class="pill pill--accent">CH07</span></h3>
+          <p>node_modules 폴더 없이, 어떤 패키지가 어디 있는지 매핑한 <code>.pnp.cjs</code> 파일로 직접 모듈을 해석하는 Yarn Berry의 설치 전략이다.</p>
+          <p><b>왜 중요한가</b> — node_modules 생성/탐색 비용이 사라져 설치와 모듈 해석이 훨씬 빨라진다.</p>
+          <p><b>한 줄 예</b> — <code>// .yarnrc.yml: nodeLinker: pnp</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a> · <a href="https://yarnpkg.com/" target="_blank" rel="noopener">yarnpkg.com</a></div>
+        </div>
+
+        <div class="gitem" id="g-zero-install">
+          <h3>Zero-Install <span class="pill pill--accent">CH07</span></h3>
+          <p>의존성 압축 파일(.yarn/cache)을 저장소에 커밋해, clone 직후 <code>yarn install</code> 없이 바로 실행 가능하게 만드는 Yarn Berry의 운영 방식이다.</p>
+          <p><b>왜 중요한가</b> — CI나 신규 팀원 온보딩에서 설치 시간과 설치 실패 가능성을 없앤다.</p>
+          <p><b>한 줄 예</b> — <code>// .yarn/cache/*.zip을 git에 커밋한다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-nodelinker">
+          <h3>nodeLinker <span class="pill pill--accent">CH07</span></h3>
+          <p>Yarn Berry가 의존성을 어떤 방식으로 배치할지 정하는 설정이다(pnp, node-modules 등).</p>
+          <p><b>왜 중요한가</b> — PnP를 지원하지 않는 도구와 함께 쓸 때 node-modules 방식으로 되돌리는 탈출구가 된다.</p>
+          <p><b>한 줄 예</b> — <code>nodeLinker: node-modules</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-workspaces">
+          <h3>Workspaces <span class="pill pill--accent">CH07</span></h3>
+          <p>하나의 저장소 안에 여러 패키지(프론트, 백엔드 등)를 두고, 서로를 로컬 의존성처럼 참조하며 함께 관리하는 기능이다.</p>
+          <p><b>왜 중요한가</b> — 모노레포에서 패키지 간 의존성을 버전 발행 없이 즉시 반영해 개발할 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>"workspaces": ["packages/*"]</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-corepack">
+          <h3>Corepack <span class="pill pill--accent">CH07</span></h3>
+          <p>Node.js에 내장된, 프로젝트가 지정한 패키지 매니저 버전을 자동으로 맞춰 실행해주는 도구다.</p>
+          <p><b>왜 중요한가</b> — yarn 버전이 팀원마다 달라서 lockfile이 계속 바뀌는 문제를 막는다.</p>
+          <p><b>한 줄 예</b> — <code>corepack enable</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a> · <a href="https://nodejs.org/en/docs" target="_blank" rel="noopener">Node.js</a></div>
+        </div>
+
+        <div class="gitem" id="g-dlx">
+          <h3>dlx <span class="pill pill--accent">CH07</span></h3>
+          <p>패키지를 프로젝트에 설치하지 않고 일회성으로 내려받아 실행하는 Yarn Berry 명령이다(npx의 Yarn 버전).</p>
+          <p><b>왜 중요한가</b> — CLI 도구를 한 번만 쓸 때 프로젝트 의존성을 늘리지 않아도 된다.</p>
+          <p><b>한 줄 예</b> — <code>yarn dlx create-vite my-app</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-package-extensions">
+          <h3>packageExtensions <span class="pill pill--accent">CH07</span></h3>
+          <p>다른 패키지가 잘못 선언한(또는 누락한) 의존성 정보를 프로젝트 쪽에서 보정해주는 Yarn 설정이다.</p>
+          <p><b>왜 중요한가</b> — PnP는 유령 의존성을 허용하지 않으므로, 잘못 선언된 패키지가 있으면 이 설정으로 직접 고쳐야 한다.</p>
+          <p><b>한 줄 예</b> — <code>packageExtensions: { "some-pkg@*": { dependencies: { "react": "*" } } }</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-monorepo">
+          <h3>monorepo <span class="pill pill--accent">CH07</span></h3>
+          <p>여러 프로젝트/패키지를 하나의 Git 저장소에서 함께 관리하는 구조다.</p>
+          <p><b>왜 중요한가</b> — 프론트/백/공용 타입을 한 저장소에서 관리하면 커밋 하나로 여러 패키지의 변경을 동기화할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// 모노레포 저장소도 front/ back/ automation/ 을 함께 관리한다</code></p>
+          <div class="links"><a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-perf"><span class="h2num">§7</span>성능 · 네트워크</h2>
+
+        <div class="gitem" id="g-core-web-vitals">
+          <h3>Core Web Vitals <span class="pill pill--accent">CH08</span></h3>
+          <p>Google이 정의한 실사용자 체감 성능 지표 모음이다. 로딩(LCP), 반응성(INP), 시각적 안정성(CLS) 세 가지가 핵심이다.</p>
+          <p><b>왜 중요한가</b> — 검색 순위와 실제 사용자 경험 모두에 영향을 주는 표준 성능 기준이다.</p>
+          <p><b>한 줄 예</b> — <code>// LCP &lt; 2.5s, INP &lt; 200ms, CLS &lt; 0.1이 "Good" 기준</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a> · <a href="https://web.dev/articles/vitals" target="_blank" rel="noopener">web.dev</a></div>
+        </div>
+
+        <div class="gitem" id="g-lcp">
+          <h3>LCP <span class="en">Largest Contentful Paint</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>화면에서 가장 큰 콘텐츠(이미지, 텍스트 블록 등)가 그려지기까지 걸린 시간이다.</p>
+          <p><b>왜 중요한가</b> — 사용자가 "페이지가 로딩됐다"고 느끼는 시점과 가장 가까운 지표다.</p>
+          <p><b>한 줄 예</b> — <code>// 히어로 이미지가 늦게 뜨면 LCP가 나빠진다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-inp">
+          <h3>INP <span class="en">Interaction to Next Paint</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>사용자 상호작용(클릭 등) 이후 화면이 반응해 다음 프레임이 그려지기까지의 지연이다.</p>
+          <p><b>왜 중요한가</b> — 클릭했는데 반응이 늦다고 느끼는 버벅임을 정량화한 지표다.</p>
+          <p><b>한 줄 예</b> — <code>// 무거운 동기 연산이 메인 스레드를 막으면 INP가 나빠진다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-cls">
+          <h3>CLS <span class="en">Cumulative Layout Shift</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>페이지 로딩 중 요소가 갑자기 밀리면서 발생하는 시각적 이동량의 누적치다.</p>
+          <p><b>왜 중요한가</b> — 이미지 크기를 미리 지정하지 않으면 로딩 도중 버튼이 밀려 오클릭을 유발한다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;img width="600" height="400" src="a.png" /&gt; // 크기 예약</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-ttfb">
+          <h3>TTFB <span class="en">Time to First Byte</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>요청을 보낸 후 서버로부터 첫 바이트를 받기까지 걸리는 시간이다.</p>
+          <p><b>왜 중요한가</b> — 서버/네트워크 지연을 측정하는 지표로, 프론트 최적화만으로는 줄일 수 없는 구간을 보여준다.</p>
+          <p><b>한 줄 예</b> — <code>// CDN, 서버 위치, DB 쿼리 속도가 TTFB에 영향을 준다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-fcp">
+          <h3>FCP <span class="en">First Contentful Paint</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>화면에 텍스트나 이미지 같은 콘텐츠가 처음으로 그려지는 시점이다.</p>
+          <p><b>왜 중요한가</b> — 완전히 빈 화면이 끝나는 순간으로, 사용자가 처음 반응을 느끼는 지표다.</p>
+          <p><b>한 줄 예</b> — <code>// 흰 화면이 오래 지속되면 FCP가 나쁘다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-lighthouse">
+          <h3>Lighthouse <span class="pill pill--accent">CH08</span></h3>
+          <p>성능, 접근성, SEO 등을 자동으로 점검해 점수와 개선안을 제공하는 Google의 감사 도구다.</p>
+          <p><b>왜 중요한가</b> — 배포 전 성능 회귀를 빠르게 캐치하는 표준 체크리스트 역할을 한다.</p>
+          <p><b>한 줄 예</b> — <code>// Chrome DevTools &gt; Lighthouse 탭에서 실행</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-profiler">
+          <h3>프로파일러 <span class="en">Profiler</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>코드 실행 중 어떤 함수가 얼마나 시간을 쓰는지 측정해 보여주는 도구다(React DevTools Profiler, Chrome Performance 탭 등).</p>
+          <p><b>왜 중요한가</b> — "느리다"는 감이 아니라 실제로 어디가 병목인지 데이터로 찾을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// React DevTools Profiler로 렌더링 시간이 긴 컴포넌트 확인</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-virtual-scroll">
+          <h3>가상 스크롤 <span class="en">Virtual Scroll</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>화면에 실제로 보이는 항목만 DOM에 렌더링하고, 나머지는 스크롤에 따라 교체하는 기법이다.</p>
+          <p><b>왜 중요한가</b> — 수천 개 리스트를 전부 DOM에 그리면 느려지므로 보이는 것만 그려 성능을 지킨다.</p>
+          <p><b>한 줄 예</b> — <code>// react-window 등이 보이는 20개 항목만 실제 DOM으로 유지한다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-pagination">
+          <h3>페이지네이션 <span class="en">offset/cursor</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>데이터를 나눠 가져오는 두 방식이다. offset은 "몇 번째부터 몇 개"로, cursor는 "이 지점 다음부터"로 다음 페이지를 요청한다.</p>
+          <p><b>왜 중요한가</b> — offset은 중간에 데이터가 추가/삭제되면 중복/누락이 생기지만, cursor는 이런 문제에 더 안전하다.</p>
+          <p><b>한 줄 예</b> — <code>GET /items?cursor=eyJpZCI6MTB9&amp;limit=20</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-infinite-scroll">
+          <h3>무한 스크롤 <span class="en">Infinite Scroll</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>사용자가 목록 끝에 가까워지면 다음 페이지를 자동으로 이어붙여 로드하는 UI 패턴이다.</p>
+          <p><b>왜 중요한가</b> — 페이지 번호 클릭 없이 자연스럽게 콘텐츠를 계속 소비하게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>useInfiniteQuery({ queryFn: fetchPage, getNextPageParam: last =&gt; last.cursor });</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a> · <a href="ch05.html">→ CH05에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-intersection-observer">
+          <h3>IntersectionObserver <span class="pill pill--accent">CH08</span></h3>
+          <p>특정 요소가 뷰포트(또는 다른 요소)에 들어오고 나가는 것을 비동기로 감지하는 브라우저 API다.</p>
+          <p><b>왜 중요한가</b> — 스크롤 이벤트를 직접 계산하지 않고도 지연 로딩, 무한 스크롤을 효율적으로 구현할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>new IntersectionObserver(entries =&gt; {}).observe(el);</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-request-animation-frame">
+          <h3>requestAnimationFrame <span class="pill pill--accent">CH08</span></h3>
+          <p>브라우저의 다음 리페인트 직전에 콜백을 실행하도록 예약하는 API다.</p>
+          <p><b>왜 중요한가</b> — setTimeout보다 화면 주사율에 맞춰 자연스럽고 효율적인 애니메이션을 만들 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>requestAnimationFrame(() =&gt; { el.style.left = x + "px"; });</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-lazy-loading">
+          <h3>지연 로딩 <span class="en">Lazy Loading</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>지금 당장 필요하지 않은 리소스(이미지, 컴포넌트)를 필요한 시점까지 불러오지 않고 미루는 기법이다.</p>
+          <p><b>왜 중요한가</b> — 초기 로딩에 필요 없는 것까지 다 받으면 첫 화면이 느려진다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;img loading="lazy" src="a.png" /&gt;</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a> · <a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-preload-prefetch">
+          <h3>프리로드/프리페치 <span class="en">Preload/Prefetch</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>preload는 현재 페이지에서 곧 쓸 리소스를 우선순위 높게 미리 받고, prefetch는 다음에 갈 가능성이 있는 리소스를 한가할 때 미리 받는다.</p>
+          <p><b>왜 중요한가</b> — 실제로 필요해지는 시점과 다운로드 시점 사이의 간격을 줄여 체감 속도를 높인다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;link rel="prefetch" href="/next-page.js"&gt;</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-cdn">
+          <h3>CDN <span class="en">Content Delivery Network</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>정적 자산을 사용자와 지리적으로 가까운 서버에 캐싱해 전달하는 분산 서버 네트워크다.</p>
+          <p><b>왜 중요한가</b> — 물리적 거리를 줄여 TTFB와 다운로드 속도를 개선한다.</p>
+          <p><b>한 줄 예</b> — <code>// 이미지/JS를 CDN 도메인에서 서빙한다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-cache-header">
+          <h3>캐시 헤더 <span class="en">Cache Header</span> <span class="pill pill--accent">CH08</span></h3>
+          <p><code>Cache-Control</code> 등으로 브라우저나 CDN이 응답을 얼마나 오래, 어떻게 캐싱할지 서버가 지시하는 HTTP 헤더다.</p>
+          <p><b>왜 중요한가</b> — 매번 새로 받지 않아도 되는 정적 자산의 재요청을 줄여준다.</p>
+          <p><b>한 줄 예</b> — <code>Cache-Control: public, max-age=31536000, immutable</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-gzip-brotli">
+          <h3>gzip/brotli <span class="pill pill--accent">CH08</span></h3>
+          <p>서버가 응답 본문을 압축해서 전송하고 브라우저가 압축을 풀어 사용하는 방식이다. brotli가 gzip보다 대체로 압축률이 높다.</p>
+          <p><b>왜 중요한가</b> — 텍스트 기반 리소스(JS, CSS, HTML)의 전송량을 크게 줄인다.</p>
+          <p><b>한 줄 예</b> — <code>Content-Encoding: br</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-http2">
+          <h3>HTTP/2 <span class="pill pill--accent">CH08</span></h3>
+          <p>하나의 연결로 여러 요청을 동시에 처리(멀티플렉싱)할 수 있는 HTTP 프로토콜 버전이다.</p>
+          <p><b>왜 중요한가</b> — HTTP/1.1의 연결당 요청 수 제한 병목을 없애 여러 리소스를 동시에 빠르게 받을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// 이미지 스프라이트로 요청 수를 줄이던 관행이 HTTP/2 이후 덜 중요해졌다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-big-o">
+          <h3>Big-O <span class="pill pill--accent">CH08</span></h3>
+          <p>입력 크기가 커질 때 알고리즘의 실행 시간이나 메모리 사용량이 어떻게 늘어나는지 나타내는 표기법이다.</p>
+          <p><b>왜 중요한가</b> — 데이터가 적을 때는 안 보이던 성능 문제가 대량 데이터에서 왜 터지는지 설명해준다.</p>
+          <p><b>한 줄 예</b> — <code>array.includes(x); // O(n)</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-map-set">
+          <h3>Map/Set <span class="pill pill--accent">CH08</span></h3>
+          <p>Map은 키-값 쌍을, Set은 중복 없는 값들을 저장하는 자료구조다. 둘 다 조회가 평균 O(1)이다.</p>
+          <p><b>왜 중요한가</b> — 배열의 includes/find(O(n))를 Map/Set으로 바꾸면 대량 데이터에서 성능이 크게 개선된다.</p>
+          <p><b>한 줄 예</b> — <code>const seen = new Set(); if (!seen.has(id)) seen.add(id);</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-lru-cache">
+          <h3>LRU 캐시 <span class="en">Least Recently Used</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>캐시가 가득 찼을 때 가장 오래 사용되지 않은 항목부터 제거하는 캐시 교체 전략이다.</p>
+          <p><b>왜 중요한가</b> — 메모리를 무한히 늘리지 않으면서 자주 쓰는 데이터만 캐시에 남기는 실용적인 방법이다.</p>
+          <p><b>한 줄 예</b> — <code>// Map은 삽입 순서를 유지하므로 LRU 구현에 활용할 수 있다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-trie">
+          <h3>트라이 <span class="en">Trie</span> <span class="pill pill--accent">CH08</span></h3>
+          <p>문자열을 문자 단위로 트리 형태로 저장해, 접두사 검색을 빠르게 하는 자료구조다.</p>
+          <p><b>왜 중요한가</b> — 자동완성처럼 "이 문자로 시작하는 단어들"을 빠르게 찾아야 할 때 배열 순회보다 훨씬 빠르다.</p>
+          <p><b>한 줄 예</b> — <code>// "app" 검색 시 a → p → p 경로만 따라가면 된다</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-bfs-dfs">
+          <h3>BFS/DFS <span class="pill pill--accent">CH08</span></h3>
+          <p>그래프나 트리를 탐색하는 두 기본 전략이다. BFS(너비 우선)는 큐로 가까운 노드부터, DFS(깊이 우선)는 스택/재귀로 한 방향을 끝까지 판다.</p>
+          <p><b>왜 중요한가</b> — 최단 경로가 필요하면 BFS, 모든 경로 탐색이나 백트래킹이 필요하면 DFS가 적합하다.</p>
+          <p><b>한 줄 예</b> — <code>// BFS: queue.shift() 반복, DFS: 재귀 또는 stack.pop() 반복</code></p>
+          <div class="links"><a href="ch08.html">→ CH08에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-render-a11y"><span class="h2num">§8</span>렌더링 · 접근성</h2>
+
+        <div class="gitem" id="g-csr">
+          <h3>CSR <span class="en">Client-Side Rendering</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>브라우저가 빈 HTML과 JS 번들을 받아, JS가 실행되면서 화면을 그리는 렌더링 방식이다.</p>
+          <p><b>왜 중요한가</b> — 초기 로딩은 느리지만 이후 페이지 전환이 빠른 SPA의 기본 방식이다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;div id="root"&gt;&lt;/div&gt;&lt;script src="bundle.js"&gt;&lt;/script&gt;</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-ssr">
+          <h3>SSR <span class="en">Server-Side Rendering</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>서버에서 매 요청마다 HTML을 미리 렌더링해서 보내는 방식이다. 브라우저는 완성된 HTML을 먼저 받는다.</p>
+          <p><b>왜 중요한가</b> — 첫 화면이 더 빨리 보이고 검색 엔진이 콘텐츠를 바로 읽을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// 요청이 올 때마다 서버가 React를 HTML 문자열로 렌더링한다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-ssg">
+          <h3>SSG <span class="en">Static Site Generation</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>빌드 시점에 미리 모든 페이지의 HTML을 만들어두고, 요청이 오면 그 정적 파일을 그대로 서빙하는 방식이다.</p>
+          <p><b>왜 중요한가</b> — 요청마다 렌더링할 필요가 없어 가장 빠르고 서버 부하도 없다.</p>
+          <p><b>한 줄 예</b> — <code>// 빌드할 때 blog/1.html, blog/2.html ... 을 미리 생성한다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-isr">
+          <h3>ISR <span class="en">Incremental Static Regeneration</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>정적으로 생성된 페이지를 일정 주기나 조건에 따라 백그라운드에서 다시 생성해 캐시를 갱신하는 방식이다.</p>
+          <p><b>왜 중요한가</b> — SSG의 속도와 SSR의 최신성을 절충한다.</p>
+          <p><b>한 줄 예</b> — <code>// 60초마다 이 페이지를 백그라운드에서 재생성한다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-streaming">
+          <h3>스트리밍 <span class="en">Streaming</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>HTML을 한 번에 다 만들어 보내지 않고, 준비되는 부분부터 순차적으로 전송하는 렌더링 방식이다.</p>
+          <p><b>왜 중요한가</b> — 느린 데이터 구간 때문에 전체 페이지가 지연되는 것을 막고 먼저 준비된 부분을 빨리 보여준다.</p>
+          <p><b>한 줄 예</b> — <code>// Suspense 경계 단위로 완성되는 대로 스트리밍 전송한다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a> · <a href="ch04.html">→ CH04에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-hydration">
+          <h3>하이드레이션 <span class="en">Hydration</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>서버에서 미리 렌더링된 정적 HTML에, 브라우저에서 React가 이벤트 리스너를 붙여 상호작용 가능하게 만드는 과정이다.</p>
+          <p><b>왜 중요한가</b> — SSR/SSG로 받은 화면이 "보이기만 하고 클릭이 안 되는" 상태를 벗어나는 단계다.</p>
+          <p><b>한 줄 예</b> — <code>hydrateRoot(document.getElementById("root"), &lt;App /&gt;);</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-hydration-mismatch">
+          <h3>하이드레이션 미스매치 <span class="en">Hydration Mismatch</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>서버가 렌더링한 HTML과 브라우저가 다시 렌더링한 결과가 달라서 발생하는 에러다.</p>
+          <p><b>왜 중요한가</b> — <code>Date.now()</code>, <code>Math.random()</code>처럼 서버/클라이언트에서 값이 달라지는 코드가 흔한 원인이다.</p>
+          <p><b>한 줄 예</b> — <code>// 서버 "2026-01-01" vs 클라이언트 "2026-01-02" → 불일치 경고</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-islands">
+          <h3>아일랜드 <span class="en">Islands Architecture</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>페이지 대부분은 정적 HTML로 두고, 상호작용이 필요한 부분(섬)만 개별적으로 하이드레이션하는 아키텍처다.</p>
+          <p><b>왜 중요한가</b> — 페이지 전체를 하이드레이션하지 않아 초기 JS 실행 비용을 크게 줄인다.</p>
+          <p><b>한 줄 예</b> — <code>// 댓글 위젯만 하이드레이션하고 나머지 본문은 순수 HTML로 남긴다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-semantic-html">
+          <h3>시맨틱 HTML <span class="en">Semantic HTML</span> <span class="pill pill--accent">CH09</span></h3>
+          <p><code>&lt;div&gt;</code>만 쓰지 않고 <code>&lt;nav&gt;</code>, <code>&lt;button&gt;</code>, <code>&lt;header&gt;</code>처럼 의미가 담긴 태그를 쓰는 것이다.</p>
+          <p><b>왜 중요한가</b> — 스크린 리더와 검색 엔진이 구조를 정확히 이해하게 해, 접근성과 SEO의 기본이 된다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;button&gt;저장&lt;/button&gt; // &lt;div onclick&gt;보다 접근성이 좋다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-accessibility-tree">
+          <h3>접근성 트리 <span class="en">Accessibility Tree</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>브라우저가 DOM으로부터 만들어내는, 스크린 리더 같은 보조 기술이 읽는 별도의 트리다.</p>
+          <p><b>왜 중요한가</b> — 시각적으로는 같아 보여도 접근성 트리에 role/name이 빠지면 스크린 리더 사용자는 그 요소를 인식하지 못한다.</p>
+          <p><b>한 줄 예</b> — <code>// DevTools의 Accessibility 탭에서 확인할 수 있다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-screen-reader">
+          <h3>스크린 리더 <span class="en">Screen Reader</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>화면의 텍스트와 구조를 음성이나 점자로 변환해주는 보조 기술 소프트웨어다.</p>
+          <p><b>왜 중요한가</b> — 시각 장애가 있는 사용자가 웹을 쓰는 주요 수단이라, 이걸 기준으로 접근성을 검증해야 한다.</p>
+          <p><b>한 줄 예</b> — <code>// VoiceOver(Mac), NVDA(Windows) 등으로 직접 테스트한다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-wcag">
+          <h3>WCAG <span class="en">Web Content Accessibility Guidelines</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>W3C가 정한 웹 접근성 국제 표준 지침이다. A/AA/AAA 등급으로 준수 수준을 나눈다.</p>
+          <p><b>왜 중요한가</b> — 법적 요구사항이나 접근성 감사의 기준선이 되는 공식 문서다.</p>
+          <p><b>한 줄 예</b> — <code>// 대부분의 조직은 WCAG 2.1 AA를 목표로 삼는다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a> · <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener">W3C</a></div>
+        </div>
+
+        <div class="gitem" id="g-pour">
+          <h3>POUR <span class="pill pill--accent">CH09</span></h3>
+          <p>WCAG가 요구하는 네 가지 원칙의 머리글자다. 인식 가능(Perceivable), 조작 가능(Operable), 이해 가능(Understandable), 견고함(Robust).</p>
+          <p><b>왜 중요한가</b> — 개별 규칙을 다 외우지 못해도 이 네 원칙으로 접근성 문제를 스스로 판단할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// 색으로만 정보를 전달하면 "인식 가능" 원칙 위반</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-aria">
+          <h3>ARIA <span class="en">Accessible Rich Internet Applications</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>HTML만으로 표현하기 어려운 역할/상태/속성을 스크린 리더에 추가로 알려주는 속성 모음이다.</p>
+          <p><b>왜 중요한가</b> — 커스텀 드롭다운, 탭처럼 시맨틱 태그가 없는 UI에 의미를 보강해준다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;div role="tablist"&gt;...&lt;/div&gt;</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a> · <a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="noopener">W3C</a></div>
+        </div>
+
+        <div class="gitem" id="g-role">
+          <h3>role <span class="pill pill--accent">CH09</span></h3>
+          <p>요소가 어떤 종류의 UI 컴포넌트인지 스크린 리더에 알려주는 ARIA 속성이다.</p>
+          <p><b>왜 중요한가</b> — 시맨틱 태그가 없는 커스텀 컴포넌트도 role로 "이건 버튼이다"라고 알려줄 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;div role="button" tabindex="0"&gt;열기&lt;/div&gt;</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-aria-label">
+          <h3>aria-label <span class="pill pill--accent">CH09</span></h3>
+          <p>화면에 보이는 텍스트가 없거나 부족할 때, 스크린 리더가 읽을 대체 텍스트를 지정하는 속성이다.</p>
+          <p><b>왜 중요한가</b> — 아이콘만 있는 버튼처럼 시각적 라벨이 없는 요소를 접근 가능하게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;button aria-label="닫기"&gt;×&lt;/button&gt;</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-aria-live">
+          <h3>aria-live <span class="pill pill--accent">CH09</span></h3>
+          <p>요소 내용이 동적으로 바뀔 때 스크린 리더가 그 변화를 자동으로 읽어주게 만드는 속성이다.</p>
+          <p><b>왜 중요한가</b> — 토스트 알림처럼 포커스 이동 없이 나타나는 콘텐츠도 스크린 리더 사용자가 놓치지 않게 한다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;div aria-live="polite"&gt;저장되었습니다&lt;/div&gt;</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-focus-trap">
+          <h3>포커스 트랩 <span class="en">Focus Trap</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>모달이 열려 있는 동안 Tab 키 포커스가 모달 바깥으로 나가지 않도록 가두는 패턴이다.</p>
+          <p><b>왜 중요한가</b> — 트랩이 없으면 키보드 사용자가 모달 뒤의 배경 콘텐츠로 포커스를 잃어 혼란스러워진다.</p>
+          <p><b>한 줄 예</b> — <code>// 모달 안 마지막 요소에서 Tab 시 첫 요소로 되돌린다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-skip-link">
+          <h3>skip link <span class="pill pill--accent">CH09</span></h3>
+          <p>페이지 최상단에 숨겨져 있다가 포커스를 받으면 나타나는, 본문으로 바로 이동하는 링크다.</p>
+          <p><b>왜 중요한가</b> — 키보드/스크린 리더 사용자가 반복되는 내비게이션을 매번 거치지 않고 본문으로 바로 갈 수 있게 한다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;a class="skip-link" href="#main"&gt;본문 바로가기&lt;/a&gt;</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-color-contrast">
+          <h3>색 대비 <span class="en">Color Contrast</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>텍스트와 배경색 사이의 밝기 차이를 수치화한 값이다. WCAG는 최소 대비 비율을 요구한다.</p>
+          <p><b>왜 중요한가</b> — 대비가 낮으면 저시력 사용자나 밝은 화면에서 텍스트를 읽기 어렵다.</p>
+          <p><b>한 줄 예</b> — <code>// WCAG AA 기준 본문 텍스트는 4.5:1 이상 권장</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-keyboard-navigation">
+          <h3>키보드 내비게이션 <span class="en">Keyboard Navigation</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>마우스 없이 Tab, Enter, 화살표 키만으로 페이지의 모든 기능을 사용할 수 있게 만드는 것이다.</p>
+          <p><b>왜 중요한가</b> — 스크린 리더 사용자, 운동 장애가 있는 사용자 모두에게 필수적인 접근 경로다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;div tabindex="0" onKeyDown={handleEnter}&gt;...&lt;/div&gt;</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-history-api">
+          <h3>History API <span class="pill pill--accent">CH09</span></h3>
+          <p>페이지를 새로 불러오지 않고 브라우저의 주소와 뒤로/앞으로 가기 기록을 조작하는 API다.</p>
+          <p><b>왜 중요한가</b> — SPA가 페이지 전체 새로고침 없이도 URL을 바꾸고 뒤로가기를 지원할 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>history.pushState({}, "", "/about");</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-spa">
+          <h3>SPA <span class="en">Single Page Application</span> <span class="pill pill--accent">CH09</span></h3>
+          <p>최초 한 번만 HTML을 로드하고, 이후 모든 화면 전환을 JS가 History API와 함께 처리하는 애플리케이션 구조다.</p>
+          <p><b>왜 중요한가</b> — 페이지 전체를 다시 받지 않아 전환이 빠르지만, 초기 로딩과 SEO는 별도로 신경 써야 한다.</p>
+          <p><b>한 줄 예</b> — <code>// react-router-dom이 SPA의 라우팅을 담당한다</code></p>
+          <div class="links"><a href="ch09.html">→ CH09에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="gsection">
+        <h2 id="s-test-git"><span class="h2num">§9</span>테스트 · 품질 · Git</h2>
+
+        <div class="gitem" id="g-unit-test">
+          <h3>단위 테스트 <span class="en">Unit Test</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>함수나 컴포넌트 하나를 다른 부분과 분리해서 독립적으로 검증하는 가장 작은 단위의 테스트다.</p>
+          <p><b>왜 중요한가</b> — 실패했을 때 원인이 되는 코드 범위가 가장 좁아 디버깅이 빠르다.</p>
+          <p><b>한 줄 예</b> — <code>expect(add(1, 2)).toBe(3);</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://vitest.dev/guide/" target="_blank" rel="noopener">Vitest</a></div>
+        </div>
+
+        <div class="gitem" id="g-integration-test">
+          <h3>통합 테스트 <span class="en">Integration Test</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>여러 모듈이나 컴포넌트가 함께 동작할 때의 결과를 검증하는 테스트다.</p>
+          <p><b>왜 중요한가</b> — 단위 테스트는 통과해도 모듈 간 연결에서 생기는 버그를 잡아준다.</p>
+          <p><b>한 줄 예</b> — <code>render(&lt;Form /&gt;); fireEvent.click(screen.getByText("제출"));</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-e2e-test">
+          <h3>E2E 테스트 <span class="en">End-to-End Test</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>실제 브라우저에서 사용자가 하는 것과 동일한 흐름(로그인 → 장바구니 → 결제 등)을 처음부터 끝까지 검증하는 테스트다.</p>
+          <p><b>왜 중요한가</b> — 프론트/백/DB가 실제로 연결된 상태에서만 드러나는 문제를 잡아낸다.</p>
+          <p><b>한 줄 예</b> — <code>await page.getByRole("button", { name: "로그인" }).click();</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://playwright.dev/docs/intro" target="_blank" rel="noopener">Playwright</a></div>
+        </div>
+
+        <div class="gitem" id="g-test-trophy">
+          <h3>테스트 트로피 <span class="en">Test Trophy</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>단위 테스트보다 통합 테스트를 더 많이 작성하라는, Testing Library 생태계에서 자주 인용되는 테스트 비중 모델이다.</p>
+          <p><b>왜 중요한가</b> — 사용자가 실제로 겪는 방식에 가까운 테스트가 리팩터링에도 잘 버티고 신뢰도가 높다는 관점을 제시한다.</p>
+          <p><b>한 줄 예</b> — <code>// 정적분석 &lt; 단위 &lt; 통합(가장 많이) &lt; E2E</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-aaa-pattern">
+          <h3>AAA 패턴 <span class="en">Arrange-Act-Assert</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>테스트 코드를 준비(Arrange) → 실행(Act) → 검증(Assert) 세 단계로 구조화하는 관례다.</p>
+          <p><b>왜 중요한가</b> — 테스트가 무엇을 하는지 한눈에 읽히게 만들어 유지보수를 쉽게 한다.</p>
+          <p><b>한 줄 예</b> — <code>// arrange: render / act: click / assert: expect(...)</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-mocking">
+          <h3>모킹 <span class="en">Mocking</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>실제 의존성(API, 모듈)을 가짜 구현으로 바꿔치기해 테스트를 독립적으로 만드는 기법이다.</p>
+          <p><b>왜 중요한가</b> — 네트워크나 외부 서비스 없이도 빠르고 안정적으로 테스트를 실행할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>vi.mock("./api", () =&gt; ({ fetchUser: vi.fn() }));</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-stub">
+          <h3>스텁 <span class="en">Stub</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>실제 함수 대신 미리 정해진 값만 반환하는 단순한 가짜 함수다.</p>
+          <p><b>왜 중요한가</b> — 테스트에 필요한 결과만 고정해서 반환하게 해 흐름을 예측 가능하게 만든다.</p>
+          <p><b>한 줄 예</b> — <code>const getUser = () =&gt; ({ id: 1, name: "test" });</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-spy">
+          <h3>스파이 <span class="en">Spy</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>실제 함수는 그대로 동작하게 두면서, 호출 여부와 인자를 기록해 검증할 수 있게 감싸는 함수다.</p>
+          <p><b>왜 중요한가</b> — 이 함수가 몇 번, 어떤 인자로 호출됐는지 확인해야 할 때 쓴다.</p>
+          <p><b>한 줄 예</b> — <code>const spy = vi.spyOn(obj, "save"); expect(spy).toHaveBeenCalledWith(1);</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-snapshot-test">
+          <h3>스냅샷 테스트 <span class="en">Snapshot Test</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>컴포넌트의 렌더링 결과를 파일로 저장해두고, 다음 실행에서 결과가 그대로인지 비교하는 테스트다.</p>
+          <p><b>왜 중요한가</b> — 의도치 않은 UI 변경을 빠르게 감지하지만, 변경 이유를 설명해주지는 않는다.</p>
+          <p><b>한 줄 예</b> — <code>expect(container).toMatchSnapshot();</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-coverage">
+          <h3>커버리지 <span class="en">Coverage</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>테스트가 소스 코드의 몇 퍼센트를 실행했는지 측정한 지표다.</p>
+          <p><b>왜 중요한가</b> — 숫자가 높다고 품질이 좋은 건 아니지만, 전혀 테스트되지 않은 위험 구간을 찾는 데 유용하다.</p>
+          <p><b>한 줄 예</b> — <code>vitest run --coverage</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-jsdom">
+          <h3>jsdom <span class="pill pill--accent">CH10</span></h3>
+          <p>실제 브라우저 없이 Node.js 환경에서 DOM API를 흉내 내주는 라이브러리다.</p>
+          <p><b>왜 중요한가</b> — 브라우저를 띄우지 않고도 컴포넌트 테스트를 빠르게 실행할 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>// vitest.config: test.environment = "jsdom"</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-vitest">
+          <h3>Vitest <span class="pill pill--accent">CH10</span></h3>
+          <p>Vite 기반 프로젝트를 위한 테스트 러너다. Jest와 유사한 API를 제공하면서 Vite 설정을 그대로 공유한다.</p>
+          <p><b>왜 중요한가</b> — 별도 트랜스파일 설정 없이 Vite 프로젝트에 바로 붙일 수 있어 설정 비용이 낮다.</p>
+          <p><b>한 줄 예</b> — <code>test("adds", () =&gt; { expect(1 + 1).toBe(2); });</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://vitest.dev/guide/" target="_blank" rel="noopener">Vitest</a></div>
+        </div>
+
+        <div class="gitem" id="g-testing-library">
+          <h3>Testing Library <span class="pill pill--accent">CH10</span></h3>
+          <p>실제 사용자가 화면을 보는 방식(텍스트, role)으로 요소를 찾아 테스트하도록 유도하는 라이브러리다.</p>
+          <p><b>왜 중요한가</b> — 구현 세부사항(클래스명, 내부 state)이 아니라 사용자 관점에서 테스트해 리팩터링에 강하다.</p>
+          <p><b>한 줄 예</b> — <code>screen.getByRole("button", { name: "저장" });</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-query-priority">
+          <h3>쿼리 우선순위 <span class="en">Query Priority</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>Testing Library가 권장하는 요소 탐색 순서다. role/label처럼 접근성 있는 방법을 우선하고 testId는 최후 수단으로 둔다.</p>
+          <p><b>왜 중요한가</b> — 접근성 있게 쿼리한 테스트는 실제 사용자가 그 요소를 찾을 수 있는지도 함께 검증해준다.</p>
+          <p><b>한 줄 예</b> — <code>// getByRole &gt; getByLabelText &gt; ... &gt; getByTestId</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-msw">
+          <h3>MSW <span class="en">Mock Service Worker</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>네트워크 요청을 실제로 가로채서 가짜 응답을 돌려주는 API 모킹 라이브러리다.</p>
+          <p><b>왜 중요한가</b> — fetch 코드를 건드리지 않고도 테스트/개발 환경에서 API 응답을 통제할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>http.get("/api/users", () =&gt; HttpResponse.json([]));</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-playwright">
+          <h3>Playwright <span class="pill pill--accent">CH10</span></h3>
+          <p>여러 브라우저 엔진(Chromium, Firefox, WebKit)을 자동으로 조작해 E2E 테스트를 실행하는 도구다.</p>
+          <p><b>왜 중요한가</b> — 실제 브라우저에서 사용자 흐름 전체를 검증하는 가장 신뢰도 높은 테스트 계층이다.</p>
+          <p><b>한 줄 예</b> — <code>await page.goto("/login");</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://playwright.dev/docs/intro" target="_blank" rel="noopener">Playwright</a></div>
+        </div>
+
+        <div class="gitem" id="g-locator">
+          <h3>로케이터 <span class="en">Locator</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>Playwright에서 페이지의 특정 요소를 나중에 찾도록 지연 평가되는 참조다.</p>
+          <p><b>왜 중요한가</b> — 요소가 아직 화면에 없어도 자동으로 기다렸다가 찾아주는 안정적인 방식이다.</p>
+          <p><b>한 줄 예</b> — <code>const btn = page.getByRole("button", { name: "저장" });</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-lint">
+          <h3>린트 <span class="en">Lint</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>코드를 실행하지 않고 정적으로 분석해 버그가 될 수 있는 패턴이나 스타일 위반을 찾아주는 도구다(ESLint 등).</p>
+          <p><b>왜 중요한가</b> — 코드 리뷰 전에 기계적으로 잡을 수 있는 실수를 자동으로 걸러낸다.</p>
+          <p><b>한 줄 예</b> — <code>eslint src/</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://eslint.org/docs/latest/" target="_blank" rel="noopener">ESLint</a></div>
+        </div>
+
+        <div class="gitem" id="g-formatter">
+          <h3>포맷터 <span class="en">Formatter</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>코드의 들여쓰기, 줄바꿈, 따옴표 등 형식을 규칙에 맞게 자동으로 통일해주는 도구다(Prettier 등).</p>
+          <p><b>왜 중요한가</b> — 스타일 논쟁 없이 팀 전체가 항상 같은 형태의 코드를 유지하게 한다.</p>
+          <p><b>한 줄 예</b> — <code>prettier --write src/</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://prettier.io/docs/en/index.html" target="_blank" rel="noopener">Prettier</a></div>
+        </div>
+
+        <div class="gitem" id="g-flat-config">
+          <h3>flat config <span class="pill pill--accent">CH10</span></h3>
+          <p>배열 기반의 단순한 JS 파일(<code>eslint.config.js</code>)로 설정하는 최신 ESLint 설정 방식이다. 기존 <code>.eslintrc</code> 계층 상속 방식을 대체한다.</p>
+          <p><b>왜 중요한가</b> — 여러 파일에 흩어져 상속되던 설정을 한 파일에서 명시적으로 파악할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>export default [{ rules: { "no-unused-vars": "error" } }];</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://eslint.org/docs/latest/" target="_blank" rel="noopener">ESLint</a></div>
+        </div>
+
+        <div class="gitem" id="g-commit">
+          <h3>커밋 <span class="en">Commit</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>변경 사항을 메시지와 함께 저장소 히스토리에 기록하는 Git의 기본 단위다.</p>
+          <p><b>왜 중요한가</b> — 작은 단위로 자주 커밋해야 문제가 생겼을 때 원인이 되는 변경을 정확히 되짚을 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>git commit -m "SCRUM-42: add KPI endpoint"</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-branch">
+          <h3>브랜치 <span class="en">Branch</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>메인 코드 흐름에서 갈라져 나와 독립적으로 작업할 수 있는 커밋의 흐름이다.</p>
+          <p><b>왜 중요한가</b> — 기능 개발이 끝나기 전까지 메인 브랜치를 안정 상태로 유지할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>git checkout -b feature/SCRUM-42-kpi</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-merge-rebase">
+          <h3>merge/rebase <span class="pill pill--accent">CH10</span></h3>
+          <p>merge는 두 브랜치의 히스토리를 합치는 병합 커밋을 만들고, rebase는 브랜치의 커밋들을 다른 브랜치 위로 옮겨 히스토리를 한 줄로 재작성한다.</p>
+          <p><b>왜 중요한가</b> — merge는 이력을 그대로 보존하고, rebase는 히스토리를 깔끔하게 정리하지만 이미 공유된 브랜치에 쓰면 위험하다.</p>
+          <p><b>한 줄 예</b> — <code>git rebase main // 로컬 브랜치를 main 최신 위로 재배치</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-conflict">
+          <h3>충돌 <span class="en">Conflict</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>같은 파일의 같은 부분을 서로 다르게 수정한 두 브랜치를 합칠 때 Git이 자동으로 결정하지 못하는 상황이다.</p>
+          <p><b>왜 중요한가</b> — 사람이 직접 어느 쪽을 남길지 판단해서 해결해야 한다.</p>
+          <p><b>한 줄 예</b> — <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD ... ======= ... &gt;&gt;&gt;&gt;&gt;&gt;&gt; branch</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-pr">
+          <h3>PR <span class="en">Pull Request</span> <span class="pill pill--accent">CH10</span></h3>
+          <p>한 브랜치의 변경사항을 다른 브랜치(주로 main)에 합쳐달라고 요청하며, 코드 리뷰를 거치는 GitHub의 협업 단위다.</p>
+          <p><b>왜 중요한가</b> — 코드가 메인에 들어가기 전에 다른 사람의 검토를 거치게 하는 품질 게이트다.</p>
+          <p><b>한 줄 예</b> — <code>gh pr create --title "..." --body "..."</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-conventional-commits">
+          <h3>Conventional Commits <span class="pill pill--accent">CH10</span></h3>
+          <p><code>feat:</code>, <code>fix:</code>, <code>chore:</code> 같은 접두사로 커밋의 성격을 표준화해서 표기하는 커밋 메시지 규약이다.</p>
+          <p><b>왜 중요한가</b> — 커밋 메시지만 보고도 변경 종류를 자동으로 분류해 체인지로그를 생성할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>feat: add optimistic update to task mutation</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="https://www.conventionalcommits.org/en/v1.0.0/" target="_blank" rel="noopener">Conventional Commits</a></div>
+        </div>
+
+        <div class="gitem" id="g-semver-git">
+          <h3>시맨틱 버전 <span class="en">SemVer</span> <span class="pill pill--accent">CH10</span></h3>
+          <p><code>1.2.3</code>을 major.minor.patch로 해석해, 각 자리 증가가 어떤 의미(호환성 깨짐/기능 추가/버그 수정)인지 정의한 버전 관리 규약이다.</p>
+          <p><b>왜 중요한가</b> — 버전 번호만 보고도 업데이트가 안전한지 위험한지 가늠할 수 있게 해준다.</p>
+          <p><b>한 줄 예</b> — <code>// 1.2.3 → 2.0.0 (breaking change)</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a> · <a href="ch07.html">→ CH07에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-ci-cd">
+          <h3>CI/CD <span class="pill pill--accent">CH10</span></h3>
+          <p>코드 변경을 자동으로 빌드·테스트(CI)하고, 통과하면 자동으로 배포(CD)까지 이어지는 파이프라인이다.</p>
+          <p><b>왜 중요한가</b> — 사람이 매번 수동으로 테스트/배포하지 않아도 일관된 품질 검증을 강제할 수 있다.</p>
+          <p><b>한 줄 예</b> — <code>// .github/workflows/*.yml</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+
+        <div class="gitem" id="g-pre-commit-hook">
+          <h3>pre-commit 훅 <span class="en">Pre-commit Hook</span> <span class="pill pill--accent">CH10</span></h3>
+          <p><code>git commit</code> 실행 직전에 자동으로 실행되는 스크립트로, 린트/포맷/테스트를 강제한다.</p>
+          <p><b>왜 중요한가</b> — 문제 있는 코드가 애초에 커밋되는 것을 막아 리뷰 이전 단계에서 품질을 지킨다.</p>
+          <p><b>한 줄 예</b> — <code>// .husky/pre-commit에서 lint-staged를 실행한다</code></p>
+          <div class="links"><a href="ch10.html">→ CH10에서 자세히</a></div>
+        </div>
+      </section>
+
+      <section class="refs">
+        <h2 id="s-refs">참고 문헌</h2>
+        <ol>
+          <li id="r1"><span class="src">MDN Web Docs</span> — "Closures". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Closures" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r2"><span class="src">MDN Web Docs</span> — "The event loop". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Event_loop" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r3"><span class="src">MDN Web Docs</span> — "Using promises". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Using_promises" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r4"><span class="src">MDN Web Docs</span> — "Inheritance and the prototype chain". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Inheritance_and_the_prototype_chain" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r5"><span class="src">MDN Web Docs</span> — "Memory management". <a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Memory_management" target="_blank" rel="noopener">developer.mozilla.org</a> (2026-08 확인)</li>
+          <li id="r6"><span class="src">TypeScript</span> — "Handbook". <a href="https://www.typescriptlang.org/docs/handbook/intro.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r7"><span class="src">TypeScript</span> — "Utility Types". <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html" target="_blank" rel="noopener">typescriptlang.org</a> (2026-08 확인)</li>
+          <li id="r8"><span class="src">React</span> — "Learn React". <a href="https://react.dev/learn" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+          <li id="r9"><span class="src">React</span> — "Hooks Reference". <a href="https://react.dev/reference/react" target="_blank" rel="noopener">react.dev</a> (2026-08 확인)</li>
+          <li id="r10"><span class="src">Vite</span> — "Guide". <a href="https://vitejs.dev/guide/" target="_blank" rel="noopener">vitejs.dev</a> (2026-08 확인)</li>
+          <li id="r11"><span class="src">Yarn</span> — "Documentation". <a href="https://yarnpkg.com/" target="_blank" rel="noopener">yarnpkg.com</a> (2026-08 확인)</li>
+          <li id="r12"><span class="src">TanStack</span> — "Query". <a href="https://tanstack.com/query/latest" target="_blank" rel="noopener">tanstack.com</a> (2026-08 확인)</li>
+          <li id="r13"><span class="src">Tailwind CSS</span> — "Documentation". <a href="https://tailwindcss.com/docs" target="_blank" rel="noopener">tailwindcss.com</a> (2026-08 확인)</li>
+          <li id="r14"><span class="src">shadcn/ui</span> — "Documentation". <a href="https://ui.shadcn.com/docs" target="_blank" rel="noopener">ui.shadcn.com</a> (2026-08 확인)</li>
+          <li id="r15"><span class="src">web.dev</span> — "Core Web Vitals". <a href="https://web.dev/articles/vitals" target="_blank" rel="noopener">web.dev</a> (2026-08 확인)</li>
+          <li id="r16"><span class="src">W3C</span> — "Web Content Accessibility Guidelines (WCAG)". <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener">w3.org</a> (2026-08 확인)</li>
+          <li id="r17"><span class="src">W3C</span> — "ARIA Authoring Practices Guide". <a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="noopener">w3.org</a> (2026-08 확인)</li>
+          <li id="r18"><span class="src">Node.js</span> — "Documentation". <a href="https://nodejs.org/en/docs" target="_blank" rel="noopener">nodejs.org</a> (2026-08 확인)</li>
+          <li id="r19"><span class="src">Ecma International</span> — "ECMA-262". <a href="https://www.ecma-international.org/publications-and-standards/standards/ecma-262/" target="_blank" rel="noopener">ecma-international.org</a> (2026-08 확인)</li>
+          <li id="r20"><span class="src">Vitest</span> — "Guide". <a href="https://vitest.dev/guide/" target="_blank" rel="noopener">vitest.dev</a> (2026-08 확인)</li>
+          <li id="r21"><span class="src">Playwright</span> — "Docs". <a href="https://playwright.dev/docs/intro" target="_blank" rel="noopener">playwright.dev</a> (2026-08 확인)</li>
+          <li id="r22"><span class="src">ESLint</span> — "Documentation". <a href="https://eslint.org/docs/latest/" target="_blank" rel="noopener">eslint.org</a> (2026-08 확인)</li>
+          <li id="r23"><span class="src">Prettier</span> — "Documentation". <a href="https://prettier.io/docs/en/index.html" target="_blank" rel="noopener">prettier.io</a> (2026-08 확인)</li>
+          <li id="r24"><span class="src">Biome</span> — "Getting Started". <a href="https://biomejs.dev/guides/getting-started/" target="_blank" rel="noopener">biomejs.dev</a> (2026-08 확인)</li>
+          <li id="r25"><span class="src">Zustand</span> — "Documentation". <a href="https://zustand.docs.pmnd.rs/" target="_blank" rel="noopener">zustand.docs.pmnd.rs</a> (2026-08 확인)</li>
+          <li id="r26"><span class="src">Conventional Commits</span> — "Specification v1.0.0". <a href="https://www.conventionalcommits.org/en/v1.0.0/" target="_blank" rel="noopener">conventionalcommits.org</a> (2026-08 확인)</li>
+        </ol>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>
