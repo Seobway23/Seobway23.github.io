@@ -59,7 +59,7 @@
     hljs: "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js",
     hljsDark: "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css",
     hljsLight: "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css",
-    mermaid: "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs"
+    mermaid: "./mermaid/mermaid.esm.min.mjs"
   };
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -255,7 +255,7 @@
         $$(".mermaid").forEach(function (el) {
           el.innerHTML =
             '<div class="note note--warn" style="text-align:left"><span class="note__t">다이어그램 로드 실패</span>' +
-            "인터넷 연결이 없으면 Mermaid CDN을 불러오지 못합니다. 아래는 원본 정의입니다." +
+            "Mermaid 스크립트를 불러오지 못했습니다. 아래는 원본 정의입니다." +
             "<pre style='margin-top:10px'>" + esc(el.textContent) + "</pre></div>";
         });
       });
