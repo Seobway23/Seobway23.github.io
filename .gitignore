@@ -22,5 +22,8 @@ ga-service-account-key.json
 
 /docs/*
 
+# 빌드 시 node_modules/mermaid에서 복사됨 (scripts/copy-roadmap-mermaid.mjs)
+/public/study/roadmap/assets/mermaid/
+
 CONTEXT.md
 CLAUDE.md
