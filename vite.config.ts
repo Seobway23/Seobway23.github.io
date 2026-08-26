@@ -91,11 +91,14 @@ const pwa = VitePWA({
     navigateFallbackDenylist: [/^\/404\.html$/, /^\/study\//],
     runtimeCaching: [
       {
-        // 레이지 청크(mermaid·three·katex…): 해시 파일명이라 내용이 불변
+        // 레이지 청크(mermaid·three·katex…): 해시 파일명이라 내용이 불변.
+        // 파일명 패턴(app-/chunk-[hash].js)까지 확인해야 함 — 그냥 "/assets/" 포함 여부만 보면
+        // /study/roadmap/assets/app.js·mermaid/*.mjs 처럼 해시 없이 이름이 고정된 정적 파일까지
+        // 걸려서 서버가 갱신돼도 브라우저가 30일간 구버전을 계속 재사용하게 된다.
         urlPattern: ({ url, request, sameOrigin }) =>
           sameOrigin &&
           request.destination === "script" &&
-          url.pathname.includes("/assets/"),
+          /\/assets\/(app|chunk)-[\w-]+\.js$/.test(url.pathname),
         handler: "CacheFirst",
         options: {
           cacheName: "app-chunks",
