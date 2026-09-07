@@ -29,7 +29,8 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <LayoutContext.Provider value={{ mobileMenuOpen, setMobileMenuOpen }}>
-      <div className="min-h-screen overflow-x-hidden">
+      {/* overflow-x 는 clip — hidden 이면 스크롤 컨테이너가 생겨 안쪽 sticky(목차)가 죽는다 */}
+      <div className="min-h-screen [overflow-x:clip]">
         <ProgressBar />
         <Header />
         {location !== "/" && (

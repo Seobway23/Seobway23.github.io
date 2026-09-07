@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { applyCodeTheme, readStoredCodeThemeId } from "@/lib/code-theme";
 
 type Theme = "dark" | "light";
 
@@ -37,10 +38,14 @@ export function ThemeProvider({
     root.classList.remove("light", "dark");
     root.classList.add(theme);
 
+    // 코드 색상 테마(사용자 선택)를 두 <link> 의 href 에 반영한 뒤,
+    // 사이트 테마에 맞춰 둘 중 하나만 활성화한다.
+    applyCodeTheme(readStoredCodeThemeId());
+
     // Switch syntax highlighting themes
     const lightSyntax = document.querySelector('.light-syntax') as HTMLLinkElement;
     const darkSyntax = document.querySelector('.dark-syntax') as HTMLLinkElement;
-    
+
     if (lightSyntax && darkSyntax) {
       if (theme === 'dark') {
         lightSyntax.disabled = true;

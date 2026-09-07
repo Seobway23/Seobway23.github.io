@@ -9,11 +9,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { getGradientTextColor, lightenColor } from "@/lib/color-utils";
+import {
+  CODE_THEMES,
+  readStoredCodeThemeId,
+  setCodeTheme,
+} from "@/lib/code-theme";
 
 interface BackgroundCustomizerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+/**
+ * 코드 테마 미리보기.
+ * hljs 가 실제로 뱉는 클래스명을 그대로 써서, 선택한 스타일시트가
+ * 곧바로 이 조각에 적용되게 한다(별도 색 지정 없음).
+ */
+const CODE_PREVIEW_HTML = [
+  '<span class="hljs-keyword">const</span> <span class="hljs-title function_">greet</span> = (',
+  '<span class="hljs-params">name</span>: <span class="hljs-built_in">string</span>) =&gt; {\n',
+  '  <span class="hljs-comment">// 인사말을 만든다</span>\n',
+  '  <span class="hljs-keyword">return</span> <span class="hljs-string">`안녕, ${name}`</span>;\n};',
+].join("");
 
 const presetGradients = [
   "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -33,6 +50,7 @@ export default function BackgroundCustomizer({
 }: BackgroundCustomizerProps) {
   const [startColor, setStartColor] = useState("#667eea");
   const [endColor, setEndColor] = useState("#764ba2");
+  const [codeThemeId, setCodeThemeId] = useState(readStoredCodeThemeId);
 
   useEffect(() => {
     const savedGradient = localStorage.getItem("custom-gradient");
@@ -169,13 +187,64 @@ export default function BackgroundCustomizer({
       <DialogContent className="max-w-md w-[calc(100%-1rem)] sm:w-full mx-2 sm:mx-auto max-h-[95vh] sm:max-h-[90vh]">
         <DialogHeader className="mb-2 sm:mb-4">
           <DialogTitle className="text-base sm:text-lg md:text-xl">
-            배경 커스터마이징
+            화면 설정
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 sm:space-y-6">
-          {/* Preset Gradients */}
+          {/* 코드 색상 테마 — 본문 코드 블록과 플레이그라운드 편집기에 함께 적용된다 */}
           <div>
+            <Label className="text-xs sm:text-sm font-medium mb-2 sm:mb-3 block">
+              코드 색상 테마
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              {CODE_THEMES.map((t) => {
+                const active = t.id === codeThemeId;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => {
+                      setCodeTheme(t.id);
+                      setCodeThemeId(t.id);
+                    }}
+                    aria-pressed={active}
+                    className={`flex items-center gap-2 rounded-lg border-2 px-2.5 py-2 text-left transition-all touch-manipulation active:scale-95 ${
+                      active
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"
+                    }`}
+                  >
+                    <span
+                      className="flex h-6 w-6 flex-none flex-wrap overflow-hidden rounded"
+                      aria-hidden
+                    >
+                      {t.swatch.map((c) => (
+                        <span
+                          key={c}
+                          className="h-3 w-3"
+                          style={{ background: c }}
+                        />
+                      ))}
+                    </span>
+                    <span className="min-w-0 truncate text-xs sm:text-sm">
+                      {t.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {/* 실제 하이라이팅 CSS 가 그대로 먹는 미리보기 */}
+            <pre className="mt-3 overflow-x-auto rounded-lg border border-border p-3 text-[11px] leading-relaxed">
+              <code
+                className="hljs language-typescript"
+                dangerouslySetInnerHTML={{ __html: CODE_PREVIEW_HTML }}
+              />
+            </pre>
+          </div>
+
+          {/* Preset Gradients */}
+          <div className="border-t border-border pt-4">
             <Label className="text-xs sm:text-sm font-medium mb-2 sm:mb-3 block">
               프리셋 그라데이션
             </Label>
