@@ -374,6 +374,10 @@ export default function Post() {
   useEffect(() => {
     if (post && contentRef.current) {
       const timer = setTimeout(async () => {
+        // 비동기 콜백이라 위의 null 체크가 여기까지 좁혀지지 않는다. 한 번만 붙잡는다.
+        const contentRoot = contentRef.current;
+        if (!contentRoot) return;
+
         // 0) Code tabs 초기화 (DOM 기반)
         const initCodeTabs = (root: HTMLElement) => {
           const groups = root.querySelectorAll<HTMLElement>("[data-code-tabs]");
@@ -414,7 +418,52 @@ export default function Post() {
           });
         };
 
-        initCodeTabs(contentRef.current);
+        initCodeTabs(contentRoot);
+
+        // 0-1) 본문 탭(::: tabs) — 코드 탭과 같은 규약, 클래스만 다르다.
+        //      키보드 ←/→ 로도 옮겨다닐 수 있게 roving tabindex 를 쓴다.
+        const initPostTabs = (root: HTMLElement) => {
+          root.querySelectorAll<HTMLElement>("[data-post-tabs]").forEach((group) => {
+            if (group.dataset.postTabsInitialized === "true") return;
+            group.dataset.postTabsInitialized = "true";
+
+            const triggers = Array.from(
+              group.querySelectorAll<HTMLButtonElement>(".post-tabs__trigger")
+            );
+            const panels = Array.from(
+              group.querySelectorAll<HTMLElement>(".post-tabs__panel")
+            );
+            if (triggers.length === 0 || panels.length === 0) return;
+
+            const setActive = (idx: number, focus = false) => {
+              triggers.forEach((t, i) => {
+                const active = i === idx;
+                t.setAttribute("aria-selected", active ? "true" : "false");
+                t.tabIndex = active ? 0 : -1;
+                t.classList.toggle("is-active", active);
+                if (active && focus) t.focus();
+              });
+              panels.forEach((p, i) => {
+                if (i === idx) p.removeAttribute("hidden");
+                else p.setAttribute("hidden", "");
+              });
+            };
+
+            triggers.forEach((t, i) => {
+              t.addEventListener("click", () => setActive(i));
+              t.addEventListener("keydown", (e) => {
+                if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+                e.preventDefault();
+                const delta = e.key === "ArrowRight" ? 1 : -1;
+                setActive((i + delta + triggers.length) % triggers.length, true);
+              });
+            });
+
+            setActive(0);
+          });
+        };
+
+        initPostTabs(contentRoot);
 
         // 1) hljs: mermaid 블록 제외하고 하이라이팅
         const codeBlocks = contentRef.current?.querySelectorAll("pre code");
@@ -424,7 +473,11 @@ export default function Post() {
             if (
               block.classList.contains("language-diagramatics") ||
               block.classList.contains("language-jsxgraph") ||
-              block.classList.contains("language-three")
+              block.classList.contains("language-three") ||
+              // 아래 두 개는 코드가 아니라 사양(spec)이라 하이라이팅 대상이 아니다
+              block.classList.contains("language-seq") ||
+              block.classList.contains("language-sequence") ||
+              block.classList.contains("language-playground")
             ) {
               return;
             }
@@ -568,6 +621,16 @@ export default function Post() {
 
         const { hydrateMechanicsVisualizations } = await import("@/lib/post-mechanics-viz");
         await hydrateMechanicsVisualizations(contentRef.current);
+
+        // ```seq / ```playground — 해당 블록이 있는 글에서만 코드를 내려받는다
+        if (contentRef.current?.querySelector("code.language-seq, code.language-sequence")) {
+          const { hydrateSequences } = await import("@/lib/post-sequence");
+          hydrateSequences(contentRef.current);
+        }
+        if (contentRef.current?.querySelector("code.language-playground")) {
+          const { hydratePlaygrounds } = await import("@/lib/post-playground");
+          hydratePlaygrounds(contentRef.current);
+        }
 
         // 도메인 배경 트리거([[domain:id]]) → 클릭 시 모달 열기
         const domainTriggers = contentRef.current?.querySelectorAll<HTMLButtonElement>(
@@ -890,6 +953,19 @@ export default function Post() {
                     ))}
                   </div>
                 </div>
+
+                {/* 작성자 — 사이드바에서 내려온 자리. 글을 다 읽은 뒤에 보이는 게 맞다 */}
+                <div className="mt-8 flex items-center gap-4 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 font-bold text-white">
+                    {post.author[0]}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground">{post.author}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      프론트엔드 개발과 사용자 경험에 관심이 많은 개발자입니다.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </article>
 
@@ -904,13 +980,8 @@ export default function Post() {
             />
           </main>
 
-          {/* Right Sidebar */}
-          <RightSidebar
-            post={post}
-            readingProgress={readingProgress}
-            toc={toc}
-            activeId={activeId}
-          />
+          {/* Right Sidebar — 목차 전용 */}
+          <RightSidebar toc={toc} activeId={activeId} />
         </div>
       </div>
     </div>

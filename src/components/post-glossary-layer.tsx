@@ -37,7 +37,7 @@ function computePanelPosition(anchorRect: DOMRect) {
   const vh = window.innerHeight;
 
   const canFitTop = anchorRect.top - padding - panelEstimatedHeight > 0;
-  const side = canFitTop ? "top" : "bottom";
+  const side: "top" | "bottom" = canFitTop ? "top" : "bottom";
 
   let left = anchorRect.left + anchorRect.width / 2 - panelWidth / 2;
   left = Math.max(padding, Math.min(vw - padding - panelWidth, left));
@@ -132,16 +132,45 @@ export function PostGlossaryLayer({
   );
   const panelRef = useRef<HTMLDivElement | null>(null);
   const hoverTimerRef = useRef<number | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
   const lastAutoAppliedSlugRef = useRef<string | null>(null);
+
+  /**
+   * 고정 상태. 용어를 클릭하면 켜진다.
+   * 켜져 있으면 마우스가 떠나도 닫지 않는다 — 패널 안의 "관련 글" 링크를
+   * 누르려면 툴팁이 살아 있어야 한다.
+   */
+  const [pinned, setPinned] = useState(false);
+
+  const cancelClose = () => {
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
 
   const close = () => {
     if (hoverTimerRef.current) {
       window.clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
     }
+    cancelClose();
     setOpen(null);
     setPos(null);
     setRelated([]);
+    setPinned(false);
+  };
+
+  /**
+   * 바로 닫지 않고 유예를 준다. 용어와 패널 사이에는 8px 틈이 있어서
+   * 즉시 닫으면 패널로 마우스를 옮기는 도중에 사라진다.
+   */
+  const scheduleClose = (delay = 220) => {
+    cancelClose();
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      close();
+    }, delay);
   };
 
   const openFor = (termEl: HTMLElement) => {
@@ -149,6 +178,7 @@ export function PostGlossaryLayer({
     if (!termId) return;
     const entry = dict[termId];
     if (!entry?.description) return;
+    cancelClose();
     const anchorRect = termEl.getBoundingClientRect();
     setOpen({ termId, text: entry.description, anchorRect });
     setPos(computePanelPosition(anchorRect));
@@ -316,6 +346,8 @@ export function PostGlossaryLayer({
       if (isMobile) return;
       const termEl = getTermElementFromEventTarget(e.target);
       if (!termEl) return;
+      cancelClose(); // 같은 용어로 되돌아온 경우 예약된 닫기를 취소
+      if (pinned) return; // 고정 중에는 다른 용어로 제멋대로 바뀌지 않게
       if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = window.setTimeout(() => openFor(termEl), 200);
     };
@@ -328,7 +360,10 @@ export function PostGlossaryLayer({
         window.clearTimeout(hoverTimerRef.current);
         hoverTimerRef.current = null;
       }
-      close();
+      if (pinned) return;
+      // 즉시 닫으면 패널로 마우스를 옮기는 도중에 사라진다. 패널의
+      // onMouseEnter 가 이 예약을 취소할 시간을 준다.
+      scheduleClose();
     };
 
     const handleFocusIn = (e: FocusEvent) => {
@@ -338,15 +373,21 @@ export function PostGlossaryLayer({
     };
 
     const handleFocusOut = () => {
-      if (isMobile) return;
-      close();
+      if (isMobile || pinned) return;
+      scheduleClose();
     };
 
     const handleClick = (e: MouseEvent) => {
       const termEl = getTermElementFromEventTarget(e.target);
       if (!termEl) return;
       e.preventDefault();
+      // 같은 용어를 다시 누르면 닫는다(토글).
+      if (pinned && open?.termId === termEl.dataset.term) {
+        close();
+        return;
+      }
       openFor(termEl);
+      setPinned(true);
     };
 
     root.addEventListener("mouseover", handleMouseOver);
@@ -361,7 +402,16 @@ export function PostGlossaryLayer({
       root.removeEventListener("focusout", handleFocusOut);
       root.removeEventListener("click", handleClick);
     };
-  }, [dict, isMobile, rootRef]);
+  }, [dict, isMobile, rootRef, pinned, open?.termId]);
+
+  // 언마운트 시 남은 타이머 정리(닫힌 패널을 다시 열려는 콜백 방지)
+  useEffect(
+    () => () => {
+      if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
+      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+    },
+    []
+  );
 
   // Reposition on scroll/resize while open.
   useEffect(() => {
@@ -411,11 +461,18 @@ export function PostGlossaryLayer({
       ref={panelRef}
       role={isMobile ? "dialog" : "tooltip"}
       aria-label="용어 설명"
-      className="fixed z-50 w-72 rounded-md border bg-popover p-4 text-sm text-popover-foreground shadow-md"
+      className={`fixed z-50 w-72 rounded-md border bg-popover p-4 text-sm text-popover-foreground shadow-md ${
+        pinned ? "ring-1 ring-primary/40" : ""
+      }`}
       style={{
         left: pos.left,
         top: pos.top,
         transform: pos.side === "top" ? "translateY(-100%)" : "translateY(0)",
+      }}
+      // 마우스가 패널에 닿으면 예약된 닫기를 취소한다 → 안의 링크를 누를 수 있다
+      onMouseEnter={cancelClose}
+      onMouseLeave={() => {
+        if (!pinned && !isMobile) scheduleClose();
       }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -441,15 +498,23 @@ export function PostGlossaryLayer({
             </div>
           ) : null}
         </div>
-        {isMobile ? (
+        {isMobile || pinned ? (
           <button
             type="button"
             className="shrink-0 rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-accent"
             onClick={close}
+            aria-label="용어 설명 닫기"
           >
             닫기
           </button>
-        ) : null}
+        ) : (
+          // 고정 전에는 클릭하면 계속 열어둘 수 있다는 걸 알려 준다
+          <span className="shrink-0 select-none text-[10px] leading-tight text-muted-foreground/70">
+            클릭해
+            <br />
+            고정
+          </span>
+        )}
       </div>
     </div>,
     document.body

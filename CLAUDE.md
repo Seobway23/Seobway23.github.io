@@ -91,7 +91,23 @@ excerpt: >
 
 ## 블로그 기능 요약 (콘텐츠 작성 시)
 
+**md 에서 쓸 수 있는 기능 전체 매뉴얼은 `posts/README.md`.** 아래는 요약이다.
 상세 프리셋·예시·체크리스트는 **`.cursor/skills/blog-post-writing/SKILL.md`** 를 본문으로 삼는다.
+
+### 인터랙티브 블록 (2026-09-07 추가)
+
+- ` ```seq ` — 단계 재생되는 시퀀스 애니메이션. `lane`/`step`/`push`·`pop`·`move`·`log`.
+  내장 preset: `event-loop`, `http-request` (`shared/seq-presets.mjs`).
+- ` ```playground ` — 독자가 고쳐 실행하는 코드. `#! react|ts|js|html title= height=`.
+  `import` 가 실제로 동작한다(esm.sh). 인터넷 필요.
+- `::: tabs` / `::: split` / `::: grid` — `== 라벨` 로 항목을 가른다. 안에 콜아웃 중첩 가능.
+- `- [ ]` 체크리스트 지원.
+
+### SEO
+
+`npm run build` 가 `scripts/prerender.mjs` 로 글마다 본문이 박힌 정적 HTML + 메타 +
+JSON-LD + `sitemap.xml` + `robots.txt` 를 만든다. 글 쓸 때 `excerpt`·`coverImage`·`tags` 를
+채우는 것이 곧 SEO 작업이다.
 
 ### 데이터·배포
 

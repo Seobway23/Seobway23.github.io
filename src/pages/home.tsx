@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, List, Route as RouteIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +15,10 @@ import { useTheme } from "@/hooks/use-theme";
 import { useLayout } from "@/components/layout";
 import LeftSidebar from "../components/left-sidebar";
 import PostCard from "../components/post-card";
+import ConceptMap from "@/components/concept-map";
 import type { Post } from "@shared/schema";
 import { addToSearchHistory } from "@/lib/search-history";
+import { getConceptGraph } from "@/lib/concept-graph";
 
 export default function Home() {
   const [location, navigate] = useLocation();
@@ -25,6 +27,34 @@ export default function Home() {
   const [sortBy, setSortBy] = useState("latest");
   const [searchQuery, setSearchQuery] = useState("");
   const { mobileMenuOpen, setMobileMenuOpen } = useLayout();
+
+  /** 리스트 ↔ 로드맵. 카테고리를 옮기면 리스트로 돌아간다 */
+  const [categoryView, setCategoryView] = useState<"list" | "map">("list");
+  /** 이 카테고리에 개념 지도가 있는가 — 있을 때만 토글을 띄운다 */
+  const [conceptCategories, setConceptCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getConceptGraph()
+      .then((g) => {
+        if (cancelled) return;
+        setConceptCategories(
+          Array.from(new Set(g.nodes.map((n) => n.category).filter(Boolean)))
+        );
+      })
+      .catch(() => {
+        // 지도가 없어도 리스트는 그대로 동작해야 한다
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const hasConceptMap =
+    selectedCategory !== "all" &&
+    conceptCategories.some((c) => c.startsWith(selectedCategory));
+
+  useEffect(() => setCategoryView("list"), [selectedCategory]);
 
   // Get search params from URL - URL이 변경될 때마다 실행
   useEffect(() => {
@@ -268,19 +298,64 @@ export default function Home() {
                 </p>
               </div>
 
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="latest">최신순</SelectItem>
-                  <SelectItem value="popular">인기순</SelectItem>
-                  <SelectItem value="oldest">오래된순</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-3">
+                {/* 개념 지도가 있는 카테고리에서만 뷰 전환이 뜬다 */}
+                {hasConceptMap && (
+                  <div
+                    className="inline-flex rounded-lg border border-border p-0.5"
+                    role="tablist"
+                    aria-label="보기 방식"
+                  >
+                    {(
+                      [
+                        ["list", "리스트", List],
+                        ["map", "로드맵", RouteIcon],
+                      ] as const
+                    ).map(([mode, label, Icon]) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        role="tab"
+                        aria-selected={categoryView === mode}
+                        onClick={() => setCategoryView(mode)}
+                        className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                          categoryView === mode
+                            ? "bg-primary/10 text-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5" aria-hidden />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {categoryView === "list" && (
+                  <Select value={sortBy} onValueChange={handleSortChange}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="latest">최신순</SelectItem>
+                      <SelectItem value="popular">인기순</SelectItem>
+                      <SelectItem value="oldest">오래된순</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
 
-            {isLoading ? (
+            {hasConceptMap && categoryView === "map" ? (
+              <ConceptMap
+                categoryPrefix={selectedCategory}
+                emptyFallback={
+                  <p className="py-12 text-center text-muted-foreground">
+                    이 카테고리에는 아직 개념 지도가 없다.
+                  </p>
+                }
+              />
+            ) : isLoading ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="animate-pulse">

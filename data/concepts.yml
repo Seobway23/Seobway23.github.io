@@ -1,0 +1,198 @@
+# 개념 그래프 — 로드맵·트랙·"다음 읽을 글"의 유일한 출처
+#
+# 여기에 적는 것은 개념과 그 선행 관계뿐이다.
+# 글과의 연결은 글 frontmatter 의 `concept: <id>` 가 만든다(양쪽에 적지 않는다).
+# 학습 순서·레벨·다음 글·잠금 여부는 전부 scripts/build-concept-graph.mjs 가 계산한다.
+#
+#   concepts.<id>
+#     label    화면에 뜰 이름 (필수)
+#     domain   javascript | typescript | react | css | build | perf | a11y | test (필수)
+#     summary  한 줄 요약 (필수, 로드맵 노드 툴팁에 뜬다)
+#     prereq   선행 개념 id 배열 (없으면 생략 = 뿌리 노드)
+#     aliases  본문 자동 매칭용 별칭 (선택, 지금은 미사용 — Phase 1에서 툴팁 연결)
+#
+#   tracks.<id>
+#     label / summary / order(개념 id 순서)
+#
+# 검증: npm run graph  (순환 참조·없는 선행·고아 노드를 잡는다)
+#
+# 원본 근거: 프론트엔드_학습자료 ch01 (§1~§10) + glossary.html 251개 항목
+
+tracks:
+  js-core:
+    label: JavaScript 코어
+    summary: 변수가 어디에 살고, 어떻게 기억되며, 무엇을 가리키는가. 나머지 전부의 바닥.
+    order:
+      - primitive-type
+      - reference-type
+      - scope
+      - hoisting
+      - tdz
+      - call-stack
+      - execution-context
+      - closure
+      - this
+      - arrow-function
+      - prototype
+      - shallow-deep-copy
+
+  js-async:
+    label: JavaScript 비동기
+    summary: 싱글 스레드가 어떻게 동시에 여러 일을 처리하는 것처럼 보이는가.
+    order:
+      - event-loop
+      - task-queue
+      - microtask
+      - promise
+      - async-await
+
+  js-functional:
+    label: 함수형 다루기
+    summary: 값을 바꾸지 않고 새로 만드는 습관이 왜 버그를 줄이는가.
+    order:
+      - immutability
+      - pure-function
+      - higher-order-function
+
+concepts:
+  # ── 값과 참조 ────────────────────────────────────────────────
+  primitive-type:
+    label: 원시 타입
+    domain: javascript
+    summary: 값 자체가 저장되고 복사되는 타입. string·number·boolean·null·undefined·bigint·symbol.
+    aliases: ["원시 타입", "primitive"]
+
+  reference-type:
+    label: 참조 타입
+    domain: javascript
+    summary: 변수에 값이 아니라 메모리 주소가 저장되는 타입. 객체·배열·함수.
+    prereq: [primitive-type]
+    aliases: ["참조 타입", "reference type"]
+
+  shallow-deep-copy:
+    label: 얕은 복사와 깊은 복사
+    domain: javascript
+    summary: 최상위만 새로 만드는가, 중첩된 값까지 새로 만드는가.
+    prereq: [reference-type]
+    aliases: ["얕은 복사", "깊은 복사"]
+
+  # ── 스코프 계열 ──────────────────────────────────────────────
+  scope:
+    label: 스코프
+    domain: javascript
+    summary: 변수와 함수가 어디서 접근 가능한지를 정하는 범위.
+    aliases: ["스코프", "scope"]
+
+  hoisting:
+    label: 호이스팅
+    domain: javascript
+    summary: 선언이 스코프 최상단으로 끌어올려진 것처럼 동작하는 현상.
+    prereq: [scope]
+    aliases: ["호이스팅", "hoisting"]
+
+  tdz:
+    label: TDZ (일시적 사각지대)
+    domain: javascript
+    summary: let·const 가 스코프 시작부터 선언문까지 접근이 금지되는 구간.
+    prereq: [hoisting]
+    aliases: ["TDZ", "Temporal Dead Zone"]
+
+  closure:
+    label: 클로저
+    domain: javascript
+    summary: 함수가 자기 바깥 스코프의 변수를 기억한 채 살아 있는 상태.
+    prereq: [scope, hoisting]
+    aliases: ["클로저", "closure"]
+
+  # ── 실행 모델 ────────────────────────────────────────────────
+  call-stack:
+    label: 콜 스택
+    domain: javascript
+    summary: 실행 중인 함수 호출을 쌓아 두는 후입선출 자료구조.
+    aliases: ["콜 스택", "call stack"]
+
+  execution-context:
+    label: 실행 컨텍스트
+    domain: javascript
+    summary: 함수가 실행될 때 만들어지는 환경. 변수·this·스코프 체인을 담는다.
+    prereq: [scope, call-stack]
+    aliases: ["실행 컨텍스트", "execution context"]
+
+  this:
+    label: this
+    domain: javascript
+    summary: 호출 방식에 따라 값이 결정되는 키워드.
+    prereq: [execution-context]
+    aliases: ["this"]
+
+  arrow-function:
+    label: 화살표 함수
+    domain: javascript
+    summary: 자체 this·arguments·prototype 을 갖지 않는 함수 문법.
+    prereq: [this]
+    aliases: ["화살표 함수", "arrow function"]
+
+  prototype:
+    label: 프로토타입
+    domain: javascript
+    summary: 객체가 다른 객체를 참조해 속성을 상속받는 JS 의 상속 방식.
+    prereq: [reference-type]
+    aliases: ["프로토타입", "prototype"]
+
+  # ── 비동기 ───────────────────────────────────────────────────
+  event-loop:
+    label: 이벤트 루프
+    domain: javascript
+    summary: 콜 스택이 비면 큐에서 작업을 꺼내 실행하는 런타임 장치.
+    prereq: [call-stack]
+    aliases: ["이벤트 루프", "event loop"]
+
+  task-queue:
+    label: 태스크 큐
+    domain: javascript
+    summary: setTimeout·DOM 이벤트 콜백이 대기하는 큐(매크로태스크).
+    prereq: [event-loop]
+    aliases: ["태스크 큐", "매크로태스크"]
+
+  microtask:
+    label: 마이크로태스크
+    domain: javascript
+    summary: Promise.then·queueMicrotask 처럼 태스크 큐보다 먼저 비워지는 작업.
+    prereq: [event-loop, task-queue]
+    aliases: ["마이크로태스크", "microtask"]
+
+  promise:
+    label: Promise
+    domain: javascript
+    summary: 비동기 결과를 나중에 다루도록 감싸는 객체. pending → fulfilled/rejected.
+    prereq: [microtask]
+    aliases: ["Promise", "프로미스"]
+
+  async-await:
+    label: async / await
+    domain: javascript
+    summary: Promise 를 동기 코드처럼 순서대로 쓰게 해주는 문법.
+    prereq: [promise]
+    aliases: ["async/await", "async await"]
+
+  # ── 함수형 ───────────────────────────────────────────────────
+  immutability:
+    label: 불변성
+    domain: javascript
+    summary: 데이터를 고치지 않고 바뀐 새 데이터를 만들어 교체하는 원칙.
+    prereq: [shallow-deep-copy]
+    aliases: ["불변성", "immutability"]
+
+  pure-function:
+    label: 순수 함수
+    domain: javascript
+    summary: 같은 입력이면 같은 출력이고, 바깥 상태를 건드리지 않는 함수.
+    prereq: [immutability]
+    aliases: ["순수 함수", "pure function"]
+
+  higher-order-function:
+    label: 고차 함수
+    domain: javascript
+    summary: 함수를 인자로 받거나 함수를 반환하는 함수. map·filter·reduce.
+    prereq: [closure]
+    aliases: ["고차 함수", "higher-order function"]

@@ -503,6 +503,157 @@ function injectCalloutsIntoHtml(html, calloutSlots, renderInnerHtml) {
   return result;
 }
 
+/* ────────────────────────────────────────────────────────────────
+ * 섹션 블록 — ::: tabs / ::: split / ::: grid
+ *
+ *   ::: tabs
+ *   == 정지 토압
+ *   벽이 움직이지 않을 때 ... $K_0 = 1-\sin\phi'$
+ *   == 주동 토압
+ *   벽이 흙에서 멀어질 때 ...
+ *   :::
+ *
+ * - `== 라벨` 줄이 항목을 가른다. 항목 본문은 일반 마크다운(수식·표·코드 다 됨).
+ * - tabs : 라벨을 탭으로, 본문을 패널로. 클릭 바인딩은 post.tsx가 한다.
+ * - split: 좌우 2단(모바일에서는 세로로 쌓임). 라벨은 소제목으로 붙는다.
+ * - grid : 카드 격자. 항목 수에 따라 열 수를 정한다.
+ * - 콜아웃(::: tip)을 안에 중첩할 수 있게 여닫는 깊이를 센다.
+ * ──────────────────────────────────────────────────────────────── */
+const SECTION_KINDS = new Set(["tabs", "split", "grid"]);
+
+/** `== 라벨` 로 본문을 항목 배열로 자른다. 첫 `==` 앞의 글은 라벨 없는 항목으로 취급. */
+function splitSectionItems(body) {
+  const lines = String(body || "").split(/\r?\n/);
+  const items = [];
+  let cur = null;
+  for (const line of lines) {
+    const m = line.match(/^==\s*(.*)$/);
+    if (m) {
+      cur = { label: m[1].trim(), body: [] };
+      items.push(cur);
+      continue;
+    }
+    if (!cur) {
+      if (line.trim() === "") continue;
+      cur = { label: "", body: [] };
+      items.push(cur);
+    }
+    cur.body.push(line);
+  }
+  return items.map((it, i) => ({
+    label: it.label || `${i + 1}`,
+    hasLabel: it.label.length > 0,
+    body: it.body.join("\n").trim(),
+  }));
+}
+
+function processSectionBlocks(markdown) {
+  if (!markdown || typeof markdown !== "string") {
+    return { markdown: markdown || "", slots: [] };
+  }
+  const lines = String(markdown).split(/\r?\n/);
+  const out = [];
+  const slots = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i].replace(/\r$/, "");
+    const open = line.match(/^:::\s*(\w+)\s*$/);
+    if (open && SECTION_KINDS.has(open[1].toLowerCase())) {
+      const kind = open[1].toLowerCase();
+      const startLine = i;
+      i++;
+      const body = [];
+      let depth = 1;
+      let closed = false;
+      while (i < lines.length) {
+        const cur = lines[i].replace(/\r$/, "");
+        if (/^:::\s*\w+/.test(cur)) depth++;
+        else if (/^:::\s*$/.test(cur)) {
+          depth--;
+          if (depth === 0) {
+            closed = true;
+            i++;
+            break;
+          }
+        }
+        body.push(cur);
+        i++;
+      }
+      const items = closed ? splitSectionItems(body.join("\n")) : [];
+      if (!closed || items.length === 0) {
+        if (!closed) console.warn(`⚠️ 섹션 블록이 :::로 닫히지 않음: ${line}`);
+        out.push(lines[startLine]);
+        i = startLine + 1;
+        continue;
+      }
+      const idx = slots.length;
+      slots.push({ kind, items });
+      out.push("");
+      out.push(`@@POSTSECTION${idx}@@`);
+      out.push("");
+    } else {
+      out.push(line);
+      i++;
+    }
+  }
+  return { markdown: out.join("\n"), slots };
+}
+
+function buildSectionHtml(idx, kind, items, renderInnerHtml) {
+  if (kind === "tabs") {
+    const groupId = `post-tabs-${idx}`;
+    const triggers = items
+      .map((t, i) => {
+        const active = i === 0;
+        return `<button type="button" class="post-tabs__trigger" role="tab" id="${groupId}-tab-${i}" aria-selected="${active}" aria-controls="${groupId}-panel-${i}" tabindex="${active ? 0 : -1}" data-tab-index="${i}">${escapeHtml(t.label)}</button>`;
+      })
+      .join("");
+    const panels = items
+      .map(
+        (t, i) =>
+          `<div class="post-tabs__panel" role="tabpanel" id="${groupId}-panel-${i}" aria-labelledby="${groupId}-tab-${i}" data-panel-index="${i}"${i === 0 ? "" : " hidden"}>${renderInnerHtml(t.body)}</div>`
+      )
+      .join("");
+    return `<div class="post-tabs" data-post-tabs data-post-tabs-id="${groupId}"><div class="post-tabs__list" role="tablist">${triggers}</div>${panels}</div>`;
+  }
+
+  if (kind === "split") {
+    const cols = items
+      .map(
+        (t) =>
+          `<div class="post-split__col">${t.hasLabel ? `<div class="post-split__label">${escapeHtml(t.label)}</div>` : ""}${renderInnerHtml(t.body)}</div>`
+      )
+      .join("");
+    return `<div class="post-split" data-cols="${Math.min(items.length, 3)}">${cols}</div>`;
+  }
+
+  // grid
+  const cards = items
+    .map(
+      (t) =>
+        `<div class="post-grid__card">${t.hasLabel ? `<div class="post-grid__title">${escapeHtml(t.label)}</div>` : ""}${renderInnerHtml(t.body)}</div>`
+    )
+    .join("");
+  return `<div class="post-grid" data-cols="${items.length % 3 === 0 ? 3 : 2}">${cards}</div>`;
+}
+
+function injectSectionsIntoHtml(html, sectionSlots, renderInnerHtml) {
+  let result = String(html || "");
+  if (!sectionSlots || sectionSlots.length === 0) return result;
+  for (let i = 0; i < sectionSlots.length; i++) {
+    const token = `@@POSTSECTION${i}@@`;
+    if (!result.includes(token)) {
+      console.warn(`⚠️ 섹션 플레이스홀더가 HTML에 없음: ${token}`);
+      continue;
+    }
+    const { kind, items } = sectionSlots[i];
+    result = result
+      .split(token)
+      .join(buildSectionHtml(i, kind, items, renderInnerHtml));
+  }
+  return result;
+}
+
 /**
  * 도메인 배경 카드 — ::: domain id="foo" title="제목" ... :::
  * 본문에는 아무것도 남기지 않아(글의 흐름 방해 X) 숨은 <template>로 부록에 모은다.
@@ -929,6 +1080,10 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     // 도메인 배경 카드(::: domain ...) — 본문에서 제거하고 부록 template로 모음. 콜아웃보다 먼저.
     const { markdown: mdWithoutDomain, cards: domainCards } = processDomainCards(processedContent);
     processedContent = mdWithoutDomain;
+    // 섹션 블록(::: tabs / split / grid) — 콜아웃보다 먼저.
+    // 안쪽에 콜아웃을 중첩할 수 있어야 하므로 깊이를 세는 이 파서가 먼저 잡아야 한다.
+    const { markdown: mdWithSections, slots: sectionSlots } = processSectionBlocks(processedContent);
+    processedContent = mdWithSections;
     // 콜아웃(::: tip 등) — 코드 탭 이후, 수식 플레이스홀더 이전
     const { markdown: mdWithCallouts, slots: calloutSlots } = processCallouts(processedContent);
     processedContent = mdWithCallouts;
@@ -988,6 +1143,10 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
       let frag = convertTableBoldToStrong(innerMd); // 표 볼드 먼저 — 아래 fixBold의 셀 넘김 방지
       frag = fixBoldBeforeCJK(frag);
       frag = normalizeLatexDelimiters(frag);
+      // 섹션/콜아웃 중첩 — 탭 안의 콜아웃, 콜아웃 안의 탭이 모두 살아나게 재귀 처리
+      const { markdown: fragNoSections, slots: sectionSlotsF } = processSectionBlocks(frag);
+      const { markdown: fragNoCallouts, slots: calloutSlotsF } = processCallouts(fragNoSections);
+      frag = fragNoCallouts;
       // 콜아웃/도메인 카드 안에서도 [[domain:id]] 트리거·[[term]] 용어사전이 동작하게 (본문과 동일 처리)
       frag = applyDomainTriggerMarkup(frag, new Set(domainCards.map((c) => c.id)), filePath);
       frag = applyGlossaryMarkup(frag, glossary, filePath);
@@ -995,9 +1154,12 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
       let h = marked.parse(mdF, { renderer });
       h = injectKatexPlaceholdersIntoHtml(h, mathSlotsF);
       h = injectCodeTabsPlaceholdersIntoHtml(h, codeTabsSlots);
+      h = injectSectionsIntoHtml(h, sectionSlotsF, renderFragmentHtml);
+      h = injectCalloutsIntoHtml(h, calloutSlotsF, renderFragmentHtml);
       return h;
     };
-    let htmlContent = injectCalloutsIntoHtml(htmlAfterCodeTabs, calloutSlots, renderFragmentHtml);
+    const htmlAfterSections = injectSectionsIntoHtml(htmlAfterCodeTabs, sectionSlots, renderFragmentHtml);
+    let htmlContent = injectCalloutsIntoHtml(htmlAfterSections, calloutSlots, renderFragmentHtml);
     // 도메인 배경 카드(숨은 template)를 본문 뒤에 붙인다.
     htmlContent += buildDomainCardsHtml(domainCards, renderFragmentHtml);
 
@@ -1056,6 +1218,12 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
 }
 
 /**
+ * 글이 아닌 문서 — posts/ 안에 있어도 게시글로 만들지 않는다.
+ * (작성 매뉴얼 posts/README.md 가 글 목록에 섞여 들어갔던 적이 있다.)
+ */
+const NON_POST_FILES = new Set(["readme.md", "_template.md", "index.md"]);
+
+/**
  * posts/ 폴더에서 모든 마크다운 파일 찾기
  */
 function getAllMarkdownFiles(dir, fileList = []) {
@@ -1069,6 +1237,8 @@ function getAllMarkdownFiles(dir, fileList = []) {
       // 재귀적으로 하위 디렉토리 탐색
       getAllMarkdownFiles(filePath, fileList);
     } else if (file.endsWith(".md")) {
+      // 밑줄로 시작하는 파일(_초안.md 등)과 문서 파일은 글이 아니다
+      if (file.startsWith("_") || NON_POST_FILES.has(file.toLowerCase())) return;
       fileList.push(filePath);
     }
   });
