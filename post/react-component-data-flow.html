@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="React의 props와 state 차이를 분명히 하고, 단방향 데이터 흐름과 state 끌어올리기를 통해 컴포넌트를 어떻게 설계해야 하는지 정리한다." />
+    <meta name="keywords" content="react, props, state, data-flow, component-design, lifting-state-up" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/react-component-data-flow" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가" />
+    <meta property="og:description" content="React의 props와 state 차이를 분명히 하고, 단방향 데이터 흐름과 state 끌어올리기를 통해 컴포넌트를 어떻게 설계해야 하는지 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/react-component-data-flow" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.305Z" />
+    <meta property="article:tag" content="react" />
+    <meta property="article:tag" content="props" />
+    <meta property="article:tag" content="state" />
+    <meta property="article:tag" content="data-flow" />
+    <meta property="article:tag" content="component-design" />
+    <meta property="article:tag" content="lifting-state-up" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가" />
+    <meta name="twitter:description" content="React의 props와 state 차이를 분명히 하고, 단방향 데이터 흐름과 state 끌어올리기를 통해 컴포넌트를 어떻게 설계해야 하는지 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가","description":"React의 props와 state 차이를 분명히 하고, 단방향 데이터 흐름과 state 끌어올리기를 통해 컴포넌트를 어떻게 설계해야 하는지 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.305Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/react-component-data-flow"},"keywords":"react, props, state, data-flow, component-design, lifting-state-up","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":3250},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Freact"},{"@type":"ListItem","position":3,"name":"React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가","item":"https://seobway23.github.io/post/react-component-data-flow"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가</h1>
+<p>React의 props와 state 차이를 분명히 하고, 단방향 데이터 흐름과 state 끌어올리기를 통해 컴포넌트를 어떻게 설계해야 하는지 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>11분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/post/ai-webdev-roadmap-foundation">로드맵 인덱스 →</a></td>
+<td>01~19 전체 학습 경로</td>
+</tr>
+<tr>
+<td><a href="/post/js-event-loop-and-async">01-1. JS 이벤트 루프와 비동기 →</a></td>
+<td>콜스택, 큐, 마이크로태스크</td>
+</tr>
+<tr>
+<td><a href="/post/settimeout-vs-promise">01-2. setTimeout vs Promise →</a></td>
+<td>비동기 실행 순서 예측</td>
+</tr>
+<tr>
+<td><a href="/post/react-component-data-flow">01-3. React 단방향 데이터 흐름 →</a></td>
+<td>props/state, state 끌어올리기</td>
+</tr>
+<tr>
+<td><a href="/post/react-controlled-vs-uncontrolled">01-4. controlled vs uncontrolled →</a></td>
+<td>React 폼 설계</td>
+</tr>
+<tr>
+<td><a href="/post/typescript-type-system-basics">01-5. TypeScript 타입 시스템 기초 →</a></td>
+<td>any, unknown, union, narrowing</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>React에서 가장 먼저 잡아야 할 것</h2>
+<p>React 입문에서 가장 중요한 질문 중 하나는 이것이다.</p>
+<p><strong>&quot;이 값은 props인가, state인가?&quot;</strong></p>
+<p>이 질문이 흔들리면 컴포넌트 구조도 같이 흔들린다. 같은 값을 여러 군데에서 따로 저장하거나, 자식이 부모 데이터를 직접 바꾸려 들면서 설계가 꼬이기 시작한다.</p>
+<hr>
+<h2>props와 state는 무엇이 다른가</h2>
+<h3>props</h3>
+<p>props는 <strong>부모가 자식에게 내려주는 읽기 전용 값</strong>이다.</p>
+<pre><code class="language-tsx">function ProfileCard({ name }: { name: string }) {
+  return &lt;h2&gt;{name}&lt;/h2&gt;
+}
+</code></pre>
+<p>자식 컴포넌트는 props를 받아서 렌더링할 수는 있지만, 그 값을 직접 바꾸면 안 된다.</p>
+<h3>state</h3>
+<p>state는 <strong>컴포넌트가 기억해야 하는 값</strong>이다.</p>
+<pre><code class="language-tsx">function Counter() {
+  const [count, setCount] = useState(0)
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  )
+}
+</code></pre>
+<p>즉 props는 &quot;외부에서 들어오는 값&quot;, state는 &quot;내가 관리하는 값&quot;으로 보면 된다.</p>
+<hr>
+<h2>React는 왜 단방향 데이터 흐름을 고집하는가</h2>
+<p>React의 데이터는 보통 <strong>부모 → 자식</strong> 방향으로 흐른다.</p>
+<pre><code class="language-mermaid">%% desc: React의 기본 데이터 흐름은 부모에서 자식으로 내려간다
+flowchart TD
+  P[&quot;Parent state&quot;] --&gt; A[&quot;Child A props&quot;]
+  P --&gt; B[&quot;Child B props&quot;]
+</code></pre>
+<p>이 구조의 장점은 추적이 쉽다는 점이다.</p>
+<ul>
+<li>값의 출처를 찾기 쉽다</li>
+<li>어떤 변화가 어디서 시작됐는지 보기 쉽다</li>
+<li>디버깅이 단순해진다</li>
+</ul>
+<p>반대로 자식이 부모 값을 여기저기 직접 바꾸는 구조가 되면, 데이터 출처가 흐려진다.</p>
+<hr>
+<h2>자식이 부모 상태를 바꾸고 싶을 때</h2>
+<p>자식이 부모의 값을 직접 바꾸는 대신, <strong>부모가 함수를 내려준다</strong>.</p>
+<pre><code class="language-tsx">function Parent() {
+  const [count, setCount] = useState(0)
+
+  return &lt;Child count={count} onIncrease={() =&gt; setCount(count + 1)} /&gt;
+}
+
+function Child({
+  count,
+  onIncrease,
+}: {
+  count: number
+  onIncrease: () =&gt; void
+}) {
+  return &lt;button onClick={onIncrease}&gt;{count}&lt;/button&gt;
+}
+</code></pre>
+<p>값은 아래로 내려오고, 이벤트는 위로 올라간다. 이 패턴이 React 설계의 기본 호흡이다.</p>
+<hr>
+<h2>state는 어디에 둬야 하는가</h2>
+<p>가장 자주 하는 실수는 <strong>같은 상태를 여러 컴포넌트가 따로 들고 있는 것</strong>이다.</p>
+<p>예를 들어 형제 컴포넌트 둘이 같은 선택값을 공유해야 한다면, 각자 state를 갖지 말고 <strong>가장 가까운 공통 부모</strong>로 state를 올려야 한다.</p>
+<pre><code class="language-tsx">function Parent() {
+  const [selectedId, setSelectedId] = useState&lt;number | null&gt;(null)
+
+  return (
+    &lt;&gt;
+      &lt;Sidebar selectedId={selectedId} onSelect={setSelectedId} /&gt;
+      &lt;Detail selectedId={selectedId} /&gt;
+    &lt;/&gt;
+  )
+}
+</code></pre>
+<p>이것을 흔히 <strong>state 끌어올리기(lifting state up)</strong> 라고 부른다.</p>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>state를 너무 아래에 두면 동기화가 어렵고, 너무 위에 두면 불필요한 props 전달이 늘어난다. 기준은 간단하다. <strong>그 값을 함께 써야 하는 가장 가까운 공통 부모</strong>에 둔다.</p>
+</div></div></aside></p>
+<hr>
+<h2>언제 props로 충분하고, 언제 state가 필요한가</h2>
+<p>다음 기준으로 생각하면 편하다.</p>
+<ul>
+<li>부모가 넘겨준 값 그대로 보여주기만 하면 <code>props</code></li>
+<li>사용자 입력이나 클릭으로 값이 바뀌어야 하면 <code>state</code></li>
+<li>여러 자식이 함께 써야 하면 공통 부모의 <code>state</code></li>
+</ul>
+<p>예를 들어 게시글 목록을 받아서 그리기만 하는 카드는 props 중심이다. 반면 모달 열림 여부, 현재 탭, 입력값은 state가 필요하다.</p>
+<hr>
+<h2>React Query, Zustand와도 연결된다</h2>
+<p>나중에 서버 상태와 클라이언트 상태를 분리해 배울 때도 이 감각이 중요하다.</p>
+<ul>
+<li>서버에서 온 데이터: React Query 같은 도구가 관리</li>
+<li>UI 열림 여부, 입력 중 값: 컴포넌트 state나 Zustand가 관리</li>
+</ul>
+<p>즉 React의 props/state 감각이 먼저 잡혀야, 이후 상태 관리 도구도 자연스럽게 이해된다.</p>
+<hr>
+<h2>마치며</h2>
+<p>React 설계의 출발점은 거창한 패턴이 아니다.</p>
+<ul>
+<li>props는 읽기 전용으로 내려온다</li>
+<li>state는 값을 기억한다</li>
+<li>데이터는 위에서 아래로 흐른다</li>
+<li>공유 상태는 공통 부모로 올린다</li>
+</ul>
+<p>이 네 줄이 정리되면 컴포넌트 구조가 훨씬 단순해진다.</p>
+<h2>조금 더 깊게 보기</h2>
+<h3>비개발자 관점으로 보는 props와 state</h3>
+<p>React 컴포넌트를 작은 부서라고 생각하면 이해가 쉽다. props는 상위 부서에서 내려온 업무 지시서이고, state는 그 부서가 현재 처리 중인 내부 메모다. 지시서는 마음대로 고치면 안 되고, 내부 메모는 상황에 따라 바뀔 수 있다.</p>
+<h3>개발자가 실제로 고민해야 하는 질문</h3>
+<p>React 설계에서 중요한 질문은 &quot;이 컴포넌트를 어떻게 나눌까&quot;보다 먼저 <strong>이 상태의 주인이 누구인가</strong>다. 상태의 주인이 분명하면 데이터 흐름은 자연스럽게 정리된다.</p>
+<h3>실무에서 자주 하는 실수</h3>
+<p>서버에서 온 데이터를 다시 로컬 state에 복사해 두거나, 형제 컴포넌트가 같은 값을 각각 state로 갖는 경우가 흔하다. 이런 구조는 원본이 무엇인지 흐리게 만들고 동기화 버그를 만든다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://react.dev/learn/passing-props-to-a-component" target="_blank">[1] React Docs — Passing Props to a Component</a></li>
+<li><a href="https://react.dev/learn/state-a-components-memory" target="_blank">[2] React Docs — State: A Component's Memory</a></li>
+<li><a href="https://react.dev/learn/sharing-state-between-components" target="_blank">[3] React Docs — Sharing State Between Components</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-controlled-vs-uncontrolled">controlled vs uncontrolled 컴포넌트 →</a></li>
+<li><a href="/post/typescript-type-system-basics">TypeScript 타입 시스템 기초 →</a></li>
+<li><a href="/post/react-query-overview">TanStack Query 개요 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>react</li><li>props</li><li>state</li><li>data-flow</li><li>component-design</li><li>lifting-state-up</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

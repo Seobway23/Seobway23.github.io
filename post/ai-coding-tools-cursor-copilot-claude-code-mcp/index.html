@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Foundation 06 단계의 AI Workflow 입문 글. AI IDE, 코딩 보조 도구, 에이전트형 도구, MCP를 서로 구분하고 어떤 순서로 익히면 좋은지 정리한다." />
+    <meta name="keywords" content="ai-workflow, cursor, github-copilot, claude-code, mcp, ai-ide, agent" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/ai-coding-tools-cursor-copilot-claude-code-mcp" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까" />
+    <meta property="og:description" content="Foundation 06 단계의 AI Workflow 입문 글. AI IDE, 코딩 보조 도구, 에이전트형 도구, MCP를 서로 구분하고 어떤 순서로 익히면 좋은지 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/ai-coding-tools-cursor-copilot-claude-code-mcp" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-06-ai-tools.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.151Z" />
+    <meta property="article:tag" content="ai-workflow" />
+    <meta property="article:tag" content="cursor" />
+    <meta property="article:tag" content="github-copilot" />
+    <meta property="article:tag" content="claude-code" />
+    <meta property="article:tag" content="mcp" />
+    <meta property="article:tag" content="ai-ide" />
+    <meta property="article:tag" content="agent" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까" />
+    <meta name="twitter:description" content="Foundation 06 단계의 AI Workflow 입문 글. AI IDE, 코딩 보조 도구, 에이전트형 도구, MCP를 서로 구분하고 어떤 순서로 익히면 좋은지 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-06-ai-tools.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까","description":"Foundation 06 단계의 AI Workflow 입문 글. AI IDE, 코딩 보조 도구, 에이전트형 도구, MCP를 서로 구분하고 어떤 순서로 익히면 좋은지 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-06-ai-tools.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.151Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/ai-coding-tools-cursor-copilot-claude-code-mcp"},"keywords":"ai-workflow, cursor, github-copilot, claude-code, mcp, ai-ide, agent","articleSection":"workflow","inLanguage":"ko-KR","wordCount":2858},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"workflow","item":"https://seobway23.github.io/?category=study%2Fai%2Fworkflow"},{"@type":"ListItem","position":3,"name":"AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까","item":"https://seobway23.github.io/post/ai-coding-tools-cursor-copilot-claude-code-mcp"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>workflow</span></nav>
+<h1>AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까</h1>
+<p>Foundation 06 단계의 AI Workflow 입문 글. AI IDE, 코딩 보조 도구, 에이전트형 도구, MCP를 서로 구분하고 어떤 순서로 익히면 좋은지 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>12분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>01</td>
+<td><a href="/post/js-event-loop-and-async">브라우저 &amp; 클라이언트 →</a></td>
+<td>JS 비동기, React 설계, TypeScript</td>
+</tr>
+<tr>
+<td>02</td>
+<td><a href="/post/js-runtime-node-bun-deno">서버 &amp; 데이터 →</a></td>
+<td>런타임, HTTP, Hono, SQL</td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="/post/code-quality-eslint-prettier-biome">코드 품질 →</a></td>
+<td>가독성, 리팩토링, ESLint, Prettier, Biome</td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="/post/git-branching-conventional-commits-husky">Git &amp; 릴리즈 →</a></td>
+<td>브랜치 전략, Conventional Commits, Husky</td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="/post/modern-css-tailwind-shadcn">UI &amp; 스타일링 →</a></td>
+<td>모던 CSS, Tailwind, shadcn/ui</td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="/post/ai-coding-tools-cursor-copilot-claude-code-mcp">AI 코딩 도구 →</a></td>
+<td>Cursor, Copilot, Claude Code, MCP</td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="/post/db-orm-postgres-drizzle-neon-supabase">DB &amp; ORM →</a></td>
+<td>PostgreSQL, Drizzle, Neon, Supabase</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>AI 도구는 전부 같은 챗봇이 아니다</h2>
+<p>AI 코딩 도구를 처음 보면 전부 &quot;코드 짜 주는 도구&quot;처럼 보인다.</p>
+<p>하지만 실제로는 역할이 다르다.</p>
+<ul>
+<li>IDE 안에서 제안해 주는 도구</li>
+<li>파일과 터미널을 직접 다루는 에이전트</li>
+<li>외부 도구와 연결하는 프로토콜</li>
+<li>팀 규칙과 메모리를 읽는 워크플로</li>
+</ul>
+<p>Foundation 단계에서는 기능을 많이 쓰기보다 <strong>각 도구가 어디까지 할 수 있는지</strong>를 구분하는 것이 먼저다.</p>
+<hr>
+<h2>GitHub Copilot — IDE 안의 코딩 보조자</h2>
+<p>GitHub Copilot은 에디터 안에서 코드 제안, 채팅, 설명, 테스트 생성 등을 도와주는 도구다.<a href="https://docs.github.com/en/copilot" target="_blank"><sup>[1]</sup></a></p>
+<p>잘 맞는 일:</p>
+<ul>
+<li>반복 코드 자동완성</li>
+<li>함수 설명 받기</li>
+<li>테스트 초안 만들기</li>
+<li>작은 리팩토링 힌트 얻기</li>
+</ul>
+<p>Copilot은 &quot;같이 타이핑하는 페어&quot;에 가깝게 생각하면 좋다.</p>
+<hr>
+<h2>Cursor — AI IDE</h2>
+<p>Cursor는 AI 기능을 중심에 둔 코드 에디터다.<a href="https://docs.cursor.com/" target="_blank"><sup>[2]</sup></a></p>
+<p>특히 Rules 파일, 코드베이스 검색, 파일 단위 수정 같은 흐름을 통해 &quot;프로젝트 맥락을 읽고 수정하는 IDE&quot; 경험을 제공한다.</p>
+<p>잘 맞는 일:</p>
+<ul>
+<li>코드베이스를 보며 질문하기</li>
+<li>여러 파일 수정 초안 만들기</li>
+<li>프로젝트 규칙을 IDE에 알려주기</li>
+</ul>
+<hr>
+<h2>Claude Code — 에이전트형 개발 도구</h2>
+<p>Claude Code는 터미널에서 동작하는 에이전트형 코딩 도구다.<a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank"><sup>[3]</sup></a></p>
+<p>IDE 보조자보다 한 단계 더 나아가, 파일을 읽고 수정하고 명령을 실행하며 작업을 이어갈 수 있다.</p>
+<p>잘 맞는 일:</p>
+<ul>
+<li>기능 구현 흐름 전체 맡기기</li>
+<li>테스트 실행과 수정 반복</li>
+<li>리팩토링 계획 수립</li>
+<li>문서와 코드 동시 정리</li>
+</ul>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>에이전트형 도구는 강력하지만, 그만큼 권한과 검증이 중요하다. 파일 수정, 셸 명령, Git 작업은 항상 결과를 확인해야 한다.</p>
+</div></div></aside></p>
+<hr>
+<h2>MCP — 도구 연결을 위한 프로토콜</h2>
+<p>MCP(Model Context Protocol)는 모델과 외부 도구, 데이터 소스를 연결하기 위한 프로토콜이다.<a href="https://modelcontextprotocol.io/introduction" target="_blank"><sup>[4]</sup></a></p>
+<p>예를 들어 AI가 다음을 안전한 방식으로 사용할 수 있게 하는 연결층으로 볼 수 있다.</p>
+<ul>
+<li>문서 저장소</li>
+<li>이슈 트래커</li>
+<li>데이터베이스</li>
+<li>브라우저 자동화</li>
+<li>사내 도구</li>
+</ul>
+<p>MCP는 특정 AI IDE 하나의 기능이라기보다, AI 도구 생태계가 외부 시스템과 연결되는 방식에 가깝다.</p>
+<hr>
+<h2>하네스라는 관점</h2>
+<p>AI 도구를 이해할 때는 모델만 보면 부족하다.</p>
+<p>실제 제품에는 보통 다음 레이어가 붙는다.</p>
+<ul>
+<li>파일 읽기/쓰기</li>
+<li>셸 명령 실행</li>
+<li>권한 확인</li>
+<li>컨텍스트 관리</li>
+<li>메모리와 규칙</li>
+<li>외부 도구 연동</li>
+</ul>
+<p>이런 오케스트레이션 레이어를 넓게 <strong>하네스</strong>로 볼 수 있다. 이 관점은 이미 정리해 둔 <a href="/post/claude-code-harness-leak-architecture">Claude Code 하네스 유출이 말해 주는 것 →</a> 글과도 연결된다.</p>
+<hr>
+<h2>추천 학습 순서</h2>
+<pre><code class="language-mermaid">%% desc: AI 코딩 도구는 자동완성에서 IDE, 에이전트, 도구 연결 순서로 확장된다
+flowchart LR
+  C[&quot;Copilot\n코딩 보조&quot;] --&gt; I[&quot;Cursor\nAI IDE&quot;]
+  I --&gt; A[&quot;Claude Code\nAgent&quot;]
+  A --&gt; M[&quot;MCP\n도구 연결&quot;]
+</code></pre>
+<ol>
+<li>Copilot류 도구로 작은 보조 경험을 익힌다</li>
+<li>Cursor처럼 프로젝트 맥락을 읽는 IDE를 써 본다</li>
+<li>Claude Code 같은 에이전트 도구로 작업 단위를 맡겨 본다</li>
+<li>MCP로 외부 도구 연결 구조를 이해한다</li>
+</ol>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>AI Workflow의 핵심은 &quot;AI가 코드를 대신 짠다&quot;가 아니라, <strong>작업을 잘 쪼개고, 맥락을 제공하고, 결과를 검증하는 루프</strong>를 만드는 것이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>조금 더 깊게 보기</h2>
+<h3>AI 도구의 차이는 권한의 차이다</h3>
+<p>Copilot, Cursor, Claude Code, MCP를 구분할 때 핵심은 모델 이름이 아니다. 어떤 도구가 어떤 컨텍스트를 읽고, 어떤 파일을 수정하고, 어떤 외부 시스템에 접근할 수 있는지가 더 중요하다. 권한이 커질수록 생산성도 올라가지만 검증 책임도 커진다.</p>
+<h3>Copilot과 Agent의 차이</h3>
+<p>Copilot은 보통 개발자 옆에서 제안하는 보조자에 가깝다. 반면 Claude Code 같은 에이전트는 파일을 읽고, 수정하고, 명령을 실행하며 작업 흐름을 이어갈 수 있다. 이 차이를 모르면 AI에게 맡길 수 있는 작업 단위를 잘못 잡게 된다.</p>
+<h3>MCP가 중요한 이유</h3>
+<p>MCP는 AI가 외부 도구와 연결되는 표준화된 통로다. 문서, 이슈, DB, 브라우저, 사내 API가 모델과 연결되면 AI는 단순 코드 생성기를 넘어 작업 환경의 일부가 된다. 그래서 앞으로는 &quot;프롬프트를 잘 쓰는 사람&quot;보다 &quot;도구와 컨텍스트를 잘 설계하는 사람&quot;의 생산성이 커진다.</p>
+<h3>실무 안전장치</h3>
+<p>AI 도구에는 항상 권한 경계가 필요하다. 쓰기 가능한 폴더, 실행 가능한 명령, 접근 가능한 secret을 제한해야 한다. AI가 빠르게 코드를 고쳐도, 테스트와 diff 리뷰 없이 merge하면 위험하다.</p>
+<h2>참고</h2>
+<ol>
+<li><a href="https://docs.github.com/en/copilot" target="_blank">[1] GitHub Docs — GitHub Copilot</a></li>
+<li><a href="https://docs.cursor.com/" target="_blank">[2] Cursor Docs</a></li>
+<li><a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank">[3] Anthropic Docs — Claude Code overview</a></li>
+<li><a href="https://modelcontextprotocol.io/introduction" target="_blank">[4] Model Context Protocol — Introduction</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/claude-code-harness-leak-architecture">Claude Code 하네스 유출이 말해 주는 것 →</a></li>
+<li><a href="/post/gstack-overview">gstack 개요 — 전체 구조와 철학 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~07 →</a></li>
+</ul>
+
+<ul><li>ai-workflow</li><li>cursor</li><li>github-copilot</li><li>claude-code</li><li>mcp</li><li>ai-ide</li><li>agent</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

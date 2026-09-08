@@ -235,6 +235,26 @@
     "path": "/post/study/frontend/javascript/settimeout-vs-promise"
   },
   {
+    "slug": "closure",
+    "title": "클로저 — 함수가 붙잡고 있는 변수",
+    "path": "/post/study/frontend/js/closure"
+  },
+  {
+    "slug": "event-loop-interactive",
+    "title": "이벤트 루프, 눈으로 따라가기",
+    "path": "/post/study/frontend/js/event-loop-interactive"
+  },
+  {
+    "slug": "hoisting",
+    "title": "호이스팅 — 선언은 먼저 올라간다",
+    "path": "/post/study/frontend/js/hoisting"
+  },
+  {
+    "slug": "scope",
+    "title": "스코프 — 변수가 어디까지 보이는가",
+    "path": "/post/study/frontend/js/scope"
+  },
+  {
     "slug": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
     "title": "빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG",
     "path": "/post/study/frontend/performance/build-performance-a11y-vite-turbopack-lighthouse-wcag"

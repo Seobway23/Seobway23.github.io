@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Electron 패키징과 asar — electron-builder로 배포하기 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다." />
+    <meta name="keywords" content="electron, asar, packaging, electron-builder, code-signing, auto-update" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/electron-packaging-asar" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Electron 패키징과 asar — electron-builder로 배포하기" />
+    <meta property="og:description" content="Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/electron-packaging-asar" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-06-14T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.267Z" />
+    <meta property="article:tag" content="electron" />
+    <meta property="article:tag" content="asar" />
+    <meta property="article:tag" content="packaging" />
+    <meta property="article:tag" content="electron-builder" />
+    <meta property="article:tag" content="code-signing" />
+    <meta property="article:tag" content="auto-update" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Electron 패키징과 asar — electron-builder로 배포하기" />
+    <meta name="twitter:description" content="Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Electron 패키징과 asar — electron-builder로 배포하기","description":"Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-14T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.267Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-packaging-asar"},"keywords":"electron, asar, packaging, electron-builder, code-signing, auto-update","articleSection":"electron","inLanguage":"ko-KR","wordCount":16843},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"Electron 패키징과 asar — electron-builder로 배포하기","item":"https://seobway23.github.io/post/electron-packaging-asar"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>electron</span></nav>
+<h1>Electron 패키징과 asar — electron-builder로 배포하기</h1>
+<p>Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-06-14T00:00:00.000Z">2026-06-14</time> · <span>14분</span></p>
+<h2>패키징, 무엇을 한 덩어리로 묶는가</h2>
+<p>지금까지 이 시리즈에서는 main·renderer·preload 프로세스가 어떻게 나뉘고(<a href="/post/electron-multi-process-architecture">Electron 멀티 프로세스 아키텍처 →</a>), 그 사이를 어떻게 안전하게 연결하는지(<a href="/post/electron-ipc-security-model">Electron IPC와 보안 모델 →</a>)를 살펴봤다. 이번에는 그렇게 완성된 앱을 <strong>사용자에게 어떻게 전달하는가</strong>를 다룬다.</p>
+<p>Electron 코어 자체에는 패키징·배포 도구가 없다. 개발 모드에서 잘 동작하는 앱을 실제 설치 파일로 만들려면 별도 도구(Electron Forge 또는 electron-builder)가 필요하다.<a href="https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging" target="_blank"><sup>[1]</sup></a></p>
+<p>Electron 배포물은 개념적으로 세 덩어리로 나뉜다.</p>
+<ol>
+<li><strong>런타임</strong> — Chromium + Node.js + Electron 네이티브 바이너리. 사용자 PC에 Node나 Chrome이 없어도 동작하도록, 앱이 자기 런타임을 통째로 들고 다닌다.</li>
+<li><strong>앱 코드</strong> — 우리가 작성한 main/preload/renderer JS·HTML·CSS·에셋. <code>app.asar</code>라는 단일 가상 파일시스템 아카이브로 봉인된다.</li>
+<li><strong>곁다리</strong> — 네이티브 모듈(<code>.node</code>), 외부 실행 파일(<code>.exe</code>), Python 사이드카, 대용량 에셋. asar 밖(<code>app.asar.unpacked/</code>, <code>resources/</code>)에 풀어둔다. 실행 가능해야 하기 때문이다.</li>
+</ol>
+<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p>Docker 이미지가 &quot;앱 + 의존성 + OS 런타임&quot;을 한 레이어 묶음으로 봉인한다면, Electron은 &quot;앱 + 의존성 + (Chromium + Node) 런타임&quot;을 한 디렉터리/인스톨러로 봉인한다. 이 글에서 등장하는 asar, asarUnpack, extraResources, electron-builder는 모두 그 봉인 과정의 부품들이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>패키징된 앱의 실제 디렉터리 구조</h2>
+<h3>수동 패키징의 골격</h3>
+<p>Electron의 prebuilt 바이너리를 받아 손으로 포장한다면, 우리 앱 폴더를 <code>app</code>이라는 이름으로 <strong>Electron의 <code>resources</code> 디렉터리</strong> 안에 넣는다.<a href="https://www.electronjs.org/docs/latest/tutorial/application-distribution" target="_blank"><sup>[2]</sup></a></p>
+<pre><code class="language-text"># Windows / Linux
+electron/resources/app
+├── package.json
+├── main.js
+└── index.html
+
+# macOS (.app 번들 내부)
+electron/Electron.app/Contents/Resources/app/
+├── package.json
+├── main.js
+└── index.html
+</code></pre>
+<p>그 다음 <code>electron.exe</code>(Windows) / <code>electron</code>(Linux) / <code>Electron.app</code>(macOS)을 실행하면, Electron이 <code>resources/app</code>을 읽어 우리 앱으로 부팅한다. 이 <code>electron/</code> 디렉터리 전체가 곧 배포물이다.<a href="https://www.electronjs.org/docs/latest/tutorial/application-distribution" target="_blank"><sup>[2]</sup></a></p>
+<h3>asar로 봉인한 형태</h3>
+<p><code>app/</code> 폴더를 통째로 복사하는 대신, asar 아카이브 하나로 치환할 수 있다. 아카이브 이름을 <code>app.asar</code>로 바꿔 <code>resources</code> 밑에 두면 Electron이 그것을 읽고 부팅한다.<a href="https://www.electronjs.org/docs/latest/tutorial/application-distribution" target="_blank"><sup>[2]</sup></a></p>
+<pre><code class="language-text"># Windows
+electron/resources/
+└── app.asar          ← app/ 폴더 전체가 이 한 파일로 봉인됨
+
+# macOS
+electron/Electron.app/Contents/Resources/
+└── app.asar
+</code></pre>
+<h3>실전 산출물 — Windows 설치 후 디렉터리</h3>
+<p>electron-builder/NSIS로 설치하면 사용자 PC에는 대략 이런 트리가 깔린다(이름은 <code>productName</code>으로 리브랜딩된다).</p>
+<pre><code class="language-text">C:\Users\&lt;user&gt;\AppData\Local\Programs\Civil Agent\
+├── Civil Agent.exe              ← [런타임] electron.exe를 리브랜딩한 실행 진입점
+├── *.dll                        ← [런타임] Chromium/Node 네이티브
+│                                   (ffmpeg.dll, libGLESv2.dll, d3dcompiler_47.dll, libEGL.dll ...)
+├── *.pak                        ← [런타임] Chromium 리소스 번들
+├── icudtl.dat                   ← [런타임] 유니코드/ICU 데이터
+├── v8_context_snapshot.bin      ← [런타임] V8 스냅샷 (빠른 부팅용)
+├── chrome_crashpad_handler.exe  ← [런타임] 크래시 리포터
+├── locales\                     ← [런타임] Chromium 언어 팩 (en-US.pak, ko.pak, ...)
+└── resources\                   ← [앱] 우리 코드/곁다리가 사는 곳
+    ├── app.asar                 ← [앱] main/preload/renderer 번들 전부 봉인 (가상 FS)
+    ├── app.asar.unpacked\       ← [곁다리] asar에서 풀린 네이티브 파일 (있을 때만 생성)
+    │   └── **/*.node ...
+    └── (extraResources 대상)    ← [곁다리] 예: backend\ (Python 사이드카)
+</code></pre>
+<p>macOS의 <code>.app</code> 번들도 구조는 비슷하다. <code>Contents/MacOS/</code>에 실행 바이너리, <code>Contents/Frameworks/</code>에 Chromium+Node 본체와 헬퍼 프로세스들, <code>Contents/Resources/</code>에 <code>app.asar</code>와 <code>app.asar.unpacked/</code>가 들어간다. 리브랜딩할 때는 <code>Info.plist</code>의 <code>CFBundleDisplayName</code>, <code>CFBundleIdentifier</code>, <code>CFBundleName</code>을 본체와 Helper 양쪽에서 바꿔야 하는데, electron-builder는 이를 자동으로 처리한다.<a href="https://www.electronjs.org/docs/latest/tutorial/application-distribution" target="_blank"><sup>[2]</sup></a></p>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>위 트리에서 <code>*.dll</code>/<code>*.pak</code>/<code>locales/</code>/<code>Frameworks/</code>는 <strong>고정 런타임 레이어</strong>고, <code>resources/app.asar</code>만이 <strong>우리가 만든 앱 레이어</strong>다. 빌드할 때마다 실질적으로 바뀌는 건 사실상 <code>app.asar</code> 하나뿐이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>asar란 무엇인가 — 가상 파일시스템 봉인</h2>
+<h3>정의와 목적</h3>
+<blockquote>
+<p>&quot;the app&#39;s source code is usually bundled into an ASAR archive, which is a simple extensive archive format designed for Electron apps. By bundling the app we can mitigate issues around long path names on Windows, speed up <code>require</code> and conceal your source code from cursory inspection.&quot; <a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a></p>
+</blockquote>
+<p>asar는 <code>tar</code>와 비슷한 <strong>무압축 연결(concatenation) 아카이브 + JSON 헤더</strong> 포맷이다. 한 디렉터리의 수천 개 파일을 한 파일로 이어붙이고, 맨 앞 헤더에 &quot;각 파일이 이 아카이브의 몇 byte offset부터 몇 byte인지&quot;를 기록한다.</p>
+<p>봉인하는 이유는 세 가지다.</p>
+<ol>
+<li><strong>Windows 긴 경로(long path) 문제 완화</strong> — <code>node_modules</code>는 경로 깊이가 수백 글자에 달해 Windows의 (구) 260자 경로 한계에 걸리기 쉽다. 한 파일로 묶으면 내부 경로는 아카이브가 관리하므로 OS 경로 한계를 우회한다.</li>
+<li><strong><code>require</code>/파일 읽기 속도 향상</strong> — 파일 수천 개를 OS 파일시스템에서 일일이 <code>open</code>하는 대신, 아카이브 하나만 열고 offset으로 점프한다. 설치 시 파일 개수가 줄어 설치도 빨라진다.</li>
+<li><strong>소스 코드의 가벼운 은닉</strong> — 평범한 사용자가 폴더를 열어 우리 <code>.js</code>를 바로 들여다보긴 어렵게 만든다.</li>
+</ol>
+<h3>한계 — asar는 암호화가 아니다</h3>
+<p>여기가 가장 흔한 오해 지점이다. 공식 문서의 표현은 &quot;conceal from <strong>cursory</strong> inspection&quot;(겉핥기 검사로부터 숨김)이다. electron-builder 문서도 &quot;to <strong>prevent casual</strong> file inspection&quot;이라고 명시한다.<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>asar는 <strong>무압축·무암호화</strong> 포맷이다. <code>npx asar extract app.asar out/</code> 한 줄이면 누구나 원본 소스를 그대로 복원할 수 있다. 따라서 <strong>API 키, 비밀번호, 라이선스 검증 로직 같은 민감 정보를 asar에 넣어도 전혀 안전하지 않다.</strong> 보안이 필요하면 서버 측 처리, 네이티브 모듈, 별도 암호화가 필요하다. asar는 &quot;패키징 편의(파일 수↓·경로 문제↓·로딩↑) + 약한 난독화&quot;일 뿐, 절대 보안 경계가 아니다.</p>
+</div></div></aside></p>
+<p>asar에는 Node API 레벨에서도 몇 가지 한계가 있다.<a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a></p>
+<table>
+<thead>
+<tr>
+<th>한계</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>읽기 전용</td>
+<td>아카이브는 수정 불가. 파일에 <em>쓰는</em> 모든 <code>fs</code> API는 asar 내부에서 동작하지 않는다.</td>
+</tr>
+<tr>
+<td>cwd로 못 씀</td>
+<td>실제 디렉터리가 아니므로 작업 디렉터리(cwd)를 asar 내부로 설정할 수 없다. <code>cwd</code> 옵션에 넘기면 에러.</td>
+</tr>
+<tr>
+<td>가짜 stat</td>
+<td><code>fs.stat</code>의 <code>Stats</code>는 추측으로 생성된다. 파일 크기·타입 외에는 신뢰하지 않는다.</td>
+</tr>
+<tr>
+<td>추가 unpack 오버헤드</td>
+<td>실제 파일 경로가 필요한 일부 API(<code>fs.open</code>, <code>child_process.execFile</code>, <code>process.dlopen</code> 등)는 임시 파일로 추출 후 그 경로를 넘긴다. 약간의 오버헤드와 백신 오탐을 유발할 수 있다.</td>
+</tr>
+<tr>
+<td>바이너리 실행 제약</td>
+<td>asar 내부 바이너리는 <code>execFile</code>만 실행 가능하다. <code>exec</code>/<code>spawn</code>은 셸 명령이라 asar 경로 치환이 불가능해 지원되지 않는다.</td>
+</tr>
+</tbody></table>
+<h3>asar 안에서 <code>require</code>가 동작하는 원리</h3>
+<p>순정 Node.js는 asar를 모른다. <strong>Electron이 Node와 Chromium에 특수 패치</strong>를 넣어, asar 아카이브를 &quot;가상 디렉터리&quot;로, 그 안의 파일을 &quot;보통 파일&quot;처럼 다루게 만든다.</p>
+<blockquote>
+<p>&quot;With special patches in Electron, Node APIs like <code>fs.readFile</code> and <code>require</code> treat ASAR archives as virtual directories, and the files in it as normal files in the filesystem.&quot; <a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a></p>
+</blockquote>
+<p>동작 메커니즘은 다음과 같다.</p>
+<ul>
+<li>Electron은 Node의 <code>fs</code> 모듈(과 그 위에 얹힌 모듈 로더)을 가로채서, 경로에 <code>*.asar</code>가 끼어 있으면 실제 디스크 접근 대신 그 asar의 <strong>헤더(JSON)에서 파일 offset/size를 찾아</strong> 아카이브의 해당 구간만 읽어 반환한다.</li>
+<li>그래서 <code>require(&#39;/path/to/example.asar/dir/module.js&#39;)</code>도, <code>fs.readFileSync(&#39;/path/to/example.asar/file.txt&#39;)</code>도 평소처럼 동작한다.</li>
+<li>Renderer(웹) 쪽에서도 <code>file://</code> 프로토콜로 asar 내부 파일을 디렉터리처럼 요청할 수 있다. 예: <code>win.loadURL(&#39;file:///.../app.asar/static/index.html&#39;)</code>.<a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a></li>
+<li>asar 지원을 끄려면 <code>original-fs</code> 모듈(asar 미지원 순정 fs)을 쓰거나 <code>process.noAsar = true</code>로 설정한다. 예컨대 asar 자체의 체크섬을 <em>파일로서</em> 읽고 싶을 때 사용한다.<a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a></li>
+</ul>
+<pre><code class="language-js">// asar를 &quot;가상 디렉터리&quot;로 — Electron 패치 덕분에 그냥 됨
+const fs = require(&#39;node:fs&#39;)
+fs.readFileSync(&#39;/path/to/example.asar/file.txt&#39;)   // OK
+require(&#39;./path/to/example.asar/dir/module.js&#39;)      // OK
+
+// asar 자체를 &quot;한 개의 파일&quot;로 다루고 싶을 때
+const originalFs = require(&#39;original-fs&#39;)
+originalFs.readFileSync(&#39;/path/to/example.asar&#39;)     // 아카이브 통째로
+</code></pre>
+<hr>
+<h2>asarUnpack / extraResources — 네이티브·사이드카를 asar 밖으로</h2>
+<h3>왜 밖으로 빼야 하나</h3>
+<p>asar 안의 바이너리(<code>.node</code> 네이티브 모듈, <code>.exe</code>, <code>.dll</code>)는 직접 실행할 수 없다. OS의 <code>exec</code>/<code>dlopen</code>은 <strong>실제 디스크 경로</strong>를 요구하기 때문이다. asar 내부 파일에는 실제 경로가 없으므로, Electron이 매번 임시 파일로 추출해 경로를 넘기게 되는데, 이는 느리고 백신 오탐을 부를 수 있다.<a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a> 따라서 <strong>네이티브/실행 바이너리는 asar 밖에 풀어두는 것이 정석</strong>이다.</p>
+<h3>asarUnpack — 논리적으로는 안, 물리적으로는 밖</h3>
+<p><code>asar pack app app.asar --unpack *.node</code>를 실행하면 <code>app.asar</code>와 나란히 <strong><code>app.asar.unpacked/</code><strong> 폴더가 생긴다. 풀린 파일들이 거기 들어가며, <code>app.asar</code>와 </strong>함께 배포되어야</strong> 한다.<a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a></p>
+<p>electron-builder에서는 다음처럼 지정한다.</p>
+<pre><code class="language-yaml">asarUnpack:
+  - &quot;**/*.node&quot;          # 모든 네이티브 모듈
+  - &quot;resources/ffmpeg&quot;   # 대용량 바이너리
+</code></pre>
+<p><code>app.asar.unpacked/</code>에 있는 파일은 asar 안에 있는 것과 <strong>동일한 경로로 접근 가능</strong>하다. Electron이 읽기 요청을 투명하게 리다이렉트해주기 때문이다.<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a> 즉 코드에서의 경로는 그대로(논리적으로는 asar 안인 척), 물리적 실체만 풀려 있어 실행 가능해진다. electron-builder는 &quot;Smart Unpack&quot;으로 실행 파일/네이티브 모듈을 <strong>자동 감지해 unpack</strong>하므로 보통 수동 설정이 불필요하다.<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+<h3>extraResources — 앱 코드와 분리해 resources/에 복사</h3>
+<p>asar와 무관하게, <strong>프로젝트 디렉터리의 파일/폴더를 통째로 <code>resources/</code>(macOS는 <code>Contents/Resources</code>) 밑에 복사</strong>하는 방법도 있다.</p>
+<blockquote>
+<p>&quot;copy the file or directory ... directly into the app&#39;s resources directory (<code>Contents/Resources</code> for macOS, <code>resources</code> for Linux and Windows).&quot; <a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+</blockquote>
+<p>네이티브 바이너리, CLI 도구, 런타임에 접근해야 하는 데이터 파일에 적합하다. 앱에서는 <code>process.resourcesPath</code>를 통해 접근한다.<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+<pre><code class="language-yaml">files:
+  - &quot;**/*&quot;
+  - &quot;!videos/**&quot;        # asar에서 제외
+extraResources:
+  - from: videos/
+    to: videos          # asar 밖, 런타임에 process.resourcesPath 로 접근
+</code></pre>
+<p><code>extraFiles</code>는 동일하되 <strong>content 디렉터리</strong>(Windows/Linux는 루트, macOS는 <code>Contents</code>)에 복사한다는 점만 다르다.<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+<h3>사이드카 번들의 핵심 연결점</h3>
+<p>구조 계산 엔진처럼 무거운 작업을 <strong>별도 프로세스(사이드카)</strong>로 돌리는 구성을 생각해보자. Python 인터프리터나 PyInstaller 산출물은 실행 가능한 바이너리이므로 asar 안에 넣으면 안 된다. 정석 흐름은 다음과 같다.</p>
+<pre><code class="language-mermaid">%% desc: Python 사이드카 산출물이 PyInstaller → extraResources를 거쳐 asar 밖 resources/backend/로 배치되고 main 프로세스가 spawn하는 흐름
+flowchart TD
+  A[&quot;python/ 소스&quot;] --&gt;|&quot;PyInstaller&quot;| B[&quot;python/dist/backend/\n(backend.exe + 의존 dll/데이터)&quot;]
+  B --&gt;|&quot;electron-builder extraResources&quot;| C[&quot;설치물: resources/backend/backend.exe\n(asar 밖, 실행 가능)&quot;]
+  C --&gt;|&quot;main 프로세스에서&quot;| D[&quot;child_process.spawn(\n  path.join(process.resourcesPath, &#39;backend&#39;, &#39;backend.exe&#39;)\n)&quot;]
+</code></pre>
+<p>핵심 규칙은 두 줄로 요약된다.</p>
+<ul>
+<li><strong>실행돼야 하는 것(<code>.exe</code>/<code>.node</code>/사이드카) → asar 밖</strong>(<code>extraResources</code> 또는 <code>asarUnpack</code>).</li>
+<li><strong>런타임 접근 경로는 항상 <code>process.resourcesPath</code> 기준</strong>(개발/패키지 환경에서 경로가 달라지므로 하드코딩 금지).</li>
+</ul>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p>사이드카를 spawn할 때 경로를 <code>process.resourcesPath</code>가 아니라 개발 환경 기준 상대 경로로 하드코딩하면, 패키징된 앱에서는 경로가 어긋나 실행 자체가 실패한다. 개발/패키지 양쪽 경로를 분기 처리하는 헬퍼 함수를 만들어두는 편이 안전하다. Python 사이드카를 실제로 동봉하는 전체 과정은 <a href="/post/electron-python-sidecar-bundling">Python 사이드카 번들링 — PyInstaller로 Electron 앱에 Python 백엔드 넣기 →</a>에서 다룬다.</p>
+</div></div></aside></p>
+<hr>
+<h2>런타임 동봉 — 사용자가 Node/Chrome을 설치하지 않아도 되는 이유</h2>
+<blockquote>
+<p>&quot;Distributables can be either installers (e.g. MSI on Windows) or portable executable files (e.g. <code>.app</code> on macOS).&quot; / &quot;bundles your app code together with the Electron binary.&quot; <a href="https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging" target="_blank"><sup>[1]</sup></a></p>
+</blockquote>
+<p>패키징이란 <code>electron-forge package</code>(또는 electron-builder의 내부 packager)가 <strong>우리 앱 코드를 Electron 바이너리와 함께 묶는 것</strong>이다. 여기서 Electron 바이너리는 Chromium(렌더링/웹 API) + Node.js(시스템/파일/프로세스 API) + Electron 자체 네이티브로 구성된다.</p>
+<p>그래서 앞서 본 디렉터리 트리의 <code>*.dll</code>/<code>*.pak</code>/<code>locales/</code>/<code>Frameworks/</code>가 <strong>전부 동봉</strong>된다. 결과적으로 사용자 PC에 Node.js나 Chrome을 따로 설치할 필요가 없다. 앱이 자기 전용 Chromium+Node를 들고 다니기 때문이다. 대가는 용량(빈 앱도 100~200MB대)과 앱마다 런타임이 중복된다는 점이다. &quot;한 번 설치/실행에 모든 의존성이 봉인되어 환경 편차가 없다&quot;는 이점을 용량으로 사는 셈이다.</p>
+<p>Docker와 비교하면 대응 관계가 뚜렷하다.</p>
+<table>
+<thead>
+<tr>
+<th>Docker</th>
+<th>Electron</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>base image (OS+런타임 레이어)</td>
+<td>동봉된 Chromium+Node 바이너리(<code>*.dll</code>/<code>Frameworks/</code>)</td>
+</tr>
+<tr>
+<td><code>COPY app/</code> (앱 레이어)</td>
+<td><code>resources/app.asar</code></td>
+</tr>
+<tr>
+<td>볼륨/외부 마운트 바이너리</td>
+<td><code>extraResources</code> / <code>app.asar.unpacked</code></td>
+</tr>
+<tr>
+<td><code>docker build</code> → 이미지</td>
+<td><code>electron-builder</code> → 인스톨러(NSIS/DMG)</td>
+</tr>
+<tr>
+<td>이미지 서명/레지스트리 신뢰</td>
+<td>코드 서명(Authenticode/notarization)</td>
+</tr>
+<tr>
+<td><code>docker pull</code> 새 태그</td>
+<td>electron-updater 자동 업데이트</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>electron-builder 설정 항목 해설</h2>
+<p>electron-builder 설정은 <code>package.json</code>의 <code>build</code> 키 또는 별도 <code>electron-builder.yml</code> 파일로 정의한다(json/json5/toml/js/ts도 지원).<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+<h3>files — asar 안에 무엇을 넣을지</h3>
+<blockquote>
+<p>&quot;A glob patterns relative to the app directory, which specifies which files to include when copying files to create the package.&quot; <a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+</blockquote>
+<p>앱 디렉터리 기준 glob 패턴을 사용하며, <code>!</code> 접두사로 제외한다. <code>from</code>/<code>to</code>로 리네임·재배치도 가능한데, 이때 <code>to</code>는 <strong>asar 루트 기준</strong>이다. 핵심 동작은 빌드 산출물(<code>dist/**</code>)은 넣고 소스·테스트·소스맵(<code>!src/**</code>, <code>!**/*.map</code>)은 제외하는 식으로 asar를 슬림하게 유지하는 것이다.</p>
+<h3>asar — 봉인 on/off 및 옵션</h3>
+<blockquote>
+<p>&quot;Whether to package the application&#39;s source code into an archive, using Electron&#39;s archive format. Node modules that must be unpacked will be detected automatically. Use <code>AsarOptions.unpack</code> to specify additional files to unpack.&quot; <a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+</blockquote>
+<p>기본값은 asar 켜짐(<code>true</code>)이다. <code>false</code>로 끄면 앞서 본 <code>app/</code> 폴더 형태 그대로 배포된다. <code>asar.ordering</code>은 부팅 시 순차 읽기를 빠르게 하도록 파일 패킹 순서를 지정해 시작 시간을 최적화하는 옵션이다.<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>
+<h3>asarUnpack / extraResources / extraFiles</h3>
+<p>앞서 다룬 대로, asar 밖으로 빼는 세 가지 수단이다. <code>asarUnpack</code>은 asar 옆 <code>app.asar.unpacked/</code>로, <code>extraResources</code>는 <code>resources/</code>로, <code>extraFiles</code>는 content 루트로 보낸다.</p>
+<h3>타깃 — win / mac / linux, 그리고 NSIS</h3>
+<p><code>win.target</code>, <code>mac.target</code>, <code>linux.target</code>로 OS별 산출 형식을 지정한다. <strong>NSIS</strong>(Nullsoft Scriptable Install System)는 Windows용 표준 인스톨러 생성기이자 electron-builder의 Windows 기본 타깃이다. 주요 <code>nsis</code> 옵션은 다음과 같다.</p>
+<ul>
+<li><code>oneClick</code> — <code>false</code>면 마법사형(다음→다음) 설치, <code>true</code>면 원클릭 자동 설치.</li>
+<li><code>perMachine</code> — <code>false</code>면 사용자 단위 설치(관리자 권한 불필요, <code>AppData\Local\Programs</code>), <code>true</code>면 머신 단위(<code>Program Files</code>, 관리자 권한 필요).</li>
+<li><code>allowToChangeInstallationDirectory</code> — 설치 경로 변경 허용 여부.</li>
+</ul>
+<hr>
+<h2>실제 설정 예시 해설</h2>
+<h3>electron-builder.yml</h3>
+<pre><code class="language-yaml">appId: com.daesan.civilagent          # 앱 고유 식별자 (macOS CFBundleIdentifier, 서명/업데이트 식별 기준)
+productName: Civil Agent               # 사용자에게 보이는 이름 + exe/번들 리브랜딩 이름
+directories:
+  buildResources: build                # 아이콘 등 빌드 리소스(코드 아님) 위치
+  output: dist                         # 인스톨러 산출 폴더
+files:                                 # ── asar 안에 넣을 것 (제외 위주 화이트리스트) ──
+  - &#39;!**/.vscode/*&#39;
+  - &#39;!src/*&#39;                           # 소스(번들 전 원본) 제외
+  - &#39;!electron.vite.config.{js,ts,mjs,cjs}&#39;
+  - &#39;!{.eslintrc,.prettierrc,tsconfig.json,tsconfig.*.json}&#39;
+  - &#39;!{README.md,*.md}&#39;
+  - &#39;!customer-data/*&#39;                 # 고객 민감 데이터 — asar에 절대 넣지 않음
+asarUnpack:                            # ── asar 밖(app.asar.unpacked)으로 풀 것 ──
+  - resources/**
+win:
+  target:
+    - nsis                             # Windows 인스톨러
+  icon: build/icon.png
+nsis:
+  oneClick: false                      # 마법사형 설치
+  perMachine: false                    # 사용자 단위 설치 → 관리자 권한 불필요
+  allowToChangeInstallationDirectory: true
+# 추후: extraResources 로 Python 사이드카(backend) 동봉
+# extraResources:
+#   - from: python/dist/backend
+#     to: backend
+</code></pre>
+<p>왜 이렇게 구성하는지 항목별로 짚어보자.</p>
+<ol>
+<li><strong><code>files</code>가 제외(<code>!</code>) 위주인 이유<strong> — electron-vite 같은 빌드 도구가 이미 <code>out/</code>로 main/preload/renderer를 번들한다. 기본적으로 산출물은 포함되므로, 여기서는 asar를 더럽히는 원본 소스/설정/문서/</strong>고객 데이터<strong>만 골라낸다. 특히 고객 데이터 디렉터리를 제외하는 것은 </strong>민감 정보가 asar(=난독화일 뿐 암호화 아님)에 박제되는 사고를 막는 보안 조치</strong>다.</li>
+<li><strong><code>asarUnpack: resources/**</code></strong> — <code>resources/</code> 밑에 들어갈 바이너리·데이터(네이티브/사이드카 보조물)를 asar 밖으로 풀어, 실행/직접 접근이 가능하게 한다. Smart Unpack에 더해 명시적으로 보장하는 셈이다.</li>
+<li><strong><code>nsis: oneClick:false / perMachine:false</code></strong> — 사용자가 설치 경로를 고를 수 있게 하고(<code>allowToChangeInstallationDirectory</code>), 관리자 권한 없이 자기 계정에 설치하는 사내 배포 친화 구성이다. <code>Program Files</code>가 아닌 <code>AppData\Local\Programs\Civil Agent</code>에 깔린다.</li>
+<li><strong>주석 처리된 <code>extraResources</code></strong> — Python 구조계산 엔진을 PyInstaller로 빌드해 <code>python/dist/backend</code>에 만든 뒤 <code>resources/backend/</code>로 동봉하는 계획이다. 이것이 앞서 본 사이드카 번들의 실제 연결 지점이다. 활성화되면 main 프로세스가 <code>path.join(process.resourcesPath, &#39;backend&#39;, &#39;backend.exe&#39;)</code>로 사이드카를 spawn한다.</li>
+</ol>
+<h3>package.json 관련 항목</h3>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;civil-agent&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;main&quot;: &quot;./out/main/index.js&quot;,
+  &quot;type&quot;: &quot;module&quot;,
+  &quot;scripts&quot;: {
+    &quot;build&quot;: &quot;electron-vite build&quot;,
+    &quot;build:win&quot;: &quot;electron-vite build &amp;&amp; electron-builder --win&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;electron&quot;: &quot;^33.2.0&quot;,
+    &quot;electron-builder&quot;: &quot;^25.1.8&quot;,
+    &quot;electron-vite&quot;: &quot;^2.3.0&quot;
+  }
+}
+</code></pre>
+<ul>
+<li><strong><code>main: ./out/main/index.js</code></strong> — Electron이 부팅 시 읽는 진입점. 패키징되면 이 경로는 <code>app.asar</code> <em>내부</em> 경로가 된다. asar 가상 FS 덕분에 코드 수정 없이 그대로 동작한다.</li>
+<li><strong>2단계 빌드 파이프라인</strong> — <code>electron-vite build</code>(소스 → <code>out/</code> 번들) 다음 <code>electron-builder --win</code>(<code>out/</code> + 런타임 → <code>app.asar</code> + NSIS 인스톨러)을 실행한다. vite가 &quot;빌드 스테이지&quot;라면, electron-builder는 &quot;이미지로 봉인 + 배포 포맷 생성&quot; 단계다.</li>
+<li>electron / electron-builder / electron-vite는 모두 <code>devDependencies</code>다. 빌드 도구일 뿐 런타임 의존성이 아니다(런타임은 Electron 바이너리로 동봉된다).</li>
+</ul>
+<hr>
+<h2>코드 서명, 공증, 자동 업데이트</h2>
+<h3>코드 서명 — 왜 필요한가</h3>
+<blockquote>
+<p>&quot;Code signing is a security technology to certify that an app was created by you. You should sign your application so it does not trigger any operating system security warnings. Both Windows and macOS prevent users from running unsigned applications.&quot; <a href="https://www.electronjs.org/docs/latest/tutorial/code-signing" target="_blank"><sup>[5]</sup></a></p>
+</blockquote>
+<p>서명하지 않으면 사용자는 OS 경고(Windows SmartScreen, macOS Gatekeeper의 &quot;손상됨&quot; 경고)를 만나고, 실행하려면 수동 우회를 거쳐야 한다.</p>
+<p><strong>macOS — 서명 + 공증(notarization) 2단계</strong><a href="https://www.electronjs.org/docs/latest/tutorial/code-signing" target="_blank"><sup>[5]</sup></a></p>
+<ol>
+<li>앱을 code sign 한다(Apple Developer Program 가입과 인증서가 필요).</li>
+<li>Apple 서버에 업로드해 notarize 한다. 자동 시스템이 악성 여부를 추가로 검증한다. macOS 서명은 <strong>앱 패키징 레벨</strong>에서 이뤄진다.</li>
+<li>도구로는 <code>@electron/osx-sign</code> + <code>@electron/notarize</code>(Forge/Packager가 내부 사용)를 쓰며, electron-builder도 동등한 기능을 제공한다.</li>
+</ol>
+<p><strong>Windows — 인스톨러 서명</strong><a href="https://www.electronjs.org/docs/latest/tutorial/code-signing" target="_blank"><sup>[5]</sup></a></p>
+<p>Windows는 macOS와 달리 <strong>distributable 인스톨러</strong>를 서명한다(macOS는 앱 본체를 서명한다).</p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p>2023년 6월부터 EV(Extended Validation) 인증서가 필수가 됐다. 구형 OV/Authenticode 인증서는 이제 미서명과 동일하게 취급되어 경고가 뜬다. EV 인증서는 FIPS 140 Level 2 등급의 하드웨어 모듈(USB 토큰류)에 저장돼야 해 CI에 단순 다운로드가 불가능하다. 이 때문에 많은 업체가 DigiCert KeyLocker 같은 <strong>클라우드 서명</strong>을 제공해 CI에서 원격 서명을 한다. Azure Artifact Signing(구 Azure Trusted Signing)은 MS의 클라우드 서명 서비스로 가장 저렴하고 SmartScreen 경고를 없애주지만 국가 제한이 있다. 도구로는 <code>@electron/windows-sign</code>(보통 <code>windowsSign</code> 설정으로 노출)을 사용한다.</p>
+</div></div></aside></p>
+<p>위 예시의 <code>electron-builder.yml</code>에는 아직 서명 설정이 없다(사내/개발 배포 단계 기준). 외부 배포 전에는 Windows EV 인증서(또는 Azure Artifact Signing) 구성이 필요하다.</p>
+<h3>자동 업데이트 — electron-updater</h3>
+<blockquote>
+<p>&quot;Auto updates are enabled by the <code>electron-updater</code> package.&quot; <a href="https://www.electron.build/auto-update" target="_blank"><sup>[6]</sup></a></p>
+</blockquote>
+<p>동작 흐름은 다음과 같다.<a href="https://www.electron.build/auto-update" target="_blank"><sup>[6]</sup></a></p>
+<ol>
+<li>빌드 시 릴리스 메타데이터(<code>latest.yml</code>, macOS는 <code>latest-mac.yml</code>)를 생성한다.</li>
+<li>electron-builder가 실제 릴리스 산출물 + 메타데이터를 publish 타깃(GitHub Releases, S3, generic 서버 등)에 업로드한다(generic 서버는 수동 업로드).</li>
+<li>앱이 실행 중 publish 서버에 질의해, 새 버전이 있으면 다운로드/설치한다.</li>
+</ol>
+<p>핵심 제약은 다음과 같다.</p>
+<ul>
+<li>Windows는 기본 NSIS 타깃이면 자동 업데이트를 지원한다(Squirrel.Windows는 미지원).<a href="https://www.electron.build/auto-update" target="_blank"><sup>[6]</sup></a></li>
+<li>macOS는 코드 서명이 필수다. 서명하지 않으면 autoUpdater가 동작하지 않는다.<a href="https://www.electron.build/auto-update" target="_blank"><sup>[6]</sup></a></li>
+<li><code>electron-updater</code>는 Electron 내장 <code>autoUpdater</code>와 다른 패키지로, Linux 지원 등 기능이 더 넓다.<a href="https://www.electron.build/auto-update" target="_blank"><sup>[6]</sup></a></li>
+<li>업데이트 채널은 버전의 pre-release 성분(<code>0.12.1-alpha.1</code> → <code>alpha</code>)으로 자동 추론된다(단 GitHub publish는 채널을 자동 추론하지 않는다).<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></li>
+</ul>
+<hr>
+<h2>전체 흐름 한눈에 보기</h2>
+<p>지금까지 설명한 단계를 하나의 파이프라인으로 그리면 다음과 같다.</p>
+<pre><code class="language-mermaid">%% desc: 소스 코드부터 빌드, asar 봉인, 런타임 동봉, NSIS 패키징, 코드 서명, 설치, 자동 업데이트까지 이어지는 전체 패키징 파이프라인
+flowchart TD
+  SRC[&quot;소스 (electron/main, preload, renderer)&quot;] --&gt;|&quot;electron-vite build&quot;| OUT[&quot;out/ (번들된 JS)&quot;]
+  OUT --&gt;|&quot;electron-builder --win&quot;| SPLIT{&quot; &quot;}
+  SPLIT --&gt; ASAR[&quot;resources/app.asar\n(가상 FS, 우리 코드)&quot;]
+  SPLIT --&gt; RUNTIME[&quot;Chromium+Node 바이너리\n(*.dll, *.pak, locales/)&quot;]
+  ASAR --&gt;|&quot;asarUnpack / extraResources&quot;| UNPACKED[&quot;resources/app.asar.unpacked/\n+ resources/backend/ (사이드카)&quot;]
+  RUNTIME --&gt; NSIS[&quot;NSIS 포장 + 코드 서명&quot;]
+  UNPACKED --&gt; NSIS
+  NSIS --&gt; INSTALLER[&quot;dist/Civil Agent Setup 0.0.1.exe&quot;]
+  INSTALLER --&gt;|&quot;설치&quot;| INSTALLED[&quot;C:\\...\\Programs\\Civil Agent\\\n├ Civil Agent.exe\n├ *.dll/*.pak/locales/\n└ resources/\n   ├ app.asar\n   ├ app.asar.unpacked/\n   └ backend/&quot;]
+  INSTALLED --&gt;|&quot;실행 후&quot;| UPDATE[&quot;electron-updater → publish 서버 질의 → 자동 갱신&quot;]
+</code></pre>
+<p>정리하면, Electron의 &quot;한 덩어리화&quot;는 다섯 단계로 완성된다.</p>
+<ol>
+<li>asar로 앱 코드를 가상 FS 단일 파일에 봉인한다.</li>
+<li>Chromium+Node 런타임을 통째로 동봉해 런타임 설치를 불필요하게 만든다.</li>
+<li>실행 바이너리·사이드카는 asar 밖(<code>asarUnpack</code>/<code>extraResources</code>)에 풀어 실행 가능하게 한다.</li>
+<li>electron-builder가 NSIS 인스톨러 하나로 포장한다.</li>
+<li>코드 서명으로 신뢰를 증명하고, electron-updater로 갱신한다.</li>
+</ol>
+<p>Docker가 &quot;환경째 봉인&quot;이라면, Electron은 &quot;런타임째 봉인&quot;이다. 다음 글에서는 이 파이프라인에 실제로 Python 백엔드를 끼워 넣는 과정, 즉 <a href="/post/electron-python-sidecar-bundling">Python 사이드카 번들링 — PyInstaller로 Electron 앱에 Python 백엔드 넣기 →</a>를 살펴본다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging" target="_blank">[1] Packaging Your Application — Electron Docs</a></li>
+<li><a href="https://www.electronjs.org/docs/latest/tutorial/application-distribution" target="_blank">[2] Application Distribution — Electron Docs</a></li>
+<li><a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank">[3] ASAR Archives — Electron Docs</a></li>
+<li><a href="https://www.electron.build/configuration" target="_blank">[4] Configuration — electron-builder</a></li>
+<li><a href="https://www.electronjs.org/docs/latest/tutorial/code-signing" target="_blank">[5] Code Signing — Electron Docs</a></li>
+<li><a href="https://www.electron.build/auto-update" target="_blank">[6] Auto Update — electron-builder</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/electron-ipc-security-model">Electron IPC와 보안 모델 — contextBridge, Context Isolation, Sandbox →</a> — 이전 글, 프로세스 간 통신과 보안 모델</li>
+<li><a href="/post/electron-python-sidecar-bundling">Python 사이드카 번들링 — PyInstaller로 Electron 앱에 Python 백엔드 넣기 →</a> — 다음 글, Python 백엔드를 Electron 앱에 함께 배포하기</li>
+<li><a href="/post/electron-multi-process-architecture">Electron 멀티 프로세스 아키텍처 — Main, Renderer, Preload, Utility 프로세스 →</a> — 시리즈 메인 글</li>
+</ul>
+
+<ul><li>electron</li><li>asar</li><li>packaging</li><li>electron-builder</li><li>code-signing</li><li>auto-update</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

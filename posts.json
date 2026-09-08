@@ -1,5 +1,85 @@
 [
   {
+    "id": "scope",
+    "title": "스코프 — 변수가 어디까지 보이는가",
+    "slug": "scope",
+    "excerpt": "같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙.\n",
+    "content": "<h2>왜 이게 필요한가</h2>\n<p>아래 코드는 마지막 줄에서 터진다. 왜 그런지 설명할 수 있어야 나머지 전부가 풀린다.</p>\n<pre><code class=\"language-js\">function outer() {\n  const secret = &quot;숨김&quot;;\n  console.log(secret); // &quot;숨김&quot;\n}\n\nouter();\nconsole.log(secret); // ReferenceError: secret is not defined\n</code></pre>\n<p><code>secret</code> 은 분명 만들어졌는데 밖에서는 없는 취급이다. <strong>변수는 아무 데서나 보이지 않는다.</strong><br>어디까지 보이는지를 정하는 경계가 스코프다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p>스코프는 <strong>이름을 찾는 범위</strong>다. 자바스크립트는 변수를 만나면 안쪽부터 바깥쪽으로<br>차례차례 뒤진다. 찾으면 멈추고, 끝까지 못 찾으면 <code>ReferenceError</code>.</p>\n<p>경계는 세 종류다.</p>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">전역 스코프</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">함수 스코프</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">블록 스코프</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p>어디에서도 보인다. 파일 맨 바깥에 선언한 것.</p>\n<pre><code class=\"language-js\">const app = &quot;blog&quot;;     // 어디서든 보인다\n</code></pre>\n<p>전역은 <strong>누구나 덮어쓸 수 있다</strong>는 뜻이기도 하다. 그래서 적을수록 좋다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p><code>function</code> 몸통 안. <code>var</code> 는 오직 이 경계만 인정한다.</p>\n<pre><code class=\"language-js\">function f() {\n  var x = 1;\n  if (true) {\n    var x = 2;          // 같은 x 다. 블록을 무시한다\n  }\n  console.log(x);       // 2\n}\n</code></pre>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p><code>{ }</code> 안. <code>let</code> · <code>const</code> 는 이 경계를 지킨다.</p>\n<pre><code class=\"language-js\">function f() {\n  let x = 1;\n  if (true) {\n    let x = 2;          // 다른 x 다\n  }\n  console.log(x);       // 1\n}\n</code></pre>\n<p><code>var</code> 대신 <code>let</code> · <code>const</code> 를 쓰는 가장 큰 이유가 이것이다.</p>\n</div></div></p>\n<p>찾는 순서를 그림으로 보면 이렇다. 안쪽 상자에서 시작해 바깥으로 나간다.</p>\n<pre><code class=\"language-seq\">title: 이름을 찾아 바깥으로 나간다\nspeed: 1500\ncaption: 안쪽 스코프에서 못 찾으면 한 칸 바깥으로. 전역에서도 없으면 ReferenceError.\n\nlane block  블록 { }\nlane func   함수 몸통\nlane global 전역\nlane result 결과 #log\n\nstep 블록 안에서 `msg` 를 찾는다. 여기에는 없다.\n  push block msg 찾는 중\nstep 한 칸 바깥, 함수 몸통에서 다시 찾는다. 여기 있다.\n  move block func msg 발견!\n  log result msg 를 함수 스코프에서 찾음\nstep 만약 함수에도 없었다면 전역까지 올라간다.\n  push global msg 찾는 중\nstep 전역에도 없으면 그때 ReferenceError 가 난다.\n  move global result ReferenceError\n</code></pre>\n<p>이 사슬을 <strong>스코프 체인</strong>이라고 부른다. 그리고 중요한 것 하나 — 이 사슬은<br><strong>함수를 어디서 호출했느냐가 아니라 어디에 썼느냐</strong>로 정해진다.</p>\n<pre><code class=\"language-js\">const name = &quot;전역&quot;;\n\nfunction print() {\n  console.log(name);   // 항상 &quot;전역&quot;\n}\n\nfunction run() {\n  const name = &quot;안쪽&quot;;\n  print();             // &quot;안쪽&quot; 이 아니라 &quot;전역&quot; 이 찍힌다\n}\n\nrun();\n</code></pre>\n<p><code>print</code> 는 자기가 <strong>쓰여 있는 자리</strong>의 바깥을 본다. <code>run</code> 이 부른 것과 무관하다.<br>이 규칙을 렉시컬 스코프라고 한다. 코드를 읽는 것만으로 어떤 변수가 쓰일지 확정할 수 있다는 뜻이라,<br>디버깅이 훨씬 쉬워진다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p>출력 순서를 먼저 예측하고 실행해라. 값을 바꿔 가며 다시 돌려도 된다 (<code>Ctrl+Enter</code>).</p>\n<pre><code class=\"language-playground\">#! js title=scope.js height=200\nconst where = &quot;전역&quot;;\n\nfunction outer() {\n  const where = &quot;함수&quot;;\n\n  if (true) {\n    const where = &quot;블록&quot;;\n    console.log(&quot;1:&quot;, where);\n  }\n\n  console.log(&quot;2:&quot;, where);\n}\n\nouter();\nconsole.log(&quot;3:&quot;, where);\n\n// var 로 바꿔 보면 2번이 어떻게 달라지는지 확인해라\n</code></pre>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>반복문 안의 <code>var</code></strong></p>\n<pre><code class=\"language-js\">for (var i = 0; i &lt; 3; i++) {\n  setTimeout(() =&gt; console.log(i), 0);\n}\n// 3, 3, 3\n</code></pre>\n<p><code>var</code> 는 블록을 인정하지 않아 <code>i</code> 가 <strong>하나뿐</strong>이다. 타이머가 실행될 때는 이미 3이 되어 있다.<br><code>let</code> 으로 바꾸면 반복마다 새 <code>i</code> 가 생겨 <code>0, 1, 2</code> 가 나온다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--tip\" data-callout=\"tip\" role=\"note\" aria-label=\"TIP\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">TIP</span><div class=\"post-callout__content\"><p>스코프는 <strong>좁을수록 좋다.</strong> 변수를 쓰는 곳에서 가장 가까운 블록에 선언해라.<br>넓은 스코프는 &quot;누가 언제 바꿨는지 모르는 값&quot;을 만든다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>스코프는 <strong>이름을 찾는 범위</strong>이고, 안쪽에서 바깥쪽으로 한 방향으로만 찾는다.<br>그 사슬은 코드가 쓰인 자리로 정해진다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>var</code> 와 <code>let</code> 의 경계 차이를 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 위 반복문이 <code>3, 3, 3</code> 인 이유를 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 함수를 어디서 호출하든 결과가 같은 이유를 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Scope\" target=\"_blank\">[1] Scope — MDN Web Docs 용어 사전</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let\" target=\"_blank\">[2] let — MDN Web Docs</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-execution-contexts\" target=\"_blank\">[3] Executable Code and Execution Contexts — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/hoisting\">호이스팅 — 선언은 먼저 올라간다 →</a> — 스코프 안에서 선언이 처리되는 순서</li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/frontend/js",
+    "tags": [
+      "javascript",
+      "스코프",
+      "변수"
+    ],
+    "author": "Seobway",
+    "readTime": 6,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-07T00:00:00.000Z",
+    "updatedAt": "2026-09-08T23:42:57.302Z"
+  },
+  {
+    "id": "hoisting",
+    "title": "호이스팅 — 선언은 먼저 올라간다",
+    "slug": "hoisting",
+    "excerpt": "선언하기 전에 쓴 변수가 왜 어떤 때는 undefined 고 어떤 때는 에러인지, 그 차이를 만드는 규칙.\n",
+    "content": "<h2>왜 이게 필요한가</h2>\n<p>똑같이 &quot;선언 전에 쓴&quot; 코드인데 결과가 셋 다 다르다.</p>\n<pre><code class=\"language-js\">console.log(a);   // undefined      — 에러가 아니다?\nvar a = 1;\n\nconsole.log(b);   // ReferenceError — 이건 에러다\nlet b = 1;\n\nhello();          // &quot;안녕&quot;          — 아예 잘 돈다?\nfunction hello() { console.log(&quot;안녕&quot;); }\n</code></pre>\n<p>셋을 구분하지 못하면 &quot;왜 여기선 되고 저기선 안 되지&quot;를 평생 겪는다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p>자바스크립트는 코드를 위에서부터 한 줄씩 실행하기 <strong>전에</strong>, 스코프를 한 번 훑어<br>그 안의 선언을 미리 등록한다. 이 등록 단계 때문에 &quot;선언이 위로 끌어올려진 것처럼&quot;<br>보이는 것이 호이스팅이다.</p>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>끌어올려지는 것은 &quot;선언&quot;이지 &quot;할당&quot;이 아니다.</strong> <code>var a = 1</code> 은<br><code>var a</code>(선언)와 <code>a = 1</code>(할당) 두 개다. 올라가는 건 앞쪽뿐이다.</p>\n</div></div></aside></p>\n<p>핵심은 <strong>선언마다 등록되는 초기값이 다르다</strong>는 것이다.</p>\n<p><div class=\"post-grid\" data-cols=\"3\"><div class=\"post-grid__card\"><div class=\"post-grid__title\">`var`</div><p>등록되면서 곧바로 <code>undefined</code> 가 들어간다. 그래서 읽어도 에러가 아니다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">`let` · `const`</div><p>등록은 되지만 <strong>값이 없는 상태</strong>로 남는다. 이 구간을 읽으면 에러다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">`function` 선언</div><p>함수 몸통까지 통째로 등록된다. 그래서 위에서 바로 호출된다.</p>\n</div></div></p>\n<p><code>let</code> · <code>const</code> 가 등록은 됐지만 아직 쓸 수 없는 그 구간을<br><strong>TDZ(Temporal Dead Zone, 일시적 사각지대)</strong> 라고 한다.</p>\n<pre><code class=\"language-seq\">title: 스코프에 들어가서 코드가 끝날 때까지\nspeed: 1600\ncaption: 등록은 함께 일어나지만, 들어가는 값이 다르다.\n\nlane reg    등록 단계\nlane var    var a\nlane let    let b\nlane fn     function hello\nlane out    실행 결과 #log\n\nstep 스코프에 들어가면 먼저 선언부터 훑어 등록한다.\n  push reg 선언 수집\nstep var 는 등록되면서 undefined 가 들어간다.\n  move reg var undefined\nstep let 은 등록되지만 값이 없다 — 여기부터 TDZ 다.\n  push let TDZ (값 없음)\nstep 함수 선언은 몸통까지 통째로 등록된다.\n  push fn 몸통 전체\nstep 이제 한 줄씩 실행한다. a 를 읽으면 undefined 가 나온다.\n  log out console.log(a) → undefined\nstep b 를 읽으면 TDZ 라서 ReferenceError 다.\n  log out console.log(b) → ReferenceError\nstep hello() 는 몸통이 이미 있으니 그냥 실행된다.\n  log out hello() → &quot;안녕&quot;\nstep let b = 1 줄에 도달하는 순간 TDZ 가 끝난다.\n  move let out b = 1 (이제 사용 가능)\n</code></pre>\n<p>TDZ 는 실수를 <strong>빨리</strong> 드러내려고 일부러 만든 장치다. <code>var</code> 였다면<br><code>undefined</code> 가 조용히 흘러다니다 한참 뒤 엉뚱한 곳에서 터진다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p>주석을 하나씩 풀어 가며 어디서 에러가 나는지 확인해라.</p>\n<pre><code class=\"language-playground\">#! js title=hoisting.js height=220\nconsole.log(&quot;var  :&quot;, typeof a);   // undefined — 에러가 아니다\nvar a = 1;\n\nhello();                            // 몸통까지 올라가 있어 잘 돈다\nfunction hello() { console.log(&quot;fn   : 안녕&quot;); }\n\n// 아래 두 줄의 주석을 풀면 TDZ 에 걸린다\n// console.log(&quot;let  :&quot;, b);\n// let b = 1;\n\n// 함수 &quot;표현식&quot; 은 변수 규칙을 따른다 — 이것도 풀어 봐라\n// bye();\n// var bye = function () { console.log(&quot;bye&quot;); };\n</code></pre>\n<p>마지막 것이 특히 헷갈린다. <code>var bye = function(){}</code> 은 <strong>함수 선언이 아니라 변수 선언</strong>이다.<br>등록될 때 <code>undefined</code> 가 들어가 있으므로 <code>bye()</code> 는 <code>TypeError: bye is not a function</code> 이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>호이스팅을 &quot;코드가 실제로 위로 옮겨진다&quot;로 이해하는 것</strong></p>\n<p>옮겨지지 않는다. 실행 전에 <strong>등록</strong>될 뿐이다. 이 차이가 중요한 이유는<br><code>let</code> 의 TDZ 를 설명할 수 있느냐로 갈린다. 옮겨진다고 믿으면<br>&quot;<code>let</code> 도 올라갔는데 왜 에러지?&quot;에서 막힌다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--tip\" data-callout=\"tip\" role=\"note\" aria-label=\"TIP\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">TIP</span><div class=\"post-callout__content\"><p>호이스팅에 기대지 마라. <strong>선언을 쓰는 자리 바로 위에 둔다.</strong><br><code>let</code>·<code>const</code> 만 쓰면 TDZ 가 대신 잔소리를 해 준다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>실행 전에 선언이 등록되고, <strong>등록될 때 들어가는 값이 <code>var</code>·<code>let</code>·<code>function</code> 마다 다르다.</strong><br><code>let</code>·<code>const</code> 는 값 없이 등록되며, 그 구간이 TDZ 다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>var</code> 는 <code>undefined</code>, <code>let</code> 은 에러인 이유를 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 함수 선언과 함수 표현식의 차이를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> TDZ 가 왜 도움이 되는지 설명할 수 있다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Hoisting\" target=\"_blank\">[1] Hoisting — MDN Web Docs 용어 사전</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let\" target=\"_blank\">[2] let — Temporal dead zone (MDN Web Docs)</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-let-and-const-declarations\" target=\"_blank\">[3] let and const Declarations — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/closure\">클로저 — 함수가 붙잡고 있는 변수 →</a> — 스코프와 호이스팅이 만나는 곳</li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/frontend/js",
+    "tags": [
+      "javascript",
+      "호이스팅",
+      "TDZ"
+    ],
+    "author": "Seobway",
+    "readTime": 7,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-07T00:00:00.000Z",
+    "updatedAt": "2026-09-08T23:42:57.300Z"
+  },
+  {
+    "id": "event-loop-interactive",
+    "title": "이벤트 루프, 눈으로 따라가기",
+    "slug": "event-loop-interactive",
+    "excerpt": "콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다.\n",
+    "content": "<p>자바스크립트는 한 번에 하나만 실행한다. 그런데도 타이머와 네트워크 요청이 화면을 멈추지 않는다. 그 사이를 메우는 게 <strong>이벤트 루프</strong>다.</p>\n<p>말로 읽으면 헷갈린다. 아래를 직접 돌려 봐라. <code>▶</code> 를 누르거나, 상자를 클릭한 뒤 <code>→</code> 키를 눌러 한 단계씩 넘길 수 있다.</p>\n<pre><code class=\"language-seq\">preset: event-loop\n</code></pre>\n<hr>\n<h2>순서를 만드는 규칙 세 가지</h2>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">콜 스택</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">마이크로태스크 큐</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">태스크 큐</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p>함수를 호출하면 스택에 쌓이고, 반환하면 빠진다. <strong>스택이 비어야만</strong> 이벤트 루프가 큐를 들여다본다.</p>\n<p>그래서 무거운 동기 루프 하나가 타이머 전부를 밀어버린다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p><code>Promise.then</code>, <code>queueMicrotask</code>, <code>await</code> 뒤의 코드가 여기 들어간다.</p>\n<p>스택이 비면 <strong>큐가 완전히 빌 때까지</strong> 연달아 실행한다. 중간에 태스크 큐로 넘어가지 않는다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p><code>setTimeout</code>, <code>setInterval</code>, DOM 이벤트 콜백이 여기 들어간다.</p>\n<p>마이크로태스크를 전부 비운 <strong>뒤에</strong>, 한 번에 <strong>하나만</strong> 꺼낸다. 그리고 다시 마이크로태스크부터 확인한다.</p>\n</div></div></p>\n<p><aside class=\"post-callout post-callout--notice\" data-callout=\"notice\" role=\"note\" aria-label=\"NOTICE\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">NOTICE</span><div class=\"post-callout__content\"><p><code>setTimeout(fn, 0)</code> 은 &quot;지금 당장&quot;이 아니라 &quot;가능한 가장 빠른 다음 태스크&quot;다. 마이크로태스크가 남아 있으면 그것들이 먼저다.</p>\n</div></div></aside></p>\n<p><div class=\"post-split\" data-cols=\"2\"><div class=\"post-split__col\"><div class=\"post-split__label\">무슨 일이 일어나는가</div><p><code>await</code> 는 문법 설탕이다. 오른쪽 코드는 아래와 같이 읽어야 한다.</p>\n<ul>\n<li><code>await</code> 를 만나면 함수가 <strong>거기서 멈추고 반환</strong>한다.</li>\n<li>나머지 몸통은 <code>.then</code> 콜백이 되어 <strong>마이크로태스크 큐</strong>로 간다.</li>\n<li>그래서 <code>await</code> 뒤 줄은 <code>setTimeout(…, 0)</code> 보다 항상 먼저 실행된다.</li>\n</ul>\n</div><div class=\"post-split__col\"><div class=\"post-split__label\">코드</div><pre><code class=\"language-js\">async function run() {\n  console.log(&quot;1&quot;);\n  await null;        // ← 여기서 반환\n  console.log(&quot;3&quot;);  // ← 마이크로태스크로 예약\n}\n\nrun();\nconsole.log(&quot;2&quot;);\n</code></pre>\n</div></div></p>\n<hr>\n<h2>직접 고쳐 보기</h2>\n<p>아래 코드의 출력 순서를 먼저 예측하고, 실행해서 맞는지 확인해라. 값을 바꿔 가며 다시 돌려도 된다 (<code>Ctrl+Enter</code>).</p>\n<pre><code class=\"language-playground\">#! js title=order.js height=180\nconsole.log(&quot;1 동기&quot;);\n\nsetTimeout(() =&gt; console.log(&quot;4 타이머&quot;), 0);\n\nPromise.resolve().then(() =&gt; console.log(&quot;3 마이크로태스크&quot;));\n\nconsole.log(&quot;2 동기&quot;);\n</code></pre>\n<p>버튼을 눌러 무거운 동기 루프를 돌려 보면, 그 동안 타이머가 밀리는 걸 눈으로 볼 수 있다.</p>\n<pre><code class=\"language-playground\">#! react title=BlockingLoop.jsx height=260\nimport { useState } from &quot;react&quot;;\n\nexport default function App() {\n  const [log, setLog] = useState([]);\n  const add = (m) =&gt; setLog((prev) =&gt; [...prev, m]);\n\n  const run = () =&gt; {\n    setLog([]);\n    add(&quot;시작&quot;);\n    setTimeout(() =&gt; add(&quot;타이머 콜백 (0ms 로 예약했다)&quot;), 0);\n    const until = Date.now() + 600;\n    while (Date.now() &lt; until) {} // 동기로 600ms 점거\n    add(&quot;동기 루프 끝 — 이제야 스택이 빈다&quot;);\n  };\n\n  return (\n    &lt;div&gt;\n      &lt;button onClick={run}&gt;600ms 막고 타이머 보기&lt;/button&gt;\n      &lt;ul&gt;{log.map((l, i) =&gt; &lt;li key={i}&gt;{l}&lt;/li&gt;)}&lt;/ul&gt;\n    &lt;/div&gt;\n  );\n}\n</code></pre>\n<hr>\n<h2>정리</h2>\n<p><div class=\"post-grid\" data-cols=\"3\"><div class=\"post-grid__card\"><div class=\"post-grid__title\">스택이 먼저다</div><p>큐는 스택이 빈 뒤에야 열린다. 동기 코드가 길면 비동기도 늦는다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">마이크로 &gt; 매크로</div><p>마이크로태스크 큐를 다 비운 다음에 태스크 큐를 하나 꺼낸다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">하나씩</div><p>태스크는 한 번에 하나. 그 사이마다 렌더 기회가 생긴다.</p>\n</div></div></p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> 스택이 비어야 큐를 본다는 걸 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>Promise.then</code> 과 <code>setTimeout(…, 0)</code> 의 순서를 예측할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 마이크로태스크가 무한히 쌓이면 왜 화면이 멈추는지 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Event_loop\" target=\"_blank\">[1] Event loop — MDN Web Docs</a></li>\n<li><a href=\"https://html.spec.whatwg.org/multipage/webappapis.html#event-loops\" target=\"_blank\">[2] Event loops — HTML Standard (WHATWG)</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/react-query-overview\">React Query 개요 →</a></li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/frontend/js",
+    "tags": [
+      "javascript",
+      "event-loop",
+      "비동기"
+    ],
+    "author": "Seobway",
+    "readTime": 8,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-07T00:00:00.000Z",
+    "updatedAt": "2026-09-08T23:42:57.298Z"
+  },
+  {
+    "id": "closure",
+    "title": "클로저 — 함수가 붙잡고 있는 변수",
+    "slug": "closure",
+    "excerpt": "함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다.\n",
+    "content": "<h2>왜 이게 필요한가</h2>\n<p>함수가 끝나면 그 안의 변수는 사라진다. 그런데 이건 안 사라진다.</p>\n<pre><code class=\"language-js\">function makeCounter() {\n  let count = 0;\n  return () =&gt; ++count;\n}\n\nconst next = makeCounter();\nconsole.log(next()); // 1\nconsole.log(next()); // 2   ← makeCounter 는 이미 끝났는데?\n</code></pre>\n<p><code>makeCounter()</code> 는 첫 줄에서 끝났다. 그런데 <code>count</code> 는 계속 살아서 값을 기억한다.<br><strong>왜 안 사라지는가</strong>가 이 글의 전부다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p><a href=\"/post/scope\">스코프</a>에서 봤듯 함수는 자기가 <strong>쓰여 있는 자리</strong>의 바깥을 본다.<br>그 &quot;바깥&quot;은 함수가 만들어질 때 정해져서, 함수와 함께 붙어 다닌다.</p>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>클로저 = 함수 + 그 함수가 태어난 스코프.</strong><br>함수를 어디로 넘기든 이 한 쌍이 같이 움직인다.</p>\n</div></div></aside></p>\n<p>그래서 <code>makeCounter</code> 의 실행은 끝나도, 돌려준 화살표 함수가 <code>count</code> 를 붙잡고 있는 한<br><code>count</code> 를 담은 상자는 버려지지 않는다. 자바스크립트 엔진은 <strong>아무도 참조하지 않는 것만</strong><br>정리하기 때문이다.</p>\n<pre><code class=\"language-seq\">title: makeCounter 가 끝나도 count 가 남는 이유\nspeed: 1600\ncaption: 반환된 함수가 스코프를 붙잡고 있으면 그 스코프는 버려지지 않는다.\n\nlane stack   콜 스택 #stack\nlane env     makeCounter 스코프\nlane outside 바깥 변수 next\nlane out     출력 #log\n\nstep makeCounter() 를 호출한다. 콜 스택에 올라간다.\n  push stack makeCounter()\nstep 그 안에서 count = 0 을 담을 스코프가 만들어진다.\n  push env count = 0\nstep 화살표 함수를 만들어 돌려준다. 이 함수는 위 스코프를 붙잡은 채로 나간다.\n  move stack outside () =&gt; ++count\nstep makeCounter 는 끝나 콜 스택에서 사라진다. 그런데 스코프는 남는다.\n  mark env\nstep next() 를 부르면 붙잡아 둔 count 를 그대로 쓴다.\n  log out 1\nstep 다시 부르면 같은 count 가 이어서 증가한다.\n  log out 2\n</code></pre>\n<p>여기서 헷갈리기 쉬운 것 하나. <strong>한 번 호출 = 한 개의 상자</strong>다.</p>\n<pre><code class=\"language-js\">const a = makeCounter();\nconst b = makeCounter();\na(); a();   // 1, 2\nb();        // 1   ← a 와 무관하다\n</code></pre>\n<p><code>makeCounter</code> 를 부를 때마다 새 스코프가 만들어지므로 <code>a</code> 와 <code>b</code> 는 서로 다른 <code>count</code> 를 본다.</p>\n<hr>\n<h2>어디에 쓰이는가</h2>\n<p>이름을 몰랐을 뿐, 이미 계속 쓰고 있었다.</p>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">상태 숨기기</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">설정을 고정한 함수 만들기</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">리액트 훅</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p>바깥에서 못 건드리는 값을 만든다. 클래스의 <code>private</code> 를 문법 없이 흉내 낸다.</p>\n<pre><code class=\"language-js\">function makeAccount(initial) {\n  let balance = initial;              // 바깥에서 접근 불가\n  return {\n    deposit: (v) =&gt; (balance += v),\n    get: () =&gt; balance,\n  };\n}\n\nconst acc = makeAccount(1000);\nacc.deposit(500);\nacc.get();        // 1500\nacc.balance;      // undefined — 직접 못 만진다\n</code></pre>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p>같은 함수를 설정만 바꿔 여러 개 찍어낸다.</p>\n<pre><code class=\"language-js\">function makeTag(tag) {\n  return (text) =&gt; `&lt;${tag}&gt;${text}&lt;/${tag}&gt;`;\n}\n\nconst b = makeTag(&quot;b&quot;);\nconst i = makeTag(&quot;i&quot;);\nb(&quot;굵게&quot;);   // &quot;&lt;b&gt;굵게&lt;/b&gt;&quot;\n</code></pre>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p><code>useState</code> 가 돌려주는 <code>setCount</code> 가 어떤 컴포넌트의 상태를 가리키는지 아는 것도<br>같은 원리다. 훅은 클로저 위에 지어져 있다.</p>\n<pre><code class=\"language-js\">const [count, setCount] = useState(0);\n// setCount 는 &quot;이 컴포넌트의 이 상태&quot; 를 붙잡고 있다\n</code></pre>\n</div></div></p>\n<hr>\n<h2>직접 확인</h2>\n<p><code>makeCounter</code> 를 두 번 부르면 카운터가 몇 개인지 눈으로 확인해라.</p>\n<pre><code class=\"language-playground\">#! react title=Counter.jsx height=260\nimport { useState } from &quot;react&quot;;\n\nfunction makeCounter() {\n  let count = 0;              // 이 상자는 호출마다 새로 생긴다\n  return () =&gt; ++count;\n}\n\nconst a = makeCounter();\nconst b = makeCounter();\n\nexport default function App() {\n  const [log, setLog] = useState([]);\n  const push = (m) =&gt; setLog((prev) =&gt; [...prev, m]);\n\n  return (\n    &lt;div&gt;\n      &lt;button onClick={() =&gt; push(`a() → ${a()}`)}&gt;a 증가&lt;/button&gt;{&quot; &quot;}\n      &lt;button onClick={() =&gt; push(`b() → ${b()}`)}&gt;b 증가&lt;/button&gt;{&quot; &quot;}\n      &lt;button onClick={() =&gt; setLog([])}&gt;지우기&lt;/button&gt;\n      &lt;ul&gt;{log.map((l, i) =&gt; &lt;li key={i}&gt;{l}&lt;/li&gt;)}&lt;/ul&gt;\n    &lt;/div&gt;\n  );\n}\n</code></pre>\n<p><code>a</code> 를 아무리 눌러도 <code>b</code> 는 1부터 시작한다. 상자가 따로이기 때문이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>반복문에서 하나의 변수를 공유하는 것</strong></p>\n<pre><code class=\"language-js\">const fns = [];\nfor (var i = 0; i &lt; 3; i++) {\n  fns.push(() =&gt; i);\n}\nfns.map((f) =&gt; f());   // [3, 3, 3]\n</code></pre>\n<p>세 함수가 <strong>같은</strong> <code>i</code> 를 붙잡고 있다. <a href=\"/post/scope\"><code>var</code> 는 블록을 인정하지 않아</a><br><code>i</code> 가 하나뿐이기 때문이다. <code>let</code> 으로 바꾸면 반복마다 새 <code>i</code> 가 생겨 <code>[0, 1, 2]</code> 가 된다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>필요 이상으로 크게 붙잡는 것</strong></p>\n<p>클로저가 붙잡은 스코프는 버려지지 않는다. 큰 데이터를 참조한 채 오래 사는 함수를<br>어딘가에 등록해 두면 그만큼 메모리가 계속 물린다. 이벤트 리스너를 제거하지 않는<br>코드가 대표적이다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>클로저는 <strong>함수와 그 함수가 태어난 스코프의 한 쌍</strong>이다.<br>그 쌍이 살아 있는 한 안의 변수도 살아 있고, 호출마다 새 쌍이 생긴다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>makeCounter</code> 를 두 번 부르면 왜 카운터가 둘인지 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>var</code> 반복문이 <code>[3,3,3]</code> 인 이유를 클로저로 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 클로저가 메모리를 붙잡는다는 뜻을 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Closures\" target=\"_blank\">[1] Closures — MDN Web Docs</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Scope\" target=\"_blank\">[2] Scope — MDN Web Docs 용어 사전</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-environment-records\" target=\"_blank\">[3] Environment Records — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/hoisting\">호이스팅 — 선언은 먼저 올라간다 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/event-loop-interactive\">이벤트 루프, 눈으로 따라가기 →</a> — 비동기 콜백도 클로저로 값을 붙잡는다</li>\n</ul>\n",
+    "coverImage": null,
+    "category": "study/frontend/js",
+    "tags": [
+      "javascript",
+      "클로저",
+      "스코프"
+    ],
+    "author": "Seobway",
+    "readTime": 8,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-07T00:00:00.000Z",
+    "updatedAt": "2026-09-08T23:42:57.296Z"
+  },
+  {
     "id": "cache-overlay-timing-rca",
     "title": "저장은 됐는데 화면이 한 박자 늦는 이유 — 캐시가 옛 값을 먼저 준다",
     "slug": "cache-overlay-timing-rca",
@@ -24,7 +104,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-07-15T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.214Z"
+    "updatedAt": "2026-09-08T23:42:57.472Z"
   },
   {
     "id": "electron-python-sidecar-bundling",
@@ -46,7 +126,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-15T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.037Z"
+    "updatedAt": "2026-09-08T23:42:57.273Z"
   },
   {
     "id": "electron-packaging-asar",
@@ -69,7 +149,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-14T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.031Z"
+    "updatedAt": "2026-09-08T23:42:57.267Z"
   },
   {
     "id": "electron-ipc-security-model",
@@ -92,7 +172,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-13T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.995Z"
+    "updatedAt": "2026-09-08T23:42:57.237Z"
   },
   {
     "id": "electron-native-layer-os-integration",
@@ -114,7 +194,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-12T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.010Z"
+    "updatedAt": "2026-09-08T23:42:57.250Z"
   },
   {
     "id": "electron-nodejs-libuv-integration",
@@ -137,7 +217,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-11T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.023Z"
+    "updatedAt": "2026-09-08T23:42:57.261Z"
   },
   {
     "id": "ai-agent-qa-automation-token-economics",
@@ -160,7 +240,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-11T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.208Z"
+    "updatedAt": "2026-09-08T23:42:57.467Z"
   },
   {
     "id": "electron-renderer-chromium-rendering",
@@ -182,7 +262,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-10T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.041Z"
+    "updatedAt": "2026-09-08T23:42:57.278Z"
   },
   {
     "id": "electron-multi-process-architecture",
@@ -204,7 +284,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-09T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.003Z"
+    "updatedAt": "2026-09-08T23:42:57.243Z"
   },
   {
     "id": "typescript-type-system-basics",
@@ -227,7 +307,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.090Z"
+    "updatedAt": "2026-09-08T23:42:57.336Z"
   },
   {
     "id": "testing-vitest-playwright",
@@ -249,7 +329,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.049Z"
+    "updatedAt": "2026-09-08T23:42:57.286Z"
   },
   {
     "id": "state-data-fetching-tanstack-zustand-server-actions",
@@ -271,7 +351,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.051Z"
+    "updatedAt": "2026-09-08T23:42:57.288Z"
   },
   {
     "id": "sql-joins-where-having-group-by",
@@ -295,7 +375,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.988Z"
+    "updatedAt": "2026-09-08T23:42:57.232Z"
   },
   {
     "id": "settimeout-vs-promise",
@@ -318,7 +398,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.055Z"
+    "updatedAt": "2026-09-08T23:42:57.292Z"
   },
   {
     "id": "requirements-spec-user-story-tradeoff",
@@ -340,7 +420,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.926Z"
+    "updatedAt": "2026-09-08T23:42:57.172Z"
   },
   {
     "id": "react-controlled-vs-uncontrolled",
@@ -362,7 +442,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.059Z"
+    "updatedAt": "2026-09-08T23:42:57.308Z"
   },
   {
     "id": "react-component-data-flow",
@@ -385,7 +465,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.058Z"
+    "updatedAt": "2026-09-08T23:42:57.305Z"
   },
   {
     "id": "observability-security-sentry-posthog-otel-npm-audit",
@@ -408,7 +488,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.048Z"
+    "updatedAt": "2026-09-08T23:42:57.285Z"
   },
   {
     "id": "modern-css-tailwind-shadcn",
@@ -431,7 +511,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.073Z"
+    "updatedAt": "2026-09-08T23:42:57.320Z"
   },
   {
     "id": "js-runtime-node-bun-deno",
@@ -454,7 +534,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.982Z"
+    "updatedAt": "2026-09-08T23:42:57.226Z"
   },
   {
     "id": "js-event-loop-and-async",
@@ -478,7 +558,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.053Z"
+    "updatedAt": "2026-09-08T23:42:57.290Z"
   },
   {
     "id": "http-methods-and-status-codes",
@@ -504,7 +584,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.979Z"
+    "updatedAt": "2026-09-08T23:42:57.224Z"
   },
   {
     "id": "hono-rest-api-overview",
@@ -528,7 +608,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.976Z"
+    "updatedAt": "2026-09-08T23:42:57.221Z"
   },
   {
     "id": "git-branching-conventional-commits-husky",
@@ -551,7 +631,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.046Z"
+    "updatedAt": "2026-09-08T23:42:57.284Z"
   },
   {
     "id": "deployment-vercel-railway-github-actions",
@@ -573,7 +653,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.098Z"
+    "updatedAt": "2026-09-08T23:42:57.345Z"
   },
   {
     "id": "db-orm-postgres-drizzle-neon-supabase",
@@ -597,7 +677,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.928Z"
+    "updatedAt": "2026-09-08T23:42:57.174Z"
   },
   {
     "id": "context-engineering-prompts-rules-memory-skills",
@@ -620,7 +700,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.886Z"
+    "updatedAt": "2026-09-08T23:42:57.133Z"
   },
   {
     "id": "code-quality-eslint-prettier-biome",
@@ -644,7 +724,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.044Z"
+    "updatedAt": "2026-09-08T23:42:57.282Z"
   },
   {
     "id": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
@@ -670,7 +750,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.056Z"
+    "updatedAt": "2026-09-08T23:42:57.303Z"
   },
   {
     "id": "auth-security-authjs-owasp-passkeys",
@@ -693,7 +773,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.985Z"
+    "updatedAt": "2026-09-08T23:42:57.228Z"
   },
   {
     "id": "architecture-patterns-layered-component-clean",
@@ -714,7 +794,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.923Z"
+    "updatedAt": "2026-09-08T23:42:57.170Z"
   },
   {
     "id": "api-design-rest-openapi-rpc-server-actions",
@@ -736,7 +816,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.921Z"
+    "updatedAt": "2026-09-08T23:42:57.168Z"
   },
   {
     "id": "ai-webdev-roadmap-foundation",
@@ -762,7 +842,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.204Z"
+    "updatedAt": "2026-09-08T23:42:57.463Z"
   },
   {
     "id": "ai-development-process-spec-tdd-hooks",
@@ -784,7 +864,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.899Z"
+    "updatedAt": "2026-09-08T23:42:57.146Z"
   },
   {
     "id": "ai-coding-tools-cursor-copilot-claude-code-mcp",
@@ -808,7 +888,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.903Z"
+    "updatedAt": "2026-09-08T23:42:57.151Z"
   },
   {
     "id": "ai-code-verification-review-quality-security-performance-ux",
@@ -831,7 +911,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.900Z"
+    "updatedAt": "2026-09-08T23:42:57.148Z"
   },
   {
     "id": "mysql-restore-test",
@@ -857,7 +937,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.117Z"
+    "updatedAt": "2026-09-08T23:42:57.372Z"
   },
   {
     "id": "mysql-backup-k8s",
@@ -883,7 +963,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.116Z"
+    "updatedAt": "2026-09-08T23:42:57.371Z"
   },
   {
     "id": "kadane-algorithm",
@@ -906,7 +986,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.918Z"
+    "updatedAt": "2026-09-08T23:42:57.164Z"
   },
   {
     "id": "claude-code-harness-leak-architecture",
@@ -931,7 +1011,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.883Z"
+    "updatedAt": "2026-09-08T23:42:57.129Z"
   },
   {
     "id": "micro-hub-and-switch",
@@ -958,7 +1038,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.186Z"
+    "updatedAt": "2026-09-08T23:42:57.443Z"
   },
   {
     "id": "micro-ethernet-nic-cable",
@@ -983,7 +1063,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.178Z"
+    "updatedAt": "2026-09-08T23:42:57.439Z"
   },
   {
     "id": "mechanics-force-equilibrium",
@@ -1007,7 +1087,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.152Z"
+    "updatedAt": "2026-09-08T23:42:57.409Z"
   },
   {
     "id": "mechanics-basics-moment-intro",
@@ -1029,7 +1109,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.120Z"
+    "updatedAt": "2026-09-08T23:42:57.375Z"
   },
   {
     "id": "mechanics-basics-forces-intro",
@@ -1051,7 +1131,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.119Z"
+    "updatedAt": "2026-09-08T23:42:57.374Z"
   },
   {
     "id": "earth-pressure-overview",
@@ -1075,7 +1155,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.127Z"
+    "updatedAt": "2026-09-08T23:42:57.382Z"
   },
   {
     "id": "kubectl-debugging",
@@ -1100,7 +1180,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.114Z"
+    "updatedAt": "2026-09-08T23:42:57.369Z"
   },
   {
     "id": "jenkins-argocd-gitops",
@@ -1126,7 +1206,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.107Z"
+    "updatedAt": "2026-09-08T23:42:57.359Z"
   },
   {
     "id": "drf-views",
@@ -1153,7 +1233,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.970Z"
+    "updatedAt": "2026-09-08T23:42:57.213Z"
   },
   {
     "id": "drf-serializer-validation",
@@ -1177,7 +1257,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.967Z"
+    "updatedAt": "2026-09-08T23:42:57.211Z"
   },
   {
     "id": "drf-overview",
@@ -1203,7 +1283,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.965Z"
+    "updatedAt": "2026-09-08T23:42:57.209Z"
   },
   {
     "id": "drf-authentication",
@@ -1229,7 +1309,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.963Z"
+    "updatedAt": "2026-09-08T23:42:57.206Z"
   },
   {
     "id": "django-urls",
@@ -1256,7 +1336,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.959Z"
+    "updatedAt": "2026-09-08T23:42:57.201Z"
   },
   {
     "id": "django-object-permissions",
@@ -1280,7 +1360,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.949Z"
+    "updatedAt": "2026-09-08T23:42:57.191Z"
   },
   {
     "id": "django-models",
@@ -1307,7 +1387,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.946Z"
+    "updatedAt": "2026-09-08T23:42:57.189Z"
   },
   {
     "id": "why-threejs-exists",
@@ -1328,7 +1408,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.089Z"
+    "updatedAt": "2026-09-08T23:42:57.334Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -1350,7 +1430,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.087Z"
+    "updatedAt": "2026-09-08T23:42:57.333Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -1372,7 +1452,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.085Z"
+    "updatedAt": "2026-09-08T23:42:57.330Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
@@ -1394,7 +1474,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.082Z"
+    "updatedAt": "2026-09-08T23:42:57.326Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -1416,7 +1496,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.079Z"
+    "updatedAt": "2026-09-08T23:42:57.324Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -1438,7 +1518,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.077Z"
+    "updatedAt": "2026-09-08T23:42:57.322Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -1460,7 +1540,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.076Z"
+    "updatedAt": "2026-09-08T23:42:57.321Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -1495,7 +1575,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.112Z"
+    "updatedAt": "2026-09-08T23:42:57.367Z"
   },
   {
     "id": "react-query-queries",
@@ -1520,7 +1600,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.071Z"
+    "updatedAt": "2026-09-08T23:42:57.318Z"
   },
   {
     "id": "react-query-overview",
@@ -1544,7 +1624,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.067Z"
+    "updatedAt": "2026-09-08T23:42:57.316Z"
   },
   {
     "id": "react-query-mutations",
@@ -1567,7 +1647,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.064Z"
+    "updatedAt": "2026-09-08T23:42:57.314Z"
   },
   {
     "id": "react-query-cache",
@@ -1591,7 +1671,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.063Z"
+    "updatedAt": "2026-09-08T23:42:57.312Z"
   },
   {
     "id": "react-query-advanced",
@@ -1615,7 +1695,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.061Z"
+    "updatedAt": "2026-09-08T23:42:57.310Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -1640,7 +1720,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.896Z"
+    "updatedAt": "2026-09-08T23:42:57.144Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -1663,7 +1743,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.894Z"
+    "updatedAt": "2026-09-08T23:42:57.141Z"
   },
   {
     "id": "gstack-overview",
@@ -1687,7 +1767,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.890Z"
+    "updatedAt": "2026-09-08T23:42:57.137Z"
   },
   {
     "id": "django-security",
@@ -1713,7 +1793,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.956Z"
+    "updatedAt": "2026-09-08T23:42:57.198Z"
   },
   {
     "id": "django-overview",
@@ -1739,7 +1819,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.972Z"
+    "updatedAt": "2026-09-08T23:42:57.215Z"
   },
   {
     "id": "django-orm-deep",
@@ -1765,7 +1845,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.952Z"
+    "updatedAt": "2026-09-08T23:42:57.195Z"
   },
   {
     "id": "django-lifecycle",
@@ -1792,7 +1872,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.936Z"
+    "updatedAt": "2026-09-08T23:42:57.180Z"
   },
   {
     "id": "django-architecture",
@@ -1819,7 +1899,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.931Z"
+    "updatedAt": "2026-09-08T23:42:57.177Z"
   },
   {
     "id": "docker-compose-django",
@@ -1844,7 +1924,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.102Z"
+    "updatedAt": "2026-09-08T23:42:57.351Z"
   },
   {
     "id": "docker-compose-basics",
@@ -1868,7 +1948,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.101Z"
+    "updatedAt": "2026-09-08T23:42:57.349Z"
   },
   {
     "id": "docker-basics",
@@ -1891,7 +1971,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.099Z"
+    "updatedAt": "2026-09-08T23:42:57.347Z"
   },
   {
     "id": "django-version-compatibility",
@@ -1916,7 +1996,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.960Z"
+    "updatedAt": "2026-09-08T23:42:57.203Z"
   },
   {
     "id": "django-settings",
@@ -1941,7 +2021,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.974Z"
+    "updatedAt": "2026-09-08T23:42:57.218Z"
   },
   {
     "id": "django-migration",
@@ -1966,7 +2046,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:40.938Z"
+    "updatedAt": "2026-09-08T23:42:57.181Z"
   },
   {
     "id": "celery-worker",
@@ -1993,7 +2073,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.094Z"
+    "updatedAt": "2026-09-08T23:42:57.341Z"
   },
   {
     "id": "celery-django",
@@ -2019,7 +2099,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.097Z"
+    "updatedAt": "2026-09-08T23:42:57.343Z"
   },
   {
     "id": "celery-broker",
@@ -2045,7 +2125,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.093Z"
+    "updatedAt": "2026-09-08T23:42:57.339Z"
   },
   {
     "id": "celery-beat",
@@ -2069,7 +2149,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.091Z"
+    "updatedAt": "2026-09-08T23:42:57.338Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -2093,7 +2173,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.174Z"
+    "updatedAt": "2026-09-08T23:42:57.434Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -2118,7 +2198,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.201Z"
+    "updatedAt": "2026-09-08T23:42:57.459Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -2141,7 +2221,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.199Z"
+    "updatedAt": "2026-09-08T23:42:57.456Z"
   },
   {
     "id": "micro-protocol",
@@ -2164,7 +2244,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.197Z"
+    "updatedAt": "2026-09-08T23:42:57.454Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -2192,7 +2272,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.195Z"
+    "updatedAt": "2026-09-08T23:42:57.451Z"
   },
   {
     "id": "micro-network-view",
@@ -2217,7 +2297,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.162Z"
+    "updatedAt": "2026-09-08T23:42:57.419Z"
   },
   {
     "id": "micro-network-traffic",
@@ -2242,7 +2322,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.192Z"
+    "updatedAt": "2026-09-08T23:42:57.449Z"
   },
   {
     "id": "micro-ip-arp",
@@ -2267,7 +2347,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.190Z"
+    "updatedAt": "2026-09-08T23:42:57.446Z"
   },
   {
     "id": "micro-http-https",
@@ -2294,7 +2374,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.182Z"
+    "updatedAt": "2026-09-08T23:42:57.441Z"
   },
   {
     "id": "micro-encapsulation",
@@ -2320,7 +2400,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.176Z"
+    "updatedAt": "2026-09-08T23:42:57.437Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -2343,7 +2423,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.172Z"
+    "updatedAt": "2026-09-08T23:42:57.432Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -2367,7 +2447,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.171Z"
+    "updatedAt": "2026-09-08T23:42:57.430Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -2389,7 +2469,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.170Z"
+    "updatedAt": "2026-09-08T23:42:57.424Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -2412,7 +2492,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.164Z"
+    "updatedAt": "2026-09-08T23:42:57.421Z"
   },
   {
     "id": "macro-network-view",
@@ -2435,7 +2515,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.156Z"
+    "updatedAt": "2026-09-08T23:42:57.413Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -2459,7 +2539,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.105Z"
+    "updatedAt": "2026-09-08T23:42:57.356Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -2482,6 +2562,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-08-26T02:26:41.104Z"
+    "updatedAt": "2026-09-08T23:42:57.353Z"
   }
 ]

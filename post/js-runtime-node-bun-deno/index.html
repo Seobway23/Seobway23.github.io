@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다." />
+    <meta name="keywords" content="javascript, runtime, nodejs, bun, deno, backend" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/js-runtime-node-bun-deno" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가" />
+    <meta property="og:description" content="브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/js-runtime-node-bun-deno" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.226Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="runtime" />
+    <meta property="article:tag" content="nodejs" />
+    <meta property="article:tag" content="bun" />
+    <meta property="article:tag" content="deno" />
+    <meta property="article:tag" content="backend" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가" />
+    <meta name="twitter:description" content="브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가","description":"브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.226Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/js-runtime-node-bun-deno"},"keywords":"javascript, runtime, nodejs, bun, deno, backend","articleSection":"runtime","inLanguage":"ko-KR","wordCount":2404},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"runtime","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fruntime"},{"@type":"ListItem","position":3,"name":"Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가","item":"https://seobway23.github.io/post/js-runtime-node-bun-deno"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>runtime</span></nav>
+<h1>Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가</h1>
+<p>브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>11분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/post/ai-webdev-roadmap-foundation">로드맵 인덱스 →</a></td>
+<td>01~19 전체 학습 경로</td>
+</tr>
+<tr>
+<td><a href="/post/js-runtime-node-bun-deno">02-1. Node.js · Bun · Deno →</a></td>
+<td>서버 JavaScript 런타임 비교</td>
+</tr>
+<tr>
+<td><a href="/post/http-methods-and-status-codes">02-2. HTTP 메서드와 상태 코드 →</a></td>
+<td>REST API의 기본 언어</td>
+</tr>
+<tr>
+<td><a href="/post/hono-rest-api-overview">02-3. Hono로 REST API 시작하기 →</a></td>
+<td>경량 서버 프레임워크 실습</td>
+</tr>
+<tr>
+<td><a href="/post/sql-joins-where-having-group-by">02-4. SQL JOIN · WHERE · HAVING · GROUP BY →</a></td>
+<td>쿼리 결과 예측과 집계</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>브라우저 JavaScript와 서버 JavaScript는 무엇이 다른가</h2>
+<p>문법 자체는 같아 보여도, JavaScript가 어디서 실행되느냐에 따라 할 수 있는 일이 달라진다.</p>
+<p>브라우저에서는 DOM, 이벤트, 렌더링에 가깝고, 서버에서는 파일 시스템, 네트워크, 프로세스 관리에 가깝다. 이때 서버 쪽 실행 환경을 <strong>런타임(runtime)</strong> 이라고 부른다.</p>
+<hr>
+<h2>Node.js</h2>
+<p>Node.js는 가장 널리 쓰이는 JavaScript 런타임이다.<a href="https://nodejs.org/learn/getting-started/introduction-to-nodejs" target="_blank"><sup>[1]</sup></a></p>
+<p>특징:</p>
+<ul>
+<li>거대한 npm 생태계</li>
+<li>성숙한 서버·도구 체인</li>
+<li>비동기 I/O 중심 설계</li>
+</ul>
+<p>Node.js를 먼저 배우는 이유는 단순하다. 지금도 가장 많은 예제, 라이브러리, 실무 환경이 Node.js를 기준으로 설명되기 때문이다.</p>
+<hr>
+<h2>Bun</h2>
+<p>Bun은 빠른 실행 속도와 번들러·테스트·패키지 매니저 같은 도구 통합을 강하게 밀고 있는 런타임이다.</p>
+<p>특징:</p>
+<ul>
+<li>빠른 시작 속도와 개발 체감 성능</li>
+<li><code>bun install</code>, <code>bun test</code>, <code>bun run</code> 같은 통합 경험</li>
+<li>Node 호환성을 강하게 의식</li>
+</ul>
+<p>즉 Bun은 &quot;런타임 + 툴체인을 한 번에 묶어 더 빠르게&quot;라는 방향이 강하다.</p>
+<hr>
+<h2>Deno</h2>
+<p>Deno는 Node.js의 창시자 Ryan Dahl이 만든 런타임으로, 보안과 표준 Web API 경험을 더 강하게 가져간다.</p>
+<p>특징:</p>
+<ul>
+<li>기본 보안 권한 모델</li>
+<li>TypeScript 친화적 경험</li>
+<li>표준 Web API를 적극 채택</li>
+</ul>
+<p>즉 Deno는 &quot;처음부터 다시 설계한 서버 JavaScript 환경&quot;에 가깝다.</p>
+<hr>
+<h2>한 장으로 비교</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Node.js</th>
+<th>Bun</th>
+<th>Deno</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>강점</td>
+<td>생태계·안정성</td>
+<td>속도·도구 통합</td>
+<td>보안·표준 API</td>
+</tr>
+<tr>
+<td>초심자 관점</td>
+<td>자료가 가장 많음</td>
+<td>체감이 빠름</td>
+<td>개념이 깔끔함</td>
+</tr>
+<tr>
+<td>추천 시작점</td>
+<td>가장 무난</td>
+<td>실험/개인 프로젝트</td>
+<td>설계 철학 학습용</td>
+</tr>
+</tbody></table>
+<pre><code class="language-mermaid">%% desc: Node.js는 생태계, Bun은 속도와 통합, Deno는 보안과 Web API 방향성이 강하다
+flowchart LR
+  N[&quot;Node.js\n생태계·안정성&quot;] --&gt; J[&quot;서버 JavaScript&quot;]
+  B[&quot;Bun\n속도·도구 통합&quot;] --&gt; J
+  D[&quot;Deno\n보안·표준 API&quot;] --&gt; J
+</code></pre>
+<hr>
+<h2>처음에는 무엇부터 쓰면 좋은가</h2>
+<p>입문 단계라면 보통 <strong>Node.js부터</strong> 시작하는 편이 가장 안정적이다.</p>
+<p>이유:</p>
+<ul>
+<li>예제가 가장 많다</li>
+<li>라이브러리 호환성 문제가 적다</li>
+<li>이후 Bun, Deno를 비교하기 쉽다</li>
+</ul>
+<p>그다음 개인 프로젝트에서 Bun이나 Deno를 써 보면 차이가 더 또렷하게 보인다.</p>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>런타임 비교의 핵심은 &quot;어느 것이 절대적으로 더 좋다&quot;가 아니다. <strong>어떤 생태계와 실행 경험을 선택하느냐</strong>에 가깝다.</p>
+</div></div></aside></p>
+<hr>
+<h2>Hono와는 어떻게 연결되는가</h2>
+<p>Hono는 특정 런타임 하나에만 묶이지 않고 여러 환경에서 동작할 수 있는 경량 웹 프레임워크다. 그래서 Node.js, Bun, Deno를 비교한 뒤 Hono를 보면 &quot;왜 경량 프레임워크가 인기가 있는지&quot;가 더 잘 보인다.</p>
+<hr>
+<h2>마치며</h2>
+<p>서버 JavaScript를 배운다는 것은 단순히 문법을 다시 보는 것이 아니라, <strong>브라우저 밖에서 JavaScript가 어떤 환경 위에서 도는지</strong> 이해하는 일이다.</p>
+<p>Node.js, Bun, Deno의 차이를 큰 그림으로 먼저 잡아 두면, 이후 Hono나 API 서버 실습도 훨씬 맥락 있게 들어온다.</p>
+<h2>조금 더 깊게 보기</h2>
+<h3>런타임은 언어의 생활 공간이다</h3>
+<p>JavaScript 문법은 같아도 브라우저, Node.js, Bun, Deno에서 할 수 있는 일은 다르다. 언어는 문법이고, 런타임은 그 문법이 실제로 살아 움직이는 공간이다.</p>
+<h3>개발자가 봐야 할 선택 기준</h3>
+<p>Node.js는 생태계가 가장 넓고 예제가 많다. Bun은 개발 체감 속도와 도구 통합이 강점이다. Deno는 보안 권한 모델과 표준 Web API 방향성이 선명하다. 선택은 팀의 배포 환경, 패키지 호환성, 운영 경험까지 포함해 결정해야 한다.</p>
+<h3>실무 함정</h3>
+<p>Bun이나 Deno로 시작했는데 특정 npm 패키지가 Node.js 전용 API에 의존하면 예상치 못한 문제가 생길 수 있다. 그래서 입문은 Node.js로 안정적으로 시작하고, 이후 Bun/Deno를 비교 실험하는 순서가 좋다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://nodejs.org/learn/getting-started/introduction-to-nodejs" target="_blank">[1] Node.js Learn — Introduction to Node.js</a></li>
+<li><a href="https://bun.sh/docs" target="_blank">[2] Bun Docs</a></li>
+<li><a href="https://docs.deno.com/runtime/manual/getting_started/first_steps/" target="_blank">[3] Deno Docs — First Steps</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/http-methods-and-status-codes">HTTP 메서드와 상태 코드 기초 →</a></li>
+<li><a href="/post/hono-rest-api-overview">Hono로 REST API 시작하기 →</a></li>
+<li><a href="/post/js-event-loop-and-async">JS 이벤트 루프와 비동기 큰 그림 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>javascript</li><li>runtime</li><li>nodejs</li><li>bun</li><li>deno</li><li>backend</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

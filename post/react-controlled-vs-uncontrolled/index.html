@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다." />
+    <meta name="keywords" content="react, forms, controlled-component, uncontrolled-component, ref" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/react-controlled-vs-uncontrolled" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가" />
+    <meta property="og:description" content="controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/react-controlled-vs-uncontrolled" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.308Z" />
+    <meta property="article:tag" content="react" />
+    <meta property="article:tag" content="forms" />
+    <meta property="article:tag" content="controlled-component" />
+    <meta property="article:tag" content="uncontrolled-component" />
+    <meta property="article:tag" content="ref" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가" />
+    <meta name="twitter:description" content="controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가","description":"controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.308Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/react-controlled-vs-uncontrolled"},"keywords":"react, forms, controlled-component, uncontrolled-component, ref","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":2864},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Freact"},{"@type":"ListItem","position":3,"name":"controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가","item":"https://seobway23.github.io/post/react-controlled-vs-uncontrolled"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가</h1>
+<p>controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>10분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/post/ai-webdev-roadmap-foundation">로드맵 인덱스 →</a></td>
+<td>01~19 전체 학습 경로</td>
+</tr>
+<tr>
+<td><a href="/post/js-event-loop-and-async">01-1. JS 이벤트 루프와 비동기 →</a></td>
+<td>콜스택, 큐, 마이크로태스크</td>
+</tr>
+<tr>
+<td><a href="/post/settimeout-vs-promise">01-2. setTimeout vs Promise →</a></td>
+<td>비동기 실행 순서 예측</td>
+</tr>
+<tr>
+<td><a href="/post/react-component-data-flow">01-3. React 단방향 데이터 흐름 →</a></td>
+<td>props/state, state 끌어올리기</td>
+</tr>
+<tr>
+<td><a href="/post/react-controlled-vs-uncontrolled">01-4. controlled vs uncontrolled →</a></td>
+<td>React 폼 설계</td>
+</tr>
+<tr>
+<td><a href="/post/typescript-type-system-basics">01-5. TypeScript 타입 시스템 기초 →</a></td>
+<td>any, unknown, union, narrowing</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>왜 폼에서 갑자기 복잡해지는가</h2>
+<p>React 초반에 많이 헷갈리는 지점이 폼이다.</p>
+<p>입력값 하나만 받아도 곧바로 이런 고민이 생긴다.</p>
+<ul>
+<li>입력값을 state로 관리해야 하나</li>
+<li>DOM에서 직접 읽어도 되나</li>
+<li>검증과 에러 메시지는 어디서 처리하나</li>
+</ul>
+<p>이때 나오는 두 가지 방식이 <strong>controlled</strong> 와 <strong>uncontrolled</strong> 다.</p>
+<hr>
+<h2>controlled 컴포넌트</h2>
+<p>controlled 컴포넌트는 입력값의 현재 상태를 <strong>React state가 소유</strong>하는 방식이다.</p>
+<pre><code class="language-tsx">function SignupForm() {
+  const [email, setEmail] = useState(&#39;&#39;)
+
+  return (
+    &lt;input
+      value={email}
+      onChange={(e) =&gt; setEmail(e.target.value)}
+    /&gt;
+  )
+}
+</code></pre>
+<p>여기서는 input의 실제 값과 React state가 항상 같이 움직인다.</p>
+<h3>장점</h3>
+<ul>
+<li>입력값을 항상 코드에서 볼 수 있다</li>
+<li>실시간 검증이 쉽다</li>
+<li>조건부 UI와 연결하기 쉽다</li>
+</ul>
+<h3>단점</h3>
+<ul>
+<li>필드가 많아질수록 보일러플레이트가 늘어난다</li>
+<li>매 입력마다 state 업데이트가 일어난다</li>
+</ul>
+<hr>
+<h2>uncontrolled 컴포넌트</h2>
+<p>uncontrolled 컴포넌트는 입력값을 DOM이 들고 있고, 필요할 때만 읽는 방식이다.</p>
+<pre><code class="language-tsx">function SignupForm() {
+  const emailRef = useRef&lt;HTMLInputElement&gt;(null)
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    console.log(emailRef.current?.value)
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input ref={emailRef} defaultValue=&quot;&quot; /&gt;
+      &lt;button type=&quot;submit&quot;&gt;전송&lt;/button&gt;
+    &lt;/form&gt;
+  )
+}
+</code></pre>
+<p>여기서는 React state가 아니라 input DOM이 값을 들고 있다.</p>
+<h3>장점</h3>
+<ul>
+<li>단순 폼에서는 코드가 짧다</li>
+<li>기존 HTML 폼 방식과 가깝다</li>
+<li>파일 입력처럼 DOM 중심인 경우에 자연스럽다</li>
+</ul>
+<h3>단점</h3>
+<ul>
+<li>입력 중 값을 React 트리에서 바로 다루기 어렵다</li>
+<li>실시간 검증이나 UI 연동이 불편해질 수 있다</li>
+</ul>
+<hr>
+<h2>어떤 상황에서 무엇을 선택할까</h2>
+<h3>controlled가 잘 맞는 경우</h3>
+<ul>
+<li>실시간 유효성 검사</li>
+<li>입력값으로 즉시 UI를 바꾸는 경우</li>
+<li>여러 필드 상태를 함께 다뤄야 하는 경우</li>
+</ul>
+<h3>uncontrolled가 잘 맞는 경우</h3>
+<ul>
+<li>제출 시점에만 값이 필요할 때</li>
+<li>아주 단순한 폼</li>
+<li>파일 업로드처럼 ref 접근이 자연스러운 경우</li>
+</ul>
+<pre><code class="language-mermaid">%% desc: 입력 중 상태를 계속 써야 하면 controlled, 제출 시점에만 읽으면 uncontrolled가 잘 맞는다
+flowchart TD
+  Q[&quot;입력 중 값을 계속 써야 하는가?&quot;] --&gt;|예| C[&quot;controlled&quot;]
+  Q --&gt;|아니오| U[&quot;uncontrolled&quot;]
+  C --&gt; C1[&quot;실시간 검증\n조건부 버튼 상태\n미리보기&quot;]
+  U --&gt; U1[&quot;간단 폼\n파일 입력\n제출 시점 읽기&quot;]
+</code></pre>
+<hr>
+<h2>React Hook Form이 인기 있는 이유</h2>
+<p>폼 라이브러리를 배우다 보면, 왜 React Hook Form이 자주 언급되는지 이해하게 된다.</p>
+<p>이 라이브러리는 기본적으로 uncontrolled 성격을 활용하면서도, 검증과 에러 관리 같은 개발 편의를 잘 붙여 준다. 즉 controlled와 uncontrolled의 trade-off를 실무 친화적으로 풀어낸 셈이다.</p>
+<hr>
+<h2>실무에서는 이렇게 생각하면 편하다</h2>
+<ul>
+<li>단순 검색창, 제출 시점 읽기 중심 → uncontrolled도 충분</li>
+<li>회원가입, 실시간 검증, 조건부 렌더링 → controlled 쪽이 안정적</li>
+</ul>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>입문 단계에서는 &quot;무조건 controlled가 정답&quot;처럼 외우지 않는 편이 좋다. 핵심은 <strong>누가 현재 값을 소유하느냐</strong>를 분명히 아는 것이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>마치며</h2>
+<p>controlled와 uncontrolled는 둘 중 하나만 옳은 문제가 아니다.</p>
+<p>중요한 것은 다음 질문이다.</p>
+<ul>
+<li>입력값을 React가 계속 알고 있어야 하는가</li>
+<li>아니면 제출 시점에만 읽으면 되는가</li>
+</ul>
+<p>그 기준이 분명하면 폼 설계도 훨씬 단순해진다.</p>
+<h2>조금 더 깊게 보기</h2>
+<h3>폼은 상태 동기화 문제다</h3>
+<p>폼은 단순한 input 모음이 아니다. 사용자는 한 글자씩 입력하고, UI는 검증하고, 버튼 상태를 바꾸고, 에러 메시지를 보여준다. 그래서 폼은 화면과 데이터가 계속 왕복하는 상태 동기화 문제다.</p>
+<h3>controlled의 진짜 의미</h3>
+<p>controlled 컴포넌트는 React가 입력값의 원본이 되는 방식이다. 비밀번호 강도 표시, 실시간 검색, 제출 버튼 활성화처럼 입력 중 값이 다른 UI에 영향을 주는 경우에 강력하다.</p>
+<h3>uncontrolled가 실무에서 사라지지 않는 이유</h3>
+<p>제출 시점에만 값이 필요하거나 파일 input처럼 DOM API가 중심인 경우에는 uncontrolled가 더 단순하다. React Hook Form 같은 라이브러리가 uncontrolled 성격을 활용하는 것도 이 때문이다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://react.dev/reference/react-dom/components/input" target="_blank">[1] React Docs — input</a></li>
+<li><a href="https://react.dev/learn/referencing-values-with-refs" target="_blank">[2] React Docs — Referencing Values with Refs</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-component-data-flow">React 단방향 데이터 흐름 →</a></li>
+<li><a href="/post/typescript-type-system-basics">TypeScript 타입 시스템 기초 →</a></li>
+<li><a href="/post/react-query-overview">TanStack Query 개요 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>react</li><li>forms</li><li>controlled-component</li><li>uncontrolled-component</li><li>ref</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

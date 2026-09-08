@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Celery 브로커가 하는 일, Redis와 RabbitMQ의 차이, AMQP 메시지 보장(Durability, Acknowledgment)이 태스크 손실을 어떻게 방지하는지 설명한다." />
+    <meta name="keywords" content="Celery, Broker, Redis, RabbitMQ, AMQP, MessageQueue, Durability, Acknowledgment, Python" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/celery-broker" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초" />
+    <meta property="og:description" content="Celery 브로커가 하는 일, Redis와 RabbitMQ의 차이, AMQP 메시지 보장(Durability, Acknowledgment)이 태스크 손실을 어떻게 방지하는지 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/celery-broker" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-26T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.339Z" />
+    <meta property="article:tag" content="Celery" />
+    <meta property="article:tag" content="Broker" />
+    <meta property="article:tag" content="Redis" />
+    <meta property="article:tag" content="RabbitMQ" />
+    <meta property="article:tag" content="AMQP" />
+    <meta property="article:tag" content="MessageQueue" />
+    <meta property="article:tag" content="Durability" />
+    <meta property="article:tag" content="Acknowledgment" />
+    <meta property="article:tag" content="Python" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초" />
+    <meta name="twitter:description" content="Celery 브로커가 하는 일, Redis와 RabbitMQ의 차이, AMQP 메시지 보장(Durability, Acknowledgment)이 태스크 손실을 어떻게 방지하는지 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초","description":"Celery 브로커가 하는 일, Redis와 RabbitMQ의 차이, AMQP 메시지 보장(Durability, Acknowledgment)이 태스크 손실을 어떻게 방지하는지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-26T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.339Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/celery-broker"},"keywords":"Celery, Broker, Redis, RabbitMQ, AMQP, MessageQueue, Durability, Acknowledgment, Python","articleSection":"celery","inLanguage":"ko-KR","wordCount":4494},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"celery","item":"https://seobway23.github.io/?category=study%2Finfra%2Fcelery"},{"@type":"ListItem","position":3,"name":"Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초","item":"https://seobway23.github.io/post/celery-broker"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>celery</span></nav>
+<h1>Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초</h1>
+<p>Celery 브로커가 하는 일, Redis와 RabbitMQ의 차이, AMQP 메시지 보장(Durability, Acknowledgment)이 태스크 손실을 어떻게 방지하는지 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-26T00:00:00.000Z">2026-03-26</time> · <span>12분</span></p>
+<h2>브로커란 무엇인가</h2>
+<p><strong>브로커(Message Broker)</strong>는 Producer(Django 뷰, Beat)가 발행한 태스크 메시지를 저장하고,<br>Worker가 요청할 때까지 보관하는 <strong>중간 저장소</strong>다.<sup id="fnref-celery-broker-docs" style="scroll-margin-top: 96px;"><a href="#fn-celery-broker-docs" aria-label="각주 1">[1]</a></sup></p>
+<pre><code class="language-mermaid">%% desc: 브로커의 역할 — Producer와 Worker를 분리하는 중간 메시지 저장소
+flowchart LR
+  subgraph PROD[&quot;Producer&quot;]
+    DJ[&quot;Django 뷰&quot;]
+    BEAT[&quot;Celery Beat&quot;]
+  end
+
+  subgraph BROKER[&quot;메시지 브로커&quot;]
+    Q1[&quot;큐: default&quot;]
+    Q2[&quot;큐: email&quot;]
+    Q3[&quot;큐: reports&quot;]
+  end
+
+  subgraph CONSUMER[&quot;Consumer&quot;]
+    W1[&quot;Worker 1&quot;]
+    W2[&quot;Worker 2&quot;]
+    W3[&quot;Worker 3&quot;]
+  end
+
+  DJ --&gt; Q1 &amp; Q2
+  BEAT --&gt; Q1 &amp; Q3
+  Q1 --&gt; W1
+  Q2 --&gt; W2
+  Q3 --&gt; W3
+</code></pre>
+<p>브로커 덕분에 Producer와 Worker가 <strong>완전히 분리</strong>된다.<br>Worker가 잠시 다운돼도 메시지는 큐에 보관되고, Worker가 재시작하면 처리된다.</p>
+<h2>Redis 브로커</h2>
+<p>Redis는 Celery에서 가장 많이 쓰이는 브로커다.<sup id="fnref-redis-celery" style="scroll-margin-top: 96px;"><a href="#fn-redis-celery" aria-label="각주 2">[2]</a></sup></p>
+<pre><code class="language-python"># settings.py
+CELERY_BROKER_URL = &quot;redis://localhost:6379/0&quot;
+# 비밀번호 사용
+CELERY_BROKER_URL = &quot;redis://:mypassword@localhost:6379/0&quot;
+# Redis Sentinel (고가용성)
+CELERY_BROKER_URL = &quot;sentinel://localhost:26379;sentinel://localhost:26380/0&quot;
+</code></pre>
+<h3>Redis 브로커의 동작</h3>
+<p>Redis는 리스트(List) 자료구조를 큐로 사용한다.</p>
+<pre><code class="language-mermaid">%% desc: Redis 브로커의 LPUSH/BRPOP 메커니즘 — 태스크 발행과 소비
+sequenceDiagram
+  participant PROD as Producer
+  participant REDIS as Redis
+  participant WORKER as Worker
+
+  PROD-&gt;&gt;REDIS: LPUSH celery {task_message}
+  Note over REDIS: 리스트에 메시지 추가
+
+  WORKER-&gt;&gt;REDIS: BRPOP celery 0 (블로킹 대기)
+  REDIS--&gt;&gt;WORKER: 메시지 반환
+  Note over WORKER: 태스크 실행
+
+  alt ACK Late 설정 시
+    WORKER-&gt;&gt;REDIS: 완료 후 별도 처리
+  end
+</code></pre>
+<h3>Redis 브로커의 주의점</h3>
+<p>Redis는 기본적으로 <strong>인메모리</strong> 저장소다.<br>서버가 재시작되면 큐의 메시지가 사라질 수 있다.</p>
+<pre><code class="language-python"># Redis 영속성 설정 (redis.conf)
+# AOF (Append Only File) — 모든 명령 로그
+appendonly yes
+appendfsync everysec
+
+# RDB 스냅샷
+save 900 1
+save 300 10
+</code></pre>
+<p>또한 Redis는 ACK를 <strong>Celery 레벨</strong>에서 처리한다.<br>Worker가 태스크를 가져간 후 프로세스가 죽으면 메시지가 손실될 수 있다.</p>
+<pre><code class="language-python"># Worker가 태스크 완료 후 ACK를 전송하도록 설정 (기본: 시작 후 즉시 ACK)
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+</code></pre>
+<h2>RabbitMQ 브로커</h2>
+<p>RabbitMQ는 AMQP(Advanced Message Queuing Protocol) 기반의 전용 메시지 브로커다.<sup id="fnref-rabbitmq-docs" style="scroll-margin-top: 96px;"><a href="#fn-rabbitmq-docs" aria-label="각주 3">[3]</a></sup></p>
+<pre><code class="language-python"># settings.py
+CELERY_BROKER_URL = &quot;amqp://guest:guest@localhost:5672//&quot;
+# vhost 지정
+CELERY_BROKER_URL = &quot;amqp://myuser:mypassword@localhost:5672/myvhost&quot;
+</code></pre>
+<h3>AMQP 구조</h3>
+<p>RabbitMQ는 Exchange → Binding → Queue의 라우팅 구조를 갖는다.</p>
+<pre><code class="language-mermaid">%% desc: RabbitMQ AMQP 구조 — Exchange가 라우팅 키 기반으로 메시지를 큐에 분배
+flowchart LR
+  PROD[&quot;Producer\n(Django/Beat)&quot;]
+
+  subgraph RABBIT[&quot;RabbitMQ&quot;]
+    subgraph EXCHANGE[&quot;Exchange&quot;]
+      EX[&quot;celery\n(direct type)&quot;]
+    end
+
+    subgraph QUEUES[&quot;Queues&quot;]
+      Q1[&quot;celery (default)&quot;]
+      Q2[&quot;email&quot;]
+      Q3[&quot;reports&quot;]
+    end
+  end
+
+  WORKER1[&quot;Worker 1\n(default 큐)&quot;]
+  WORKER2[&quot;Worker 2\n(email 큐)&quot;]
+  WORKER3[&quot;Worker 3\n(reports 큐)&quot;]
+
+  PROD -- &quot;routing_key=celery&quot; --&gt; EX
+  PROD -- &quot;routing_key=email&quot; --&gt; EX
+  EX -- &quot;binding: celery→celery&quot; --&gt; Q1
+  EX -- &quot;binding: email→email&quot; --&gt; Q2
+  EX -- &quot;binding: reports→reports&quot; --&gt; Q3
+  Q1 --&gt; WORKER1
+  Q2 --&gt; WORKER2
+  Q3 --&gt; WORKER3
+</code></pre>
+<h3>RabbitMQ 메시지 보장</h3>
+<p>RabbitMQ는 AMQP 수준에서 메시지 보장을 제공한다.</p>
+<p><strong>1. 메시지 영속성 (Durability)</strong></p>
+<pre><code class="language-python"># settings.py
+CELERY_TASK_SERIALIZER = &quot;json&quot;
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    &quot;delivery_mode&quot;: 2,  # PERSISTENT (재시작 후에도 보존)
+}
+</code></pre>
+<p><strong>2. Publisher Confirm</strong></p>
+<pre><code class="language-python">CELERY_BROKER_TRANSPORT_OPTIONS = {
+    &quot;confirm_publish&quot;: True,  # 브로커가 수신 확인 후 발행 완료
+}
+</code></pre>
+<p><strong>3. Consumer ACK</strong></p>
+<p>RabbitMQ는 Worker가 명시적으로 ACK를 보내야 메시지를 큐에서 제거한다.<br>ACK 전에 Worker가 죽으면 메시지가 <strong>자동으로 다른 Worker에 재분배</strong>된다.</p>
+<pre><code class="language-mermaid">%% desc: RabbitMQ의 Consumer ACK — Worker 장애 시 메시지 자동 재분배
+sequenceDiagram
+  participant RABBIT as RabbitMQ
+  participant W1 as Worker 1 (장애)
+  participant W2 as Worker 2
+
+  RABBIT-&gt;&gt;W1: 메시지 전달 (unacked 상태)
+  Note over W1: 태스크 실행 중
+  W1-&gt;&gt;W1: 프로세스 크래시!
+
+  Note over RABBIT: Heartbeat 실패 감지
+  RABBIT-&gt;&gt;W2: 메시지 재전달 (requeue)
+  W2-&gt;&gt;W2: 태스크 실행
+  W2-&gt;&gt;RABBIT: basic.ack
+  Note over RABBIT: 메시지 큐에서 제거
+</code></pre>
+<h2>Redis vs RabbitMQ 비교</h2>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>Redis</th>
+<th>RabbitMQ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>프로토콜</strong></td>
+<td>Redis Protocol</td>
+<td>AMQP 0-9-1</td>
+</tr>
+<tr>
+<td><strong>설치 복잡도</strong></td>
+<td>낮음</td>
+<td>중간</td>
+</tr>
+<tr>
+<td><strong>메시지 영속성</strong></td>
+<td>설정 필요 (AOF/RDB)</td>
+<td>기본 지원</td>
+</tr>
+<tr>
+<td><strong>ACK 보장</strong></td>
+<td>Celery 레벨</td>
+<td>AMQP 레벨 (더 강력)</td>
+</tr>
+<tr>
+<td><strong>성능</strong></td>
+<td>매우 높음</td>
+<td>높음</td>
+</tr>
+<tr>
+<td><strong>라우팅</strong></td>
+<td>단순</td>
+<td>Exchange/Binding으로 복잡한 라우팅</td>
+</tr>
+<tr>
+<td><strong>관리 UI</strong></td>
+<td>Redis Commander</td>
+<td>RabbitMQ Management Plugin</td>
+</tr>
+<tr>
+<td><strong>동시 용도</strong></td>
+<td>캐시, 세션 등 다용도</td>
+<td>전용 메시지 브로커</td>
+</tr>
+<tr>
+<td><strong>추천 케이스</strong></td>
+<td>빠른 개발, 단순 태스크</td>
+<td>메시지 손실 불허, 복잡한 라우팅</td>
+</tr>
+</tbody></table>
+<h2>Result Backend</h2>
+<p>브로커와 별도로 <strong>Result Backend</strong>는 태스크 실행 결과를 저장한다.</p>
+<pre><code class="language-python"># Redis를 Result Backend로
+CELERY_RESULT_BACKEND = &quot;redis://localhost:6379/1&quot;
+
+# Django DB를 Result Backend로 (django-celery-results)
+CELERY_RESULT_BACKEND = &quot;django-db&quot;
+
+# 결과 만료 시간 (기본 24시간)
+CELERY_RESULT_EXPIRES = 3600  # 1시간
+</code></pre>
+<p>결과를 조회하지 않는다면 Result Backend 설정을 생략하거나 무시(ignore)할 수 있다.</p>
+<pre><code class="language-python">@shared_task(ignore_result=True)
+def fire_and_forget_task():
+    do_something()
+</code></pre>
+<h2>연결 풀과 재연결</h2>
+<pre><code class="language-python"># settings.py
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True   # 시작 시 연결 실패 재시도
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
+CELERY_BROKER_POOL_LIMIT = 10                       # 연결 풀 크기
+</code></pre>
+<h2>참고</h2>
+<ol>
+<li id="fn-celery-broker-docs" style="scroll-margin-top: 96px;">Celery Brokers, <a href="https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.html" target="_blank">Celery Docs</a> <a href="#fnref-celery-broker-docs" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-redis-celery" style="scroll-margin-top: 96px;">Using Redis with Celery, <a href="https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html" target="_blank">Celery Docs</a> <a href="#fnref-redis-celery" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-rabbitmq-docs" style="scroll-margin-top: 96px;">RabbitMQ, <a href="https://www.rabbitmq.com/docs" target="_blank">RabbitMQ Docs</a> <a href="#fnref-rabbitmq-docs" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/celery-django">Django + Celery 개요 →</a> — 브로커 설정을 포함한 전체 Celery 설정</li>
+<li><a href="/post/celery-worker">Celery Worker — 내부 구조와 동시성 모델 →</a> — ACK 설정과 Prefetch가 브로커 메시지 보장에 미치는 영향</li>
+<li><a href="/post/celery-beat">Celery Beat — 주기적 태스크 스케줄링 →</a> — Beat가 브로커에 발행하는 스케줄 메시지</li>
+</ul>
+<hr>
+
+<ul><li>Celery</li><li>Broker</li><li>Redis</li><li>RabbitMQ</li><li>AMQP</li><li>MessageQueue</li><li>Durability</li><li>Acknowledgment</li><li>Python</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

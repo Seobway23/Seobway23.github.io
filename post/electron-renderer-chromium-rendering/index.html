@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다." />
+    <meta name="keywords" content="electron, chromium, blink, v8, rendering-pipeline" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/electron-renderer-chromium-rendering" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인" />
+    <meta property="og:description" content="Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/electron-renderer-chromium-rendering" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-06-10T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.278Z" />
+    <meta property="article:tag" content="electron" />
+    <meta property="article:tag" content="chromium" />
+    <meta property="article:tag" content="blink" />
+    <meta property="article:tag" content="v8" />
+    <meta property="article:tag" content="rendering-pipeline" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인" />
+    <meta name="twitter:description" content="Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인","description":"Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-10T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.278Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-renderer-chromium-rendering"},"keywords":"electron, chromium, blink, v8, rendering-pipeline","articleSection":"electron","inLanguage":"ko-KR","wordCount":11949},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인","item":"https://seobway23.github.io/post/electron-renderer-chromium-rendering"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>electron</span></nav>
+<h1>렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인</h1>
+<p>Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-06-10T00:00:00.000Z">2026-06-10</time> · <span>12분</span></p>
+<h2>이 글에서 다루는 것</h2>
+<p><a href="/post/electron-multi-process-architecture">지난 글</a>에서는 Electron이 main·renderer·preload·utility 프로세스로 어떻게 나뉘는지, 그 전체 그림을 살펴봤다. 이번 글은 그 그림의 한 칸 — <strong>renderer 프로세스 안</strong>으로 들어가서, 우리가 작성한 React 컴포넌트가 실제로 화면의 픽셀이 되기까지 무슨 일이 벌어지는지를 다룬다.</p>
+<p>renderer 프로세스는 Chromium의 렌더링 엔진인 <strong>Blink</strong>와 자바스크립트 엔진인 <strong>V8</strong>을 품고 있다. 이 둘이 HTML/CSS/JS를 받아서</p>
+<p><strong>파싱(DOM) → 스타일(computed style) → 레이아웃(geometry) → 페인트(paint record) → 컴포지팅(layer·raster·GPU)</strong></p>
+<p>이라는 5단계 파이프라인을 통해 화면을 그린다. 그리고 이 파이프라인의 대부분은 <strong>단 하나의 main thread</strong>에서 돈다 — 그래서 무거운 JS 한 줄이 화면 전체를 멈추게 할 수 있다. 반면 스크롤이나 <code>transform</code> 애니메이션처럼 <strong>compositor thread</strong>가 처리하는 작업은 main thread가 막혀 있어도 부드럽게 동작한다.</p>
+<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p>이 글의 핵심 인용은 Chrome 팀의 &quot;Inside look at modern web browser&quot; 시리즈(part 1, part 3)에서 가져왔다. 원문은 영어지만, 렌더링 파이프라인을 설명하는 표준 출처로 자주 인용되는 문서다.</p>
+</div></div></aside></p>
+<hr>
+<h2>renderer 프로세스 = 탭 하나의 내부 전체</h2>
+<p>1편에서 본 대로, 각 <code>BrowserWindow</code>(=탭)는 자기만의 renderer 프로세스를 가진다. Chrome 공식 문서는 이 프로세스의 역할을 다음과 같이 설명한다.</p>
+<blockquote>
+<p>&quot;Controls anything inside of the tab where a website is displayed.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part1" target="_blank"><sup>[1]</sup></a></p>
+</blockquote>
+<blockquote>
+<p>&quot;The renderer process is responsible for everything that happens inside of a tab.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>즉 우리 React UI — 메뉴, 캔버스, 채팅 패널 전부 — 는 <strong>renderer 프로세스 안에서만</strong> 산다. main 프로세스에는 <code>DOM</code>도 <code>window</code>도 없다.</p>
+<h3>탭/사이트마다 renderer가 따로 뜬다</h3>
+<p>Chrome은 탭마다 별도의 renderer 프로세스를 띄우는 것이 기본 모델이다.</p>
+<blockquote>
+<p>&quot;imagine each tab has its own renderer process.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part1" target="_blank"><sup>[1]</sup></a></p>
+</blockquote>
+<blockquote>
+<p>&quot;Site Isolation is a recently introduced feature in Chrome that runs a separate renderer process for each cross-site iframe.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part1" target="_blank"><sup>[1]</sup></a></p>
+</blockquote>
+<p>Electron 앱은 보통 창 하나(=renderer 하나)지만, <code>&lt;iframe&gt;</code>이나 <code>&lt;webview&gt;</code>로 외부 사이트를 끼우면 Site Isolation에 의해 <strong>별도의 renderer 프로세스</strong>가 추가로 생길 수 있다. 이것이 작업 관리자에서 <code>Electron.exe</code> 프로세스가 여러 개 보이는 이유 중 하나다.</p>
+<h3>renderer는 샌드박스 안에 있다</h3>
+<p>1편에서 다룬 보안 모델의 물리적 근거가 바로 여기 있다.</p>
+<blockquote>
+<p>&quot;[Chrome] can sandbox certain processes from certain features ... arbitrary file access for processes that handle arbitrary user input like the renderer process.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part1" target="_blank"><sup>[1]</sup></a></p>
+</blockquote>
+<p>renderer가 파일 시스템에 직접 접근하지 못하는 이유가 바로 이 샌드박스 정책이다. 그래서 파일 읽기, 외부 프로세스 호출처럼 권한이 필요한 작업은 <strong>전부 IPC를 통해 main 프로세스에 위임</strong>해야 한다 — 이 부분은 시리즈 후반에서 다시 다룬다.</p>
+<hr>
+<h2>renderer를 구동하는 두 엔진 — Blink와 V8</h2>
+<p>renderer 프로세스 안에는 두 개의 Chromium 엔진이 함께 들어 있다.</p>
+<table>
+<thead>
+<tr>
+<th>엔진</th>
+<th>역할</th>
+<th>비유</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Blink</strong></td>
+<td>렌더링 엔진. HTML/CSS를 해석해 DOM·레이아웃·페인트를 만들고 화면을 그린다</td>
+<td>그림을 그리는 손</td>
+</tr>
+<tr>
+<td><strong>V8</strong></td>
+<td>자바스크립트(+WebAssembly) 엔진. React 코드를 실제로 실행한다</td>
+<td>생각하고 명령하는 머리</td>
+</tr>
+</tbody></table>
+<p>Blink는 Chromium의 렌더링 엔진, V8은 Chromium의 자바스크립트 엔진이라는 구분은 Electron과 Chromium 문서 전반에서 일관되게 쓰인다 <a href="https://www.electronjs.org/docs/latest/tutorial/process-model" target="_blank"><sup>[3]</sup></a><a href="https://v8.dev/docs" target="_blank"><sup>[4]</sup></a>. 1편에서 확인했던 &quot;각 <code>BrowserWindow</code>는 웹 표준을 사용해 페이지를 렌더링한다&quot;는 설명이 바로 &quot;renderer 안에서 Blink와 V8이 함께 돈다&quot;는 뜻이다.</p>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p>V8은 renderer뿐 아니라 <strong>main 프로세스(Node.js)에도</strong> 들어 있다. 같은 V8 엔진이 양쪽에서 돌지만, renderer의 V8은 <strong>Node API가 차단된</strong> 웹 표준 환경에서, main의 V8은 <strong>Node 전권</strong> 환경에서 동작한다. 엔진은 같고 권한이 다르다 — 이것이 Electron 보안 설계의 뿌리다. 다음 글에서 이 두 V8과 두 이벤트 루프의 통합을 자세히 다룬다.</p>
+</div></div></aside></p>
+<h3>핵심: main thread가 거의 다 한다</h3>
+<p>renderer 프로세스의 스레드 구성을 보면 이렇게 정리된다.</p>
+<blockquote>
+<p>&quot;In a renderer process, the main thread handles most of the code you send to the user.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<blockquote>
+<p>&quot;Compositor and raster threads are also run inside of a renderer process to render a page efficiently and smoothly.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>정리하면 renderer 프로세스 = <strong>main thread 1개</strong> + worker threads + <strong>compositor thread</strong> + <strong>raster threads</strong>다. 그런데 아래에서 살펴볼 파이프라인의 Parse·Style·Layout·Paint 단계, 그리고 <strong>우리가 작성한 JS 전부</strong>가 이 <strong>단 하나의 main thread</strong>에서 실행된다. 여기서 무거운 작업을 하면 화면 전체가 멈춘다(jank). 이 사실이 이 글 전체를 관통하는 실무적 핵심이다.</p>
+<hr>
+<h2>렌더링 파이프라인 — HTML이 픽셀이 되기까지</h2>
+<blockquote>
+<p>&quot;The renderer process&#39;s core job is to turn HTML, CSS, and JavaScript into a web page that the user can interact with.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>순서는 <strong>Parsing(DOM) → Style → Layout → Paint → Compositing</strong>이다. 전체 흐름을 먼저 그림으로 보자.</p>
+<pre><code class="language-mermaid">%% desc: Parse-Style-Layout-Paint-Composite 렌더링 파이프라인. 앞 네 단계는 main thread, 마지막 단계는 compositor/raster thread에서 실행된다
+flowchart TD
+  subgraph MAIN[&quot;MAIN THREAD (여기서 막히면 화면 전체가 멈춤)&quot;]
+    direction TB
+    HTML[&quot;HTML 수신&quot;] --&gt;|parse| DOM[&quot;DOM 트리&quot;]
+    CSS[&quot;CSS 수신&quot;] --&gt;|parse| CSSOM[&quot;computed style&quot;]
+    DOM --&gt; STYLE[&quot;Style 계산&quot;]
+    CSSOM --&gt; STYLE
+    STYLE --&gt; LAYOUT[&quot;Layout Tree\n(x, y, width, height)&quot;]
+    LAYOUT --&gt; PAINT[&quot;Paint Records\n(그리는 순서)&quot;]
+    JS[&quot;JS (V8) 실행&quot;] -.-&gt;|DOM/스타일 변경 시 재실행| STYLE
+  end
+
+  PAINT --&gt;|&quot;commit (layer tree)&quot;| COMPOSITOR
+
+  subgraph COMPOSITOR[&quot;COMPOSITOR THREAD (main thread 없이 동작)&quot;]
+    direction TB
+    LAYER[&quot;Layer Tree → Tiles&quot;] --&gt; RASTER[&quot;Raster Threads\n→ GPU 메모리&quot;]
+    RASTER --&gt; FRAME[&quot;Draw Quads\n→ Compositor Frame&quot;]
+  end
+
+  FRAME --&gt;|GPU| SCREEN[&quot;화면 출력&quot;]
+</code></pre>
+<h3>Parsing — 텍스트(HTML)를 DOM 트리로</h3>
+<blockquote>
+<p>&quot;When the renderer process receives a commit message for a navigation and starts to receive HTML data, the main thread begins to parse the text string (HTML) and turn it into a Document Object Model (DOM).&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<blockquote>
+<p>&quot;The DOM is a browser&#39;s internal representation of the page as well as the data structure and API that web developers interact with via JavaScript.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<h4>preload scanner — 동시에 리소스를 미리 긁는다</h4>
+<p>main thread가 HTML을 파싱하면서 <code>&lt;img&gt;</code>나 <code>&lt;link&gt;</code> 같은 서브리소스를 한 줄씩 순서대로 요청하면 느리다. 그래서 Chromium은 파서가 만들어내는 토큰을 곁눈질하며 <strong>미리 리소스 요청을 보내는</strong> preload scanner를 동시에 돌린다.</p>
+<blockquote>
+<p>&quot;in order to speed up, &#39;preload scanner&#39; is run concurrently. If there are things like <code>&lt;img&gt;</code> or <code>&lt;link&gt;</code> in the HTML document, preload scanner peeks at tokens generated by the HTML parser and sends requests ...&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<h4>JavaScript는 파싱을 막을 수 있다</h4>
+<p>여기서 중요한 사실이 하나 있다. <code>&lt;script&gt;</code> 태그를 만나면 파서가 멈춘다.</p>
+<blockquote>
+<p>&quot;JavaScript can block the parsing ... because JavaScript can change the shape of the document using things like <code>document.write()</code> which changes the entire DOM structure.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>해결책은 스크립트에 <code>async</code>나 <code>defer</code>를 붙이는 것이다.</p>
+<blockquote>
+<p>&quot;The browser then loads and runs the JavaScript code asynchronously and does not block the parsing.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>Vite로 번들된 React 진입 스크립트는 보통 <code>type=&quot;module&quot;</code>로 주입되는데, 모듈 스크립트는 기본적으로 <code>defer</code>처럼 동작하므로 파싱을 막지 않는다. 다만 <code>index.html</code>에 직접 <code>&lt;script&gt;</code>를 추가할 일이 생긴다면 <code>defer</code> 속성을 챙겨야 한다.</p>
+</div></div></aside></p>
+<h3>Style — 각 DOM 노드의 computed style 계산</h3>
+<p>DOM이 만들어지면, main thread는 CSS를 파싱해서 각 DOM 노드의 <strong>computed style</strong>을 계산한다.</p>
+<blockquote>
+<p>&quot;The main thread parses CSS and determines the computed style for each DOM node.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<blockquote>
+<p>&quot;Even if you do not provide any CSS, each DOM node has a computed style.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>DOM(구조)과 computed style(외형 규칙)이 합쳐져도 아직 &quot;어디에 얼마 크기로 놓이는가&quot;는 알 수 없다. 그 답은 다음 단계인 Layout에서 나온다.</p>
+<h3>Layout — 기하(geometry) 계산</h3>
+<p>레이아웃은 각 요소의 좌표와 크기를 계산하는 단계다.</p>
+<blockquote>
+<p>&quot;The layout is a process to find the geometry of elements. The main thread walks through the DOM and computed styles and creates the layout tree which has information like x y coordinates and bounding box sizes.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>레이아웃 트리는 DOM과 비슷한 모양이지만, <strong>화면에 실제로 보이는 것만</strong> 담는다.</p>
+<blockquote>
+<p>&quot;If <code>display: none</code> is applied, that element is not part of the layout tree (however, an element with <code>visibility: hidden</code> is in the layout tree).&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>즉 <code>display: none</code>은 레이아웃 트리에서 완전히 빠지고(공간을 차지하지 않음), <code>visibility: hidden</code>은 트리에 남아 공간은 차지한 채 보이지 않을 뿐이다. UI에서 패널을 숨길 때 둘 중 무엇을 쓰느냐가 레이아웃 비용에 영향을 준다.</p>
+<h3>Paint — 그리는 순서(paint record) 결정</h3>
+<p>레이아웃 트리가 완성되면, main thread는 그 트리를 순회하며 &quot;무엇을 어떤 순서로 그릴지&quot;를 적은 <strong>paint record</strong>를 만든다.</p>
+<blockquote>
+<p>&quot;At this paint step, the main thread walks the layout tree to create paint records. Paint record is a note of painting process like &#39;background first, then text, then rectangle&#39;.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>요소들이 겹칠 때는 그리는 <strong>순서</strong>가 결과를 결정한다. <code>z-index</code>처럼 쌓임 순서에 영향을 주는 속성이 바뀌면 paint record를 다시 만들어야 한다.</p>
+<blockquote>
+<p>&quot;For example, <code>z-index</code> might be set for certain elements, in that case painting in order of ... [is needed].&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>여기까지 — Parse, Style, Layout, Paint — <strong>전부 main thread</strong>에서 일어난다. 무거운 JS 연산이나 대량의 DOM 변경은 이 네 단계 전체를 다시 돌게 만들 수 있고, 그 동안 화면은 멈춘다.</p>
+</div></div></aside></p>
+<h3>Compositing — 레이어로 쪼개 별도 스레드에서 합성</h3>
+<p>마지막 단계는 paint record를 실제 픽셀로 바꾸는 <strong>래스터화(rasterizing)</strong>다.</p>
+<blockquote>
+<p>&quot;[Turning the paint records into pixels on] the screen is called rasterizing.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>만약 뷰포트 영역만 단순하게 래스터화한다면, 스크롤할 때마다 새로 드러나는 영역을 매번 다시 그려야 한다. 그래서 현대 Chromium은 페이지를 여러 <strong>레이어</strong>로 나누고, 각 레이어를 따로 래스터화한 뒤 별도 스레드에서 합성한다.</p>
+<blockquote>
+<p>&quot;Compositing is a technique to separate parts of a page into layers, rasterize them separately, and composite as a page in a separate thread called compositor thread.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<blockquote>
+<p>&quot;If scroll happens, since layers are already rasterized, all it has to do is to composite a new frame.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<h4>레이어 트리와 will-change</h4>
+<p>어떤 요소를 별도 레이어로 분리할지는 main thread가 레이아웃 트리를 순회하며 <strong>레이어 트리</strong>를 만들 때 결정한다.</p>
+<blockquote>
+<p>&quot;In order to find out which elements need to be in which layers, the main thread walks through the layout tree to create the layer tree.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>슬라이드인 메뉴처럼 별도 레이어가 되어야 할 요소가 자동으로 분리되지 않는다면, <code>will-change</code> CSS 속성으로 브라우저에 힌트를 줄 수 있다.</p>
+<blockquote>
+<p>&quot;If certain parts of a page that should be [a] separate layer (like slide-in side menu) is not getting one, then you can hint to the browser by using <code>will-change</code> attribute in CSS.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>다만 레이어를 무분별하게 늘리면 오히려 역효과가 난다.</p>
+<blockquote>
+<p>&quot;compositing across an excess number of layers could result in slower operation than rasterizing small parts of a page every frame, so it [is recommended to] Stick to Compositor-Only Properties and Manage Layer Count.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<h4>main thread를 떠나는 순간 — commit</h4>
+<p>레이어 트리와 paint 순서가 결정되면, main thread는 그 정보를 <strong>commit</strong>해서 compositor thread로 넘긴다. 이 시점부터는 main thread가 더 이상 필요 없다.</p>
+<blockquote>
+<p>&quot;Once the layer tree is created and paint orders are determined, the main thread commits that information to the compositor thread. The compositor thread then rasterizes each layer.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>레이어가 페이지 전체 길이만큼 클 수도 있으므로, compositor thread는 레이어를 <strong>타일</strong> 단위로 나눠 raster thread들에게 분배한다.</p>
+<blockquote>
+<p>&quot;[Layers] could be large like the entire length of a page, so the compositor thread divides them into tiles and sends each tile off to raster threads. Raster threads rasterize each tile and store them in GPU memory.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>타일이 래스터화되면, compositor thread는 <strong>draw quad</strong>라는 타일 정보를 모아 <strong>compositor frame</strong>을 만들고 GPU로 보낸다. 스크롤 이벤트가 들어오면 compositor thread는 main thread를 거치지 않고 새 compositor frame을 만든다.</p>
+<blockquote>
+<p>&quot;Once tiles are rastered, compositor thread gathers tile information called draw quads to create a compositor frame. [These] compositor frames are sent to the GPU to display it on a screen. If a scroll event comes in, compositor thread creates another compositor frame to be sent to the GPU.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<h4>결론 — 컴포지팅이 부드러운 이유</h4>
+<blockquote>
+<p>&quot;The benefit of compositing is that it is done without involving the main thread. ... compositing only animations are considered the best for smooth performance.&quot; <a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank"><sup>[2]</sup></a></p>
+</blockquote>
+<p>즉 <code>transform</code>이나 <code>opacity</code>처럼 <strong>compositor만 건드리는 속성</strong>으로 애니메이션을 구현하면, main thread가 무거운 JS로 막혀 있어도 스크롤과 애니메이션은 부드럽게 동작한다. 반대로 <code>top</code>/<code>left</code>/<code>width</code>/<code>height</code>를 애니메이션으로 바꾸면 매 프레임마다 <strong>Layout → Paint → Composite 전체를 main thread에서 다시</strong> 돌려야 해서 버벅인다(jank).</p>
+<hr>
+<h2>한눈에 보는 요약표</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>입력 → 출력</th>
+<th>실행 위치</th>
+<th>무엇이 트리거하나</th>
+<th>비용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Parse</strong></td>
+<td>HTML/CSS → DOM·CSSOM</td>
+<td>main thread</td>
+<td>문서 수신, <code>innerHTML</code> 변경</td>
+<td>중</td>
+</tr>
+<tr>
+<td><strong>Style</strong></td>
+<td>DOM+CSS → computed style</td>
+<td>main thread</td>
+<td>클래스/스타일 변경</td>
+<td>중</td>
+</tr>
+<tr>
+<td><strong>Layout</strong></td>
+<td>style → layout tree(x, y, size)</td>
+<td>main thread</td>
+<td>기하 변경(width/top/폰트/텍스트)</td>
+<td>높음</td>
+</tr>
+<tr>
+<td><strong>Paint</strong></td>
+<td>layout tree → paint records</td>
+<td>main thread</td>
+<td>색·그림자·z-index 등</td>
+<td>중</td>
+</tr>
+<tr>
+<td><strong>Composite</strong></td>
+<td>layer tree → tiles → GPU frame</td>
+<td>compositor/raster thread</td>
+<td><code>transform</code>, <code>opacity</code>, 스크롤</td>
+<td>낮음(부드러움)</td>
+</tr>
+</tbody></table>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>황금률: 애니메이션은 <strong>compositor-only 속성(<code>transform</code>, <code>opacity</code>)</strong>으로 만든다. Layout을 건드리는 속성을 애니메이션하면 main thread가 매 프레임 점유된다.</p>
+</div></div></aside></p>
+<hr>
+<h2>Electron 앱에 적용하기</h2>
+<p>위 사실들을 실제 Electron 앱의 무거운 화면 작업에 대응해 보면 다음과 같다. 두 가지 대표적인 패턴 모두 <strong>renderer의 main thread</strong>에 부담을 준다.</p>
+<h3>1. 캔버스 줌/팬을 transform으로</h3>
+<p>PDF 뷰어나 이미지 캔버스에서 확대/이동을 구현할 때, <code>left</code>/<code>top</code>/<code>width</code> 같은 기하 속성을 직접 바꾸면 매 프레임 Layout과 Paint가 main thread에서 다시 돈다. 대신 컨테이너 요소를 <code>transform: translate() scale()</code>로 움직이면 컴포지터 경로를 타서 부드럽다.</p>
+<pre><code class="language-js">// 느린 방식 — 매 프레임 Layout/Paint 재계산
+canvas.style.left = `${x}px`;
+canvas.style.top = `${y}px`;
+canvas.style.width = `${scale * baseWidth}px`;
+
+// 빠른 방식 — compositor thread에서만 처리
+canvas.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+</code></pre>
+<h3>2. 무거운 계산은 Web Worker나 별도 프로세스로</h3>
+<p>3D 렌더링이나 대량의 캔버스 드로잉이 main thread를 점유하면, 같은 thread에서 처리되는 React 이벤트와 레이아웃까지 함께 멈춘다. 가벼운 계산은 <strong>Web Worker</strong>(별도 thread)로, 더 무거운 작업은 <strong>utility 프로세스나 사이드카 프로세스</strong>(별도 프로세스)로 떼어내 main thread를 비워두는 것이 원칙이다.</p>
+<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p>&quot;Worker로 갈지 별도 프로세스로 갈지&quot;를 가르는 기준은 1편에서 다룬 격리 단위·장애 반경의 논리와 같다 — 작업의 무게와 위험도에 따라 thread 격리(Worker)와 프로세스 격리(utility process) 중 적절한 수준을 고른다.</p>
+</div></div></aside></p>
+<p>또한 renderer는 샌드박스 안에 있어 파일이나 OS 자원에 직접 접근할 수 없으므로, 파일 읽기나 외부 엔진 호출처럼 권한이 필요한 작업은 preload에서 노출한 최소한의 API를 통해 main 프로세스에 위임해야 한다.</p>
+<hr>
+<p>이 글에서는 renderer 프로세스 <strong>안</strong>에서 화면이 그려지는 과정 — Blink와 V8, 그리고 main thread 병목 — 을 살펴봤다. <a href="/post/electron-nodejs-libuv-integration">다음 글</a>에서는 같은 V8이지만 Node 전권 환경에서 동작하는 main 프로세스의 Node.js 런타임과, libuv 이벤트 루프가 Chromium의 메시지 루프와 어떻게 통합되는지를 다룬다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.chrome.com/blog/inside-browser-part1" target="_blank">[1] Inside look at modern web browser (part 1) — Chrome Developers</a></li>
+<li><a href="https://developer.chrome.com/blog/inside-browser-part3" target="_blank">[2] Inside look at modern web browser (part 3) — Chrome Developers</a></li>
+<li><a href="https://www.electronjs.org/docs/latest/tutorial/process-model" target="_blank">[3] Process Model — Electron Docs</a></li>
+<li><a href="https://v8.dev/docs" target="_blank">[4] V8 Documentation — v8.dev</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/electron-multi-process-architecture">Electron 멀티 프로세스 아키텍처 — Main, Renderer, Preload, Utility 프로세스 →</a> — 시리즈 첫 글, 프로세스 구조 전체 개요</li>
+<li><a href="/post/electron-nodejs-libuv-integration">Node.js, libuv, Chromium 통합 — Electron의 이중 이벤트 루프 →</a> — 메인 프로세스의 Node.js 이벤트 루프와 Chromium 통합</content></li>
+</ul>
+
+<ul><li>electron</li><li>chromium</li><li>blink</li><li>v8</li><li>rendering-pipeline</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

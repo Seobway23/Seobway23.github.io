@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="GitLab push 한 번으로 Jenkins가 빌드하고, ArgoCD가 k3s에 자동 배포하는 전체 흐름. Docker Buildx 멀티 플랫폼 빌드, 레이어 캐싱, GitOps의 핵심 원칙까지 로우 레벨로 설명한다." />
+    <meta name="keywords" content="GitOps, Jenkins, ArgoCD, Kubernetes, k3s, CI/CD, Docker, Buildx, DevOps" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/jenkins-argocd-gitops" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기" />
+    <meta property="og:description" content="GitLab push 한 번으로 Jenkins가 빌드하고, ArgoCD가 k3s에 자동 배포하는 전체 흐름. Docker Buildx 멀티 플랫폼 빌드, 레이어 캐싱, GitOps의 핵심 원칙까지 로우 레벨로 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/jenkins-argocd-gitops" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.359Z" />
+    <meta property="article:tag" content="GitOps" />
+    <meta property="article:tag" content="Jenkins" />
+    <meta property="article:tag" content="ArgoCD" />
+    <meta property="article:tag" content="Kubernetes" />
+    <meta property="article:tag" content="k3s" />
+    <meta property="article:tag" content="CI/CD" />
+    <meta property="article:tag" content="Docker" />
+    <meta property="article:tag" content="Buildx" />
+    <meta property="article:tag" content="DevOps" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기" />
+    <meta name="twitter:description" content="GitLab push 한 번으로 Jenkins가 빌드하고, ArgoCD가 k3s에 자동 배포하는 전체 흐름. Docker Buildx 멀티 플랫폼 빌드, 레이어 캐싱, GitOps의 핵심 원칙까지 로우 레벨로 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기","description":"GitLab push 한 번으로 Jenkins가 빌드하고, ArgoCD가 k3s에 자동 배포하는 전체 흐름. Docker Buildx 멀티 플랫폼 빌드, 레이어 캐싱, GitOps의 핵심 원칙까지 로우 레벨로 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.359Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/jenkins-argocd-gitops"},"keywords":"GitOps, Jenkins, ArgoCD, Kubernetes, k3s, CI/CD, Docker, Buildx, DevOps","articleSection":"gitops","inLanguage":"ko-KR","wordCount":6717},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"gitops","item":"https://seobway23.github.io/?category=study%2Finfra%2Fgitops"},{"@type":"ListItem","position":3,"name":"GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기","item":"https://seobway23.github.io/post/jenkins-argocd-gitops"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>gitops</span></nav>
+<h1>GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기</h1>
+<p>GitLab push 한 번으로 Jenkins가 빌드하고, ArgoCD가 k3s에 자동 배포하는 전체 흐름. Docker Buildx 멀티 플랫폼 빌드, 레이어 캐싱, GitOps의 핵심 원칙까지 로우 레벨로 설명한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-03T00:00:00.000Z">2026-04-03</time> · <span>18분</span></p>
+<h2>현대 배포의 목표: &quot;사람이 서버에 로그인하지 않는다&quot;</h2>
+<p>코드를 배포하는 방법은 크게 두 가지다.</p>
+<table>
+<thead>
+<tr>
+<th>방식</th>
+<th>설명</th>
+<th>문제점</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Push 방식</strong></td>
+<td>CI 서버가 직접 kubectl apply</td>
+<td>CI 서버에 클러스터 자격증명 노출</td>
+</tr>
+<tr>
+<td><strong>Pull 방식 (GitOps)</strong></td>
+<td>Git 변경 → ArgoCD가 감지 후 적용</td>
+<td><strong>보안 ↑, 감사 이력 ↑</strong></td>
+</tr>
+</tbody></table>
+<p>GitOps는 <strong>Git 저장소가 인프라의 단일 진실의 원천(Single Source of Truth)</strong>이 되는 방식이다.<a href="https://argo-cd.readthedocs.io/en/stable/core_concepts/" target="_blank"><sup>[1]</sup></a></p>
+<hr>
+<h2>전체 파이프라인 구조</h2>
+<pre><code class="language-mermaid">%% desc: GitLab → Jenkins → DockerHub → ArgoCD → k3s 전체 흐름
+flowchart LR
+  subgraph DEV[&quot;개발자&quot;]
+    A[&quot;git push\n(GitLab)&quot;]
+  end
+
+  subgraph CI[&quot;CI: Jenkins&quot;]
+    B[&quot;Webhook 수신&quot;]
+    C[&quot;Docker Buildx\n멀티플랫폼 빌드&quot;]
+    D[&quot;DockerHub\nImage Push\n태그: git-{commit}-{build}&quot;]
+    E[&quot;K8s 매니페스트\n저장소 태그 업데이트\n(kustomization.yaml)&quot;]
+  end
+
+  subgraph CD[&quot;CD: ArgoCD&quot;]
+    F[&quot;매니페스트 저장소\n변경 감지\n(1분 폴링 or Webhook)&quot;]
+    G[&quot;k3s 클러스터\n자동 동기화\nkubectl apply&quot;]
+  end
+
+  subgraph K8S[&quot;k3s Cluster&quot;]
+    H[&quot;Django Web\nDeployment&quot;]
+    I[&quot;Celery Worker\nDeployment&quot;]
+    J[&quot;Redis\nStatefulSet&quot;]
+    K[&quot;MySQL\nStatefulSet&quot;]
+  end
+
+  A --&gt; B --&gt; C --&gt; D --&gt; E --&gt; F --&gt; G --&gt; H
+  G --&gt; I &amp; J &amp; K
+</code></pre>
+<hr>
+<h2>Jenkins: CI 파이프라인 상세</h2>
+<h3>Jenkinsfile 구조</h3>
+<pre><code class="language-groovy">// Jenkinsfile
+pipeline {
+    agent any
+
+    environment {
+        // Jenkins Credentials에 저장된 비밀값 주입
+        DOCKERHUB_CRED  = credentials(&#39;dockerhub-credentials&#39;)
+        IMAGE_NAME      = &quot;myorg/pms-web&quot;
+        // 이미지 태그: Git 커밋 해시 + Jenkins 빌드 번호
+        IMAGE_TAG       = &quot;${GIT_COMMIT[0..7]}-${BUILD_NUMBER}&quot;
+        MANIFEST_REPO   = &quot;git@gitlab.com:myorg/k8s-manifests.git&quot;
+    }
+
+    stages {
+        stage(&#39;Checkout&#39;) {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage(&#39;Build &amp; Push&#39;) {
+            steps {
+                script {
+                    // Docker Buildx: 멀티 플랫폼 빌드
+                    sh &quot;&quot;&quot;
+                        docker buildx create --use --name multiarch-builder || true
+
+                        docker buildx build \\
+                            --platform linux/amd64,linux/arm64 \\
+                            --cache-from type=registry,ref=${IMAGE_NAME}:buildcache \\
+                            --cache-to   type=registry,ref=${IMAGE_NAME}:buildcache,mode=max \\
+                            --tag ${IMAGE_NAME}:${IMAGE_TAG} \\
+                            --tag ${IMAGE_NAME}:latest \\
+                            --push \\
+                            .
+                    &quot;&quot;&quot;
+                }
+            }
+        }
+
+        stage(&#39;Update Manifest&#39;) {
+            steps {
+                script {
+                    // 매니페스트 저장소의 이미지 태그를 새 태그로 교체
+                    sh &quot;&quot;&quot;
+                        git clone ${MANIFEST_REPO} manifests
+                        cd manifests
+                        sed -i &#39;s|newTag:.*|newTag: ${IMAGE_TAG}|&#39; kustomization.yaml
+                        git config user.email &quot;jenkins@ci&quot;
+                        git config user.name  &quot;Jenkins CI&quot;
+                        git add kustomization.yaml
+                        git commit -m &quot;ci: update image tag to ${IMAGE_TAG}&quot;
+                        git push origin main
+                    &quot;&quot;&quot;
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            // Slack, Email 알림
+            echo &quot;Pipeline failed!&quot;
+        }
+    }
+}
+</code></pre>
+<hr>
+<h2>Docker Buildx: 멀티 플랫폼 빌드와 레이어 캐싱</h2>
+<h3>왜 Buildx인가</h3>
+<p>일반 <code>docker build</code>는 현재 시스템 아키텍처(amd64)만 지원한다. Buildx를 쓰면 <strong>한 번의 명령으로 amd64/arm64 양쪽 이미지</strong>를 동시에 빌드할 수 있다.<a href="https://docs.docker.com/reference/cli/docker/buildx/build/" target="_blank"><sup>[2]</sup></a></p>
+<pre><code class="language-mermaid">%% desc: Docker Buildx 레이어 캐싱 동작 — 변경된 레이어부터만 다시 빌드
+flowchart TD
+  A[&quot;FROM python:3.11-slim\n(기반 이미지)&quot;]
+  B[&quot;COPY requirements.txt\npip install\n→ 의존성 설치&quot;]
+  C[&quot;COPY . .\n→ 애플리케이션 코드&quot;]
+  D[&quot;CMD gunicorn...&quot;]
+
+  A --&gt;|&quot;캐시 HIT ✅&quot;| B
+  B --&gt;|&quot;캐시 HIT ✅\n(requirements.txt 변경 없음)&quot;| C
+  C --&gt;|&quot;캐시 MISS ❌\n(코드 변경)&quot;| D
+
+  style C fill:#ff6b6b,color:#fff
+  style D fill:#ff6b6b,color:#fff
+</code></pre>
+<pre><code class="language-dockerfile"># Dockerfile — 캐싱을 최대화하는 레이어 순서
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# requirements.txt를 먼저 복사 → pip install 결과가 캐시됨
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 코드는 마지막에 복사 → 코드가 바뀌어도 pip install은 재실행 안 됨
+COPY . .
+
+CMD [&quot;gunicorn&quot;, &quot;config.wsgi:application&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8000&quot;]
+</code></pre>
+<h3>캐시 플래그 설명</h3>
+<pre><code class="language-bash">docker buildx build \
+  --cache-from type=registry,ref=myimage:buildcache \
+  # ↑ 이전 빌드의 캐시를 레지스트리에서 가져옴
+
+  --cache-to type=registry,ref=myimage:buildcache,mode=max \
+  # ↑ 현재 빌드 캐시를 레지스트리에 저장 (mode=max: 모든 레이어 저장)
+
+  --platform linux/amd64,linux/arm64 \
+  # ↑ 두 아키텍처 동시 빌드
+
+  --push \
+  # ↑ 빌드 후 즉시 레지스트리에 푸시
+</code></pre>
+<p><strong>효과</strong>: 의존성이 변경되지 않으면 <code>pip install</code> 단계를 건너뛰어 <strong>빌드 시간 70~80% 절약</strong>.</p>
+<hr>
+<h2>ArgoCD: GitOps CD</h2>
+<h3>ArgoCD가 동작하는 원리</h3>
+<p><strong>폴링 vs Webhook</strong>:</p>
+<ul>
+<li>기본: <strong>3분(180초)</strong> 마다 매니페스트 저장소를 폴링 (<code>timeout.reconciliation</code> 설정값)<a href="https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/" target="_blank"><sup>[1]</sup></a></li>
+<li>Webhook 설정 시: GitLab/GitHub push 이벤트를 즉시 수신 → 폴링 대기 없이 Sync 트리거</li>
+<li>Webhook은 <strong>신뢰하지 않음</strong> — Refresh만 트리거하고 blind sync는 하지 않음</li>
+</ul>
+<pre><code class="language-mermaid">%% desc: ArgoCD Sync 루프 — Git 상태와 클러스터 상태를 지속적으로 일치시킴
+sequenceDiagram
+  participant G as Git (매니페스트 저장소)
+  participant A as ArgoCD
+  participant K as k3s Cluster
+
+  loop 3분마다 폴링 (기본값 180초, Webhook 설정 시 즉시)
+    A-&gt;&gt;G: 매니페스트 상태 확인
+    G--&gt;&gt;A: kustomization.yaml (newTag: abc123)
+    A-&gt;&gt;K: 현재 클러스터 상태 확인
+    K--&gt;&gt;A: 현재 실행 중: tag xyz789
+    A-&gt;&gt;A: Diff 감지: abc123 ≠ xyz789
+    A-&gt;&gt;K: kubectl apply -k ./overlays/prod
+    K--&gt;&gt;A: Sync 완료
+  end
+</code></pre>
+<h3>kustomization.yaml 구조</h3>
+<pre><code class="language-yaml"># k8s-manifests/overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+images:
+  - name: myorg/pms-web
+    newTag: abc1234-42   # ← Jenkins가 이 값을 sed로 교체
+</code></pre>
+<pre><code class="language-yaml"># k8s-manifests/base/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pms-web
+  namespace: pms-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pms-web
+  template:
+    spec:
+      containers:
+        - name: web
+          image: myorg/pms-web  # kustomize가 태그를 붙여줌
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pms-secrets
+                  key: secret-key
+</code></pre>
+<hr>
+<h2>k3s: 왜 경량 Kubernetes인가</h2>
+<p>k3s는 Rancher Lab이 만든 <strong>경량 Kubernetes 배포판</strong>이다.<a href="https://docs.k3s.io/" target="_blank"><sup>[3]</sup></a></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>일반 K8s</th>
+<th>k3s</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>바이너리 크기</td>
+<td>~수백 MB</td>
+<td>~70MB</td>
+</tr>
+<tr>
+<td>메모리 요구량</td>
+<td>2GB+</td>
+<td>512MB</td>
+</tr>
+<tr>
+<td>설치</td>
+<td>복잡</td>
+<td>`curl -sfL <a href="https://get.k3s.io">https://get.k3s.io</a></td>
+</tr>
+<tr>
+<td>용도</td>
+<td>대규모 프로덕션</td>
+<td>소규모 서버, 엣지, IoT, 개발</td>
+</tr>
+</tbody></table>
+<h3>이 프로젝트의 k3s 리소스 구조</h3>
+<pre><code class="language-mermaid">%% desc: k3s 클러스터 내 리소스 — Deployment vs StatefulSet 구분
+flowchart TD
+  subgraph NS[&quot;Namespace: pms-web&quot;]
+    subgraph DEP[&quot;Deployment (상태 없음, 확장 가능)&quot;]
+      D1[&quot;Django Web\n× 2 replicas&quot;]
+      D2[&quot;Celery Worker\n× 2 replicas&quot;]
+    end
+    subgraph STS[&quot;StatefulSet (상태 있음, 데이터 보존)&quot;]
+      S1[&quot;MySQL\n× 1\n+ PersistentVolume&quot;]
+      S2[&quot;Redis\n× 1\n+ PersistentVolume&quot;]
+    end
+    subgraph SVC[&quot;Service&quot;]
+      V1[&quot;ClusterIP: mysql-svc&quot;]
+      V2[&quot;ClusterIP: redis-svc&quot;]
+      V3[&quot;LoadBalancer: web-svc\n(외부 노출)&quot;]
+    end
+  end
+
+  D1 --&gt; V1 &amp; V2
+  D2 --&gt; V1 &amp; V2
+  V3 --&gt; D1
+</code></pre>
+<p><strong>Deployment vs StatefulSet</strong>:</p>
+<ul>
+<li><code>Deployment</code>: Pod이 죽어도 데이터가 없어도 됨 → Django, Celery</li>
+<li><code>StatefulSet</code>: Pod에 고정 이름이 붙고 PVC(영구 스토리지)가 유지됨 → MySQL, Redis</li>
+</ul>
+<hr>
+<h2>이미지 태그 전략: 왜 git-{commit}-{build} 형태인가</h2>
+<pre><code class="language-bash"># 나쁜 예: latest 태그만 사용
+docker push myimage:latest
+# → 어느 커밋이 배포됐는지 알 수 없음
+# → Rollback 불가
+
+# 좋은 예: Commit Hash + Build Number
+docker push myimage:a1b2c3d4-42
+# → git show a1b2c3d4로 어느 코드인지 즉시 확인
+# → 이전 태그로 kustomization.yaml만 되돌리면 Rollback 완료
+</code></pre>
+<h3>롤백 방법</h3>
+<pre><code class="language-bash"># 방법 1: Git revert (권장 — GitOps 원칙 유지)
+git revert HEAD
+git push origin main
+# → ArgoCD가 감지 후 이전 태그로 자동 롤백
+
+# 방법 2: 직접 태그 수정 (긴급 상황)
+sed -i &#39;s|newTag:.*|newTag: a1b2c3d4-38|&#39; kustomization.yaml
+git commit -am &quot;hotfix: rollback to build 38&quot;
+git push
+</code></pre>
+<hr>
+<h2>배포 흐름 최종 요약</h2>
+<pre><code class="language-mermaid">%% desc: 개발자 git push → 서버 자동 배포까지 전체 단계 타임라인
+sequenceDiagram
+  participant D as 개발자
+  participant G as GitLab
+  participant J as Jenkins
+  participant R as DockerHub
+  participant M as Manifest Repo
+  participant A as ArgoCD
+  participant K as k3s
+
+  D-&gt;&gt;G: git push origin main
+  G-&gt;&gt;J: Webhook 트리거
+  J-&gt;&gt;J: Docker Buildx 빌드
+  J-&gt;&gt;R: Image Push (tag: abc123-42)
+  J-&gt;&gt;M: kustomization.yaml 태그 업데이트
+  J--&gt;&gt;D: Build 성공 알림
+
+  loop 최대 3분 이내 (Webhook 설정 시 즉시)
+    A-&gt;&gt;M: 변경 감지
+    A-&gt;&gt;K: kubectl apply
+    K--&gt;&gt;A: Sync 완료
+  end
+
+  Note over D,K: 총 소요시간: 빌드 3~8분 + ArgoCD sync 최대 3분
+</code></pre>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://argo-cd.readthedocs.io/en/stable/core_concepts/" target="_blank">[1] ArgoCD Core Concepts — 공식 문서</a></li>
+<li><a href="https://docs.docker.com/reference/cli/docker/buildx/build/" target="_blank">[2] Docker Buildx build — 공식 문서</a></li>
+<li><a href="https://docs.k3s.io/" target="_blank">[3] k3s 공식 문서</a></li>
+<li><a href="https://www.jenkins.io/doc/book/pipeline/syntax/" target="_blank">[4] Jenkins Pipeline Syntax — 공식 문서</a></li>
+<li><a href="https://kustomize.io/" target="_blank">[5] Kustomize 공식 문서</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/kubectl-debugging">kubectl 실전 — 로그, 디버깅, 모니터링 →</a></li>
+<li><a href="/post/gitlab-cicd-guide">GitLab CI/CD — .gitlab-ci.yml → K3s →</a></li>
+</ul>
+
+<ul><li>GitOps</li><li>Jenkins</li><li>ArgoCD</li><li>Kubernetes</li><li>k3s</li><li>CI/CD</li><li>Docker</li><li>Buildx</li><li>DevOps</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>클로저 — 함수가 붙잡고 있는 변수 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다." />
+    <meta name="keywords" content="javascript, 클로저, 스코프" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/closure" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="클로저 — 함수가 붙잡고 있는 변수" />
+    <meta property="og:description" content="함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/closure" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-09-07T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.296Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="클로저" />
+    <meta property="article:tag" content="스코프" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="클로저 — 함수가 붙잡고 있는 변수" />
+    <meta name="twitter:description" content="함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"클로저 — 함수가 붙잡고 있는 변수","description":"함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-09-07T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.296Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/closure"},"keywords":"javascript, 클로저, 스코프","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":3089},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Fjs"},{"@type":"ListItem","position":3,"name":"클로저 — 함수가 붙잡고 있는 변수","item":"https://seobway23.github.io/post/closure"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>클로저 — 함수가 붙잡고 있는 변수</h1>
+<p>함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-07T00:00:00.000Z">2026-09-07</time> · <span>8분</span></p>
+<h2>왜 이게 필요한가</h2>
+<p>함수가 끝나면 그 안의 변수는 사라진다. 그런데 이건 안 사라진다.</p>
+<pre><code class="language-js">function makeCounter() {
+  let count = 0;
+  return () =&gt; ++count;
+}
+
+const next = makeCounter();
+console.log(next()); // 1
+console.log(next()); // 2   ← makeCounter 는 이미 끝났는데?
+</code></pre>
+<p><code>makeCounter()</code> 는 첫 줄에서 끝났다. 그런데 <code>count</code> 는 계속 살아서 값을 기억한다.<br><strong>왜 안 사라지는가</strong>가 이 글의 전부다.</p>
+<hr>
+<h2>어떻게 동작하는가</h2>
+<p><a href="/post/scope">스코프</a>에서 봤듯 함수는 자기가 <strong>쓰여 있는 자리</strong>의 바깥을 본다.<br>그 &quot;바깥&quot;은 함수가 만들어질 때 정해져서, 함수와 함께 붙어 다닌다.</p>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>클로저 = 함수 + 그 함수가 태어난 스코프.</strong><br>함수를 어디로 넘기든 이 한 쌍이 같이 움직인다.</p>
+</div></div></aside></p>
+<p>그래서 <code>makeCounter</code> 의 실행은 끝나도, 돌려준 화살표 함수가 <code>count</code> 를 붙잡고 있는 한<br><code>count</code> 를 담은 상자는 버려지지 않는다. 자바스크립트 엔진은 <strong>아무도 참조하지 않는 것만</strong><br>정리하기 때문이다.</p>
+<p>인터랙티브 다이어그램: makeCounter 가 끝나도 count 가 남는 이유 (단계별로 재생할 수 있다)</p><ol><li>makeCounter() 를 호출한다. 콜 스택에 올라간다.</li><li>그 안에서 count = 0 을 담을 스코프가 만들어진다.</li><li>화살표 함수를 만들어 돌려준다. 이 함수는 위 스코프를 붙잡은 채로 나간다.</li><li>makeCounter 는 끝나 콜 스택에서 사라진다. 그런데 스코프는 남는다.</li><li>next() 를 부르면 붙잡아 둔 count 를 그대로 쓴다.</li><li>다시 부르면 같은 count 가 이어서 증가한다.</li></ol>
+<p>여기서 헷갈리기 쉬운 것 하나. <strong>한 번 호출 = 한 개의 상자</strong>다.</p>
+<pre><code class="language-js">const a = makeCounter();
+const b = makeCounter();
+a(); a();   // 1, 2
+b();        // 1   ← a 와 무관하다
+</code></pre>
+<p><code>makeCounter</code> 를 부를 때마다 새 스코프가 만들어지므로 <code>a</code> 와 <code>b</code> 는 서로 다른 <code>count</code> 를 본다.</p>
+<hr>
+<h2>어디에 쓰이는가</h2>
+<p>이름을 몰랐을 뿐, 이미 계속 쓰고 있었다.</p>
+<p><div class="post-tabs" data-post-tabs data-post-tabs-id="post-tabs-0"><div class="post-tabs__list" role="tablist"><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-0" aria-selected="true" aria-controls="post-tabs-0-panel-0" tabindex="0" data-tab-index="0">상태 숨기기</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-1" aria-selected="false" aria-controls="post-tabs-0-panel-1" tabindex="-1" data-tab-index="1">설정을 고정한 함수 만들기</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-2" aria-selected="false" aria-controls="post-tabs-0-panel-2" tabindex="-1" data-tab-index="2">리액트 훅</button></div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-0" aria-labelledby="post-tabs-0-tab-0" data-panel-index="0"><p>바깥에서 못 건드리는 값을 만든다. 클래스의 <code>private</code> 를 문법 없이 흉내 낸다.</p>
+<pre><code class="language-js">function makeAccount(initial) {
+  let balance = initial;              // 바깥에서 접근 불가
+  return {
+    deposit: (v) =&gt; (balance += v),
+    get: () =&gt; balance,
+  };
+}
+
+const acc = makeAccount(1000);
+acc.deposit(500);
+acc.get();        // 1500
+acc.balance;      // undefined — 직접 못 만진다
+</code></pre>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-1" aria-labelledby="post-tabs-0-tab-1" data-panel-index="1" hidden><p>같은 함수를 설정만 바꿔 여러 개 찍어낸다.</p>
+<pre><code class="language-js">function makeTag(tag) {
+  return (text) =&gt; `&lt;${tag}&gt;${text}&lt;/${tag}&gt;`;
+}
+
+const b = makeTag(&quot;b&quot;);
+const i = makeTag(&quot;i&quot;);
+b(&quot;굵게&quot;);   // &quot;&lt;b&gt;굵게&lt;/b&gt;&quot;
+</code></pre>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-2" aria-labelledby="post-tabs-0-tab-2" data-panel-index="2" hidden><p><code>useState</code> 가 돌려주는 <code>setCount</code> 가 어떤 컴포넌트의 상태를 가리키는지 아는 것도<br>같은 원리다. 훅은 클로저 위에 지어져 있다.</p>
+<pre><code class="language-js">const [count, setCount] = useState(0);
+// setCount 는 &quot;이 컴포넌트의 이 상태&quot; 를 붙잡고 있다
+</code></pre>
+</div></div></p>
+<hr>
+<h2>직접 확인</h2>
+<p><code>makeCounter</code> 를 두 번 부르면 카운터가 몇 개인지 눈으로 확인해라.</p>
+<pre><code class="language-playground">import { useState } from &quot;react&quot;;
+
+function makeCounter() {
+  let count = 0;              // 이 상자는 호출마다 새로 생긴다
+  return () =&gt; ++count;
+}
+
+const a = makeCounter();
+const b = makeCounter();
+
+export default function App() {
+  const [log, setLog] = useState([]);
+  const push = (m) =&gt; setLog((prev) =&gt; [...prev, m]);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; push(`a() → ${a()}`)}&gt;a 증가&lt;/button&gt;{&quot; &quot;}
+      &lt;button onClick={() =&gt; push(`b() → ${b()}`)}&gt;b 증가&lt;/button&gt;{&quot; &quot;}
+      &lt;button onClick={() =&gt; setLog([])}&gt;지우기&lt;/button&gt;
+      &lt;ul&gt;{log.map((l, i) =&gt; &lt;li key={i}&gt;{l}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<p><code>a</code> 를 아무리 눌러도 <code>b</code> 는 1부터 시작한다. 상자가 따로이기 때문이다.</p>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>반복문에서 하나의 변수를 공유하는 것</strong></p>
+<pre><code class="language-js">const fns = [];
+for (var i = 0; i &lt; 3; i++) {
+  fns.push(() =&gt; i);
+}
+fns.map((f) =&gt; f());   // [3, 3, 3]
+</code></pre>
+<p>세 함수가 <strong>같은</strong> <code>i</code> 를 붙잡고 있다. <a href="/post/scope"><code>var</code> 는 블록을 인정하지 않아</a><br><code>i</code> 가 하나뿐이기 때문이다. <code>let</code> 으로 바꾸면 반복마다 새 <code>i</code> 가 생겨 <code>[0, 1, 2]</code> 가 된다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>필요 이상으로 크게 붙잡는 것</strong></p>
+<p>클로저가 붙잡은 스코프는 버려지지 않는다. 큰 데이터를 참조한 채 오래 사는 함수를<br>어딘가에 등록해 두면 그만큼 메모리가 계속 물린다. 이벤트 리스너를 제거하지 않는<br>코드가 대표적이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p>클로저는 <strong>함수와 그 함수가 태어난 스코프의 한 쌍</strong>이다.<br>그 쌍이 살아 있는 한 안의 변수도 살아 있고, 호출마다 새 쌍이 생긴다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>makeCounter</code> 를 두 번 부르면 왜 카운터가 둘인지 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>var</code> 반복문이 <code>[3,3,3]</code> 인 이유를 클로저로 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> 클로저가 메모리를 붙잡는다는 뜻을 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Closures" target="_blank">[1] Closures — MDN Web Docs</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Glossary/Scope" target="_blank">[2] Scope — MDN Web Docs 용어 사전</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-environment-records" target="_blank">[3] Environment Records — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/scope">스코프 — 변수가 어디까지 보이는가 →</a> — 이 글의 선행</li>
+<li><a href="/post/hoisting">호이스팅 — 선언은 먼저 올라간다 →</a> — 이 글의 선행</li>
+<li><a href="/post/event-loop-interactive">이벤트 루프, 눈으로 따라가기 →</a> — 비동기 콜백도 클로저로 값을 붙잡는다</li>
+</ul>
+
+<ul><li>javascript</li><li>클로저</li><li>스코프</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

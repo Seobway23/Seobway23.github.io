@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Django 모델은 Python 클래스로 DB 테이블을 정의한다. 각 필드 타입의 용도와 ForeignKey, ManyToManyField, OneToOneField 세 가지 관계의 차이, Meta 클래스로 인덱스·정렬·제약조건을 설정하는 방법을 설명한다." />
+    <meta name="keywords" content="Django, Model, ORM, ForeignKey, ManyToMany, OneToOne, Meta, ModelFields, Database, Python" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/django-models" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션" />
+    <meta property="og:description" content="Django 모델은 Python 클래스로 DB 테이블을 정의한다. 각 필드 타입의 용도와 ForeignKey, ManyToManyField, OneToOneField 세 가지 관계의 차이, Meta 클래스로 인덱스·정렬·제약조건을 설정하는 방법을 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/django-models" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.189Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="Model" />
+    <meta property="article:tag" content="ORM" />
+    <meta property="article:tag" content="ForeignKey" />
+    <meta property="article:tag" content="ManyToMany" />
+    <meta property="article:tag" content="OneToOne" />
+    <meta property="article:tag" content="Meta" />
+    <meta property="article:tag" content="ModelFields" />
+    <meta property="article:tag" content="Database" />
+    <meta property="article:tag" content="Python" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션" />
+    <meta name="twitter:description" content="Django 모델은 Python 클래스로 DB 테이블을 정의한다. 각 필드 타입의 용도와 ForeignKey, ManyToManyField, OneToOneField 세 가지 관계의 차이, Meta 클래스로 인덱스·정렬·제약조건을 설정하는 방법을 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션","description":"Django 모델은 Python 클래스로 DB 테이블을 정의한다. 각 필드 타입의 용도와 ForeignKey, ManyToManyField, OneToOneField 세 가지 관계의 차이, Meta 클래스로 인덱스·정렬·제약조건을 설정하는 방법을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.189Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-models"},"keywords":"Django, Model, ORM, ForeignKey, ManyToMany, OneToOne, Meta, ModelFields, Database, Python","articleSection":"django","inLanguage":"ko-KR","wordCount":12573},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션","item":"https://seobway23.github.io/post/django-models"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>django</span></nav>
+<h1>Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션</h1>
+<p>Django 모델은 Python 클래스로 DB 테이블을 정의한다. 각 필드 타입의 용도와 ForeignKey, ManyToManyField, OneToOneField 세 가지 관계의 차이, Meta 클래스로 인덱스·정렬·제약조건을 설정하는 방법을 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-04-03T00:00:00.000Z">2026-04-03</time> · <span>15분</span></p>
+<h2>모델이란 무엇인가</h2>
+<p>Django에서 모델은 <strong>데이터의 단일 정보 소스</strong>다.<sup id="fnref-django-models" style="scroll-margin-top: 96px;"><a href="#fn-django-models" aria-label="각주 1">[1]</a></sup></p>
+<p>Python 클래스 하나가 DB 테이블 하나에 대응되고, 클래스의 속성이 테이블의 컬럼이 된다.<br>SQL을 직접 쓰지 않아도 Python 코드만으로 스키마를 정의하고, ORM이 실제 SQL로 변환해 실행한다.</p>
+<pre><code class="language-python">from django.db import models
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    is_done = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+</code></pre>
+<p>위 코드 세 줄이 아래 SQL을 대신한다.</p>
+<pre><code class="language-sql">CREATE TABLE tasks_task (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    title      VARCHAR(200) NOT NULL,
+    is_done    BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME NOT NULL
+);
+</code></pre>
+<hr>
+<h2>시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>순서</th>
+<th>제목</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Django 큰 그림</td>
+<td>철학, MTV, Batteries Included</td>
+</tr>
+<tr>
+<td>2</td>
+<td>MTV 아키텍처</td>
+<td>Project, App, settings.py</td>
+</tr>
+<tr>
+<td>3</td>
+<td>요청-응답 라이프사이클</td>
+<td>HTTP 요청 처리 11단계</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>Django 모델</strong> ←</td>
+<td><strong>필드, 관계, Meta</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Django URL 라우팅</td>
+<td>path(), include(), namespace</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Django ORM 심층</td>
+<td>QuerySet, N+1, select_related</td>
+</tr>
+<tr>
+<td>7</td>
+<td>DRF 기초</td>
+<td>Serializer, ModelSerializer</td>
+</tr>
+<tr>
+<td>8</td>
+<td>DRF Views</td>
+<td>APIView, ViewSet, Router</td>
+</tr>
+<tr>
+<td>9</td>
+<td>DRF 인증</td>
+<td>Token, JWT, SimpleJWT</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Django Migration</td>
+<td>makemigrations, FK 순서 문제</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Django 보안</td>
+<td>CSRF, XSS, SQL Injection</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>기본 필드 타입</h2>
+<p>Django는 DB 컬럼 타입별로 다양한 필드 클래스를 제공한다.</p>
+<h3>문자열 필드</h3>
+<pre><code class="language-python">class Article(models.Model):
+    # 짧은 문자열 — max_length 필수, VARCHAR로 매핑
+    title = models.CharField(max_length=200)
+
+    # 긴 텍스트 — max_length 없음, TEXT로 매핑
+    body = models.TextField()
+
+    # 이메일 형식 자동 검증
+    contact = models.EmailField(max_length=254)
+
+    # URL 형식 자동 검증
+    homepage = models.URLField(blank=True)
+
+    # UUID 저장 (32자 16진수)
+    external_id = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    # 선택지 제한 (choices)
+    STATUS_CHOICES = [
+        (&#39;draft&#39;, &#39;초안&#39;),
+        (&#39;published&#39;, &#39;발행&#39;),
+        (&#39;archived&#39;, &#39;보관&#39;),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=&#39;draft&#39;,
+    )
+</code></pre>
+<blockquote>
+<p><strong>주의: CharField에 null=True를 쓰지 않는다.</strong><br>빈 문자열은 <code>&#39;&#39;</code>(빈 문자열)로 저장한다. <code>null=True</code>를 추가하면 <code>None</code>과 <code>&#39;&#39;</code> 두 가지 &quot;없음&quot; 상태가 생겨 혼란스럽다. Django 컨벤션은 CharField/TextField는 <code>blank=True</code>만 사용한다.</p>
+</blockquote>
+<h3>숫자 필드</h3>
+<pre><code class="language-python">class Product(models.Model):
+    # 정수
+    quantity = models.IntegerField(default=0)
+    view_count = models.PositiveIntegerField(default=0)
+
+    # 고정 소수점 — 금액, 비율 등 정확도가 중요할 때
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # 부동 소수점 — 정확도보다 범위가 중요할 때
+    latitude = models.FloatField()
+</code></pre>
+<h3>날짜/시간 필드</h3>
+<pre><code class="language-python">class Post(models.Model):
+    # auto_now_add=True: 생성 시 자동 설정, 이후 수정 불가
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # auto_now=True: 저장할 때마다 자동 갱신
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # 직접 날짜 입력받을 때
+    published_at = models.DateTimeField(null=True, blank=True)
+
+    # 날짜만 (시간 없음)
+    due_date = models.DateField(null=True, blank=True)
+</code></pre>
+<h3>파일/이미지 필드</h3>
+<pre><code class="language-python">class Profile(models.Model):
+    # FileField: 파일 경로를 문자열로 DB에 저장, 실제 파일은 MEDIA_ROOT에
+    resume = models.FileField(upload_to=&#39;resumes/&#39;)
+
+    # ImageField: FileField + Pillow로 이미지 유효성 검증
+    avatar = models.ImageField(upload_to=&#39;avatars/&#39;, blank=True)
+</code></pre>
+<pre><code class="language-python"># settings.py
+MEDIA_URL = &#39;/media/&#39;
+MEDIA_ROOT = BASE_DIR / &#39;media&#39;
+</code></pre>
+<h3>기타 필드</h3>
+<pre><code class="language-python">class Config(models.Model):
+    # JSON 데이터 — PostgreSQL은 jsonb, 나머지는 TEXT
+    metadata = models.JSONField(default=dict)
+
+    # True/False
+    is_active = models.BooleanField(default=True)
+
+    # IP 주소 자동 검증
+    last_ip = models.GenericIPAddressField(null=True, blank=True)
+</code></pre>
+<hr>
+<h2>null=True vs blank=True 차이</h2>
+<p>이 두 옵션은 전혀 다른 레벨에서 동작한다.</p>
+<table>
+<thead>
+<tr>
+<th>옵션</th>
+<th>적용 레벨</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>null=True</code></td>
+<td><strong>DB 레벨</strong></td>
+<td>컬럼에 NULL 허용</td>
+</tr>
+<tr>
+<td><code>blank=True</code></td>
+<td><strong>폼/검증 레벨</strong></td>
+<td>빈 값 입력 허용</td>
+</tr>
+</tbody></table>
+<pre><code class="language-python"># DB에는 NULL로 저장 가능, 폼에서는 필수 입력 (unusual pattern)
+field = models.IntegerField(null=True)
+
+# DB에는 NOT NULL, 폼에서는 빈 값 허용 → 빈 문자열 &#39;&#39;로 저장
+field = models.CharField(max_length=100, blank=True)
+
+# DB와 폼 모두 선택사항
+field = models.IntegerField(null=True, blank=True)
+</code></pre>
+<p><strong>가이드라인:</strong></p>
+<ul>
+<li>문자열 필드(Char, Text): <code>blank=True</code>만 사용</li>
+<li>숫자/날짜 필드에서 선택 입력: <code>null=True, blank=True</code> 함께</li>
+</ul>
+<hr>
+<h2>관계 필드 — 3가지 핵심</h2>
+<h3>ForeignKey (N:1 관계)</h3>
+<p>가장 많이 쓰이는 관계다. &quot;하나의 카테고리에 여러 개의 태스크&quot;처럼 N(Task) : 1(Category) 관계를 표현한다.</p>
+<pre><code class="language-python">class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+
+    # ForeignKey: Task(N) → Category(1)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,   # Category 삭제 시 NULL로
+        null=True,
+        blank=True,
+        related_name=&#39;tasks&#39;,        # category.tasks.all() 로 역참조
+    )
+</code></pre>
+<h4>on_delete 옵션</h4>
+<table>
+<thead>
+<tr>
+<th>옵션</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CASCADE</code></td>
+<td>부모 삭제 시 자식도 삭제 (주문 삭제 → 주문상품 삭제)</td>
+</tr>
+<tr>
+<td><code>SET_NULL</code></td>
+<td>부모 삭제 시 FK 컬럼을 NULL로 (null=True 필요)</td>
+</tr>
+<tr>
+<td><code>PROTECT</code></td>
+<td>자식이 있으면 부모 삭제 차단 (에러 발생)</td>
+</tr>
+<tr>
+<td><code>SET_DEFAULT</code></td>
+<td>부모 삭제 시 default 값으로 설정</td>
+</tr>
+<tr>
+<td><code>DO_NOTHING</code></td>
+<td>아무것도 안 함 (DB에서 직접 처리)</td>
+</tr>
+</tbody></table>
+<pre><code class="language-python"># 역참조 사용 예
+category = Category.objects.get(id=1)
+tasks = category.tasks.all()          # related_name=&#39;tasks&#39; 덕분
+tasks = category.task_set.all()       # related_name 없으면 이렇게
+</code></pre>
+<h3>ManyToManyField (N:M 관계)</h3>
+<p>&quot;하나의 태스크에 여러 태그, 하나의 태그에 여러 태스크&quot;처럼 양방향으로 다수가 연결되는 관계다.</p>
+<pre><code class="language-python">class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+
+    # ManyToManyField: Django가 중간 테이블(tasks_task_tags)을 자동 생성
+    tags = models.ManyToManyField(
+        Tag,
+        blank=True,
+        related_name=&#39;tasks&#39;,
+    )
+</code></pre>
+<pre><code class="language-python"># 사용법
+task = Task.objects.get(id=1)
+task.tags.add(tag1, tag2)
+task.tags.remove(tag1)
+task.tags.set([tag2, tag3])   # 현재 태그를 tag2, tag3으로 교체
+task.tags.clear()              # 모두 제거
+task.tags.all()                # 연결된 태그 QuerySet
+</code></pre>
+<h4>through 모델 — 중간 테이블에 추가 데이터가 필요할 때</h4>
+<p>태그를 붙인 날짜나 태그를 붙인 사람 같은 정보가 필요하면 <code>through</code>로 직접 중간 모델을 지정한다.</p>
+<pre><code class="language-python">class TaskTag(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tagged_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    tagged_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [[&#39;task&#39;, &#39;tag&#39;]]
+
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    tags = models.ManyToManyField(Tag, through=&#39;TaskTag&#39;, blank=True)
+</code></pre>
+<pre><code class="language-python"># through 모델을 쓰면 add()가 아닌 직접 생성
+TaskTag.objects.create(task=task, tag=tag, tagged_by=request.user)
+</code></pre>
+<h3>OneToOneField (1:1 관계)</h3>
+<p>하나의 User에 하나의 Profile처럼 테이블을 확장할 때 사용한다.<br>ForeignKey에 <code>unique=True</code>를 건 것과 동일하지만, 역참조가 QuerySet이 아닌 단일 객체다.</p>
+<pre><code class="language-python">class Profile(models.Model):
+    # User와 1:1 연결 — User 삭제 시 Profile도 삭제
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name=&#39;profile&#39;,
+    )
+    bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to=&#39;avatars/&#39;, blank=True)
+    website = models.URLField(blank=True)
+</code></pre>
+<pre><code class="language-python"># 역참조: ForeignKey는 .objects QuerySet, OneToOne은 단일 객체
+user = User.objects.get(id=1)
+profile = user.profile           # 단일 Profile 객체
+# user.profile.all() 은 불가 — QuerySet이 아님
+</code></pre>
+<h4>post_save 시그널로 자동 생성</h4>
+<pre><code class="language-python">from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+</code></pre>
+<hr>
+<h2>Meta 클래스</h2>
+<p>모델의 동작 방식을 세부 조정하는 내부 클래스다.</p>
+<pre><code class="language-python">class Task(models.Model):
+    title = models.CharField(max_length=200)
+    priority = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        # 기본 정렬: -created_at이면 최신순
+        ordering = [&#39;-created_at&#39;, &#39;priority&#39;]
+
+        # 인덱스 설정 (자주 필터링하는 컬럼)
+        indexes = [
+            models.Index(fields=[&#39;category&#39;, &#39;created_at&#39;]),
+            models.Index(fields=[&#39;priority&#39;]),
+        ]
+
+        # 복합 유니크 제약
+        unique_together = [[&#39;title&#39;, &#39;category&#39;]]
+
+        # Django 5.1+: UniqueConstraint로 더 세밀하게
+        constraints = [
+            models.UniqueConstraint(
+                fields=[&#39;title&#39;, &#39;category&#39;],
+                name=&#39;unique_task_title_per_category&#39;,
+            ),
+            models.CheckConstraint(
+                check=models.Q(priority__gte=0),
+                name=&#39;task_priority_non_negative&#39;,
+            ),
+        ]
+
+        # Admin, 오류 메시지에 표시되는 이름
+        verbose_name = &#39;태스크&#39;
+        verbose_name_plural = &#39;태스크 목록&#39;
+
+        # DB 테이블 이름 직접 지정 (기본: appname_modelname)
+        db_table = &#39;tasks&#39;
+</code></pre>
+<h3>abstract 모델 — 공통 필드 재사용</h3>
+<pre><code class="language-python">class TimeStampedModel(models.Model):
+    &quot;&quot;&quot;생성/수정 시각을 자동 기록하는 추상 모델&quot;&quot;&quot;
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True  # DB 테이블 생성 안 됨, 상속만 가능
+
+
+class Task(TimeStampedModel):
+    title = models.CharField(max_length=200)
+    # created_at, updated_at 자동으로 포함됨
+
+
+class Comment(TimeStampedModel):
+    body = models.TextField()
+    # created_at, updated_at 자동으로 포함됨
+</code></pre>
+<hr>
+<h2><strong>str</strong> 메서드</h2>
+<p>Admin, shell, 디버그 출력 등 모든 곳에서 모델 객체를 사람이 읽을 수 있게 표현한다.<br><strong>반드시 정의해야 한다.</strong></p>
+<pre><code class="language-python">class Task(models.Model):
+    title = models.CharField(max_length=200)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f&#39;[{self.category}] {self.title}&#39;
+</code></pre>
+<pre><code class="language-python"># __str__ 없으면
+&gt;&gt;&gt; Task.objects.first()
+&lt;Task: Task object (1)&gt;  # 의미 없음
+
+# __str__ 있으면
+&gt;&gt;&gt; Task.objects.first()
+&lt;Task: [개발] Django 모델 정리&gt;  # 명확함
+</code></pre>
+<hr>
+<h2>실전 예제: Task 앱 전체 모델</h2>
+<p>Task 관리 앱의 모델을 처음부터 끝까지 작성한다.</p>
+<pre><code class="language-python"># tasks/models.py
+import uuid
+from django.conf import settings
+from django.db import models
+
+
+class TimeStampedModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class Category(TimeStampedModel):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = &#39;카테고리&#39;
+        verbose_name_plural = &#39;카테고리 목록&#39;
+        ordering = [&#39;name&#39;]
+
+    def __str__(self):
+        return self.name
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Task(TimeStampedModel):
+    PRIORITY_LOW = 0
+    PRIORITY_MEDIUM = 1
+    PRIORITY_HIGH = 2
+    PRIORITY_CHOICES = [
+        (PRIORITY_LOW, &#39;낮음&#39;),
+        (PRIORITY_MEDIUM, &#39;보통&#39;),
+        (PRIORITY_HIGH, &#39;높음&#39;),
+    ]
+
+    STATUS_TODO = &#39;todo&#39;
+    STATUS_IN_PROGRESS = &#39;in_progress&#39;
+    STATUS_DONE = &#39;done&#39;
+    STATUS_CHOICES = [
+        (STATUS_TODO, &#39;할 일&#39;),
+        (STATUS_IN_PROGRESS, &#39;진행 중&#39;),
+        (STATUS_DONE, &#39;완료&#39;),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_TODO
+    )
+
+    due_date = models.DateField(null=True, blank=True)
+
+    # FK 관계
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name=&#39;tasks&#39;,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name=&#39;created_tasks&#39;,
+    )
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name=&#39;assigned_tasks&#39;,
+    )
+
+    # M2M 관계
+    tags = models.ManyToManyField(Tag, blank=True, related_name=&#39;tasks&#39;)
+
+    class Meta:
+        ordering = [&#39;-created_at&#39;]
+        indexes = [
+            models.Index(fields=[&#39;status&#39;, &#39;priority&#39;]),
+            models.Index(fields=[&#39;created_by&#39;, &#39;created_at&#39;]),
+            models.Index(fields=[&#39;due_date&#39;]),
+        ]
+        verbose_name = &#39;태스크&#39;
+        verbose_name_plural = &#39;태스크 목록&#39;
+
+    def __str__(self):
+        return f&#39;[{self.get_status_display()}] {self.title}&#39;
+
+    @property
+    def is_overdue(self):
+        from django.utils import timezone
+        if self.due_date and self.status != self.STATUS_DONE:
+            return self.due_date &lt; timezone.now().date()
+        return False
+
+
+class Comment(TimeStampedModel):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name=&#39;comments&#39;)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    body = models.TextField()
+
+    class Meta:
+        ordering = [&#39;created_at&#39;]
+
+    def __str__(self):
+        return f&#39;{self.author} → {self.task.title[:30]}&#39;
+</code></pre>
+<hr>
+<h2>자주 하는 실수</h2>
+<h3>1. ForeignKey로 연결된 객체를 N+1로 조회</h3>
+<pre><code class="language-python"># BAD: Task 수만큼 category 쿼리 추가 발생
+tasks = Task.objects.all()
+for task in tasks:
+    print(task.category.name)  # 매번 DB 쿼리
+
+# GOOD: JOIN으로 한 번에 가져오기
+tasks = Task.objects.select_related(&#39;category&#39;, &#39;created_by&#39;).all()
+for task in tasks:
+    print(task.category.name)  # 추가 쿼리 없음
+</code></pre>
+<h3>2. ManyToMany를 즉시 평가하지 않고 N+1 유발</h3>
+<pre><code class="language-python"># BAD
+tasks = Task.objects.all()
+for task in tasks:
+    print(task.tags.all())  # 매번 쿼리
+
+# GOOD
+tasks = Task.objects.prefetch_related(&#39;tags&#39;).all()
+for task in tasks:
+    print(task.tags.all())  # 미리 가져온 캐시 사용
+</code></pre>
+<h3>3. CharField에 null=True 추가</h3>
+<pre><code class="language-python"># BAD: 빈 상태가 None과 &#39;&#39; 두 가지
+name = models.CharField(max_length=100, null=True, blank=True)
+
+# GOOD: 빈 상태는 &#39;&#39; 하나로 통일
+name = models.CharField(max_length=100, blank=True, default=&#39;&#39;)
+</code></pre>
+<hr>
+<h2>마치며</h2>
+<p>Django 모델을 제대로 설계하면 ORM이 나머지를 처리한다.</p>
+<p>핵심 원칙:</p>
+<ul>
+<li><strong>FK, M2M, O2O</strong> 중 관계 유형을 먼저 명확히 정한다</li>
+<li><code>on_delete</code>를 비즈니스 로직에 맞게 선택한다 (CASCADE vs SET_NULL vs PROTECT)</li>
+<li><code>null=True</code> / <code>blank=True</code> 차이를 정확히 이해하고 적용한다</li>
+<li><code>abstract = True</code> 추상 모델로 공통 필드(created_at, updated_at)를 재사용한다</li>
+<li><code>__str__</code>을 반드시 정의한다</li>
+<li><code>Meta.indexes</code>로 자주 쓰는 필터 컬럼에 인덱스를 설정한다</li>
+</ul>
+<hr>
+<h2>참고</h2>
+<ol>
+<li id="fn-django-models" style="scroll-margin-top: 96px;"><a href="https://docs.djangoproject.com/en/5.2/topics/db/models/" target="_blank">Django Documentation — Models</a> <a href="#fnref-django-models" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/django-urls">Django URL 라우팅 →</a> — path(), include(), namespace</li>
+<li><a href="/post/drf-overview">DRF 기초 →</a> — Serializer, ModelSerializer</li>
+</ul>
+
+<ul><li>Django</li><li>Model</li><li>ORM</li><li>ForeignKey</li><li>ManyToMany</li><li>OneToOne</li><li>Meta</li><li>ModelFields</li><li>Database</li><li>Python</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

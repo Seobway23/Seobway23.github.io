@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="React Query 캐시가 내부적으로 어떻게 동작하는지, invalidateQueries의 fuzzy prefix matching, setQueryData로 캐시를 직접 수정하는 방법, prefetchQuery로 UX를 향상시키는 패턴을 설명한다." />
+    <meta name="keywords" content="react-query, tanstack-query, cache, invalidateQueries, setQueryData, prefetch, staleTime" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/react-query-cache" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거" />
+    <meta property="og:description" content="React Query 캐시가 내부적으로 어떻게 동작하는지, invalidateQueries의 fuzzy prefix matching, setQueryData로 캐시를 직접 수정하는 방법, prefetchQuery로 UX를 향상시키는 패턴을 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/react-query-cache" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-28T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.312Z" />
+    <meta property="article:tag" content="react-query" />
+    <meta property="article:tag" content="tanstack-query" />
+    <meta property="article:tag" content="cache" />
+    <meta property="article:tag" content="invalidateQueries" />
+    <meta property="article:tag" content="setQueryData" />
+    <meta property="article:tag" content="prefetch" />
+    <meta property="article:tag" content="staleTime" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거" />
+    <meta name="twitter:description" content="React Query 캐시가 내부적으로 어떻게 동작하는지, invalidateQueries의 fuzzy prefix matching, setQueryData로 캐시를 직접 수정하는 방법, prefetchQuery로 UX를 향상시키는 패턴을 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거","description":"React Query 캐시가 내부적으로 어떻게 동작하는지, invalidateQueries의 fuzzy prefix matching, setQueryData로 캐시를 직접 수정하는 방법, prefetchQuery로 UX를 향상시키는 패턴을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-28T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.312Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/react-query-cache"},"keywords":"react-query, tanstack-query, cache, invalidateQueries, setQueryData, prefetch, staleTime","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":7560},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Freact-query"},{"@type":"ListItem","position":3,"name":"React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거","item":"https://seobway23.github.io/post/react-query-cache"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거</h1>
+<p>React Query 캐시가 내부적으로 어떻게 동작하는지, invalidateQueries의 fuzzy prefix matching, setQueryData로 캐시를 직접 수정하는 방법, prefetchQuery로 UX를 향상시키는 패턴을 설명한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-03-28T00:00:00.000Z">2026-03-28</time> · <span>14분</span></p>
+<h2>캐시 내부 동작</h2>
+<p><code>QueryCache</code>는 해시된 쿼리 키를 키로 하는 JavaScript 객체다.<a href="https://tanstack.com/query/latest/docs/framework/react/guides/caching" target="_blank"><sup>[1]</sup></a></p>
+<pre><code class="language-mermaid">%% desc: QueryCache 내부 — 쿼리 키 해시 → QueryEntry → 데이터/메타데이터
+flowchart TD
+  subgraph CACHE[&quot;QueryCache (in-memory)&quot;]
+    K1[&quot;해시: &#39;todos&#39;&quot;]
+    K2[&quot;해시: &#39;todos-detail-1&#39;&quot;]
+    K3[&quot;해시: &#39;user&#39;&quot;]
+
+    K1 --&gt; E1[&quot;QueryEntry\ndata: [...]\nstatus: &#39;success&#39;\nfetchStatus: &#39;idle&#39;\nobservers: 2\ndataUpdatedAt: 1234567890&quot;]
+    K2 --&gt; E2[&quot;QueryEntry\ndata: {id:1,...}\nstatus: &#39;success&#39;\n...&quot;]
+    K3 --&gt; E3[&quot;QueryEntry\ndata: null\nstatus: &#39;pending&#39;\nfetchStatus: &#39;fetching&#39;\n...&quot;]
+  end
+</code></pre>
+<p><strong>키 해시는 결정론적이다:</strong></p>
+<pre><code class="language-tsx">// 아래 둘은 동일한 캐시 엔트리를 참조
+useQuery({ queryKey: [&#39;todos&#39;, { status: &#39;active&#39;, page: 1 }] })
+useQuery({ queryKey: [&#39;todos&#39;, { page: 1, status: &#39;active&#39; }] })
+// 객체 프로퍼티 순서 무관 → 같은 해시
+</code></pre>
+<h3>캐시 생명주기</h3>
+<pre><code class="language-mermaid">%% desc: 쿼리 캐시 생명주기 — mount에서 garbage collection까지
+flowchart TD
+  M[&quot;useQuery 마운트\n(observer 추가)&quot;] --&gt; HIT{캐시 히트?}
+
+  HIT --&gt;|NO| F[&quot;queryFn 실행\nFETCHING&quot;]
+  HIT --&gt;|YES| S[&quot;캐시 즉시 반환\nstale 여부 체크&quot;]
+
+  F --&gt; D[&quot;데이터 캐시\nFRESH&quot;]
+  S --&gt; ST{stale?}
+  ST --&gt;|NO| IDLE[&quot;IDLE\n아무것도 안 함&quot;]
+  ST --&gt;|YES| BG[&quot;백그라운드 refetch\nFETCHING + cached data 표시&quot;]
+
+  D &amp; BG --&gt; STALED[&quot;staleTime 경과\nSTALE&quot;]
+  STALED --&gt; UNMOUNT[&quot;컴포넌트 언마운트\nINACTIVE (observer 0)&quot;]
+  UNMOUNT --&gt; GC[&quot;gcTime 경과\nGarbage Collected&quot;]
+
+  REMOUNT[&quot;재마운트 (gcTime 전)&quot;] --&gt;|캐시 히트| HIT
+</code></pre>
+<hr>
+<h2>백그라운드 Refetch 트리거</h2>
+<p>모두 기본값 <code>true</code>. 각 트리거가 발생할 때 stale 데이터가 있으면 백그라운드 refetch가 시작된다.<a href="https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults" target="_blank"><sup>[2]</sup></a></p>
+<table>
+<thead>
+<tr>
+<th>트리거</th>
+<th>옵션</th>
+<th>조건</th>
+<th>v5 변경점</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>컴포넌트 마운트</td>
+<td><code>refetchOnMount</code></td>
+<td>stale 시</td>
+<td>-</td>
+</tr>
+<tr>
+<td>윈도우 포커스</td>
+<td><code>refetchOnWindowFocus</code></td>
+<td>stale 시</td>
+<td><code>visibilitychange</code> 이벤트만 사용 (v5)</td>
+</tr>
+<tr>
+<td>네트워크 재연결</td>
+<td><code>refetchOnReconnect</code></td>
+<td>stale 시</td>
+<td>-</td>
+</tr>
+<tr>
+<td>수동 무효화</td>
+<td><code>invalidateQueries()</code></td>
+<td>항상</td>
+<td>-</td>
+</tr>
+<tr>
+<td>폴링</td>
+<td><code>refetchInterval</code></td>
+<td><code>staleTime</code>과 무관</td>
+<td>-</td>
+</tr>
+</tbody></table>
+<p><strong>v5 변경</strong>: <code>refetchOnWindowFocus</code>가 <code>focus</code> 이벤트 대신 <code>visibilitychange</code> 이벤트를 사용한다. 개발 중 불필요한 refetch가 줄었다.</p>
+<pre><code class="language-tsx">// 폴링 — 30초마다 자동 갱신
+const { data } = useQuery({
+  queryKey: [&#39;status&#39;],
+  queryFn: fetchStatus,
+  refetchInterval: 1000 * 30,
+  // 윈도우가 백그라운드일 때도 폴링하려면:
+  refetchIntervalInBackground: true,
+})
+
+// 윈도우 포커스 refetch 비활성화 — staleTime을 충분히 크게 설정하는 것을 먼저 고려
+const { data } = useQuery({
+  queryKey: [&#39;config&#39;],
+  queryFn: fetchConfig,
+  staleTime: 1000 * 60 * 10,  // 10분 fresh → 포커스 시 refetch 안 됨
+  // refetchOnWindowFocus: false 대신 staleTime으로 해결하는 것이 더 명확
+})
+</code></pre>
+<blockquote>
+<p><strong>흔한 실수</strong>: <code>refetchOnWindowFocus: false</code>를 설정하는 것보다 <code>staleTime</code>을 늘리는 것이 더 올바른 해결책이다. &quot;윈도우를 다시 활성화했을 때 깜빡임&quot;은 대부분 <code>staleTime: 0</code>(기본값)이 원인이다.</p>
+</blockquote>
+<hr>
+<h2>invalidateQueries — 캐시 무효화</h2>
+<p>쿼리를 stale로 표시하고 현재 활성(마운트된) 쿼리를 즉시 refetch한다.<a href="https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation" target="_blank"><sup>[3]</sup></a></p>
+<pre><code class="language-tsx">const queryClient = useQueryClient()
+
+// 모든 쿼리 무효화
+queryClient.invalidateQueries()
+
+// prefix matching — [&#39;todos&#39;]로 시작하는 모든 것
+queryClient.invalidateQueries({ queryKey: [&#39;todos&#39;] })
+// [&#39;todos&#39;]                        ← 무효화됨
+// [&#39;todos&#39;, &#39;list&#39;, ...]           ← 무효화됨
+// [&#39;todos&#39;, &#39;detail&#39;, 42]         ← 무효화됨
+// [&#39;user&#39;]                         ← 무효화 안 됨
+
+// 정확한 키만
+queryClient.invalidateQueries({
+  queryKey: [&#39;todos&#39;, &#39;detail&#39;, 42],
+  exact: true,
+})
+
+// 활성 쿼리만 즉시 refetch, 비활성은 stale 표시만
+queryClient.invalidateQueries({
+  queryKey: [&#39;todos&#39;],
+  refetchType: &#39;active&#39;,  // 기본값
+})
+
+// 비활성 쿼리도 즉시 refetch
+queryClient.invalidateQueries({
+  queryKey: [&#39;todos&#39;],
+  refetchType: &#39;all&#39;,
+})
+
+// stale 표시만, refetch 없음
+queryClient.invalidateQueries({
+  queryKey: [&#39;todos&#39;],
+  refetchType: &#39;none&#39;,
+})
+</code></pre>
+<h3>Mutation 후 invalidation 패턴</h3>
+<pre><code class="language-tsx">const mutation = useMutation({
+  mutationFn: createTodo,
+  onSuccess: () =&gt; {
+    // todo 생성 성공 → 모든 todo 관련 쿼리 무효화
+    queryClient.invalidateQueries({ queryKey: [&#39;todos&#39;] })
+  },
+})
+</code></pre>
+<hr>
+<h2>setQueryData — 캐시 직접 수정</h2>
+<p>서버 응답을 받은 즉시 캐시를 동기적으로 업데이트한다. 추가 network 요청 없이 UI를 즉시 갱신할 수 있다.</p>
+<pre><code class="language-tsx">// 단일 아이템 업데이트 후 캐시 반영
+const mutation = useMutation({
+  mutationFn: updateTodo,
+  onSuccess: (updatedTodo) =&gt; {
+    // 서버가 업데이트된 전체 객체를 반환하는 경우 — invalidation 없이 바로 반영
+    queryClient.setQueryData&lt;Todo&gt;([&#39;todos&#39;, updatedTodo.id], updatedTodo)
+
+    // 리스트 캐시에서도 해당 아이템 업데이트
+    queryClient.setQueryData&lt;Todo[]&gt;([&#39;todos&#39;], (old) =&gt;
+      old?.map(t =&gt; t.id === updatedTodo.id ? updatedTodo : t) ?? []
+    )
+  },
+})
+
+// 새 아이템 생성 후 리스트에 추가
+const createMutation = useMutation({
+  mutationFn: createTodo,
+  onSuccess: (newTodo) =&gt; {
+    queryClient.setQueryData&lt;Todo[]&gt;([&#39;todos&#39;], (old) =&gt;
+      [...(old ?? []), newTodo]
+    )
+  },
+})
+
+// 아이템 삭제 후 리스트에서 제거
+const deleteMutation = useMutation({
+  mutationFn: deleteTodo,
+  onSuccess: (_, deletedId) =&gt; {
+    queryClient.setQueryData&lt;Todo[]&gt;([&#39;todos&#39;], (old) =&gt;
+      old?.filter(t =&gt; t.id !== deletedId) ?? []
+    )
+  },
+})
+</code></pre>
+<h3>setQueryData vs invalidateQueries</h3>
+<pre><code class="language-mermaid">%% desc: setQueryData는 즉시 동기 업데이트, invalidateQueries는 서버 재검증
+flowchart LR
+  subgraph SET[&quot;setQueryData&quot;]
+    S1[&quot;서버 응답 데이터 있음&quot;]
+    S2[&quot;캐시 즉시 동기 업데이트&quot;]
+    S3[&quot;추가 network 요청 없음&quot;]
+    S1 --&gt; S2 --&gt; S3
+  end
+
+  subgraph INV[&quot;invalidateQueries&quot;]
+    I1[&quot;stale 표시&quot;]
+    I2[&quot;활성 쿼리 refetch 트리거&quot;]
+    I3[&quot;서버에서 최신 데이터 수신&quot;]
+    I1 --&gt; I2 --&gt; I3
+  end
+</code></pre>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>setQueryData</code></th>
+<th><code>invalidateQueries</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시점</td>
+<td>동기, 즉시</td>
+<td>비동기, refetch 후</td>
+</tr>
+<tr>
+<td>network</td>
+<td>없음</td>
+<td>있음</td>
+</tr>
+<tr>
+<td>적합한 경우</td>
+<td>서버가 완전한 객체 반환</td>
+<td>서버 상태 확실히 동기화</td>
+</tr>
+</tbody></table>
+<p><strong>실전 팁</strong>: mutation 성공 시 <code>setQueryData</code>로 캐시를 업데이트한 뒤에도 <code>invalidateQueries</code>를 <code>onSettled</code>에서 호출하는 것이 안전하다. <code>setQueryData</code>의 데이터가 서버와 미묘하게 다를 수 있기 때문이다.</p>
+<pre><code class="language-tsx">useMutation({
+  mutationFn: updateTodo,
+  onSuccess: (updatedTodo) =&gt; {
+    queryClient.setQueryData([&#39;todos&#39;, updatedTodo.id], updatedTodo) // 즉각 반영
+  },
+  onSettled: (_, __, variables) =&gt; {
+    queryClient.invalidateQueries({ queryKey: [&#39;todos&#39;, variables.id] }) // 최종 동기화
+  },
+})
+</code></pre>
+<hr>
+<h2>prefetchQuery — 사전 로드</h2>
+<p>컴포넌트가 마운트되기 전에 데이터를 미리 로드한다. 이미 캐시에 있으면 즉시 반환한다.</p>
+<pre><code class="language-tsx">// 라우터 loader — 페이지 진입 전 데이터 준비
+// (TanStack Router, React Router v6.4+ loader)
+export const loader = async () =&gt; {
+  await queryClient.prefetchQuery({
+    queryKey: [&#39;todos&#39;],
+    queryFn: fetchTodos,
+  })
+  return null
+}
+
+// 이후 컴포넌트에서 useQuery → 이미 캐시에 있어 즉시 data 반환
+function TodoList() {
+  const { data } = useQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos })
+  // isLoading: false, data 즉시 사용 가능
+}
+</code></pre>
+<h3>hover에서 prefetch — 클릭 시 즉각 느낌</h3>
+<pre><code class="language-tsx">function TodoLink({ id }: { id: number }) {
+  const queryClient = useQueryClient()
+
+  return (
+    &lt;Link
+      to={`/todos/${id}`}
+      onMouseEnter={() =&gt; {
+        // 마우스를 올리는 순간 로드 시작
+        queryClient.prefetchQuery({
+          queryKey: [&#39;todo&#39;, id],
+          queryFn: () =&gt; fetchTodo(id),
+          staleTime: 1000 * 10, // 10초 내 이미 캐시됐으면 스킵
+        })
+      }}
+    &gt;
+      Todo #{id}
+    &lt;/Link&gt;
+  )
+}
+</code></pre>
+<h3>prefetchQuery vs fetchQuery</h3>
+<pre><code class="language-tsx">// prefetchQuery — 에러 throw 없음, 실패해도 조용히 무시
+await queryClient.prefetchQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos })
+
+// fetchQuery — Promise 반환, 에러 throw됨
+try {
+  const data = await queryClient.fetchQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos })
+} catch (err) {
+  // 에러 처리 가능
+}
+</code></pre>
+<hr>
+<h2>Dependent Queries (의존성 쿼리)</h2>
+<p><code>enabled</code> 옵션으로 이전 쿼리의 결과를 기다린다.</p>
+<pre><code class="language-tsx">function UserProjects({ email }: { email: string }) {
+  // 1단계: email로 user 조회
+  const { data: user } = useQuery({
+    queryKey: [&#39;user&#39;, email],
+    queryFn: () =&gt; getUserByEmail(email),
+  })
+
+  // 2단계: user.id가 있을 때만 실행
+  const { data: projects } = useQuery({
+    queryKey: [&#39;projects&#39;, user?.id],
+    queryFn: () =&gt; getProjectsByUser(user!.id),
+    enabled: !!user?.id,
+  })
+
+  return &lt;div&gt;{/* ... */}&lt;/div&gt;
+}
+</code></pre>
+<pre><code class="language-mermaid">%% desc: enabled 옵션으로 쿼리 순서 제어 — user 로드 후 projects 자동 실행
+sequenceDiagram
+  participant C as 컴포넌트
+  participant Q1 as useQuery user
+  participant Q2 as useQuery projects (enabled)
+  participant S as 서버
+
+  C-&gt;&gt;Q1: 마운트 (email 있음)
+  Q1-&gt;&gt;S: GET /users?email=...
+  S--&gt;&gt;Q1: { id: 42, name: &#39;...&#39; }
+  Q1--&gt;&gt;C: user.id = 42 반환
+
+  Note over Q2: enabled: !!user?.id → true가 됨
+  Q2-&gt;&gt;S: GET /projects?userId=42
+  S--&gt;&gt;Q2: [...]
+  Q2--&gt;&gt;C: projects 반환
+</code></pre>
+<blockquote>
+<p><strong>성능 주의</strong>: 의존성 쿼리는 순차 실행이므로 두 요청이 각각 500ms면 총 1초가 걸린다. 둘을 합친 백엔드 엔드포인트가 있다면 그것을 우선 고려하라.</p>
+</blockquote>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/caching" target="_blank">[1] Caching — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults" target="_blank">[2] Important Defaults — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation" target="_blank">[3] Query Invalidation — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/prefetching" target="_blank">[4] Prefetching — TanStack Query Docs</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-query-overview">TanStack Query 개요 →</a></li>
+<li><a href="/post/react-query-queries">useQuery 심층 →</a></li>
+<li><a href="/post/react-query-mutations">useMutation · Optimistic Updates →</a></li>
+<li><a href="/post/react-query-advanced">고급 패턴 · v5 마이그레이션 →</a></li>
+</ul>
+
+<ul><li>react-query</li><li>tanstack-query</li><li>cache</li><li>invalidateQueries</li><li>setQueryData</li><li>prefetch</li><li>staleTime</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

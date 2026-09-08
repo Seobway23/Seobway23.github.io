@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>스코프 — 변수가 어디까지 보이는가 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙." />
+    <meta name="keywords" content="javascript, 스코프, 변수" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/scope" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="스코프 — 변수가 어디까지 보이는가" />
+    <meta property="og:description" content="같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙." />
+    <meta property="og:url" content="https://seobway23.github.io/post/scope" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-09-07T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.302Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="스코프" />
+    <meta property="article:tag" content="변수" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="스코프 — 변수가 어디까지 보이는가" />
+    <meta name="twitter:description" content="같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"스코프 — 변수가 어디까지 보이는가","description":"같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-09-07T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.302Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/scope"},"keywords":"javascript, 스코프, 변수","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":2226},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Fjs"},{"@type":"ListItem","position":3,"name":"스코프 — 변수가 어디까지 보이는가","item":"https://seobway23.github.io/post/scope"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>스코프 — 변수가 어디까지 보이는가</h1>
+<p>같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-07T00:00:00.000Z">2026-09-07</time> · <span>6분</span></p>
+<h2>왜 이게 필요한가</h2>
+<p>아래 코드는 마지막 줄에서 터진다. 왜 그런지 설명할 수 있어야 나머지 전부가 풀린다.</p>
+<pre><code class="language-js">function outer() {
+  const secret = &quot;숨김&quot;;
+  console.log(secret); // &quot;숨김&quot;
+}
+
+outer();
+console.log(secret); // ReferenceError: secret is not defined
+</code></pre>
+<p><code>secret</code> 은 분명 만들어졌는데 밖에서는 없는 취급이다. <strong>변수는 아무 데서나 보이지 않는다.</strong><br>어디까지 보이는지를 정하는 경계가 스코프다.</p>
+<hr>
+<h2>어떻게 동작하는가</h2>
+<p>스코프는 <strong>이름을 찾는 범위</strong>다. 자바스크립트는 변수를 만나면 안쪽부터 바깥쪽으로<br>차례차례 뒤진다. 찾으면 멈추고, 끝까지 못 찾으면 <code>ReferenceError</code>.</p>
+<p>경계는 세 종류다.</p>
+<p><div class="post-tabs" data-post-tabs data-post-tabs-id="post-tabs-0"><div class="post-tabs__list" role="tablist"><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-0" aria-selected="true" aria-controls="post-tabs-0-panel-0" tabindex="0" data-tab-index="0">전역 스코프</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-1" aria-selected="false" aria-controls="post-tabs-0-panel-1" tabindex="-1" data-tab-index="1">함수 스코프</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-2" aria-selected="false" aria-controls="post-tabs-0-panel-2" tabindex="-1" data-tab-index="2">블록 스코프</button></div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-0" aria-labelledby="post-tabs-0-tab-0" data-panel-index="0"><p>어디에서도 보인다. 파일 맨 바깥에 선언한 것.</p>
+<pre><code class="language-js">const app = &quot;blog&quot;;     // 어디서든 보인다
+</code></pre>
+<p>전역은 <strong>누구나 덮어쓸 수 있다</strong>는 뜻이기도 하다. 그래서 적을수록 좋다.</p>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-1" aria-labelledby="post-tabs-0-tab-1" data-panel-index="1" hidden><p><code>function</code> 몸통 안. <code>var</code> 는 오직 이 경계만 인정한다.</p>
+<pre><code class="language-js">function f() {
+  var x = 1;
+  if (true) {
+    var x = 2;          // 같은 x 다. 블록을 무시한다
+  }
+  console.log(x);       // 2
+}
+</code></pre>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-2" aria-labelledby="post-tabs-0-tab-2" data-panel-index="2" hidden><p><code>{ }</code> 안. <code>let</code> · <code>const</code> 는 이 경계를 지킨다.</p>
+<pre><code class="language-js">function f() {
+  let x = 1;
+  if (true) {
+    let x = 2;          // 다른 x 다
+  }
+  console.log(x);       // 1
+}
+</code></pre>
+<p><code>var</code> 대신 <code>let</code> · <code>const</code> 를 쓰는 가장 큰 이유가 이것이다.</p>
+</div></div></p>
+<p>찾는 순서를 그림으로 보면 이렇다. 안쪽 상자에서 시작해 바깥으로 나간다.</p>
+<p>인터랙티브 다이어그램: 이름을 찾아 바깥으로 나간다 (단계별로 재생할 수 있다)</p><ol><li>블록 안에서 `msg` 를 찾는다. 여기에는 없다.</li><li>한 칸 바깥, 함수 몸통에서 다시 찾는다. 여기 있다.</li><li>만약 함수에도 없었다면 전역까지 올라간다.</li><li>전역에도 없으면 그때 ReferenceError 가 난다.</li></ol>
+<p>이 사슬을 <strong>스코프 체인</strong>이라고 부른다. 그리고 중요한 것 하나 — 이 사슬은<br><strong>함수를 어디서 호출했느냐가 아니라 어디에 썼느냐</strong>로 정해진다.</p>
+<pre><code class="language-js">const name = &quot;전역&quot;;
+
+function print() {
+  console.log(name);   // 항상 &quot;전역&quot;
+}
+
+function run() {
+  const name = &quot;안쪽&quot;;
+  print();             // &quot;안쪽&quot; 이 아니라 &quot;전역&quot; 이 찍힌다
+}
+
+run();
+</code></pre>
+<p><code>print</code> 는 자기가 <strong>쓰여 있는 자리</strong>의 바깥을 본다. <code>run</code> 이 부른 것과 무관하다.<br>이 규칙을 렉시컬 스코프라고 한다. 코드를 읽는 것만으로 어떤 변수가 쓰일지 확정할 수 있다는 뜻이라,<br>디버깅이 훨씬 쉬워진다.</p>
+<hr>
+<h2>직접 확인</h2>
+<p>출력 순서를 먼저 예측하고 실행해라. 값을 바꿔 가며 다시 돌려도 된다 (<code>Ctrl+Enter</code>).</p>
+<pre><code class="language-playground">const where = &quot;전역&quot;;
+
+function outer() {
+  const where = &quot;함수&quot;;
+
+  if (true) {
+    const where = &quot;블록&quot;;
+    console.log(&quot;1:&quot;, where);
+  }
+
+  console.log(&quot;2:&quot;, where);
+}
+
+outer();
+console.log(&quot;3:&quot;, where);
+
+// var 로 바꿔 보면 2번이 어떻게 달라지는지 확인해라
+</code></pre>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>반복문 안의 <code>var</code></strong></p>
+<pre><code class="language-js">for (var i = 0; i &lt; 3; i++) {
+  setTimeout(() =&gt; console.log(i), 0);
+}
+// 3, 3, 3
+</code></pre>
+<p><code>var</code> 는 블록을 인정하지 않아 <code>i</code> 가 <strong>하나뿐</strong>이다. 타이머가 실행될 때는 이미 3이 되어 있다.<br><code>let</code> 으로 바꾸면 반복마다 새 <code>i</code> 가 생겨 <code>0, 1, 2</code> 가 나온다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>스코프는 <strong>좁을수록 좋다.</strong> 변수를 쓰는 곳에서 가장 가까운 블록에 선언해라.<br>넓은 스코프는 &quot;누가 언제 바꿨는지 모르는 값&quot;을 만든다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p>스코프는 <strong>이름을 찾는 범위</strong>이고, 안쪽에서 바깥쪽으로 한 방향으로만 찾는다.<br>그 사슬은 코드가 쓰인 자리로 정해진다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>var</code> 와 <code>let</code> 의 경계 차이를 말할 수 있다</li>
+<li><input disabled="" type="checkbox"> 위 반복문이 <code>3, 3, 3</code> 인 이유를 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> 함수를 어디서 호출하든 결과가 같은 이유를 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Glossary/Scope" target="_blank">[1] Scope — MDN Web Docs 용어 사전</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let" target="_blank">[2] let — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-execution-contexts" target="_blank">[3] Executable Code and Execution Contexts — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/hoisting">호이스팅 — 선언은 먼저 올라간다 →</a> — 스코프 안에서 선언이 처리되는 순서</li>
+</ul>
+
+<ul><li>javascript</li><li>스코프</li><li>변수</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

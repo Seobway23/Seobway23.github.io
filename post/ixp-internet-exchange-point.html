@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>IXP — ISP들이 만나는 물리적 교차로 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="IXP(Internet Exchange Point)가 ISP 간 트래픽을 직접 교환하게 해서 비용과 지연을 동시에 줄이는 방법을 설명한다." />
+    <meta name="keywords" content="Network, IXP, Peering, Transit, BGP, AS" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/ixp-internet-exchange-point" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="IXP — ISP들이 만나는 물리적 교차로" />
+    <meta property="og:description" content="IXP(Internet Exchange Point)가 ISP 간 트래픽을 직접 교환하게 해서 비용과 지연을 동시에 줄이는 방법을 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/ixp-internet-exchange-point" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.432Z" />
+    <meta property="article:tag" content="Network" />
+    <meta property="article:tag" content="IXP" />
+    <meta property="article:tag" content="Peering" />
+    <meta property="article:tag" content="Transit" />
+    <meta property="article:tag" content="BGP" />
+    <meta property="article:tag" content="AS" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="IXP — ISP들이 만나는 물리적 교차로" />
+    <meta name="twitter:description" content="IXP(Internet Exchange Point)가 ISP 간 트래픽을 직접 교환하게 해서 비용과 지연을 동시에 줄이는 방법을 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"IXP — ISP들이 만나는 물리적 교차로","description":"IXP(Internet Exchange Point)가 ISP 간 트래픽을 직접 교환하게 해서 비용과 지연을 동시에 줄이는 방법을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.432Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/ixp-internet-exchange-point"},"keywords":"Network, IXP, Peering, Transit, BGP, AS","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":3190},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmacro"},{"@type":"ListItem","position":3,"name":"IXP — ISP들이 만나는 물리적 교차로","item":"https://seobway23.github.io/post/ixp-internet-exchange-point"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>네트워크</span></nav>
+<h1>IXP — ISP들이 만나는 물리적 교차로</h1>
+<p>IXP(Internet Exchange Point)가 ISP 간 트래픽을 직접 교환하게 해서 비용과 지연을 동시에 줄이는 방법을 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-25T00:00:00.000Z">2026-03-25</time> · <span>7분</span></p>
+<h2>인터넷에도 교차로가 있다</h2>
+<p>고속도로에는 인터체인지가 있다. 서로 다른 도로망이 만나는 지점이다. 인터넷에도 같은 역할을 하는 시설이 있다. 바로 <strong>IXP(Internet Exchange Point, 인터넷 교환 포인트)</strong>다.<sup id="fnref-ixp" style="scroll-margin-top: 96px;"><a href="#fn-ixp" aria-label="각주 1">[1]</a></sup></p>
+<p>IXP가 없다면 어떻게 될까? A ISP 사용자가 B ISP 서버에 접근할 때, 데이터는 C, D, E ISP를 거쳐 돌아가는 긴 경로를 타야 한다. 홉(hop)이 늘어날수록 지연이 커지고, 중간 경유 ISP에게 내야 하는 <strong>트랜짓 비용</strong>도 쌓인다.</p>
+<p>IXP는 이 문제를 우아하게 해결한다.</p>
+<hr>
+<h2>IXP 없을 때 vs 있을 때</h2>
+<pre><code class="language-mermaid">%% desc: IXP 없는 경우 A ISP에서 B ISP까지 중간 AS를 3개 경유하는 긴 경로와, IXP가 있는 경우 직접 연결되는 짧은 경로를 비교한다.
+flowchart LR
+  subgraph Without[&quot;IXP 없는 경우 (우회 경로)&quot;]
+    direction LR
+    A1[&quot;A ISP\n(서울)&quot;] --&gt;|트랜짓| M1[&quot;중간 AS 1\n(도쿄)&quot;]
+    M1 --&gt;|트랜짓| M2[&quot;중간 AS 2\n(홍콩)&quot;]
+    M2 --&gt;|트랜짓| B1[&quot;B ISP\n(서울)&quot;]
+  end
+
+  subgraph With[&quot;IXP 있는 경우 (직접 경로)&quot;]
+    direction LR
+    A2[&quot;A ISP\n(서울)&quot;] --&gt;|피어링| IXP[&quot;IXP\n(KINX, 서울)&quot;]
+    IXP --&gt;|피어링| B2[&quot;B ISP\n(서울)&quot;]
+  end
+</code></pre>
+<p>IXP가 있으면 같은 IXP에 연결된 두 AS는 <strong>직접 트래픽을 교환</strong>할 수 있다. 중간 사업자를 거칠 이유가 없다.</p>
+<hr>
+<h2>IXP의 구조</h2>
+<p>IXP는 물리적으로 <strong>대형 데이터센터 안의 스위치 패브릭(Switch Fabric)</strong>이다.<sup id="fnref-ixp" style="scroll-margin-top: 96px;"><a href="#fn-ixp" aria-label="각주 1">[1]</a></sup> 수십 개에서 수백 개의 ISP, CDN, 기업망이 이 스위치에 물리적으로 케이블을 연결한다.</p>
+<p>각 참여자는 BGP(Border Gateway Protocol)<sup id="fnref-bgp" style="scroll-margin-top: 96px;"><a href="#fn-bgp" aria-label="각주 2">[2]</a></sup>를 통해 서로의 IP 경로 정보를 교환한다. &quot;나는 이 IP 대역을 가지고 있다&quot;고 광고하고, 상대방도 마찬가지로 광고한다. 이렇게 서로가 서로의 경로를 학습하면 직접 통신이 가능해진다.</p>
+<hr>
+<h2>피어링(Peering) 계약</h2>
+<p>IXP에서 이루어지는 트래픽 교환 방식을 <strong>피어링</strong>이라 부른다.<sup id="fnref-peering" style="scroll-margin-top: 96px;"><a href="#fn-peering" aria-label="각주 3">[3]</a></sup> 피어링에는 두 가지 형태가 있다.</p>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>공개 피어링 (Public Peering)</th>
+<th>비공개 피어링 (Private Peering)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>장소</td>
+<td>IXP의 공유 스위치</td>
+<td>전용 직접 연결(전용선)</td>
+</tr>
+<tr>
+<td>비용</td>
+<td>IXP 포트 이용료만</td>
+<td>전용선 회선 비용</td>
+</tr>
+<tr>
+<td>대상</td>
+<td>동일 IXP 참여자 모두</td>
+<td>특정 두 사업자 간</td>
+</tr>
+<tr>
+<td>예시</td>
+<td>KINX에서 다수 ISP와 연결</td>
+<td>Netflix-KT 직접 전용선</td>
+</tr>
+</tbody></table>
+<p>트래픽 규모가 작을 때는 공개 피어링이 효율적이다. 그러나 Netflix와 KT처럼 트래픽 규모가 압도적으로 크면, IXP 공유 스위치를 거치는 것보다 <strong>전용 직접 연결(Private Peering)</strong>을 구성하는 편이 더 안정적이다.</p>
+<hr>
+<h2>IXP가 가져다 주는 이점</h2>
+<p>IXP 참여로 얻는 혜택은 세 가지로 정리할 수 있다.</p>
+<p><strong>1. 비용 절감</strong><br>트랜짓 비용은 MB당 단가가 붙는다. IXP에서 직접 피어링하면 그 트래픽에 대한 트랜짓 비용이 0이 된다. 트래픽이 클수록 절감 효과가 크다.</p>
+<p><strong>2. 지연 감소</strong><br>서울의 A ISP에서 서울의 B ISP로 가는 트래픽이 도쿄를 경유할 이유가 없다. IXP를 통한 직접 경로는 물리적 거리와 홉 수를 동시에 줄인다.</p>
+<p><strong>3. 경로 안정성 향상</strong><br>중간 AS를 많이 거칠수록 그 중 하나가 장애를 일으킬 확률이 높아진다. 직접 경로는 의존하는 외부 AS 수를 줄여 경로 안정성을 높인다.</p>
+<hr>
+<h2>대형 IXP 사례</h2>
+<p>전 세계에는 수백 개의 IXP가 운영되고 있다.</p>
+<table>
+<thead>
+<tr>
+<th>IXP</th>
+<th>위치</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DE-CIX</strong></td>
+<td>프랑크푸르트</td>
+<td>세계 최대 IXP, 피크 트래픽 14+ Tbps</td>
+</tr>
+<tr>
+<td><strong>AMS-IX</strong></td>
+<td>암스테르담</td>
+<td>유럽 주요 IXP, 1,000개 이상 연결 사업자</td>
+</tr>
+<tr>
+<td><strong>LINX</strong></td>
+<td>런던</td>
+<td>영국 주요 인터넷 허브</td>
+</tr>
+<tr>
+<td><strong>KINX</strong></td>
+<td>서울</td>
+<td>한국 최대 IXP, 국내 ISP·CDN 집결</td>
+</tr>
+<tr>
+<td><strong>JPIX / JPNAP</strong></td>
+<td>도쿄</td>
+<td>일본 주요 IXP</td>
+</tr>
+</tbody></table>
+<p>한국의 <strong>KINX(Korea Internet Neutral Exchange)</strong>는 국내 주요 ISP, CDN, 클라우드 사업자들이 모이는 중심 교환 포인트다.<sup id="fnref-kinx" style="scroll-margin-top: 96px;"><a href="#fn-kinx" aria-label="각주 4">[4]</a></sup> 국내 트래픽의 상당 부분이 KINX를 통해 ISP 간을 이동한다.</p>
+<hr>
+<h2>AS와 BGP의 관계</h2>
+<p>IXP를 제대로 이해하려면 <strong>AS(Autonomous System)</strong><sup id="fnref-as" style="scroll-margin-top: 96px;"><a href="#fn-as" aria-label="각주 5">[5]</a></sup> 개념이 필요하다.</p>
+<p>인터넷에서 각 ISP나 대형 기업은 하나의 AS로 식별된다. AS는 고유한 번호(ASN)를 부여받으며, 자신이 관리하는 IP 대역을 BGP로 광고한다. IXP에서 두 AS가 피어링을 맺으면, 서로의 BGP 광고를 수신해 직접 경로를 라우팅 테이블에 등록한다.</p>
+<pre><code class="language-mermaid">%% desc: KINX IXP 스위치를 중심으로 KT(AS4766), SKT(AS9318), Cloudflare(AS13335)가 BGP로 서로의 경로를 교환하는 피어링 구조
+flowchart TD
+  IXP[&quot;KINX IXP\n공유 스위치 패브릭&quot;]
+
+  KT[&quot;KT\nAS4766&quot;]
+  SKT[&quot;SKT\nAS9318&quot;]
+  CF[&quot;Cloudflare\nAS13335&quot;]
+  LG[&quot;LG U+\nAS17858&quot;]
+
+  KT &lt;--&gt;|&quot;BGP 피어링&quot;| IXP
+  SKT &lt;--&gt;|&quot;BGP 피어링&quot;| IXP
+  CF &lt;--&gt;|&quot;BGP 피어링&quot;| IXP
+  LG &lt;--&gt;|&quot;BGP 피어링&quot;| IXP
+</code></pre>
+<p>이 구조에서 KT 사용자가 Cloudflare CDN에 접근하면, 데이터는 해외를 돌아가지 않고 KINX를 통해 직접 Cloudflare 엣지로 전달된다.</p>
+<hr>
+<h2>핵심 인사이트</h2>
+<blockquote>
+<p>인터넷 트래픽의 대부분은 실제로 IXP를 통해 지름길을 찾는다. 유튜브 영상이 한국에서 빠르게 재생되는 이유 중 하나는, Google이 KINX 같은 IXP에 참여해 국내 ISP와 직접 피어링을 맺고 있기 때문이다.</p>
+</blockquote>
+<p>IXP는 인터넷의 인프라 중에서도 가장 덜 알려져 있지만, 인터넷 성능과 비용 구조에 가장 직접적인 영향을 미치는 시설 중 하나다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li id="fn-ixp" style="scroll-margin-top: 96px;">Internet exchange point, <a href="https://en.wikipedia.org/wiki/Internet_exchange_point" target="_blank">Wikipedia</a> <a href="#fnref-ixp" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-bgp" style="scroll-margin-top: 96px;">Border Gateway Protocol, <a href="https://en.wikipedia.org/wiki/Border_Gateway_Protocol" target="_blank">Wikipedia</a> <a href="#fnref-bgp" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-peering" style="scroll-margin-top: 96px;">Peering, <a href="https://en.wikipedia.org/wiki/Peering" target="_blank">Wikipedia</a> <a href="#fnref-peering" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-kinx" style="scroll-margin-top: 96px;">KINX, <a href="https://en.wikipedia.org/wiki/Korea_Internet_Neutral_Exchange" target="_blank">Wikipedia</a> <a href="#fnref-kinx" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-as" style="scroll-margin-top: 96px;">Autonomous system (Internet), <a href="https://en.wikipedia.org/wiki/Autonomous_system_(Internet)" target="_blank">Wikipedia</a> <a href="#fnref-as" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/isp-internet-service-provider">ISP — 인터넷 접속을 파는 사람들 →</a> — IXP에서 만나는 사업자들의 계층 구조</li>
+<li><a href="/post/cdn-content-delivery-network">CDN — 콘텐츠를 가장 빠른 경로로 전달하는 방법 →</a> — IXP 피어링을 활용해 속도를 높이는 콘텐츠 네트워크</li>
+<li><a href="/post/circuit-vs-packet-switching">회선 교환 vs 패킷 교환 →</a> — IXP가 주고받는 데이터의 전달 방식</li>
+</ul>
+<hr>
+
+<ul><li>Network</li><li>IXP</li><li>Peering</li><li>Transit</li><li>BGP</li><li>AS</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

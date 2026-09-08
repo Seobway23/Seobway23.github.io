@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Operating &amp; Growing 16 단계. 레이어 아키텍처, 컴포넌트 기반 설계, 클린 아키텍처 원칙을 작은 웹 프로젝트 관점에서 정리한다." />
+    <meta name="keywords" content="architecture, layered-architecture, component-design, clean-architecture" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/architecture-patterns-layered-component-clean" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처" />
+    <meta property="og:description" content="Operating &amp; Growing 16 단계. 레이어 아키텍처, 컴포넌트 기반 설계, 클린 아키텍처 원칙을 작은 웹 프로젝트 관점에서 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/architecture-patterns-layered-component-clean" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-16-architecture.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.170Z" />
+    <meta property="article:tag" content="architecture" />
+    <meta property="article:tag" content="layered-architecture" />
+    <meta property="article:tag" content="component-design" />
+    <meta property="article:tag" content="clean-architecture" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처" />
+    <meta name="twitter:description" content="Operating &amp; Growing 16 단계. 레이어 아키텍처, 컴포넌트 기반 설계, 클린 아키텍처 원칙을 작은 웹 프로젝트 관점에서 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-16-architecture.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처","description":"Operating & Growing 16 단계. 레이어 아키텍처, 컴포넌트 기반 설계, 클린 아키텍처 원칙을 작은 웹 프로젝트 관점에서 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-16-architecture.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.170Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/architecture-patterns-layered-component-clean"},"keywords":"architecture, layered-architecture, component-design, clean-architecture","articleSection":"patterns","inLanguage":"ko-KR","wordCount":2223},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"patterns","item":"https://seobway23.github.io/?category=study%2Farchitecture%2Fpatterns"},{"@type":"ListItem","position":3,"name":"아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처","item":"https://seobway23.github.io/post/architecture-patterns-layered-component-clean"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>patterns</span></nav>
+<h1>아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처</h1>
+<p>Operating &amp; Growing 16 단계. 레이어 아키텍처, 컴포넌트 기반 설계, 클린 아키텍처 원칙을 작은 웹 프로젝트 관점에서 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>12분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>15</td>
+<td><a href="/post/deployment-vercel-railway-github-actions">배포 &amp; 운영 →</a></td>
+<td>Vercel, Railway, GitHub Actions</td>
+</tr>
+<tr>
+<td>16</td>
+<td><a href="/post/architecture-patterns-layered-component-clean">아키텍처 패턴 →</a></td>
+<td>레이어, 컴포넌트 기반 설계, 클린 아키텍처</td>
+</tr>
+<tr>
+<td>17</td>
+<td><a href="/post/observability-security-sentry-posthog-otel-npm-audit">관측 &amp; 보안 →</a></td>
+<td>Sentry, PostHog, OpenTelemetry, npm audit</td>
+</tr>
+<tr>
+<td>18</td>
+<td><a href="/post/ai-development-process-spec-tdd-hooks">AI 개발 프로세스 →</a></td>
+<td>작업 분할, Spec, TDD Workflow, Hook 설계</td>
+</tr>
+<tr>
+<td>19</td>
+<td><a href="/post/ai-code-verification-review-quality-security-performance-ux">AI 코드 검증 →</a></td>
+<td>품질, 보안, 성능, UX 검증</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>아키텍처는 폴더 이름이 아니다</h2>
+<p>아키텍처는 코드가 어떤 방향으로 의존하고, 어떤 변경을 어디에 가두는지 정하는 일이다.</p>
+<p>좋은 아키텍처는 변경 비용을 낮춘다.</p>
+<hr>
+<h2>레이어 아키텍처</h2>
+<p>레이어 아키텍처는 관심사를 층으로 나누는 방식이다. Microsoft의 아키텍처 가이드도 계층화된 앱에서 presentation, business, data access 같은 분리를 설명한다.<a href="https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/n-tier" target="_blank"><sup>[1]</sup></a></p>
+<p>예:</p>
+<ul>
+<li>UI layer</li>
+<li>application/service layer</li>
+<li>domain layer</li>
+<li>infrastructure/data layer</li>
+</ul>
+<hr>
+<h2>컴포넌트 기반 설계</h2>
+<p>프론트엔드에서는 UI를 작은 컴포넌트로 나누고 조합한다. React 문서도 UI를 컴포넌트 트리로 나누어 사고하는 방식을 강조한다.<a href="https://react.dev/learn/thinking-in-react" target="_blank"><sup>[2]</sup></a></p>
+<p>컴포넌트 설계의 핵심:</p>
+<ul>
+<li>단일 책임</li>
+<li>명확한 props</li>
+<li>내부 상태 최소화</li>
+<li>재사용보다 먼저 이해 가능성</li>
+</ul>
+<hr>
+<h2>클린 아키텍처 원칙</h2>
+<p>클린 아키텍처의 핵심은 의존성 방향이다. 바깥쪽 구현 세부사항이 안쪽 정책을 침범하지 않게 한다.<a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank"><sup>[3]</sup></a></p>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>작은 프로젝트에서 클린 아키텍처를 과하게 적용할 필요는 없다. 하지만 <strong>비즈니스 규칙이 프레임워크와 DB에 끌려다니지 않게 한다</strong>는 방향은 중요하다.</p>
+</div></div></aside></p>
+<hr>
+<h2>조금 더 깊게 보기</h2>
+<h3>아키텍처는 변경의 방향을 정한다</h3>
+<p>아키텍처가 필요한 이유는 멋진 폴더 구조를 만들기 위해서가 아니다. 요구사항이 바뀔 때 어떤 코드가 영향을 받고, 어떤 코드는 그대로 남을지 결정하기 위해서다. 좋은 아키텍처는 변경의 파장을 작게 만든다.</p>
+<h3>레이어를 나누는 이유</h3>
+<p>UI, application, domain, infrastructure를 나누는 이유는 각 층의 관심사가 다르기 때문이다. UI는 보여주고, application은 유스케이스를 조율하고, domain은 핵심 규칙을 담고, infrastructure는 DB나 외부 API를 다룬다. 이 구분이 없으면 DB 변경이 UI까지 번지고, 화면 요구사항이 비즈니스 규칙을 흔든다.</p>
+<h3>컴포넌트 기반 설계와 클린 아키텍처의 연결</h3>
+<p>프론트엔드 컴포넌트도 아키텍처의 일부다. 버튼 하나는 단순 UI지만, 페이지 컴포넌트는 데이터 페칭, 상태, 권한, 라우팅이 섞이기 쉽다. 클린 아키텍처 관점은 이런 혼합을 줄이고, UI와 비즈니스 규칙을 분리하게 도와준다.</p>
+<h3>과설계를 피하는 법</h3>
+<p>작은 프로젝트에 레이어를 과하게 나누면 오히려 이해가 어려워진다. 처음에는 feature 단위로 묶고, 반복되는 규칙이 보일 때 분리한다. 아키텍처는 예측이 아니라 관찰을 바탕으로 진화해야 한다.</p>
+<hr>
+<h2>실전 적용 시나리오</h2>
+<p>예를 들어 게시글 작성 기능을 만든다고 하자. UI 컴포넌트는 제목과 본문을 입력받고, application layer는 &quot;게시글 작성&quot; 유스케이스를 실행한다. domain 규칙은 제목이 비어 있으면 안 되고, 작성자는 존재해야 한다는 정책을 담는다. infrastructure layer는 실제 DB insert를 담당한다.</p>
+<p>이렇게 나누면 UI가 바뀌어도 게시글 작성 규칙은 유지된다. DB가 Drizzle에서 Prisma로 바뀌어도 domain 규칙은 그대로 남는다. 이것이 아키텍처의 가치다. 반대로 페이지 컴포넌트 하나에 폼 검증, 권한 검사, DB 호출, 토스트까지 모두 넣으면 처음에는 빠르지만 다음 변경부터 비용이 커진다.</p>
+<h3>판단 기준</h3>
+<p>분리할지 말지 고민될 때는 변경 이유가 다른지 본다. 화면 때문에 바뀌는 코드와 비즈니스 규칙 때문에 바뀌는 코드는 떨어뜨리는 편이 좋다. 같은 이유로 바뀌는 코드는 너무 일찍 나누지 않아도 된다.</p>
+<h2>참고</h2>
+<ol>
+<li><a href="https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/n-tier" target="_blank">[1] Microsoft Learn — N-tier architecture style</a></li>
+<li><a href="https://react.dev/learn/thinking-in-react" target="_blank">[2] React Docs — Thinking in React</a></li>
+<li><a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[3] The Clean Code Blog — The Clean Architecture</a></li>
+<li><a href="https://martinfowler.com/eaaCatalog/" target="_blank">[4] Martin Fowler — Patterns of Enterprise Application Architecture Catalog</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-component-data-flow">React 단방향 데이터 흐름 →</a></li>
+<li><a href="/post/api-design-rest-openapi-rpc-server-actions">API 설계 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>architecture</li><li>layered-architecture</li><li>component-design</li><li>clean-architecture</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다." />
+    <meta name="keywords" content="Network Traffic, Bandwidth, Throughput, Packet Loss, Congestion, Latency, QoS, Network Performance" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/micro-network-traffic" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡" />
+    <meta property="og:description" content="네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/micro-network-traffic" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.449Z" />
+    <meta property="article:tag" content="Network Traffic" />
+    <meta property="article:tag" content="Bandwidth" />
+    <meta property="article:tag" content="Throughput" />
+    <meta property="article:tag" content="Packet Loss" />
+    <meta property="article:tag" content="Congestion" />
+    <meta property="article:tag" content="Latency" />
+    <meta property="article:tag" content="QoS" />
+    <meta property="article:tag" content="Network Performance" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡" />
+    <meta name="twitter:description" content="네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡","description":"네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.449Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-network-traffic"},"keywords":"Network Traffic, Bandwidth, Throughput, Packet Loss, Congestion, Latency, QoS, Network Performance","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":4707},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡","item":"https://seobway23.github.io/post/micro-network-traffic"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>네트워크</span></nav>
+<h1>트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡</h1>
+<p>네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-25T00:00:00.000Z">2026-03-25</time> · <span>12분</span></p>
+<h2>네트워크 성능을 어떻게 측정하는가</h2>
+<p>인터넷이 빠른지 느린지는 어떻게 판단할까?<br>단순히 &quot;빠르다 / 느리다&quot;는 모호하다.</p>
+<p>네트워크 엔지니어는 아래 네 가지 지표로 성능을 정량화한다.<sup id="fnref-network-performance" style="scroll-margin-top: 96px;"><a href="#fn-network-performance" aria-label="각주 1">[1]</a></sup></p>
+<table>
+<thead>
+<tr>
+<th>지표</th>
+<th>정의</th>
+<th>단위</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>대역폭</strong></td>
+<td>링크가 이론적으로 전달 가능한 최대 데이터 양</td>
+<td>bps (bit/s)</td>
+</tr>
+<tr>
+<td><strong>처리율</strong></td>
+<td>실제로 전달된 데이터 양</td>
+<td>bps (bit/s)</td>
+</tr>
+<tr>
+<td><strong>지연(Latency)</strong></td>
+<td>패킷이 출발지에서 목적지까지 이동하는 시간</td>
+<td>ms</td>
+</tr>
+<tr>
+<td><strong>패킷 손실</strong></td>
+<td>전송 중 유실된 패킷의 비율</td>
+<td>%</td>
+</tr>
+</tbody></table>
+<h2>대역폭 (Bandwidth)</h2>
+<p><strong>대역폭</strong>은 네트워크 링크가 단위 시간에 전달할 수 있는 <strong>최대</strong> 데이터 양이다.<sup id="fnref-bandwidth" style="scroll-margin-top: 96px;"><a href="#fn-bandwidth" aria-label="각주 2">[2]</a></sup><br>이것은 이론적 상한(upper bound)이며, 물리적 매체와 기술 규격으로 결정된다.</p>
+<pre><code class="language-mermaid">%% desc: 대역폭을 도로 차선 수에 비유한 개념 — 차선이 많을수록 더 많은 차가 동시에 이동 가능
+flowchart LR
+  subgraph 좁은[&quot;좁은 대역폭 (100 Mbps)&quot;]
+    direction LR
+    C1[데이터 1] --&gt; LINK1[──────]
+    C2[데이터 2] --&gt; LINK1
+    C3[데이터 3] --&gt; LINK1
+    LINK1 --&gt; DST1[목적지]
+  end
+
+  subgraph 넓은[&quot;넓은 대역폭 (1 Gbps)&quot;]
+    direction LR
+    D1[데이터 1] --&gt; LINK2[══════]
+    D2[데이터 2] --&gt; LINK2
+    D3[데이터 3] --&gt; LINK2
+    D4[데이터 4] --&gt; LINK2
+    D5[데이터 5] --&gt; LINK2
+    LINK2 --&gt; DST2[목적지]
+  end
+</code></pre>
+<p><strong>대역폭 예시</strong></p>
+<table>
+<thead>
+<tr>
+<th>매체</th>
+<th>표준 대역폭</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>전화 모뎀</td>
+<td>56 Kbps</td>
+</tr>
+<tr>
+<td>DSL</td>
+<td>1~100 Mbps</td>
+</tr>
+<tr>
+<td>Fast Ethernet</td>
+<td>100 Mbps</td>
+</tr>
+<tr>
+<td>Gigabit Ethernet</td>
+<td>1 Gbps</td>
+</tr>
+<tr>
+<td>광섬유 (DWDM)</td>
+<td>수십 Tbps</td>
+</tr>
+<tr>
+<td>Wi-Fi 6 (802.11ax)</td>
+<td>최대 9.6 Gbps</td>
+</tr>
+</tbody></table>
+<h2>처리율 (Throughput)</h2>
+<p><strong>처리율</strong>은 실제로 전달된 데이터 양이다.<sup id="fnref-throughput" style="scroll-margin-top: 96px;"><a href="#fn-throughput" aria-label="각주 3">[3]</a></sup><br>대역폭은 파이프의 굵기, 처리율은 파이프 안을 실제로 흐르는 물의 양이다.</p>
+<pre><code>처리율 ≤ 대역폭
+</code></pre>
+<p>처리율이 대역폭보다 낮은 이유:</p>
+<ol>
+<li><strong>프로토콜 오버헤드</strong>: TCP/IP 헤더, Ethernet 프레임 헤더는 순수 데이터가 아니다. 일반적으로 전체 전송량의 2~10%가 헤더다.</li>
+<li><strong>재전송</strong>: <a href="#패킷-손실-packet-loss">패킷 손실</a>이 발생하면 같은 데이터를 다시 보내 대역폭이 낭비된다.</li>
+<li><strong>흐름 제어</strong>: <a href="/post/micro-tcp-udp">TCP의 슬라이딩 윈도우</a>가 전송 속도를 제한한다.</li>
+<li><strong>혼잡 제어</strong>: <a href="/post/micro-tcp-udp">TCP AIMD</a>가 네트워크 혼잡 신호에 반응해 속도를 줄인다.</li>
+<li><strong>처리 지연</strong>: 라우터, 스위치에서 패킷을 처리하는 시간이 걸린다.</li>
+</ol>
+<h3>처리율 측정 예시</h3>
+<pre><code class="language-mermaid">%% desc: 1 Gbps 링크에서 처리율이 오버헤드와 재전송으로 인해 600 Mbps로 낮아지는 예시
+flowchart LR
+  BW[&quot;대역폭\n1 Gbps&quot;]
+  OH[&quot;프로토콜 오버헤드\n-50 Mbps&quot;]
+  LOSS[&quot;패킷 손실·재전송\n-100 Mbps&quot;]
+  FC[&quot;흐름·혼잡 제어\n-250 Mbps&quot;]
+  TH[&quot;실제 처리율\n~600 Mbps&quot;]
+
+  BW --&gt; OH --&gt; LOSS --&gt; FC --&gt; TH
+</code></pre>
+<h2>지연 (Latency)</h2>
+<p><strong>지연</strong>은 패킷이 출발지에서 목적지까지 이동하는 데 걸리는 시간이다.<br>일반적으로 <strong>RTT(Round-Trip Time)</strong> — 요청 전송부터 응답 수신까지의 왕복 시간 — 으로 측정한다.</p>
+<p>지연의 구성 요소:</p>
+<table>
+<thead>
+<tr>
+<th>종류</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>전파 지연</strong></td>
+<td>신호가 물리 매체를 통해 이동하는 시간. 거리에 비례. 광섬유: 빛의 속도의 약 2/3</td>
+</tr>
+<tr>
+<td><strong>전송 지연</strong></td>
+<td>패킷을 링크에 올리는 시간. = 패킷 크기 / 대역폭</td>
+</tr>
+<tr>
+<td><strong>처리 지연</strong></td>
+<td>라우터/스위치에서 패킷 헤더를 분석하고 경로를 결정하는 시간</td>
+</tr>
+<tr>
+<td><strong>큐잉 지연</strong></td>
+<td>라우터 큐에서 대기하는 시간. 혼잡도에 따라 크게 변동</td>
+</tr>
+</tbody></table>
+<h2>패킷 손실 (Packet Loss)</h2>
+<p><strong>패킷 손실</strong>은 전송된 패킷이 목적지에 도달하지 못하는 비율이다.<sup id="fnref-packet-loss" style="scroll-margin-top: 96px;"><a href="#fn-packet-loss" aria-label="각주 4">[4]</a></sup></p>
+<pre><code>패킷 손실률 = (손실된 패킷 수 / 전송된 패킷 수) × 100%
+</code></pre>
+<h3>발생 원인</h3>
+<pre><code class="language-mermaid">%% desc: 패킷 손실이 발생하는 주요 원인들과 각 원인의 특성
+flowchart TD
+  LOSS[패킷 손실]
+
+  LOSS --&gt; CG[혼잡으로 인한 버퍼 오버플로\n라우터 큐가 가득 참 → tail-drop 또는 RED]
+  LOSS --&gt; CORRUPT[물리 오류\n케이블 손상, 전파 간섭 → CRC 오류]
+  LOSS --&gt; TTL[TTL 만료\n라우팅 루프 → 라우터가 패킷 폐기]
+  LOSS --&gt; FILTER[정책/방화벽\n관리자가 의도적으로 차단]
+
+  style CG fill:#ef4444,color:#fff
+  style CORRUPT fill:#f97316,color:#fff
+  style TTL fill:#eab308,color:#fff
+  style FILTER fill:#6366f1,color:#fff
+</code></pre>
+<p>주요 원인:</p>
+<ol>
+<li><strong>혼잡(Congestion)</strong>: 가장 흔한 원인. 라우터 버퍼가 가득 차면 새로 들어오는 패킷을 버린다.</li>
+<li><strong>물리 오류</strong>: 이더넷 CRC 오류, Wi-Fi 간섭. 데이터링크 계층에서 감지해 해당 프레임을 버린다.</li>
+<li><strong>TTL 만료</strong>: 라우팅 루프에서 패킷이 무한 순환하지 않도록 TTL이 0이 되면 폐기.</li>
+<li><strong>정책 필터링</strong>: 방화벽, ACL로 의도적으로 차단.</li>
+</ol>
+<h3>패킷 손실의 영향</h3>
+<table>
+<thead>
+<tr>
+<th>프로토콜</th>
+<th>영향</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/post/micro-tcp-udp">TCP</a></td>
+<td>재전송으로 손실 복구. 단, 혼잡 제어가 속도를 줄임.</td>
+</tr>
+<tr>
+<td><a href="/post/micro-tcp-udp">UDP</a></td>
+<td>손실 그대로. 영상 통화에서 화면 깨짐, 게임에서 캐릭터 순간이동</td>
+</tr>
+<tr>
+<td>QUIC</td>
+<td>스트림 단위로 독립 관리. TCP보다 손실 영향 범위가 좁음</td>
+</tr>
+</tbody></table>
+<p>1~2% 손실은 TCP 재전송으로 처리 가능하지만, 5% 이상이면 성능이 급격히 저하된다.</p>
+<h2>혼잡과 과부하 (Congestion &amp; Overload)</h2>
+<p><strong>혼잡(Congestion)</strong>은 네트워크 링크나 라우터가 처리할 수 있는 것보다 더 많은 트래픽이 몰릴 때 발생한다.<sup id="fnref-congestion" style="scroll-margin-top: 96px;"><a href="#fn-congestion" aria-label="각주 5">[5]</a></sup></p>
+<pre><code class="language-mermaid">%% desc: 라우터 큐에 트래픽이 몰려 버퍼가 차고 패킷이 드롭되는 혼잡 상황
+flowchart LR
+  SRC1[호스트 A\n500 Mbps] --&gt; RTR
+  SRC2[호스트 B\n500 Mbps] --&gt; RTR
+  SRC3[호스트 C\n200 Mbps] --&gt; RTR
+
+  subgraph RTR[&quot;라우터 (출력 링크 1 Gbps)&quot;]
+    Q[&quot;큐 (Buffer)\n1000 Mbps 입력\n1000 Mbps 출력 한계\n200 Mbps 초과 → 드롭!&quot;]
+  end
+
+  RTR --&gt; DST[목적지 링크\n1 Gbps]
+
+  style Q fill:#ef4444,color:#fff
+</code></pre>
+<h3>혼잡 발생 지점</h3>
+<ul>
+<li><strong>병목 링크(Bottleneck Link)</strong>: 경로 중 대역폭이 가장 좁은 링크. 전체 처리율을 제한한다.</li>
+<li><strong>과부하 라우터</strong>: 초당 처리할 수 있는 패킷 수를 초과하면 지연과 손실이 증가한다.</li>
+</ul>
+<h3>혼잡 대응 방법</h3>
+<p><strong>1. TCP 혼잡 제어 (End-to-End)</strong></p>
+<p><a href="/post/micro-tcp-udp">TCP AIMD</a>는 패킷 손실을 혼잡 신호로 해석하고 전송 속도를 줄인다.<br>네트워크 중간 장비의 협력 없이 엔드포인트만으로 혼잡을 완화한다.</p>
+<p><strong>2. ECN — Explicit Congestion Notification (RFC 3168)</strong></p>
+<p>라우터가 혼잡을 감지하면 패킷을 버리는 대신 IP 헤더의 ECN 비트를 1로 설정한다.<br>수신자가 이를 TCP ACK에 반영해 송신자에게 알린다.<br>패킷 손실 없이 혼잡을 미리 신호할 수 있다.</p>
+<p><strong>3. AQM — Active Queue Management</strong></p>
+<p>라우터 큐가 가득 차기 전에 미리 패킷을 확률적으로 버린다.<br>대표 알고리즘:</p>
+<ul>
+<li><strong>RED(Random Early Detection)</strong>: 큐 길이에 따라 확률적으로 드롭</li>
+<li><strong>CoDel(Controlled Delay)</strong>: 큐 지연 시간을 기반으로 제어</li>
+</ul>
+<p><strong>4. QoS — Quality of Service</strong></p>
+<p>모든 패킷을 동등하게 처리하는 대신, 중요도에 따라 우선순위를 부여한다.<br>VoIP(음성) 패킷을 파일 다운로드보다 먼저 처리하는 식이다.</p>
+<pre><code class="language-mermaid">%% desc: QoS 트래픽 분류 — 실시간 트래픽을 높은 우선순위 큐에 배치하는 구조
+flowchart LR
+  IN[인입 트래픽]
+  CLASS[패킷 분류기\nDSCP 마킹]
+
+  subgraph QUEUES[&quot;우선순위 큐&quot;]
+    Q1[&quot;높음: VoIP, 화상 회의&quot;]
+    Q2[&quot;중간: 웹 트래픽&quot;]
+    Q3[&quot;낮음: 파일 다운로드&quot;]
+  end
+
+  SCHED[스케줄러\n가중 우선순위 처리]
+  OUT[출력 링크]
+
+  IN --&gt; CLASS
+  CLASS --&gt; Q1 &amp; Q2 &amp; Q3
+  Q1 &amp; Q2 &amp; Q3 --&gt; SCHED --&gt; OUT
+</code></pre>
+<h2>지표 간 관계</h2>
+<pre><code class="language-mermaid">%% desc: 대역폭, 처리율, 혼잡, 패킷 손실의 상호 영향 관계
+flowchart TD
+  BW[대역폭\n물리적 최대값]
+  LOAD[트래픽 부하]
+  CONG[혼잡 발생]
+  DROP[패킷 드롭]
+  RETX[TCP 재전송]
+  TH[처리율 저하]
+  LAT[지연 증가]
+
+  LOAD -- &quot;부하 &gt; 용량&quot; --&gt; CONG
+  CONG --&gt; DROP
+  DROP --&gt; RETX
+  RETX --&gt; TH
+  CONG --&gt; LAT
+  DROP --&gt; LAT
+  TH -- &quot;처리율 ≤ 대역폭&quot; --&gt; BW
+</code></pre>
+<blockquote>
+<p>혼잡이 발생하면 패킷 손실 → 재전송 → 처리율 저하 → 지연 증가의 악순환이 시작된다.<br>TCP 혼잡 제어는 이 악순환을 끊기 위해 자발적으로 전송 속도를 줄이는 시스템이다.</p>
+</blockquote>
+<h2>참고</h2>
+<ol>
+<li id="fn-network-performance" style="scroll-margin-top: 96px;">Network performance, <a href="https://en.wikipedia.org/wiki/Network_performance" target="_blank">Wikipedia</a> <a href="#fnref-network-performance" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-bandwidth" style="scroll-margin-top: 96px;">Bandwidth (computing), <a href="https://en.wikipedia.org/wiki/Bandwidth_(computing)" target="_blank">Wikipedia</a> <a href="#fnref-bandwidth" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-throughput" style="scroll-margin-top: 96px;">Throughput, <a href="https://en.wikipedia.org/wiki/Throughput" target="_blank">Wikipedia</a> <a href="#fnref-throughput" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-packet-loss" style="scroll-margin-top: 96px;">Packet loss, <a href="https://en.wikipedia.org/wiki/Packet_loss" target="_blank">Wikipedia</a> <a href="#fnref-packet-loss" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-congestion" style="scroll-margin-top: 96px;">Network congestion, <a href="https://en.wikipedia.org/wiki/Network_congestion" target="_blank">Wikipedia</a> <a href="#fnref-congestion" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/micro-tcp-udp">TCP와 UDP — 신뢰성과 속도의 트레이드오프 →</a> — TCP 혼잡 제어(AIMD, Slow Start)의 상세 동작</li>
+<li><a href="/post/micro-protocol">프로토콜 — 왜 패킷 교환을 쓰는가 →</a> — 패킷 교환이 혼잡에 취약한 이유와 설계 트레이드오프</li>
+<li><a href="/post/micro-encapsulation">캡슐화와 역캡슐화 — PDU의 여정 →</a> — 트래픽을 구성하는 패킷 구조</li>
+</ul>
+<hr>
+
+<ul><li>Network Traffic</li><li>Bandwidth</li><li>Throughput</li><li>Packet Loss</li><li>Congestion</li><li>Latency</li><li>QoS</li><li>Network Performance</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

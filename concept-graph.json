@@ -1,0 +1,583 @@
+{
+  "generatedAt": "2026-09-08T23:45:57.660Z",
+  "nodes": [
+    {
+      "id": "arrow-function",
+      "label": "화살표 함수",
+      "domain": "javascript",
+      "summary": "자체 this·arguments·prototype 을 갖지 않는 함수 문법.",
+      "prereq": [
+        "this"
+      ],
+      "next": [],
+      "level": 3,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "scope",
+        "execution-context",
+        "this",
+        "arrow-function"
+      ]
+    },
+    {
+      "id": "async-await",
+      "label": "async / await",
+      "domain": "javascript",
+      "summary": "Promise 를 동기 코드처럼 순서대로 쓰게 해주는 문법.",
+      "prereq": [
+        "promise"
+      ],
+      "next": [],
+      "level": 5,
+      "track": "js-async",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "call-stack",
+        "event-loop",
+        "task-queue",
+        "microtask",
+        "promise",
+        "async-await"
+      ]
+    },
+    {
+      "id": "call-stack",
+      "label": "콜 스택",
+      "domain": "javascript",
+      "summary": "실행 중인 함수 호출을 쌓아 두는 후입선출 자료구조.",
+      "prereq": [],
+      "next": [
+        "event-loop",
+        "execution-context"
+      ],
+      "level": 0,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "call-stack"
+      ]
+    },
+    {
+      "id": "closure",
+      "label": "클로저",
+      "domain": "javascript",
+      "summary": "함수가 자기 바깥 스코프의 변수를 기억한 채 살아 있는 상태.",
+      "prereq": [
+        "scope",
+        "hoisting"
+      ],
+      "next": [
+        "higher-order-function"
+      ],
+      "level": 2,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": true,
+      "post": "closure",
+      "postTitle": "클로저 — 함수가 붙잡고 있는 변수",
+      "readTime": 8,
+      "excerpt": "함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다.",
+      "chain": [
+        "scope",
+        "hoisting",
+        "closure"
+      ]
+    },
+    {
+      "id": "event-loop",
+      "label": "이벤트 루프",
+      "domain": "javascript",
+      "summary": "콜 스택이 비면 큐에서 작업을 꺼내 실행하는 런타임 장치.",
+      "prereq": [
+        "call-stack"
+      ],
+      "next": [
+        "microtask",
+        "task-queue"
+      ],
+      "level": 1,
+      "track": "js-async",
+      "category": "study/frontend/js",
+      "written": true,
+      "post": "event-loop-interactive",
+      "postTitle": "이벤트 루프, 눈으로 따라가기",
+      "readTime": 8,
+      "excerpt": "콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다.",
+      "chain": [
+        "call-stack",
+        "event-loop"
+      ]
+    },
+    {
+      "id": "execution-context",
+      "label": "실행 컨텍스트",
+      "domain": "javascript",
+      "summary": "함수가 실행될 때 만들어지는 환경. 변수·this·스코프 체인을 담는다.",
+      "prereq": [
+        "scope",
+        "call-stack"
+      ],
+      "next": [
+        "this"
+      ],
+      "level": 1,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "scope",
+        "execution-context"
+      ]
+    },
+    {
+      "id": "higher-order-function",
+      "label": "고차 함수",
+      "domain": "javascript",
+      "summary": "함수를 인자로 받거나 함수를 반환하는 함수. map·filter·reduce.",
+      "prereq": [
+        "closure"
+      ],
+      "next": [],
+      "level": 3,
+      "track": "js-functional",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "scope",
+        "hoisting",
+        "closure",
+        "higher-order-function"
+      ]
+    },
+    {
+      "id": "hoisting",
+      "label": "호이스팅",
+      "domain": "javascript",
+      "summary": "선언이 스코프 최상단으로 끌어올려진 것처럼 동작하는 현상.",
+      "prereq": [
+        "scope"
+      ],
+      "next": [
+        "closure",
+        "tdz"
+      ],
+      "level": 1,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": true,
+      "post": "hoisting",
+      "postTitle": "호이스팅 — 선언은 먼저 올라간다",
+      "readTime": 7,
+      "excerpt": "선언하기 전에 쓴 변수가 왜 어떤 때는 undefined 고 어떤 때는 에러인지, 그 차이를 만드는 규칙.",
+      "chain": [
+        "scope",
+        "hoisting"
+      ]
+    },
+    {
+      "id": "immutability",
+      "label": "불변성",
+      "domain": "javascript",
+      "summary": "데이터를 고치지 않고 바뀐 새 데이터를 만들어 교체하는 원칙.",
+      "prereq": [
+        "shallow-deep-copy"
+      ],
+      "next": [
+        "pure-function"
+      ],
+      "level": 3,
+      "track": "js-functional",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "primitive-type",
+        "reference-type",
+        "shallow-deep-copy",
+        "immutability"
+      ]
+    },
+    {
+      "id": "microtask",
+      "label": "마이크로태스크",
+      "domain": "javascript",
+      "summary": "Promise.then·queueMicrotask 처럼 태스크 큐보다 먼저 비워지는 작업.",
+      "prereq": [
+        "event-loop",
+        "task-queue"
+      ],
+      "next": [
+        "promise"
+      ],
+      "level": 3,
+      "track": "js-async",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "call-stack",
+        "event-loop",
+        "task-queue",
+        "microtask"
+      ]
+    },
+    {
+      "id": "primitive-type",
+      "label": "원시 타입",
+      "domain": "javascript",
+      "summary": "값 자체가 저장되고 복사되는 타입. string·number·boolean·null·undefined·bigint·symbol.",
+      "prereq": [],
+      "next": [
+        "reference-type"
+      ],
+      "level": 0,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "primitive-type"
+      ]
+    },
+    {
+      "id": "promise",
+      "label": "Promise",
+      "domain": "javascript",
+      "summary": "비동기 결과를 나중에 다루도록 감싸는 객체. pending → fulfilled/rejected.",
+      "prereq": [
+        "microtask"
+      ],
+      "next": [
+        "async-await"
+      ],
+      "level": 4,
+      "track": "js-async",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "call-stack",
+        "event-loop",
+        "task-queue",
+        "microtask",
+        "promise"
+      ]
+    },
+    {
+      "id": "prototype",
+      "label": "프로토타입",
+      "domain": "javascript",
+      "summary": "객체가 다른 객체를 참조해 속성을 상속받는 JS 의 상속 방식.",
+      "prereq": [
+        "reference-type"
+      ],
+      "next": [],
+      "level": 2,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "primitive-type",
+        "reference-type",
+        "prototype"
+      ]
+    },
+    {
+      "id": "pure-function",
+      "label": "순수 함수",
+      "domain": "javascript",
+      "summary": "같은 입력이면 같은 출력이고, 바깥 상태를 건드리지 않는 함수.",
+      "prereq": [
+        "immutability"
+      ],
+      "next": [],
+      "level": 4,
+      "track": "js-functional",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "primitive-type",
+        "reference-type",
+        "shallow-deep-copy",
+        "immutability",
+        "pure-function"
+      ]
+    },
+    {
+      "id": "reference-type",
+      "label": "참조 타입",
+      "domain": "javascript",
+      "summary": "변수에 값이 아니라 메모리 주소가 저장되는 타입. 객체·배열·함수.",
+      "prereq": [
+        "primitive-type"
+      ],
+      "next": [
+        "prototype",
+        "shallow-deep-copy"
+      ],
+      "level": 1,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "primitive-type",
+        "reference-type"
+      ]
+    },
+    {
+      "id": "scope",
+      "label": "스코프",
+      "domain": "javascript",
+      "summary": "변수와 함수가 어디서 접근 가능한지를 정하는 범위.",
+      "prereq": [],
+      "next": [
+        "closure",
+        "execution-context",
+        "hoisting"
+      ],
+      "level": 0,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": true,
+      "post": "scope",
+      "postTitle": "스코프 — 변수가 어디까지 보이는가",
+      "readTime": 6,
+      "excerpt": "같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙.",
+      "chain": [
+        "scope"
+      ]
+    },
+    {
+      "id": "shallow-deep-copy",
+      "label": "얕은 복사와 깊은 복사",
+      "domain": "javascript",
+      "summary": "최상위만 새로 만드는가, 중첩된 값까지 새로 만드는가.",
+      "prereq": [
+        "reference-type"
+      ],
+      "next": [
+        "immutability"
+      ],
+      "level": 2,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "primitive-type",
+        "reference-type",
+        "shallow-deep-copy"
+      ]
+    },
+    {
+      "id": "task-queue",
+      "label": "태스크 큐",
+      "domain": "javascript",
+      "summary": "setTimeout·DOM 이벤트 콜백이 대기하는 큐(매크로태스크).",
+      "prereq": [
+        "event-loop"
+      ],
+      "next": [
+        "microtask"
+      ],
+      "level": 2,
+      "track": "js-async",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "call-stack",
+        "event-loop",
+        "task-queue"
+      ]
+    },
+    {
+      "id": "tdz",
+      "label": "TDZ (일시적 사각지대)",
+      "domain": "javascript",
+      "summary": "let·const 가 스코프 시작부터 선언문까지 접근이 금지되는 구간.",
+      "prereq": [
+        "hoisting"
+      ],
+      "next": [],
+      "level": 2,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "scope",
+        "hoisting",
+        "tdz"
+      ]
+    },
+    {
+      "id": "this",
+      "label": "this",
+      "domain": "javascript",
+      "summary": "호출 방식에 따라 값이 결정되는 키워드.",
+      "prereq": [
+        "execution-context"
+      ],
+      "next": [
+        "arrow-function"
+      ],
+      "level": 2,
+      "track": "js-core",
+      "category": "study/frontend/js",
+      "written": false,
+      "post": null,
+      "postTitle": null,
+      "readTime": null,
+      "excerpt": null,
+      "chain": [
+        "scope",
+        "execution-context",
+        "this"
+      ]
+    }
+  ],
+  "levels": [
+    [
+      "call-stack",
+      "primitive-type",
+      "scope"
+    ],
+    [
+      "event-loop",
+      "execution-context",
+      "hoisting",
+      "reference-type"
+    ],
+    [
+      "closure",
+      "prototype",
+      "shallow-deep-copy",
+      "task-queue",
+      "tdz",
+      "this"
+    ],
+    [
+      "arrow-function",
+      "higher-order-function",
+      "immutability",
+      "microtask"
+    ],
+    [
+      "promise",
+      "pure-function"
+    ],
+    [
+      "async-await"
+    ]
+  ],
+  "tracks": {
+    "js-core": {
+      "label": "JavaScript 코어",
+      "summary": "변수가 어디에 살고, 어떻게 기억되며, 무엇을 가리키는가. 나머지 전부의 바닥.",
+      "order": [
+        "primitive-type",
+        "reference-type",
+        "scope",
+        "hoisting",
+        "tdz",
+        "call-stack",
+        "execution-context",
+        "closure",
+        "this",
+        "arrow-function",
+        "prototype",
+        "shallow-deep-copy"
+      ],
+      "written": 3,
+      "total": 12
+    },
+    "js-async": {
+      "label": "JavaScript 비동기",
+      "summary": "싱글 스레드가 어떻게 동시에 여러 일을 처리하는 것처럼 보이는가.",
+      "order": [
+        "event-loop",
+        "task-queue",
+        "microtask",
+        "promise",
+        "async-await"
+      ],
+      "written": 1,
+      "total": 5
+    },
+    "js-functional": {
+      "label": "함수형 다루기",
+      "summary": "값을 바꾸지 않고 새로 만드는 습관이 왜 버그를 줄이는가.",
+      "order": [
+        "immutability",
+        "pure-function",
+        "higher-order-function"
+      ],
+      "written": 0,
+      "total": 3
+    }
+  },
+  "stats": {
+    "concepts": 20,
+    "written": 4,
+    "depth": 6,
+    "tracks": 3
+  }
+}

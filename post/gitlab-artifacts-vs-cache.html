@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>GitLab CI/CD — artifacts vs cache — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다." />
+    <meta name="keywords" content="GitLab, CI/CD, DevOps, artifacts, cache, 인프라" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/gitlab-artifacts-vs-cache" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="GitLab CI/CD — artifacts vs cache" />
+    <meta property="og:description" content="GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/gitlab-artifacts-vs-cache" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-19T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.353Z" />
+    <meta property="article:tag" content="GitLab" />
+    <meta property="article:tag" content="CI/CD" />
+    <meta property="article:tag" content="DevOps" />
+    <meta property="article:tag" content="artifacts" />
+    <meta property="article:tag" content="cache" />
+    <meta property="article:tag" content="인프라" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="GitLab CI/CD — artifacts vs cache" />
+    <meta name="twitter:description" content="GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"GitLab CI/CD — artifacts vs cache","description":"GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-19T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.353Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/gitlab-artifacts-vs-cache"},"keywords":"GitLab, CI/CD, DevOps, artifacts, cache, 인프라","articleSection":"infra","inLanguage":"ko-KR","wordCount":7325},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"infra","item":"https://seobway23.github.io/?category=study%2Finfra"},{"@type":"ListItem","position":3,"name":"GitLab CI/CD — artifacts vs cache","item":"https://seobway23.github.io/post/gitlab-artifacts-vs-cache"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>infra</span></nav>
+<h1>GitLab CI/CD — artifacts vs cache</h1>
+<p>GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-19T00:00:00.000Z">2026-03-19</time> · <span>12분</span></p>
+<h1>GitLab CI/CD — <code>artifacts</code> vs <code>cache</code></h1>
+<blockquote>
+<p>GitLab CI에서 가장 자주 혼동되는 두 개념.<br><strong>잘못 쓰면 빌드가 느려지거나, 파일이 다음 잡에 전달되지 않는 문제</strong>가 생깁니다.<br>개념부터 실전 설정까지 한 번에 정리합니다.</p>
+</blockquote>
+<hr>
+<h2>1. 왜 헷갈리나 — 근본 원인부터</h2>
+<p>GitLab CI의 각 잡은 <strong>독립된 컨테이너</strong>에서 실행됩니다.<br>잡 A에서 만든 파일은 잡 B에서 자동으로 보이지 않습니다.</p>
+<pre><code class="language-mermaid">%% desc: 잡 간 파일시스템 격리 — 컨테이너 A의 파일이 컨테이너 B에서 보이지 않는 이유
+flowchart LR
+    subgraph JOB_A[&quot;build 잡 (컨테이너 A)&quot;]
+        A_FS[&quot;파일시스템\n/builds/project/...&quot;]
+        A_OUT[&quot;dist/app.js ✅ 생성됨&quot;]
+        A_FS --&gt; A_OUT
+    end
+
+    subgraph JOB_B[&quot;deploy 잡 (컨테이너 B)&quot;]
+        B_FS[&quot;파일시스템\n/builds/project/...&quot;]
+        B_NOPE[&quot;dist/app.js ❌ 없음!\n(다른 컨테이너)&quot;]
+        B_FS --&gt; B_NOPE
+    end
+
+    JOB_A -.-&gt;|&quot;기본적으로 공유 안 됨&quot;| JOB_B
+
+
+</code></pre>
+<p>이 문제를 해결하는 두 가지 방법이 <code>artifacts</code>와 <code>cache</code>입니다.<br>하지만 <strong>용도가 다릅니다.</strong></p>
+<hr>
+<h2>2. 핵심 차이 한눈에 보기</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>artifacts</code></th>
+<th><code>cache</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>목적</strong></td>
+<td>잡 간 파일 전달</td>
+<td>의존성 재다운로드 방지</td>
+</tr>
+<tr>
+<td><strong>방향</strong></td>
+<td>같은 파이프라인 내 잡 → 잡</td>
+<td>파이프라인 → 파이프라인</td>
+</tr>
+<tr>
+<td><strong>저장 위치</strong></td>
+<td>GitLab 서버</td>
+<td>Runner 캐시 스토리지 (로컬/S3)</td>
+</tr>
+<tr>
+<td><strong>보장</strong></td>
+<td>✅ 항상 다음 잡에 전달</td>
+<td>⚠️ 캐시 미스 가능 (있으면 쓰는 것)</td>
+</tr>
+<tr>
+<td><strong>만료</strong></td>
+<td><code>expire_in</code> 으로 설정</td>
+<td>수동 삭제 또는 <code>cache:key</code> 갱신</td>
+</tr>
+<tr>
+<td><strong>대표 사용처</strong></td>
+<td>빌드 산출물, 테스트 리포트, 커버리지</td>
+<td><code>node_modules</code>, <code>.gradle</code>, <code>~/.pip</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. <code>artifacts</code> — 잡 간 파일 전달</h2>
+<h3>개념</h3>
+<p>같은 파이프라인 안에서 <strong>앞 잡의 결과물을 뒷 잡이 받아야 할 때</strong> 씁니다.<br>build 잡에서 만든 <code>.jar</code>, <code>.js</code>, 테스트 리포트 등을 deploy/test 잡에서 써야 하는 상황이 대표적입니다.</p>
+<h3>흐름</h3>
+<pre><code class="language-mermaid">%% desc: artifacts 흐름 — GitLab 서버를 통해 빌드 산출물을 test/deploy 잡에 전달
+flowchart LR
+    subgraph PIPE[&quot;파이프라인 #1&quot;]
+        direction LR
+
+        subgraph JOB_A[&quot;build 잡&quot;]
+            A1[&quot;소스코드 빌드&quot;]
+            A2[&quot;dist/app.js\nbuild/libs/*.jar&quot;]
+            A1 --&gt; A2
+        end
+
+        subgraph GL[&quot;GitLab 서버\nArtifacts 저장소&quot;]
+            GL_STORE[(&quot;artifacts\n압축 저장\nexpire_in 적용&quot;)]
+        end
+
+        subgraph JOB_B[&quot;test 잡&quot;]
+            B1[&quot;artifacts\n자동 다운로드&quot;]
+            B2[&quot;테스트 실행\n(빌드 결과물 사용)&quot;]
+            B1 --&gt; B2
+        end
+
+        subgraph JOB_C[&quot;deploy 잡&quot;]
+            C1[&quot;artifacts\n자동 다운로드&quot;]
+            C2[&quot;배포 실행&quot;]
+            C1 --&gt; C2
+        end
+
+        A2 --&gt;|&quot;업로드&quot;| GL_STORE
+        GL_STORE --&gt;|&quot;다음 잡 시작 시\n자동 다운로드&quot;| B1
+        GL_STORE --&gt;|&quot;다음 잡 시작 시\n자동 다운로드&quot;| C1
+    end
+
+
+</code></pre>
+<h3>yml 설정</h3>
+<pre><code class="language-yaml">stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/ # 이 경로를 다음 잡에 전달
+    expire_in: 1 hour # GitLab 서버에서 1시간 후 삭제
+
+test:
+  stage: test
+  needs: [build] # build artifacts 자동 수신
+  script:
+    - npm test # dist/ 파일 사용 가능
+
+deploy:
+  stage: deploy
+  needs: [build] # build artifacts 자동 수신
+  script:
+    - ./deploy.sh dist/
+</code></pre>
+<h3>알아두면 좋은 것들</h3>
+<pre><code class="language-mermaid">%% desc: artifacts 심화 옵션 — expire_in / when / reports / needs 설정 가이드
+flowchart TD
+    ROOT[&quot;artifacts 심화&quot;]
+
+    ROOT --&gt; EXP[&quot;expire_in\n1 hour / 1 day / 1 week\n설정 안 하면 기본값 (30일)&quot;]
+    ROOT --&gt; WHEN[&quot;when: always\n실패한 잡의 산출물도 보존\n→ 실패 로그, 스크린샷 수집에 유용&quot;]
+    ROOT --&gt; REPORT[&quot;artifacts: reports:\njunit, coverage, dotenv 등\nGitLab UI에서 바로 확인 가능&quot;]
+    ROOT --&gt; NEEDS[&quot;needs: []\n빈 배열이면 artifacts 안 내려옴\n주의 필요&quot;]
+
+
+</code></pre>
+<p><strong><code>artifacts: reports:</code></strong> 는 특히 강력합니다.</p>
+<pre><code class="language-yaml">test:
+  script:
+    - pytest --junitxml=report.xml --cov-report=xml
+  artifacts:
+    reports:
+      junit: report.xml # MR에서 테스트 결과 표시
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml # MR에서 커버리지 표시
+</code></pre>
+<hr>
+<h2>4. <code>cache</code> — 파이프라인 간 의존성 재사용</h2>
+<h3>개념</h3>
+<p><strong>매번 <code>npm install</code> / <code>pip install</code> / <code>./gradlew dependencies</code> 를 처음부터 하는 시간을 줄이기 위해</strong> 씁니다.<br>파이프라인이 달라도 같은 브랜치라면 이전 캐시를 재사용합니다.</p>
+<blockquote>
+<p><strong>중요:</strong> cache는 &quot;있으면 쓰고, 없으면 새로 시작&quot;입니다.<br>캐시 미스가 나도 파이프라인은 실패하지 않습니다.</p>
+</blockquote>
+<h3>흐름</h3>
+<pre><code class="language-mermaid">%% desc: cache 파이프라인 흐름 — 첫 번째(MISS)→저장, 두 번째(HIT)→재사용
+flowchart TB
+    subgraph PIPE1[&quot;파이프라인 #1 (첫 푸시)&quot;]
+        P1[&quot;build 잡&quot;]
+        P1A[&quot;캐시 복원 시도\n→ cache MISS ❌\n(처음이라 없음)&quot;]
+        P1B[&quot;npm ci\n패키지 전체 다운로드\n(느림 ⏳)&quot;]
+        P1C[&quot;node_modules/ 캐시 저장&quot;]
+        P1 --&gt; P1A --&gt; P1B --&gt; P1C
+    end
+
+    subgraph RS[&quot;Runner 캐시 스토리지\n(key: main-{lock-hash})&quot;]
+        CACHE[(&quot;node_modules/\n압축 저장&quot;)]
+    end
+
+    subgraph PIPE2[&quot;파이프라인 #2 (다음 푸시)&quot;]
+        P2[&quot;build 잡&quot;]
+        P2A[&quot;캐시 복원 시도\n→ cache HIT ✅&quot;]
+        P2B[&quot;npm ci\n변경분만 처리\n(빠름 ⚡)&quot;]
+        P2C[&quot;node_modules/ 캐시 갱신&quot;]
+        P2 --&gt; P2A --&gt; P2B --&gt; P2C
+    end
+
+    P1C --&gt;|&quot;저장&quot;| CACHE
+    CACHE --&gt;|&quot;복원&quot;| P2A
+    P2C --&gt;|&quot;갱신&quot;| CACHE
+
+
+</code></pre>
+<h3>yml 설정</h3>
+<pre><code class="language-yaml">build:
+  cache:
+    key:
+      files:
+        - package-lock.json # 락파일이 바뀌면 캐시 키도 바뀜 → 자동 무효화
+    paths:
+      - node_modules/
+  script:
+    - npm ci
+    - npm run build
+</code></pre>
+<h3>cache key 전략</h3>
+<p>캐시 키를 어떻게 잡느냐에 따라 캐시 효율이 크게 달라집니다.</p>
+<pre><code class="language-mermaid">%% desc: cache key 전략 — 브랜치/락파일/전역/복합 키 비교
+flowchart TD
+    ROOT[&quot;cache key 전략&quot;]
+
+    ROOT --&gt; K1[&quot;key: $CI_COMMIT_REF_SLUG\n브랜치별 캐시\n→ 브랜치마다 독립 캐시 유지&quot;]
+    ROOT --&gt; K2[&quot;key:\n  files:\n    - package-lock.json\n락파일 해시 기반\n→ 의존성 변경 시 자동 무효화&quot;]
+    ROOT --&gt; K3[&quot;key: global\n모든 브랜치 공유\n→ 저장소 절약, 충돌 주의&quot;]
+    ROOT --&gt; K4[&quot;key: $CI_COMMIT_REF_SLUG-node\n브랜치 + 런타임 조합\n→ 다중 언어 프로젝트에 유용&quot;]
+
+
+</code></pre>
+<p><strong>락파일 기반 키</strong> 가 가장 실전적입니다.</p>
+<pre><code class="language-yaml">cache:
+  key:
+    files:
+      - package-lock.json # 이 파일의 해시가 키
+    prefix: &quot;$CI_COMMIT_REF_SLUG&quot; # + 브랜치명 조합
+  paths:
+    - node_modules/
+</code></pre>
+<hr>
+<h2>5. 같이 쓰는 실전 패턴</h2>
+<p><code>artifacts</code>와 <code>cache</code>는 <strong>같이 쓰는 게 정석</strong>입니다.</p>
+<pre><code class="language-mermaid">%% desc: artifacts + cache 병용 패턴 — build 잡에서 캐시 복원 후 빌드, artifacts 업로드, 캐시 저장
+flowchart TB
+    subgraph PIPE[&quot;파이프라인&quot;]
+        direction TB
+
+        subgraph BUILD[&quot;build 잡&quot;]
+            B_CACHE[&quot;① cache 복원\nnode_modules/ (빠른 install)&quot;]
+            B_INSTALL[&quot;npm ci&quot;]
+            B_BUILD[&quot;npm run build&quot;]
+            B_ART[&quot;② artifacts 업로드\ndist/ (다음 잡 전달)&quot;]
+            B_CSAVE[&quot;③ cache 저장\nnode_modules/ (다음 파이프라인용)&quot;]
+            B_CACHE --&gt; B_INSTALL --&gt; B_BUILD --&gt; B_ART
+            B_BUILD --&gt; B_CSAVE
+        end
+
+        subgraph TEST[&quot;test 잡&quot;]
+            T_ART[&quot;artifacts 다운로드\ndist/ 수신&quot;]
+            T_RUN[&quot;테스트 실행&quot;]
+            T_ART --&gt; T_RUN
+        end
+
+        subgraph DEPLOY[&quot;deploy 잡&quot;]
+            D_ART[&quot;artifacts 다운로드\ndist/ 수신&quot;]
+            D_RUN[&quot;배포 실행&quot;]
+            D_ART --&gt; D_RUN
+        end
+    end
+
+    subgraph STORES[&quot;저장소&quot;]
+        GL[(&quot;GitLab 서버\nArtifacts&quot;)]
+        RS[(&quot;Runner 캐시\nnode_modules&quot;)]
+    end
+
+    B_ART --&gt;|&quot;업로드&quot;| GL
+    GL --&gt;|&quot;다운로드&quot;| T_ART
+    GL --&gt;|&quot;다운로드&quot;| D_ART
+    B_CSAVE --&gt;|&quot;저장&quot;| RS
+    RS --&gt;|&quot;다음 파이프라인\n복원&quot;| B_CACHE
+
+
+</code></pre>
+<h3>실전 yml 예시</h3>
+<pre><code class="language-yaml">stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/ # ← cache: 파이프라인 간 재사용
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - dist/ # ← artifacts: 다음 잡에 전달
+    expire_in: 1 hour
+
+test:
+  stage: test
+  needs: [build] # dist/ 자동 수신
+  script:
+    - npm test
+  artifacts:
+    when: always # 실패해도 리포트 보존
+    reports:
+      junit: test-results.xml
+
+deploy:
+  stage: deploy
+  needs: [build] # dist/ 자동 수신
+  script:
+    - ./deploy.sh dist/
+</code></pre>
+<hr>
+<h2>6. 흐름 비교 — 한 장으로 끝내기</h2>
+<pre><code class="language-mermaid">%% desc: artifacts vs cache 흐름 비교 — 같은 파이프라인(artifacts) vs 파이프라인 간(cache)
+flowchart LR
+    subgraph ART[&quot;artifacts — 같은 파이프라인, 잡 → 잡&quot;]
+        direction LR
+        A1[&quot;잡 A\n빌드 산출물 생성&quot;] --&gt;|&quot;항상 업로드 ✅&quot;| AGL[(&quot;GitLab 서버&quot;)]
+        AGL --&gt;|&quot;다음 잡 자동 다운로드&quot;| A2[&quot;잡 B\n산출물 사용&quot;]
+    end
+
+    subgraph CAC[&quot;cache — 파이프라인 → 파이프라인&quot;]
+        direction LR
+        C1[&quot;파이프라인 #1\n의존성 설치 후 저장&quot;] --&gt;|&quot;캐시 저장&quot;| CRS[(&quot;Runner 캐시&quot;)]
+        CRS --&gt;|&quot;복원 (캐시 히트 시만) ⚠️&quot;| C2[&quot;파이프라인 #2\n의존성 재사용&quot;]
+    end
+
+
+</code></pre>
+<hr>
+<h2>7. 실전 판단 플로차트</h2>
+<pre><code class="language-mermaid">%% desc: 실전 판단 플로차트 — 상황별 artifacts/cache/병용 선택 가이드
+flowchart TD
+    Q[&quot;이 파일, 어떻게 공유할까?&quot;]
+
+    Q --&gt;|&quot;같은 파이프라인의\n다른 잡에서 써야 함&quot;| ART
+    Q --&gt;|&quot;다음 파이프라인에서\n재설치 시간 줄이고 싶음&quot;| CAC
+    Q --&gt;|&quot;둘 다 해당\n(빌드 산출물 + 의존성)&quot;| BOTH
+
+    ART[&quot;✅ artifacts\npath: 빌드 결과물\nexpire_in: 보관 기간&quot;]
+    CAC[&quot;✅ cache\nkey: 락파일 해시\npath: node_modules 등&quot;]
+    BOTH[&quot;✅ 같이 사용\nartifacts: dist/\ncache: node_modules/&quot;]
+
+    ART --&gt; SUB_ART[&quot;언제 받나?\nneeds: [이전잡] → 자동\nneeds 없어도 같은 stage면 자동&quot;]
+    CAC --&gt; SUB_CAC[&quot;캐시 미스나도 괜찮나?\n✅ 괜찮음\n처음부터 다시 설치할 뿐&quot;]
+    BOTH --&gt; SUB_BOTH[&quot;순서?\n① cache 복원 (의존성)\n② 빌드 실행\n③ artifacts 업로드 (산출물)\n④ cache 저장 (의존성)&quot;]
+
+
+</code></pre>
+<hr>
+<h2>8. 자주 하는 실수 모음</h2>
+<h3>artifacts인데 cache 씀 (또는 반대)</h3>
+<pre><code class="language-mermaid">%% desc: 잘못된 패턴 vs 올바른 패턴 — 잡 간 전달에 cache 대신 artifacts 사용해야 하는 이유
+flowchart LR
+    subgraph WRONG[&quot;❌ 잘못된 패턴 — cache 사용&quot;]
+        direction TB
+        W1[&quot;build 잡\ncache: dist/ 저장&quot;]
+        W2[&quot;deploy 잡\n→ dist/ 없음!\n캐시 미스 또는 다른 Runner&quot;]
+        W1 -.-&gt;|&quot;보장 안 됨 ⚠️&quot;| W2
+    end
+
+    subgraph RIGHT[&quot;✅ 올바른 패턴 — artifacts 사용&quot;]
+        direction TB
+        R1[&quot;build 잡\nartifacts: dist/ 저장&quot;]
+        R2[&quot;deploy 잡\n→ dist/ 항상 있음 ✅&quot;]
+        R1 --&gt;|&quot;artifacts 보장&quot;| R2
+    end
+
+    WRONG ~~~ RIGHT
+
+
+</code></pre>
+<h3><code>needs: []</code> 로 artifacts 차단</h3>
+<pre><code class="language-yaml"># ❌ 이렇게 하면 build artifacts 안 내려옴
+deploy:
+  needs: []     # 빈 배열 = &quot;아무 잡도 기다리지 않겠다&quot; = artifacts도 없음
+
+# ✅ 올바른 방법
+deploy:
+  needs: [build]  # build 잡의 artifacts 자동 수신
+</code></pre>
+<h3>캐시 키 너무 넓게 잡기</h3>
+<pre><code class="language-yaml"># ❌ 모든 브랜치가 같은 캐시 → 충돌/오염 위험
+cache:
+  key: &quot;global&quot;
+  paths:
+    - node_modules/
+
+# ✅ 브랜치 + 락파일 조합
+cache:
+  key:
+    files:
+      - package-lock.json
+    prefix: &quot;$CI_COMMIT_REF_SLUG&quot;
+  paths:
+    - node_modules/
+</code></pre>
+<hr>
+<h2>9. 한 줄 요약</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>한 줄 요약</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>artifacts</code></td>
+<td><strong>&quot;이 파일, 다음 잡에 줘&quot;</strong> — 같은 파이프라인 내 잡 간 전달, 보장됨</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td><strong>&quot;이 폴더, 다음 파이프라인에서 재사용&quot;</strong> — 설치 시간 단축, 미스 가능</td>
+</tr>
+</tbody></table>
+
+<ul><li>GitLab</li><li>CI/CD</li><li>DevOps</li><li>artifacts</li><li>cache</li><li>인프라</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

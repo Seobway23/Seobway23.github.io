@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Django REST Framework가 무엇인지, Serializer가 왜 필요한지, ModelSerializer로 CRUD API를 얼마나 빠르게 만들 수 있는지 — DRF의 핵심 흐름을 단계별로 설명한다." />
+    <meta name="keywords" content="Django, DRF, REST, API, Serializer, ModelSerializer, Validation, JSONResponse, Python" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/drf-overview" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초" />
+    <meta property="og:description" content="Django REST Framework가 무엇인지, Serializer가 왜 필요한지, ModelSerializer로 CRUD API를 얼마나 빠르게 만들 수 있는지 — DRF의 핵심 흐름을 단계별로 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/drf-overview" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.209Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="DRF" />
+    <meta property="article:tag" content="REST" />
+    <meta property="article:tag" content="API" />
+    <meta property="article:tag" content="Serializer" />
+    <meta property="article:tag" content="ModelSerializer" />
+    <meta property="article:tag" content="Validation" />
+    <meta property="article:tag" content="JSONResponse" />
+    <meta property="article:tag" content="Python" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초" />
+    <meta name="twitter:description" content="Django REST Framework가 무엇인지, Serializer가 왜 필요한지, ModelSerializer로 CRUD API를 얼마나 빠르게 만들 수 있는지 — DRF의 핵심 흐름을 단계별로 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초","description":"Django REST Framework가 무엇인지, Serializer가 왜 필요한지, ModelSerializer로 CRUD API를 얼마나 빠르게 만들 수 있는지 — DRF의 핵심 흐름을 단계별로 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.209Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/drf-overview"},"keywords":"Django, DRF, REST, API, Serializer, ModelSerializer, Validation, JSONResponse, Python","articleSection":"django","inLanguage":"ko-KR","wordCount":9552},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초","item":"https://seobway23.github.io/post/drf-overview"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>django</span></nav>
+<h1>DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초</h1>
+<p>Django REST Framework가 무엇인지, Serializer가 왜 필요한지, ModelSerializer로 CRUD API를 얼마나 빠르게 만들 수 있는지 — DRF의 핵심 흐름을 단계별로 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-04-03T00:00:00.000Z">2026-04-03</time> · <span>14분</span></p>
+<h2>DRF가 필요한 이유</h2>
+<p>Django 기본 View로도 JSON API를 만들 수 있다.</p>
+<pre><code class="language-python"># Django 기본으로 JSON API 만들기
+import json
+from django.http import JsonResponse
+from django.views import View
+from .models import Task
+
+class TaskListView(View):
+    def get(self, request):
+        tasks = Task.objects.all()
+        data = []
+        for task in tasks:
+            data.append({
+                &#39;id&#39;: task.id,
+                &#39;title&#39;: task.title,
+                &#39;status&#39;: task.status,
+                &#39;created_at&#39;: task.created_at.isoformat(),
+            })
+        return JsonResponse({&#39;results&#39;: data})
+
+    def post(self, request):
+        body = json.loads(request.body)
+        # 검증 없음, 오류 처리 없음, 직렬화 없음
+        task = Task.objects.create(**body)
+        return JsonResponse({&#39;id&#39;: task.id}, status=201)
+</code></pre>
+<p>이 코드에는 문제가 많다:</p>
+<ul>
+<li>직렬화/역직렬화를 손으로 구현해야 한다</li>
+<li>입력값 검증이 없다</li>
+<li>인증/권한 로직이 없다</li>
+<li>오류 응답 형식이 일관되지 않는다</li>
+<li>파일 업로드, 중첩 객체 등 처리가 복잡하다</li>
+</ul>
+<p>DRF는 이 모든 것을 체계적으로 해결한다.</p>
+<hr>
+<h2>시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>순서</th>
+<th>제목</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>7</strong></td>
+<td><strong>DRF 기초</strong> ←</td>
+<td><strong>Serializer, ModelSerializer</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>DRF Views</td>
+<td>APIView, ViewSet, Router</td>
+</tr>
+<tr>
+<td>9</td>
+<td>DRF 인증</td>
+<td>Token, JWT, SimpleJWT</td>
+</tr>
+<tr>
+<td>10</td>
+<td>DRF Serializer 검증 심화</td>
+<td>validate_<field>, 3단계 검증</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Django 객체 레벨 권한</td>
+<td>Owner, 팀 기반 접근 제어</td>
+</tr>
+</tbody></table>
+<p>앞선 시리즈:</p>
+<table>
+<thead>
+<tr>
+<th>순서</th>
+<th>제목</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Django 큰 그림</td>
+</tr>
+<tr>
+<td>2</td>
+<td>MTV 아키텍처</td>
+</tr>
+<tr>
+<td>3</td>
+<td>요청-응답 라이프사이클</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Django 모델</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Django URL 라우팅</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Django ORM 심층</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>REST API란</h2>
+<p>REST는 HTTP를 올바르게 쓰는 규칙이다.</p>
+<table>
+<thead>
+<tr>
+<th>HTTP 메서드</th>
+<th>의미</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td>조회</td>
+<td><code>GET /api/tasks/</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td>생성</td>
+<td><code>POST /api/tasks/</code></td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>전체 수정</td>
+<td><code>PUT /api/tasks/42/</code></td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td>부분 수정</td>
+<td><code>PATCH /api/tasks/42/</code></td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>삭제</td>
+<td><code>DELETE /api/tasks/42/</code></td>
+</tr>
+</tbody></table>
+<p>HTTP 상태 코드로 결과를 표현한다:</p>
+<table>
+<thead>
+<tr>
+<th>상태 코드</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>200 OK</td>
+<td>성공 (GET, PUT, PATCH)</td>
+</tr>
+<tr>
+<td>201 Created</td>
+<td>생성 성공 (POST)</td>
+</tr>
+<tr>
+<td>204 No Content</td>
+<td>삭제 성공 (DELETE)</td>
+</tr>
+<tr>
+<td>400 Bad Request</td>
+<td>잘못된 요청 (검증 오류)</td>
+</tr>
+<tr>
+<td>401 Unauthorized</td>
+<td>인증 필요</td>
+</tr>
+<tr>
+<td>403 Forbidden</td>
+<td>권한 없음</td>
+</tr>
+<tr>
+<td>404 Not Found</td>
+<td>리소스 없음</td>
+</tr>
+<tr>
+<td>500 Internal Server Error</td>
+<td>서버 오류</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Serializer의 역할</h2>
+<p>Serializer는 두 가지 방향으로 동작한다.</p>
+<pre><code>Python 객체 → Serializer → JSON (직렬화, Serialization)
+JSON       → Serializer → Python 객체 (역직렬화, Deserialization + 검증)
+</code></pre>
+<pre><code class="language-mermaid">flowchart LR
+    A[Django Model Instance] --&gt;|to_representation| B[Serializer]
+    B --&gt;|직렬화| C[JSON Response]
+    
+    D[HTTP Request Body JSON] --&gt;|to_internal_value| E[Serializer]
+    E --&gt;|검증| F{is_valid?}
+    F --&gt;|True| G[validated_data]
+    F --&gt;|False| H[errors]
+    G --&gt;|save| I[DB 저장]
+</code></pre>
+<h3>기본 Serializer 작성</h3>
+<pre><code class="language-python"># tasks/serializers.py
+from rest_framework import serializers
+
+class TaskSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField(max_length=200)
+    status = serializers.ChoiceField(choices=[&#39;todo&#39;, &#39;in_progress&#39;, &#39;done&#39;])
+    priority = serializers.IntegerField(min_value=0, max_value=2)
+    created_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        return Task.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get(&#39;title&#39;, instance.title)
+        instance.status = validated_data.get(&#39;status&#39;, instance.status)
+        instance.save()
+        return instance
+</code></pre>
+<p>기본 <code>Serializer</code>는 모든 필드를 직접 선언해야 하고, <code>create()</code>와 <code>update()</code>를 직접 구현해야 한다.</p>
+<hr>
+<h2>ModelSerializer — 빠른 CRUD</h2>
+<p><code>ModelSerializer</code>는 모델을 기반으로 필드를 자동 생성하고, <code>create()</code>와 <code>update()</code>를 기본 구현해준다.</p>
+<pre><code class="language-python">from rest_framework import serializers
+from .models import Task, Category, Tag
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = [&#39;id&#39;, &#39;name&#39;]
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = [&#39;id&#39;, &#39;name&#39;]
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    # 중첩 직렬화: category 객체를 JSON으로 펼쳐서 출력
+    category = CategorySerializer(read_only=True)
+    # 쓰기 전용: category_id로 FK 설정
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        source=&#39;category&#39;,
+        write_only=True,
+        required=False,
+    )
+    tags = TagSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Task
+        fields = [
+            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;, &#39;status&#39;, &#39;priority&#39;,
+            &#39;due_date&#39;, &#39;category&#39;, &#39;category_id&#39;, &#39;tags&#39;, &#39;created_at&#39;,
+        ]
+        read_only_fields = [&#39;id&#39;, &#39;created_at&#39;]
+</code></pre>
+<h3>Meta.fields 설정 방식</h3>
+<pre><code class="language-python">class Meta:
+    model = Task
+    fields = &#39;__all__&#39;          # 모든 필드 (권장하지 않음 — 민감 필드 노출 위험)
+    fields = [&#39;id&#39;, &#39;title&#39;]    # 명시적 목록 (권장)
+    exclude = [&#39;password&#39;]      # 특정 필드만 제외
+</code></pre>
+<p><code>fields = &#39;__all__&#39;</code>은 개발 편의를 위해 쓰지만, 나중에 모델에 민감한 필드가 추가될 경우 자동으로 노출된다.<br><strong>실제 서비스에서는 명시적 목록을 쓰는 것이 안전하다.</strong></p>
+<hr>
+<h2>read_only / write_only 패턴</h2>
+<pre><code class="language-python">class UserSerializer(serializers.ModelSerializer):
+    # write_only: 요청에서는 받지만 응답에는 포함하지 않음
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    # read_only: 응답에는 포함하지만 수정 불가
+    created_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [&#39;id&#39;, &#39;email&#39;, &#39;password&#39;, &#39;created_at&#39;]
+        read_only_fields = [&#39;id&#39;, &#39;created_at&#39;]  # Meta에서 일괄 설정도 가능
+</code></pre>
+<hr>
+<h2>검증 흐름</h2>
+<pre><code class="language-python"># views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+class TaskListView(APIView):
+    def post(self, request):
+        serializer = TaskSerializer(data=request.data)
+
+        # is_valid() — 검증 실행
+        if not serializer.is_valid():
+            # 검증 실패: 400 + errors 반환
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # validated_data — 검증된 데이터 (안전하게 사용 가능)
+        task = serializer.save(created_by=request.user)
+
+        return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
+</code></pre>
+<p><code>raise_exception=True</code>를 쓰면 DRF가 자동으로 400 응답을 돌려준다.</p>
+<pre><code class="language-python"># 더 간결한 방식
+def post(self, request):
+    serializer = TaskSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)  # 검증 실패 시 자동 400
+    task = serializer.save(created_by=request.user)
+    return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
+</code></pre>
+<p><code>serializer.errors</code>가 반환하는 형태:</p>
+<pre><code class="language-json">{
+    &quot;title&quot;: [&quot;이 필드는 필수입니다.&quot;],
+    &quot;status&quot;: [&quot;\&quot;invalid_status\&quot;은(는) 올바른 선택이 아닙니다.&quot;],
+    &quot;priority&quot;: [&quot;유효한 정수(integer)를 넣어주세요.&quot;]
+}
+</code></pre>
+<hr>
+<h2>save() 내부 동작</h2>
+<p><code>serializer.save()</code>는 인스턴스 여부에 따라 <code>create()</code> 또는 <code>update()</code>를 호출한다.</p>
+<pre><code class="language-python"># 생성 (instance 없음)
+serializer = TaskSerializer(data=request.data)
+serializer.is_valid(raise_exception=True)
+serializer.save()   # → create(validated_data) 호출
+
+# 수정 (instance 있음)
+task = Task.objects.get(pk=pk)
+serializer = TaskSerializer(task, data=request.data, partial=True)
+serializer.is_valid(raise_exception=True)
+serializer.save()   # → update(task, validated_data) 호출
+</code></pre>
+<p><code>save()</code>에 키워드 인자를 추가하면 <code>validated_data</code>에 병합된다.</p>
+<pre><code class="language-python"># request.user를 created_by로 자동 설정
+serializer.save(created_by=request.user)
+
+# 뷰에서 URL 파라미터로 받은 값 주입
+serializer.save(task=task)  # Comment 생성 시 부모 Task 연결
+</code></pre>
+<hr>
+<h2>중첩 Serializer</h2>
+<p>관계된 객체를 JSON에 포함할 때 중첩 시리얼라이저를 쓴다.</p>
+<pre><code class="language-python">class CommentSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source=&#39;author.username&#39;, read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [&#39;id&#39;, &#39;body&#39;, &#39;author_name&#39;, &#39;created_at&#39;]
+
+
+class TaskDetailSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    comment_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Task
+        fields = [
+            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;, &#39;status&#39;, &#39;priority&#39;,
+            &#39;category&#39;, &#39;tags&#39;, &#39;comments&#39;, &#39;comment_count&#39;, &#39;created_at&#39;,
+        ]
+
+    def get_comment_count(self, obj):
+        return obj.comments.count()
+</code></pre>
+<p><code>SerializerMethodField</code>는 모델에 없는 계산 값을 응답에 포함할 때 쓴다.<br><code>get_{field_name}</code> 메서드를 정의하면 된다.</p>
+<hr>
+<h2>실전: Task CRUD 시리얼라이저 전체</h2>
+<pre><code class="language-python"># tasks/serializers.py
+from rest_framework import serializers
+from .models import Task, Category, Tag
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = [&#39;id&#39;, &#39;name&#39;]
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    task_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = [&#39;id&#39;, &#39;name&#39;, &#39;task_count&#39;]
+
+    def get_task_count(self, obj):
+        return obj.tasks.count()
+
+
+class TaskListSerializer(serializers.ModelSerializer):
+    &quot;&quot;&quot;목록 조회용 — 경량 버전&quot;&quot;&quot;
+    category_name = serializers.CharField(source=&#39;category.name&#39;, read_only=True)
+    tag_names = serializers.SlugRelatedField(
+        source=&#39;tags&#39;, many=True, read_only=True, slug_field=&#39;name&#39;
+    )
+    is_overdue = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Task
+        fields = [
+            &#39;id&#39;, &#39;title&#39;, &#39;status&#39;, &#39;priority&#39;,
+            &#39;category_name&#39;, &#39;tag_names&#39;, &#39;due_date&#39;, &#39;is_overdue&#39;, &#39;created_at&#39;,
+        ]
+
+
+class TaskDetailSerializer(serializers.ModelSerializer):
+    &quot;&quot;&quot;단건 조회용 — 상세 버전&quot;&quot;&quot;
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        source=&#39;category&#39;,
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    tags = TagSerializer(many=True, read_only=True)
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        source=&#39;tags&#39;,
+        many=True,
+        write_only=True,
+        required=False,
+    )
+
+    class Meta:
+        model = Task
+        fields = [
+            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;, &#39;status&#39;, &#39;priority&#39;, &#39;due_date&#39;,
+            &#39;category&#39;, &#39;category_id&#39;, &#39;tags&#39;, &#39;tag_ids&#39;, &#39;created_at&#39;, &#39;updated_at&#39;,
+        ]
+        read_only_fields = [&#39;id&#39;, &#39;created_at&#39;, &#39;updated_at&#39;]
+
+    def validate_title(self, value):
+        if len(value.strip()) &lt; 2:
+            raise serializers.ValidationError(&#39;제목은 2자 이상이어야 합니다.&#39;)
+        return value.strip()
+</code></pre>
+<hr>
+<h2>마치며</h2>
+<p>DRF Serializer 핵심 요약:</p>
+<ul>
+<li><code>Serializer</code> = Python 객체 ↔ JSON 변환 + 검증 레이어</li>
+<li><code>ModelSerializer</code> = 모델 기반 자동 필드 생성, create()/update() 기본 구현</li>
+<li><code>is_valid(raise_exception=True)</code> = 검증 + 자동 400 응답</li>
+<li><code>save(**kwargs)</code> = create 또는 update 호출, kwargs는 validated_data에 병합</li>
+<li>목록/상세 용도에 따라 시리얼라이저를 분리하는 것이 관리하기 좋다</li>
+</ul>
+<hr>
+<h2>참고</h2>
+<ol>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/drf-views">DRF Views →</a> — APIView, ViewSet, Router</li>
+<li><a href="/post/drf-authentication">DRF 인증 →</a> — Token, JWT, SimpleJWT</li>
+<li><a href="/post/drf-serializer-validation">DRF Serializer 검증 심화 →</a> — validate_<field> 완전 정복</li>
+</ul>
+
+<ul><li>Django</li><li>DRF</li><li>REST</li><li>API</li><li>Serializer</li><li>ModelSerializer</li><li>Validation</li><li>JSONResponse</li><li>Python</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

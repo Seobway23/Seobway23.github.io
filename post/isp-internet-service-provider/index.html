@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>ISP — 인터넷 접속을 파는 사람들 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="ISP(Internet Service Provider)의 계층 구조와 트랜짓·피어링의 차이를 통해 인터넷이 실제로 어떻게 연결되는지 설명한다." />
+    <meta name="keywords" content="Network, ISP, Tier1, Tier2, Transit, Peering, BGP" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/isp-internet-service-provider" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="ISP — 인터넷 접속을 파는 사람들" />
+    <meta property="og:description" content="ISP(Internet Service Provider)의 계층 구조와 트랜짓·피어링의 차이를 통해 인터넷이 실제로 어떻게 연결되는지 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/isp-internet-service-provider" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.430Z" />
+    <meta property="article:tag" content="Network" />
+    <meta property="article:tag" content="ISP" />
+    <meta property="article:tag" content="Tier1" />
+    <meta property="article:tag" content="Tier2" />
+    <meta property="article:tag" content="Transit" />
+    <meta property="article:tag" content="Peering" />
+    <meta property="article:tag" content="BGP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ISP — 인터넷 접속을 파는 사람들" />
+    <meta name="twitter:description" content="ISP(Internet Service Provider)의 계층 구조와 트랜짓·피어링의 차이를 통해 인터넷이 실제로 어떻게 연결되는지 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"ISP — 인터넷 접속을 파는 사람들","description":"ISP(Internet Service Provider)의 계층 구조와 트랜짓·피어링의 차이를 통해 인터넷이 실제로 어떻게 연결되는지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.430Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/isp-internet-service-provider"},"keywords":"Network, ISP, Tier1, Tier2, Transit, Peering, BGP","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":2652},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmacro"},{"@type":"ListItem","position":3,"name":"ISP — 인터넷 접속을 파는 사람들","item":"https://seobway23.github.io/post/isp-internet-service-provider"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>네트워크</span></nav>
+<h1>ISP — 인터넷 접속을 파는 사람들</h1>
+<p>ISP(Internet Service Provider)의 계층 구조와 트랜짓·피어링의 차이를 통해 인터넷이 실제로 어떻게 연결되는지 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-25T00:00:00.000Z">2026-03-25</time> · <span>8분</span></p>
+<h2>인터넷을 파는 사람들</h2>
+<p>&quot;인터넷에 연결한다&quot;는 말은 자연스럽게 쓰지만, 실제로 그 연결을 제공하는 주체가 누구인지는 잘 모르는 경우가 많다. 우리는 KT, SKT, LG U+에 돈을 내고 인터넷을 쓴다. 이 회사들이 바로 <strong>ISP(Internet Service Provider)</strong>, 즉 인터넷 서비스 제공자다.<sup id="fnref-isp" style="scroll-margin-top: 96px;"><a href="#fn-isp" aria-label="각주 1">[1]</a></sup></p>
+<p>그런데 KT가 전 세계 서버에 직접 연결선을 깔아 둔 걸까? 당연히 아니다. 인터넷은 하나의 회사가 운영하는 단일 망이 아니라, 수천 개의 ISP가 서로 계약을 맺고 트래픽을 주고받으며 만들어진 <strong>분산된 네트워크의 집합</strong>이다. 이 구조를 이해하면 인터넷의 본질에 한 걸음 가까워진다.</p>
+<hr>
+<h2>ISP의 세 계층</h2>
+<p>ISP는 규모와 역할에 따라 크게 세 계층으로 나눌 수 있다.</p>
+<pre><code class="language-mermaid">%% desc: Tier 1 ISP에서 가정/기업 사용자까지 이어지는 인터넷 계층 구조. 상위 계층이 하위 계층에 Transit을 제공한다.
+flowchart TD
+  T1A[&quot;Tier 1 ISP\n(AT&amp;T, NTT, Lumen)&quot;]
+  T1B[&quot;Tier 1 ISP\n(Deutsche Telekom)&quot;]
+  T1A &lt;--&gt;|&quot;피어링(무료 교환)&quot;| T1B
+
+  T2A[&quot;Tier 2 ISP\n(KT, SKT, LG U+)&quot;]
+  T2B[&quot;Tier 2 ISP\n(해외 리전 ISP)&quot;]
+  T1A --&gt;|&quot;트랜짓 제공&quot;| T2A
+  T1B --&gt;|&quot;트랜짓 제공&quot;| T2B
+
+  T3A[&quot;Tier 3 ISP\n(지역 케이블 사업자)&quot;]
+  T3B[&quot;Tier 3 ISP\n(소규모 지역망)&quot;]
+  T2A --&gt;|&quot;트랜짓 제공&quot;| T3A
+  T2B --&gt;|&quot;트랜짓 제공&quot;| T3B
+
+  HOME[&quot;가정·기업 사용자&quot;]
+  T3A --&gt; HOME
+  T3B --&gt; HOME
+</code></pre>
+<h3>Tier 1 ISP</h3>
+<p>Tier 1은 전 세계 인터넷 백본(backbone)을 구성하는 최상위 사업자다. AT&amp;T, NTT, Lumen(구 CenturyLink), Deutsche Telekom 등이 여기에 해당한다.<sup id="fnref-tier1" style="scroll-margin-top: 96px;"><a href="#fn-tier1" aria-label="각주 2">[2]</a></sup></p>
+<p>이들의 특징은 <strong>다른 ISP에게 트랜짓 비용을 내지 않는다</strong>는 점이다. 전 세계 모든 Tier 1 ISP는 서로 <strong>피어링(Peering)</strong> 계약을 맺고 무료로 트래픽을 교환한다. 전 세계 어디로든 도달할 수 있는 경로를 직접 보유하고 있기 때문이다.</p>
+<h3>Tier 2 ISP</h3>
+<p>Tier 1과 Tier 3의 중간 계층이다. 한국의 KT, SKT, LG U+가 여기에 해당한다. Tier 2 ISP는 일부 구간은 직접 연결(피어링)로 처리하고, 닿지 않는 구간은 Tier 1에게 <strong>트랜짓(Transit) 비용을 지불</strong>해 경로를 확보한다.</p>
+<p>즉, KT가 미국 AWS 서버와 통신할 때는 KT → Tier 1 ISP → AWS 리전 네트워크 경로를 따라가게 된다.</p>
+<h3>Tier 3 ISP</h3>
+<p>가정과 기업에 직접 인터넷을 연결하는 마지막 단계다. 지역 케이블 사업자, 소규모 인터넷 사업자들이 여기에 속한다. 이들은 Tier 2 ISP에게 비용을 내고 상위 인터넷에 접근한다.</p>
+<hr>
+<h2>트랜짓(Transit) vs 피어링(Peering)</h2>
+<p>ISP 간 트래픽 교환 방식은 크게 두 가지로 나뉜다.</p>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>트랜짓 (Transit)</th>
+<th>피어링 (Peering)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>방향</td>
+<td>상위 ISP → 하위 ISP</td>
+<td>동등한 ISP 간</td>
+</tr>
+<tr>
+<td>비용</td>
+<td>하위 ISP가 상위에 지불</td>
+<td>무료 (혹은 협상)</td>
+</tr>
+<tr>
+<td>범위</td>
+<td>전체 인터넷 경로 제공</td>
+<td>상호 트래픽만 교환</td>
+</tr>
+<tr>
+<td>예시</td>
+<td>KT가 AT&amp;T에게 비용 지불</td>
+<td>KT와 SKT 직접 연결</td>
+</tr>
+</tbody></table>
+<p><strong>트랜짓</strong>은 &quot;당신이 가진 모든 경로를 나에게 팔아라&quot;는 계약이다. 돈을 내고 상위 ISP의 경로를 통째로 빌리는 것이다.</p>
+<p><strong>피어링</strong>은 &quot;우리 둘 사이 트래픽은 서로 무료로 교환하자&quot;는 계약이다. 양쪽 트래픽 규모가 비슷할 때 성립하며, 주로 <a href="/post/ixp-internet-exchange-point">IXP(인터넷 교환 포인트)</a>에서 이루어진다.</p>
+<hr>
+<h2>BGP — 경로를 결정하는 언어</h2>
+<p>ISP 간에 경로 정보를 주고받는 프로토콜이 <strong>BGP(Border Gateway Protocol)</strong>이다.<sup id="fnref-bgp" style="scroll-margin-top: 96px;"><a href="#fn-bgp" aria-label="각주 3">[3]</a></sup> 각 ISP는 하나의 <strong>AS(Autonomous System, 자율 시스템)</strong>로 식별되며, BGP를 통해 &quot;나는 이 IP 대역에 도달할 수 있다&quot;는 정보를 이웃 ISP에게 광고한다.</p>
+<p>BGP는 인터넷의 GPS라고 할 수 있다. 단, 가장 빠른 경로가 아니라 <strong>가장 비용이 적은 경로<strong> 혹은 </strong>정책상 선호되는 경로</strong>를 선택한다는 점이 일반 라우팅과 다르다. 이 때문에 BGP 설정 실수 하나가 전 세계 트래픽 경로를 바꿔버리는 사고(BGP Hijacking, BGP Leak)로 이어지기도 한다.</p>
+<hr>
+<h2>핵심 인사이트</h2>
+<blockquote>
+<p>인터넷은 하나의 회사가 운영하는 것이 아니다. 수천 개의 ISP가 트랜짓과 피어링 계약으로 얽혀서 만들어진 네트워크다. 우리가 내는 인터넷 요금의 일부는 이 계층 구조를 타고 올라가 결국 전 세계 백본을 유지하는 비용으로 흘러들어간다.</p>
+</blockquote>
+<p>인터넷의 &quot;연결성&quot;은 기술만으로 만들어지는 게 아니라, 수천 개의 사업자 간 <strong>비즈니스 계약</strong>으로 유지된다. ISP가 파산하거나 계약이 끊기면 실제로 인터넷 경로가 사라지기도 한다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li id="fn-isp" style="scroll-margin-top: 96px;">Internet Service Provider, <a href="https://en.wikipedia.org/wiki/Internet_service_provider" target="_blank">Wikipedia</a> <a href="#fnref-isp" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-tier1" style="scroll-margin-top: 96px;">Tier 1 network, <a href="https://en.wikipedia.org/wiki/Tier_1_network" target="_blank">Wikipedia</a> <a href="#fnref-tier1" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-bgp" style="scroll-margin-top: 96px;">Border Gateway Protocol, <a href="https://en.wikipedia.org/wiki/Border_Gateway_Protocol" target="_blank">Wikipedia</a> <a href="#fnref-bgp" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/ixp-internet-exchange-point">IXP — ISP들이 만나는 물리적 교차로 →</a> — 피어링이 실제로 일어나는 물리적 공간</li>
+<li><a href="/post/cdn-content-delivery-network">CDN — 콘텐츠를 가장 빠른 경로로 전달하는 방법 →</a> — ISP 네트워크 위에서 작동하는 콘텐츠 배포 전략</li>
+<li><a href="/post/circuit-vs-packet-switching">회선 교환 vs 패킷 교환 →</a> — 인터넷이 선택한 데이터 전달 방식</li>
+</ul>
+<hr>
+
+<ul><li>Network</li><li>ISP</li><li>Tier1</li><li>Tier2</li><li>Transit</li><li>Peering</li><li>BGP</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

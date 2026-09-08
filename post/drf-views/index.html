@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="DRF의 뷰 계층을 APIView부터 ModelViewSet까지 단계별로 설명한다. 각 레벨의 코드량 차이, ViewSet이 Router와 어떻게 URL을 자동 생성하는지, 언제 어떤 클래스를 선택해야 하는지 기준을 제시한다." />
+    <meta name="keywords" content="Django, DRF, APIView, ViewSet, Router, GenericAPIView, ModelViewSet, CRUD, REST, Python" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/drf-views" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router" />
+    <meta property="og:description" content="DRF의 뷰 계층을 APIView부터 ModelViewSet까지 단계별로 설명한다. 각 레벨의 코드량 차이, ViewSet이 Router와 어떻게 URL을 자동 생성하는지, 언제 어떤 클래스를 선택해야 하는지 기준을 제시한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/drf-views" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.213Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="DRF" />
+    <meta property="article:tag" content="APIView" />
+    <meta property="article:tag" content="ViewSet" />
+    <meta property="article:tag" content="Router" />
+    <meta property="article:tag" content="GenericAPIView" />
+    <meta property="article:tag" content="ModelViewSet" />
+    <meta property="article:tag" content="CRUD" />
+    <meta property="article:tag" content="REST" />
+    <meta property="article:tag" content="Python" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router" />
+    <meta name="twitter:description" content="DRF의 뷰 계층을 APIView부터 ModelViewSet까지 단계별로 설명한다. 각 레벨의 코드량 차이, ViewSet이 Router와 어떻게 URL을 자동 생성하는지, 언제 어떤 클래스를 선택해야 하는지 기준을 제시한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router","description":"DRF의 뷰 계층을 APIView부터 ModelViewSet까지 단계별로 설명한다. 각 레벨의 코드량 차이, ViewSet이 Router와 어떻게 URL을 자동 생성하는지, 언제 어떤 클래스를 선택해야 하는지 기준을 제시한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.213Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/drf-views"},"keywords":"Django, DRF, APIView, ViewSet, Router, GenericAPIView, ModelViewSet, CRUD, REST, Python","articleSection":"django","inLanguage":"ko-KR","wordCount":10633},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router","item":"https://seobway23.github.io/post/drf-views"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>django</span></nav>
+<h1>DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router</h1>
+<p>DRF의 뷰 계층을 APIView부터 ModelViewSet까지 단계별로 설명한다. 각 레벨의 코드량 차이, ViewSet이 Router와 어떻게 URL을 자동 생성하는지, 언제 어떤 클래스를 선택해야 하는지 기준을 제시한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-04-03T00:00:00.000Z">2026-04-03</time> · <span>14분</span></p>
+<h2>DRF 뷰 계층 구조</h2>
+<p>DRF는 뷰를 여러 레벨로 제공한다. 위로 올라갈수록 코드가 줄어들고, 아래로 내려올수록 유연성이 높아진다.</p>
+<pre><code>APIView                  ← 가장 유연, 모든 것 직접 구현
+  └─ GenericAPIView      ← queryset, serializer_class 연결
+       └─ Mixins         ← list, create, retrieve, update, destroy 행동 단위
+            └─ Generic Views  ← Mixin 조합 (ListCreateAPIView 등)
+                 └─ ViewSet   ← URL action 기반 뷰 묶음
+                      └─ ModelViewSet  ← CRUD 완성
+</code></pre>
+<hr>
+<h2>시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>순서</th>
+<th>제목</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>7</td>
+<td>DRF 기초</td>
+<td>Serializer, ModelSerializer</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td><strong>DRF Views</strong> ←</td>
+<td><strong>APIView, ViewSet, Router</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>DRF 인증</td>
+<td>Token, JWT, SimpleJWT</td>
+</tr>
+<tr>
+<td>10</td>
+<td>DRF Serializer 검증 심화</td>
+<td>validate_<field>, 3단계 검증</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Django 객체 레벨 권한</td>
+<td>Owner, 팀 기반 접근 제어</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>@api_view — 함수형 뷰</h2>
+<p>가장 간단한 형태. 함수형 뷰에 DRF 기능을 붙인다.</p>
+<pre><code class="language-python">from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Task
+from .serializers import TaskSerializer
+
+@api_view([&#39;GET&#39;, &#39;POST&#39;])
+@permission_classes([IsAuthenticated])
+def task_list(request):
+    if request.method == &#39;GET&#39;:
+        tasks = Task.objects.filter(created_by=request.user)
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+
+    elif request.method == &#39;POST&#39;:
+        serializer = TaskSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+</code></pre>
+<p><strong>언제 쓰나:</strong> 빠른 프로토타입, 단일 엔드포인트, 메서드 로직이 복잡할 때.</p>
+<hr>
+<h2>APIView — 클래스 기반 기본</h2>
+<p>HTTP 메서드(get, post, put, delete)를 클래스 메서드로 분리한다.<br>인증, 권한, 파싱, 렌더링이 자동으로 처리된다.</p>
+<pre><code class="language-python">from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+
+class TaskListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        tasks = Task.objects.filter(created_by=request.user)
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = TaskSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TaskDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk, user):
+        try:
+            return Task.objects.get(pk=pk, created_by=user)
+        except Task.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        task = self.get_object(pk, request.user)
+        serializer = TaskSerializer(task)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        task = self.get_object(pk, request.user)
+        serializer = TaskSerializer(task, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        task = self.get_object(pk, request.user)
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+</code></pre>
+<p><strong>언제 쓰나:</strong> 비즈니스 로직이 복잡해서 제네릭 뷰에 맞지 않을 때. 예외적인 쿼리, 다중 시리얼라이저.</p>
+<hr>
+<h2>GenericAPIView + Mixins</h2>
+<p><code>GenericAPIView</code>에 <code>queryset</code>과 <code>serializer_class</code>를 선언하고, Mixin으로 행동을 붙인다.</p>
+<pre><code class="language-python">from rest_framework import generics, mixins
+
+class TaskListView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    generics.GenericAPIView,
+):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # 현재 사용자의 태스크만
+        return Task.objects.filter(created_by=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+</code></pre>
+<p>Mixin 종류:</p>
+<table>
+<thead>
+<tr>
+<th>Mixin</th>
+<th>제공하는 메서드</th>
+<th>HTTP 동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ListModelMixin</code></td>
+<td><code>list()</code></td>
+<td>GET (목록)</td>
+</tr>
+<tr>
+<td><code>CreateModelMixin</code></td>
+<td><code>create()</code></td>
+<td>POST</td>
+</tr>
+<tr>
+<td><code>RetrieveModelMixin</code></td>
+<td><code>retrieve()</code></td>
+<td>GET (단건)</td>
+</tr>
+<tr>
+<td><code>UpdateModelMixin</code></td>
+<td><code>update()</code>, <code>partial_update()</code></td>
+<td>PUT, PATCH</td>
+</tr>
+<tr>
+<td><code>DestroyModelMixin</code></td>
+<td><code>destroy()</code></td>
+<td>DELETE</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Generic Views — Mixin 조합</h2>
+<p>자주 쓰는 Mixin 조합을 미리 만들어놓은 뷰들이다.</p>
+<pre><code class="language-python">from rest_framework import generics
+
+# GET(목록) + POST
+class TaskListView(generics.ListCreateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(created_by=self.request.user)
+
+    def perform_create(self, serializer):
+        # save() 호출 직전 — 추가 데이터 주입
+        serializer.save(created_by=self.request.user)
+
+
+# GET(단건) + PUT + PATCH + DELETE
+class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+</code></pre>
+<p>Generic Views 전체 목록:</p>
+<table>
+<thead>
+<tr>
+<th>클래스</th>
+<th>지원 메서드</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ListAPIView</code></td>
+<td>GET (목록)</td>
+</tr>
+<tr>
+<td><code>CreateAPIView</code></td>
+<td>POST</td>
+</tr>
+<tr>
+<td><code>RetrieveAPIView</code></td>
+<td>GET (단건)</td>
+</tr>
+<tr>
+<td><code>UpdateAPIView</code></td>
+<td>PUT, PATCH</td>
+</tr>
+<tr>
+<td><code>DestroyAPIView</code></td>
+<td>DELETE</td>
+</tr>
+<tr>
+<td><code>ListCreateAPIView</code></td>
+<td>GET, POST</td>
+</tr>
+<tr>
+<td><code>RetrieveUpdateAPIView</code></td>
+<td>GET, PUT, PATCH</td>
+</tr>
+<tr>
+<td><code>RetrieveDestroyAPIView</code></td>
+<td>GET, DELETE</td>
+</tr>
+<tr>
+<td><code>RetrieveUpdateDestroyAPIView</code></td>
+<td>GET, PUT, PATCH, DELETE</td>
+</tr>
+</tbody></table>
+<p><strong>언제 쓰나:</strong> 표준 CRUD에 약간의 커스터마이징이 필요할 때. <code>get_queryset()</code>, <code>perform_create()</code> 오버라이드로 대부분 처리 가능.</p>
+<hr>
+<h2>perform_create / perform_update / perform_destroy</h2>
+<p>Generic Views의 훅 메서드. <code>save()</code> 직전에 호출되어 추가 데이터를 주입하거나 사이드 이펙트를 처리한다.</p>
+<pre><code class="language-python">class TaskListView(generics.ListCreateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+
+    def perform_create(self, serializer):
+        # 현재 사용자를 created_by로 자동 설정
+        serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    def perform_destroy(self, instance):
+        # 실제 삭제 대신 soft delete
+        instance.is_deleted = True
+        instance.save()
+</code></pre>
+<hr>
+<h2>ViewSet — action 기반</h2>
+<p>ViewSet은 연관된 뷰들을 하나의 클래스로 묶는다.<br>HTTP 메서드가 아닌 <strong>action</strong>(<code>list</code>, <code>create</code>, <code>retrieve</code>, <code>update</code>, <code>destroy</code>) 이름으로 메서드를 정의한다.</p>
+<pre><code class="language-python">from rest_framework import viewsets
+from rest_framework.response import Response
+
+class TaskViewSet(viewsets.ViewSet):
+    &quot;&quot;&quot;직접 구현하는 ViewSet&quot;&quot;&quot;
+
+    def list(self, request):
+        &quot;&quot;&quot;GET /tasks/&quot;&quot;&quot;
+        tasks = Task.objects.filter(created_by=request.user)
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        &quot;&quot;&quot;POST /tasks/&quot;&quot;&quot;
+        serializer = TaskSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=request.user)
+        return Response(serializer.data, status=201)
+
+    def retrieve(self, request, pk=None):
+        &quot;&quot;&quot;GET /tasks/{pk}/&quot;&quot;&quot;
+        task = get_object_or_404(Task, pk=pk, created_by=request.user)
+        serializer = TaskSerializer(task)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        &quot;&quot;&quot;PUT /tasks/{pk}/&quot;&quot;&quot;
+        ...
+
+    def partial_update(self, request, pk=None):
+        &quot;&quot;&quot;PATCH /tasks/{pk}/&quot;&quot;&quot;
+        ...
+
+    def destroy(self, request, pk=None):
+        &quot;&quot;&quot;DELETE /tasks/{pk}/&quot;&quot;&quot;
+        ...
+</code></pre>
+<hr>
+<h2>ModelViewSet — CRUD 완성</h2>
+<p><code>ModelViewSet</code>은 <code>queryset</code>과 <code>serializer_class</code>만 선언하면 5개 action을 모두 자동으로 구현한다.</p>
+<pre><code class="language-python">from rest_framework import viewsets, permissions
+
+class TaskViewSet(viewsets.ModelViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(
+            created_by=self.request.user
+        ).select_related(&#39;category&#39;).prefetch_related(&#39;tags&#39;)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+</code></pre>
+<p>이 15줄이 아래 모든 엔드포인트를 처리한다:</p>
+<pre><code>GET    /tasks/          → list
+POST   /tasks/          → create
+GET    /tasks/{pk}/     → retrieve
+PUT    /tasks/{pk}/     → update
+PATCH  /tasks/{pk}/     → partial_update
+DELETE /tasks/{pk}/     → destroy
+</code></pre>
+<hr>
+<h2>Router — URL 자동 생성</h2>
+<p>ViewSet과 Router를 연결하면 URL을 수동으로 작성할 필요가 없다.</p>
+<pre><code class="language-python"># tasks/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import TaskViewSet, CategoryViewSet
+
+router = DefaultRouter()
+router.register(&#39;tasks&#39;, TaskViewSet, basename=&#39;task&#39;)
+router.register(&#39;categories&#39;, CategoryViewSet, basename=&#39;category&#39;)
+
+urlpatterns = [
+    path(&#39;&#39;, include(router.urls)),
+]
+</code></pre>
+<p><code>DefaultRouter</code>가 생성하는 URL:</p>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>메서드</th>
+<th>Action</th>
+<th>URL Name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/tasks/</code></td>
+<td>GET</td>
+<td>list</td>
+<td><code>task-list</code></td>
+</tr>
+<tr>
+<td><code>/tasks/</code></td>
+<td>POST</td>
+<td>create</td>
+<td><code>task-list</code></td>
+</tr>
+<tr>
+<td><code>/tasks/{pk}/</code></td>
+<td>GET</td>
+<td>retrieve</td>
+<td><code>task-detail</code></td>
+</tr>
+<tr>
+<td><code>/tasks/{pk}/</code></td>
+<td>PUT</td>
+<td>update</td>
+<td><code>task-detail</code></td>
+</tr>
+<tr>
+<td><code>/tasks/{pk}/</code></td>
+<td>PATCH</td>
+<td>partial_update</td>
+<td><code>task-detail</code></td>
+</tr>
+<tr>
+<td><code>/tasks/{pk}/</code></td>
+<td>DELETE</td>
+<td>destroy</td>
+<td><code>task-detail</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>@action — 커스텀 엔드포인트</h2>
+<p>CRUD 외에 비즈니스 액션이 필요하면 <code>@action</code> 데코레이터를 쓴다.</p>
+<pre><code class="language-python">from rest_framework.decorators import action
+from rest_framework.response import Response
+
+class TaskViewSet(viewsets.ModelViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(created_by=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=[&#39;post&#39;])
+    def complete(self, request, pk=None):
+        &quot;&quot;&quot;POST /tasks/{pk}/complete/ — 태스크 완료 처리&quot;&quot;&quot;
+        task = self.get_object()
+        task.status = Task.STATUS_DONE
+        task.save()
+        serializer = self.get_serializer(task)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=[&#39;post&#39;])
+    def reopen(self, request, pk=None):
+        &quot;&quot;&quot;POST /tasks/{pk}/reopen/ — 태스크 재개&quot;&quot;&quot;
+        task = self.get_object()
+        task.status = Task.STATUS_TODO
+        task.save()
+        return Response({&#39;status&#39;: &#39;reopened&#39;})
+
+    @action(detail=False, methods=[&#39;get&#39;])
+    def overdue(self, request):
+        &quot;&quot;&quot;GET /tasks/overdue/ — 마감 초과 태스크 목록&quot;&quot;&quot;
+        from django.utils import timezone
+        today = timezone.now().date()
+        tasks = self.get_queryset().filter(
+            due_date__lt=today,
+            status__in=[Task.STATUS_TODO, Task.STATUS_IN_PROGRESS],
+        )
+        serializer = self.get_serializer(tasks, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=[&#39;get&#39;])
+    def stats(self, request):
+        &quot;&quot;&quot;GET /tasks/stats/ — 상태별 통계&quot;&quot;&quot;
+        qs = self.get_queryset()
+        return Response({
+            &#39;total&#39;: qs.count(),
+            &#39;todo&#39;: qs.filter(status=Task.STATUS_TODO).count(),
+            &#39;in_progress&#39;: qs.filter(status=Task.STATUS_IN_PROGRESS).count(),
+            &#39;done&#39;: qs.filter(status=Task.STATUS_DONE).count(),
+        })
+</code></pre>
+<p><code>@action(detail=True)</code>는 <code>tasks/{pk}/complete/</code>처럼 특정 객체 액션이고,<br><code>@action(detail=False)</code>는 <code>tasks/overdue/</code>처럼 컬렉션 액션이다.</p>
+<hr>
+<h2>뷰 선택 기준</h2>
+<table>
+<thead>
+<tr>
+<th>상황</th>
+<th>선택</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>비표준 로직, 다중 모델, 복잡한 쿼리</td>
+<td><code>APIView</code></td>
+</tr>
+<tr>
+<td>표준 CRUD + 약간의 커스터마이징</td>
+<td><code>GenericAPIView</code> / Generic Views</td>
+</tr>
+<tr>
+<td>완전 표준 CRUD</td>
+<td><code>ModelViewSet</code></td>
+</tr>
+<tr>
+<td>CRUD 일부만 노출 (조회만, 생성만)</td>
+<td><code>ReadOnlyModelViewSet</code>, 또는 개별 Mixin 조합</td>
+</tr>
+<tr>
+<td>커스텀 액션 필요</td>
+<td><code>ModelViewSet</code> + <code>@action</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>get_serializer_class — 상황별 다른 Serializer</h2>
+<p>목록 조회와 상세 조회에서 다른 시리얼라이저를 쓰고 싶을 때:</p>
+<pre><code class="language-python">class TaskViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == &#39;list&#39;:
+            return TaskListSerializer    # 경량 버전
+        return TaskDetailSerializer      # 상세 버전
+
+    def get_queryset(self):
+        qs = Task.objects.filter(created_by=self.request.user)
+        if self.action == &#39;list&#39;:
+            return qs.select_related(&#39;category&#39;)
+        return qs.select_related(&#39;category&#39;).prefetch_related(&#39;tags&#39;, &#39;comments&#39;)
+</code></pre>
+<hr>
+<h2>마치며</h2>
+<p>DRF Views 핵심 요약:</p>
+<ul>
+<li><code>APIView</code> — 가장 유연, 모든 것 직접 구현</li>
+<li><code>GenericAPIView</code> + Mixin — 표준 행동을 조합</li>
+<li>Generic Views — 자주 쓰는 조합을 미리 만들어놓은 것</li>
+<li><code>ModelViewSet</code> + Router — CRUD + URL 자동 생성, 가장 생산적</li>
+<li><code>@action</code> — CRUD 외 커스텀 엔드포인트 추가</li>
+<li><code>get_serializer_class()</code> — 액션별로 다른 시리얼라이저 선택</li>
+</ul>
+<hr>
+<h2>참고</h2>
+<ol>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/drf-authentication">DRF 인증 →</a> — Token, JWT, SimpleJWT</li>
+<li><a href="/post/drf-serializer-validation">DRF Serializer 검증 심화 →</a></li>
+</ul>
+
+<ul><li>Django</li><li>DRF</li><li>APIView</li><li>ViewSet</li><li>Router</li><li>GenericAPIView</li><li>ModelViewSet</li><li>CRUD</li><li>REST</li><li>Python</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

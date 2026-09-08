@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Docker Compose로 Django 5개 서비스 띄우기 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="MySQL, Redis, Django(Gunicorn), Celery Worker, Celery Beat — 5개 서비스를 docker-compose.yml 하나로 올리는 실전 구성과 자주 막히는 포인트를 설명한다." />
+    <meta name="keywords" content="Docker, DockerCompose, Django, MySQL, Redis, Celery, Gunicorn, DevOps" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/docker-compose-django" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Docker Compose로 Django 5개 서비스 띄우기" />
+    <meta property="og:description" content="MySQL, Redis, Django(Gunicorn), Celery Worker, Celery Beat — 5개 서비스를 docker-compose.yml 하나로 올리는 실전 구성과 자주 막히는 포인트를 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/docker-compose-django" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-26T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.351Z" />
+    <meta property="article:tag" content="Docker" />
+    <meta property="article:tag" content="DockerCompose" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="MySQL" />
+    <meta property="article:tag" content="Redis" />
+    <meta property="article:tag" content="Celery" />
+    <meta property="article:tag" content="Gunicorn" />
+    <meta property="article:tag" content="DevOps" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Docker Compose로 Django 5개 서비스 띄우기" />
+    <meta name="twitter:description" content="MySQL, Redis, Django(Gunicorn), Celery Worker, Celery Beat — 5개 서비스를 docker-compose.yml 하나로 올리는 실전 구성과 자주 막히는 포인트를 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Docker Compose로 Django 5개 서비스 띄우기","description":"MySQL, Redis, Django(Gunicorn), Celery Worker, Celery Beat — 5개 서비스를 docker-compose.yml 하나로 올리는 실전 구성과 자주 막히는 포인트를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-26T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.351Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/docker-compose-django"},"keywords":"Docker, DockerCompose, Django, MySQL, Redis, Celery, Gunicorn, DevOps","articleSection":"infra","inLanguage":"ko-KR","wordCount":5150},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"infra","item":"https://seobway23.github.io/?category=study%2Finfra"},{"@type":"ListItem","position":3,"name":"Docker Compose로 Django 5개 서비스 띄우기","item":"https://seobway23.github.io/post/docker-compose-django"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>infra</span></nav>
+<h1>Docker Compose로 Django 5개 서비스 띄우기</h1>
+<p>MySQL, Redis, Django(Gunicorn), Celery Worker, Celery Beat — 5개 서비스를 docker-compose.yml 하나로 올리는 실전 구성과 자주 막히는 포인트를 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-26T00:00:00.000Z">2026-03-26</time> · <span>15분</span></p>
+<h2>구성 목표</h2>
+<p>로컬 개발 환경에서 다음 5개 서비스를 한 번에 올린다.</p>
+<table>
+<thead>
+<tr>
+<th>서비스</th>
+<th>역할</th>
+<th>이미지</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>db</code></td>
+<td>MySQL 8.0 데이터베이스</td>
+<td><code>mysql:8.0</code></td>
+</tr>
+<tr>
+<td><code>redis</code></td>
+<td>메시지 브로커 / 캐시</td>
+<td><code>redis:7-alpine</code></td>
+</tr>
+<tr>
+<td><code>web</code></td>
+<td>Django + Gunicorn</td>
+<td>로컬 Dockerfile</td>
+</tr>
+<tr>
+<td><code>worker</code></td>
+<td>Celery Worker</td>
+<td>로컬 Dockerfile</td>
+</tr>
+<tr>
+<td><code>beat</code></td>
+<td>Celery Beat 스케줄러</td>
+<td>로컬 Dockerfile</td>
+</tr>
+</tbody></table>
+<pre><code class="language-mermaid">%% desc: 5개 서비스의 의존 관계 — db/redis가 먼저 healthy 상태가 돼야 나머지가 시작
+flowchart TD
+  subgraph INFRA[&quot;인프라 레이어&quot;]
+    DB[&quot;db\n(MySQL 8.0)\nPort: 3306&quot;]
+    REDIS[&quot;redis\n(Redis 7)\nPort: 6379&quot;]
+  end
+
+  subgraph APP[&quot;애플리케이션 레이어&quot;]
+    WEB[&quot;web\n(Django + Gunicorn)\nPort: 8000&quot;]
+    WORKER[&quot;worker\n(Celery Worker)&quot;]
+    BEAT[&quot;beat\n(Celery Beat)&quot;]
+  end
+
+  DB -- &quot;healthcheck 통과 후&quot; --&gt; WEB &amp; WORKER &amp; BEAT
+  REDIS -- &quot;healthcheck 통과 후&quot; --&gt; WEB &amp; WORKER &amp; BEAT
+  WEB -- &quot;태스크 발행&quot; --&gt; REDIS
+  BEAT -- &quot;스케줄 발행&quot; --&gt; REDIS
+  REDIS -- &quot;태스크 전달&quot; --&gt; WORKER
+  WEB &amp; WORKER -- &quot;DB 읽기/쓰기&quot; --&gt; DB
+</code></pre>
+<h2>파일 구조</h2>
+<pre><code>myproject/
+├── docker-compose.yml
+├── Dockerfile
+├── .env                 ← Compose 변수 치환용 (WEB_PORT 등)
+├── .env.local           ← 컨테이너 환경변수 (시크릿, DB URL 등)
+├── requirements.txt
+└── config/
+    └── settings/
+        ├── base.py
+        ├── local.py
+        └── production.py
+</code></pre>
+<h2>docker-compose.yml</h2>
+<pre><code class="language-yaml">version: &quot;3.9&quot;
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: pms_v3-mysql
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-h&quot;, &quot;localhost&quot;]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    networks:
+      - pms_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: pms_v3-redis
+    restart: unless-stopped
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;redis-cli&quot;, &quot;ping&quot;]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - pms_network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pms_v3-web
+    restart: unless-stopped
+    ports:
+      - &quot;${WEB_PORT}:${WEB_PORT}&quot;
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+      - static_files:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: &gt;
+      gunicorn config.wsgi:application
+        --bind 0.0.0.0:${WEB_PORT}
+        --workers 2
+        --timeout 120
+    networks:
+      - pms_network
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pms_v3-worker
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config worker --loglevel=info -Q default
+    networks:
+      - pms_network
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pms_v3-beat
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: &gt;
+      celery -A config beat
+        --scheduler django_celery_beat.schedulers:DatabaseScheduler
+        --loglevel=info
+    networks:
+      - pms_network
+
+volumes:
+  mysql_data:
+  static_files:
+
+networks:
+  pms_network:
+    driver: bridge
+</code></pre>
+<h2>환경변수 파일 구성</h2>
+<h3>.env — Compose 변수 치환용</h3>
+<pre><code class="language-bash"># .env (git에 커밋 가능, 단순 포트/이름만)
+WEB_PORT=8000
+COMPOSE_PROJECT_NAME=pms_v3
+</code></pre>
+<h3>.env.local — 컨테이너 내부 환경변수용</h3>
+<pre><code class="language-bash"># .env.local (반드시 .gitignore에 추가!)
+
+# Django
+DJANGO_SETTINGS_MODULE=config.settings.local
+DJANGO_SECRET_KEY=your-secret-key-here-change-this
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+# MySQL (MySQL 컨테이너 초기화에도 사용)
+MYSQL_DATABASE=pms_db
+MYSQL_USER=pms_user
+MYSQL_PASSWORD=pms_password
+MYSQL_ROOT_PASSWORD=root_password
+
+# DATABASE_URL (web, worker, beat 컨테이너용)
+# 호스트명 = MySQL 서비스 이름 (pms_v3-mysql)
+DATABASE_URL=mysql://pms_user:pms_password@pms_v3-mysql:3306/pms_db
+
+# Redis
+REDIS_URL=redis://pms_v3-redis:6379/0
+CELERY_BROKER_URL=redis://pms_v3-redis:6379/0
+CELERY_RESULT_BACKEND=redis://pms_v3-redis:6379/1
+</code></pre>
+<h2>Dockerfile</h2>
+<pre><code class="language-dockerfile">FROM python:3.12-slim
+
+# 시스템 패키지 (mysqlclient 빌드에 필요)
+RUN apt-get update &amp;&amp; apt-get install -y \
+    default-libmysqlclient-dev \
+    gcc \
+    pkg-config \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+</code></pre>
+<h2>실행 순서</h2>
+<pre><code class="language-bash"># 1. 첫 실행
+docker compose up -d
+
+# 2. 컨테이너 상태 확인 (db/redis가 healthy인지 확인)
+docker compose ps
+
+# 3. 마이그레이션
+docker compose exec web python manage.py migrate
+
+# 4. 정적 파일 수집
+docker compose exec web python manage.py collectstatic --noinput
+
+# 5. 슈퍼유저 생성
+docker compose exec web python manage.py createsuperuser
+</code></pre>
+<h2>자주 막히는 포인트</h2>
+<h3>1. DB 접속 에러 1045 (Access Denied)</h3>
+<pre><code>django.db.utils.OperationalError: (1045, &quot;Access denied for user &#39;pms_user&#39;@...&quot;)
+</code></pre>
+<p><strong>원인</strong>: 두 가지 중 하나</p>
+<pre><code class="language-mermaid">%% desc: DB 1045 에러의 두 가지 원인과 해결 흐름
+flowchart TD
+  ERR[&quot;1045 Access Denied&quot;]
+
+  A[&quot;원인 1: mysql_data 볼륨이 이미 존재\n이전 비밀번호로 초기화된 상태\n새 MYSQL_PASSWORD가 적용 안 됨&quot;]
+  B[&quot;원인 2: DATABASE_URL의 계정 정보와\nMYSQL_USER/MYSQL_PASSWORD 불일치&quot;]
+
+  SOL_A[&quot;해결: docker compose down -v\n볼륨 삭제 후 재시작&quot;]
+  SOL_B[&quot;해결: .env.local에서\nDATABASE_URL ↔ MYSQL_* 값 통일&quot;]
+
+  ERR --&gt; A &amp; B
+  A --&gt; SOL_A
+  B --&gt; SOL_B
+</code></pre>
+<pre><code class="language-bash"># 볼륨 포함 완전 초기화 (로컬 환경에서만)
+docker compose down -v
+docker compose up -d
+</code></pre>
+<h3>2. Compose 변수 치환 에러</h3>
+<pre><code>invalid interpolated value: mandatory variable &#39;WEB_PORT&#39; is not set
+</code></pre>
+<p>프로젝트 루트에 <code>.env</code> 파일이 없어서 발생.<br><code>env_file:</code>에 지정한 파일은 치환에 쓰이지 않는다.</p>
+<pre><code class="language-bash">echo &quot;WEB_PORT=8000&quot; &gt; .env
+docker compose up -d
+</code></pre>
+<h3>3. web이 DB보다 먼저 시작돼 연결 실패</h3>
+<p><code>depends_on</code>만 설정하고 <code>healthcheck</code>가 없으면 발생한다.<br>위 <code>docker-compose.yml</code>의 healthcheck 설정을 그대로 사용하면 해결된다.</p>
+<h2>참고</h2>
+<ol>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/docker-basics">Docker 기초 — Image, Container, Volume, Network →</a> — 서비스 구성의 기본 개념</li>
+<li><a href="/post/docker-compose-basics">Docker Compose 기초 — env_file, interpolation, depends_on →</a> — .env 파일 구분과 healthcheck 상세</li>
+<li><a href="/post/django-settings">Django settings 분리와 환경변수 관리 →</a> — DJANGO_SETTINGS_MODULE, django-environ, DATABASE_URL 설정법</li>
+</ul>
+<hr>
+
+<ul><li>Docker</li><li>DockerCompose</li><li>Django</li><li>MySQL</li><li>Redis</li><li>Celery</li><li>Gunicorn</li><li>DevOps</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

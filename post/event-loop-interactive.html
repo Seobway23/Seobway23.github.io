@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>이벤트 루프, 눈으로 따라가기 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다." />
+    <meta name="keywords" content="javascript, event-loop, 비동기" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/event-loop-interactive" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="이벤트 루프, 눈으로 따라가기" />
+    <meta property="og:description" content="콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/event-loop-interactive" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-09-07T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.298Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="event-loop" />
+    <meta property="article:tag" content="비동기" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="이벤트 루프, 눈으로 따라가기" />
+    <meta name="twitter:description" content="콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"이벤트 루프, 눈으로 따라가기","description":"콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-09-07T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.298Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/event-loop-interactive"},"keywords":"javascript, event-loop, 비동기","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":2275},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Fjs"},{"@type":"ListItem","position":3,"name":"이벤트 루프, 눈으로 따라가기","item":"https://seobway23.github.io/post/event-loop-interactive"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>이벤트 루프, 눈으로 따라가기</h1>
+<p>콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-07T00:00:00.000Z">2026-09-07</time> · <span>8분</span></p>
+<p>자바스크립트는 한 번에 하나만 실행한다. 그런데도 타이머와 네트워크 요청이 화면을 멈추지 않는다. 그 사이를 메우는 게 <strong>이벤트 루프</strong>다.</p>
+<p>말로 읽으면 헷갈린다. 아래를 직접 돌려 봐라. <code>▶</code> 를 누르거나, 상자를 클릭한 뒤 <code>→</code> 키를 눌러 한 단계씩 넘길 수 있다.</p>
+<p>인터랙티브 다이어그램: 이벤트 루프 한 바퀴 (단계별로 재생할 수 있다)</p><ol><li>스크립트가 실행되며 main()이 콜 스택에 올라간다.</li><li>console.log('A') 가 스택에 쌓이고 즉시 실행된다.</li><li>setTimeout 은 콜백을 브라우저(Web API)에 맡기고 바로 반환한다.</li><li>Promise.then 의 콜백은 마이크로태스크 큐로 예약된다.</li><li>타이머가 끝나 콜백이 태스크 큐로 넘어간다.</li><li>main() 이 끝나 콜 스택이 완전히 빈다.</li><li>스택이 비면 이벤트 루프는 마이크로태스크 큐부터 전부 비운다.</li><li>그 다음에야 태스크 큐에서 하나를 꺼낸다.</li><li>큐가 모두 비었다. 다음 틱을 기다린다.</li></ol>
+<hr>
+<h2>순서를 만드는 규칙 세 가지</h2>
+<p><div class="post-tabs" data-post-tabs data-post-tabs-id="post-tabs-0"><div class="post-tabs__list" role="tablist"><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-0" aria-selected="true" aria-controls="post-tabs-0-panel-0" tabindex="0" data-tab-index="0">콜 스택</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-1" aria-selected="false" aria-controls="post-tabs-0-panel-1" tabindex="-1" data-tab-index="1">마이크로태스크 큐</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-2" aria-selected="false" aria-controls="post-tabs-0-panel-2" tabindex="-1" data-tab-index="2">태스크 큐</button></div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-0" aria-labelledby="post-tabs-0-tab-0" data-panel-index="0"><p>함수를 호출하면 스택에 쌓이고, 반환하면 빠진다. <strong>스택이 비어야만</strong> 이벤트 루프가 큐를 들여다본다.</p>
+<p>그래서 무거운 동기 루프 하나가 타이머 전부를 밀어버린다.</p>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-1" aria-labelledby="post-tabs-0-tab-1" data-panel-index="1" hidden><p><code>Promise.then</code>, <code>queueMicrotask</code>, <code>await</code> 뒤의 코드가 여기 들어간다.</p>
+<p>스택이 비면 <strong>큐가 완전히 빌 때까지</strong> 연달아 실행한다. 중간에 태스크 큐로 넘어가지 않는다.</p>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-2" aria-labelledby="post-tabs-0-tab-2" data-panel-index="2" hidden><p><code>setTimeout</code>, <code>setInterval</code>, DOM 이벤트 콜백이 여기 들어간다.</p>
+<p>마이크로태스크를 전부 비운 <strong>뒤에</strong>, 한 번에 <strong>하나만</strong> 꺼낸다. 그리고 다시 마이크로태스크부터 확인한다.</p>
+</div></div></p>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p><code>setTimeout(fn, 0)</code> 은 &quot;지금 당장&quot;이 아니라 &quot;가능한 가장 빠른 다음 태스크&quot;다. 마이크로태스크가 남아 있으면 그것들이 먼저다.</p>
+</div></div></aside></p>
+<p><div class="post-split" data-cols="2"><div class="post-split__col"><div class="post-split__label">무슨 일이 일어나는가</div><p><code>await</code> 는 문법 설탕이다. 오른쪽 코드는 아래와 같이 읽어야 한다.</p>
+<ul>
+<li><code>await</code> 를 만나면 함수가 <strong>거기서 멈추고 반환</strong>한다.</li>
+<li>나머지 몸통은 <code>.then</code> 콜백이 되어 <strong>마이크로태스크 큐</strong>로 간다.</li>
+<li>그래서 <code>await</code> 뒤 줄은 <code>setTimeout(…, 0)</code> 보다 항상 먼저 실행된다.</li>
+</ul>
+</div><div class="post-split__col"><div class="post-split__label">코드</div><pre><code class="language-js">async function run() {
+  console.log(&quot;1&quot;);
+  await null;        // ← 여기서 반환
+  console.log(&quot;3&quot;);  // ← 마이크로태스크로 예약
+}
+
+run();
+console.log(&quot;2&quot;);
+</code></pre>
+</div></div></p>
+<hr>
+<h2>직접 고쳐 보기</h2>
+<p>아래 코드의 출력 순서를 먼저 예측하고, 실행해서 맞는지 확인해라. 값을 바꿔 가며 다시 돌려도 된다 (<code>Ctrl+Enter</code>).</p>
+<pre><code class="language-playground">console.log(&quot;1 동기&quot;);
+
+setTimeout(() =&gt; console.log(&quot;4 타이머&quot;), 0);
+
+Promise.resolve().then(() =&gt; console.log(&quot;3 마이크로태스크&quot;));
+
+console.log(&quot;2 동기&quot;);
+</code></pre>
+<p>버튼을 눌러 무거운 동기 루프를 돌려 보면, 그 동안 타이머가 밀리는 걸 눈으로 볼 수 있다.</p>
+<pre><code class="language-playground">import { useState } from &quot;react&quot;;
+
+export default function App() {
+  const [log, setLog] = useState([]);
+  const add = (m) =&gt; setLog((prev) =&gt; [...prev, m]);
+
+  const run = () =&gt; {
+    setLog([]);
+    add(&quot;시작&quot;);
+    setTimeout(() =&gt; add(&quot;타이머 콜백 (0ms 로 예약했다)&quot;), 0);
+    const until = Date.now() + 600;
+    while (Date.now() &lt; until) {} // 동기로 600ms 점거
+    add(&quot;동기 루프 끝 — 이제야 스택이 빈다&quot;);
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={run}&gt;600ms 막고 타이머 보기&lt;/button&gt;
+      &lt;ul&gt;{log.map((l, i) =&gt; &lt;li key={i}&gt;{l}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<hr>
+<h2>정리</h2>
+<p><div class="post-grid" data-cols="3"><div class="post-grid__card"><div class="post-grid__title">스택이 먼저다</div><p>큐는 스택이 빈 뒤에야 열린다. 동기 코드가 길면 비동기도 늦는다.</p>
+</div><div class="post-grid__card"><div class="post-grid__title">마이크로 &gt; 매크로</div><p>마이크로태스크 큐를 다 비운 다음에 태스크 큐를 하나 꺼낸다.</p>
+</div><div class="post-grid__card"><div class="post-grid__title">하나씩</div><p>태스크는 한 번에 하나. 그 사이마다 렌더 기회가 생긴다.</p>
+</div></div></p>
+<ul>
+<li><input disabled="" type="checkbox"> 스택이 비어야 큐를 본다는 걸 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>Promise.then</code> 과 <code>setTimeout(…, 0)</code> 의 순서를 예측할 수 있다</li>
+<li><input disabled="" type="checkbox"> 마이크로태스크가 무한히 쌓이면 왜 화면이 멈추는지 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Event_loop" target="_blank">[1] Event loop — MDN Web Docs</a></li>
+<li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#event-loops" target="_blank">[2] Event loops — HTML Standard (WHATWG)</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-query-overview">React Query 개요 →</a></li>
+</ul>
+
+<ul><li>javascript</li><li>event-loop</li><li>비동기</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

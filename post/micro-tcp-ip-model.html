@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>TCP/IP 참조 모델 — 현재 인터넷의 실질적 표준 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="현재 인터넷이 실제로 사용하는 4계층 TCP/IP 모델. ARPANET에서 시작해 DoD 표준을 거쳐 전 세계 인터넷의 기반이 된 과정과 OSI 7계층과의 차이를 설명한다." />
+    <meta name="keywords" content="TCP/IP Model, Internet Model, DoD Model, RFC 1122, ARPANET, Network Architecture" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/micro-tcp-ip-model" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="TCP/IP 참조 모델 — 현재 인터넷의 실질적 표준" />
+    <meta property="og:description" content="현재 인터넷이 실제로 사용하는 4계층 TCP/IP 모델. ARPANET에서 시작해 DoD 표준을 거쳐 전 세계 인터넷의 기반이 된 과정과 OSI 7계층과의 차이를 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/micro-tcp-ip-model" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.456Z" />
+    <meta property="article:tag" content="TCP/IP Model" />
+    <meta property="article:tag" content="Internet Model" />
+    <meta property="article:tag" content="DoD Model" />
+    <meta property="article:tag" content="RFC 1122" />
+    <meta property="article:tag" content="ARPANET" />
+    <meta property="article:tag" content="Network Architecture" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TCP/IP 참조 모델 — 현재 인터넷의 실질적 표준" />
+    <meta name="twitter:description" content="현재 인터넷이 실제로 사용하는 4계층 TCP/IP 모델. ARPANET에서 시작해 DoD 표준을 거쳐 전 세계 인터넷의 기반이 된 과정과 OSI 7계층과의 차이를 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TCP/IP 참조 모델 — 현재 인터넷의 실질적 표준","description":"현재 인터넷이 실제로 사용하는 4계층 TCP/IP 모델. ARPANET에서 시작해 DoD 표준을 거쳐 전 세계 인터넷의 기반이 된 과정과 OSI 7계층과의 차이를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.456Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-tcp-ip-model"},"keywords":"TCP/IP Model, Internet Model, DoD Model, RFC 1122, ARPANET, Network Architecture","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":3369},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"TCP/IP 참조 모델 — 현재 인터넷의 실질적 표준","item":"https://seobway23.github.io/post/micro-tcp-ip-model"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>네트워크</span></nav>
+<h1>TCP/IP 참조 모델 — 현재 인터넷의 실질적 표준</h1>
+<p>현재 인터넷이 실제로 사용하는 4계층 TCP/IP 모델. ARPANET에서 시작해 DoD 표준을 거쳐 전 세계 인터넷의 기반이 된 과정과 OSI 7계층과의 차이를 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-25T00:00:00.000Z">2026-03-25</time> · <span>10분</span></p>
+<h2>TCP/IP 모델이란</h2>
+<p><a href="/post/micro-osi-7layer">OSI 7계층 모델</a>이 이론적 표준이라면,<br><strong>TCP/IP 모델</strong>은 실제 인터넷에서 사용되는 실용 표준이다.<sup id="fnref-tcpip-model" style="scroll-margin-top: 96px;"><a href="#fn-tcpip-model" aria-label="각주 1">[1]</a></sup></p>
+<p>1969년 ARPANET에서 출발해, 1982년 미국 국방부(DoD) 공식 표준으로 채택됐고,<br>1983년 플래그 데이(Flag Day)에 모든 ARPANET 노드가 일제히 전환하면서<br>현재 인터넷의 실질적 기반이 됐다.</p>
+<p>OSI 7계층을 4계층으로 압축한 구조이며,<br><strong>DoD 모델(Department of Defense Model)</strong>이라고도 불린다.</p>
+<h2>4계층 구조</h2>
+<pre><code class="language-mermaid">%% desc: TCP/IP 4계층 모델의 계층 구성과 각 계층의 역할 및 대표 프로토콜
+flowchart TD
+  subgraph TCPIP[&quot;TCP/IP 4계층&quot;]
+    direction TB
+    L4[&quot;4. 응용 (Application)\nHTTP, HTTPS, DNS, FTP, SMTP, SSH\n사용자 서비스, 데이터 형식, 세션 통합&quot;]
+    L3[&quot;3. 전송 (Transport)\nTCP, UDP\n프로세스 간 통신, 신뢰성·속도 선택&quot;]
+    L2[&quot;2. 인터넷 (Internet)\nIP, ICMP, ARP, OSPF, BGP\n논리 주소, 라우팅, 패킷 전달&quot;]
+    L1[&quot;1. 네트워크 접근 (Network Access)\nEthernet, Wi-Fi, PPP\n물리 전송, 프레임, MAC 주소&quot;]
+  end
+
+  L4 --- L3 --- L2 --- L1
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>TCP/IP 계층</th>
+<th>OSI 대응</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>응용</td>
+<td>5, 6, 7계층</td>
+<td>사용자 애플리케이션, 세션, 데이터 표현</td>
+</tr>
+<tr>
+<td>전송</td>
+<td>4계층</td>
+<td>프로세스 간 통신, TCP/UDP</td>
+</tr>
+<tr>
+<td>인터넷</td>
+<td>3계층</td>
+<td>논리 주소 지정, 라우팅, IP</td>
+</tr>
+<tr>
+<td>네트워크 접근</td>
+<td>1, 2계층</td>
+<td>물리 전송, 프레임, 매체 접근</td>
+</tr>
+</tbody></table>
+<h2>각 계층 상세</h2>
+<h3>4계층 — 응용 (Application)</h3>
+<p>OSI의 5(세션) + 6(표현) + 7(응용) 계층을 하나로 통합했다.<br>애플리케이션 개발자가 직접 다루는 계층이다.</p>
+<p>대표 프로토콜:</p>
+<ul>
+<li><strong><a href="/post/micro-http-https">HTTP/HTTPS</a></strong>: 웹 문서 전송 (포트 80, 443)</li>
+<li><strong>DNS</strong>: 도메인 → IP 변환 (포트 53)</li>
+<li><strong>FTP</strong>: 파일 전송 (포트 20, 21)</li>
+<li><strong>SMTP/IMAP</strong>: 이메일 전송/수신 (포트 25, 143)</li>
+<li><strong>SSH</strong>: 원격 접속 (포트 22)</li>
+</ul>
+<h3>3계층 — 전송 (Transport)</h3>
+<p>포트 번호로 프로세스를 식별하고, 필요에 따라 신뢰성 또는 속도를 선택한다.</p>
+<ul>
+<li><strong><a href="/post/micro-tcp-udp">TCP</a></strong>: 신뢰성 보장, 순서 보장, 흐름 제어, 혼잡 제어</li>
+<li><strong><a href="/post/micro-tcp-udp">UDP</a></strong>: 빠른 전송, 보장 없음, 낮은 오버헤드</li>
+</ul>
+<h3>2계층 — 인터넷 (Internet)</h3>
+<p>TCP/IP 모델의 핵심 계층. 이름 자체가 인터넷을 가리킨다.</p>
+<ul>
+<li><strong><a href="/post/micro-ip-arp">IP</a></strong> (RFC 791): 논리 주소 부여, 라우팅, 단편화</li>
+<li><strong>ICMP</strong>: 오류 보고, 연결 진단 (<code>ping</code>, <code>traceroute</code>)</li>
+<li><strong><a href="/post/micro-ip-arp">ARP</a></strong>: IP → MAC 주소 변환</li>
+<li><strong>OSPF, BGP</strong>: 라우팅 프로토콜 (AS 내부/간 경로 교환)</li>
+</ul>
+<h3>1계층 — 네트워크 접근 (Network Access)</h3>
+<p>OSI의 물리 계층과 데이터링크 계층을 합친 것이다.<br>TCP/IP는 이 계층을 명시적으로 정의하지 않는다 — 기존 기술(Ethernet, Wi-Fi, 광섬유 등)을 그대로 사용한다.</p>
+<p>이 계층이 추상화되어 있기 때문에 TCP/IP는 어떤 물리 매체 위에서도 동작할 수 있다.</p>
+<h2>TCP/IP vs OSI 비교</h2>
+<pre><code class="language-mermaid">%% desc: OSI 7계층과 TCP/IP 4계층의 계층 대응 관계와 주요 프로토콜 배치
+flowchart LR
+  subgraph OSI[&quot;OSI 7계층&quot;]
+    direction TB
+    O7[&quot;7. 응용\nHTTP, DNS, FTP&quot;]
+    O6[&quot;6. 표현\nTLS, JPEG&quot;]
+    O5[&quot;5. 세션\nNetBIOS, RPC&quot;]
+    O4[&quot;4. 전송\nTCP, UDP&quot;]
+    O3[&quot;3. 네트워크\nIP, ICMP&quot;]
+    O2[&quot;2. 데이터링크\nEthernet, Wi-Fi&quot;]
+    O1[&quot;1. 물리\n케이블, 전파&quot;]
+  end
+
+  subgraph TCPIP[&quot;TCP/IP 4계층&quot;]
+    direction TB
+    T4[&quot;응용\nHTTP, DNS, FTP\nTLS, SSH...&quot;]
+    T3[&quot;전송\nTCP, UDP&quot;]
+    T2[&quot;인터넷\nIP, ICMP, ARP&quot;]
+    T1[&quot;네트워크 접근\nEthernet, Wi-Fi, PPP&quot;]
+  end
+
+  O7 --- T4
+  O6 --- T4
+  O5 --- T4
+  O4 --- T3
+  O3 --- T2
+  O2 --- T1
+  O1 --- T1
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>비교 항목</th>
+<th>OSI 7계층</th>
+<th>TCP/IP 4계층</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>목적</td>
+<td>범용 이론 모델, 표준화</td>
+<td>실용 구현 모델</td>
+</tr>
+<tr>
+<td>계층 수</td>
+<td>7</td>
+<td>4</td>
+</tr>
+<tr>
+<td>표준화 기구</td>
+<td>ISO</td>
+<td>IETF (RFC)</td>
+</tr>
+<tr>
+<td>시장 채택</td>
+<td>제한적</td>
+<td>전 세계 인터넷</td>
+</tr>
+<tr>
+<td>핵심 표준</td>
+<td>ISO/IEC 7498-1 (1984)</td>
+<td>RFC 1122 (1989)</td>
+</tr>
+<tr>
+<td>물리 계층</td>
+<td>별도 정의</td>
+<td>명시적 정의 없음 (위임)</td>
+</tr>
+<tr>
+<td>용도</td>
+<td>교육, 분석, 설계 기준</td>
+<td>실제 인터넷 구현</td>
+</tr>
+</tbody></table>
+<h2>TCP/IP 모델에서의 데이터 흐름</h2>
+<pre><code class="language-mermaid">%% desc: TCP/IP 4계층 모델에서 클라이언트가 HTTP 요청을 서버에 보내는 전체 흐름
+sequenceDiagram
+  participant APP as 응용 (4)
+  participant TRANS as 전송 (3)
+  participant INET as 인터넷 (2)
+  participant NA as 네트워크 접근 (1)
+  participant NET as 물리 네트워크
+
+  APP-&gt;&gt;TRANS: HTTP 요청 메시지
+  Note over TRANS: TCP 헤더 추가 (src/dst 포트, seq, ack)
+  TRANS-&gt;&gt;INET: TCP 세그먼트
+  Note over INET: IP 헤더 추가 (src/dst IP, TTL)
+  INET-&gt;&gt;NA: IP 패킷
+  Note over NA: Ethernet 헤더+FCS 추가
+  NA-&gt;&gt;NET: Ethernet 프레임 → 비트 신호
+</code></pre>
+<h2>RFC 1122 — TCP/IP 구현 요구사항</h2>
+<p>TCP/IP 모델의 표준 문서는 <strong>RFC 1122 (1989)</strong>다.<sup id="fnref-rfc1122" style="scroll-margin-top: 96px;"><a href="#fn-rfc1122" aria-label="각주 2">[2]</a></sup><br>이 문서는 인터넷 호스트가 통신 계층을 어떻게 구현해야 하는지 규정한다.</p>
+<p>RFC 1122가 강조하는 핵심 원칙:</p>
+<blockquote>
+<p><strong>&quot;Be liberal in what you accept, and conservative in what you send.&quot;</strong><br>(수신은 너그럽게, 송신은 엄격하게)</p>
+</blockquote>
+<p>이를 <strong>Postel의 법칙(Robustness Principle)</strong>이라 부른다.<br>인터넷이 다양한 구현 간에도 잘 동작하는 이유 중 하나다.</p>
+<h2>참고</h2>
+<ol>
+<li id="fn-tcpip-model" style="scroll-margin-top: 96px;">Internet protocol suite, <a href="https://en.wikipedia.org/wiki/Internet_protocol_suite" target="_blank">Wikipedia</a> <a href="#fnref-tcpip-model" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-rfc1122" style="scroll-margin-top: 96px;">R. Braden, "Requirements for Internet Hosts — Communication Layers", RFC 1122, October 1989, <a href="https://datatracker.ietf.org/doc/html/rfc1122" target="_blank">IETF</a> <a href="#fnref-rfc1122" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/micro-osi-7layer">OSI 7계층 모델 →</a> — OSI 모델과의 상세 비교</li>
+<li><a href="/post/micro-encapsulation">캡슐화와 역캡슐화 — PDU의 여정 →</a> — TCP/IP 각 계층에서 데이터가 포장되는 방식</li>
+<li><a href="/post/micro-ip-arp">IP와 ARP — 주소와 경로의 언어 →</a> — 인터넷 계층의 핵심 프로토콜</li>
+<li><a href="/post/micro-tcp-udp">TCP와 UDP — 신뢰성과 속도의 트레이드오프 →</a> — 전송 계층의 두 프로토콜</li>
+</ul>
+<hr>
+
+<ul><li>TCP/IP Model</li><li>Internet Model</li><li>DoD Model</li><li>RFC 1122</li><li>ARPANET</li><li>Network Architecture</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

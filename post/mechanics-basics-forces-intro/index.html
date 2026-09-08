@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1) — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="토압·옹벽 글에서 쓰는 ‘수평 힘’, ‘수직 힘’, ΣF=0을 문과 친화적으로 한 번에 정리한다. 공식은 최소, 직관을 최대로." />
+    <meta name="keywords" content="역학, 정역학, 힘, 평형, 비전공" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/mechanics-basics-forces-intro" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1)" />
+    <meta property="og:description" content="토압·옹벽 글에서 쓰는 ‘수평 힘’, ‘수직 힘’, ΣF=0을 문과 친화적으로 한 번에 정리한다. 공식은 최소, 직관을 최대로." />
+    <meta property="og:url" content="https://seobway23.github.io/post/mechanics-basics-forces-intro" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-05T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.374Z" />
+    <meta property="article:tag" content="역학" />
+    <meta property="article:tag" content="정역학" />
+    <meta property="article:tag" content="힘" />
+    <meta property="article:tag" content="평형" />
+    <meta property="article:tag" content="비전공" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1)" />
+    <meta name="twitter:description" content="토압·옹벽 글에서 쓰는 ‘수평 힘’, ‘수직 힘’, ΣF=0을 문과 친화적으로 한 번에 정리한다. 공식은 최소, 직관을 최대로." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1)","description":"토압·옹벽 글에서 쓰는 ‘수평 힘’, ‘수직 힘’, ΣF=0을 문과 친화적으로 한 번에 정리한다. 공식은 최소, 직관을 최대로.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-05T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.374Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/mechanics-basics-forces-intro"},"keywords":"역학, 정역학, 힘, 평형, 비전공","articleSection":"역학","inLanguage":"ko-KR","wordCount":1131},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"역학","item":"https://seobway23.github.io/?category=study%2Fmechanics%2Fbasics"},{"@type":"ListItem","position":3,"name":"힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1)","item":"https://seobway23.github.io/post/mechanics-basics-forces-intro"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>역학</span></nav>
+<h1>힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1)</h1>
+<p>토압·옹벽 글에서 쓰는 ‘수평 힘’, ‘수직 힘’, ΣF=0을 문과 친화적으로 한 번에 정리한다. 공식은 최소, 직관을 최대로.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-05T00:00:00.000Z">2026-04-05</time> · <span>6분</span></p>
+<h2>이 글의 역할</h2>
+<p>옹벽이나 토압을 읽다 보면 <strong>수평으로 밀리는 힘</strong>, <strong>아래로 눌리는 힘</strong>, <strong>서로 맞서야 정지한다<strong> 같은 말이 반복된다. 여기서는 </strong>고등학교 물리에서 본 힘</strong>만 다시 잡고, “왜 수평·수직으로 나누나?”를 짧게 맞춘다.<a href="https://en.wikipedia.org/wiki/Force" target="_blank"><sup>[1]</sup></a></p>
+<hr>
+<h2>힘이란 무엇인가 (한 줄)</h2>
+<p><strong>힘</strong>은 물체를 밀거나 당기거나 비틀게 만드는 <strong>상호작용</strong>이다. 크기(숫자)와 <strong>방향</strong>이 있어서, 화살표로 그리면 이해가 쉽다.</p>
+<hr>
+<h2>수평·수직으로 쪼개기</h2>
+<p>바닥을 <strong>수평</strong>이라고 두면, 아무 힘이나</p>
+<ul>
+<li><strong>수평 성분</strong> — 동서로 밀거나 막는 부분</li>
+<li><strong>수직 성분</strong> — 위아래로 누르거나 들어 올리는 부분</li>
+</ul>
+<p>으로 나눌 수 있다. 나중에 옹벽에서는 <strong>토압의 합력 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mi>h</mi></msub></mrow><annotation encoding="application/x-tex">P_h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">h</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><strong> 가 대표적으로 </strong>수평</strong>에 해당한다.</p>
+<hr>
+<h2>정지해 있을 때: 힘의 평형</h2>
+<p>물체가 <strong>정지</strong>해 있고 회전도 안 한다고 가정하면(맨 처음 옹벽을 ‘한 덩어리’로 볼 때가 여기에 해당), 뉴턴 역학에서는 <strong>들어오는 힘과 나가는 힘이 방향별로 맞아야</strong> 한다.</p>
+<ul>
+<li><strong>수평 방향</strong>으로는: 밀어오는 쪽과 막는 쪽의 합이 <strong>상쇄</strong> → <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo><msub><mi>F</mi><mi>x</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sum F_x = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></li>
+<li><strong>수직 방향</strong>으로는: 아래로 누르는 것과 위로 받쳐 주는 것이 <strong>상쇄</strong> → <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo><msub><mi>F</mi><mi>y</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sum F_y = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span></li>
+</ul>
+<p>문장으로만 말하면 이렇다. <strong>“옆으로 밀리지 않으려면 옆으로 막아 주는 힘이 필요하고, 위아래로 둥둥 떠 있지 않으려면 위·아래 힘도 맞아야 한다.”</strong></p>
+<p>아래 그림은 <strong>한 물체</strong>에 수평으로 두 힘이 닿아 있을 때, 크기가 같으면 가로로 안 움직인다는 뜻을 스케치한 것이다.</p>
+<pre><code class="language-diagramatics">{&quot;preset&quot;:&quot;balance_horizontal&quot;}
+</code></pre>
+<hr>
+<h2>왜 이걸 토압 글에서 쓰나</h2>
+<p>토압 글에서는 아직 <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mi>h</mi></msub></mrow><annotation encoding="application/x-tex">P_h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">h</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>가 얼마인지</strong>를 몰라도, <strong>“흙이 벽을 수평으로 이만큼 밀면, 저면 마찰·반력이 그만큼 맞서야 한다”</strong>는 식으로 <strong>평형 문장</strong>을 세운다. 그때 위의 <strong>수평·수직 나누기</strong>가 문법 역할을 한다.</p>
+<hr>
+<h2>다음으로 읽을 것</h2>
+<p><strong>모멘트</strong>(돌리는 효과)는 수평 힘만으로는 설명이 부족해서, 전도(넘어짐) 이야기와 함께 <strong>별도 짧은 글</strong>로 이어진다.</p>
+<hr>
+<h2>참고</h2>
+<p><a href="https://en.wikipedia.org/wiki/Force" target="_blank">[1] Force — Wikipedia</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Statics" target="_blank">[2] Statics — Wikipedia</a></p>
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/mechanics-basics-moment-intro">모멘트와 지렛대 직관 (역학 기초 2) →</a></li>
+<li><a href="/post/earth-pressure-overview">토압이 뭔가요? — 시리즈 개요 →</a></li>
+<li><a href="/post/mechanics-force-equilibrium">옹벽 힘의 평형 — 미끄럼·전도 →</a></li>
+</ul>
+
+<ul><li>역학</li><li>정역학</li><li>힘</li><li>평형</li><li>비전공</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

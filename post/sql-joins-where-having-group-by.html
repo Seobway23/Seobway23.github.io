@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="SQL 입문에서 가장 자주 헷갈리는 JOIN, WHERE, HAVING, GROUP BY를 한 글에 묶어 정리한다. 쿼리를 외우기보다 결과를 예측하는 감각을 만드는 것이 목표다." />
+    <meta name="keywords" content="sql, postgresql, join, where, having, group-by, aggregate" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/sql-joins-where-having-group-by" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기" />
+    <meta property="og:description" content="SQL 입문에서 가장 자주 헷갈리는 JOIN, WHERE, HAVING, GROUP BY를 한 글에 묶어 정리한다. 쿼리를 외우기보다 결과를 예측하는 감각을 만드는 것이 목표다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/sql-joins-where-having-group-by" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.232Z" />
+    <meta property="article:tag" content="sql" />
+    <meta property="article:tag" content="postgresql" />
+    <meta property="article:tag" content="join" />
+    <meta property="article:tag" content="where" />
+    <meta property="article:tag" content="having" />
+    <meta property="article:tag" content="group-by" />
+    <meta property="article:tag" content="aggregate" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기" />
+    <meta name="twitter:description" content="SQL 입문에서 가장 자주 헷갈리는 JOIN, WHERE, HAVING, GROUP BY를 한 글에 묶어 정리한다. 쿼리를 외우기보다 결과를 예측하는 감각을 만드는 것이 목표다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기","description":"SQL 입문에서 가장 자주 헷갈리는 JOIN, WHERE, HAVING, GROUP BY를 한 글에 묶어 정리한다. 쿼리를 외우기보다 결과를 예측하는 감각을 만드는 것이 목표다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.232Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/sql-joins-where-having-group-by"},"keywords":"sql, postgresql, join, where, having, group-by, aggregate","articleSection":"sql","inLanguage":"ko-KR","wordCount":3041},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"sql","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fsql"},{"@type":"ListItem","position":3,"name":"SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기","item":"https://seobway23.github.io/post/sql-joins-where-having-group-by"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>sql</span></nav>
+<h1>SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기</h1>
+<p>SQL 입문에서 가장 자주 헷갈리는 JOIN, WHERE, HAVING, GROUP BY를 한 글에 묶어 정리한다. 쿼리를 외우기보다 결과를 예측하는 감각을 만드는 것이 목표다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>13분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/post/ai-webdev-roadmap-foundation">로드맵 인덱스 →</a></td>
+<td>01~19 전체 학습 경로</td>
+</tr>
+<tr>
+<td><a href="/post/js-runtime-node-bun-deno">02-1. Node.js · Bun · Deno →</a></td>
+<td>서버 JavaScript 런타임 비교</td>
+</tr>
+<tr>
+<td><a href="/post/http-methods-and-status-codes">02-2. HTTP 메서드와 상태 코드 →</a></td>
+<td>REST API의 기본 언어</td>
+</tr>
+<tr>
+<td><a href="/post/hono-rest-api-overview">02-3. Hono로 REST API 시작하기 →</a></td>
+<td>경량 서버 프레임워크 실습</td>
+</tr>
+<tr>
+<td><a href="/post/sql-joins-where-having-group-by">02-4. SQL JOIN · WHERE · HAVING · GROUP BY →</a></td>
+<td>쿼리 결과 예측과 집계</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>왜 SQL은 결과를 예측하는 연습이 중요한가</h2>
+<p>SQL은 문법만 외우면 금방 막힌다.</p>
+<p>정말 중요한 것은 &quot;이 쿼리를 실행하면 표가 어떻게 바뀔까?&quot;를 머릿속으로 그릴 수 있는지다. 그래서 이 글은 <code>SELECT</code>, <code>JOIN</code>, <code>WHERE</code>, <code>HAVING</code>, <code>GROUP BY</code>를 <strong>결과 중심</strong>으로 설명한다.</p>
+<hr>
+<h2>예제 테이블</h2>
+<pre><code class="language-sql">-- users
+id | name
+---+-------
+1  | Alice
+2  | Bob
+3  | Chris
+
+-- orders
+id | user_id | amount
+---+---------+--------
+1  | 1       | 10000
+2  | 1       | 15000
+3  | 2       | 7000
+</code></pre>
+<hr>
+<h2>INNER JOIN vs LEFT JOIN</h2>
+<h3>INNER JOIN</h3>
+<p>양쪽에 <strong>매칭되는 행만</strong> 남긴다.</p>
+<pre><code class="language-sql">SELECT u.name, o.amount
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id;
+</code></pre>
+<p>결과:</p>
+<pre><code class="language-sql">Alice | 10000
+Alice | 15000
+Bob   | 7000
+</code></pre>
+<p>Chris는 주문이 없으므로 빠진다.</p>
+<h3>LEFT JOIN</h3>
+<p>왼쪽 테이블은 모두 남기고, 오른쪽에서 매칭이 없으면 <code>NULL</code>을 채운다.</p>
+<pre><code class="language-sql">SELECT u.name, o.amount
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id;
+</code></pre>
+<p>결과:</p>
+<pre><code class="language-sql">Alice | 10000
+Alice | 15000
+Bob   | 7000
+Chris | NULL
+</code></pre>
+<pre><code class="language-mermaid">%% desc: INNER JOIN은 교집합, LEFT JOIN은 왼쪽 기준 전체를 남긴다
+flowchart LR
+  I[&quot;INNER JOIN\n매칭되는 행만&quot;] --&gt; R[&quot;결과&quot;]
+  L[&quot;LEFT JOIN\n왼쪽 행은 모두 유지&quot;] --&gt; R
+</code></pre>
+<hr>
+<h2>WHERE는 언제 쓰는가</h2>
+<p><code>WHERE</code>는 <strong>그룹핑하기 전 행(row)을 걸러내는 조건</strong>이다.</p>
+<pre><code class="language-sql">SELECT *
+FROM orders
+WHERE amount &gt;= 10000;
+</code></pre>
+<p>이 쿼리는 개별 주문 행 중에서 금액이 10000 이상인 행만 남긴다.</p>
+<hr>
+<h2>GROUP BY와 집계 함수</h2>
+<p>사용자별 총 주문 금액을 보고 싶다면 <code>GROUP BY</code>를 쓴다.</p>
+<pre><code class="language-sql">SELECT user_id, SUM(amount) AS total_amount
+FROM orders
+GROUP BY user_id;
+</code></pre>
+<p>결과:</p>
+<pre><code class="language-sql">1 | 25000
+2 | 7000
+</code></pre>
+<p>대표적인 집계 함수는 다음과 같다.</p>
+<ul>
+<li><code>COUNT()</code></li>
+<li><code>SUM()</code></li>
+<li><code>AVG()</code></li>
+<li><code>MIN()</code></li>
+<li><code>MAX()</code></li>
+</ul>
+<hr>
+<h2>HAVING은 왜 필요한가</h2>
+<p><code>HAVING</code>은 <strong>그룹핑한 결과에 조건을 거는 것</strong>이다.</p>
+<pre><code class="language-sql">SELECT user_id, SUM(amount) AS total_amount
+FROM orders
+GROUP BY user_id
+HAVING SUM(amount) &gt;= 10000;
+</code></pre>
+<p>결과:</p>
+<pre><code class="language-sql">1 | 25000
+</code></pre>
+<p>즉 <code>WHERE</code>와 <code>HAVING</code>의 차이는 다음으로 보면 된다.</p>
+<ul>
+<li><code>WHERE</code> — 그룹핑 전 행을 거름</li>
+<li><code>HAVING</code> — 그룹핑 후 집계 결과를 거름</li>
+</ul>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>입문 단계에서는 <code>WHERE = row 필터</code>, <code>HAVING = group 필터</code>로 기억해도 충분하다. 이 한 줄이 SQL 독해 속도를 크게 올려 준다.</p>
+</div></div></aside></p>
+<hr>
+<h2>JOIN과 GROUP BY를 같이 쓰면 어떻게 읽나</h2>
+<pre><code class="language-sql">SELECT u.name, COUNT(o.id) AS order_count, SUM(o.amount) AS total_amount
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+GROUP BY u.id, u.name;
+</code></pre>
+<p>이 쿼리는 다음 순서로 읽으면 좋다.</p>
+<ol>
+<li><code>users</code>를 기준으로 본다</li>
+<li><code>orders</code>를 <code>LEFT JOIN</code>한다</li>
+<li>사용자별로 묶는다</li>
+<li>주문 개수와 총액을 계산한다</li>
+</ol>
+<p>결과는 대략 이렇게 된다.</p>
+<pre><code class="language-sql">Alice | 2 | 25000
+Bob   | 1 | 7000
+Chris | 0 | NULL
+</code></pre>
+<hr>
+<h2>초반에 꼭 해 볼 연습</h2>
+<ul>
+<li>JOIN 결과를 실행 전에 표로 그려 보기</li>
+<li><code>WHERE</code>와 <code>HAVING</code>을 바꿔 쓰면 왜 달라지는지 비교하기</li>
+<li><code>INNER JOIN</code>과 <code>LEFT JOIN</code>이 누굴 빼먹는지 확인하기</li>
+</ul>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>SQL은 &quot;정답 쿼리 외우기&quot;보다 <strong>중간 결과 테이블을 상상하는 힘</strong>이 중요하다. 손으로 표를 그려 보는 연습이 생각보다 훨씬 효과적이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>마치며</h2>
+<p>백엔드 기초에서 SQL이 어려운 이유는 문법이 많아서가 아니라, <strong>행과 그룹이 어떻게 변하는지 머릿속에서 추적해야 하기 때문</strong>이다.</p>
+<p>그래서 JOIN, WHERE, HAVING, GROUP BY를 묶어서 이해하면 훨씬 빨리 감이 온다.</p>
+<h2>조금 더 깊게 보기</h2>
+<h3>SQL은 표를 변형하는 언어다</h3>
+<p>SQL을 어렵게 느끼는 이유는 코드를 위에서 아래로 실행한다고 생각하기 때문이다. SQL은 절차형 코드라기보다 표를 선언적으로 변형하는 언어다.</p>
+<h3>JOIN을 머릿속에서 그리는 법</h3>
+<p>JOIN은 두 표를 옆으로 붙이는 일이다. <code>INNER JOIN</code>은 양쪽에 짝이 있는 행만 남기고, <code>LEFT JOIN</code>은 왼쪽 표의 행을 보존한다. 실무에서 LEFT JOIN은 &quot;주문이 없는 사용자도 보여줘&quot; 같은 요구사항에서 자주 등장한다.</p>
+<h3>개발자 인사이트</h3>
+<p>ORM을 쓰더라도 SQL 결과를 예측하는 힘은 필수다. ORM 코드는 결국 SQL로 변환되고, 성능 문제도 SQL에서 드러난다. N+1 문제, 느린 JOIN, 잘못된 GROUP BY는 ORM을 잘 써도 피할 수 없다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://www.postgresql.org/docs/current/sql-select.html" target="_blank">[1] PostgreSQL Docs — SELECT</a></li>
+<li><a href="https://www.postgresql.org/docs/current/queries-table-expressions.html" target="_blank">[2] PostgreSQL Docs — Table Expressions and JOINs</a></li>
+<li><a href="https://www.postgresql.org/docs/current/tutorial-select.html" target="_blank">[3] PostgreSQL Docs — Tutorial: Queries</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/http-methods-and-status-codes">HTTP 메서드와 상태 코드 기초 →</a></li>
+<li><a href="/post/hono-rest-api-overview">Hono로 REST API 시작하기 →</a></li>
+<li><a href="/post/django-orm-deep">Django ORM 심층 — QuerySet, lazy evaluation, N+1 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>sql</li><li>postgresql</li><li>join</li><li>where</li><li>having</li><li>group-by</li><li>aggregate</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

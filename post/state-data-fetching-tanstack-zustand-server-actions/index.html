@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>상태 &amp; 데이터 페칭 — TanStack Query, Zustand, Server Actions — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Building 08 단계. 서버 상태와 클라이언트 상태를 구분하고, TanStack Query, Zustand, React Server Functions/Actions를 어떤 역할로 보면 좋은지 정리한다." />
+    <meta name="keywords" content="tanstack-query, zustand, server-actions, react, state-management" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/state-data-fetching-tanstack-zustand-server-actions" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="상태 &amp; 데이터 페칭 — TanStack Query, Zustand, Server Actions" />
+    <meta property="og:description" content="Building 08 단계. 서버 상태와 클라이언트 상태를 구분하고, TanStack Query, Zustand, React Server Functions/Actions를 어떤 역할로 보면 좋은지 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/state-data-fetching-tanstack-zustand-server-actions" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-08-state-data.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.288Z" />
+    <meta property="article:tag" content="tanstack-query" />
+    <meta property="article:tag" content="zustand" />
+    <meta property="article:tag" content="server-actions" />
+    <meta property="article:tag" content="react" />
+    <meta property="article:tag" content="state-management" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="상태 &amp; 데이터 페칭 — TanStack Query, Zustand, Server Actions" />
+    <meta name="twitter:description" content="Building 08 단계. 서버 상태와 클라이언트 상태를 구분하고, TanStack Query, Zustand, React Server Functions/Actions를 어떤 역할로 보면 좋은지 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-08-state-data.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"상태 & 데이터 페칭 — TanStack Query, Zustand, Server Actions","description":"Building 08 단계. 서버 상태와 클라이언트 상태를 구분하고, TanStack Query, Zustand, React Server Functions/Actions를 어떤 역할로 보면 좋은지 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-08-state-data.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.288Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/state-data-fetching-tanstack-zustand-server-actions"},"keywords":"tanstack-query, zustand, server-actions, react, state-management","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":3059},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Fdata-fetching"},{"@type":"ListItem","position":3,"name":"상태 & 데이터 페칭 — TanStack Query, Zustand, Server Actions","item":"https://seobway23.github.io/post/state-data-fetching-tanstack-zustand-server-actions"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>상태 &amp; 데이터 페칭 — TanStack Query, Zustand, Server Actions</h1>
+<p>Building 08 단계. 서버 상태와 클라이언트 상태를 구분하고, TanStack Query, Zustand, React Server Functions/Actions를 어떤 역할로 보면 좋은지 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>12분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>08</td>
+<td><a href="/post/state-data-fetching-tanstack-zustand-server-actions">상태 &amp; 데이터 페칭 →</a></td>
+<td>TanStack Query, Zustand, Server Actions</td>
+</tr>
+<tr>
+<td>09</td>
+<td><a href="/post/api-design-rest-openapi-rpc-server-actions">API 설계 →</a></td>
+<td>REST 원칙, OpenAPI, RPC</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="/post/auth-security-authjs-owasp-passkeys">인증 &amp; 보안 →</a></td>
+<td>Auth.js, OWASP, 패스키</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="/post/requirements-spec-user-story-tradeoff">요구사항 분석 →</a></td>
+<td>Spec, 유저 스토리, 기술 선택</td>
+</tr>
+<tr>
+<td>12</td>
+<td><a href="/post/testing-vitest-playwright">테스트 →</a></td>
+<td>테스트 사고법, Vitest, Playwright</td>
+</tr>
+<tr>
+<td>13</td>
+<td><a href="/post/context-engineering-prompts-rules-memory-skills">Context Engineering →</a></td>
+<td>프롬프트, Rules, 메모리, Skill</td>
+</tr>
+<tr>
+<td>14</td>
+<td><a href="/post/build-performance-a11y-vite-turbopack-lighthouse-wcag">빌드 · 성능 · a11y →</a></td>
+<td>Vite, Turbopack, Lighthouse, WCAG</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>상태를 먼저 나눠야 한다</h2>
+<p>프론트엔드 상태 관리는 &quot;어떤 라이브러리가 더 좋은가&quot;보다 먼저 <strong>상태의 성격</strong>을 나누는 일이 중요하다.</p>
+<ul>
+<li>서버 상태: 서버가 원본인 데이터</li>
+<li>클라이언트 상태: UI가 원본인 데이터</li>
+<li>서버 실행 액션: 폼 제출이나 mutation을 서버 함수로 처리하는 흐름</li>
+</ul>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>TanStack Query와 Zustand는 경쟁 관계라기보다 역할이 다르다. 서버에서 온 데이터는 TanStack Query, 모달 열림이나 탭 선택 같은 UI 상태는 Zustand가 자연스럽다.</p>
+</div></div></aside></p>
+<hr>
+<h2>TanStack Query — 서버 상태</h2>
+<p>TanStack Query는 서버 상태를 가져오고 캐싱하고 다시 동기화하는 도구다.<a href="https://tanstack.com/query/latest/docs/framework/react/overview" target="_blank"><sup>[1]</sup></a></p>
+<pre><code class="language-tsx">const { data, isLoading, error } = useQuery({
+  queryKey: [&#39;posts&#39;],
+  queryFn: fetchPosts,
+})
+</code></pre>
+<p>핵심은 <code>fetch</code>를 감싸는 것이 아니라, stale time, cache, refetch, mutation, optimistic update 같은 서버 상태 문제를 해결한다는 점이다.</p>
+<p>기존 심화 글:</p>
+<ul>
+<li><a href="/post/react-query-overview">TanStack Query 개요 →</a></li>
+<li><a href="/post/react-query-queries">useQuery 심층 →</a></li>
+<li><a href="/post/react-query-mutations">useMutation 심층 →</a></li>
+</ul>
+<hr>
+<h2>Zustand — 클라이언트 상태</h2>
+<p>Zustand는 가벼운 클라이언트 상태 관리 라이브러리다.<a href="https://zustand.docs.pmnd.rs/getting-started/introduction" target="_blank"><sup>[2]</sup></a></p>
+<pre><code class="language-ts">const useUIStore = create((set) =&gt; ({
+  isSidebarOpen: true,
+  toggleSidebar: () =&gt; set((state) =&gt; ({ isSidebarOpen: !state.isSidebarOpen })),
+}))
+</code></pre>
+<p>서버 데이터 저장소로 쓰기보다, UI 상태나 앱 내부 상태에 쓰는 편이 좋다.</p>
+<hr>
+<h2>Server Actions / Server Functions</h2>
+<p>React 문서에서는 Server Functions가 Client Component에서 서버의 async 함수를 호출할 수 있게 한다고 설명한다.<a href="https://react.dev/reference/rsc/server-functions" target="_blank"><sup>[3]</sup></a></p>
+<p>폼 제출, 서버 mutation, 점진적 향상과 잘 맞지만, 프레임워크 지원과 서버 환경을 함께 봐야 한다.</p>
+<hr>
+<h2>선택 기준</h2>
+<pre><code class="language-mermaid">%% desc: 서버가 원본이면 TanStack Query, UI가 원본이면 Zustand, 서버 실행 흐름은 Server Actions로 본다
+flowchart LR
+  S[&quot;서버가 원본&quot;] --&gt; TQ[&quot;TanStack Query&quot;]
+  U[&quot;UI가 원본&quot;] --&gt; Z[&quot;Zustand&quot;]
+  A[&quot;서버에서 실행할 mutation&quot;] --&gt; SA[&quot;Server Actions / Functions&quot;]
+</code></pre>
+<hr>
+<h2>조금 더 깊게 보기</h2>
+<h3>상태 관리는 저장소 선택 문제가 아니다</h3>
+<p>초보자는 상태 관리라고 하면 Redux, Zustand, TanStack Query 같은 라이브러리 이름부터 떠올린다. 하지만 실무에서 먼저 해야 할 일은 상태를 분류하는 것이다. 서버가 원본인지, 브라우저 UI가 원본인지, URL이 원본인지, 폼이 잠시 들고 있는 값인지에 따라 답이 달라진다.</p>
+<h3>서버 상태의 어려움</h3>
+<p>서버 상태는 단순히 <code>fetch</code>로 가져온 데이터가 아니다. 오래됐는지, 다시 가져와야 하는지, 실패했는지, 로딩 중인지, 다른 화면에서도 같은 캐시를 써야 하는지 같은 문제가 붙는다. TanStack Query는 이 문제들을 체계적으로 다룬다.</p>
+<h3>Zustand를 남용하면 생기는 문제</h3>
+<p>Zustand는 간단하고 강력하지만, 서버 데이터를 전역 store에 무조건 넣으면 캐싱, refetch, invalidation을 직접 구현해야 한다. 그 순간 TanStack Query가 해결하던 문제를 다시 만들게 된다. Zustand는 UI 상태, 임시 클라이언트 상태, 앱 내부 preference에 더 잘 맞는다.</p>
+<h3>Server Actions를 볼 때의 기준</h3>
+<p>Server Actions는 mutation 흐름을 단순하게 만들 수 있지만, 프레임워크와 서버 환경에 강하게 묶인다. 공개 API가 필요한지, 앱 내부 폼 처리인지, optimistic update가 필요한지에 따라 선택이 달라진다.</p>
+<hr>
+<h2>실전 적용 시나리오</h2>
+<p>게시글 목록 화면을 만든다고 하자. 게시글 목록 데이터는 서버가 원본이므로 TanStack Query가 가져오고 캐싱한다. 검색어는 URL query string에 두면 공유 가능한 화면이 된다. 사이드바 열림 여부나 선택된 탭은 Zustand나 컴포넌트 state로 충분하다.</p>
+<p>게시글 작성은 mutation이다. 작성 성공 후에는 <code>posts</code> query를 invalidate하거나 새 게시글을 캐시에 반영한다. 이때 폼 제출을 Server Action으로 처리할지, 클라이언트 mutation으로 처리할지는 앱 구조에 따라 다르다. Next.js App Router처럼 서버 액션이 자연스러운 환경이면 Server Action이 좋고, 클라이언트 중심 SPA라면 TanStack Query mutation이 더 직관적일 수 있다.</p>
+<h3>판단 기준</h3>
+<p>상태의 원본이 어디인지 계속 묻는다. 서버가 원본이면 query, 브라우저 UI가 원본이면 local/client state, URL이 원본이면 router state다. 이 질문 하나가 상태관리 혼란을 크게 줄인다.</p>
+<h2>참고</h2>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/overview" target="_blank">[1] TanStack Query Docs — Overview</a></li>
+<li><a href="https://zustand.docs.pmnd.rs/getting-started/introduction" target="_blank">[2] Zustand Docs — Introduction</a></li>
+<li><a href="https://react.dev/reference/rsc/server-functions" target="_blank">[3] React Docs — Server Functions</a></li>
+<li><a href="https://react.dev/reference/react/useActionState" target="_blank">[4] React Docs — useActionState</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-query-overview">TanStack Query 개요 →</a></li>
+<li><a href="/post/react-query-mutations">useMutation 심층 →</a></li>
+<li><a href="/post/react-component-data-flow">React 단방향 데이터 흐름 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>tanstack-query</li><li>zustand</li><li>server-actions</li><li>react</li><li>state-management</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

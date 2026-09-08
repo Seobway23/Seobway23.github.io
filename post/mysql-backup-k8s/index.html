@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="백업 크론은 돌고 있었다. 그런데 실제로 백업이 되고 있었을까. rsync 기반 물리 백업에서 K8s CronJob+mysqldump 논리 백업으로 전환한 과정과 이유를 정리한다." />
+    <meta name="keywords" content="Kubernetes, k3s, MySQL, mysqldump, CronJob, Backup, DevOps, 인프라, 데이터베이스" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/mysql-backup-k8s" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로" />
+    <meta property="og:description" content="백업 크론은 돌고 있었다. 그런데 실제로 백업이 되고 있었을까. rsync 기반 물리 백업에서 K8s CronJob+mysqldump 논리 백업으로 전환한 과정과 이유를 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/mysql-backup-k8s" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-06T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.371Z" />
+    <meta property="article:tag" content="Kubernetes" />
+    <meta property="article:tag" content="k3s" />
+    <meta property="article:tag" content="MySQL" />
+    <meta property="article:tag" content="mysqldump" />
+    <meta property="article:tag" content="CronJob" />
+    <meta property="article:tag" content="Backup" />
+    <meta property="article:tag" content="DevOps" />
+    <meta property="article:tag" content="인프라" />
+    <meta property="article:tag" content="데이터베이스" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로" />
+    <meta name="twitter:description" content="백업 크론은 돌고 있었다. 그런데 실제로 백업이 되고 있었을까. rsync 기반 물리 백업에서 K8s CronJob+mysqldump 논리 백업으로 전환한 과정과 이유를 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로","description":"백업 크론은 돌고 있었다. 그런데 실제로 백업이 되고 있었을까. rsync 기반 물리 백업에서 K8s CronJob+mysqldump 논리 백업으로 전환한 과정과 이유를 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-06T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.371Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/mysql-backup-k8s"},"keywords":"Kubernetes, k3s, MySQL, mysqldump, CronJob, Backup, DevOps, 인프라, 데이터베이스","articleSection":"kubernetes","inLanguage":"ko-KR","wordCount":5244},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"kubernetes","item":"https://seobway23.github.io/?category=study%2Finfra%2Fkubernetes"},{"@type":"ListItem","position":3,"name":"K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로","item":"https://seobway23.github.io/post/mysql-backup-k8s"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>kubernetes</span></nav>
+<h1>K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로</h1>
+<p>백업 크론은 돌고 있었다. 그런데 실제로 백업이 되고 있었을까. rsync 기반 물리 백업에서 K8s CronJob+mysqldump 논리 백업으로 전환한 과정과 이유를 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-06T00:00:00.000Z">2026-04-06</time> · <span>14분</span></p>
+<p>백업이 있다고 안심하다가 정작 복구할 때 안 된다는 걸 알게 되는 게 최악의 시나리오다.</p>
+<p>우리 서버에도 백업 스크립트가 있었다. 매일 새벽 3시에 크론이 돌았고, 로그에는 &quot;백업 완료&quot;가 찍혔다. 그런데 막상 뜯어보니 문제가 한두 가지가 아니었다.</p>
+<hr>
+<h2>V1: 있었지만 믿을 수 없었던 백업</h2>
+<p>기존 스크립트는 <code>/home/ops/backup/container/rsync_backup.sh</code>였다. 노드 crontab에 등록되어 있었고, 새벽 3시에 자동 실행됐다.</p>
+<pre><code class="language-bash">0 3 * * * /home/ops/backup/container/rsync_backup.sh
+</code></pre>
+<p>스크립트가 백업하는 항목:</p>
+<ul>
+<li>uploads 디렉터리</li>
+<li>Grafana / Loki / Prometheus 볼륨</li>
+<li><strong>MySQL 데이터 디렉터리 (ibdata, ibd 등 물리 파일)</strong></li>
+</ul>
+<p>여기서 첫 번째 문제가 보인다. MySQL을 <strong>물리 백업</strong>으로 처리하고 있었다.</p>
+<h3>문제 1: 실행 중 물리 백업의 위험</h3>
+<p>MySQL이 돌고 있는 상태에서 데이터 디렉터리를 rsync로 복사하면, 복사 도중에도 MySQL이 파일을 계속 변경한다. 결과물은 특정 시점의 일관된 스냅샷이 아니다.</p>
+<p>스크립트 주석에도 &quot;MySQL (컨테이너 중지 후 권장)&quot;이라고 적혀 있었다. 알고 있었지만 중지하지 않고 돌리고 있었다는 뜻이다. 이 상태의 덤프로 복구하면 InnoDB 내부 불일치로 복구 자체가 실패할 수 있다.<a href="https://dev.mysql.com/doc/refman/8.0/en/backup-types.html" target="_blank"><sup>[1]</sup></a></p>
+<h3>문제 2: 실패가 가려지는 구조</h3>
+<p>대상 경로(<code>/mnt/backup/prod-server/...</code>)가 존재하지 않으면 rsync가 <code>mkdir ... failed: No such file or directory</code> 오류를 냈다. 그런데 스크립트는 오류 여부를 확인하지 않고 마지막에 무조건 &quot;백업 완료&quot;를 로그에 남겼다.</p>
+<pre><code class="language-bash"># 실제 스크립트의 구조 (의사 코드)
+rsync -av /source/ /mnt/backup/prod-server/  # 실패해도
+echo &quot;백업 완료 $(date)&quot;                          # 항상 출력
+</code></pre>
+<p>새벽 3시 로그를 아침에 확인하면 항상 성공처럼 보였다.</p>
+<h3>문제 3: 운영 DB를 백업하는 건지 불명확</h3>
+<p><code>app-prod</code> 네임스페이스에는 MySQL Pod가 없었다. MySQL은 다른 스택(<code>legacy-web-stack</code>)에서 운영됐고, 스크립트는 그 스택의 볼륨 경로를 백업했다. 과연 이 백업이 운영 DB를 백업하는 것인지 확인할 방법이 없었다.</p>
+<hr>
+<h2>무엇이 달라야 하는가</h2>
+<p>정리하면 세 가지가 필요했다.</p>
+<ol>
+<li><strong>논리 백업(mysqldump)으로 전환</strong> — 실행 중에도 일관된 덤프 가능</li>
+<li><strong>실패가 실패로 기록되는 구조</strong> — exit code 기반 성공/실패 판단</li>
+<li><strong>백업 대상이 명확해야 함</strong> — 어떤 DB를 백업하는지 코드에 드러나야 함</li>
+</ol>
+<p>그리고 K8s 환경이면 노드 crontab보다 <strong>K8s CronJob</strong>이 자연스럽다. 클러스터 안에서 관리되고, kubectl로 상태를 확인할 수 있고, Secret을 통해 DB 접속정보를 주입할 수 있다.</p>
+<hr>
+<h2>V2: K8s CronJob + mysqldump</h2>
+<h3>핵심 아이디어: Secret에서 접속정보 읽기</h3>
+<p>DB 비밀번호를 스크립트에 하드코딩하지 않는다. 이미 <code>app-db-secrets</code>라는 Secret이 있고, 거기에 <code>DATABASE_URL</code>이 들어 있었다.</p>
+<pre><code>DATABASE_URL=mysql://user:password@host:3306/dbname
+</code></pre>
+<p>CronJob에서 <code>envFrom.secretRef</code>로 이 Secret을 주입하고, 컨테이너 안에서 URL을 파싱해 mysqldump에 넘긴다.</p>
+<h3>저장 경로 준비</h3>
+<pre><code class="language-bash">sudo mkdir -p /data/app/mysql-dumps
+sudo chmod 700 /data/app/mysql-dumps
+</code></pre>
+<p>CronJob에서 이 경로를 <code>hostPath</code>로 마운트한다. <code>/backup</code>으로 매핑한다.</p>
+<h3>CronJob 매니페스트</h3>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-dump
+  namespace: app-prod
+spec:
+  schedule: &quot;0 3 * * *&quot;         # 매일 새벽 3시
+  concurrencyPolicy: Forbid      # 이전 job이 안 끝나면 새 job 생성 안 함
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: mysqldump
+              image: mysql:8.0
+              envFrom:
+                - secretRef:
+                    name: app-db-secrets   # DATABASE_URL 주입
+              volumeMounts:
+                - name: backup-volume
+                  mountPath: /backup
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  # DATABASE_URL 파싱
+                  # 형식: mysql://user:password@host:port/dbname
+                  DB_USER=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*://\([^:]*\):.*|\1|p&#39;)
+                  DB_PASS=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*://[^:]*:\([^@]*\)@.*|\1|p&#39;)
+                  DB_HOST=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*@\([^:]*\):.*|\1|p&#39;)
+                  DB_PORT=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*:\([0-9]*\)/.*|\1|p&#39;)
+                  DB_NAME=$(echo &quot;$DATABASE_URL&quot; | sed -n &#39;s|.*/\([^?]*\).*|\1|p&#39;)
+
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  OUTPUT=&quot;/backup/${DB_NAME}_${TIMESTAMP}.sql.gz&quot;
+
+                  echo &quot;[$(date)] 백업 시작: $DB_NAME → $OUTPUT&quot;
+
+                  mysqldump \
+                    -h &quot;$DB_HOST&quot; \
+                    -P &quot;$DB_PORT&quot; \
+                    -u &quot;$DB_USER&quot; \
+                    -p&quot;$DB_PASS&quot; \
+                    --no-tablespaces \
+                    --single-transaction \
+                    --routines \
+                    &quot;$DB_NAME&quot; \
+                    | gzip &gt; &quot;$OUTPUT&quot;
+
+                  echo &quot;[$(date)] 백업 완료: $(du -sh &quot;$OUTPUT&quot;)&quot;
+
+                  # 보관 정책: 14일 초과 파일 삭제
+                  find /backup -name &#39;*.sql.gz&#39; -mtime +14 -delete
+                  echo &quot;[$(date)] 보관 정책 적용 완료 (14일 초과 삭제)&quot;
+          volumes:
+            - name: backup-volume
+              hostPath:
+                path: /data/app/mysql-dumps
+                type: DirectoryOrCreate
+</code></pre>
+<h3>mysqldump 옵션 선택 이유</h3>
+<pre><code class="language-bash">--single-transaction   # InnoDB: 트랜잭션으로 일관된 스냅샷 (테이블 잠금 없음)
+--no-tablespaces       # PROCESS 권한 없어도 실행 가능
+--routines             # 저장 프로시저/함수 포함
+</code></pre>
+<p><code>--single-transaction</code>이 핵심이다. InnoDB 테이블에서 <code>BEGIN TRANSACTION</code> → 덤프 → <code>COMMIT</code> 순으로 동작해, 다른 트랜잭션이 커밋되더라도 일관된 시점의 데이터를 읽는다.<a href="https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html" target="_blank"><sup>[2]</sup></a> 서비스를 중단하지 않아도 된다.</p>
+<p><code>--no-tablespaces</code>는 초기에 <code>PROCESS privilege</code> 오류가 발생해서 추가했다. 권한을 올리는 대신 옵션으로 해결했다.</p>
+<hr>
+<h2>CronJob 적용 및 확인</h2>
+<pre><code class="language-bash">kubectl apply -f /root/mysql-dump-cronjob.yaml -n app-prod
+kubectl get cronjob -n app-prod mysql-dump
+</code></pre>
+<p>스케줄이 돌기 전에 수동으로 1회 실행해서 즉시 검증할 수 있다.</p>
+<pre><code class="language-bash"># 수동 실행
+kubectl -n app-prod delete job mysql-dump-manual --ignore-not-found
+kubectl -n app-prod create job --from=cronjob/mysql-dump mysql-dump-manual
+
+# 완료 대기
+kubectl -n app-prod wait \
+  --for=condition=complete job/mysql-dump-manual \
+  --timeout=600s
+
+# 로그 확인
+kubectl -n app-prod logs job/mysql-dump-manual --tail=200
+</code></pre>
+<p>로그에서 아래를 확인한다:</p>
+<pre><code>[2026-04-06 03:00:12] 백업 시작: app_db → /backup/app_db_20260406_030012.sql.gz
+[2026-04-06 03:00:45] 백업 완료: 48M /backup/app_db_20260406_030012.sql.gz
+[2026-04-06 03:00:45] 보관 정책 적용 완료 (14일 초과 삭제)
+</code></pre>
+<h3>덤프 파일 내용 직접 확인</h3>
+<pre><code class="language-bash"># 노드에서
+ls -la /data/app/mysql-dumps | tail
+du -sh /data/app/mysql-dumps
+
+# 파일 내용 앞부분 (mysqldump 헤더와 버전 정보)
+zcat /data/app/mysql-dumps/app_db_20260406_030012.sql.gz | head -n 40
+
+# CREATE TABLE 목록
+zcat /data/app/mysql-dumps/app_db_20260406_030012.sql.gz | grep -n &quot;CREATE TABLE&quot;
+</code></pre>
+<p>헤더에 <code>mysqldump</code>로 시작하고, CREATE TABLE 문들이 나오면 덤프가 정상이다.</p>
+<hr>
+<h2>V1 vs V2 비교</h2>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>V1 (rsync)</th>
+<th>V2 (CronJob+mysqldump)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>백업 방식</td>
+<td>물리 파일 복사</td>
+<td>논리 덤프 (SQL)</td>
+</tr>
+<tr>
+<td>실행 중 일관성</td>
+<td>보장 안 됨</td>
+<td><code>--single-transaction</code>으로 보장</td>
+</tr>
+<tr>
+<td>실패 감지</td>
+<td>실패해도 &quot;완료&quot; 출력</td>
+<td><code>set -euo pipefail</code>, exit code 기반</td>
+</tr>
+<tr>
+<td>접속정보 위치</td>
+<td>스크립트 내 하드코딩</td>
+<td>K8s Secret 주입</td>
+</tr>
+<tr>
+<td>관리 위치</td>
+<td>노드 crontab</td>
+<td>K8s CronJob (kubectl로 관리)</td>
+</tr>
+<tr>
+<td>보관 정책</td>
+<td>없음</td>
+<td>14일 자동 삭제</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>그래서 진짜 백업인가</h2>
+<p>파일이 생겼다고 백업이 완성된 게 아니다. <strong>복구가 되어야 백업이다.</strong></p>
+<p>다음 글에서는 이 덤프 파일을 실제로 K3s 클러스터 안에 임시 MySQL Pod를 띄워 import하고, 테이블이 정상인지 확인하는 과정을 다룬다. <a href="/post/mysql-restore-test"><code>백업의 증명 — K3s에서 mysqldump 복구 테스트 →</code></a></p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://dev.mysql.com/doc/refman/8.0/en/backup-types.html" target="_blank">[1] Backup and Recovery Types — MySQL Documentation</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html" target="_blank">[2] mysqldump — MySQL Documentation</a></li>
+</ol>
+
+<ul><li>Kubernetes</li><li>k3s</li><li>MySQL</li><li>mysqldump</li><li>CronJob</li><li>Backup</li><li>DevOps</li><li>인프라</li><li>데이터베이스</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

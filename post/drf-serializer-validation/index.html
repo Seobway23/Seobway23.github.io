@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>DRF Serializer 검증 완전 정복 — validate_&lt;field&gt;가 return을 빠뜨리면 생기는 일 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="validate_category()에서 검증을 통과했는데 저장된 데이터에 category가 없다?  DRF Serializer 검증 라이프사이클을 이해하면 이런 '조용한 실패'를 다시는 겪지 않는다." />
+    <meta name="keywords" content="Django, DRF, Serializer, Validation, REST, API, 시행착오" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/drf-serializer-validation" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="DRF Serializer 검증 완전 정복 — validate_&lt;field&gt;가 return을 빠뜨리면 생기는 일" />
+    <meta property="og:description" content="validate_category()에서 검증을 통과했는데 저장된 데이터에 category가 없다?  DRF Serializer 검증 라이프사이클을 이해하면 이런 '조용한 실패'를 다시는 겪지 않는다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/drf-serializer-validation" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.211Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="DRF" />
+    <meta property="article:tag" content="Serializer" />
+    <meta property="article:tag" content="Validation" />
+    <meta property="article:tag" content="REST" />
+    <meta property="article:tag" content="API" />
+    <meta property="article:tag" content="시행착오" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DRF Serializer 검증 완전 정복 — validate_&lt;field&gt;가 return을 빠뜨리면 생기는 일" />
+    <meta name="twitter:description" content="validate_category()에서 검증을 통과했는데 저장된 데이터에 category가 없다?  DRF Serializer 검증 라이프사이클을 이해하면 이런 '조용한 실패'를 다시는 겪지 않는다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"DRF Serializer 검증 완전 정복 — validate_<field>가 return을 빠뜨리면 생기는 일","description":"validate_category()에서 검증을 통과했는데 저장된 데이터에 category가 없다?  DRF Serializer 검증 라이프사이클을 이해하면 이런 '조용한 실패'를 다시는 겪지 않는다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.211Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/drf-serializer-validation"},"keywords":"Django, DRF, Serializer, Validation, REST, API, 시행착오","articleSection":"django","inLanguage":"ko-KR","wordCount":6400},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"DRF Serializer 검증 완전 정복 — validate_<field>가 return을 빠뜨리면 생기는 일","item":"https://seobway23.github.io/post/drf-serializer-validation"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>django</span></nav>
+<h1>DRF Serializer 검증 완전 정복 — validate_&lt;field&gt;가 return을 빠뜨리면 생기는 일</h1>
+<p>validate_category()에서 검증을 통과했는데 저장된 데이터에 category가 없다?  DRF Serializer 검증 라이프사이클을 이해하면 이런 '조용한 실패'를 다시는 겪지 않는다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-03T00:00:00.000Z">2026-04-03</time> · <span>13분</span></p>
+<h2>오늘의 시행착오: 검증 통과 → 데이터 유실</h2>
+<pre><code class="language-python"># ❌ 이 코드의 문제가 보이는가?
+def validate_category(self, value):
+    if not Category.objects.filter(id=value).exists():
+        raise serializers.ValidationError(&quot;존재하지 않는 카테고리입니다.&quot;)
+    # return이 없다!
+</code></pre>
+<p>카테고리 검증 로직을 완성했고, ValidationError도 잘 발생시킨다. 그런데 정작 유효한 값으로 저장을 시도하면 <strong>category 필드가 빠진 채로 저장</strong>된다.</p>
+<p>에러도 없다. 경고도 없다. 그냥 조용히 사라진다.</p>
+<hr>
+<h2>Serializer 검증 라이프사이클</h2>
+<p>DRF가 <code>.is_valid()</code>를 호출할 때 내부에서 어떤 일이 벌어지는지 전체 흐름을 이해해야 한다.<a href="https://www.django-rest-framework.org/api-guide/serializers/#validation" target="_blank"><sup>[1]</sup></a></p>
+<pre><code class="language-mermaid">%% desc: DRF Serializer.is_valid() 내부 검증 순서
+flowchart TD
+  A[&quot;is_valid() 호출&quot;]
+  B[&quot;1단계: run_validators()\n각 필드의 validators 리스트 실행&quot;]
+  C[&quot;2단계: validate_&lt;field&gt;()\n필드별 커스텀 검증 메서드\n→ 반드시 value를 return해야 함&quot;]
+  D[&quot;3단계: validate()\n전체 데이터 교차 검증\n→ 반드시 data를 return해야 함&quot;]
+  E[&quot;validated_data 완성&quot;]
+  F[&quot;save() / create() / update() 호출 가능&quot;]
+
+  A --&gt; B --&gt; C --&gt; D --&gt; E --&gt; F
+
+  B --&gt;|&quot;ValidationError 발생&quot;| ERR[&quot;is_valid() = False\nerrors 딕셔너리 채움&quot;]
+  C --&gt;|&quot;ValidationError 발생&quot;| ERR
+  D --&gt;|&quot;ValidationError 발생&quot;| ERR
+</code></pre>
+<p><strong>핵심</strong>: 각 단계는 <strong>검증 + 값 변환</strong>을 동시에 수행한다. 값을 return하지 않으면 <code>None</code>이 반환되어 <code>validated_data</code>에서 해당 필드가 <code>None</code>으로 덮어씌워진다.</p>
+<hr>
+<h2>1단계: 필드 레벨 validators</h2>
+<pre><code class="language-python">from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+
+class TaskSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=Task.objects.all(),
+                message=&quot;이미 존재하는 제목입니다.&quot;
+            )
+        ]
+    )
+</code></pre>
+<p><code>validators</code> 리스트는 <code>validate_&lt;field&gt;</code> 메서드보다 먼저 실행된다. 값을 <strong>반환하지 않고 에러만 raise</strong>한다.</p>
+<hr>
+<h2>2단계: validate_&lt;field&gt;() — 반드시 return</h2>
+<pre><code class="language-python">class TaskSerializer(serializers.ModelSerializer):
+
+    def validate_category(self, value):
+        &quot;&quot;&quot;
+        value: 클라이언트가 보낸 category 값 (이미 타입 변환 완료)
+        반드시 value를 return해야 validated_data에 들어간다.
+        &quot;&quot;&quot;
+        if not Category.objects.filter(id=value).exists():
+            raise serializers.ValidationError(&quot;존재하지 않는 카테고리입니다.&quot;)
+
+        # ✅ 이 한 줄이 없으면 validated_data[&#39;category&#39;] = None
+        return value
+
+    def validate_due_date(self, value):
+        &quot;&quot;&quot;날짜 검증 + 변환 예시&quot;&quot;&quot;
+        if value &lt; date.today():
+            raise serializers.ValidationError(&quot;과거 날짜는 설정할 수 없습니다.&quot;)
+        return value  # ✅ 반드시 return
+
+    def validate_priority(self, value):
+        &quot;&quot;&quot;값을 변환해서 반환하는 예시&quot;&quot;&quot;
+        # 입력값을 정규화하여 반환할 수도 있다
+        return value.upper()  # &#39;high&#39; → &#39;HIGH&#39;
+</code></pre>
+<h3>Python에서 return이 없으면 어떻게 되는가</h3>
+<pre><code class="language-python">def validate_category(self, value):
+    if not Category.objects.filter(id=value).exists():
+        raise serializers.ValidationError(&quot;...&quot;)
+    # return 없음 → Python이 암묵적으로 None 반환
+
+# DRF 내부 동작 (간략화):
+validated_value = self.validate_category(raw_value)  # None 반환
+validated_data[&#39;category&#39;] = validated_value          # None 저장됨
+</code></pre>
+<p>Python의 모든 함수는 <code>return</code> 없으면 <code>None</code>을 반환한다. DRF는 이것을 &quot;의도적인 None 설정&quot;으로 해석한다.</p>
+<hr>
+<h2>3단계: validate() — 교차 검증</h2>
+<p>복수 필드 간의 관계를 검증할 때 사용한다.</p>
+<pre><code class="language-python">class TaskSerializer(serializers.ModelSerializer):
+
+    def validate(self, data):
+        &quot;&quot;&quot;
+        data: 모든 필드 레벨 검증이 완료된 validated_data
+        반드시 data를 return해야 한다.
+        &quot;&quot;&quot;
+        start_date = data.get(&#39;start_date&#39;)
+        end_date = data.get(&#39;end_date&#39;)
+
+        if start_date and end_date and start_date &gt; end_date:
+            raise serializers.ValidationError(
+                &quot;종료일은 시작일 이후여야 합니다.&quot;
+            )
+
+        # 비즈니스 로직: 마감일 기본값 설정
+        if not data.get(&#39;due_date&#39;) and start_date:
+            data[&#39;due_date&#39;] = start_date + timedelta(days=7)
+
+        return data  # ✅ 반드시 return
+</code></pre>
+<hr>
+<h2>전체 예시: TaskModelSerializer</h2>
+<pre><code class="language-python">from rest_framework import serializers
+from datetime import date, timedelta
+from .models import Task, Category
+
+class TaskModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Task
+        fields = [
+            &#39;id&#39;, &#39;title&#39;, &#39;description&#39;,
+            &#39;category&#39;, &#39;priority&#39;, &#39;due_date&#39;,
+            &#39;start_date&#39;, &#39;end_date&#39;, &#39;created_by&#39;,
+        ]
+        read_only_fields = [&#39;id&#39;, &#39;created_by&#39;]
+
+    # ── 필드 레벨 검증 ────────────────────────────────────────────────
+
+    def validate_title(self, value):
+        &quot;&quot;&quot;빈 문자열·공백 차단&quot;&quot;&quot;
+        if not value.strip():
+            raise serializers.ValidationError(&quot;제목은 공백일 수 없습니다.&quot;)
+        return value.strip()  # 앞뒤 공백 제거 후 반환
+
+    def validate_category(self, value):
+        &quot;&quot;&quot;카테고리 존재 여부 확인&quot;&quot;&quot;
+        if not Category.objects.filter(id=value).exists():
+            raise serializers.ValidationError(&quot;존재하지 않는 카테고리입니다.&quot;)
+        return value  # ✅ 핵심
+
+    def validate_priority(self, value):
+        VALID = [&#39;LOW&#39;, &#39;MEDIUM&#39;, &#39;HIGH&#39;, &#39;CRITICAL&#39;]
+        if value.upper() not in VALID:
+            raise serializers.ValidationError(
+                f&quot;우선순위는 {VALID} 중 하나여야 합니다.&quot;
+            )
+        return value.upper()
+
+    def validate_due_date(self, value):
+        if value and value &lt; date.today():
+            raise serializers.ValidationError(&quot;과거 날짜는 설정할 수 없습니다.&quot;)
+        return value
+
+    # ── 교차 검증 ────────────────────────────────────────────────────
+
+    def validate(self, data):
+        start = data.get(&#39;start_date&#39;)
+        end = data.get(&#39;end_date&#39;)
+
+        if start and end and start &gt; end:
+            raise serializers.ValidationError({
+                &#39;end_date&#39;: &quot;종료일은 시작일 이후여야 합니다.&quot;
+            })
+
+        return data
+
+    # ── 저장 시 created_by 주입 ──────────────────────────────────────
+
+    def create(self, validated_data):
+        &quot;&quot;&quot;request.user를 created_by에 자동 주입&quot;&quot;&quot;
+        request = self.context.get(&#39;request&#39;)
+        if request and request.user.is_authenticated:
+            validated_data[&#39;created_by&#39;] = request.user
+        return super().create(validated_data)
+</code></pre>
+<hr>
+<h2>검증 에러 응답 구조</h2>
+<pre><code class="language-python"># 단일 필드 에러
+raise serializers.ValidationError(&quot;메시지&quot;)
+# → {&quot;category&quot;: [&quot;메시지&quot;]}
+
+# non_field_errors (교차 검증)
+raise serializers.ValidationError(&quot;메시지&quot;)  # validate() 안에서
+# → {&quot;non_field_errors&quot;: [&quot;메시지&quot;]}
+
+# 특정 필드 지정
+raise serializers.ValidationError({&quot;end_date&quot;: &quot;종료일이 잘못됐습니다.&quot;})
+# → {&quot;end_date&quot;: [&quot;종료일이 잘못됐습니다.&quot;]}
+</code></pre>
+<pre><code class="language-json">// 실제 API 응답 예시 (HTTP 400)
+{
+  &quot;category&quot;: [&quot;존재하지 않는 카테고리입니다.&quot;],
+  &quot;due_date&quot;: [&quot;과거 날짜는 설정할 수 없습니다.&quot;],
+  &quot;non_field_errors&quot;: [&quot;종료일은 시작일 이후여야 합니다.&quot;]
+}
+</code></pre>
+<hr>
+<h2>검증 흐름 요약표</h2>
+<table>
+<thead>
+<tr>
+<th>메서드</th>
+<th>실행 시점</th>
+<th>입력</th>
+<th>반드시 return</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>validators</code> 리스트</td>
+<td>가장 먼저</td>
+<td>개별 필드 값</td>
+<td>불필요 (에러만 raise)</td>
+</tr>
+<tr>
+<td><code>validate_&lt;field&gt;()</code></td>
+<td>필드별 순서대로</td>
+<td>해당 필드 값</td>
+<td><strong>반드시 value return</strong></td>
+</tr>
+<tr>
+<td><code>validate()</code></td>
+<td>마지막</td>
+<td>전체 validated_data</td>
+<td><strong>반드시 data return</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>흔한 실수 목록</h2>
+<pre><code class="language-python"># ❌ 1. return 없음 → 필드가 None으로 저장
+def validate_category(self, value):
+    if not Category.objects.filter(id=value).exists():
+        raise serializers.ValidationError(&quot;없는 카테고리&quot;)
+    # return 없음!
+
+# ❌ 2. validate()에서 data 대신 None 반환
+def validate(self, data):
+    if data[&#39;start&#39;] &gt; data[&#39;end&#39;]:
+        raise serializers.ValidationError(&quot;날짜 오류&quot;)
+    # return 없음! → validated_data 전체가 None
+
+# ❌ 3. validate()에서 수정한 data를 반환 안 함
+def validate(self, data):
+    data[&#39;slug&#39;] = slugify(data[&#39;title&#39;])
+    # return data 빠짐 → slug 변환 안 됨
+
+# ✅ 올바른 패턴
+def validate_category(self, value):
+    # ... 검증 ...
+    return value  # 항상 return
+
+def validate(self, data):
+    # ... 교차 검증 ...
+    data[&#39;computed_field&#39;] = some_value
+    return data  # 항상 return
+</code></pre>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://www.django-rest-framework.org/api-guide/serializers/#validation" target="_blank">[1] DRF Serializers — Validation — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/validators/" target="_blank">[2] DRF Validators — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/fields/#field-level-validation" target="_blank">[3] DRF Field-level validation — 공식 문서</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/django-object-permissions">Django 객체 레벨 권한 — Owner와 팀 기반 접근 제어 →</a></li>
+<li><a href="/post/django-migration">Django Migration 완전 정복 →</a></li>
+</ul>
+
+<ul><li>Django</li><li>DRF</li><li>Serializer</li><li>Validation</li><li>REST</li><li>API</li><li>시행착오</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

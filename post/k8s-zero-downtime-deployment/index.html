@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Jenkins + ArgoCD로 구현하는 K8s 무중단 배포 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다." />
+    <meta name="keywords" content="Jenkins, Kubernetes, CI/CD, DevOps, ArgoCD, GitOps, Docker, Kustomize, 인프라" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/k8s-zero-downtime-deployment" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Jenkins + ArgoCD로 구현하는 K8s 무중단 배포" />
+    <meta property="og:description" content="Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/k8s-zero-downtime-deployment" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-01T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.367Z" />
+    <meta property="article:tag" content="Jenkins" />
+    <meta property="article:tag" content="Kubernetes" />
+    <meta property="article:tag" content="CI/CD" />
+    <meta property="article:tag" content="DevOps" />
+    <meta property="article:tag" content="ArgoCD" />
+    <meta property="article:tag" content="GitOps" />
+    <meta property="article:tag" content="Docker" />
+    <meta property="article:tag" content="Kustomize" />
+    <meta property="article:tag" content="인프라" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Jenkins + ArgoCD로 구현하는 K8s 무중단 배포" />
+    <meta name="twitter:description" content="Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Jenkins + ArgoCD로 구현하는 K8s 무중단 배포","description":"Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-01T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.367Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/k8s-zero-downtime-deployment"},"keywords":"Jenkins, Kubernetes, CI/CD, DevOps, ArgoCD, GitOps, Docker, Kustomize, 인프라","articleSection":"infra","inLanguage":"ko-KR","wordCount":25587},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"infra","item":"https://seobway23.github.io/?category=study%2Finfra"},{"@type":"ListItem","position":3,"name":"Jenkins + ArgoCD로 구현하는 K8s 무중단 배포","item":"https://seobway23.github.io/post/k8s-zero-downtime-deployment"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>infra</span></nav>
+<h1>Jenkins + ArgoCD로 구현하는 K8s 무중단 배포</h1>
+<p>Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다.</p>
+<p><span>Seobway</span> · <time datetime="2026-04-01T00:00:00.000Z">2026-04-01</time> · <span>25분</span></p>
+<h1>Jenkins + ArgoCD로 구현하는 K8s 무중단 배포</h1>
+<blockquote>
+<p>이 글은 &quot;서버를 절대 끄지 않고 새 버전을 배포하는 방법&quot;을 처음부터 설명합니다.</p>
+</blockquote>
+<hr>
+<h2>0. 왜 무중단 배포가 필요한가?</h2>
+<h3>전통적인 배포 방식의 문제</h3>
+<p>예전 방식은 간단했습니다.</p>
+<pre><code>1. 서버 중지
+2. 새 파일 복사
+3. 서버 재시작
+</code></pre>
+<p>문제는 <strong>2번과 3번 사이에 서비스가 중단</strong>된다는 것입니다.</p>
+<ul>
+<li>사용자는 &quot;서버 점검 중&quot; 화면을 보게 됩니다</li>
+<li>쇼핑몰이라면 결제 중이던 사용자의 세션이 날아갑니다</li>
+<li>매일 배포하는 서비스라면 매일 중단이 발생합니다</li>
+</ul>
+<h3>무중단 배포(Zero-Downtime Deployment)란?</h3>
+<p><strong>서비스를 멈추지 않고 새 버전으로 교체하는 기술</strong>입니다.</p>
+<p>핵심 아이디어는 &quot;낡은 버전과 새 버전을 잠깐 동시에 실행한 뒤, 트래픽을 서서히 새 버전으로 옮기는 것&quot;입니다.</p>
+<pre><code>[사용자 요청] → [로드밸런서]
+                    ├── [구버전 서버 (처리 중)] ← 기존 요청 처리 완료까지 유지
+                    └── [신버전 서버 (준비 완료)] ← 새 요청은 여기로
+</code></pre>
+<hr>
+<h2>1. 이 글에서 다루는 기술 스택</h2>
+<p>이 글은 용어 정의를 본문에 길게 적기보다, 글을 읽는 흐름을 끊지 않도록 <strong>용어를 탭/호버로 바로 설명</strong>해주는 방식으로 정리합니다.</p>
+<ul>
+<li>PC: 단어에 마우스를 올리거나(hover), 키보드로 포커스하면 설명이 뜹니다.\n+- 모바일: 단어를 탭하면 설명이 뜹니다.</li>
+</ul>
+<hr>
+<h3>1-2. 전체 아키텍처 한눈에 보기</h3>
+<p>이 글에서 구현하는 시스템의 전체 흐름입니다.</p>
+<pre><code class="language-mermaid">%% desc: 무중단 배포 전체 아키텍처 — 개발자 Git Push부터 K8s 클러스터 반영까지
+flowchart LR
+    DEV[/&quot;개발자\nGit Push&quot;/]
+    subgraph CI[&quot;① Jenkins CI (빌드·테스트)&quot;]
+        CHK[&quot;코드 체크아웃\n커밋 SHA 추출&quot;]
+        BCX[&quot;Docker 이미지 빌드\n(BuildKit 캐시 활용)&quot;]
+        MAN[&quot;Kustomize\n이미지 태그 교체 → Git 커밋&quot;]
+    end
+    REG[(&quot;② Docker Registry\n이미지 저장소&quot;)]
+    GIT[(&quot;③ Git Manifest\n배포 설정 저장소&quot;)]
+    subgraph CD[&quot;④ ArgoCD (자동 배포)&quot;]
+        SYNC[&quot;Git 변경 감지\n→ Sync&quot;]
+    end
+    K8S[(&quot;⑤ K8s 클러스터\nRolling Update&quot;)]
+
+    DEV --&gt; CHK --&gt; BCX --&gt; MAN
+    BCX --&gt;|&quot;이미지 push&quot;| REG
+    MAN --&gt;|&quot;설정 push&quot;| GIT
+    GIT --&gt;|&quot;감지&quot;| SYNC
+    SYNC --&gt;|&quot;kubectl apply&quot;| K8S
+</code></pre>
+<p><strong>흐름 요약:</strong></p>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>담당</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>①</td>
+<td>Jenkins</td>
+<td>코드를 Docker 이미지로 빌드 → 레지스트리에 푸시</td>
+</tr>
+<tr>
+<td>②</td>
+<td>Docker Registry</td>
+<td>빌드된 이미지를 버전별로 보관</td>
+</tr>
+<tr>
+<td>③</td>
+<td>Git (Manifest Repo)</td>
+<td>&quot;어떤 이미지를 배포할지&quot; 설정 파일 보관</td>
+</tr>
+<tr>
+<td>④</td>
+<td>ArgoCD</td>
+<td>Git 변경 감지 → K8s에 자동 반영</td>
+</tr>
+<tr>
+<td>⑤</td>
+<td>Kubernetes</td>
+<td>무중단 롤링 업데이트로 새 Pod 교체</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. Jenkins 파이프라인 — CI 자동화</h2>
+<h3>Jenkinsfile이란?</h3>
+<p>Jenkins 파이프라인을 <strong>코드로 정의한 파일</strong>입니다. 프로젝트 루트에 <code>Jenkinsfile</code>을 두면, Jenkins가 이 파일을 읽어 자동으로 빌드·배포를 진행합니다.</p>
+<pre><code>pipeline {
+    stages {
+        stage(&#39;스테이지 이름&#39;) {  // 파이프라인의 각 단계
+            steps { ... }        // 실제 실행할 명령어
+        }
+    }
+}
+</code></pre>
+<p>파이프라인은 <strong>스테이지(stage)</strong> 단위로 실행됩니다. 아래에서 각 스테이지를 하나씩 살펴봅니다.</p>
+<hr>
+<h3>2-1. Checkout — 코드 가져오기 &amp; 이미지 태그 결정</h3>
+<p><strong>Checkout</strong>은 Jenkins가 Git 저장소에서 최신 코드를 가져오는(clone/pull) 단계입니다.</p>
+<p>이 단계에서 중요한 것은 <strong>이미지 태그를 무엇으로 정할지</strong> 결정하는 것입니다.</p>
+<pre><code class="language-mermaid">%% desc: 체크아웃 단계 — Git 커밋 SHA와 빌드 번호를 조합해 유일한 이미지 태그 생성
+flowchart LR
+    SCM[&quot;Git 저장소에서\n코드 가져오기&quot;]
+    SHA[&quot;git rev-parse --short HEAD\n→ 7자리 커밋 SHA 추출\n예: abc1d2e&quot;]
+    TAG[&quot;이미지 태그 생성\n= SHA + 빌드번호\n예: abc1d2e-42&quot;]
+    SCM --&gt; SHA --&gt; TAG
+</code></pre>
+<pre><code class="language-groovy">stage(&#39;Checkout&#39;) {
+    steps {
+        checkout scm  // Git에서 코드 가져오기 (scm = Source Control Management)
+        script {
+            // git rev-parse --short HEAD: 현재 커밋의 짧은 SHA 가져오기
+            env.GIT_COMMIT_SHORT = sh(
+                script: &quot;git rev-parse --short HEAD&quot;,
+                returnStdout: true
+            ).trim()
+
+            // IMAGE_TAG 예시: abc1d2e-42 (SHA 7자리 + 빌드 번호)
+            env.IMAGE_TAG = &quot;${env.GIT_COMMIT_SHORT}-${env.BUILD_NUMBER}&quot;
+
+            // FULL_IMAGE_TAG 예시: docker.io/myorg/app:abc1d2e-42
+            env.FULL_IMAGE_TAG = &quot;${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.IMAGE_TAG}&quot;
+        }
+    }
+}
+</code></pre>
+<p><strong>왜 커밋 SHA를 태그로 쓰나요?</strong></p>
+<table>
+<thead>
+<tr>
+<th>태그 방식</th>
+<th>예시</th>
+<th>장·단점</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>latest</code></td>
+<td><code>app:latest</code></td>
+<td>편하지만 &quot;어느 버전인지&quot; 알 수 없음</td>
+</tr>
+<tr>
+<td>날짜</td>
+<td><code>app:20260401</code></td>
+<td>날짜는 알지만 코드 버전과 연결 어려움</td>
+</tr>
+<tr>
+<td>커밋 SHA</td>
+<td><code>app:abc1d2e</code></td>
+<td>이미지만 보면 어느 코드 커밋인지 바로 추적 가능</td>
+</tr>
+<tr>
+<td>SHA + 빌드번호</td>
+<td><code>app:abc1d2e-42</code></td>
+<td>동일 커밋을 두 번 빌드해도 구별 가능 ✅</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>장애 발생 시:</strong> 실행 중인 이미지 태그 <code>abc1d2e-42</code>를 보고 → Git에서 커밋 <code>abc1d2e</code>를 찾으면 → 어떤 코드 변경이 문제였는지 바로 확인 가능</p>
+</blockquote>
+<hr>
+<h3>2-2. Credentials 관리 — 비밀번호를 코드에 넣지 않는 방법</h3>
+<p><strong>Credentials(크리덴셜)</strong>은 비밀번호, API 키, 인증서처럼 외부에 노출되면 안 되는 정보입니다.</p>
+<p>코드에 직접 쓰면 안 되는 이유:</p>
+<ul>
+<li>Git에 올라가면 전 세계에 공개</li>
+<li>해커가 DockerHub 계정을 탈취하면 이미지를 마음대로 올릴 수 있음</li>
+</ul>
+<p>Jenkins는 <strong>Credentials Store</strong>에 이런 정보를 암호화해서 저장하고, 파이프라인 실행 시에만 환경변수로 주입합니다.</p>
+<pre><code class="language-mermaid">%% desc: Jenkins Credentials 흐름 — 암호화 저장소에서 파이프라인 실행 중에만 환경변수로 주입
+flowchart LR
+    subgraph STORE[&quot;Jenkins Credentials Store (암호화 저장)&quot;]
+        C1[&quot;dockerhub-username&quot;]
+        C2[&quot;dockerhub-password&quot;]
+        C3[&quot;kubeconfig-data (base64)&quot;]
+    end
+    subgraph PIPE[&quot;파이프라인 실행 중 (메모리에만 존재)&quot;]
+        ENV[&quot;환경변수로 주입\nDOCKERHUB_USERNAME=...\nDOCKERHUB_PASSWORD=...&quot;]
+    end
+    STORE --&gt;|&quot;withCredentials([...]) 블록 안에서만&quot;| ENV
+</code></pre>
+<p><strong>Credentials 등록하는 방법</strong></p>
+<pre><code>Jenkins 대시보드 접속
+→ Manage Jenkins (젠킨스 관리)
+→ Manage Credentials (자격증명 관리)
+→ Global credentials (전역)
+→ Add Credentials (자격증명 추가)
+  ├─ Kind: Secret text       ← 단순 텍스트 비밀값
+  ├─ Secret: &lt;비밀값 입력&gt;
+  └─ ID: dockerhub-username  ← 코드에서 이 ID로 참조
+</code></pre>
+<p><strong>파이프라인에서 사용하는 방법</strong></p>
+<pre><code class="language-groovy">stage(&#39;Parse Deploy Config&#39;) {
+    steps {
+        script {
+            // withCredentials: 이 블록 안에서만 비밀값을 환경변수로 사용 가능
+            // 블록 밖에서는 접근 불가 → 보안 유지
+            withCredentials([
+                string(credentialsId: &#39;dockerhub-username&#39;, variable: &#39;DOCKERHUB_USERNAME&#39;),
+                string(credentialsId: &#39;dockerhub-password&#39;, variable: &#39;DOCKERHUB_PASSWORD&#39;),
+                string(credentialsId: &#39;kubeconfig-data&#39;,    variable: &#39;KUBECONFIG_DATA&#39;)
+            ]) {
+                // pipeline 환경변수로 복사해 다른 stage에서도 사용
+                env.DOCKERHUB_USERNAME = DOCKERHUB_USERNAME
+                env.DOCKERHUB_PASSWORD = DOCKERHUB_PASSWORD
+                env.KUBECONFIG_DATA    = KUBECONFIG_DATA
+            }
+        }
+    }
+}
+</code></pre>
+<hr>
+<h3>2-3. kubeconfig 설정 — Jenkins가 K8s에 명령하는 방법</h3>
+<p><strong>kubeconfig</strong>는 K8s 클러스터에 접속하기 위한 &quot;열쇠&quot;입니다. 클러스터 주소, 인증서, 토큰이 담겨 있습니다.</p>
+<p>Jenkins 컨테이너는 매 빌드마다 새로 시작되기 때문에, kubeconfig를 매번 파일로 복원해야 합니다.</p>
+<pre><code class="language-mermaid">%% desc: kubeconfig 설정 흐름 — base64 인코딩된 값을 복호화해 ~/.kube/config 파일로 복원
+flowchart LR
+    A[&quot;K8s 서버의\n~/.kube/config 파일&quot;]
+    B[&quot;base64로 인코딩\n→ 텍스트 문자열로 변환\n(Jenkins Credentials에 저장)&quot;]
+    C[&quot;파이프라인 실행 시\nbase64 -d 로 복호화\n~/.kube/config 파일 생성&quot;]
+    D[&quot;kubectl 명령 실행 가능\n클러스터에 접속&quot;]
+    A --&gt; B --&gt; C --&gt; D
+</code></pre>
+<p><strong>K8s 서버에서 kubeconfig 준비하는 방법</strong></p>
+<pre><code class="language-bash"># 1. K8s 서버에서 kubeconfig 파일 확인
+cat ~/.kube/config
+
+# 2. server 주소가 127.0.0.1이면 Jenkins가 접근할 수 없음 → 실제 서버 IP로 변경
+# server: https://127.0.0.1:6443  (변경 전)
+# server: https://192.168.1.100:6443  (변경 후 - Jenkins가 접근 가능한 IP)
+
+# 3. base64로 인코딩 (-w 0: 줄바꿈 없이 한 줄로)
+base64 -w 0 ~/.kube/config
+
+# 4. 출력된 긴 문자열을 Jenkins Credentials에 &#39;kubeconfig-data&#39; ID로 저장
+</code></pre>
+<p><strong>파이프라인에서 kubeconfig 복원</strong></p>
+<pre><code class="language-groovy">stage(&#39;Configure kubeconfig&#39;) {
+    steps {
+        script {
+            sh &quot;&quot;&quot;
+                # .kube 폴더 생성 (없으면 오류)
+                mkdir -p \$HOME/.kube
+
+                # base64 -d: base64 디코딩 → 원래 파일 내용으로 복원
+                echo &quot;${env.KUBECONFIG_DATA}&quot; | base64 -d &gt; \$HOME/.kube/config
+
+                # 파일 권한 600: 소유자만 읽기/쓰기 (보안상 필수)
+                chmod 600 \$HOME/.kube/config
+
+                # 연결 확인
+                kubectl cluster-info   # 클러스터 정보 출력
+                kubectl get nodes      # 연결된 서버(노드) 목록 출력
+            &quot;&quot;&quot;
+        }
+    }
+}
+</code></pre>
+<hr>
+<h3>2-4. 인프라 분리 배포 — DB와 앱은 왜 따로 배포하나?</h3>
+<p><strong>핵심 원칙</strong>: MySQL(데이터베이스)과 Redis(캐시)는 <strong>데이터를 가지고 있는 상태 저장(Stateful) 서비스</strong>이므로, 앱 배포와 분리합니다.</p>
+<p><strong>왜 분리해야 하나요?</strong></p>
+<p>앱은 매 커밋마다 새 버전으로 교체합니다. 하지만 MySQL은 아무 때나 재시작하면 안 됩니다.</p>
+<ul>
+<li>데이터 손실 위험</li>
+<li>복제(Replication) 구성이 깨질 수 있음</li>
+<li>초기화 순서가 중요함</li>
+</ul>
+<p>따라서 파이프라인에서 &quot;DB가 이미 배포되어 있으면 건너뛴다&quot;는 로직을 넣습니다.</p>
+<pre><code class="language-mermaid">%% desc: 인프라 배포 판단 흐름 — MySQL StatefulSet 존재 여부로 초기 1회만 배포 결정
+flowchart TD
+    CHECK{&quot;kubectl get statefulset\napp-mysql 존재?&quot;}
+    DEPLOY[&quot;최초 배포:\nMySQL StatefulSet\nRedis StatefulSet\nNginx Deployment&quot;]
+    SKIP[&quot;이미 배포됨 → Skip\n(데이터 보호)&quot;]
+    CHECK --&gt;|&quot;없음(not-found)&quot;| DEPLOY
+    CHECK --&gt;|&quot;있음&quot;| SKIP
+</code></pre>
+<p><strong>Deployment vs StatefulSet — 언제 무엇을 쓰나?</strong></p>
+<table>
+<thead>
+<tr>
+<th>비교 항목</th>
+<th>Deployment</th>
+<th>StatefulSet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Pod 이름</strong></td>
+<td>랜덤 (예: <code>app-7f9b-abc12</code>)</td>
+<td>고정 순서 (예: <code>mysql-0</code>, <code>mysql-1</code>)</td>
+</tr>
+<tr>
+<td><strong>네트워크 주소</strong></td>
+<td>Pod가가 재시작되면 IP가 바뀜</td>
+<td><code>mysql-0.mysql.ns.svc</code> 고정 DNS</td>
+</tr>
+<tr>
+<td><strong>데이터 저장</strong></td>
+<td>Pod별 전용 볼륨 없음</td>
+<td>Pod마다 PVC(디스크) 자동 생성</td>
+</tr>
+<tr>
+<td><strong>시작 순서</strong></td>
+<td>동시에 시작</td>
+<td>0번부터 순서대로 시작</td>
+</tr>
+<tr>
+<td><strong>주 사용처</strong></td>
+<td>웹 앱, API 서버</td>
+<td>MySQL, Redis, Elasticsearch 등</td>
+</tr>
+</tbody></table>
+<p><strong>왜 MySQL은 고정 DNS가 필요한가?</strong></p>
+<p>MySQL을 Primary 1대 + Replica 2대로 구성하면, Replica는 Primary의 주소를 설정 파일에 써야 합니다.</p>
+<pre><code class="language-yaml"># MySQL Replica 설정 예시
+master_host: mysql-0.mysql.databases.svc.cluster.local # 고정 주소
+</code></pre>
+<p>Deployment라면 Pod가 재시작될 때마다 IP가 바뀌어 이 설정이 깨집니다. StatefulSet은 <code>mysql-0</code>이라는 이름(DNS)이 고정되므로 안전합니다.</p>
+<p><strong>MySQL StatefulSet YAML 구조</strong></p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: app-mysql
+  namespace: databases # 앱과 다른 네임스페이스에 분리
+spec:
+  serviceName: &quot;mysql&quot; # Headless Service 이름 (DNS 생성에 필요)
+  replicas: 1 # MySQL 인스턴스 수
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret # Secret에서 비밀번호 가져오기
+                  key: password
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql # 데이터 저장 경로
+
+  # volumeClaimTemplates: Pod가 생성될 때 자동으로 PVC(디스크)도 함께 생성
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: [&quot;ReadWriteOnce&quot;] # 하나의 노드에서만 읽기/쓰기
+        resources:
+          requests:
+            storage: 10Gi # 10GB 요청
+</code></pre>
+<p><strong>Headless Service란?</strong></p>
+<p>일반 Service는 하나의 고정 IP를 제공합니다. 하지만 StatefulSet에서는 각 Pod에 직접 접근해야 할 때가 있습니다.</p>
+<p>Headless Service(<code>clusterIP: None</code>)는 고정 IP 없이 각 Pod의 DNS 레코드만 만들어줍니다.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: databases
+spec:
+  clusterIP: None # Headless: 고정 IP 없음
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+
+# 결과: 각 Pod에 DNS 주소 생성
+# mysql-0.mysql.databases.svc.cluster.local
+# mysql-1.mysql.databases.svc.cluster.local
+</code></pre>
+<hr>
+<h3>2-5. Docker Buildx 빌드 &amp; 푸시</h3>
+<p><strong>Docker Buildx</strong>는 기본 <code>docker build</code>의 확장 버전입니다. 여러 CPU 아키텍처(AMD64, ARM64 등)용 이미지를 동시에 빌드하고, BuildKit의 고급 캐싱 기능을 활용할 수 있습니다.</p>
+<pre><code class="language-mermaid">%% desc: Docker Buildx 빌드 흐름 — DockerHub 로그인 → Buildx 설정 → 캐시 활용 빌드 → 레지스트리 푸시
+flowchart LR
+    LOGIN[&quot;DockerHub\n로그인&quot;]
+    BCX[&quot;Buildx Builder\n생성/활성화&quot;]
+    CACHE_IN[&quot;이전 빌드 캐시\n레지스트리에서 불러오기&quot;]
+    BUILD[&quot;이미지 빌드\nplatform: linux/amd64&quot;]
+    PUSH[&quot;레지스트리에 푸시\napp:abc1d2e-42\napp:latest&quot;]
+    CACHE_OUT[&quot;새 캐시 레지스트리에 저장\n(다음 빌드에서 재사용)&quot;]
+    LOGIN --&gt; BCX --&gt; CACHE_IN --&gt; BUILD --&gt; PUSH
+    BUILD --&gt; CACHE_OUT
+</code></pre>
+<pre><code class="language-groovy">// Stage 1: Docker Hub 로그인
+stage(&#39;Docker Login&#39;) {
+    steps {
+        script {
+            // --password-stdin: 비밀번호를 표준 입력으로 전달 (보안상 권장)
+            sh &quot;&quot;&quot;
+                echo &quot;${env.DOCKERHUB_PASSWORD}&quot; | docker login ${DOCKER_REGISTRY} \\
+                    -u &quot;${env.DOCKERHUB_USERNAME}&quot; \\
+                    --password-stdin
+            &quot;&quot;&quot;
+        }
+    }
+}
+
+// Stage 2: Docker Buildx 설정
+stage(&#39;Set up Docker Buildx&#39;) {
+    steps {
+        script {
+            sh &#39;&#39;&#39;
+                # Buildx 버전 확인, 없으면 설치
+                docker buildx version || docker buildx install
+
+                # &#39;builder&#39;라는 이름의 Buildx Builder 생성
+                # docker-container 드라이버: BuildKit 기능 전체 사용 가능
+                docker buildx create --use --name builder --driver docker-container || true
+
+                # Builder 초기화 및 상태 확인
+                docker buildx inspect --bootstrap
+            &#39;&#39;&#39;
+        }
+    }
+}
+
+// Stage 3: 이미지 빌드 &amp; 푸시
+stage(&#39;Build and Push with Cache&#39;) {
+    steps {
+        script {
+            sh &quot;&quot;&quot;
+                docker buildx build \\
+                    --platform linux/amd64 \\         # AMD64 아키텍처용 이미지 빌드
+                    --push \\                          # 빌드 완료 즉시 레지스트리에 업로드
+                    --tag ${env.FULL_IMAGE_TAG} \\     # 예: docker.io/myorg/app:abc1d2e-42
+                    --tag ${env.LATEST_IMAGE_TAG} \\   # 예: docker.io/myorg/app:latest
+                    --cache-from type=registry,ref=${DOCKER_REGISTRY}/${IMAGE_NAME}:buildcache \\
+                    --cache-to   type=registry,ref=${DOCKER_REGISTRY}/${IMAGE_NAME}:buildcache,mode=max \\
+                    .
+            &quot;&quot;&quot;
+        }
+    }
+}
+</code></pre>
+<p><strong>BuildKit 레이어 캐시란?</strong></p>
+<p>Dockerfile의 각 명령어는 <strong>레이어(Layer)</strong>를 만듭니다. 레이어가 변경되지 않으면 이전 빌드의 캐시를 재사용합니다.</p>
+<pre><code class="language-dockerfile"># 자주 변하지 않는 것을 먼저 (캐시 유지)
+COPY package.json package-lock.json ./
+RUN npm ci              # package.json이 안 바뀌면 캐시 사용 → 빠름
+
+# 자주 바뀌는 소스 코드는 나중에
+COPY . .
+RUN npm run build
+</code></pre>
+<pre><code>소스 코드 변경 시:
+  Layer 1 (FROM node:18)    → 캐시 재사용 ⚡
+  Layer 2 (COPY package.json)→ 캐시 재사용 ⚡  (package.json 변경 없음)
+  Layer 3 (RUN npm ci)       → 캐시 재사용 ⚡  (의존성 재설치 불필요)
+  Layer 4 (COPY . .)         → 새로 빌드      (소스 변경됨)
+  Layer 5 (RUN npm build)    → 새로 빌드
+</code></pre>
+<p><code>--cache-from/to type=registry</code>: CI 서버가 매번 새 컨테이너로 실행되어도, 레지스트리에 캐시를 저장·불러와서 빠른 빌드 유지</p>
+<hr>
+<h3>2-6. 이전 버전 저장 — 롤백 기준점 확보</h3>
+<p>새 버전 배포 전에 현재 실행 중인 이미지 태그를 저장해둡니다. 배포 실패 시 이 값으로 롤백합니다.</p>
+<pre><code class="language-groovy">stage(&#39;Save Previous Version&#39;) {
+    steps {
+        script {
+            try {
+                // kubectl get deployment: 현재 배포 정보 조회
+                // -o jsonpath: JSON 결과에서 특정 값만 추출 (여기서는 이미지 주소)
+                env.PREVIOUS_IMAGE = sh(
+                    script: &quot;&quot;&quot;
+                        kubectl get deployment web -n ${K8S_NAMESPACE} \\
+                            -o jsonpath=&#39;{.spec.template.spec.containers[0].image}&#39; 2&gt;/dev/null || echo &quot;&quot;
+                    &quot;&quot;&quot;,
+                    returnStdout: true
+                ).trim()
+                echo &quot;롤백 기준점: ${env.PREVIOUS_IMAGE}&quot;
+            } catch (Exception e) {
+                env.PREVIOUS_IMAGE = &quot;&quot;  // 최초 배포면 이전 버전 없음
+            }
+        }
+    }
+}
+</code></pre>
+<hr>
+<h3>2-7. Kustomize로 매니페스트 업데이트 — GitOps의 핵심</h3>
+<p><strong>매니페스트(Manifest)</strong>는 K8s에게 &quot;이렇게 배포해줘&quot;라고 알려주는 YAML 파일입니다.</p>
+<p>GitOps에서는 이 파일을 Git 저장소에 보관하고, 변경하면 ArgoCD가 자동으로 클러스터에 반영합니다.</p>
+<p><strong>왜 이미지 태그만 바꾸나요?</strong></p>
+<p>매번 YAML 전체를 새로 쓰면 실수가 생깁니다. Kustomize는 기본 설정(base)을 그대로 두고, 환경별로 &quot;이 값만 덮어써&quot;라는 방식으로 관리합니다.</p>
+<pre><code class="language-mermaid">%% desc: Kustomize 구조 — base 기본 설정 위에 환경별 overlay로 이미지 태그만 교체
+flowchart TD
+    BASE[&quot;base/kustomization.yaml\n이미지 이름만 명시\napp:placeholder&quot;]
+    PROD[&quot;overlays/prod/kustomization.yaml\n이미지 태그 덮어쓰기\nnewTag: abc1d2e-42&quot;]
+    RESULT[&quot;최종 배포 YAML\napp:abc1d2e-42\n(base + overlay 합산)&quot;]
+    BASE --&gt; RESULT
+    PROD --&gt; RESULT
+</code></pre>
+<p><strong>디렉토리 구조</strong></p>
+<pre><code>k8s/
+├── base/
+│   ├── kustomization.yaml   ← 기본 설정 (이미지 이름만)
+│   └── deployment.yaml      ← Deployment 기본 구조
+└── overlays/
+    ├── dev/
+    │   └── kustomization.yaml  ← 개발 환경용 (replicas: 1)
+    └── prod/
+        └── kustomization.yaml  ← 운영 환경용 (replicas: 3)
+                                   Jenkins가 newTag 값을 여기 교체
+</code></pre>
+<p><strong>overlays/prod/kustomization.yaml</strong></p>
+<pre><code class="language-yaml">apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base # base 디렉토리를 기반으로 사용
+
+namespace: app-prod
+
+images:
+  - name: app # base에서 사용한 이미지 이름
+    newName: docker.io/myorg/app # 실제 레지스트리 주소
+    newTag: &quot;abc1d2e-42&quot; # ← Jenkins가 이 값을 새 이미지 태그로 교체
+</code></pre>
+<p><strong>Jenkins에서 태그 교체 &amp; Git 커밋</strong></p>
+<pre><code class="language-groovy">stage(&#39;Update K8s Manifest&#39;) {
+    steps {
+        script {
+            sh &quot;&quot;&quot;
+                # Git 커밋 작성자 설정 (Jenkins가 커밋하는 것)
+                git config user.name  &quot;Jenkins&quot;
+                git config user.email &quot;jenkins@example.com&quot;
+
+                # sed 명령: kustomization.yaml에서 newTag 줄을 새 태그로 교체
+                # sed -i &#39;s|찾을 패턴|교체할 값|g&#39; 파일명
+                sed -i &#39;s|newTag:.*|newTag: ${env.IMAGE_TAG}|g&#39; \\
+                    k8s/overlays/prod/kustomization.yaml
+
+                # 변경된 파일만 커밋
+                git add k8s/overlays/prod/kustomization.yaml
+                git commit -m &quot;ci: update image tag to ${env.IMAGE_TAG} [skip ci]&quot;
+                # [skip ci]: 이 커밋은 다시 Jenkins를 실행하지 않도록 하는 신호
+                # 없으면: git push → Jenkins 재실행 → git push → Jenkins 재실행 → 무한 루프!
+
+                git push origin ${K8S_BRANCH}
+            &quot;&quot;&quot;
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p><strong>[skip ci] 키워드가 없으면 어떻게 되나요?</strong><br>Jenkins가 Git 저장소를 감시하다가, 새 커밋이 생기면 파이프라인을 실행합니다.<br>그런데 파이프라인 자체가 Git에 커밋을 만드니까, 다시 파이프라인이 실행됩니다.<br><code>[skip ci]</code>는 &quot;이 커밋으로 CI를 돌리지 마라&quot;는 약속된 신호입니다.</p>
+</blockquote>
+<hr>
+<h2>3. ArgoCD — GitOps 기반 자동 배포</h2>
+<h3>3-1. ArgoCD가 하는 일</h3>
+<p>ArgoCD는 <strong>Git 저장소를 지속적으로 감시</strong>합니다. Git의 상태(원하는 상태)와 K8s 클러스터의 실제 상태가 다르면 자동으로 맞춰줍니다.</p>
+<pre><code class="language-mermaid">%% desc: ArgoCD GitOps 동작 원리 — Git과 클러스터 상태 비교 후 자동 동기화
+flowchart TD
+    GIT[(&quot;Git Repository\n원하는 상태\nnewTag: abc1d2e-42&quot;)]
+    ARGO[&quot;ArgoCD Controller\n3초마다 비교&quot;]
+    CLUSTER[(&quot;K8s Cluster\n실제 상태\n현재 실행: abc1d2e-41&quot;)]
+    DIFF{&quot;다름 감지\n(Out of Sync)&quot;}
+    SYNC[&quot;kubectl apply 실행\n클러스터를 Git 상태로 맞춤&quot;]
+    SAME{&quot;같음\n(Synced)&quot;}
+
+    GIT --&gt; ARGO
+    CLUSTER --&gt; ARGO
+    ARGO --&gt; DIFF
+    DIFF --&gt;|&quot;다름&quot;| SYNC
+    DIFF --&gt;|&quot;같음&quot;| SAME
+    SYNC --&gt; CLUSTER
+    SAME --&gt;|&quot;계속 감시&quot;| ARGO
+</code></pre>
+<p><strong>왜 &quot;Git이 유일한 진실(Single Source of Truth)&quot;인가?</strong></p>
+<p>ArgoCD 없이 직접 <code>kubectl</code> 명령으로 배포하면:</p>
+<ul>
+<li>&quot;누가 언제 어떻게 바꿨는지&quot; 기록이 없음</li>
+<li>서버가 망가지면 어디서부터 복구해야 할지 막막</li>
+<li>개발·운영 환경이 언제 달라졌는지 모름</li>
+</ul>
+<p>Git에 모든 배포 설정을 두면:</p>
+<ul>
+<li>모든 변경이 commit으로 기록 → &quot;언제 누가 뭘 바꿨는지&quot; 추적 가능</li>
+<li>Git에서 이전 커밋으로 revert하면 바로 이전 상태로 복구</li>
+<li>PR 리뷰를 통해 배포 전 검토 가능</li>
+</ul>
+<p><strong>직접 kubectl로 바꾸면 어떻게 되나요?</strong></p>
+<p>ArgoCD의 <code>selfHeal: true</code> 옵션이 켜져 있으면, kubectl로 직접 수정해도 ArgoCD가 3초 안에 Git 상태로 되돌립니다.</p>
+<pre><code>개발자가 kubectl set image ... 실행 (직접 수정)
+  → ArgoCD가 감지: &quot;Git과 다름&quot; (Out of Sync)
+  → ArgoCD가 자동 복구: Git의 설정으로 되돌림
+</code></pre>
+<h3>3-2. ArgoCD Application 설정</h3>
+<p>ArgoCD에 &quot;이 Git 저장소의 이 경로를 감시해서 이 클러스터에 배포해라&quot;를 알려주는 설정 파일입니다.</p>
+<pre><code class="language-yaml">apiVersion: argoproj.io/v1alpha1
+kind: Application # ArgoCD의 커스텀 리소스 타입
+metadata:
+  name: app-prod
+  namespace: argocd # ArgoCD 자체가 설치된 네임스페이스
+spec:
+  project: default
+
+  # source: 어디서 설정 파일을 가져올지
+  source:
+    repoURL: https://github.com/your-org/k8s-manifests.git
+    targetRevision: main # 감시할 브랜치
+    path: k8s/overlays/prod # 저장소 내 경로
+
+  # destination: 어느 클러스터·네임스페이스에 배포할지
+  destination:
+    server: https://kubernetes.default.svc # 현재 클러스터
+    namespace: app-prod
+
+  # syncPolicy: 동기화 정책
+  syncPolicy:
+    automated:
+      prune: true # Git에서 삭제된 리소스를 클러스터에서도 자동 삭제
+      selfHeal: true # kubectl 직접 수정 시 Git 상태로 자동 복구
+    syncOptions:
+      - CreateNamespace=true # 네임스페이스가 없으면 자동 생성
+    retry:
+      limit: 5 # 실패 시 최대 5번 재시도
+      backoff:
+        duration: 5s # 처음 재시도는 5초 후
+        factor: 2 # 재시도마다 2배씩 대기 시간 증가 (5s → 10s → 20s...)
+        maxDuration: 3m # 최대 3분까지만
+</code></pre>
+<p><strong>Auto-Sync vs Manual Sync</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Auto-Sync (자동)</th>
+<th>Manual Sync (수동)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>동작 방식</strong></td>
+<td>Git 변경 감지 즉시 자동 배포</td>
+<td>운영자가 직접 ArgoCD UI/CLI에서 실행</td>
+</tr>
+<tr>
+<td><strong>적합 환경</strong></td>
+<td>개발·스테이징 환경</td>
+<td>프로덕션 환경</td>
+</tr>
+<tr>
+<td><strong>장점</strong></td>
+<td>완전 자동화, 빠른 반영</td>
+<td>배포 전 사람이 검토 가능</td>
+</tr>
+<tr>
+<td><strong>단점</strong></td>
+<td>잘못된 코드가 바로 배포될 수 있음</td>
+<td>배포가 느림, 사람 개입 필요</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. K8s 무중단 배포 — Rolling Update 상세</h2>
+<h3>4-1. Rolling Update란?</h3>
+<p><strong>롤링 업데이트(Rolling Update)</strong>는 &quot;기존 Pod을 한 번에 다 끄지 않고, 하나씩 새 버전으로 교체하는 방식&quot;입니다.</p>
+<pre><code class="language-mermaid">%% desc: Rolling Update 단계별 흐름 — maxSurge=1 maxUnavailable=0, Replica 3개 예시
+flowchart LR
+    S0[&quot;초기 상태\nv1×3 실행 중&quot;]
+    S1[&quot;v2 Pod 1개 생성\nv1×3 + v2×1\n(총 4개 실행)&quot;]
+    S2[&quot;v2 준비 완료\nv1 1개 종료\nv1×2 + v2×1&quot;]
+    S3[&quot;v2 1개 더 생성\nv1×2 + v2×2&quot;]
+    S4[&quot;v1 1개 종료\nv1×1 + v2×2&quot;]
+    S5[&quot;v2 마지막 생성\n→ v1 마지막 종료\nv2×3 완료&quot;]
+    S0 --&gt; S1 --&gt; S2 --&gt; S3 --&gt; S4 --&gt; S5
+</code></pre>
+<p>이 과정에서 서비스가 중단되지 않으려면, <strong>항상 Ready 상태의 Pod가 요청을 처리할 수 있어야</strong> 합니다.</p>
+<h3>4-2. maxSurge &amp; maxUnavailable — 교체 속도 조절</h3>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>의미</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>maxSurge</code></td>
+<td>원래 Pod 수보다 얼마나 더 많이 만들 수 있나</td>
+<td><code>1</code> → replicas 3이면 최대 4개까지 허용</td>
+</tr>
+<tr>
+<td><code>maxUnavailable</code></td>
+<td>원래 Pod 수보다 얼마나 줄어들 수 있나</td>
+<td><code>0</code> → 항상 3개 유지 (무중단 보장)</td>
+</tr>
+</tbody></table>
+<p><strong>무중단 설정: <code>maxUnavailable: 0</code></strong></p>
+<pre><code class="language-yaml">strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1 # replicas(3)+1 = 4개까지 허용 (신규 Pod 생성 여유)
+    maxUnavailable: 0 # 0개: 언제나 replicas만큼 정상 Pod 유지 → 무중단 보장
+</code></pre>
+<blockquote>
+<p><code>maxSurge: 0, maxUnavailable: 0</code>은 불가능합니다. 교체 자체가 진행될 수 없기 때문입니다.</p>
+</blockquote>
+<p><strong>속도 vs 안정성 트레이드오프</strong></p>
+<pre><code>replicas: 3 기준
+
+maxSurge: 1, maxUnavailable: 0 (무중단, 느림)
+  → 한 번에 1개씩 교체
+  → 항상 최소 3개 정상 운영
+  → 배포 시간 ∝ replicas 수
+
+maxSurge: 25%, maxUnavailable: 25% (빠름, 일시적 축소 허용)
+  → 동시에 여러 개 교체 (25% 줄어들어도 OK)
+  → 배포 빠르지만, 순간적으로 용량 줄어듦
+</code></pre>
+<h3>4-3. Readiness Probe — 무중단 배포의 실질적 보증</h3>
+<p><strong>Probe(프로브)</strong>는 K8s가 Pod의 상태를 확인하기 위해 주기적으로 보내는 &quot;안녕하세요?&quot; 신호입니다.</p>
+<p><strong>Readiness Probe</strong>가 없으면 어떻게 되나요?</p>
+<p>K8s는 컨테이너가 시작됐다는 것만 알고, &quot;앱이 실제로 요청을 처리할 준비가 됐는지&quot;는 모릅니다.</p>
+<pre><code>Readiness Probe 없을 때:
+  컨테이너 시작 (5초)
+  → K8s: &quot;시작됐네? 트래픽 보내!&quot;
+  → 앱: &quot;아직 DB 연결 중인데...&quot; → 오류 발생 ❌
+
+Readiness Probe 있을 때:
+  컨테이너 시작 (5초)
+  → K8s: &quot;준비됐어?&quot; → /health/ready 호출
+  → 앱: &quot;DB 연결 중... (503 반환)&quot;
+  → K8s: &quot;아직이구나. 트래픽 안 보냄&quot;
+  → 10초 후 다시 확인 → &quot;OK 이제 됐어! 트래픽 보냄&quot; ✅
+</code></pre>
+<pre><code class="language-mermaid">%% desc: Readiness Probe와 Service Endpoint — Ready Pod만 Endpoint에 등록되어 트래픽 수신
+flowchart LR
+    CLIENT[&quot;사용자 요청&quot;]
+    SERVICE[&quot;K8s Service\n(고정 주소)&quot;]
+    EP[&quot;Endpoint Slice\nReady Pod 목록&quot;]
+    OLD[&quot;기존 Pod v1\nReady ✓&quot;]
+    NEW_OK[&quot;신규 Pod v2\nReady ✓\n(Probe 통과)&quot;]
+    NEW_NO[&quot;신규 Pod v2\nNot Ready ✗\n(Probe 응답 대기)&quot;]
+
+    CLIENT --&gt; SERVICE --&gt; EP
+    EP --&gt;|&quot;트래픽 전달&quot;| OLD
+    EP --&gt;|&quot;트래픽 전달&quot;| NEW_OK
+    NEW_NO -.-&gt;|&quot;Endpoint 등록 안 됨&quot;| EP
+</code></pre>
+<p><strong>Probe 3종 역할 비교</strong></p>
+<table>
+<thead>
+<tr>
+<th>Probe 종류</th>
+<th>실패하면?</th>
+<th>언제 쓰나?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>readinessProbe</code></td>
+<td>Service Endpoint에서 제외 (Pod은 유지, 트래픽만 안 보냄)</td>
+<td>앱이 요청 처리 준비가 됐는지 확인</td>
+</tr>
+<tr>
+<td><code>livenessProbe</code></td>
+<td>Pod을 강제 재시작</td>
+<td>앱이 응답 불가 상태(교착, 무한루프)에 빠졌는지 감지</td>
+</tr>
+<tr>
+<td><code>startupProbe</code></td>
+<td>livenessProbe 비활성화 (시작 시간만큼 여유)</td>
+<td>JVM처럼 시작이 느린 앱 보호</td>
+</tr>
+</tbody></table>
+<h3>4-4. 완전한 Deployment YAML — 실전 설정</h3>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: app-prod
+spec:
+  replicas: 3 # 항상 3개의 Pod 유지
+
+  # ── 배포 전략 ────────────────────────────────
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # replicas+1까지 허용 → 최대 4개
+      maxUnavailable: 0 # 항상 3개 이상 유지 → 무중단 보장
+
+  # Ready 후 추가 안정화 시간
+  # 0이면 Readiness Probe 통과 즉시 트래픽 받음
+  # 예열(warmup)이 필요한 앱이면 10~30 권장
+  minReadySeconds: 10
+
+  # 이 시간(초) 내에 배포가 완료 안 되면 실패 처리
+  # 기본 600초(10분). CI/CD에서 실패 여부 판단에 사용
+  progressDeadlineSeconds: 600
+
+  # 롤백을 위해 이전 ReplicaSet 몇 개 보관할지
+  # 이전 10개 버전으로 롤백 가능
+  revisionHistoryLimit: 10
+
+  selector:
+    matchLabels:
+      app: myapp # 이 라벨을 가진 Pod을 관리
+
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      # SIGTERM 신호 후 Pod가 강제 종료되기까지 대기 시간
+      # preStop 시간보다 반드시 길게 설정
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: app
+          image: docker.io/myorg/app:abc1d2e-42
+          imagePullPolicy: IfNotPresent # 이미지가 이미 있으면 다운로드 안 함
+
+          ports:
+            - name: http # 포트에 이름 붙이기 → Probe에서 이름으로 참조 가능
+              containerPort: 8080
+
+          # ── 준비 확인 (무중단 배포 핵심) ──────
+          readinessProbe:
+            httpGet:
+              path: /health/ready # 이 경로로 HTTP GET 요청
+              port: http # 위에서 정의한 &#39;http&#39; 포트
+            initialDelaySeconds: 10 # 컨테이너 시작 후 10초 기다렸다가 첫 체크
+            periodSeconds: 5 # 이후 5초마다 체크
+            failureThreshold: 3 # 3번 연속 실패하면 Not Ready로 판정
+
+          # ── 생존 확인 (응답 불가 상태 감지) ───
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 30 # readiness보다 늦게 시작 (초기화 실패 방지)
+            periodSeconds: 10
+            failureThreshold: 3 # 3번 연속 실패하면 Pod 재시작
+
+          # ── 우아한 종료 (Graceful Shutdown) ───
+          lifecycle:
+            preStop:
+              exec:
+                # Pod 종료 신호(SIGTERM)를 받으면 즉시 종료하지 않고
+                # 15초 대기 → 처리 중인 요청이 완료될 시간 확보
+                command: [&quot;/bin/sh&quot;, &quot;-c&quot;, &quot;sleep 15&quot;]
+
+          # ── 리소스 제한 ────────────────────────
+          resources:
+            requests: # Pod 실행에 필요한 최소 자원 (스케줄링 기준)
+              cpu: 200m # 200 밀리코어 = 0.2 CPU
+              memory: 256Mi # 256 MiB
+            limits: # Pod가 사용할 수 있는 최대 자원
+              cpu: 500m
+              memory: 512Mi
+</code></pre>
+<p><strong>CPU 단위 m(밀리코어)이란?</strong></p>
+<ul>
+<li><code>1000m</code> = CPU 1개 전체</li>
+<li><code>500m</code> = CPU 반 개</li>
+<li><code>200m</code> = CPU 0.2개</li>
+</ul>
+<p>일반적으로 요청(requests)은 낮게, 한계(limits)는 버스트 허용을 위해 높게 설정합니다.</p>
+<p><strong>Graceful Shutdown 흐름</strong></p>
+<pre><code>1. K8s가 Pod에 종료 신호(SIGTERM) 전송
+2. preStop 훅 실행: sleep 15 (15초 대기)
+   ← 이 15초 동안 새 요청은 안 오고, 처리 중인 요청만 마무리
+3. 15초 후 앱이 SIGTERM 받아 종료 처리 시작
+4. terminationGracePeriodSeconds(30초) 지나면 강제 종료(SIGKILL)
+
+총 유예 시간: 최대 30초 (terminationGracePeriodSeconds)
+preStop 시간(15) + 앱 종료 시간이 30초보다 짧아야 함
+</code></pre>
+<hr>
+<h2>5. 롤백 전략 — 장애 시 빠른 복구</h2>
+<h3>5-1. 롤백이 왜 쉬운가?</h3>
+<p>K8s는 배포할 때마다 <strong>ReplicaSet</strong>이라는 스냅샷을 남겨둡니다. 롤백은 이전 스냅샷으로 되돌아가는 것입니다.</p>
+<pre><code class="language-mermaid">%% desc: 롤백 흐름 — ReplicaSet 히스토리에서 이전 버전으로 교체
+flowchart LR
+    R1[&quot;ReplicaSet v1\n(revision 1)\n보관 중&quot;]
+    R2[&quot;ReplicaSet v2\n(revision 2)\n보관 중&quot;]
+    R3[&quot;ReplicaSet v3\n(revision 3)\n현재 실행&quot;]
+    UNDO[&quot;kubectl rollout undo&quot;]
+    R3 --&gt;|&quot;장애 발생&quot;| UNDO
+    UNDO --&gt;|&quot;이전으로&quot;| R2
+</code></pre>
+<h3>5-2. minReadySeconds &amp; progressDeadlineSeconds</h3>
+<p>이 두 파라미터는 배포 타이밍과 실패 감지를 제어합니다.</p>
+<pre><code class="language-mermaid">%% desc: 배포 타이밍 — initialDelay → Readiness 성공 → minReadySeconds 대기 → Available
+flowchart LR
+    START[&quot;Pod 생성 완료&quot;]
+    INIT[&quot;initialDelaySeconds (10초)\n첫 Readiness Probe 전 대기&quot;]
+    PROBE[&quot;Readiness Probe\n/health/ready → 200 OK&quot;]
+    MIN[&quot;minReadySeconds (10초)\nReady 후 추가 안정화 대기&quot;]
+    AVAIL[&quot;Available 상태\n다음 Pod 교체 시작&quot;]
+    START --&gt; INIT --&gt; PROBE --&gt; MIN --&gt; AVAIL
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>역할</th>
+<th>기본값</th>
+<th>설정 권장</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>minReadySeconds</code></td>
+<td>Ready 후 추가 안정화 대기 시간</td>
+<td>0초</td>
+<td>예열 필요 앱: 10~30초</td>
+</tr>
+<tr>
+<td><code>progressDeadlineSeconds</code></td>
+<td>전체 배포 제한 시간. 초과 시 <code>ProgressDeadlineExceeded</code> 오류</td>
+<td>600초</td>
+<td>Probe 설정에 맞게 조정</td>
+</tr>
+</tbody></table>
+<h3>5-3. kubectl rollout 명령어 완전 정리</h3>
+<pre><code class="language-bash"># 배포 진행 상황 실시간 확인
+# &quot;successfully rolled out&quot; 메시지가 나올 때까지 대기
+kubectl rollout status deployment/app -n app-prod
+
+# 배포 이력 조회 (몇 번째 revision이 있는지)
+kubectl rollout history deployment/app -n app-prod
+# REVISION  CHANGE-CAUSE
+# 1         최초 배포
+# 2         v1.1.0 업데이트
+# 3         v1.2.0 업데이트 (현재)
+
+# 특정 revision의 상세 내용 확인 (어떤 이미지였는지)
+kubectl rollout history deployment/app -n app-prod --revision=2
+
+# 직전 버전으로 즉시 롤백 (가장 많이 쓰임)
+kubectl rollout undo deployment/app -n app-prod
+
+# 특정 revision으로 롤백
+kubectl rollout undo deployment/app -n app-prod --to-revision=1
+
+# 배포 일시 중지 (canary 검증 시: 일부만 배포하고 잠깐 멈춤)
+kubectl rollout pause  deployment/app -n app-prod
+
+# 배포 재개
+kubectl rollout resume deployment/app -n app-prod
+</code></pre>
+<blockquote>
+<p><strong>rollout undo는 새 revision을 만든다</strong><br>revision 3에서 <code>undo</code>하면 revision 1의 내용으로 revision 4가 생성됩니다.<br>이전 revision은 삭제되지 않고 history에 남습니다.</p>
+</blockquote>
+<h3>5-4. Jenkins 자동 롤백</h3>
+<pre><code class="language-groovy">post {
+    success {
+        echo &quot;✅ 배포 성공! 이미지: ${env.FULL_IMAGE_TAG}&quot;
+    }
+    failure {
+        script {
+            echo &quot;❌ 배포 실패! 롤백 시작...&quot;
+            sh &quot;&quot;&quot;
+                # 직전 버전으로 즉시 롤백
+                kubectl rollout undo deployment/web -n ${K8S_NAMESPACE}
+
+                # 롤백 완료까지 대기 (최대 5분)
+                kubectl rollout status deployment/web -n ${K8S_NAMESPACE} --timeout=5m
+            &quot;&quot;&quot;
+        }
+    }
+}
+</code></pre>
+<hr>
+<h2>6. 배포 이력 추적 — 언제 무엇이 배포됐나?</h2>
+<p>GitOps의 강점: <strong>모든 배포가 Git 커밋으로 기록</strong>됩니다.</p>
+<pre><code class="language-mermaid">%% desc: 배포 이력 추적 — 소스 커밋부터 ArgoCD Sync까지 전체 감사 로그
+flowchart TD
+    SC[&quot;① 소스 커밋\nabc1d2e\n&#39;Fix: 메모리 누수 수정&#39;&quot;]
+    BUILD[&quot;② Jenkins 빌드 #42\n이미지: app:abc1d2e-42\n결과: SUCCESS&quot;]
+    MAN[&quot;③ 매니페스트 커밋\ndef5f6g\nnewTag 교체 기록&quot;]
+    SYNC[&quot;④ ArgoCD Sync\nRevision: def5f6g\n클러스터 반영 완료&quot;]
+    SC --&gt; BUILD --&gt; MAN --&gt; SYNC
+</code></pre>
+<pre><code class="language-bash"># 매니페스트 저장소에서 배포 이력 확인
+git log --oneline overlays/prod/kustomization.yaml
+# def5f6g ci: update image to abc1d2e-42
+# bcd4e5f ci: update image to aaa9b8c-41
+# ...
+
+# 특정 커밋에서 어떤 이미지 태그로 바뀌었는지 확인
+git show def5f6g
+
+# 이미지 태그 변경 이력만 추출
+git log -p overlays/prod/kustomization.yaml | grep &quot;newTag:&quot;
+# -newTag: &quot;aaa9b8c-41&quot;
+# +newTag: &quot;abc1d2e-42&quot;
+
+# ArgoCD CLI로 배포 이력 확인
+argocd app history app-prod
+# ID  DATE                          REVISION
+# 0   2026-04-01 10:30:22 +0000 UTC main (def5f6g)
+# 1   2026-03-31 14:15:10 +0000 UTC main (bcd4e5f)
+</code></pre>
+<p><strong>좋은 커밋 메시지 예시</strong></p>
+<pre><code>ci: update app image to abc1d2e-42
+
+Triggered by: Jenkins #42
+Source Commit: abc1d2e (Fix: 메모리 누수 수정)
+Image: docker.io/myorg/app:abc1d2e-42
+Environment: prod
+Time: 2026-04-01T10:30:00Z
+</code></pre>
+<p>&quot;언제 누가 무엇을 왜 배포했는지&quot;가 한눈에 보입니다.</p>
+<hr>
+<h2>7. 인프라 분리 설계 — Namespace로 계층 나누기</h2>
+<h3>Namespace란?</h3>
+<p>K8s 클러스터 안에서 리소스를 <strong>논리적으로 격리</strong>하는 공간입니다. 마치 하나의 사무실 건물 안에 부서별로 방을 나눈 것과 같습니다.</p>
+<pre><code class="language-mermaid">%% desc: 인프라 계층 분리 — databases Namespace와 app-prod Namespace로 역할 분리
+flowchart TD
+    subgraph NS_DB[&quot;Namespace: databases (데이터 계층)&quot;]
+        MYSQL[&quot;MySQL StatefulSet\n(고정 이름: mysql-0)\nPVC: 10Gi&quot;]
+        REDIS[&quot;Redis StatefulSet\n(고정 이름: redis-0)\nPVC: 5Gi&quot;]
+    end
+    subgraph NS_APP[&quot;Namespace: app-prod (앱 계층)&quot;]
+        WEB[&quot;Web App\nDeployment\n(Rolling Update)&quot;]
+        WORKER[&quot;Background Worker\nDeployment\n(Rolling Update)&quot;]
+    end
+
+    WEB --&gt;|&quot;mysql.databases.svc.cluster.local:3306&quot;| MYSQL
+    WEB --&gt;|&quot;redis.databases.svc.cluster.local:6379&quot;| REDIS
+    WORKER --&gt;|&quot;redis.databases.svc.cluster.local:6379&quot;| REDIS
+</code></pre>
+<p><strong>왜 Namespace를 분리하나요?</strong></p>
+<table>
+<thead>
+<tr>
+<th>이유</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>배포 독립성</strong></td>
+<td>앱 업데이트 시 DB는 건드리지 않음</td>
+</tr>
+<tr>
+<td><strong>권한 분리</strong></td>
+<td>앱 개발자는 <code>app-prod</code>만 접근, DBA는 <code>databases</code>만 접근</td>
+</tr>
+<tr>
+<td><strong>리소스 관리</strong></td>
+<td>Namespace별로 CPU·메모리 사용량 제한 가능</td>
+</tr>
+<tr>
+<td><strong>보안</strong></td>
+<td>NetworkPolicy로 <code>app-prod</code>에서 <code>databases</code>로만 접근 허용</td>
+</tr>
+</tbody></table>
+<p><strong>Namespace 간 통신 주소 (FQDN)</strong></p>
+<p>FQDN(Fully Qualified Domain Name, 완전한 도메인 이름)은 Namespace를 포함한 전체 DNS 주소입니다.</p>
+<pre><code>형식: [서비스 이름].[네임스페이스].svc.cluster.local:[포트]
+
+예시:
+  mysql.databases.svc.cluster.local:3306
+  redis.databases.svc.cluster.local:6379
+
+같은 Namespace 내에서는 서비스 이름만으로 접근 가능:
+  mysql:3306
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>계층</th>
+<th>K8s 리소스</th>
+<th>배포 빈도</th>
+<th>데이터</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>데이터 계층</strong></td>
+<td>StatefulSet + PVC</td>
+<td>초기 1회 (잘 안 바꿈)</td>
+<td>영속 저장</td>
+</tr>
+<tr>
+<td><strong>앱 계층</strong></td>
+<td>Deployment</td>
+<td>매 커밋마다</td>
+<td>Stateless (상태 없음)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>8. 전체 파이프라인 타이밍</h2>
+<pre><code class="language-mermaid">%% desc: Jenkins → ArgoCD 전체 파이프라인 타이밍 — 각 단계별 흐름과 자동화 포인트
+flowchart TD
+    GIT_PUSH[/&quot;개발자 Git Push&quot;/]
+
+    subgraph JENKINS[&quot;Jenkins Pipeline (CI)&quot;]
+        J1[&quot;① 체크아웃\n커밋 SHA 추출 → 이미지 태그 결정&quot;]
+        J2[&quot;② Credentials 로드\nkubeconfig 복원&quot;]
+        J3[&quot;③ 인프라 확인\n(MySQL·Redis 없을 때만 배포)&quot;]
+        J4[&quot;④ Docker Buildx 설정\nDockerHub 로그인&quot;]
+        J5[&quot;⑤ 이미지 빌드 &amp; 푸시\n(BuildKit 레이어 캐시 활용)&quot;]
+        J6[&quot;⑥ 현재 버전 저장\n(롤백 기준점 확보)&quot;]
+        J7[&quot;⑦ Kustomize newTag 교체\nGit 커밋 &amp; 푸시 [skip ci]&quot;]
+    end
+
+    subgraph ARGOCD[&quot;ArgoCD (CD)&quot;]
+        A1[&quot;Git 변경 감지 (~3초)&quot;]
+        A2[&quot;현재 vs Git 상태 비교\n→ Out of Sync 판정&quot;]
+        A3[&quot;kubectl apply 실행\nRolling Update 시작&quot;]
+    end
+
+    subgraph K8S[&quot;K8s Rolling Update&quot;]
+        K1[&quot;신규 Pod 생성\n(컨테이너 시작)&quot;]
+        K2[&quot;Readiness Probe 통과\n→ Service Endpoint 등록\n→ 트래픽 수신 시작&quot;]
+        K3[&quot;기존 Pod 종료\n(preStop sleep → SIGTERM)\n→ 처리 중인 요청 완료&quot;]
+    end
+
+    GIT_PUSH --&gt; J1 --&gt; J2 --&gt; J3 --&gt; J4 --&gt; J5 --&gt; J6 --&gt; J7
+    J7 --&gt;|&quot;git push&quot;| A1 --&gt; A2 --&gt; A3
+    A3 --&gt; K1 --&gt; K2 --&gt; K3
+</code></pre>
+<hr>
+<h2>9. 핵심 개념 요약</h2>
+<table>
+<thead>
+<tr>
+<th>개념</th>
+<th>한 줄 정리</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>무중단 배포</strong></td>
+<td>서비스를 멈추지 않고 새 버전으로 교체</td>
+</tr>
+<tr>
+<td><strong>Rolling Update</strong></td>
+<td>Pod을 하나씩 순서대로 교체하는 K8s 배포 전략</td>
+</tr>
+<tr>
+<td><strong>maxUnavailable: 0</strong></td>
+<td>항상 기존 Pod 수 유지 → 무중단 실질 보증</td>
+</tr>
+<tr>
+<td><strong>Readiness Probe</strong></td>
+<td>준비된 Pod에만 트래픽 보내는 K8s 헬스 체크</td>
+</tr>
+<tr>
+<td><strong>Graceful Shutdown</strong></td>
+<td>기존 요청을 처리 완료한 뒤 Pod 종료</td>
+</tr>
+<tr>
+<td><strong>GitOps</strong></td>
+<td>Git이 유일한 진실. 모든 변경은 Git 커밋으로</td>
+</tr>
+<tr>
+<td><strong>ArgoCD</strong></td>
+<td>Git 감시 → K8s 자동 배포 도구</td>
+</tr>
+<tr>
+<td><strong>Kustomize</strong></td>
+<td>환경별 YAML 설정 관리 (base + overlay)</td>
+</tr>
+<tr>
+<td><strong>StatefulSet</strong></td>
+<td>고정 이름·저장소 필요한 앱 (DB, Redis)</td>
+</tr>
+<tr>
+<td><strong>Deployment</strong></td>
+<td>상태 없는 앱의 무중단 배포 (웹 앱, API)</td>
+</tr>
+<tr>
+<td><strong>PVC</strong></td>
+<td>Pod가 요청하는 영구 저장 공간</td>
+</tr>
+<tr>
+<td><strong>Namespace</strong></td>
+<td>K8s 클러스터 안에서 리소스를 논리 분리</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>체크리스트</h2>
+<p><strong>Jenkins 파이프라인</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> 이미지 태그 = 커밋 SHA + 빌드번호 (추적 가능)</li>
+<li><input disabled="" type="checkbox"> 민감 정보는 Jenkins Credentials에 저장 (코드에 직접 쓰지 않음)</li>
+<li><input disabled="" type="checkbox"> kubeconfig는 base64 인코딩해서 Credentials 저장</li>
+<li><input disabled="" type="checkbox"> Kustomize로 이미지 태그만 교체 후 Git 커밋</li>
+<li><input disabled="" type="checkbox"> Git 커밋 메시지에 <code>[skip ci]</code> 포함 (무한 루프 방지)</li>
+<li><input disabled="" type="checkbox"> BuildKit 레지스트리 캐시 설정 (빌드 속도 향상)</li>
+</ul>
+<p><strong>K8s 무중단 배포 설정</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>strategy.type: RollingUpdate</code></li>
+<li><input disabled="" type="checkbox"> <code>maxUnavailable: 0</code> (트래픽 중단 없이 교체)</li>
+<li><input disabled="" type="checkbox"> <code>readinessProbe</code> 반드시 정의</li>
+<li><input disabled="" type="checkbox"> <code>livenessProbe</code> 설정 (응답 불가 상태 자동 재시작)</li>
+<li><input disabled="" type="checkbox"> <code>lifecycle.preStop</code> 설정 (기존 요청 처리 완료 후 종료)</li>
+<li><input disabled="" type="checkbox"> <code>terminationGracePeriodSeconds</code> &gt; preStop 시간</li>
+</ul>
+<p><strong>운영</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>revisionHistoryLimit</code> 설정 (롤백 이력 보관)</li>
+<li><input disabled="" type="checkbox"> <code>progressDeadlineSeconds</code> 설정 (무한 대기 방지)</li>
+<li><input disabled="" type="checkbox"> 배포 실패 시 자동 롤백 (<code>post { failure { ... } }</code>)</li>
+<li><input disabled="" type="checkbox"> MySQL · Redis는 StatefulSet (Deployment 아님)</li>
+<li><input disabled="" type="checkbox"> 앱과 DB는 다른 Namespace에 분리</li>
+</ul>
+
+<ul><li>Jenkins</li><li>Kubernetes</li><li>CI/CD</li><li>DevOps</li><li>ArgoCD</li><li>GitOps</li><li>Docker</li><li>Kustomize</li><li>인프라</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

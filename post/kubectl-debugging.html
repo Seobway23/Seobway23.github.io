@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="배포 후 서버가 왜 안 되는지 모를 때 kubectl을 쓴다. logs, exec, describe, top —  쿠버네티스 환경에서 실제 문제를 진단하는 명령어를 상황별로 정리한다." />
+    <meta name="keywords" content="Kubernetes, kubectl, k3s, 모니터링, 로그, 디버깅, DevOps, 인프라" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/kubectl-debugging" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링" />
+    <meta property="og:description" content="배포 후 서버가 왜 안 되는지 모를 때 kubectl을 쓴다. logs, exec, describe, top —  쿠버네티스 환경에서 실제 문제를 진단하는 명령어를 상황별로 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/kubectl-debugging" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.369Z" />
+    <meta property="article:tag" content="Kubernetes" />
+    <meta property="article:tag" content="kubectl" />
+    <meta property="article:tag" content="k3s" />
+    <meta property="article:tag" content="모니터링" />
+    <meta property="article:tag" content="로그" />
+    <meta property="article:tag" content="디버깅" />
+    <meta property="article:tag" content="DevOps" />
+    <meta property="article:tag" content="인프라" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링" />
+    <meta name="twitter:description" content="배포 후 서버가 왜 안 되는지 모를 때 kubectl을 쓴다. logs, exec, describe, top —  쿠버네티스 환경에서 실제 문제를 진단하는 명령어를 상황별로 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링","description":"배포 후 서버가 왜 안 되는지 모를 때 kubectl을 쓴다. logs, exec, describe, top —  쿠버네티스 환경에서 실제 문제를 진단하는 명령어를 상황별로 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.369Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/kubectl-debugging"},"keywords":"Kubernetes, kubectl, k3s, 모니터링, 로그, 디버깅, DevOps, 인프라","articleSection":"kubernetes","inLanguage":"ko-KR","wordCount":7869},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"kubernetes","item":"https://seobway23.github.io/?category=study%2Finfra%2Fkubernetes"},{"@type":"ListItem","position":3,"name":"kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링","item":"https://seobway23.github.io/post/kubectl-debugging"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>kubernetes</span></nav>
+<h1>kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링</h1>
+<p>배포 후 서버가 왜 안 되는지 모를 때 kubectl을 쓴다. logs, exec, describe, top —  쿠버네티스 환경에서 실제 문제를 진단하는 명령어를 상황별로 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-03T00:00:00.000Z">2026-04-03</time> · <span>11분</span></p>
+<h2>배포 이후: &quot;서버가 이상해요&quot;</h2>
+<p>자동화 배포가 완성되면 다음 문제가 찾아온다. &quot;잘 배포됐다는데 왜 에러가 나요?&quot; </p>
+<p>SSH로 서버에 들어가 로그 파일을 찾는 시대는 끝났다. 쿠버네티스 환경에서는 <strong>kubectl</strong>로 모든 것을 진단한다.</p>
+<pre><code class="language-mermaid">%% desc: 쿠버네티스 디버깅 의사결정 트리
+flowchart TD
+  A[&quot;문제 발생&quot;]
+  B[&quot;Pod 상태 확인\nkubectl get pods&quot;]
+  
+  C1[&quot;Running 인데 에러&quot;]
+  C2[&quot;CrashLoopBackOff&quot;]
+  C3[&quot;Pending / Error&quot;]
+
+  D1[&quot;로그 확인\nkubectl logs -f&quot;]
+  D2[&quot;종료 직전 로그\nkubectl logs --previous&quot;]
+  D3[&quot;이벤트 확인\nkubectl describe pod&quot;]
+
+  E1[&quot;코드/환경변수\n문제 해결&quot;]
+  E2[&quot;OOMKilled?\nResource Limit 조정&quot;]
+  E3[&quot;이미지 Pull 실패?\nScheduling 문제?&quot;]
+
+  A --&gt; B
+  B --&gt; C1 --&gt; D1 --&gt; E1
+  B --&gt; C2 --&gt; D2 --&gt; E2
+  B --&gt; C3 --&gt; D3 --&gt; E3
+</code></pre>
+<hr>
+<h2>기본: Pod 상태 한눈에 보기</h2>
+<pre><code class="language-bash"># 특정 네임스페이스의 모든 Pod 확인
+kubectl get pods -n pms-web
+
+# 출력 예시:
+# NAME                         READY   STATUS    RESTARTS   AGE
+# pms-web-7d9f8b6c4-xk2pq     1/1     Running   0          2d
+# pms-web-7d9f8b6c4-r8mnv     1/1     Running   0          2d
+# celery-worker-59b7d4-hj3lp   1/1     Running   2          1d
+# mysql-0                      1/1     Running   0          7d
+
+# 더 상세한 정보 (-o wide: 노드, IP까지)
+kubectl get pods -n pms-web -o wide
+
+# 모든 네임스페이스 동시 확인
+kubectl get pods --all-namespaces
+</code></pre>
+<h3>STATUS 코드 해석</h3>
+<table>
+<thead>
+<tr>
+<th>STATUS</th>
+<th>의미</th>
+<th>해결 방향</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Running</code></td>
+<td>정상 실행 중</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>Pending</code></td>
+<td>노드 스케줄링 대기</td>
+<td><code>describe</code>로 이벤트 확인</td>
+</tr>
+<tr>
+<td><code>CrashLoopBackOff</code></td>
+<td>실행 → 충돌 → 재시작 반복</td>
+<td><code>logs --previous</code>로 원인 확인</td>
+</tr>
+<tr>
+<td><code>OOMKilled</code></td>
+<td>메모리 초과로 강제 종료</td>
+<td>Resource Limit 증가</td>
+</tr>
+<tr>
+<td><code>ImagePullBackOff</code></td>
+<td>이미지 Pull 실패</td>
+<td>이미지 태그/레지스트리 인증 확인</td>
+</tr>
+<tr>
+<td><code>Terminating</code></td>
+<td>삭제 중 (오래되면 강제 삭제)</td>
+<td><code>delete pod --grace-period=0</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>kubectl logs — 로그 확인</h2>
+<pre><code class="language-bash"># 기본: 특정 Pod의 로그
+kubectl logs pms-web-7d9f8b6c4-xk2pq -n pms-web
+
+# -f (follow): 실시간 스트리밍 (tail -f와 동일)
+kubectl logs -f pms-web-7d9f8b6c4-xk2pq -n pms-web
+
+# --tail: 마지막 N줄만 출력
+kubectl logs --tail=100 pms-web-7d9f8b6c4-xk2pq -n pms-web
+
+# --since: 최근 시간 기준 (1h, 30m, 2h)
+kubectl logs --since=30m pms-web-7d9f8b6c4-xk2pq -n pms-web
+
+# --previous (-p): 이전 컨테이너 로그 (CrashLoopBackOff 시 핵심)
+kubectl logs --previous pms-web-7d9f8b6c4-xk2pq -n pms-web
+
+# Deployment 이름으로 (Pod 이름 모를 때)
+kubectl logs -f deployment/pms-web -n pms-web
+
+# 여러 Pod 동시 로그 (라벨 셀렉터)
+kubectl logs -f -l app=pms-web -n pms-web --max-log-requests=10
+</code></pre>
+<h3>Django 에러 로그 찾기 예시</h3>
+<pre><code class="language-bash"># 에러만 필터링 (grep 파이프)
+kubectl logs -f deployment/pms-web -n pms-web | grep -i &quot;error\|exception\|traceback&quot;
+
+# 특정 시간대 에러 확인
+kubectl logs --since=1h deployment/pms-web -n pms-web | grep &quot;ERROR&quot;
+</code></pre>
+<hr>
+<h2>kubectl exec — 컨테이너 내부 접속</h2>
+<pre><code class="language-bash"># 컨테이너에 bash 셸로 접속
+kubectl exec -it pms-web-7d9f8b6c4-xk2pq -n pms-web -- /bin/bash
+
+# sh만 있는 경우 (Alpine 등 경량 이미지)
+kubectl exec -it pms-web-7d9f8b6c4-xk2pq -n pms-web -- /bin/sh
+
+# 단일 명령 실행 (접속 없이)
+kubectl exec pms-web-7d9f8b6c4-xk2pq -n pms-web -- python manage.py check
+kubectl exec pms-web-7d9f8b6c4-xk2pq -n pms-web -- env | grep DJANGO
+</code></pre>
+<h3>접속 후 활용 예시</h3>
+<pre><code class="language-bash"># 컨테이너 내부에서 할 수 있는 것들:
+
+# 환경변수 확인 (DB 연결 정보 등)
+env | grep -E &quot;DATABASE|SECRET|REDIS&quot;
+
+# Django 쉘 진입
+python manage.py shell
+
+# 수동 마이그레이션 실행
+python manage.py migrate
+
+# 파일 시스템 확인
+ls -la /app/logs/
+cat /app/config/settings.py
+
+# DB 연결 테스트
+python manage.py dbshell
+</code></pre>
+<blockquote>
+<p><strong>주의</strong>: 컨테이너는 임시(Ephemeral)다. <code>exec</code>으로 접속해서 파일을 수정해도 Pod가 재시작되면 사라진다. 영구 변경은 반드시 코드/ConfigMap/Secret을 통해 해야 한다.</p>
+</blockquote>
+<hr>
+<h2>kubectl describe — 상세 이벤트 확인</h2>
+<pre><code class="language-bash"># Pod 상세 정보 (Events 섹션이 핵심)
+kubectl describe pod pms-web-7d9f8b6c4-xk2pq -n pms-web
+
+# Deployment 상태
+kubectl describe deployment pms-web -n pms-web
+
+# Service 확인 (엔드포인트, 포트 등)
+kubectl describe service pms-web-svc -n pms-web
+</code></pre>
+<h3>describe 출력에서 볼 것</h3>
+<pre><code class="language-yaml"># kubectl describe pod 출력 예시 (핵심 부분)
+Name:         pms-web-7d9f8b6c4-xk2pq
+Namespace:    pms-web
+Status:       Running
+
+Containers:
+  web:
+    Image:      myorg/pms-web:a1b2c3d4-42
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:     250m
+      memory:  256Mi
+    Environment:
+      DJANGO_SECRET_KEY:  &lt;set to the key &#39;secret-key&#39; in secret &#39;pms-secrets&#39;&gt;
+      DATABASE_URL:       &lt;set to the key &#39;db-url&#39; in secret &#39;pms-secrets&#39;&gt;
+
+Events:
+  Type     Reason            Age   Message
+  ----     ------            ---   -------
+  Normal   Scheduled         5m    Successfully assigned pms-web/...
+  Normal   Pulling           5m    Pulling image &quot;myorg/pms-web:a1b2c3d4-42&quot;
+  Normal   Pulled            4m    Successfully pulled image
+  Normal   Created           4m    Created container web
+  Normal   Started           4m    Started container web
+  Warning  BackOff           2m    Back-off restarting failed container  # ← 문제 신호
+</code></pre>
+<hr>
+<h2>kubectl top — 리소스 모니터링</h2>
+<pre><code class="language-bash"># 노드별 CPU/Memory 사용량
+kubectl top nodes
+
+# 출력 예시:
+# NAME         CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+# k3s-server   234m         11%    1842Mi           47%
+
+# Pod별 리소스 사용량
+kubectl top pods -n pms-web
+
+# 출력 예시:
+# NAME                          CPU(cores)   MEMORY(bytes)
+# pms-web-7d9f8b6c4-xk2pq     15m          145Mi
+# celery-worker-59b7d4-hj3lp   85m          212Mi
+# mysql-0                      32m          387Mi
+
+# 컨테이너별 세분화
+kubectl top pods -n pms-web --containers
+</code></pre>
+<blockquote>
+<p><strong>필요 조건</strong>: <code>kubectl top</code>은 Metrics Server가 설치되어 있어야 한다. k3s는 기본 포함.</p>
+</blockquote>
+<h3>OOMKilled 진단</h3>
+<pre><code class="language-bash"># 메모리로 인해 죽은 Pod 확인
+kubectl describe pod &lt;pod-name&gt; -n pms-web | grep -A5 &quot;OOMKilled\|Last State&quot;
+
+# 출력:
+# Last State: Terminated
+#   Reason: OOMKilled       # ← 메모리 초과
+#   Exit Code: 137
+
+# 해결: Deployment의 resources.limits.memory 증가
+kubectl edit deployment pms-web -n pms-web
+# 또는 kustomization에서 patch로 설정
+</code></pre>
+<hr>
+<h2>Deployment 운영 명령어</h2>
+<pre><code class="language-bash"># 재시작 (코드 변경 없이 Pod 교체)
+kubectl rollout restart deployment/pms-web -n pms-web
+
+# 롤아웃 상태 확인
+kubectl rollout status deployment/pms-web -n pms-web
+
+# 롤백 (이전 버전으로)
+kubectl rollout undo deployment/pms-web -n pms-web
+
+# 스케일 조정
+kubectl scale deployment pms-web --replicas=3 -n pms-web
+
+# 특정 리비전으로 롤백
+kubectl rollout undo deployment/pms-web --to-revision=3 -n pms-web
+
+# 롤아웃 히스토리 확인
+kubectl rollout history deployment/pms-web -n pms-web
+</code></pre>
+<hr>
+<h2>실전 디버깅 시나리오</h2>
+<h3>시나리오 1: 배포 직후 Pod이 계속 재시작됨</h3>
+<pre><code class="language-bash"># 1. 상태 확인
+kubectl get pods -n pms-web
+# → CrashLoopBackOff 확인
+
+# 2. 이전 실행 로그 확인 (죽기 전 로그)
+kubectl logs --previous deployment/pms-web -n pms-web
+# → Django 에러: ImproperlyConfigured: DATABASE_URL not set
+
+# 3. 환경변수 확인
+kubectl exec deployment/pms-web -n pms-web -- env | grep DATABASE
+# → DATABASE_URL이 없음 → Secret 누락
+
+# 4. Secret 확인
+kubectl get secret pms-secrets -n pms-web -o yaml
+</code></pre>
+<h3>시나리오 2: 배포는 됐는데 API가 500 에러</h3>
+<pre><code class="language-bash"># 1. 실시간 로그 모니터링하면서 요청 보내기
+kubectl logs -f deployment/pms-web -n pms-web | grep -v &quot;GET /health&quot;
+
+# 2. Django Traceback 발견
+# → AttributeError: &#39;NoneType&#39; object has no attribute &#39;team&#39;
+# → 신규 User에 Profile이 없어서 created_by 권한 체크에서 실패
+
+# 3. 컨테이너 접속 후 확인
+kubectl exec -it deployment/pms-web -n pms-web -- python manage.py shell
+# &gt;&gt;&gt; from django.contrib.auth import get_user_model
+# &gt;&gt;&gt; User = get_user_model()
+# &gt;&gt;&gt; User.objects.filter(profile__isnull=True).count()
+# 3  → Profile 없는 유저 존재
+</code></pre>
+<h3>시나리오 3: Django migration 적용 안 됨</h3>
+<pre><code class="language-bash"># 배포 후 마이그레이션 실행
+kubectl exec deployment/pms-web -n pms-web -- python manage.py migrate
+
+# 또는 Job으로 실행 (권장)
+kubectl apply -f - &lt;&lt;EOF
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-migrate
+  namespace: pms-web
+spec:
+  template:
+    spec:
+      containers:
+        - name: migrate
+          image: myorg/pms-web:a1b2c3d4-42
+          command: [&quot;python&quot;, &quot;manage.py&quot;, &quot;migrate&quot;]
+          envFrom:
+            - secretRef:
+                name: pms-secrets
+      restartPolicy: Never
+EOF
+</code></pre>
+<hr>
+<h2>자주 쓰는 명령어 치트시트</h2>
+<pre><code class="language-bash"># ── 상태 확인 ──────────────────────────────────────────────────────
+kubectl get pods -n pms-web                          # Pod 목록
+kubectl get all -n pms-web                           # 모든 리소스
+kubectl get events -n pms-web --sort-by=&#39;.lastTimestamp&#39;  # 최근 이벤트
+
+# ── 로그 ────────────────────────────────────────────────────────────
+kubectl logs -f deployment/pms-web -n pms-web        # 실시간 로그
+kubectl logs --previous &lt;pod&gt; -n pms-web             # 이전 실행 로그
+kubectl logs --since=30m deployment/pms-web -n pms-web  # 최근 30분
+
+# ── 접속 ────────────────────────────────────────────────────────────
+kubectl exec -it &lt;pod&gt; -n pms-web -- /bin/bash       # bash 접속
+kubectl exec &lt;pod&gt; -n pms-web -- &lt;command&gt;           # 단일 명령
+
+# ── 상세 정보 ────────────────────────────────────────────────────────
+kubectl describe pod &lt;pod&gt; -n pms-web                # Pod 이벤트
+kubectl describe node &lt;node&gt;                         # 노드 상태
+
+# ── 리소스 사용량 ────────────────────────────────────────────────────
+kubectl top nodes                                    # 노드 CPU/MEM
+kubectl top pods -n pms-web                          # Pod CPU/MEM
+
+# ── 배포 관리 ────────────────────────────────────────────────────────
+kubectl rollout restart deployment/pms-web -n pms-web
+kubectl rollout status deployment/pms-web -n pms-web
+kubectl rollout undo deployment/pms-web -n pms-web
+kubectl scale deployment pms-web --replicas=3 -n pms-web
+</code></pre>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/quick-reference/" target="_blank">[1] kubectl Quick Reference — 공식 문서</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/" target="_blank">[2] Debug Pods — Kubernetes 공식 문서</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-usage-monitoring/" target="_blank">[3] Resource Usage Monitoring — Kubernetes 공식 문서</a></li>
+<li><a href="https://docs.k3s.io/quick-start" target="_blank">[4] k3s Quick Start — 공식 문서</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/jenkins-argocd-gitops">GitOps 파이프라인 — Jenkins + ArgoCD + k3s →</a></li>
+<li><a href="/post/gitlab-cicd-guide">GitLab CI/CD — .gitlab-ci.yml → K3s →</a></li>
+</ul>
+
+<ul><li>Kubernetes</li><li>kubectl</li><li>k3s</li><li>모니터링</li><li>로그</li><li>디버깅</li><li>DevOps</li><li>인프라</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>랜선 꽂으면 왜 연결이 될까 — 이더넷, NIC, 케이블 이야기 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="랜선을 꽂는 순간 실제로 무슨 일이 일어나는지. 이더넷이 어떻게 만들어졌는지, NIC가 어떤 역할을 하는지, 케이블 종류가 왜 그렇게 많은지 — 연결의 물리적 기반을 처음부터 풀어낸다." />
+    <meta name="keywords" content="Ethernet, NIC, MAC, Cable, IEEE 802.3, Physical Layer, DataLink, Network" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/micro-ethernet-nic-cable" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="랜선 꽂으면 왜 연결이 될까 — 이더넷, NIC, 케이블 이야기" />
+    <meta property="og:description" content="랜선을 꽂는 순간 실제로 무슨 일이 일어나는지. 이더넷이 어떻게 만들어졌는지, NIC가 어떤 역할을 하는지, 케이블 종류가 왜 그렇게 많은지 — 연결의 물리적 기반을 처음부터 풀어낸다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/micro-ethernet-nic-cable" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-05T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.439Z" />
+    <meta property="article:tag" content="Ethernet" />
+    <meta property="article:tag" content="NIC" />
+    <meta property="article:tag" content="MAC" />
+    <meta property="article:tag" content="Cable" />
+    <meta property="article:tag" content="IEEE 802.3" />
+    <meta property="article:tag" content="Physical Layer" />
+    <meta property="article:tag" content="DataLink" />
+    <meta property="article:tag" content="Network" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="랜선 꽂으면 왜 연결이 될까 — 이더넷, NIC, 케이블 이야기" />
+    <meta name="twitter:description" content="랜선을 꽂는 순간 실제로 무슨 일이 일어나는지. 이더넷이 어떻게 만들어졌는지, NIC가 어떤 역할을 하는지, 케이블 종류가 왜 그렇게 많은지 — 연결의 물리적 기반을 처음부터 풀어낸다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"랜선 꽂으면 왜 연결이 될까 — 이더넷, NIC, 케이블 이야기","description":"랜선을 꽂는 순간 실제로 무슨 일이 일어나는지. 이더넷이 어떻게 만들어졌는지, NIC가 어떤 역할을 하는지, 케이블 종류가 왜 그렇게 많은지 — 연결의 물리적 기반을 처음부터 풀어낸다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-05T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.439Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-ethernet-nic-cable"},"keywords":"Ethernet, NIC, MAC, Cable, IEEE 802.3, Physical Layer, DataLink, Network","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":3638},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"랜선 꽂으면 왜 연결이 될까 — 이더넷, NIC, 케이블 이야기","item":"https://seobway23.github.io/post/micro-ethernet-nic-cable"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>네트워크</span></nav>
+<h1>랜선 꽂으면 왜 연결이 될까 — 이더넷, NIC, 케이블 이야기</h1>
+<p>랜선을 꽂는 순간 실제로 무슨 일이 일어나는지. 이더넷이 어떻게 만들어졌는지, NIC가 어떤 역할을 하는지, 케이블 종류가 왜 그렇게 많은지 — 연결의 물리적 기반을 처음부터 풀어낸다.</p>
+<p><span>Seobway</span> · <time datetime="2026-04-05T00:00:00.000Z">2026-04-05</time> · <span>12분</span></p>
+<p>랜선을 꽂으면 인터넷이 된다.</p>
+<p>너무 당연한 말처럼 들리지만, 저 짧은 문장 안에는 꽤 많은 것들이 숨어 있다. 케이블 안에서 신호가 어떻게 오가는지, 컴퓨터는 그 신호를 어떻게 알아보는지, 그리고 그 규칙은 누가 만들었는지.</p>
+<p>이 글은 그 물리적인 기반, 즉 이더넷과 NIC와 케이블에 대한 이야기다.</p>
+<hr>
+<h2>이더넷이 처음 나왔을 때</h2>
+<p>1973년, 제록스(Xerox)의 연구소 PARC에서 Bob Metcalfe라는 엔지니어가 재밌는 문제를 고민하고 있었다. 연구소 안에 여러 컴퓨터가 있는데, 이걸 어떻게 연결하면 좋을까. 그가 만들어낸 것이 <strong>이더넷(Ethernet)</strong>이다.<sup id="fnref-ieee8023" style="scroll-margin-top: 96px;"><a href="#fn-ieee8023" aria-label="각주 1">[1]</a></sup></p>
+<p>이름이 묘하다. &#39;Ether&#39;는 예전에 빛이 파동으로 전달되는 매질이라 여겼던 가상의 물질 이름이다. 신호가 보이지 않는 매질을 타고 퍼진다는 뉘앙스였는데, 오늘날 이더넷은 그 이름 그대로 전선 하나에 여러 기기가 동시에 신호를 보내는 방식으로 시작했다.</p>
+<p>1980년대에 디지털이퀴프먼트(DEC), 인텔, 제록스가 공동으로 이더넷 표준을 정리했고, 이후 IEEE가 <strong>802.3</strong> 번호로 공식 표준화했다. 거기서 지금까지 계속 발전하고 있다.</p>
+<h3>속도가 어떻게 올라왔는가</h3>
+<p>처음 이더넷은 10 Mbps였다. 당시 파일 하나가 수십 KB였으니 충분했다.</p>
+<table>
+<thead>
+<tr>
+<th>표준</th>
+<th>이름</th>
+<th>속도</th>
+<th>등장 시기</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IEEE 802.3</td>
+<td>이더넷</td>
+<td>10 Mbps</td>
+<td>1983</td>
+</tr>
+<tr>
+<td>IEEE 802.3u</td>
+<td>패스트 이더넷</td>
+<td>100 Mbps</td>
+<td>1995</td>
+</tr>
+<tr>
+<td>IEEE 802.3ab</td>
+<td>기가비트 이더넷</td>
+<td>1 Gbps</td>
+<td>1999</td>
+</tr>
+<tr>
+<td>IEEE 802.3an</td>
+<td>10기가 이더넷</td>
+<td>10 Gbps</td>
+<td>2006</td>
+</tr>
+</tbody></table>
+<p>지금 사무실 대부분은 기가비트 환경이고, 데이터센터는 10G, 40G, 100G도 흔하다. 이름은 계속 &#39;이더넷&#39;이지만, 속도는 1000배가 올라갔다.</p>
+<p>한 가지 흥미로운 사실은 1000BASE-T(기가비트)부터 케이블의 4쌍을 전부 동시에 쓴다는 것이다. 100Mbps까지는 4쌍 중 2쌍만 썼는데, 기가비트부터는 에코 캔슬링 기술을 써서 모든 쌍으로 동시에 양방향 전송을 한다. 케이블을 보면 똑같이 생겼어도 내부에서 꽤 다른 일이 벌어지고 있다.</p>
+<hr>
+<h2>NIC — 컴퓨터와 네트워크 사이의 번역기</h2>
+<p>NIC(Network Interface Card)는 컴퓨터를 물리적으로 네트워크에 연결하는 하드웨어다. 랜포트가 있는 그 부분이다. 요즘은 메인보드에 통합돼 있어서 별도 카드 형태를 보기 힘들지만, 역할은 그대로다.</p>
+<p>NIC가 하는 일을 한 문장으로 표현하면 이렇다: <strong>컴퓨터 안의 디지털 데이터를 전선 위의 전기 신호로 바꾸고, 반대로 신호를 받아 데이터로 복원한다.</strong></p>
+<p>그런데 네트워크에 여러 기기가 연결돼 있으면 신호를 누구한테 보내는지 구분해야 한다. 이때 쓰는 것이 <strong>MAC 주소</strong>다.</p>
+<h3>MAC 주소가 뭔가</h3>
+<p>MAC(Media Access Control) 주소는 네트워크 장치마다 고유하게 부여된 48비트 식별자다. 주로 이렇게 표시된다:</p>
+<pre><code>00:1A:2B:3C:4D:5E
+</code></pre>
+<p>앞 24비트는 <strong>OUI(Organizationally Unique Identifier)</strong>로, 제조사를 나타낸다. 뒤 24비트는 제조사가 개별 장치에 붙이는 고유 번호다. <code>00:1A:2B</code>가 인텔이라면 인텔이 만든 NIC라는 의미다.<sup id="fnref-ieee-mac" style="scroll-margin-top: 96px;"><a href="#fn-ieee-mac" aria-label="각주 2">[2]</a></sup></p>
+<p>48비트면 약 281조 개의 주소를 만들 수 있다. 지구상 모든 사람이 수백만 개씩 갖고도 남는다.</p>
+<p>한 가지 알아두면 좋은 것: MAC 주소는 소프트웨어로 바꿀 수 있다. 하드웨어에 새겨진 값을 &quot;burnt-in address&quot;라고 하고, 운영체제가 덮어쓴 값을 &quot;locally administered address&quot;라고 한다. 보안이나 프라이버시 이유로 변경하는 경우도 있다.</p>
+<h3>전이중(Full-Duplex)과 반이중(Half-Duplex)</h3>
+<p>NIC에는 두 가지 동작 모드가 있다.</p>
+<p><strong>반이중(Half-Duplex)</strong>은 한 번에 송신 또는 수신 하나만 할 수 있다. 무전기와 비슷하다. 말하고 있을 때는 들을 수 없다. 허브 환경에서는 여러 기기가 하나의 선을 공유하기 때문에 반이중으로 동작한다.</p>
+<p><strong>전이중(Full-Duplex)</strong>은 동시에 송수신이 가능하다. 스위치와 연결될 때 사용한다. 현대 네트워크는 거의 전이중이다.</p>
+<p><strong>오토니고시에이션(Auto-Negotiation)</strong>은 두 장치가 연결될 때 서로 &quot;나는 기가비트도 되고 전이중도 가능해&quot;라고 광고하면서 가장 좋은 조합을 자동으로 협상하는 기능이다. 요즘은 기본 동작이라 의식할 일이 없지만, 한쪽이 수동 설정이고 한쪽이 오토니고시에이션이면 <strong>듀플렉스 불일치(Duplex Mismatch)</strong>가 생겨서 성능이 심각하게 떨어진다. 이걸 모르고 몇 시간 삽질하는 경우가 종종 있다.</p>
+<hr>
+<h2>케이블 — Cat 뒤에 붙은 숫자의 의미</h2>
+<p>UTP 케이블(흔히 &#39;랜선&#39;)에는 Cat5e, Cat6, Cat6a 같은 이름이 붙는다. &#39;Cat&#39;은 Category의 줄임말이고, 뒤의 숫자는 성능 등급이다.</p>
+<table>
+<thead>
+<tr>
+<th>케이블</th>
+<th>최대 속도</th>
+<th>최대 거리</th>
+<th>주파수</th>
+<th>특징</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cat5e</td>
+<td>1 Gbps</td>
+<td>100m</td>
+<td>100 MHz</td>
+<td>현재도 사무용으로 충분</td>
+</tr>
+<tr>
+<td>Cat6</td>
+<td>1 Gbps (100m), 10 Gbps (55m 이내)</td>
+<td>100m</td>
+<td>250 MHz</td>
+<td>크로스토크 감소</td>
+</tr>
+<tr>
+<td>Cat6a</td>
+<td>10 Gbps</td>
+<td>100m</td>
+<td>500 MHz</td>
+<td>10G 전체 거리 지원</td>
+</tr>
+<tr>
+<td>Cat7</td>
+<td>10 Gbps</td>
+<td>100m</td>
+<td>600 MHz</td>
+<td>쉴딩 있음, 커넥터 비표준</td>
+</tr>
+<tr>
+<td>Cat8</td>
+<td>25~40 Gbps</td>
+<td>30m</td>
+<td>2000 MHz</td>
+<td>데이터센터 전용</td>
+</tr>
+</tbody></table>
+<p>대부분의 가정이나 사무실 환경에서는 Cat5e나 Cat6으로 충분하다. 만약 앞으로 10G 환경을 고려하고 있다면 <strong>Cat6a</strong>가 현실적인 선택이다. 100m 전 구간에서 10 Gbps를 지원하는 가장 보편적인 기준이다.</p>
+<p>Cat7과 Cat8은 쉴딩(Shielding)이 들어가서 외부 노이즈에 강하지만, 무겁고 뻣뻣하고 비싸다. Cat7은 커넥터가 RJ-45 표준을 벗어나는 경우도 있다. 특별한 이유가 없다면 Cat6a로 충분하다.</p>
+<pre><code class="language-mermaid">flowchart LR
+    PC[&quot;PC\n(NIC)&quot;] --&gt;|전기 신호| Cable[&quot;UTP 케이블\nCat5e~Cat8&quot;]
+    Cable --&gt; Switch[&quot;스위치\n(Layer 2)&quot;]
+    Switch --&gt; Server[&quot;서버\n(NIC)&quot;]
+</code></pre>
+<p>케이블 안에는 4쌍, 8가닥의 선이 꼬여 있다. 꼬아놓는 이유는 <strong>크로스토크(Crosstalk)</strong> 때문이다. 인접한 선끼리 전자기 간섭이 생기는데, 일정 간격으로 꼬으면 그 간섭이 서로 상쇄된다. 단순해 보이는 설계지만 수십 년째 유효하다.</p>
+<hr>
+<h2>정리하자면</h2>
+<p>이더넷은 하나의 규격이 아니라 30년 넘게 계속 발전해온 표준 체계다. 10 Mbps에서 100G까지 이름은 같고 속도는 천 배 넘게 올라갔다.</p>
+<p>NIC는 그 이더넷 신호를 주고받는 하드웨어이고, MAC 주소라는 고유 식별자로 네트워크 안에서 자신을 드러낸다.</p>
+<p>케이블은 그 신호가 달리는 물리적인 통로다. 어떤 케이블을 쓰느냐에 따라 얼마나 멀리, 얼마나 빠르게 보낼 수 있는지가 결정된다.</p>
+<p>이 세 가지가 맞물려야 비로소 물리적 연결이 완성된다. 랜선 하나 꽂는 행위가 이걸 전부 한 번에 시작시킨다.</p>
+<p>다음에는 이 연결된 기기들이 데이터를 주고받을 때 신호를 어떻게 나누는지, <strong><a href="/post/micro-hub-and-switch">허브와 스위치가 거기서 어떤 역할을 하는지 →</a></strong> 이어서 살펴보겠다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li id="fn-ieee8023" style="scroll-margin-top: 96px;"><a href="https://standards.ieee.org/ieee/802.3/6935/" target="_blank">IEEE 802.3 Ethernet Working Group</a> <a href="#fnref-ieee8023" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-ieee-mac" style="scroll-margin-top: 96px;"><a href="https://standards.ieee.org/products-programs/regauth/mac/" target="_blank">IEEE MAC Address Registration Authority</a> <a href="#fnref-ieee-mac" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/micro-hub-and-switch">허브는 왜 사라졌을까 — 허브와 스위치 →</a> — 같은 케이블 위에서 충돌·MAC 테이블·스위칭 이야기</li>
+</ul>
+
+<ul><li>Ethernet</li><li>NIC</li><li>MAC</li><li>Cable</li><li>IEEE 802.3</li><li>Physical Layer</li><li>DataLink</li><li>Network</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

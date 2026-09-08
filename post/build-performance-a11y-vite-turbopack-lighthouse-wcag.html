@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어 프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다." />
+    <meta name="keywords" content="vite, turbopack, ssr, csr, ssg, lighthouse, accessibility, wcag, aria" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/build-performance-a11y-vite-turbopack-lighthouse-wcag" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG" />
+    <meta property="og:description" content="Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어 프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/build-performance-a11y-vite-turbopack-lighthouse-wcag" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-14-build-performance.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.303Z" />
+    <meta property="article:tag" content="vite" />
+    <meta property="article:tag" content="turbopack" />
+    <meta property="article:tag" content="ssr" />
+    <meta property="article:tag" content="csr" />
+    <meta property="article:tag" content="ssg" />
+    <meta property="article:tag" content="lighthouse" />
+    <meta property="article:tag" content="accessibility" />
+    <meta property="article:tag" content="wcag" />
+    <meta property="article:tag" content="aria" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG" />
+    <meta name="twitter:description" content="Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어 프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-14-build-performance.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG","description":"Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어 프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-14-build-performance.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.303Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/build-performance-a11y-vite-turbopack-lighthouse-wcag"},"keywords":"vite, turbopack, ssr, csr, ssg, lighthouse, accessibility, wcag, aria","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":2298},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Fperformance"},{"@type":"ListItem","position":3,"name":"빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG","item":"https://seobway23.github.io/post/build-performance-a11y-vite-turbopack-lighthouse-wcag"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG</h1>
+<p>Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어 프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>13분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>08</td>
+<td><a href="/post/state-data-fetching-tanstack-zustand-server-actions">상태 &amp; 데이터 페칭 →</a></td>
+<td>TanStack Query, Zustand, Server Actions</td>
+</tr>
+<tr>
+<td>09</td>
+<td><a href="/post/api-design-rest-openapi-rpc-server-actions">API 설계 →</a></td>
+<td>REST 원칙, OpenAPI, RPC</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="/post/auth-security-authjs-owasp-passkeys">인증 &amp; 보안 →</a></td>
+<td>Auth.js, OWASP, 패스키</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="/post/requirements-spec-user-story-tradeoff">요구사항 분석 →</a></td>
+<td>Spec, 유저 스토리, 기술 선택</td>
+</tr>
+<tr>
+<td>12</td>
+<td><a href="/post/testing-vitest-playwright">테스트 →</a></td>
+<td>테스트 사고법, Vitest, Playwright</td>
+</tr>
+<tr>
+<td>13</td>
+<td><a href="/post/context-engineering-prompts-rules-memory-skills">Context Engineering →</a></td>
+<td>프롬프트, Rules, 메모리, Skill</td>
+</tr>
+<tr>
+<td>14</td>
+<td><a href="/post/build-performance-a11y-vite-turbopack-lighthouse-wcag">빌드 · 성능 · a11y →</a></td>
+<td>Vite, Turbopack, Lighthouse, WCAG</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>기능은 사용자에게 도착해야 완성이다</h2>
+<p>프론트엔드 기능은 코드가 작성됐다고 끝나지 않는다.</p>
+<ul>
+<li>빌드되어야 하고</li>
+<li>빠르게 로드되어야 하고</li>
+<li>검색/공유/초기 렌더링 전략이 맞아야 하고</li>
+<li>접근성이 있어야 한다</li>
+</ul>
+<hr>
+<h2>Vite와 Turbopack</h2>
+<p>Vite는 개발 서버와 빌드 경험을 빠르게 만드는 프론트엔드 툴링이다.<a href="https://vite.dev/guide/" target="_blank"><sup>[1]</sup></a></p>
+<p>Turbopack은 Vercel이 만드는 Rust 기반 번들러로, Next.js와 함께 사용되는 흐름이 강하다.<a href="https://nextjs.org/docs/architecture/turbopack" target="_blank"><sup>[2]</sup></a></p>
+<p>초반에는 &quot;무엇이 더 빠른가&quot;보다 번들러가 다음을 담당한다는 점을 먼저 이해하면 된다.</p>
+<ul>
+<li>모듈 그래프 분석</li>
+<li>개발 서버</li>
+<li>코드 변환</li>
+<li>번들 생성</li>
+</ul>
+<hr>
+<h2>CSR, SSR, SSG</h2>
+<p>렌더링 전략은 HTML을 언제 어디서 만들 것인가의 문제다.</p>
+<ul>
+<li>CSR: 브라우저에서 렌더링</li>
+<li>SSR: 요청 시 서버에서 렌더링</li>
+<li>SSG: 빌드 시 정적 HTML 생성</li>
+</ul>
+<p>Next.js 문서는 렌더링과 데이터 페칭 전략을 프레임워크 차원에서 설명한다.<a href="https://nextjs.org/docs/app/building-your-application/rendering" target="_blank"><sup>[3]</sup></a></p>
+<hr>
+<h2>Lighthouse와 접근성</h2>
+<p>Lighthouse는 성능, 접근성, SEO, Best Practices를 측정하는 도구다.<a href="https://developer.chrome.com/docs/lighthouse/overview" target="_blank"><sup>[4]</sup></a></p>
+<p>접근성은 WCAG와 WAI-ARIA를 기준으로 학습하는 것이 좋다.<a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank"><sup>[5]</sup></a></p>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>성능과 접근성은 마지막에 &quot;점수 맞추기&quot;로 붙이는 작업이 아니다. 라우팅, 이미지, 폼, 버튼, 색 대비를 만들 때부터 같이 봐야 한다.</p>
+</div></div></aside></p>
+<hr>
+<h2>조금 더 깊게 보기</h2>
+<h3>성능은 사용자 경험이다</h3>
+<p>성능은 숫자 게임이 아니다. 사용자가 기다리는 시간, 버튼을 눌렀을 때 반응하는 느낌, 화면이 흔들리지 않는 안정감이 전부 성능이다. Lighthouse 점수는 출발점이지 최종 목표가 아니다.</p>
+<h3>빌드 도구를 이해해야 하는 이유</h3>
+<p>Vite나 Turbopack은 개발 경험을 빠르게 해준다. 하지만 번들러가 어떤 모듈을 묶고, 어떤 코드를 분리하고, 어떤 asset을 최적화하는지 모르면 성능 문제를 해결하기 어렵다. 번들 크기, code splitting, lazy loading은 기능이 커질수록 중요해진다.</p>
+<h3>렌더링 전략은 제품 요구사항과 연결된다</h3>
+<p>관리자 페이지는 CSR로도 충분할 수 있다. 마케팅 페이지는 SSG가 좋을 수 있다. 로그인 후 개인화된 대시보드는 SSR이나 client fetching을 섞어야 할 수 있다. 중요한 것은 기술 이름이 아니라 사용자에게 언제 어떤 HTML과 데이터를 보여줄지다.</p>
+<h3>a11y를 나중에 붙이면 비싸다</h3>
+<p>접근성은 마지막에 aria 속성 몇 개 추가하는 작업이 아니다. 버튼을 button으로 만들고, label을 연결하고, 키보드 이동을 보장하고, 색 대비를 맞추는 기본 설계다. 초반부터 지키면 비용이 작고, 나중에 고치면 구조를 갈아엎게 된다.</p>
+<hr>
+<h2>실전 적용 시나리오</h2>
+<p>블로그 상세 페이지가 느리다고 가정하자. 먼저 Lighthouse로 LCP, CLS, INP를 확인한다. 이미지가 크면 적절한 크기와 lazy loading을 적용한다. 번들이 크면 route-level code splitting을 본다. 초기 HTML이 중요하면 SSR/SSG 전략을 검토한다.</p>
+<p>접근성도 같은 흐름으로 본다. 제목 계층이 올바른지, 버튼이 키보드로 이동 가능한지, input에 label이 있는지, 색 대비가 충분한지 확인한다. 성능과 접근성은 별도 작업이 아니라 사용자 경험의 두 축이다.</p>
+<h3>개발자 체크리스트</h3>
+<p>새 페이지를 만들 때는 번들 크기, 이미지 크기, loading/error/empty 상태, 키보드 이동, aria가 필요한 컴포넌트를 함께 확인한다. 배포 직전에 점수만 맞추는 것보다 개발 중에 계속 작게 확인하는 편이 훨씬 싸다.</p>
+<h2>참고</h2>
+<ol>
+<li><a href="https://vite.dev/guide/" target="_blank">[1] Vite Docs — Getting Started</a></li>
+<li><a href="https://nextjs.org/docs/architecture/turbopack" target="_blank">[2] Next.js Docs — Turbopack</a></li>
+<li><a href="https://nextjs.org/docs/app/building-your-application/rendering" target="_blank">[3] Next.js Docs — Rendering</a></li>
+<li><a href="https://developer.chrome.com/docs/lighthouse/overview" target="_blank">[4] Chrome for Developers — Lighthouse overview</a></li>
+<li><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank">[5] W3C WAI — WCAG</a></li>
+<li><a href="https://www.w3.org/WAI/standards-guidelines/aria/" target="_blank">[6] W3C WAI — WAI-ARIA</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/modern-css-tailwind-shadcn">UI &amp; 스타일링 기초 →</a></li>
+<li><a href="/post/react-component-data-flow">React 단방향 데이터 흐름 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>vite</li><li>turbopack</li><li>ssr</li><li>csr</li><li>ssg</li><li>lighthouse</li><li>accessibility</li><li>wcag</li><li>aria</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

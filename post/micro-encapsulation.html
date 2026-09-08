@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>캡슐화와 역캡슐화 — PDU의 여정 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="데이터가 송신 측 응용 계층에서 출발해 물리 신호로 변환되기까지, 각 계층에서 헤더가 추가되는 캡슐화와 수신 측에서 헤더를 제거하는 역캡슐화 과정을 PDU 단위로 설명한다." />
+    <meta name="keywords" content="Encapsulation, De-encapsulation, PDU, Header, Payload, Frame, Packet, Segment, TCP/IP" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/micro-encapsulation" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="캡슐화와 역캡슐화 — PDU의 여정" />
+    <meta property="og:description" content="데이터가 송신 측 응용 계층에서 출발해 물리 신호로 변환되기까지, 각 계층에서 헤더가 추가되는 캡슐화와 수신 측에서 헤더를 제거하는 역캡슐화 과정을 PDU 단위로 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/micro-encapsulation" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.437Z" />
+    <meta property="article:tag" content="Encapsulation" />
+    <meta property="article:tag" content="De-encapsulation" />
+    <meta property="article:tag" content="PDU" />
+    <meta property="article:tag" content="Header" />
+    <meta property="article:tag" content="Payload" />
+    <meta property="article:tag" content="Frame" />
+    <meta property="article:tag" content="Packet" />
+    <meta property="article:tag" content="Segment" />
+    <meta property="article:tag" content="TCP/IP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="캡슐화와 역캡슐화 — PDU의 여정" />
+    <meta name="twitter:description" content="데이터가 송신 측 응용 계층에서 출발해 물리 신호로 변환되기까지, 각 계층에서 헤더가 추가되는 캡슐화와 수신 측에서 헤더를 제거하는 역캡슐화 과정을 PDU 단위로 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"캡슐화와 역캡슐화 — PDU의 여정","description":"데이터가 송신 측 응용 계층에서 출발해 물리 신호로 변환되기까지, 각 계층에서 헤더가 추가되는 캡슐화와 수신 측에서 헤더를 제거하는 역캡슐화 과정을 PDU 단위로 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.437Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-encapsulation"},"keywords":"Encapsulation, De-encapsulation, PDU, Header, Payload, Frame, Packet, Segment, TCP/IP","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":4760},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"캡슐화와 역캡슐화 — PDU의 여정","item":"https://seobway23.github.io/post/micro-encapsulation"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>네트워크</span></nav>
+<h1>캡슐화와 역캡슐화 — PDU의 여정</h1>
+<p>데이터가 송신 측 응용 계층에서 출발해 물리 신호로 변환되기까지, 각 계층에서 헤더가 추가되는 캡슐화와 수신 측에서 헤더를 제거하는 역캡슐화 과정을 PDU 단위로 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-25T00:00:00.000Z">2026-03-25</time> · <span>11분</span></p>
+<h2>캡슐화란 무엇인가</h2>
+<p>네트워크에서 데이터를 전송할 때, 상위 계층의 데이터는 그냥 전선에 흘러가지 않는다.<br>각 계층은 자신이 담당하는 <strong>제어 정보(헤더)</strong>를 데이터에 덧붙인다.</p>
+<p>마치 편지를 봉투에 넣고, 그 봉투를 또 다른 봉투에 넣는 것처럼 — 이 과정을 <strong>캡슐화(Encapsulation)</strong>라 한다.<sup id="fnref-encapsulation" style="scroll-margin-top: 96px;"><a href="#fn-encapsulation" aria-label="각주 1">[1]</a></sup></p>
+<p>수신 측에서는 역순으로 봉투를 열어가며 헤더를 제거하는데, 이를 <strong>역캡슐화(De-encapsulation)</strong>라 한다.</p>
+<h2>PDU — 계층별 데이터 단위</h2>
+<p>각 계층에서 다루는 데이터 덩어리를 <strong>PDU(Protocol Data Unit)</strong>라 한다.<br>계층마다 다른 이름이 붙는다.<sup id="fnref-pdu" style="scroll-margin-top: 96px;"><a href="#fn-pdu" aria-label="각주 2">[2]</a></sup></p>
+<pre><code class="language-mermaid">%% desc: OSI 계층별 PDU 이름과 각 계층의 헤더가 추가되는 구조
+flowchart TD
+  subgraph L7[&quot;응용 계층&quot;]
+    DATA[&quot;Data (메시지)\nHTTP 요청/응답, DNS 쿼리 등&quot;]
+  end
+
+  subgraph L4[&quot;전송 계층&quot;]
+    SEG[&quot;세그먼트 (TCP) / 데이터그램 (UDP)\n= TCP/UDP 헤더 + Data&quot;]
+  end
+
+  subgraph L3[&quot;네트워크 계층&quot;]
+    PKT[&quot;패킷 (Packet)\n= IP 헤더 + 세그먼트&quot;]
+  end
+
+  subgraph L2[&quot;데이터링크 계층&quot;]
+    FRM[&quot;프레임 (Frame)\n= Ethernet 헤더 + 패킷 + FCS 트레일러&quot;]
+  end
+
+  subgraph L1[&quot;물리 계층&quot;]
+    BIT[&quot;비트 (Bits)\n= 0과 1의 전기/광/무선 신호&quot;]
+  end
+
+  L7 --&gt; L4 --&gt; L3 --&gt; L2 --&gt; L1
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>계층</th>
+<th>PDU 이름</th>
+<th>포함 내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>응용 (7)</td>
+<td>데이터 / 메시지</td>
+<td>실제 전달할 내용 (HTTP 메시지, DNS 쿼리 등)</td>
+</tr>
+<tr>
+<td>전송 (4)</td>
+<td>세그먼트 (TCP) / 데이터그램 (UDP)</td>
+<td>전송 계층 헤더 + 상위 데이터</td>
+</tr>
+<tr>
+<td>네트워크 (3)</td>
+<td>패킷 (Packet)</td>
+<td>IP 헤더 + 세그먼트</td>
+</tr>
+<tr>
+<td>데이터링크 (2)</td>
+<td>프레임 (Frame)</td>
+<td>Ethernet 헤더 + 패킷 + 트레일러(FCS)</td>
+</tr>
+<tr>
+<td>물리 (1)</td>
+<td>비트 (Bit)</td>
+<td>프레임을 0/1로 인코딩한 신호</td>
+</tr>
+</tbody></table>
+<h2>헤더와 페이로드</h2>
+<p>모든 PDU는 두 부분으로 구성된다.</p>
+<ul>
+<li><strong>헤더(Header)</strong>: 해당 계층의 제어 정보. 주소, 길이, 오류 검출 코드 등.</li>
+<li><strong>페이로드(Payload)</strong>: 상위 계층에서 내려온 데이터. 하위 계층 입장에서는 페이로드가 &quot;무엇인지&quot; 알 필요가 없다.</li>
+</ul>
+<pre><code class="language-mermaid">%% desc: PDU 구조 — 헤더와 페이로드, 그리고 트레일러(데이터링크만)의 관계
+flowchart LR
+  subgraph FRAME[&quot;Ethernet 프레임&quot;]
+    direction LR
+    EH[&quot;Ethernet 헤더\n(dst MAC, src MAC, EtherType)\n14바이트&quot;]
+    subgraph PKT[&quot;IP 패킷 (페이로드)&quot;]
+      direction LR
+      IH[&quot;IP 헤더\n(src IP, dst IP, TTL, Protocol)\n20바이트&quot;]
+      subgraph SEG[&quot;TCP 세그먼트 (페이로드)&quot;]
+        direction LR
+        TH[&quot;TCP 헤더\n(src port, dst port, seq, ack)\n20바이트&quot;]
+        subgraph DATA[&quot;HTTP 메시지 (페이로드)&quot;]
+          D[&quot;GET /index.html HTTP/1.1\nHost: example.com\n...&quot;]
+        end
+      end
+    end
+    FCS[&quot;FCS 트레일러\n(CRC 체크섬)\n4바이트&quot;]
+  end
+</code></pre>
+<blockquote>
+<p>이 구조에서 각 계층은 자신의 헤더만 처리한다.<br>IP는 Ethernet 헤더를 해석하지 않고, TCP는 IP 헤더를 해석하지 않는다.<br>이것이 계층화의 핵심 가치 — <strong>캡슐화가 계층 독립성을 구현한다</strong>.</p>
+</blockquote>
+<h2>캡슐화 전체 과정</h2>
+<h3>송신 측 (캡슐화)</h3>
+<p>실제 HTTP 요청(<code>GET /index.html HTTP/1.1</code>)이 어떻게 전기 신호가 되는지 따라가보자.</p>
+<pre><code class="language-mermaid">%% desc: 송신 측에서 HTTP 메시지가 단계적으로 캡슐화되어 Ethernet 프레임이 되는 과정
+sequenceDiagram
+  participant APP as 응용 계층
+  participant TCP as 전송 계층 (TCP)
+  participant IP as 네트워크 계층 (IP)
+  participant ETH as 데이터링크 (Ethernet)
+  participant PHY as 물리 계층
+
+  APP-&gt;&gt;TCP: HTTP 메시지 (&quot;GET /index.html HTTP/1.1...&quot;)
+  Note over TCP: [TCP 헤더] + [HTTP 메시지]&lt;br/&gt;= TCP 세그먼트&lt;br/&gt;(src port: 54321, dst port: 80, seq=1000, ack=0)
+
+  TCP-&gt;&gt;IP: TCP 세그먼트
+  Note over IP: [IP 헤더] + [TCP 세그먼트]&lt;br/&gt;= IP 패킷&lt;br/&gt;(src: 192.168.1.10, dst: 93.184.216.34, TTL=64, proto=6)
+
+  IP-&gt;&gt;ETH: IP 패킷
+  Note over ETH: [Eth 헤더] + [IP 패킷] + [FCS]&lt;br/&gt;= Ethernet 프레임&lt;br/&gt;(src MAC: AA:BB:CC:DD:EE:FF, dst MAC: 11:22:33:44:55:66)
+
+  ETH-&gt;&gt;PHY: Ethernet 프레임
+  Note over PHY: 비트 스트림으로 변환 → 전기 신호 전송
+</code></pre>
+<h3>수신 측 (역캡슐화)</h3>
+<p>수신 측은 역순으로 각 헤더를 제거한다.</p>
+<pre><code class="language-mermaid">%% desc: 수신 측에서 Ethernet 프레임이 역캡슐화되어 HTTP 메시지가 복원되는 과정
+sequenceDiagram
+  participant PHY as 물리 계층
+  participant ETH as 데이터링크 (Ethernet)
+  participant IP as 네트워크 계층 (IP)
+  participant TCP as 전송 계층 (TCP)
+  participant APP as 응용 계층
+
+  PHY-&gt;&gt;ETH: 비트 신호 수신 → Ethernet 프레임 복원
+  Note over ETH: dst MAC 확인 (나에게 온 것인가?)&lt;br/&gt;FCS로 오류 검사&lt;br/&gt;Ethernet 헤더 제거
+
+  ETH-&gt;&gt;IP: IP 패킷 전달
+  Note over IP: dst IP 확인 (나에게 온 것인가?)&lt;br/&gt;TTL 확인, 체크섬 검증&lt;br/&gt;IP 헤더 제거
+
+  IP-&gt;&gt;TCP: TCP 세그먼트 전달
+  Note over TCP: dst port 확인 (어느 프로세스로?)&lt;br/&gt;seq/ack로 순서 확인&lt;br/&gt;TCP 헤더 제거
+
+  TCP-&gt;&gt;APP: HTTP 메시지 전달
+  Note over APP: &quot;GET /index.html HTTP/1.1&quot; 처리
+</code></pre>
+<h2>각 헤더의 핵심 필드 요약</h2>
+<h3>Ethernet 헤더 (14바이트)</h3>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>크기</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Destination MAC</td>
+<td>6바이트</td>
+<td>목적지 MAC 주소</td>
+</tr>
+<tr>
+<td>Source MAC</td>
+<td>6바이트</td>
+<td>출발지 MAC 주소</td>
+</tr>
+<tr>
+<td>EtherType</td>
+<td>2바이트</td>
+<td>페이로드 프로토콜 (0x0800 = IPv4, 0x0806 = ARP, 0x86DD = IPv6)</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>FCS 트레일러</strong> (4바이트): CRC-32 오류 검출 코드</li>
+</ul>
+<h3>IP 헤더 (20바이트 기본, 최대 60바이트)</h3>
+<p>핵심 필드: 출발지/목적지 IP 주소, TTL, Protocol (6=TCP, 17=UDP), 체크섬</p>
+<p>→ 상세 내용: <a href="/post/micro-ip-arp">IP와 ARP</a></p>
+<h3>TCP 헤더 (20바이트 기본, 최대 60바이트)</h3>
+<p>핵심 필드: 출발지/목적지 포트, Sequence Number, Acknowledgment Number, Flags, Window Size</p>
+<p>→ 상세 내용: <a href="/post/micro-tcp-udp">TCP와 UDP</a></p>
+<h2>단편화 — MTU를 넘는 패킷의 처리</h2>
+<p>각 네트워크 링크는 한 번에 전송할 수 있는 최대 프레임 크기 <strong>MTU(Maximum Transmission Unit)</strong>가 있다.<br>Ethernet의 표준 MTU는 <strong>1500바이트</strong>다.</p>
+<p>IP 패킷이 MTU를 초과하면 IP 계층에서 <strong>단편화(Fragmentation)</strong>가 발생한다.</p>
+<pre><code class="language-mermaid">%% desc: 4000바이트 IP 패킷이 MTU=1500인 Ethernet에서 3개의 단편으로 분할되는 과정
+flowchart TD
+  BIG[&quot;IP 패킷\n4000바이트 (헤더 포함)&quot;]
+
+  subgraph 단편화[&quot;MTU=1500에서 단편화&quot;]
+    F1[&quot;단편 1\n헤더 + 1480바이트\noffset=0, MF=1&quot;]
+    F2[&quot;단편 2\n헤더 + 1480바이트\noffset=185, MF=1&quot;]
+    F3[&quot;단편 3\n헤더 + 1020바이트\noffset=370, MF=0&quot;]
+  end
+
+  REASSEMBLE[&quot;목적지에서 재조립\n동일한 Identification 필드로 식별&quot;]
+
+  BIG --&gt; 단편화
+  단편화 --&gt; REASSEMBLE
+</code></pre>
+<ul>
+<li><strong>DF(Don&#39;t Fragment) 플래그</strong>: 단편화 금지. 설정 시 라우터가 ICMP &quot;Fragmentation Needed&quot; 반환 → PMTUD(Path MTU Discovery) 기반</li>
+<li><strong>MF(More Fragments) 플래그</strong>: 뒤에 더 단편이 있음을 표시</li>
+<li><strong>Fragment Offset</strong>: 원본 데이터 내 이 단편의 위치 (8바이트 단위)</li>
+</ul>
+<h2>캡슐화가 주는 것</h2>
+<ol>
+<li><p><strong>계층 독립성</strong>: 각 계층은 자신의 헤더만 처리하고 나머지는 불투명한 페이로드로 본다. Ethernet을 Wi-Fi로 바꿔도 IP, TCP, HTTP는 변경 없다.</p>
+</li>
+<li><p><strong>프로토콜 교체 가능성</strong>: IP → IPv6, TCP → QUIC으로 교체해도 다른 계층은 영향받지 않는다.</p>
+</li>
+<li><p><strong>멀티플렉싱</strong>: 하나의 IP 패킷이 TCP/UDP를 구분하고, 하나의 TCP 연결이 여러 포트를 구분해 다수의 응용이 공존한다.</p>
+</li>
+</ol>
+<h2>참고</h2>
+<ol>
+<li id="fn-encapsulation" style="scroll-margin-top: 96px;">Encapsulation (networking), <a href="https://en.wikipedia.org/wiki/Encapsulation_(networking)" target="_blank">Wikipedia</a> <a href="#fnref-encapsulation" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-pdu" style="scroll-margin-top: 96px;">Protocol data unit, <a href="https://en.wikipedia.org/wiki/Protocol_data_unit" target="_blank">Wikipedia</a> <a href="#fnref-pdu" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/micro-osi-7layer">OSI 7계층 모델 →</a> — 각 PDU가 속한 계층의 역할 전체 그림</li>
+<li><a href="/post/micro-tcp-ip-model">TCP/IP 참조 모델 →</a> — TCP/IP 4계층에서의 캡슐화 구조</li>
+<li><a href="/post/micro-ip-arp">IP와 ARP — 주소와 경로의 언어 →</a> — IP 헤더 상세 구조</li>
+<li><a href="/post/micro-tcp-udp">TCP와 UDP — 신뢰성과 속도의 트레이드오프 →</a> — TCP 헤더와 세그먼트 구조</li>
+</ul>
+<hr>
+
+<ul><li>Encapsulation</li><li>De-encapsulation</li><li>PDU</li><li>Header</li><li>Payload</li><li>Frame</li><li>Packet</li><li>Segment</li><li>TCP/IP</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

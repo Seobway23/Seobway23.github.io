@@ -40,7 +40,8 @@
     "electron-nodejs-libuv-integration",
     "electron-renderer-chromium-rendering",
     "js-event-loop-and-async",
-    "settimeout-vs-promise"
+    "settimeout-vs-promise",
+    "event-loop-interactive"
   ],
   "docker": [
     "django-migration",
@@ -100,6 +101,7 @@
     "electron-nodejs-libuv-integration",
     "js-event-loop-and-async",
     "settimeout-vs-promise",
+    "event-loop-interactive",
     "react-component-data-flow",
     "react-controlled-vs-uncontrolled",
     "typescript-type-system-basics",
@@ -109,6 +111,7 @@
     "electron-nodejs-libuv-integration",
     "js-event-loop-and-async",
     "settimeout-vs-promise",
+    "event-loop-interactive",
     "react-component-data-flow",
     "react-controlled-vs-uncontrolled",
     "typescript-type-system-basics"

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="IsAuthenticated만으로는 &quot;내 일정을 남이 수정하는 것&quot;을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다." />
+    <meta name="keywords" content="Django, DRF, Permissions, ObjectPermission, RBAC, Authorization, 권한시스템" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/django-object-permissions" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어" />
+    <meta property="og:description" content="IsAuthenticated만으로는 &quot;내 일정을 남이 수정하는 것&quot;을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/django-object-permissions" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.191Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="DRF" />
+    <meta property="article:tag" content="Permissions" />
+    <meta property="article:tag" content="ObjectPermission" />
+    <meta property="article:tag" content="RBAC" />
+    <meta property="article:tag" content="Authorization" />
+    <meta property="article:tag" content="권한시스템" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어" />
+    <meta name="twitter:description" content="IsAuthenticated만으로는 &quot;내 일정을 남이 수정하는 것&quot;을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어","description":"IsAuthenticated만으로는 \"내 일정을 남이 수정하는 것\"을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.191Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-object-permissions"},"keywords":"Django, DRF, Permissions, ObjectPermission, RBAC, Authorization, 권한시스템","articleSection":"django","inLanguage":"ko-KR","wordCount":8508},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어","item":"https://seobway23.github.io/post/django-object-permissions"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>django</span></nav>
+<h1>Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어</h1>
+<p>IsAuthenticated만으로는 &quot;내 일정을 남이 수정하는 것&quot;을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-03T00:00:00.000Z">2026-04-03</time> · <span>14분</span></p>
+<h2>왜 IsAuthenticated만으로는 부족한가</h2>
+<pre><code class="language-python"># 이 코드의 구멍은?
+class TaskViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+</code></pre>
+<p>로그인한 사용자라면 <strong>누구든</strong> 모든 Task를 수정·삭제할 수 있다.<br><code>IsAuthenticated</code>는 &quot;로그인했는가&quot;만 확인하지, &quot;이 데이터의 주인인가&quot;를 확인하지 않는다.</p>
+<pre><code class="language-mermaid">%% desc: Django DRF 권한 체계 — 3개 레이어
+flowchart TD
+  A[&quot;요청 도착&quot;]
+  B[&quot;Authentication\n인증: 이 사람이 누구인가?\nJWT·Session·Token&quot;]
+  C[&quot;Permission (View 레벨)\nhas_permission()\n이 뷰에 접근할 수 있는가?\nIsAuthenticated 등&quot;]
+  D[&quot;Object Permission (Object 레벨)\nhas_object_permission()\n이 특정 객체를 다룰 수 있는가?\n→ 여기가 핵심&quot;]
+  E[&quot;비즈니스 로직 실행&quot;]
+
+  A --&gt; B
+  B --&gt;|&quot;인증 실패&quot;| ERR1[&quot;401 Unauthorized&quot;]
+  B --&gt; C
+  C --&gt;|&quot;권한 없음&quot;| ERR2[&quot;403 Forbidden&quot;]
+  C --&gt; D
+  D --&gt;|&quot;객체 권한 없음&quot;| ERR2
+  D --&gt; E
+</code></pre>
+<hr>
+<h2>Step 1: 모델에 소유자 필드 추가</h2>
+<p>누가 만들었는지 모르면 소유권 검사가 불가능하다. <code>created_by</code>를 먼저 추가한다.<a href="https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ForeignKey" target="_blank"><sup>[1]</sup></a></p>
+<pre><code class="language-python"># models.py
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Task(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey(&#39;Category&#39;, on_delete=models.SET_NULL, null=True)
+    due_date = models.DateField(null=True, blank=True)
+
+    # ── 소유권 필드 ───────────────────────────────────────────────────
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,       # 기존 데이터 호환: null 허용
+        blank=True,
+        related_name=&#39;created_tasks&#39;,
+        verbose_name=&#39;작성자&#39;,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = [&#39;-created_at&#39;]
+</code></pre>
+<blockquote>
+<p><strong>null=True가 필요한 이유</strong>: 기존에 데이터가 있는 테이블에 ForeignKey를 추가하면 기존 행에 넣을 값이 없다. <code>null=True</code>를 지정하지 않으면 <code>makemigrations</code> 시 기본값을 요구하고, 잘못된 값을 입력하면 DB 무결성이 깨진다.</p>
+</blockquote>
+<h3>마이그레이션 생성</h3>
+<pre><code class="language-bash">python manage.py makemigrations tasks --name task_auditing_fields
+python manage.py migrate
+</code></pre>
+<p>생성되는 <code>0003_task_auditing_fields.py</code>:</p>
+<pre><code class="language-python">from django.conf import settings
+from django.db import migrations, models
+import django.db.models.deletion
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        (&#39;tasks&#39;, &#39;0002_previous_migration&#39;),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name=&#39;task&#39;,
+            name=&#39;created_by&#39;,
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name=&#39;created_tasks&#39;,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name=&#39;작성자&#39;,
+            ),
+        ),
+    ]
+</code></pre>
+<hr>
+<h2>Step 2: 커스텀 Permission 클래스 작성</h2>
+<p>DRF의 <code>BasePermission</code>을 상속한다.<a href="https://www.django-rest-framework.org/api-guide/permissions/#custom-permissions" target="_blank"><sup>[2]</sup></a></p>
+<pre><code class="language-python"># permissions.py
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+# 승인된 팀 코드 목록
+PRIVILEGED_TEAMS = {&#39;MGMT&#39;, &#39;SALES&#39;}  # 경영지원, 기술영업
+
+
+class IsOwnerOrPrivilegedTeam(BasePermission):
+    &quot;&quot;&quot;
+    접근 허용 조건 (OR 관계):
+    1. 이 객체를 만든 사람 (Owner)
+    2. MGMT / SALES 팀 소속 (상위 권한 보유 팀)
+    &quot;&quot;&quot;
+
+    def has_permission(self, request, view):
+        &quot;&quot;&quot;뷰 접근 자체: 로그인만 확인&quot;&quot;&quot;
+        return request.user and request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        &quot;&quot;&quot;객체 수준 권한: 읽기는 허용, 쓰기는 조건 확인&quot;&quot;&quot;
+
+        # 읽기(GET, HEAD, OPTIONS)는 항상 허용
+        if request.method in SAFE_METHODS:
+            return True
+
+        # 조건 1: 소유자 본인
+        if obj.created_by == request.user:
+            return True
+
+        # 조건 2: 상위 권한 팀 (User 모델에 team/department 필드가 있다고 가정)
+        user_team = getattr(request.user, &#39;team&#39;, None)
+        if user_team and user_team.upper() in PRIVILEGED_TEAMS:
+            return True
+
+        return False
+</code></pre>
+<h3>팀 정보를 어디서 가져오는가</h3>
+<pre><code class="language-python"># User 모델 확장 예시 (Profile 또는 AbstractUser)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name=&#39;profile&#39;)
+    team = models.CharField(
+        max_length=20,
+        choices=[
+            (&#39;MGMT&#39;, &#39;경영지원&#39;),
+            (&#39;SALES&#39;, &#39;기술영업&#39;),
+            (&#39;DEV&#39;, &#39;개발&#39;),
+            (&#39;OPS&#39;, &#39;운영&#39;),
+        ],
+        default=&#39;DEV&#39;,
+    )
+
+# Permission에서 접근
+user_team = getattr(request.user.profile, &#39;team&#39;, None)
+</code></pre>
+<hr>
+<h2>Step 3: ViewSet에 권한 적용</h2>
+<pre><code class="language-python"># views.py
+from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .models import Task
+from .serializers import TaskModelSerializer
+from .permissions import IsOwnerOrPrivilegedTeam
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    serializer_class = TaskModelSerializer
+
+    # ── 권한: 로그인 + 객체 레벨 권한 ────────────────────────────────
+    permission_classes = [IsOwnerOrPrivilegedTeam]
+
+    def get_queryset(self):
+        &quot;&quot;&quot;
+        일반 사용자: 본인이 만든 태스크만 조회
+        MGMT/SALES: 전체 조회
+        &quot;&quot;&quot;
+        user = self.request.user
+        team = getattr(getattr(user, &#39;profile&#39;, None), &#39;team&#39;, &#39;&#39;)
+
+        if team.upper() in {&#39;MGMT&#39;, &#39;SALES&#39;}:
+            return Task.objects.all().select_related(&#39;created_by&#39;, &#39;category&#39;)
+
+        return Task.objects.filter(
+            created_by=user
+        ).select_related(&#39;created_by&#39;, &#39;category&#39;)
+
+    def perform_create(self, serializer):
+        &quot;&quot;&quot;생성 시 자동으로 created_by 주입&quot;&quot;&quot;
+        serializer.save(created_by=self.request.user)
+
+    def get_permissions(self):
+        &quot;&quot;&quot;
+        액션별 권한 클래스를 다르게 설정할 수 있다.
+        create는 로그인만 확인, update/delete는 객체 권한 필요
+        &quot;&quot;&quot;
+        if self.action == &#39;create&#39;:
+            return [IsAuthenticated()]
+        return [IsOwnerOrPrivilegedTeam()]
+</code></pre>
+<hr>
+<h2>권한 매트릭스</h2>
+<pre><code class="language-mermaid">%% desc: 역할별 Task CRUD 권한 매트릭스
+flowchart LR
+  subgraph OWNER[&quot;소유자 (Owner)&quot;]
+    O1[&quot;본인 Task 조회 ✅&quot;]
+    O2[&quot;본인 Task 수정 ✅&quot;]
+    O3[&quot;본인 Task 삭제 ✅&quot;]
+    O4[&quot;타인 Task 조회 ❌&quot;]
+    O5[&quot;타인 Task 수정 ❌&quot;]
+  end
+
+  subgraph MGMT_SALES[&quot;MGMT / SALES 팀&quot;]
+    M1[&quot;전체 Task 조회 ✅&quot;]
+    M2[&quot;전체 Task 수정 ✅&quot;]
+    M3[&quot;전체 Task 삭제 ✅&quot;]
+  end
+
+  subgraph OTHERS[&quot;일반 사용자&quot;]
+    G1[&quot;본인 Task 조회 ✅&quot;]
+    G2[&quot;타인 Task 수정 ❌ → 403&quot;]
+  end
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>액션</th>
+<th>본인(Owner)</th>
+<th>MGMT/SALES</th>
+<th>타팀 일반 사용자</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>List (GET)</td>
+<td>본인 것만</td>
+<td>전체</td>
+<td>본인 것만</td>
+</tr>
+<tr>
+<td>Retrieve (GET)</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌ 403</td>
+</tr>
+<tr>
+<td>Create (POST)</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Update (PUT/PATCH)</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌ 403</td>
+</tr>
+<tr>
+<td>Destroy (DELETE)</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌ 403</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Step 4: Serializer에서 created_by 읽기 전용 처리</h2>
+<pre><code class="language-python">class TaskModelSerializer(serializers.ModelSerializer):
+    # 소유자 정보: 읽기 전용으로 노출
+    created_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Task
+        fields = [&#39;id&#39;, &#39;title&#39;, &#39;category&#39;, &#39;due_date&#39;, &#39;created_by&#39;, ...]
+        read_only_fields = [&#39;id&#39;, &#39;created_by&#39;]
+
+    def get_created_by(self, obj):
+        if obj.created_by:
+            return {
+                &#39;id&#39;: obj.created_by.id,
+                &#39;username&#39;: obj.created_by.username,
+                &#39;team&#39;: getattr(getattr(obj.created_by, &#39;profile&#39;, None), &#39;team&#39;, None),
+            }
+        return None
+</code></pre>
+<hr>
+<h2>다중 날짜 일정 지원</h2>
+<p>오늘 구현한 다른 기능: 달력에서 여러 날짜를 선택해 일정 범위를 지정하는 기능.</p>
+<pre><code class="language-python"># 모델에 start_date, end_date 추가
+class Task(models.Model):
+    # 기존 필드...
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+</code></pre>
+<pre><code class="language-python"># Serializer: 날짜 범위 교차 검증
+def validate(self, data):
+    start = data.get(&#39;start_date&#39;)
+    end = data.get(&#39;end_date&#39;)
+
+    if start and end and start &gt; end:
+        raise serializers.ValidationError({
+            &#39;end_date&#39;: &quot;종료일은 시작일 이후여야 합니다.&quot;
+        })
+
+    return data  # ✅ 반드시 return
+</code></pre>
+<pre><code class="language-tsx">// Frontend: ScheduleCalendar.tsx — 2번 클릭으로 범위 지정
+const [rangeStart, setRangeStart] = useState&lt;Date | null&gt;(null)
+
+const handleDateClick = (date: Date) =&gt; {
+  if (!rangeStart) {
+    setRangeStart(date)       // 첫 번째 클릭: 시작일 설정
+  } else {
+    const start = rangeStart &lt; date ? rangeStart : date
+    const end = rangeStart &lt; date ? date : rangeStart
+
+    openNewScheduleModal({ start_date: start, end_date: end })
+    setRangeStart(null)       // 선택 완료 후 초기화
+  }
+}
+</code></pre>
+<hr>
+<h2>권한 테스트 작성</h2>
+<pre><code class="language-python">from rest_framework.test import APITestCase
+from rest_framework import status
+from django.contrib.auth import get_user_model
+from .models import Task
+
+User = get_user_model()
+
+
+class TaskPermissionTest(APITestCase):
+
+    def setUp(self):
+        self.owner = User.objects.create_user(&#39;owner&#39;, password=&#39;pass&#39;)
+        self.other = User.objects.create_user(&#39;other&#39;, password=&#39;pass&#39;)
+        self.mgmt_user = User.objects.create_user(&#39;mgmt&#39;, password=&#39;pass&#39;)
+        # mgmt_user.profile.team = &#39;MGMT&#39; 설정 가정
+
+        self.task = Task.objects.create(
+            title=&#39;Test Task&#39;,
+            created_by=self.owner
+        )
+
+    def test_owner_can_update(self):
+        self.client.force_authenticate(user=self.owner)
+        res = self.client.patch(f&#39;/api/tasks/{self.task.id}/&#39;, {&#39;title&#39;: &#39;Updated&#39;})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_other_user_cannot_update(self):
+        self.client.force_authenticate(user=self.other)
+        res = self.client.patch(f&#39;/api/tasks/{self.task.id}/&#39;, {&#39;title&#39;: &#39;Hacked&#39;})
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_mgmt_can_update_any(self):
+        self.client.force_authenticate(user=self.mgmt_user)
+        res = self.client.patch(f&#39;/api/tasks/{self.task.id}/&#39;, {&#39;title&#39;: &#39;Managed&#39;})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+</code></pre>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ForeignKey" target="_blank">[1] Django ForeignKey — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/permissions/#custom-permissions" target="_blank">[2] DRF Custom Permissions — 공식 문서</a></li>
+<li><a href="https://www.django-rest-framework.org/api-guide/permissions/#object-level-permissions" target="_blank">[3] DRF Object Level Permissions — 공식 문서</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/drf-serializer-validation">DRF Serializer 검증 완전 정복 →</a></li>
+<li><a href="/post/django-migration">Django Migration 완전 정복 →</a></li>
+</ul>
+
+<ul><li>Django</li><li>DRF</li><li>Permissions</li><li>ObjectPermission</li><li>RBAC</li><li>Authorization</li><li>권한시스템</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

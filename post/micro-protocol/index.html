@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>프로토콜 — 왜 패킷 교환을 쓰는가 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="인터넷이 패킷 교환 방식을 채택한 이유와 역사적 배경. Paul Baran과 Donald Davies가 독립적으로 발명한 아이디어가 현대 인터넷의 기초가 된 과정을 설명한다." />
+    <meta name="keywords" content="Protocol, Packet Switching, Circuit Switching, Network, Paul Baran, Donald Davies" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/micro-protocol" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="프로토콜 — 왜 패킷 교환을 쓰는가" />
+    <meta property="og:description" content="인터넷이 패킷 교환 방식을 채택한 이유와 역사적 배경. Paul Baran과 Donald Davies가 독립적으로 발명한 아이디어가 현대 인터넷의 기초가 된 과정을 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/micro-protocol" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.454Z" />
+    <meta property="article:tag" content="Protocol" />
+    <meta property="article:tag" content="Packet Switching" />
+    <meta property="article:tag" content="Circuit Switching" />
+    <meta property="article:tag" content="Network" />
+    <meta property="article:tag" content="Paul Baran" />
+    <meta property="article:tag" content="Donald Davies" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="프로토콜 — 왜 패킷 교환을 쓰는가" />
+    <meta name="twitter:description" content="인터넷이 패킷 교환 방식을 채택한 이유와 역사적 배경. Paul Baran과 Donald Davies가 독립적으로 발명한 아이디어가 현대 인터넷의 기초가 된 과정을 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"프로토콜 — 왜 패킷 교환을 쓰는가","description":"인터넷이 패킷 교환 방식을 채택한 이유와 역사적 배경. Paul Baran과 Donald Davies가 독립적으로 발명한 아이디어가 현대 인터넷의 기초가 된 과정을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.454Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-protocol"},"keywords":"Protocol, Packet Switching, Circuit Switching, Network, Paul Baran, Donald Davies","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":3623},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"프로토콜 — 왜 패킷 교환을 쓰는가","item":"https://seobway23.github.io/post/micro-protocol"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>네트워크</span></nav>
+<h1>프로토콜 — 왜 패킷 교환을 쓰는가</h1>
+<p>인터넷이 패킷 교환 방식을 채택한 이유와 역사적 배경. Paul Baran과 Donald Davies가 독립적으로 발명한 아이디어가 현대 인터넷의 기초가 된 과정을 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-25T00:00:00.000Z">2026-03-25</time> · <span>10분</span></p>
+<h2>왜 프로토콜이 필요한가</h2>
+<p>1960년대 컴퓨터들은 서로 통신할 수 없었다.<br>IBM 컴퓨터는 DEC 컴퓨터를 이해하지 못했고, 미국 군의 컴퓨터는 대학 연구소의 컴퓨터와 연결할 방법이 없었다.</p>
+<p>이 문제를 해결하는 방법은 하나뿐이었다: <strong>공통 규칙을 정하는 것</strong>.<br>그 공통 규칙이 <strong>프로토콜(Protocol)</strong>이다.<sup id="fnref-protocol" style="scroll-margin-top: 96px;"><a href="#fn-protocol" aria-label="각주 1">[1]</a></sup></p>
+<p>프로토콜은 세 가지를 정의한다.</p>
+<ol>
+<li><strong>문법(Syntax)</strong>: 데이터를 어떤 형식으로 표현할 것인가</li>
+<li><strong>의미(Semantics)</strong>: 각 비트 패턴이 무엇을 의미하는가</li>
+<li><strong>타이밍(Timing)</strong>: 언제 데이터를 보내고 얼마나 빠르게 전송할 것인가</li>
+</ol>
+<h2>회선 교환의 시대 — 왜 변화가 필요했는가</h2>
+<p>패킷 교환이 등장하기 전, 모든 통신은 <strong>회선 교환(Circuit Switching)</strong> 방식을 사용했다.<br>전화망이 대표적 예다.<sup id="fnref-circuit-switching" style="scroll-margin-top: 96px;"><a href="#fn-circuit-switching" aria-label="각주 2">[2]</a></sup></p>
+<p>회선 교환은 통화를 시작하기 전에 출발지에서 목적지까지 <strong>전용 경로</strong>를 물리적으로 예약한다.<br>통화하는 동안 그 경로는 다른 사람이 사용할 수 없다.</p>
+<pre><code class="language-mermaid">%% desc: 회선 교환 방식 — 통화 내내 전용 경로가 점유되는 구조
+sequenceDiagram
+  participant A as 발신자
+  participant N as 교환망
+  participant B as 수신자
+
+  A-&gt;&gt;N: 연결 요청
+  N-&gt;&gt;B: 전용 경로 설정
+  B--&gt;&gt;N: 수락
+  N--&gt;&gt;A: 연결 완료
+
+  Note over A,B: 전용 경로 점유 (침묵 구간에도 자원 낭비)
+
+  A-&gt;&gt;B: 음성 데이터 전송
+  Note over A,B: 실제 데이터 전송은 전체 시간의 10% 미만
+  A-&gt;&gt;N: 연결 종료
+  N-&gt;&gt;B: 연결 해제
+</code></pre>
+<h3>회선 교환의 세 가지 문제</h3>
+<p><strong>1. 자원 낭비</strong><br>음성 통화에서 실제로 말하는 시간은 전체의 30~40%에 불과하다.<br>컴퓨터 데이터 통신은 더 심해서 실제 데이터 전송은 전체 시간의 10% 미만이다.<br>나머지 90%는 경로가 점유되어 있으면서도 아무 데이터도 흐르지 않는다.</p>
+<p><strong>2. 단일 경로 의존성</strong><br>경로 중 한 지점만 끊어져도 통신 전체가 불가능해진다.<br>1960년대 냉전 시대, 핵 공격으로 일부 인프라가 파괴되더라도 통신이 유지되어야 했다.<br>회선 교환망은 이 요구를 만족할 수 없었다.</p>
+<p><strong>3. 확장성 한계</strong><br>사용자가 늘수록 필요한 전용 회선 수가 기하급수적으로 증가한다.<br>N명이 동시에 통신하려면 최대 N(N-1)/2개의 회선이 필요하다.</p>
+<h2>패킷 교환의 발명 — 두 개의 독립된 아이디어</h2>
+<p>1960년대 초, 대서양 양편에서 동일한 문제를 해결하는 동일한 아이디어가 독립적으로 나타났다.</p>
+<h3>Paul Baran — RAND Corporation, 1962</h3>
+<p>미국 공군은 RAND Corporation의 Paul Baran에게 핵 공격 이후에도 살아남을 수 있는 통신 네트워크 설계를 의뢰했다.</p>
+<p>Baran의 답은 세 가지 원칙이었다.<sup id="fnref-baran" style="scroll-margin-top: 96px;"><a href="#fn-baran" aria-label="각주 3">[3]</a></sup></p>
+<ol>
+<li><strong>분산 네트워크</strong>: 단일 명령 센터 없이 모든 노드가 동등하게 연결</li>
+<li><strong>메시지 블록 분할</strong>: 메시지를 작은 블록으로 쪼개 독립적으로 전송</li>
+<li><strong>저장-전달(Store and Forward)</strong>: 각 노드가 수신한 블록을 임시 저장하고 다음 노드로 전달</li>
+</ol>
+<p>그는 이 방식을 <strong>&quot;분산 적응형 메시지 블록 교환(Distributed Adaptive Message Block Switching)&quot;</strong>이라 불렀다.<br>1962년 RAND Paper P-2626으로 처음 발표했고, 1964년 11권짜리 기술 보고서 <em>On Distributed Communications</em>로 완성했다.</p>
+<p>AT&amp;T 엔지니어들은 그의 아이디어를 비웃었다. &quot;당신은 통신을 이해 못 한다&quot;고 했다.</p>
+<h3>Donald Davies — National Physical Laboratory, UK, 1965</h3>
+<p>영국 NPL의 Donald Davies는 전혀 다른 문제에서 출발했다.<br>그의 관심사는 <strong>효율성</strong>이었다.</p>
+<p>당시 시분할 컴퓨팅 시스템은 사용자마다 전용 전화선을 유지해야 했다.<br>Davies는 컴퓨터 통신이 <strong>버스티(Bursty)</strong>하다는 것을 간파했다.<br>즉, 짧은 데이터 폭발과 긴 침묵이 반복된다.</p>
+<p>그는 이 특성에 최적화된 방식을 독립적으로 설계했고,<br>언어학자와 상담한 끝에 데이터 블록에 <strong>&quot;패킷(Packet)&quot;</strong>이라는 이름을 붙였다.<br>이 단어가 여러 언어로 깔끔하게 번역된다는 이유에서였다.</p>
+<p>1967년 Davies의 발표를 들은 ARPANET 설계팀(BBN)이 그의 아이디어를 직접 채택했다.<br>Baran의 1964년 논문보다 Davies의 1967년 발표가 실용적 인터넷의 직접적 출발점이 됐다.</p>
+<blockquote>
+<p>두 사람은 동일한 크기의 패킷을 독립적으로 제안했다: 1024비트.<br>이 일치는 통신 역사상 가장 놀라운 우연 중 하나로 꼽힌다.</p>
+</blockquote>
+<pre><code class="language-mermaid">%% desc: 패킷 교환 방식 — 각 패킷이 독립적으로 라우팅되고 목적지에서 재조립되는 흐름
+flowchart LR
+  SRC[출발지 호스트]
+
+  subgraph 패킷 분할
+    P1[패킷 1&lt;br/&gt;seq=1]
+    P2[패킷 2&lt;br/&gt;seq=2]
+    P3[패킷 3&lt;br/&gt;seq=3]
+  end
+
+  R1[라우터 A]
+  R2[라우터 B]
+  R3[라우터 C]
+
+  DST[목적지 호스트&lt;br/&gt;재조립]
+
+  SRC --&gt; P1 &amp; P2 &amp; P3
+  P1 --&gt; R1 --&gt; DST
+  P2 --&gt; R2 --&gt; DST
+  P3 --&gt; R1 --&gt; R3 --&gt; DST
+
+  style P1 fill:#3b82f6,color:#fff
+  style P2 fill:#8b5cf6,color:#fff
+  style P3 fill:#10b981,color:#fff
+</code></pre>
+<p>각 패킷은 <strong>독립적으로 라우팅</strong>되어 서로 다른 경로를 취할 수 있다.<br>한 경로가 혼잡하거나 끊어져도 나머지 경로로 우회한다.<br>목적지에서 시퀀스 번호로 올바른 순서로 재조립한다.</p>
+<h2>패킷 교환이 해결한 것들</h2>
+<table>
+<thead>
+<tr>
+<th>문제</th>
+<th>회선 교환</th>
+<th>패킷 교환</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>자원 효율</td>
+<td>전용 경로 독점 → 낭비</td>
+<td>경로 공유 → 효율적</td>
+</tr>
+<tr>
+<td>장애 내성</td>
+<td>경로 단절 = 통신 불가</td>
+<td>우회 경로로 자동 전환</td>
+</tr>
+<tr>
+<td>확장성</td>
+<td>N² 회선 필요</td>
+<td>공유 인프라로 확장 용이</td>
+</tr>
+<tr>
+<td>지연 예측성</td>
+<td>일정한 지연</td>
+<td>혼잡 시 지연 변동 가능</td>
+</tr>
+<tr>
+<td>멀티미디어</td>
+<td>단순 음성에 최적화</td>
+<td>모든 종류의 데이터 전송 가능</td>
+</tr>
+</tbody></table>
+<h2>패킷 교환 위의 프로토콜들</h2>
+<p>패킷 교환이라는 기반 위에, 각기 다른 목적의 프로토콜들이 계층을 이룬다.</p>
+<pre><code class="language-mermaid">%% desc: 패킷 교환을 기반으로 각 계층 프로토콜이 쌓이는 구조
+flowchart BT
+  PS[패킷 교환 — 기반 원칙]
+  IP[IP — 주소 지정과 경로 선택]
+  ARP[ARP — IP↔MAC 주소 변환]
+  TCP[TCP — 신뢰성 있는 전송]
+  UDP[UDP — 빠른 비신뢰성 전송]
+  HTTP[HTTP/HTTPS — 웹 문서 전송]
+
+  PS --&gt; IP
+  PS --&gt; ARP
+  IP --&gt; TCP &amp; UDP
+  TCP --&gt; HTTP
+</code></pre>
+<p>각 프로토콜의 상세 내용은 아래 글에서 다룬다.</p>
+<h2>참고</h2>
+<ol>
+<li id="fn-protocol" style="scroll-margin-top: 96px;">Communication protocol, <a href="https://en.wikipedia.org/wiki/Communication_protocol" target="_blank">Wikipedia</a> <a href="#fnref-protocol" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-circuit-switching" style="scroll-margin-top: 96px;">Circuit switching, <a href="https://en.wikipedia.org/wiki/Circuit_switching" target="_blank">Wikipedia</a> <a href="#fnref-circuit-switching" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-baran" style="scroll-margin-top: 96px;">Paul Baran, *On Distributed Communications* (RAND Corporation, 1964) — <a href="https://en.wikipedia.org/wiki/Paul_Baran" target="_blank">Wikipedia</a> <a href="#fnref-baran" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/micro-ip-arp">IP와 ARP — 주소와 경로의 언어 →</a> — IP가 패킷에 주소를 붙이고 ARP가 IP를 MAC으로 변환하는 과정</li>
+<li><a href="/post/micro-http-https">HTTP와 HTTPS — 웹을 움직이는 프로토콜 →</a> — Tim Berners-Lee가 만든 웹 프로토콜의 진화</li>
+<li><a href="/post/micro-tcp-udp">TCP와 UDP — 신뢰성과 속도의 트레이드오프 →</a> — TCP의 3-way 핸드셰이크와 UDP의 단순성</li>
+<li><a href="/post/micro-osi-7layer">OSI 7계층 모델 →</a> — 프로토콜을 계층으로 분류하는 틀</li>
+<li><a href="/post/circuit-vs-packet-switching">회선 교환 vs 패킷 교환 →</a> — 회선·패킷 방식의 더 자세한 비교</li>
+</ul>
+<hr>
+
+<ul><li>Protocol</li><li>Packet Switching</li><li>Circuit Switching</li><li>Network</li><li>Paul Baran</li><li>Donald Davies</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="브라우저가 보낸 HTTP 요청이 Gunicorn에 도달한 순간부터 응답이 돌아올 때까지 — Django가 처리하는 11단계 전체 흐름을 미들웨어 onion 구조와 함께 설명한다." />
+    <meta name="keywords" content="Django, Lifecycle, Middleware, URLResolver, View, ORM, Template, WSGI, ASGI, HttpRequest" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/django-lifecycle" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름" />
+    <meta property="og:description" content="브라우저가 보낸 HTTP 요청이 Gunicorn에 도달한 순간부터 응답이 돌아올 때까지 — Django가 처리하는 11단계 전체 흐름을 미들웨어 onion 구조와 함께 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/django-lifecycle" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-27T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.180Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="Lifecycle" />
+    <meta property="article:tag" content="Middleware" />
+    <meta property="article:tag" content="URLResolver" />
+    <meta property="article:tag" content="View" />
+    <meta property="article:tag" content="ORM" />
+    <meta property="article:tag" content="Template" />
+    <meta property="article:tag" content="WSGI" />
+    <meta property="article:tag" content="ASGI" />
+    <meta property="article:tag" content="HttpRequest" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름" />
+    <meta name="twitter:description" content="브라우저가 보낸 HTTP 요청이 Gunicorn에 도달한 순간부터 응답이 돌아올 때까지 — Django가 처리하는 11단계 전체 흐름을 미들웨어 onion 구조와 함께 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름","description":"브라우저가 보낸 HTTP 요청이 Gunicorn에 도달한 순간부터 응답이 돌아올 때까지 — Django가 처리하는 11단계 전체 흐름을 미들웨어 onion 구조와 함께 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-27T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.180Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-lifecycle"},"keywords":"Django, Lifecycle, Middleware, URLResolver, View, ORM, Template, WSGI, ASGI, HttpRequest","articleSection":"django","inLanguage":"ko-KR","wordCount":6912},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름","item":"https://seobway23.github.io/post/django-lifecycle"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>django</span></nav>
+<h1>Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름</h1>
+<p>브라우저가 보낸 HTTP 요청이 Gunicorn에 도달한 순간부터 응답이 돌아올 때까지 — Django가 처리하는 11단계 전체 흐름을 미들웨어 onion 구조와 함께 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-27T00:00:00.000Z">2026-03-27</time> · <span>14분</span></p>
+<h2>왜 라이프사이클을 알아야 하는가</h2>
+<p>Django를 쓰다 보면 이런 상황을 만난다:</p>
+<ul>
+<li>로그인 체크가 왜 특정 요청에선 안 되지?</li>
+<li>미들웨어 순서가 왜 중요한가?</li>
+<li><code>request.user</code>는 언제 채워지는가?</li>
+<li>내 View가 호출되기 전에 무슨 일이 일어나는가?</li>
+</ul>
+<p>이 모든 질문의 답이 <strong>라이프사이클</strong> 안에 있다.</p>
+<h2>전체 흐름 — 11단계</h2>
+<pre><code class="language-mermaid">%% desc: HTTP 요청이 Django를 통과해 응답이 되기까지의 11단계 전체 흐름
+flowchart TD
+  REQ[&quot;🌐 HTTP Request\n(브라우저 / API 클라이언트)&quot;]
+
+  S1[&quot;① Web Server\nGunicorn / uWSGI / Uvicorn&quot;]
+  S2[&quot;② WSGI / ASGI 진입점\nwsgi.py / asgi.py&quot;]
+  S3[&quot;③ Middleware Stack (Inbound)\n위→아래 순서 process_request()&quot;]
+  S4[&quot;④ URL Resolver\nurlpatterns 매칭&quot;]
+  S5[&quot;⑤ Middleware process_view()\nView 호출 직전&quot;]
+  S6[&quot;⑥ View 실행\nFBV / CBV&quot;]
+  S7[&quot;⑦ ORM 쿼리\nQuerySet SQL 실행&quot;]
+  S8[&quot;⑧ Template 렌더링\ncontext → HTML&quot;]
+  S9[&quot;⑨ HttpResponse 생성\n상태코드 · 헤더 · 본문&quot;]
+  S10[&quot;⑩ Middleware Stack (Outbound)\n아래→위 순서 process_response()&quot;]
+  S11[&quot;⑪ HTTP Response\n클라이언트에 반환&quot;]
+
+  REQ --&gt; S1 --&gt; S2 --&gt; S3 --&gt; S4 --&gt; S5 --&gt; S6
+  S6 --&gt; S7 --&gt; S8 --&gt; S9 --&gt; S10 --&gt; S11
+
+  style S3 fill:#3b82f6,color:#fff
+  style S10 fill:#3b82f6,color:#fff
+  style S6 fill:#8b5cf6,color:#fff
+</code></pre>
+<h2>① Web Server</h2>
+<p>Gunicorn(WSGI), Uvicorn/Daphne(ASGI) 같은 웹 서버가 TCP 소켓을 열고 HTTP 요청을 받는다.</p>
+<p>Django 자체는 HTTP 파싱을 하지 않는다. 웹 서버가 HTTP를 파싱하고 WSGI/ASGI 인터페이스로 Django에 전달한다.</p>
+<h2>② WSGI / ASGI 진입점</h2>
+<pre><code class="language-python"># config/wsgi.py
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, &quot;config.settings.local&quot;)
+application = get_wsgi_application()   # ← 웹 서버가 호출하는 callable
+</code></pre>
+<p><code>application</code> 객체가 웹 서버와 Django 사이의 계약(Contract)이다.<sup id="fnref-pep3333" style="scroll-margin-top: 96px;"><a href="#fn-pep3333" aria-label="각주 1">[1]</a></sup></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>WSGI</th>
+<th>ASGI</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>표준</td>
+<td>PEP 3333</td>
+<td>ASGI Specification</td>
+</tr>
+<tr>
+<td>동작</td>
+<td>동기 (요청 1개 = 스레드 1개)</td>
+<td>비동기 (이벤트 루프)</td>
+</tr>
+<tr>
+<td>서버</td>
+<td>Gunicorn, uWSGI</td>
+<td>Uvicorn, Daphne</td>
+</tr>
+<tr>
+<td>Django 지원</td>
+<td>Django 1.0~</td>
+<td>Django 3.0~</td>
+</tr>
+</tbody></table>
+<h2>③ Middleware Stack — Inbound (위→아래)</h2>
+<p>Django의 <code>MIDDLEWARE</code> 설정에 나열된 순서대로 실행된다.</p>
+<pre><code class="language-python"># settings.py
+MIDDLEWARE = [
+    &quot;django.middleware.security.SecurityMiddleware&quot;,      # 1번
+    &quot;django.contrib.sessions.middleware.SessionMiddleware&quot;,  # 2번
+    &quot;django.middleware.common.CommonMiddleware&quot;,          # 3번
+    &quot;django.middleware.csrf.CsrfViewMiddleware&quot;,          # 4번
+    &quot;django.contrib.auth.middleware.AuthenticationMiddleware&quot;,  # 5번
+    &quot;django.contrib.messages.middleware.MessageMiddleware&quot;,  # 6번
+    &quot;django.middleware.clickjacking.XFrameOptionsMiddleware&quot;,  # 7번
+]
+</code></pre>
+<pre><code class="language-mermaid">%% desc: Middleware onion 구조 — 요청은 위→아래, 응답은 아래→위로 처리됨
+flowchart LR
+  subgraph ONION[&quot;Middleware Onion 구조&quot;]
+    M1[&quot;SecurityMiddleware\n(가장 바깥)&quot;]
+    M2[&quot;SessionMiddleware&quot;]
+    M3[&quot;CsrfViewMiddleware&quot;]
+    M4[&quot;AuthenticationMiddleware&quot;]
+    M5[&quot;XFrameOptionsMiddleware\n(가장 안쪽)&quot;]
+    VIEW[&quot;View&quot;]
+  end
+
+  REQ[&quot;요청 →&quot;] --&gt; M1 --&gt; M2 --&gt; M3 --&gt; M4 --&gt; M5 --&gt; VIEW
+  VIEW --&gt; M5 --&gt; M4 --&gt; M3 --&gt; M2 --&gt; M1 --&gt; RES[&quot;→ 응답&quot;]
+
+  style M1 fill:#1e40af,color:#fff
+  style VIEW fill:#7c3aed,color:#fff
+</code></pre>
+<h3>왜 순서가 중요한가</h3>
+<p><code>SessionMiddleware</code>는 반드시 <code>AuthenticationMiddleware</code>보다 앞에 있어야 한다.</p>
+<pre><code>요청 처리 순서:
+SessionMiddleware → 세션 쿠키를 읽어 request.session 채움
+AuthenticationMiddleware → request.session을 읽어 request.user 채움
+</code></pre>
+<p><code>AuthenticationMiddleware</code>가 먼저 오면 <code>request.session</code>이 아직 없어서 <code>request.user</code>를 설정할 수 없다.</p>
+<p>각 미들웨어의 역할:</p>
+<table>
+<thead>
+<tr>
+<th>미들웨어</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SecurityMiddleware</code></td>
+<td>HTTPS 리디렉션, HSTS 헤더, SECURE 쿠키</td>
+</tr>
+<tr>
+<td><code>SessionMiddleware</code></td>
+<td>세션 쿠키 읽기/쓰기, <code>request.session</code> 제공</td>
+</tr>
+<tr>
+<td><code>CommonMiddleware</code></td>
+<td>URL 정규화 (<code>/blog</code> → <code>/blog/</code>), ETags</td>
+</tr>
+<tr>
+<td><code>CsrfViewMiddleware</code></td>
+<td>CSRF 토큰 검증</td>
+</tr>
+<tr>
+<td><code>AuthenticationMiddleware</code></td>
+<td><code>request.user</code> 설정 (세션 기반 인증)</td>
+</tr>
+<tr>
+<td><code>MessageMiddleware</code></td>
+<td>1회성 플래시 메시지</td>
+</tr>
+<tr>
+<td><code>XFrameOptionsMiddleware</code></td>
+<td>Clickjacking 방어 (<code>X-Frame-Options</code>)</td>
+</tr>
+</tbody></table>
+<h3>미들웨어가 요청을 중단시키는 경우</h3>
+<p>미들웨어가 <code>HttpResponse</code>를 반환하면 이후 스택이 모두 건너뛰어진다.</p>
+<pre><code class="language-python">class MaintenanceModeMiddleware:
+    def __call__(self, request):
+        if settings.MAINTENANCE_MODE:
+            return HttpResponse(&quot;점검 중입니다.&quot;, status=503)  # ← View까지 가지 않음
+        return self.get_response(request)
+</code></pre>
+<h2>④ URL Resolver</h2>
+<p><code>ROOT_URLCONF</code>에 지정된 파일의 <code>urlpatterns</code>를 위에서부터 순서대로 검사한다.<sup id="fnref-url-dispatcher" style="scroll-margin-top: 96px;"><a href="#fn-url-dispatcher" aria-label="각주 2">[2]</a></sup></p>
+<pre><code class="language-python"># config/urls.py
+urlpatterns = [
+    path(&quot;admin/&quot;, admin.site.urls),
+    path(&quot;api/articles/&quot;, include(&quot;articles.urls&quot;)),  # 앱 URLconf 위임
+    path(&quot;api/users/&quot;, include(&quot;users.urls&quot;)),
+]
+
+# articles/urls.py
+urlpatterns = [
+    path(&quot;&quot;, views.ArticleListView.as_view()),
+    path(&quot;&lt;int:pk&gt;/&quot;, views.ArticleDetailView.as_view()),
+    path(&quot;&lt;int:pk&gt;/comments/&quot;, views.CommentListView.as_view()),
+]
+</code></pre>
+<pre><code class="language-mermaid">%% desc: URL 리졸버가 urlpatterns를 위에서부터 순서대로 매칭하는 흐름
+sequenceDiagram
+  participant REQ as 요청 /api/articles/42/
+  participant ROOT as config/urls.py
+  participant APP as articles/urls.py
+  participant VIEW as ArticleDetailView
+
+  REQ-&gt;&gt;ROOT: 매칭 시작
+  ROOT-&gt;&gt;ROOT: &quot;admin/&quot; → 불일치
+  ROOT-&gt;&gt;ROOT: &quot;api/articles/&quot; → 일치! include() 위임
+  ROOT-&gt;&gt;APP: 나머지 &quot;42/&quot; 전달
+  APP-&gt;&gt;APP: &quot;&quot; → 불일치 (42/ 남음)
+  APP-&gt;&gt;APP: &quot;&lt;int:pk&gt;/&quot; → 일치! pk=42
+  APP-&gt;&gt;VIEW: pk=42 전달
+</code></pre>
+<p>매칭 실패 시 <code>Http404</code> 예외 발생 → 404 응답 반환.</p>
+<h2>⑤ Middleware process_view()</h2>
+<p>View가 호출되기 <strong>직전</strong>에 실행된다. View 함수와 인자를 받는다.<br><code>CsrfViewMiddleware</code>의 CSRF 검증이 여기서 일어난다.</p>
+<h2>⑥ View 실행</h2>
+<p>요청을 실제로 처리하는 곳이다.</p>
+<pre><code class="language-python"># Function-Based View
+def article_detail(request, pk):
+    article = Article.objects.get(pk=pk)      # ⑦ ORM
+    return render(request, &quot;detail.html&quot;, {&quot;article&quot;: article})  # ⑧ Template
+
+# Class-Based View
+class ArticleDetailView(DetailView):
+    model = Article
+    template_name = &quot;detail.html&quot;
+</code></pre>
+<p>View의 책임:</p>
+<ul>
+<li>요청 파라미터 검증</li>
+<li>ORM으로 데이터 조회/변경</li>
+<li>비즈니스 로직 처리</li>
+<li>Template에 context 전달</li>
+<li><code>HttpResponse</code> 반환</li>
+</ul>
+<h2>⑦ ORM 쿼리</h2>
+<p>View 안에서 QuerySet을 <strong>평가(evaluate)</strong>하는 시점에 SQL이 실행된다.</p>
+<pre><code class="language-python"># SQL 실행 안 됨 — QuerySet은 lazy
+qs = Article.objects.filter(is_published=True).order_by(&quot;-created_at&quot;)
+
+# 이 시점에 SELECT 실행
+articles = list(qs)           # 명시적 평가
+article = qs.get(pk=pk)       # .get()
+count = qs.count()             # .count()
+for a in qs:                   # 반복
+    ...
+</code></pre>
+<h2>⑧ Template 렌더링</h2>
+<pre><code class="language-python">render(request, &quot;articles/detail.html&quot;, {&quot;article&quot;: article})
+</code></pre>
+<p>내부 동작:</p>
+<ol>
+<li><code>TEMPLATES</code> 설정에서 엔진(DTL 또는 Jinja2) 선택</li>
+<li>템플릿 파일 로드</li>
+<li><code>{% extends %}</code>, <code>{% block %}</code> 상속 관계 해석</li>
+<li>context 변수를 템플릿 코드에 바인딩</li>
+<li>모든 변수 <strong>자동 이스케이프</strong> (XSS 방어)</li>
+<li>HTML 문자열 반환</li>
+</ol>
+<h2>⑩ Middleware Stack — Outbound (아래→위)</h2>
+<p>응답 경로는 요청과 반대 방향이다.</p>
+<pre><code class="language-python">class TimingMiddleware:
+    def __call__(self, request):
+        start = time.time()
+        response = self.get_response(request)  # 아래 스택 전체 실행
+        duration = time.time() - start
+        response[&quot;X-Response-Time&quot;] = f&quot;{duration:.3f}s&quot;  # 응답에 헤더 추가
+        return response
+</code></pre>
+<p><code>TemplateResponse</code>를 사용하면 <code>process_template_response()</code>도 이 단계에서 호출된다.</p>
+<h2>전체 시퀀스 다이어그램</h2>
+<pre><code class="language-mermaid">%% desc: Django 요청-응답 라이프사이클 전체 — 미들웨어, URL, View, ORM, Template의 상호작용
+sequenceDiagram
+  participant C as 클라이언트
+  participant GU as Gunicorn
+  participant MW as Middleware Stack
+  participant URL as URL Resolver
+  participant VIEW as View
+  participant ORM as ORM / DB
+  participant TPL as Template
+
+  C-&gt;&gt;GU: HTTP GET /api/articles/42/
+  GU-&gt;&gt;MW: WSGI environ 전달
+  MW-&gt;&gt;MW: SecurityMiddleware (inbound)
+  MW-&gt;&gt;MW: SessionMiddleware → request.session 설정
+  MW-&gt;&gt;MW: AuthenticationMiddleware → request.user 설정
+  MW-&gt;&gt;URL: process_view 전 URL 매칭 요청
+  URL-&gt;&gt;URL: urlpatterns 순서대로 매칭
+  URL-&gt;&gt;MW: ArticleDetailView, kwargs={pk:42}
+  MW-&gt;&gt;VIEW: process_view() 후 View 호출
+  VIEW-&gt;&gt;ORM: Article.objects.get(pk=42)
+  ORM-&gt;&gt;ORM: SELECT * FROM articles WHERE id=42
+  ORM--&gt;&gt;VIEW: Article 인스턴스
+  VIEW-&gt;&gt;TPL: render(request, &quot;detail.html&quot;, context)
+  TPL--&gt;&gt;VIEW: HTML 문자열
+  VIEW--&gt;&gt;MW: HttpResponse(html, status=200)
+  MW-&gt;&gt;MW: XFrameOptionsMiddleware (outbound)
+  MW-&gt;&gt;MW: SecurityMiddleware → HSTS 헤더 추가
+  MW--&gt;&gt;GU: 최종 HttpResponse
+  GU--&gt;&gt;C: HTTP 200 OK
+</code></pre>
+<h2>참고</h2>
+<ol>
+<li id="fn-pep3333" style="scroll-margin-top: 96px;">Python, <a href="https://peps.python.org/pep-3333/" target="_blank">PEP 3333 — Python Web Server Gateway Interface v1.0.1</a> <a href="#fnref-pep3333" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-url-dispatcher" style="scroll-margin-top: 96px;">Django Project, <a href="https://docs.djangoproject.com/en/5.2/topics/http/urls/" target="_blank">URL dispatcher — Django Docs</a> <a href="#fnref-url-dispatcher" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/django-overview">Django 프레임워크 큰 그림 →</a> — Django 철학과 전체 구조 개요</li>
+<li><a href="/post/django-architecture">Django MTV 아키텍처와 앱 구조 →</a> — MTV 패턴, Project vs App, WSGI vs ASGI 상세</li>
+<li><a href="/post/django-orm-deep">Django ORM — QuerySet과 지연 실행 →</a> — ⑦단계 ORM 동작 심층 탐구</li>
+</ul>
+<hr>
+
+<ul><li>Django</li><li>Lifecycle</li><li>Middleware</li><li>URLResolver</li><li>View</li><li>ORM</li><li>Template</li><li>WSGI</li><li>ASGI</li><li>HttpRequest</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="프러스텀(카메라 절두체)과 컬링의 개념을 정리하고, 왜 '그리기 전에 빼는 것'이 가장 강력한 최적화인지 설명한다." />
+    <meta name="keywords" content="Three.js, Rendering, Performance, Frustum, Culling" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/threejs-frustum-culling" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유" />
+    <meta property="og:description" content="프러스텀(카메라 절두체)과 컬링의 개념을 정리하고, 왜 '그리기 전에 빼는 것'이 가장 강력한 최적화인지 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/threejs-frustum-culling" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-01T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.322Z" />
+    <meta property="article:tag" content="Three.js" />
+    <meta property="article:tag" content="Rendering" />
+    <meta property="article:tag" content="Performance" />
+    <meta property="article:tag" content="Frustum" />
+    <meta property="article:tag" content="Culling" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유" />
+    <meta name="twitter:description" content="프러스텀(카메라 절두체)과 컬링의 개념을 정리하고, 왜 '그리기 전에 빼는 것'이 가장 강력한 최적화인지 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유","description":"프러스텀(카메라 절두체)과 컬링의 개념을 정리하고, 왜 '그리기 전에 빼는 것'이 가장 강력한 최적화인지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-01T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.322Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/threejs-frustum-culling"},"keywords":"Three.js, Rendering, Performance, Frustum, Culling","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":1933},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Fthreejs"},{"@type":"ListItem","position":3,"name":"Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유","item":"https://seobway23.github.io/post/threejs-frustum-culling"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유</h1>
+<p>프러스텀(카메라 절두체)과 컬링의 개념을 정리하고, 왜 '그리기 전에 빼는 것'이 가장 강력한 최적화인지 설명한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-01T00:00:00.000Z">2026-04-01</time> · <span>11분</span></p>
+<h2>이 글에서 다룰 것</h2>
+<ul>
+<li>프러스텀(Frustum)이란 무엇인가</li>
+<li>컬링(Culling)이 왜 &quot;렌더 최적화의 첫 번째 레버&quot;인지</li>
+<li>Three.js에서 컬링이 어떻게 작동하는지(개념 + 코드)</li>
+</ul>
+<hr>
+<h2>1) 프러스텀(Frustum) = 카메라가 보는 절두체</h2>
+<p>원근 카메라는 &quot;원뿔&quot;이 아니라 <strong>절두체(Frustum)</strong> 형태로 공간을 잘라서 본다.</p>
+<pre><code class="language-mermaid">%% desc: PerspectiveCamera 절두체 — near/far/시야각 구조
+flowchart LR
+  Cam[&quot;카메라\n(PerspectiveCamera)&quot;]
+  Near[&quot;Near Plane\n(너무 가까운 것 클리핑)&quot;]
+  Vis[&quot;가시 영역\n(Frustum 내부)\n→ 렌더링 대상&quot;]
+  Far[&quot;Far Plane\n(너무 먼 것 클리핑)&quot;]
+  Out[&quot;Frustum 외부\n(좌/우/상/하/근/원)\n→ Culling(스킵)&quot;]
+
+  Cam --&gt; Near --&gt; Vis --&gt; Far
+  Vis -.-&gt;|&quot;범위 밖&quot;| Out
+
+  style Cam  fill:#1e3a5f,color:#7dd3fc,stroke:#334155
+  style Near fill:#1c3a2b,color:#6ee7b7,stroke:#334155
+  style Vis  fill:#1c3a2b,color:#6ee7b7,stroke:#334155
+  style Far  fill:#3b1f5e,color:#c4b5fd,stroke:#334155
+  style Out  fill:#4a1f1f,color:#fca5a5,stroke:#334155
+</code></pre>
+<ul>
+<li>near plane보다 가까운 건 잘린다</li>
+<li>far plane보다 먼 것도 잘린다</li>
+<li>좌/우/상/하도 시야 밖이면 잘린다</li>
+</ul>
+<p>이 절두체 밖의 오브젝트는 <strong>애초에 그릴 필요가 없다</strong>.</p>
+<hr>
+<h2>2) 컬링이 왜 그렇게 중요한가</h2>
+<p>렌더링 비용은 크게 2단계로 볼 수 있다.</p>
+<ul>
+<li><strong>그릴지 말지 결정</strong>(CPU 쪽 판단)</li>
+<li><strong>실제로 그리기</strong>(GPU가 픽셀을 채우는 비용)</li>
+</ul>
+<p>컬링은 &quot;그릴지 말지&quot; 단계에서 오브젝트를 빼버리니까,</p>
+<ul>
+<li>드로우콜</li>
+<li>셰이더 실행</li>
+<li>픽셀 채우기(fill-rate)</li>
+</ul>
+<p>같은 비용을 통째로 줄이는 효과가 있다.</p>
+<hr>
+<h2>3) Three.js의 자동 Frustum Culling</h2>
+<p>Three.js는 <strong>기본적으로 모든 Mesh에 frustum culling을 켜둔다</strong>.<a href="https://threejs.org/manual/en/fundamentals.html" target="_blank"><sup>[1]</sup></a></p>
+<p>내부적으로 Mesh마다 <code>BoundingSphere</code>(바운딩 구)를 계산하고, 매 프레임 렌더 전에 카메라 절두체와 교차 여부를 확인한다. 절두체 밖이면 드로우콜 자체를 건너뛴다.</p>
+<pre><code class="language-javascript">// 기본값: frustumCulled = true (자동 컬링 활성)
+const mesh = new THREE.Mesh(geo, mat);
+console.log(mesh.frustumCulled); // true
+
+// 컬링을 끄고 싶을 때 (항상 그려야 하는 오브젝트 — 예: 전체화면 후처리용 쿼드)
+mesh.frustumCulled = false;
+</code></pre>
+<p>바운딩 볼륨이 geometry와 맞지 않을 때(예: 버텍스 셰이더에서 위치를 동적으로 바꾸는 경우)는 수동으로 갱신해야 한다.</p>
+<pre><code class="language-javascript">// geometry가 변경된 후 바운딩 구 재계산
+geo.computeBoundingSphere();
+geo.computeBoundingBox();
+</code></pre>
+<hr>
+<h2>4) 실전 팁(최적화 글과 연결)</h2>
+<p>컬링은 특히 이런 경우에 체감이 크다.</p>
+<ul>
+<li>씬에 오브젝트가 많다(수백~수천)</li>
+<li>카메라가 이동한다(가시 영역이 계속 바뀐다)</li>
+<li>포스트프로세싱/고DPR로 픽셀 비용이 크다</li>
+</ul>
+<p>다만, &quot;내 포트폴리오 키보드 씬&quot;처럼 오브젝트 수가 제한적이고 화면에 대부분 들어오는 경우에는 컬링이 병목이 아닐 수도 있다.<br>그럴 때는 DPR, rAF 루프, 입력 이벤트(Raycaster) 쪽이 더 큰 레버가 된다.</p>
+<hr>
+<h2>참고</h2>
+<p><a href="https://threejs.org/manual/en/fundamentals.html" target="_blank">[1] Fundamentals — Three.js Manual</a></p>
+<p><a href="https://threejs.org/manual/en/tips.html" target="_blank">[2] Tips on Optimizing — Three.js Manual</a></p>
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/threejs-dpr-and-canvas-resolution">DPR과 캔버스 해상도: 선명도/성능의 본질 →</a></li>
+<li><a href="/post/threejs-gltf-loading">glTF 로딩: 씬 그래프, 렌더 타이밍 →</a></li>
+<li><a href="/post/threejs-portfolio-rendering-optimization-story">Three.js 포트폴리오 최적화 실전기 →</a></li>
+</ul>
+
+<ul><li>Three.js</li><li>Rendering</li><li>Performance</li><li>Frustum</li><li>Culling</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

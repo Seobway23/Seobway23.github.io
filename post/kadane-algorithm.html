@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="최대 부분배열(Maximum Subarray)은 “연속 구간”이라는 제약이 붙는 순간 O(n^2)로 쉽게 터진다. Kadane 알고리즘을 DP 관점으로 정리하고, 왜 맞는지(증명 스케치)와 어디에 재사용되는지까지 파헤쳐본다." />
+    <meta name="keywords" content="Algorithm, DynamicProgramming, Kadane, MaximumSubarray, DP, 최적화" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/kadane-algorithm" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP" />
+    <meta property="og:description" content="최대 부분배열(Maximum Subarray)은 “연속 구간”이라는 제약이 붙는 순간 O(n^2)로 쉽게 터진다. Kadane 알고리즘을 DP 관점으로 정리하고, 왜 맞는지(증명 스케치)와 어디에 재사용되는지까지 파헤쳐본다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/kadane-algorithm" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-04-06T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.164Z" />
+    <meta property="article:tag" content="Algorithm" />
+    <meta property="article:tag" content="DynamicProgramming" />
+    <meta property="article:tag" content="Kadane" />
+    <meta property="article:tag" content="MaximumSubarray" />
+    <meta property="article:tag" content="DP" />
+    <meta property="article:tag" content="최적화" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP" />
+    <meta name="twitter:description" content="최대 부분배열(Maximum Subarray)은 “연속 구간”이라는 제약이 붙는 순간 O(n^2)로 쉽게 터진다. Kadane 알고리즘을 DP 관점으로 정리하고, 왜 맞는지(증명 스케치)와 어디에 재사용되는지까지 파헤쳐본다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP","description":"최대 부분배열(Maximum Subarray)은 “연속 구간”이라는 제약이 붙는 순간 O(n^2)로 쉽게 터진다. Kadane 알고리즘을 DP 관점으로 정리하고, 왜 맞는지(증명 스케치)와 어디에 재사용되는지까지 파헤쳐본다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-06T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.164Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/kadane-algorithm"},"keywords":"Algorithm, DynamicProgramming, Kadane, MaximumSubarray, DP, 최적화","articleSection":"알고리즘","inLanguage":"ko-KR","wordCount":5448},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"알고리즘","item":"https://seobway23.github.io/?category=study%2Falgorithm"},{"@type":"ListItem","position":3,"name":"Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP","item":"https://seobway23.github.io/post/kadane-algorithm"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>알고리즘</span></nav>
+<h1>Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP</h1>
+<p>최대 부분배열(Maximum Subarray)은 “연속 구간”이라는 제약이 붙는 순간 O(n^2)로 쉽게 터진다. Kadane 알고리즘을 DP 관점으로 정리하고, 왜 맞는지(증명 스케치)와 어디에 재사용되는지까지 파헤쳐본다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-06T00:00:00.000Z">2026-04-06</time> · <span>12분</span></p>
+<p>연속된 구간의 합이 최대가 되는 부분배열을 찾는 문제는 자주 나온다.<br>그런데 “연속”이라는 제약 때문에, 부분집합처럼 정렬/그리디로 대충 처리하면 바로 깨진다.</p>
+<p>Kadane 알고리즘은 이 문제를 <strong>한 번의 선형 스캔</strong>으로 해결한다.<a href="https://en.wikipedia.org/wiki/Maximum_subarray_problem" target="_blank"><sup>[1]</sup></a></p>
+<hr>
+<h2>문제 정의 (Maximum Subarray)</h2>
+<p>정수 배열 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mn>0</mn><mo>…</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[0 \ldots n-1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord">0</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span> 이 있을 때,<br>합이 최대가 되는 연속 구간 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>l</mi><mo>…</mo><mi>r</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[l \ldots r]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mclose">]</span></span></span></span> 의 합을 구한다.</p>
+<p>예를 들어,</p>
+<pre><code class="language-text">[-2, 1, -3, 4, -1, 2, 1, -5, 4]
+</code></pre>
+<p>최대 합은 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mo>+</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>+</mo><mn>2</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>6</mn></mrow><annotation encoding="application/x-tex">4 + (-1) + 2 + 1 = 6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span> 이다.<a href="https://en.wikipedia.org/wiki/Maximum_subarray_problem" target="_blank"><sup>[1]</sup></a></p>
+<hr>
+<h2>직관: “손해 보는 접두사는 버린다”</h2>
+<p>어떤 시점까지의 누적합이 음수가 됐다면, 그 음수 누적합을 들고 다음 원소를 붙여봤자 <strong>무조건 손해</strong>다.</p>
+<ul>
+<li>지금까지 만든 구간 합이 -10인데 다음 값이 5라면: -10 + 5 = -5</li>
+<li>그냥 새로 시작하면: 5</li>
+</ul>
+<p>그래서 “지금까지 만든 구간을 이어갈지 / 여기서 새로 시작할지”만 결정하면 된다.<br>이게 Kadane의 핵심이다.</p>
+<hr>
+<h2>DP로 보기: 점화식이 전부다</h2>
+<p>인덱스 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>에서 끝나는(즉, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">r=i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>) 최대 부분배열 합을 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span> 라고 두면,</p>
+<p>
+<div class="post-math-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo>=</mo><mi>max</mi><mo>⁡</mo><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo separator="true">,</mo><mtext> </mtext><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo><mo>+</mo><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow><annotation encoding="application/x-tex">dp[i] = \max\bigl(a[i],\ dp[i-1] + a[i]\bigr)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mop">max</span><span class="mopen"><span class="delimsizing size1">(</span></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mclose"><span class="delimsizing size1">)</span></span></span></span></span></span></div>
+</p>
+<p>의미는 간단하다.</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span>로 <strong>새로 시작</strong>한다.</li>
+<li>또는 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>에서 끝나는 최적 구간에 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span>를 <strong>연장</strong>한다.</li>
+</ul>
+<p>전체 정답은 모든 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span> 중 최댓값이다.</p>
+<p>Kadane은 이 DP를 배열로 만들지 않고, <strong>현재값 하나만 들고</strong> 굴리는 최적화 버전이다. (공간 O(1))</p>
+<p>같은 내용을 “함수”로 쓰면 더 직관적으로 보일 때가 있다.</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(i)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">i</span><span class="mclose">)</span></span></span></span>: 인덱스 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>에서 <strong>끝나는</strong> 최대 부분배열 합</li>
+</ul>
+<p>그러면 점화식은</p>
+<p>
+<div class="post-math-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo><mo>=</mo><mi>max</mi><mo>⁡</mo><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo separator="true">,</mo><mtext> </mtext><mi>f</mi><mo stretchy="false">(</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>+</mo><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo fence="true" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow><annotation encoding="application/x-tex">f(i) = \max\bigl(a[i],\ f(i-1) + a[i]\bigr)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">i</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mop">max</span><span class="mopen"><span class="delimsizing size1">(</span></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mclose"><span class="delimsizing size1">)</span></span></span></span></span></span></div>
+</p>
+<p>이고, 최종 답은</p>
+<p>
+<div class="post-math-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mrow><mn>0</mn><mo>≤</mo><mi>i</mi><mo>≤</mo><mi>n</mi><mo>−</mo><mn>1</mn></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\max_{0 \le i \le n-1} f(i)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.5728em;vertical-align:-0.8228em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.3723em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span><span class="mrel mtight">≤</span><span class="mord mathnormal mtight">i</span><span class="mrel mtight">≤</span><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8228em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">i</span><span class="mclose">)</span></span></span></span></span></div>
+</p>
+<p>로 정리된다.</p>
+<hr>
+<h2>구현 — 합만 구하기</h2>
+<p>아래 구현은 “모두 음수인 경우”도 제대로 처리하도록, 초기값을 <code>nums[0]</code> 기반으로 잡는다.</p>
+<p><div class="code-tabs" data-code-tabs data-code-tabs-id="code-tabs-0"><div class="code-tabs__list" role="tablist"><button type="button" class="code-tabs__trigger" role="tab" aria-selected="true" aria-controls="code-tabs-0-panel-0" data-code-tab="typescript" data-code-tab-index="0">TypeScript</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-0-panel-1" data-code-tab="python" data-code-tab-index="1">Python</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-0-panel-2" data-code-tab="cpp" data-code-tab-index="2">C++</button></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-0-panel-0" data-code-panel="typescript" data-code-panel-index="0" ><pre><code class="language-typescript">export function maxSubarraySum(nums: number[]): number {
+  if (nums.length === 0) throw new Error(&quot;nums is empty&quot;);
+
+  let best = nums[0];
+  let cur = nums[0];
+
+  for (let i = 1; i &lt; nums.length; i++) {
+    cur = Math.max(nums[i], cur + nums[i]);
+    best = Math.max(best, cur);
+  }
+
+  return best;
+}</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-0-panel-1" data-code-panel="python" data-code-panel-index="1" hidden><pre><code class="language-python">from typing import List
+
+
+def max_subarray_sum(nums: List[int]) -&gt; int:
+    if not nums:
+        raise ValueError(&quot;nums is empty&quot;)
+
+    best = nums[0]
+    cur = nums[0]
+
+    for x in nums[1:]:
+        cur = max(x, cur + x)
+        best = max(best, cur)
+
+    return best</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-0-panel-2" data-code-panel="cpp" data-code-panel-index="2" hidden><pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+
+long long maxSubarraySum(const std::vector&lt;long long&gt;&amp; a) {
+  if (a.empty()) throw std::invalid_argument(&quot;a is empty&quot;);
+
+  long long best = a[0];
+  long long cur = a[0];
+
+  for (size_t i = 1; i &lt; a.size(); i++) {
+    cur = std::max(a[i], cur + a[i]);
+    best = std::max(best, cur);
+  }
+
+  return best;
+}</code></pre></div></div></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시간복잡도</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>공간복잡도</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>구현 — 구간 인덱스까지 구하기 (TypeScript / Python / C++)</h2>
+<p>실전에서는 합만이 아니라 “어떤 구간이냐”가 필요할 때가 많다.</p>
+<p><div class="code-tabs" data-code-tabs data-code-tabs-id="code-tabs-1"><div class="code-tabs__list" role="tablist"><button type="button" class="code-tabs__trigger" role="tab" aria-selected="true" aria-controls="code-tabs-1-panel-0" data-code-tab="typescript" data-code-tab-index="0">TypeScript</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-1-panel-1" data-code-tab="python" data-code-tab-index="1">Python</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-1-panel-2" data-code-tab="cpp" data-code-tab-index="2">C++</button></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-1-panel-0" data-code-panel="typescript" data-code-panel-index="0" ><pre><code class="language-typescript">export function maxSubarray(nums: number[]): {
+  sum: number;
+  l: number;
+  r: number;
+} {
+  if (nums.length === 0) throw new Error(&quot;nums is empty&quot;);
+
+  let bestSum = nums[0];
+  let bestL = 0;
+  let bestR = 0;
+
+  let curSum = nums[0];
+  let curL = 0;
+
+  for (let i = 1; i &lt; nums.length; i++) {
+    const extend = curSum + nums[i];
+    if (nums[i] &gt; extend) {
+      curSum = nums[i];
+      curL = i;
+    } else {
+      curSum = extend;
+    }
+
+    if (curSum &gt; bestSum) {
+      bestSum = curSum;
+      bestL = curL;
+      bestR = i;
+    }
+  }
+
+  return { sum: bestSum, l: bestL, r: bestR };
+}</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-1-panel-1" data-code-panel="python" data-code-panel-index="1" hidden><pre><code class="language-python">from typing import List, Tuple
+
+
+def max_subarray(nums: List[int]) -&gt; Tuple[int, int, int]:
+    if not nums:
+        raise ValueError(&quot;nums is empty&quot;)
+
+    best_sum = nums[0]
+    best_l = 0
+    best_r = 0
+
+    cur_sum = nums[0]
+    cur_l = 0
+
+    for i in range(1, len(nums)):
+        x = nums[i]
+        extend = cur_sum + x
+
+        if x &gt; extend:
+            cur_sum = x
+            cur_l = i
+        else:
+            cur_sum = extend
+
+        if cur_sum &gt; best_sum:
+            best_sum = cur_sum
+            best_l = cur_l
+            best_r = i
+
+    return best_sum, best_l, best_r</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-1-panel-2" data-code-panel="cpp" data-code-panel-index="2" hidden><pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;stdexcept&gt;
+#include &lt;tuple&gt;
+#include &lt;vector&gt;
+
+std::tuple&lt;long long, int, int&gt; maxSubarray(const std::vector&lt;long long&gt;&amp; a) {
+  if (a.empty()) throw std::invalid_argument(&quot;a is empty&quot;);
+
+  long long bestSum = a[0];
+  int bestL = 0;
+  int bestR = 0;
+
+  long long curSum = a[0];
+  int curL = 0;
+
+  for (int i = 1; i &lt; static_cast&lt;int&gt;(a.size()); i++) {
+    const long long x = a[i];
+    const long long extend = curSum + x;
+
+    if (x &gt; extend) {
+      curSum = x;
+      curL = i;
+    } else {
+      curSum = extend;
+    }
+
+    if (curSum &gt; bestSum) {
+      bestSum = curSum;
+      bestL = curL;
+      bestR = i;
+    }
+  }
+
+  return { bestSum, bestL, bestR };
+}</code></pre></div></div></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>시간복잡도</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>공간복잡도</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>왜 맞는가 (증명 스케치)</h2>
+<p>핵심 주장:</p>
+<ul>
+<li>어떤 최적 구간 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>l</mi><mo>…</mo><mi>r</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[l \ldots r]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mclose">]</span></span></span></span>가 있을 때,<br><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi></mrow><annotation encoding="application/x-tex">l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span></span></span></span> 이전의 부분합이 양수라면 그걸 포함시키는 게 더 이득이므로 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi></mrow><annotation encoding="application/x-tex">l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0197em;">l</span></span></span></span>이 최적일 수 없다.</li>
+<li>따라서 최적 구간은 “이전까지의 누적합이 음수였던 지점 다음”에서 시작해도 손해가 없다.</li>
+</ul>
+<p>CP-Algorithms는 이 아이디어를 “누적합이 음수가 되는 지점(critical position) 뒤에서만 시작해도 된다”는 형태로 정리하고, 그로부터 선형 알고리즘의 정당성을 도출한다.<a href="https://cp-algorithms.com/others/maximum_average_segment.html" target="_blank"><sup>[2]</sup></a></p>
+<p>DP 관점에서는 더 직접적이다.</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>에서 끝나는 최적해는 <strong>새로 시작</strong>하거나 <strong>이전 최적해를 연장</strong>하는 두 경우만 존재한다.</li>
+<li>두 경우 중 큰 값을 택하면 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span>가 된다.</li>
+<li>전체 최적해는 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span>의 최댓값이다.</li>
+</ul>
+<hr>
+<h2>이걸로 무엇을 “최적화”할 수 있나</h2>
+<p>Kadane은 단순히 “배열 한 번 훑어서 최대 합 구하기”에서 끝나지 않는다.<br>핵심은 <strong>연속 구간의 최적값을 선형으로 뽑는 패턴</strong>이다.</p>
+<h3>1) 구간 점수 최적화 (score = Σ value)</h3>
+<p>예:</p>
+<ul>
+<li>특정 기간의 순이익(매출-비용) 배열이 있을 때, <strong>가장 성과가 좋은 연속 기간</strong> 찾기</li>
+<li>로그/지표에서 “개선량”을 +/−로 변환해, <strong>가장 크게 좋아진 구간</strong> 찾기</li>
+</ul>
+<h3>2) 2차원(서브매트릭스)로 확장</h3>
+<p>2D 최대 합 부분행렬은 행 범위를 고정해 1D로 접어서 Kadane을 적용하는 방식으로 풀 수 있고,<br>전형적으로 O(n^3) 접근이 많이 소개된다.<a href="https://cp-algorithms.com/others/maximum_average_segment.html" target="_blank"><sup>[2]</sup></a></p>
+<h3>3) “최대 평균 구간” 같은 문제로 변형</h3>
+<p>평균을 직접 최대화하기 어렵다면,<br>값을 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo>−</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">a[i] - x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">a</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>로 치환하고 “양수 합 구간이 존재하는가”를 판단하는 서브문제로 바꿔서<br>이분탐색 + (Kadane 계열)로 푸는 테크닉이 자주 쓰인다.<a href="https://cp-algorithms.com/others/maximum_average_segment.html" target="_blank"><sup>[2]</sup></a></p>
+<hr>
+<h2>자주 터지는 포인트</h2>
+<h3>모든 원소가 음수면?</h3>
+<p>구현이 “누적합이 음수면 0으로 리셋”만 하고 <code>best</code> 초기화를 0으로 두면,<br>배열이 전부 음수일 때 답이 0이 되어버린다(실제 최대는 가장 덜 음수인 값).</p>
+<p>그래서 이 글의 구현처럼:</p>
+<ul>
+<li><code>best = nums[0]</code>, <code>cur = nums[0]</code>로 시작하거나</li>
+<li><code>best = -Infinity</code>로 시작하고 케이스를 따로 처리해야 한다.</li>
+</ul>
+<h3>답의 정의가 “빈 구간 허용”인지 확인</h3>
+<p>문제에 따라 “아무것도 선택하지 않음(합=0)”을 허용하는 변형이 있다.<br>그때는 초기값/리셋 규칙이 달라진다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://en.wikipedia.org/wiki/Maximum_subarray_problem" target="_blank">[1] Maximum subarray problem — Wikipedia</a></li>
+<li><a href="https://cp-algorithms.com/others/maximum_average_segment.html" target="_blank">[2] Search the subsegment with the maximum/minimum sum — CP-Algorithms</a></li>
+</ol>
+
+<ul><li>Algorithm</li><li>DynamicProgramming</li><li>Kadane</li><li>MaximumSubarray</li><li>DP</li><li>최적화</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

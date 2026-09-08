@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Redux로 서버 데이터를 관리하다 지쳤는가? TanStack Query(React Query v5)가 서버 상태와 클라이언트 상태를 구분하고 캐싱·백그라운드 동기화·에러 처리를 자동화하는 방식을 설명한다." />
+    <meta name="keywords" content="react-query, tanstack-query, server-state, react, frontend, async, cache" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/react-query-overview" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준" />
+    <meta property="og:description" content="Redux로 서버 데이터를 관리하다 지쳤는가? TanStack Query(React Query v5)가 서버 상태와 클라이언트 상태를 구분하고 캐싱·백그라운드 동기화·에러 처리를 자동화하는 방식을 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/react-query-overview" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-28T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.316Z" />
+    <meta property="article:tag" content="react-query" />
+    <meta property="article:tag" content="tanstack-query" />
+    <meta property="article:tag" content="server-state" />
+    <meta property="article:tag" content="react" />
+    <meta property="article:tag" content="frontend" />
+    <meta property="article:tag" content="async" />
+    <meta property="article:tag" content="cache" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준" />
+    <meta name="twitter:description" content="Redux로 서버 데이터를 관리하다 지쳤는가? TanStack Query(React Query v5)가 서버 상태와 클라이언트 상태를 구분하고 캐싱·백그라운드 동기화·에러 처리를 자동화하는 방식을 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준","description":"Redux로 서버 데이터를 관리하다 지쳤는가? TanStack Query(React Query v5)가 서버 상태와 클라이언트 상태를 구분하고 캐싱·백그라운드 동기화·에러 처리를 자동화하는 방식을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-28T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.316Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/react-query-overview"},"keywords":"react-query, tanstack-query, server-state, react, frontend, async, cache","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":6311},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Freact-query"},{"@type":"ListItem","position":3,"name":"TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준","item":"https://seobway23.github.io/post/react-query-overview"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준</h1>
+<p>Redux로 서버 데이터를 관리하다 지쳤는가? TanStack Query(React Query v5)가 서버 상태와 클라이언트 상태를 구분하고 캐싱·백그라운드 동기화·에러 처리를 자동화하는 방식을 설명한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-03-28T00:00:00.000Z">2026-03-28</time> · <span>12분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>[1편] TanStack Query 개요 (현재 글)</strong></td>
+<td>왜 React Query인가, 서버/클라이언트 상태, SWR 전략, Zustand 역할 분담</td>
+</tr>
+<tr>
+<td><a href="/post/react-query-queries">[2편] QueryClient · Query Keys · useQuery 심층</a></td>
+<td>QueryClient 설정, 쿼리 키 팩토리, useQuery 전체 옵션, status vs fetchStatus</td>
+</tr>
+<tr>
+<td><a href="/post/react-query-mutations">[3편] useMutation · Optimistic Updates</a></td>
+<td>mutation 라이프사이클, 두 레벨 콜백, 낙관적 업데이트</td>
+</tr>
+<tr>
+<td><a href="/post/react-query-cache">[4편] 캐시 · 무효화 · Prefetch</a></td>
+<td>staleTime vs gcTime, invalidateQueries, setQueryData, 백그라운드 트리거</td>
+</tr>
+<tr>
+<td><a href="/post/react-query-advanced">[5편] 고급 패턴 · v5 마이그레이션</a></td>
+<td>Infinite Query, 병렬 쿼리, Suspense, Custom Hooks, v4→v5 변경점</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>왜 React Query인가</h2>
+<p>React로 데이터를 fetching하는 고전적인 방법:</p>
+<pre><code class="language-tsx">function TodoList() {
+  const [todos, setTodos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+    setIsLoading(true);
+    fetch(&#39;/api/todos&#39;)
+      .then(res =&gt; res.json())
+      .then(data =&gt; setTodos(data))
+      .catch(setError)
+      .finally(() =&gt; setIsLoading(false));
+  }, []);
+  // ...
+}
+</code></pre>
+<p>이것만으로는 처리되지 않는 것들:</p>
+<ul>
+<li>컴포넌트가 다시 마운트될 때 재요청?</li>
+<li>탭을 다시 활성화할 때 갱신?</li>
+<li>네트워크 재연결 시 갱신?</li>
+<li>여러 컴포넌트에서 같은 데이터를 요청할 때 중복 제거?</li>
+<li>캐시 무효화와 재검증?</li>
+<li>에러 시 자동 재시도?</li>
+</ul>
+<p>이 모든 것이 <strong>TanStack Query</strong>가 해결하는 문제다.<a href="https://tanstack.com/query/latest/docs/framework/react/overview" target="_blank"><sup>[1]</sup></a></p>
+<hr>
+<h2>서버 상태 vs 클라이언트 상태</h2>
+<p>React Query의 핵심 통찰은 상태를 두 종류로 구분하는 것이다.<a href="https://tkdodo.eu/blog/react-query-as-a-state-manager" target="_blank"><sup>[2]</sup></a></p>
+<pre><code class="language-mermaid">%% desc: 서버 상태와 클라이언트 상태의 근본적 차이
+flowchart LR
+  subgraph CLIENT[&quot;클라이언트 상태&quot;]
+    C1[&quot;모달 열림/닫힘&quot;]
+    C2[&quot;다크모드 설정&quot;]
+    C3[&quot;폼 입력값&quot;]
+    C4[&quot;선택된 탭&quot;]
+  end
+
+  subgraph SERVER[&quot;서버 상태&quot;]
+    S1[&quot;API 응답 데이터&quot;]
+    S2[&quot;사용자 프로필&quot;]
+    S3[&quot;상품 목록&quot;]
+    S4[&quot;댓글 데이터&quot;]
+  end
+
+  CLIENT --&gt; CL[&quot;내 앱이 소유\n동기적\n항상 최신&quot;]
+  SERVER --&gt; SL[&quot;서버가 소유\n비동기적\n언제든 stale&quot;]
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>차원</th>
+<th>클라이언트 상태</th>
+<th>서버 상태</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>소유권</td>
+<td>내 앱</td>
+<td>원격 서버</td>
+</tr>
+<tr>
+<td>지속성</td>
+<td>메모리</td>
+<td>DB / API</td>
+</tr>
+<tr>
+<td>동기화</td>
+<td>불필요</td>
+<td>지속적 동기화 필요</td>
+</tr>
+<tr>
+<td>Staleness</td>
+<td>항상 최신</td>
+<td>즉시 outdated 가능</td>
+</tr>
+<tr>
+<td>비동기</td>
+<td>거의 없음</td>
+<td>항상</td>
+</tr>
+</tbody></table>
+<p>서버 상태 관리를 Redux로 하면:</p>
+<ul>
+<li>Action creators, reducers, selectors, middleware(thunk/saga) 전부 직접 작성</li>
+<li>캐시 무효화 없음, 백그라운드 갱신 없음, stale 추적 없음</li>
+<li>React Query 10줄이 Redux 수백 줄을 대체한다</li>
+</ul>
+<blockquote>
+<p><strong>TkDodo</strong>: React Query is not a cache — it&#39;s a <strong>synchronization tool</strong>. 서버가 진짜 데이터 소유자이고, React Query는 UI를 그것과 동기화한다.</p>
+</blockquote>
+<hr>
+<h2>Stale-While-Revalidate 전략</h2>
+<p>React Query는 HTTP의 <code>stale-while-revalidate</code> 캐싱 원칙을 채택한다.</p>
+<p><strong>실생활 비유</strong>: 카카오톡 채널 피드를 열었을 때, 앱이 이전에 저장해둔 게시글을 <strong>즉시 보여준다</strong>. 동시에 백그라운드에서 서버에 새 글이 있는지 확인하고, 있으면 <strong>조용히 업데이트</strong>한다. 빈 화면 + 스피너를 보여주는 것보다 훨씬 빠른 UX.</p>
+<pre><code class="language-mermaid">%% desc: Stale-While-Revalidate — 캐시된 데이터를 즉시 보여주고 백그라운드에서 재검증
+sequenceDiagram
+  participant U as 사용자
+  participant C as React Query Cache
+  participant S as 서버
+
+  U-&gt;&gt;C: 컴포넌트 마운트
+  C--&gt;&gt;U: ① 캐시 데이터 즉시 반환 (스피너 없음)
+  C-&gt;&gt;S: ② 백그라운드에서 재검증 요청
+  S--&gt;&gt;C: ③ 새 데이터 수신
+  C--&gt;&gt;U: ④ 변경됐으면 조용히 UI 업데이트
+  Note over U,S: 변경 없으면 UI 업데이트 없음 (structural sharing)
+</code></pre>
+<ol>
+<li><strong>캐시 데이터 즉시 반환</strong> — 스피너(로딩 애니메이션) 없음, 빠른 UI</li>
+<li><strong>백그라운드에서 재검증</strong> — 네트워크 요청이 진행 중이지만 사용자는 이미 내용을 보고 있음</li>
+<li><strong>변경 시 조용히 업데이트</strong> — loading 상태 없이 새 데이터로 교체</li>
+</ol>
+<blockquote>
+<p><strong>핵심</strong>: stale(오래된) 데이터가 데이터 없음보다 낫다. 데이터 없음 = 스피너(빈 화면 + 원형 로딩 표시) = 느린 UX.</p>
+</blockquote>
+<hr>
+<h2>설치</h2>
+<p><div class="code-tabs" data-code-tabs data-code-tabs-id="code-tabs-0"><div class="code-tabs__list" role="tablist"><button type="button" class="code-tabs__trigger" role="tab" aria-selected="true" aria-controls="code-tabs-0-panel-0" data-code-tab="npm" data-code-tab-index="0">npm</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-0-panel-1" data-code-tab="yarn" data-code-tab-index="1">yarn</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-0-panel-2" data-code-tab="pnpm" data-code-tab-index="2">pnpm</button></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-0-panel-0" data-code-panel="npm" data-code-panel-index="0" ><pre><code class="language-npm">npm install @tanstack/react-query
+npm install -D @tanstack/react-query-devtools</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-0-panel-1" data-code-panel="yarn" data-code-panel-index="1" hidden><pre><code class="language-yarn">yarn add @tanstack/react-query
+yarn add -D @tanstack/react-query-devtools</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-0-panel-2" data-code-panel="pnpm" data-code-panel-index="2" hidden><pre><code class="language-pnpm">pnpm add @tanstack/react-query
+pnpm add -D @tanstack/react-query-devtools</code></pre></div></div></p>
+<hr>
+<h2>빠른 시작</h2>
+<pre><code class="language-tsx">// main.tsx — QueryClient는 반드시 컴포넌트 밖에서 생성
+import { QueryClient, QueryClientProvider } from &#39;@tanstack/react-query&#39;
+import { ReactQueryDevtools } from &#39;@tanstack/react-query-devtools&#39;
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60,    // 1분 전역 기본값
+      retry: 3,
+    },
+  },
+})
+
+function App() {
+  return (
+    &lt;QueryClientProvider client={queryClient}&gt;
+      &lt;TodoApp /&gt;
+      {/* 개발 환경에서만 표시되는 쿼리 디버거 */}
+      &lt;ReactQueryDevtools initialIsOpen={false} /&gt;
+    &lt;/QueryClientProvider&gt;
+  )
+}
+</code></pre>
+<pre><code class="language-tsx">// components/TodoList.tsx
+import { useQuery } from &#39;@tanstack/react-query&#39;
+
+function TodoList() {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: [&#39;todos&#39;],
+    queryFn: () =&gt; fetch(&#39;/api/todos&#39;).then(res =&gt; res.json()),
+  })
+
+  // isLoading: 아직 데이터가 없고 처음 요청 중인 상태
+  // → 스피너(Spinner): 원형 로딩 애니메이션 컴포넌트. 데이터가 올 때까지 임시로 표시
+  if (isLoading) return &lt;Spinner /&gt;
+
+  if (isError) return &lt;Alert message={error.message} /&gt;
+
+  return (
+    &lt;ul&gt;
+      {data.map(todo =&gt; &lt;li key={todo.id}&gt;{todo.title}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  )
+}
+</code></pre>
+<p>이게 전부다. 자동으로 처리되는 것들:</p>
+<ul>
+<li>✅ 로딩/에러/성공 상태 관리</li>
+<li>✅ 에러 시 자동 재시도 (3회)</li>
+<li>✅ 윈도우 포커스 복귀 시 백그라운드 갱신</li>
+<li>✅ 동일 키 중복 요청 자동 dedup</li>
+<li>✅ 5분간 캐시 유지 (gcTime 기본값)</li>
+</ul>
+<hr>
+<h2>Redux / Zustand 와의 역할 분담</h2>
+<p>React Query를 도입한 뒤 남은 진짜 클라이언트 상태는 매우 작다.</p>
+<pre><code class="language-mermaid">%% desc: React Query 도입 전후 상태 관리 구조 변화
+flowchart TD
+  subgraph BEFORE[&quot;React Query 도입 전&quot;]
+    R1[&quot;Redux Store\n서버 데이터 + 클라이언트 상태\n전부 섞임&quot;]
+  end
+
+  subgraph AFTER[&quot;React Query 도입 후&quot;]
+    RQ[&quot;TanStack Query\nAPI 데이터·캐시·동기화&quot;]
+    ZU[&quot;Zustand / useState\n모달·다크모드·폼 상태&quot;]
+  end
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>역할</th>
+<th>담당</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>서버 데이터 (API 응답, 목록, 상세)</td>
+<td><strong>TanStack Query</strong></td>
+</tr>
+<tr>
+<td>전역 UI 상태 (모달, 사이드바, 테마)</td>
+<td><strong>Zustand</strong></td>
+</tr>
+<tr>
+<td>로컬 컴포넌트 상태 (입력값, 토글)</td>
+<td><strong>useState</strong></td>
+</tr>
+</tbody></table>
+<h3>Zustand — 클라이언트 상태 관리</h3>
+<p>Zustand는 Redux의 복잡한 boilerplate 없이 전역 상태를 관리하는 경량 라이브러리다. React Query가 서버 상태를 담당하고, Zustand가 클라이언트 UI 상태를 담당하는 조합이 현재 가장 많이 쓰인다.</p>
+<p><div class="code-tabs" data-code-tabs data-code-tabs-id="code-tabs-1"><div class="code-tabs__list" role="tablist"><button type="button" class="code-tabs__trigger" role="tab" aria-selected="true" aria-controls="code-tabs-1-panel-0" data-code-tab="npm" data-code-tab-index="0">npm</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-1-panel-1" data-code-tab="yarn" data-code-tab-index="1">yarn</button><button type="button" class="code-tabs__trigger" role="tab" aria-selected="false" aria-controls="code-tabs-1-panel-2" data-code-tab="pnpm" data-code-tab-index="2">pnpm</button></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-1-panel-0" data-code-panel="npm" data-code-panel-index="0" ><pre><code class="language-npm">npm install zustand</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-1-panel-1" data-code-panel="yarn" data-code-panel-index="1" hidden><pre><code class="language-yarn">yarn add zustand</code></pre></div><div class="code-tabs__panel" role="tabpanel" id="code-tabs-1-panel-2" data-code-panel="pnpm" data-code-panel-index="2" hidden><pre><code class="language-pnpm">pnpm add zustand</code></pre></div></div></p>
+<pre><code class="language-tsx">// store/ui-store.ts — 전역 UI 상태 (React Query와 역할 분리)
+import { create } from &#39;zustand&#39;
+
+interface UIStore {
+  // 모달 상태
+  isModalOpen: boolean
+  openModal: () =&gt; void
+  closeModal: () =&gt; void
+
+  // 사이드바 상태
+  isSidebarOpen: boolean
+  toggleSidebar: () =&gt; void
+
+  // 테마
+  theme: &#39;light&#39; | &#39;dark&#39;
+  toggleTheme: () =&gt; void
+}
+
+export const useUIStore = create&lt;UIStore&gt;((set) =&gt; ({
+  isModalOpen: false,
+  openModal: () =&gt; set({ isModalOpen: true }),
+  closeModal: () =&gt; set({ isModalOpen: false }),
+
+  isSidebarOpen: true,
+  toggleSidebar: () =&gt; set((state) =&gt; ({ isSidebarOpen: !state.isSidebarOpen })),
+
+  theme: &#39;dark&#39;,
+  toggleTheme: () =&gt;
+    set((state) =&gt; ({ theme: state.theme === &#39;dark&#39; ? &#39;light&#39; : &#39;dark&#39; })),
+}))
+</code></pre>
+<pre><code class="language-tsx">// 컴포넌트에서 사용 — 서버 데이터는 React Query, UI 상태는 Zustand
+function PostList() {
+  // 서버 상태: React Query
+  const { data: posts, isLoading } = useQuery({
+    queryKey: [&#39;posts&#39;],
+    queryFn: fetchPosts,
+  })
+
+  // 클라이언트 상태: Zustand
+  const { isModalOpen, openModal, closeModal } = useUIStore()
+
+  if (isLoading) return &lt;Spinner /&gt;
+
+  return (
+    &lt;div&gt;
+      {posts?.map(post =&gt; (
+        &lt;PostCard key={post.id} post={post} onSelect={openModal} /&gt;
+      ))}
+      {isModalOpen &amp;&amp; &lt;PostModal onClose={closeModal} /&gt;}
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+<p><strong>Zustand의 특징</strong>:</p>
+<ul>
+<li>Redux의 Action/Reducer/Dispatch 패턴 없음 → 함수 직접 호출</li>
+<li><code>set()</code>으로 상태 업데이트, <code>get()</code>으로 현재 상태 참조</li>
+<li><code>persist</code> 미들웨어로 localStorage 자동 동기화 가능</li>
+<li>번들 크기 ~1KB (Redux toolkit 대비 매우 가벼움)</li>
+</ul>
+<blockquote>
+<p>Zustand를 서버 데이터 저장소로 쓰지 말 것. <code>fetch</code> 후 <code>set()</code>으로 저장하면 캐싱·갱신·에러 처리를 전부 직접 구현해야 한다. 그게 React Query가 해결하는 문제다.</p>
+</blockquote>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/overview" target="_blank">[1] TanStack Query v5 Overview — 공식 문서</a></li>
+<li><a href="https://tkdodo.eu/blog/react-query-as-a-state-manager" target="_blank">[2] React Query as a State Manager — TkDodo</a></li>
+<li><a href="https://tkdodo.eu/blog/practical-react-query" target="_blank">[3] Practical React Query — TkDodo</a></li>
+<li><a href="https://docs.pmnd.rs/zustand/getting-started/introduction" target="_blank">[4] Zustand 공식 문서</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-query-queries">[2편] QueryClient · Query Keys · useQuery 심층 →</a></li>
+<li><a href="/post/react-query-mutations">[3편] useMutation · Optimistic Updates →</a></li>
+<li><a href="/post/react-query-cache">[4편] 캐시 · 무효화 · Prefetch →</a></li>
+<li><a href="/post/react-query-advanced">[5편] 고급 패턴 · v5 마이그레이션 →</a></li>
+</ul>
+
+<ul><li>react-query</li><li>tanstack-query</li><li>server-state</li><li>react</li><li>frontend</li><li>async</li><li>cache</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Django settings를 환경별로 분리하는 방법, django-environ으로 .env 파일을 읽는 방법, DATABASE_URL 형식이 Docker 서비스명과 어떻게 연결되는지를 설명한다." />
+    <meta name="keywords" content="Django, Settings, djangoenviron, DATABASE_URL, WSGI, Gunicorn, EnvironmentVariables, Python" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/django-settings" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL" />
+    <meta property="og:description" content="Django settings를 환경별로 분리하는 방법, django-environ으로 .env 파일을 읽는 방법, DATABASE_URL 형식이 Docker 서비스명과 어떻게 연결되는지를 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/django-settings" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-26T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.218Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="Settings" />
+    <meta property="article:tag" content="djangoenviron" />
+    <meta property="article:tag" content="DATABASE_URL" />
+    <meta property="article:tag" content="WSGI" />
+    <meta property="article:tag" content="Gunicorn" />
+    <meta property="article:tag" content="EnvironmentVariables" />
+    <meta property="article:tag" content="Python" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL" />
+    <meta name="twitter:description" content="Django settings를 환경별로 분리하는 방법, django-environ으로 .env 파일을 읽는 방법, DATABASE_URL 형식이 Docker 서비스명과 어떻게 연결되는지를 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL","description":"Django settings를 환경별로 분리하는 방법, django-environ으로 .env 파일을 읽는 방법, DATABASE_URL 형식이 Docker 서비스명과 어떻게 연결되는지를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-26T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.218Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-settings"},"keywords":"Django, Settings, djangoenviron, DATABASE_URL, WSGI, Gunicorn, EnvironmentVariables, Python","articleSection":"backend","inLanguage":"ko-KR","wordCount":5235},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"backend","item":"https://seobway23.github.io/?category=study%2Fbackend"},{"@type":"ListItem","position":3,"name":"Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL","item":"https://seobway23.github.io/post/django-settings"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>backend</span></nav>
+<h1>Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL</h1>
+<p>Django settings를 환경별로 분리하는 방법, django-environ으로 .env 파일을 읽는 방법, DATABASE_URL 형식이 Docker 서비스명과 어떻게 연결되는지를 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-26T00:00:00.000Z">2026-03-26</time> · <span>12분</span></p>
+<h2>왜 settings를 분리해야 하는가</h2>
+<p>기본 <code>settings.py</code> 하나에 모든 설정을 담으면 문제가 생긴다.</p>
+<pre><code class="language-python"># 이렇게 하면 안 된다
+DEBUG = True                         # 운영에서 True면 장애
+DATABASES = {
+    &quot;default&quot;: {
+        &quot;HOST&quot;: &quot;localhost&quot;,         # 운영 서버에선 다른 주소
+        &quot;PASSWORD&quot;: &quot;1234&quot;,          # 시크릿이 코드에 노출
+    }
+}
+ALLOWED_HOSTS = [&quot;*&quot;]               # 운영에서 보안 취약
+</code></pre>
+<p>문제:</p>
+<ol>
+<li><strong>시크릿 유출</strong> — <code>SECRET_KEY</code>, DB 비밀번호가 Git에 올라감</li>
+<li><strong>환경 불일치</strong> — 로컬/스테이징/운영 설정이 다른데 하나의 파일로 관리 불가</li>
+<li><strong>배포 위험</strong> — <code>DEBUG=True</code>가 운영에 올라가는 실수</li>
+</ol>
+<h2>settings 분리 패턴</h2>
+<pre><code>config/
+└── settings/
+    ├── __init__.py
+    ├── base.py         ← 공통 설정 (앱 목록, 미들웨어 등)
+    ├── local.py        ← 로컬 개발용 (DEBUG=True, 느슨한 보안)
+    └── production.py   ← 운영용 (DEBUG=False, 엄격한 보안)
+</code></pre>
+<pre><code class="language-mermaid">%% desc: DJANGO_SETTINGS_MODULE 환경변수로 환경별 settings 파일을 선택하는 흐름
+flowchart LR
+  ENV[&quot;DJANGO_SETTINGS_MODULE\n환경변수&quot;]
+
+  LOCAL[&quot;config.settings.local\nDEBUG=True\nDB=localhost&quot;]
+  PROD[&quot;config.settings.production\nDEBUG=False\nDB=prod-db.internal&quot;]
+
+  ENV -- &quot;=config.settings.local&quot; --&gt; LOCAL
+  ENV -- &quot;=config.settings.production&quot; --&gt; PROD
+
+  BASE[&quot;config.settings.base\n(공통 설정)\nINSTALLED_APPS\nMIDDLEWARE\n...&quot;]
+  LOCAL &amp; PROD -- &quot;from .base import *&quot; --&gt; BASE
+</code></pre>
+<pre><code class="language-python"># config/settings/base.py
+from pathlib import Path
+import environ
+
+env = environ.Env()
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+INSTALLED_APPS = [
+    &quot;django.contrib.admin&quot;,
+    &quot;django.contrib.auth&quot;,
+    ...
+    &quot;rest_framework&quot;,
+    &quot;django_celery_beat&quot;,
+    &quot;myapp&quot;,
+]
+
+MIDDLEWARE = [...]
+ROOT_URLCONF = &quot;config.urls&quot;
+</code></pre>
+<pre><code class="language-python"># config/settings/local.py
+from .base import *
+
+DEBUG = True
+ALLOWED_HOSTS = [&quot;*&quot;]
+
+# .env.local 파일 읽기
+environ.Env.read_env(BASE_DIR / &quot;.env.local&quot;)
+
+SECRET_KEY = env(&quot;DJANGO_SECRET_KEY&quot;)
+DATABASES = {&quot;default&quot;: env.db(&quot;DATABASE_URL&quot;)}
+
+CELERY_BROKER_URL = env(&quot;CELERY_BROKER_URL&quot;)
+</code></pre>
+<pre><code class="language-python"># config/settings/production.py
+from .base import *
+
+DEBUG = False
+ALLOWED_HOSTS = env.list(&quot;DJANGO_ALLOWED_HOSTS&quot;)
+
+SECRET_KEY = env(&quot;DJANGO_SECRET_KEY&quot;)
+DATABASES = {&quot;default&quot;: env.db(&quot;DATABASE_URL&quot;)}
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+</code></pre>
+<h2>django-environ — 환경변수 읽기</h2>
+<p><strong>django-environ</strong>은 <code>.env</code> 파일을 읽고 타입 변환까지 해주는 라이브러리다.<sup id="fnref-django-environ" style="scroll-margin-top: 96px;"><a href="#fn-django-environ" aria-label="각주 1">[1]</a></sup></p>
+<pre><code class="language-bash">pip install django-environ
+</code></pre>
+<pre><code class="language-python">import environ
+
+env = environ.Env(
+    # 기본값 설정 (타입 명시)
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+)
+</code></pre>
+<h3>env() 동작 방식</h3>
+<pre><code class="language-mermaid">%% desc: env()가 환경변수를 읽는 우선순위 — 쉘 &gt; .env 파일 &gt; 기본값
+flowchart LR
+  SHELL[&quot;쉘 환경변수\nexport DJANGO_SECRET_KEY=...&quot;]
+  FILE[&quot;.env.local 파일\nDJANGO_SECRET_KEY=...&quot;]
+  DEFAULT[&quot;기본값\nenv(&#39;KEY&#39;, default=None)&quot;]
+
+  ENV[&quot;env(&#39;DJANGO_SECRET_KEY&#39;)&quot;]
+
+  SHELL -- &quot;1순위&quot; --&gt; ENV
+  FILE -- &quot;2순위 (read_env 호출 시)&quot; --&gt; ENV
+  DEFAULT -- &quot;3순위&quot; --&gt; ENV
+
+  RESULT[&quot;값 반환\n(없으면 ImproperlyConfigured 예외)&quot;]
+  ENV --&gt; RESULT
+</code></pre>
+<pre><code class="language-python"># .env.local 파일을 읽도록 등록
+environ.Env.read_env(BASE_DIR / &quot;.env.local&quot;)
+
+# 필수값 (없으면 ImproperlyConfigured 예외 발생)
+SECRET_KEY = env(&quot;DJANGO_SECRET_KEY&quot;)
+
+# 선택값 (없으면 None 반환)
+SENTRY_DSN = env(&quot;SENTRY_DSN&quot;, default=None)
+
+# 타입 변환
+DEBUG = env.bool(&quot;DEBUG&quot;, default=False)
+PORT = env.int(&quot;PORT&quot;, default=8000)
+ALLOWED_HOSTS = env.list(&quot;DJANGO_ALLOWED_HOSTS&quot;, default=[&quot;localhost&quot;])
+</code></pre>
+<h2>DATABASE_URL — 한 줄로 DB 연결 설정</h2>
+<p><code>DATABASE_URL</code>은 DB 연결 정보를 URI 형식으로 표현하는 관례다.<sup id="fnref-twelve-factor" style="scroll-margin-top: 96px;"><a href="#fn-twelve-factor" aria-label="각주 2">[2]</a></sup></p>
+<pre><code>mysql://USER:PASSWORD@HOST:PORT/DBNAME
+</code></pre>
+<p>예시:</p>
+<pre><code class="language-bash"># 로컬 MySQL
+DATABASE_URL=mysql://root:1234@localhost:3306/mydb
+
+# Docker Compose 환경 (서비스 이름이 호스트)
+DATABASE_URL=mysql://pms_user:pms_password@pms_v3-mysql:3306/pms_db
+
+# PostgreSQL
+DATABASE_URL=postgres://user:pass@db-host:5432/mydb
+
+# SQLite (테스트용)
+DATABASE_URL=sqlite:///./db.sqlite3
+</code></pre>
+<p>django-environ이 이 URL을 Django <code>DATABASES</code> dict로 변환한다.</p>
+<pre><code class="language-python"># settings.py
+DATABASES = {&quot;default&quot;: env.db(&quot;DATABASE_URL&quot;)}
+
+# 위 한 줄은 아래와 동일
+DATABASES = {
+    &quot;default&quot;: {
+        &quot;ENGINE&quot;: &quot;django.db.backends.mysql&quot;,
+        &quot;NAME&quot;: &quot;pms_db&quot;,
+        &quot;USER&quot;: &quot;pms_user&quot;,
+        &quot;PASSWORD&quot;: &quot;pms_password&quot;,
+        &quot;HOST&quot;: &quot;pms_v3-mysql&quot;,   # Docker Compose 서비스 이름
+        &quot;PORT&quot;: &quot;3306&quot;,
+    }
+}
+</code></pre>
+<h3>Docker Compose에서 HOST는 서비스 이름</h3>
+<pre><code class="language-mermaid">%% desc: DATABASE_URL의 HOST가 Docker 서비스 이름과 매핑되는 구조
+flowchart LR
+  ENVFILE[&quot;.env.local\nDATABASE_URL=mysql://pms_user:pass\n@pms_v3-mysql:3306/pms_db&quot;]
+  DJANGO[&quot;Django\nDATABASES[&#39;HOST&#39;]=&#39;pms_v3-mysql&#39;&quot;]
+  NETWORK[&quot;Docker 내부 DNS\npms_v3-mysql → 172.18.0.3&quot;]
+  MYSQL[&quot;MySQL 컨테이너\ncontainer_name: pms_v3-mysql&quot;]
+
+  ENVFILE --&gt; DJANGO
+  DJANGO -- &quot;TCP 연결&quot; --&gt; NETWORK
+  NETWORK --&gt; MYSQL
+</code></pre>
+<p><code>localhost</code>를 쓰면 컨테이너 자기 자신을 가리킨다.<br>반드시 <strong>Docker Compose 서비스 이름</strong> (<code>pms_v3-mysql</code>)을 사용해야 한다.</p>
+<h2>WSGI vs ASGI</h2>
+<p>Django는 두 가지 서버 인터페이스를 지원한다.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>WSGI</th>
+<th>ASGI</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>표준</strong></td>
+<td>PEP 3333</td>
+<td>PEP 503 (ASGI Spec)</td>
+</tr>
+<tr>
+<td><strong>동작 방식</strong></td>
+<td>동기 (요청 1개 = 스레드 1개)</td>
+<td>비동기 (이벤트 루프)</td>
+</tr>
+<tr>
+<td><strong>서버</strong></td>
+<td>Gunicorn, uWSGI</td>
+<td>Uvicorn, Daphne</td>
+</tr>
+<tr>
+<td><strong>사용 시기</strong></td>
+<td>일반 REST API</td>
+<td>WebSocket, Server-Sent Events, async views</td>
+</tr>
+</tbody></table>
+<pre><code class="language-python"># config/wsgi.py (기본 Django 생성)
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, &quot;config.settings.local&quot;)
+application = get_wsgi_application()
+</code></pre>
+<pre><code class="language-bash"># Gunicorn으로 실행
+gunicorn config.wsgi:application \
+  --bind 0.0.0.0:8000 \
+  --workers 2 \
+  --timeout 120
+</code></pre>
+<p>Gunicorn의 <code>--workers</code>는 보통 <code>CPU 코어 수 × 2 + 1</code>을 권장한다.<sup id="fnref-gunicorn-workers" style="scroll-margin-top: 96px;"><a href="#fn-gunicorn-workers" aria-label="각주 3">[3]</a></sup></p>
+<h2>manage.py와 DJANGO_SETTINGS_MODULE</h2>
+<pre><code class="language-bash"># settings 파일 명시적으로 지정
+python manage.py migrate --settings=config.settings.local
+
+# 환경변수로 지정 (권장)
+export DJANGO_SETTINGS_MODULE=config.settings.local
+python manage.py migrate
+
+# Docker Compose 환경에서
+docker compose exec web python manage.py migrate
+# (DJANGO_SETTINGS_MODULE은 .env.local에서 이미 설정됨)
+</code></pre>
+<h2>참고</h2>
+<ol>
+<li id="fn-django-environ" style="scroll-margin-top: 96px;">joke2k, <a href="https://django-environ.readthedocs.io/en/latest/" target="_blank">django-environ 공식 문서</a> <a href="#fnref-django-environ" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-twelve-factor" style="scroll-margin-top: 96px;">Heroku, <a href="https://12factor.net/config" target="_blank">The Twelve-Factor App — III. Config</a> <a href="#fnref-twelve-factor" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-gunicorn-workers" style="scroll-margin-top: 96px;">Gunicorn, <a href="https://docs.gunicorn.org/en/stable/design.html#how-many-workers" target="_blank">How Many Workers? — Gunicorn Docs</a> <a href="#fnref-gunicorn-workers" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/docker-compose-django">Docker Compose로 Django 5개 서비스 띄우기 →</a> — .env.local, DATABASE_URL을 실전 프로젝트에 적용</li>
+<li><a href="/post/django-migration">Django Migration 완전 정복 →</a> — settings 설정 이후 migrate 실행 방법과 순서 문제</li>
+</ul>
+<hr>
+
+<ul><li>Django</li><li>Settings</li><li>djangoenviron</li><li>DATABASE_URL</li><li>WSGI</li><li>Gunicorn</li><li>EnvironmentVariables</li><li>Python</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

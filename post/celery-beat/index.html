@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Celery Beat — 주기적 태스크 스케줄링 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Celery Beat가 어떻게 주기적 태스크를 발행하는지, crontab 문법과 timedelta 설정, django-celery-beat로 DB에서 동적으로 스케줄을 관리하는 방법을 설명한다." />
+    <meta name="keywords" content="Celery, Beat, Scheduler, PeriodicTask, Crontab, django-celery-beat, Python" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/celery-beat" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Celery Beat — 주기적 태스크 스케줄링" />
+    <meta property="og:description" content="Celery Beat가 어떻게 주기적 태스크를 발행하는지, crontab 문법과 timedelta 설정, django-celery-beat로 DB에서 동적으로 스케줄을 관리하는 방법을 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/celery-beat" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-26T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.338Z" />
+    <meta property="article:tag" content="Celery" />
+    <meta property="article:tag" content="Beat" />
+    <meta property="article:tag" content="Scheduler" />
+    <meta property="article:tag" content="PeriodicTask" />
+    <meta property="article:tag" content="Crontab" />
+    <meta property="article:tag" content="django-celery-beat" />
+    <meta property="article:tag" content="Python" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Celery Beat — 주기적 태스크 스케줄링" />
+    <meta name="twitter:description" content="Celery Beat가 어떻게 주기적 태스크를 발행하는지, crontab 문법과 timedelta 설정, django-celery-beat로 DB에서 동적으로 스케줄을 관리하는 방법을 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Celery Beat — 주기적 태스크 스케줄링","description":"Celery Beat가 어떻게 주기적 태스크를 발행하는지, crontab 문법과 timedelta 설정, django-celery-beat로 DB에서 동적으로 스케줄을 관리하는 방법을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-26T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.338Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/celery-beat"},"keywords":"Celery, Beat, Scheduler, PeriodicTask, Crontab, django-celery-beat, Python","articleSection":"celery","inLanguage":"ko-KR","wordCount":4246},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"celery","item":"https://seobway23.github.io/?category=study%2Finfra%2Fcelery"},{"@type":"ListItem","position":3,"name":"Celery Beat — 주기적 태스크 스케줄링","item":"https://seobway23.github.io/post/celery-beat"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>celery</span></nav>
+<h1>Celery Beat — 주기적 태스크 스케줄링</h1>
+<p>Celery Beat가 어떻게 주기적 태스크를 발행하는지, crontab 문법과 timedelta 설정, django-celery-beat로 DB에서 동적으로 스케줄을 관리하는 방법을 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-26T00:00:00.000Z">2026-03-26</time> · <span>11분</span></p>
+<h2>Beat란 무엇인가</h2>
+<p><strong>Celery Beat</strong>는 주기적 태스크를 예약하고 발행하는 스케줄러 프로세스다.<sup id="fnref-beat-docs" style="scroll-margin-top: 96px;"><a href="#fn-beat-docs" aria-label="각주 1">[1]</a></sup></p>
+<p>Beat 자체는 태스크를 실행하지 않는다.<br>정해진 시각이 되면 브로커에 메시지를 발행하고, 실제 실행은 <a href="/post/celery-worker">Worker</a>가 담당한다.</p>
+<pre><code class="language-mermaid">%% desc: Beat의 역할 — 시계처럼 정해진 시각에 메시지를 발행하고 Worker가 실행
+flowchart LR
+  subgraph BEAT[&quot;Celery Beat&quot;]
+    CLOCK[&quot;⏰ 내부 클락\n1초마다 due 체크&quot;]
+    SCHEDULE[&quot;스케줄 저장소\n(파일 또는 DB)&quot;]
+    CLOCK -- &quot;due 태스크 확인&quot; --&gt; SCHEDULE
+  end
+
+  BROKER[&quot;메시지 브로커\n(Redis)&quot;]
+  WORKER[&quot;Celery Worker&quot;]
+
+  BEAT -- &quot;메시지 발행&quot; --&gt; BROKER
+  BROKER --&gt; WORKER
+  WORKER -- &quot;태스크 실행&quot; --&gt; RESULT[결과]
+</code></pre>
+<blockquote>
+<p><strong>중요</strong>: Beat는 항상 <strong>단 하나</strong>만 실행해야 한다.<br>두 개 이상 실행하면 같은 태스크가 중복 발행된다.</p>
+</blockquote>
+<h2>스케줄 유형</h2>
+<h3>1. timedelta — 일정 간격 반복</h3>
+<pre><code class="language-python">from datetime import timedelta
+
+CELERY_BEAT_SCHEDULE = {
+    &quot;check-health-every-30s&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.health_check&quot;,
+        &quot;schedule&quot;: timedelta(seconds=30),
+    },
+    &quot;cleanup-every-hour&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.cleanup_expired_sessions&quot;,
+        &quot;schedule&quot;: timedelta(hours=1),
+    },
+}
+</code></pre>
+<h3>2. crontab — 특정 시각 지정</h3>
+<pre><code class="language-python">from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    # 매일 오전 8시
+    &quot;daily-report&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.generate_daily_report&quot;,
+        &quot;schedule&quot;: crontab(hour=8, minute=0),
+    },
+    # 월요일 오전 9시
+    &quot;weekly-digest&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.send_weekly_digest&quot;,
+        &quot;schedule&quot;: crontab(hour=9, minute=0, day_of_week=&quot;monday&quot;),
+    },
+    # 매월 1일 자정
+    &quot;monthly-invoice&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.generate_invoices&quot;,
+        &quot;schedule&quot;: crontab(hour=0, minute=0, day_of_month=&quot;1&quot;),
+    },
+    # 평일 오전 9~18시, 매 15분마다
+    &quot;business-hours-sync&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.sync_data&quot;,
+        &quot;schedule&quot;: crontab(
+            minute=&quot;*/15&quot;,
+            hour=&quot;9-18&quot;,
+            day_of_week=&quot;mon-fri&quot;,
+        ),
+    },
+}
+</code></pre>
+<h3>crontab 파라미터</h3>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>의미</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>minute</code></td>
+<td>분 (0-59)</td>
+<td><code>&quot;*/15&quot;</code> → 15분마다</td>
+</tr>
+<tr>
+<td><code>hour</code></td>
+<td>시 (0-23)</td>
+<td><code>&quot;9-18&quot;</code> → 9시~18시</td>
+</tr>
+<tr>
+<td><code>day_of_week</code></td>
+<td>요일 (0=일, mon-fri)</td>
+<td><code>&quot;monday&quot;</code></td>
+</tr>
+<tr>
+<td><code>day_of_month</code></td>
+<td>날짜 (1-31)</td>
+<td><code>&quot;1,15&quot;</code> → 1일, 15일</td>
+</tr>
+<tr>
+<td><code>month_of_year</code></td>
+<td>월 (1-12)</td>
+<td><code>&quot;1,7&quot;</code> → 1월, 7월</td>
+</tr>
+</tbody></table>
+<h3>3. solar — 일출/일몰 기반</h3>
+<pre><code class="language-python">from celery.schedules import solar
+
+CELERY_BEAT_SCHEDULE = {
+    &quot;at-sunrise&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.morning_task&quot;,
+        &quot;schedule&quot;: solar(&quot;sunrise&quot;, latitude=37.5665, longitude=126.9780),
+    },
+}
+</code></pre>
+<h2>스케줄 저장 방식</h2>
+<p>Beat는 마지막 실행 시각을 저장해 재시작 후에도 중복 실행을 방지한다.</p>
+<h3>기본 방식 — 파일</h3>
+<pre><code class="language-bash">celery -A myproject beat --schedule=/var/run/celerybeat-schedule
+</code></pre>
+<p><code>celerybeat-schedule</code> 파일에 마지막 실행 시각을 저장한다.<br>설정을 변경하려면 Beat를 재시작해야 한다.</p>
+<h3>django-celery-beat — DB 기반 동적 스케줄</h3>
+<pre><code class="language-bash">pip install django-celery-beat
+python manage.py migrate
+</code></pre>
+<pre><code class="language-python"># settings.py
+CELERY_BEAT_SCHEDULER = &quot;django_celery_beat.schedulers:DatabaseScheduler&quot;
+</code></pre>
+<p>장점:<sup id="fnref-django-celery-beat-docs" style="scroll-margin-top: 96px;"><a href="#fn-django-celery-beat-docs" aria-label="각주 2">[2]</a></sup></p>
+<ul>
+<li>Django Admin에서 스케줄을 <strong>실시간 수정</strong> 가능</li>
+<li>Beat 재시작 없이 태스크 추가/삭제/수정</li>
+<li>다중 서버 환경에서도 스케줄 공유</li>
+</ul>
+<pre><code class="language-mermaid">%% desc: django-celery-beat의 DB 기반 스케줄 관리 — Admin에서 수정 후 즉시 반영
+flowchart TD
+  ADMIN[&quot;Django Admin\n스케줄 편집 UI&quot;]
+  DB[&quot;PostgreSQL\nPeriodicTask 테이블&quot;]
+  BEAT[&quot;Celery Beat\n(DB 폴링)&quot;]
+  BROKER[&quot;Redis 브로커&quot;]
+  WORKER[&quot;Worker&quot;]
+
+  ADMIN -- &quot;스케줄 추가/수정/삭제&quot; --&gt; DB
+  BEAT -- &quot;변경 감지 (5초마다)&quot; --&gt; DB
+  BEAT -- &quot;due 태스크 발행&quot; --&gt; BROKER
+  BROKER --&gt; WORKER
+</code></pre>
+<pre><code class="language-python"># 코드에서 동적으로 스케줄 추가
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
+import json
+
+schedule, _ = CrontabSchedule.objects.get_or_create(
+    minute=&quot;0&quot;,
+    hour=&quot;9&quot;,
+    day_of_week=&quot;mon-fri&quot;,
+    day_of_month=&quot;*&quot;,
+    month_of_year=&quot;*&quot;,
+    timezone=&quot;Asia/Seoul&quot;,
+)
+
+PeriodicTask.objects.create(
+    crontab=schedule,
+    name=&quot;매일 아침 리포트&quot;,
+    task=&quot;myapp.tasks.generate_daily_report&quot;,
+    args=json.dumps([]),
+    kwargs=json.dumps({&quot;send_email&quot;: True}),
+    enabled=True,
+)
+</code></pre>
+<h2>태스크에 인자 전달</h2>
+<pre><code class="language-python">CELERY_BEAT_SCHEDULE = {
+    &quot;weekly-report-kr&quot;: {
+        &quot;task&quot;: &quot;myapp.tasks.generate_report&quot;,
+        &quot;schedule&quot;: crontab(hour=8, minute=0, day_of_week=&quot;monday&quot;),
+        &quot;args&quot;: (&quot;weekly&quot;,),
+        &quot;kwargs&quot;: {&quot;region&quot;: &quot;KR&quot;, &quot;format&quot;: &quot;pdf&quot;},
+    },
+}
+</code></pre>
+<h2>Beat 실행 명령</h2>
+<pre><code class="language-bash"># 기본 실행
+celery -A myproject beat --loglevel=info
+
+# 파일 기반 스케줄 저장 위치 지정
+celery -A myproject beat \
+  --scheduler celery.beat:PersistentScheduler \
+  --schedule /var/run/celerybeat-schedule
+
+# django-celery-beat (DB 기반)
+celery -A myproject beat \
+  --scheduler django_celery_beat.schedulers:DatabaseScheduler \
+  --loglevel=info
+</code></pre>
+<h2>자주 하는 실수</h2>
+<h3>Beat를 여러 개 실행</h3>
+<pre><code class="language-bash"># 잘못된 예: 두 서버에서 동시 실행
+server1$ celery -A myproject beat &amp;
+server2$ celery -A myproject beat &amp;   # 태스크 중복 발행!
+</code></pre>
+<p>해결: Beat는 반드시 단일 프로세스. 고가용성이 필요하면 Redis 분산 락을 활용한 <code>redbeat</code> 사용을 검토한다.<sup id="fnref-redbeat" style="scroll-margin-top: 96px;"><a href="#fn-redbeat" aria-label="각주 3">[3]</a></sup></p>
+<h3>Worker 없이 Beat만 실행</h3>
+<p>Beat가 발행하는 메시지를 처리할 Worker가 없으면 메시지가 큐에 쌓인다.<br>Beat와 Worker는 항상 함께 실행해야 한다.</p>
+<h2>참고</h2>
+<ol>
+<li id="fn-beat-docs" style="scroll-margin-top: 96px;">Celery Periodic Tasks, <a href="https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html" target="_blank">Celery Docs</a> <a href="#fnref-beat-docs" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-django-celery-beat-docs" style="scroll-margin-top: 96px;">django-celery-beat documentation, <a href="https://django-celery-beat.readthedocs.io/en/latest/" target="_blank">Read the Docs</a> <a href="#fnref-django-celery-beat-docs" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-redbeat" style="scroll-margin-top: 96px;">redbeat — Redis-based Celery Beat scheduler, <a href="https://github.com/sibson/redbeat" target="_blank">GitHub</a> <a href="#fnref-redbeat" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/celery-django">Django + Celery 개요 →</a> — Celery 전체 설정과 주기적 태스크 기본 예시</li>
+<li><a href="/post/celery-worker">Celery Worker — 내부 구조와 동시성 모델 →</a> — Beat가 발행한 태스크를 실행하는 Worker</li>
+<li><a href="/post/celery-broker">Celery Broker — Redis vs RabbitMQ →</a> — Beat가 메시지를 발행하는 브로커</li>
+</ul>
+<hr>
+
+<ul><li>Celery</li><li>Beat</li><li>Scheduler</li><li>PeriodicTask</li><li>Crontab</li><li>django-celery-beat</li><li>Python</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

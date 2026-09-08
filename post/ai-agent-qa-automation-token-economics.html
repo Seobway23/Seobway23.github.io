@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>AI 에이전트 QA 자동화 — 토큰 경제 분석 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다." />
+    <meta name="keywords" content="ai-agent, claude-code, subagent, mcp, token-economics, qa-automation" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/ai-agent-qa-automation-token-economics" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="AI 에이전트 QA 자동화 — 토큰 경제 분석" />
+    <meta property="og:description" content="&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/ai-agent-qa-automation-token-economics" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-06-11T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.467Z" />
+    <meta property="article:tag" content="ai-agent" />
+    <meta property="article:tag" content="claude-code" />
+    <meta property="article:tag" content="subagent" />
+    <meta property="article:tag" content="mcp" />
+    <meta property="article:tag" content="token-economics" />
+    <meta property="article:tag" content="qa-automation" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI 에이전트 QA 자동화 — 토큰 경제 분석" />
+    <meta name="twitter:description" content="&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"AI 에이전트 QA 자동화 — 토큰 경제 분석","description":"\"QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?\" 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-11T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.467Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/ai-agent-qa-automation-token-economics"},"keywords":"ai-agent, claude-code, subagent, mcp, token-economics, qa-automation","articleSection":"analysis","inLanguage":"ko-KR","wordCount":5028},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"analysis","item":"https://seobway23.github.io/?category=work%2Fanalysis"},{"@type":"ListItem","position":3,"name":"AI 에이전트 QA 자동화 — 토큰 경제 분석","item":"https://seobway23.github.io/post/ai-agent-qa-automation-token-economics"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>analysis</span></nav>
+<h1>AI 에이전트 QA 자동화 — 토큰 경제 분석</h1>
+<p>&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-06-11T00:00:00.000Z">2026-06-11</time> · <span>10분</span></p>
+<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="TL;DR"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TL;DR</span><div class="post-callout__content"><p><strong>질문</strong>: 로컬 MCP를 따로 빼는 게 이득인가 / 스킬로 처리하는 게 이득인가 / 서브에이전트로 QA하는 게 이득인가?</p>
+<p><strong>결론</strong>: 서브에이전트 격리가 본질이다. 스킬은 절차 고정용 보조 수단이고, MCP를 별도 서버로 분리하는 건 이 환경(deferred tool loading)에서는 거의 의미가 없다.</p>
+<p>QA 3회 + 이후 일반 작업 20턴을 기준으로 계산하면, 메인 에이전트가 부담하는 총 빌링 토큰은 서브에이전트 방식이 MCP 직접 호출 방식 대비 <strong>약 10배 적다.</strong></p>
+</div></div></aside></p>
+<hr>
+<h2>0. 비교 결과 한눈에 보기</h2>
+<table>
+<thead>
+<tr>
+<th>지표 (QA 3회 + 이후 일반작업 20턴 기준)</th>
+<th>A: MCP 직접</th>
+<th>B: 스킬만</th>
+<th>C: 서브에이전트</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>메인 최종 컨텍스트 크기</td>
+<td>119,550</td>
+<td>121,050</td>
+<td><strong>20,400</strong></td>
+</tr>
+<tr>
+<td>QA 중 메인 빌링 input</td>
+<td>2,320,500</td>
+<td>2,370,000</td>
+<td><strong>56,400</strong></td>
+</tr>
+<tr>
+<td>QA 후 20턴 빌링 input</td>
+<td>2,391,000</td>
+<td>2,421,000</td>
+<td><strong>408,000</strong></td>
+</tr>
+<tr>
+<td><strong>메인이 부담하는 총 빌링</strong></td>
+<td><strong>4,711,500</strong></td>
+<td><strong>4,791,000</strong></td>
+<td><strong>464,400</strong></td>
+</tr>
+</tbody></table>
+<ul>
+<li>메인 컨텍스트 오염: C가 A 대비 <strong>5.9배</strong> 작음</li>
+<li>QA 수행 중 메인 빌링: C가 A 대비 <strong>41배</strong> 적음</li>
+<li>메인이 실제로 부담하는 총 토큰: C가 A 대비 <strong>10.1배</strong> 적음</li>
+</ul>
+<p>세 선택지는 경쟁 관계가 아니라 서로 다른 레이어다. 그래서 &quot;택1&quot;이 아니라 &quot;조합&quot;이 정답이다.</p>
+<hr>
+<h2>1. 왜 같은 층위 비교가 아닌가</h2>
+<table>
+<thead>
+<tr>
+<th>선택지</th>
+<th>실제 역할</th>
+<th>토큰에 영향 주는 지점</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MCP 따로 빼기</td>
+<td>도구 전송층 — 브라우저를 <em>어떻게</em> 조종하나</td>
+<td>도구 스키마 로딩 비용</td>
+</tr>
+<tr>
+<td>스킬</td>
+<td>절차/지시 — QA를 <em>무슨 순서로</em> 하나</td>
+<td>절차 텍스트 1회 로딩 + 계획 재추론 절감</td>
+</tr>
+<tr>
+<td>서브에이전트</td>
+<td>컨텍스트 격리 경계 — 노이즈가 <em>어디에</em> 쌓이나</td>
+<td>누적 출력 격리 (지배적 변수)</td>
+</tr>
+</tbody></table>
+<p>이 셋 중 토큰을 좌우하는 절대 변수는 <strong>&quot;QA가 만들어내는 더러운 중간 산출물이 어느 컨텍스트에 누적되느냐&quot;</strong> 다. 그건 오직 서브에이전트(격리)만 해결한다.</p>
+<hr>
+<h2>2. 핵심 원리 — LLM 비용은 준2차(quasi-quadratic)다</h2>
+<p>LLM은 매 턴 컨텍스트 전체를 input으로 다시 전송한다.</p>
+<pre><code class="language-text">턴 t의 빌링 input = (그 시점까지 누적된 컨텍스트 크기)
+세션 총 빌링 input = Σ_{t=1..N} (컨텍스트_at_t)
+</code></pre>
+<p>컨텍스트가 매 턴 커지면 비용은 선형이 아니라 누적합(준2차)으로 증가한다. 한 번 들어온 노이즈는 그 턴만 비싼 게 아니라 <strong>이후 모든 턴에서 계속 재청구</strong>된다. 이게 &quot;QA 출력을 메인에 떨구면 안 되는&quot; 진짜 이유다.</p>
+<hr>
+<h2>3. 모델 가정 — 계산에 사용한 파라미터</h2>
+<h3>3.1 Playwright 단일 호출 출력 토큰 (실측 근사, char/4)</h3>
+<table>
+<thead>
+<tr>
+<th>도구 호출</th>
+<th>min</th>
+<th>max</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>browser_navigate</code></td>
+<td>300</td>
+<td>800</td>
+<td>ack + 상태</td>
+</tr>
+<tr>
+<td><code>browser_snapshot</code></td>
+<td>3,000</td>
+<td>15,000</td>
+<td>접근성 트리 — DOM 규모에 비례, 최대 변수</td>
+</tr>
+<tr>
+<td><code>browser_click</code></td>
+<td>200</td>
+<td>600</td>
+<td></td>
+</tr>
+<tr>
+<td><code>browser_type</code> / <code>fill</code></td>
+<td>200</td>
+<td>600</td>
+<td></td>
+</tr>
+<tr>
+<td><code>browser_console_messages</code></td>
+<td>200</td>
+<td>2,000</td>
+<td></td>
+</tr>
+<tr>
+<td><code>browser_network_requests</code></td>
+<td>500</td>
+<td>5,000</td>
+<td></td>
+</tr>
+<tr>
+<td><code>browser_take_screenshot</code></td>
+<td>1,000</td>
+<td>1,500</td>
+<td>이미지 토큰</td>
+</tr>
+<tr>
+<td><code>browser_wait_for</code></td>
+<td>100</td>
+<td>400</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3>3.2 대표 QA 플로우 1회 = 10 스텝</h3>
+<pre><code class="language-text">navigate → snapshot → click → snapshot → type → click
+        → snapshot → console → network → screenshot
+</code></pre>
+<p>플로우 1회 도구 출력 누계: 최소 <strong>11,600 토큰</strong>, 평균 <strong>33,850 토큰</strong>, 최대 <strong>56,100 토큰</strong>.</p>
+<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p>실제 PMS 같은 폼 많은 페이지는 snapshot이 한 장에 1만 토큰을 쉽게 넘기므로 현실값은 평균~최대 구간으로 봐야 한다.</p>
+</div></div></aside></p>
+<h3>3.3 기타 상수</h3>
+<table>
+<thead>
+<tr>
+<th>변수</th>
+<th>값</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>BASE_MAIN</code></td>
+<td>18,000</td>
+<td>메인 에이전트 베이스 (시스템 프롬프트 + CLAUDE.md + 전역 룰 + 대화)</td>
+</tr>
+<tr>
+<td><code>BASE_SUB</code></td>
+<td>9,000</td>
+<td>서브에이전트 베이스 (qa.md + 도구 일부, 슬림)</td>
+</tr>
+<tr>
+<td><code>SKILL</code></td>
+<td>1,500</td>
+<td>스킬 절차 텍스트</td>
+</tr>
+<tr>
+<td><code>REPORT</code></td>
+<td>800</td>
+<td>서브 → 메인 최종 리포트</td>
+</tr>
+<tr>
+<td><code>RUNS</code></td>
+<td>3</td>
+<td>QA 실행 횟수</td>
+</tr>
+<tr>
+<td><code>POST_TURNS</code></td>
+<td>20</td>
+<td>QA 종료 후 메인에서 이어지는 일반 개발 턴 수</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. 옵션별 계산</h2>
+<p>계산 코드(요지):</p>
+<pre><code class="language-python">def billed(base, outs):          # 한 플로우의 준2차 빌링
+    ctx = base; tot = 0
+    for o in outs:
+        tot += ctx               # 이번 턴 컨텍스트 전체 재전송
+        ctx += o                 # 도구 출력이 컨텍스트에 누적
+    tot += ctx
+    return tot, ctx
+</code></pre>
+<h3>옵션 A — MCP를 메인 에이전트가 직접 호출 (격리 X)</h3>
+<p>QA 노이즈(평균 33,850/회)가 메인 컨텍스트에 그대로 누적되고, 이후 모든 턴에서 재청구된다.</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>메인 최종 컨텍스트</td>
+<td>119,550</td>
+</tr>
+<tr>
+<td>QA 중 메인 빌링</td>
+<td>2,320,500</td>
+</tr>
+<tr>
+<td>QA 후 20턴 빌링</td>
+<td>2,391,000</td>
+</tr>
+<tr>
+<td><strong>총 빌링</strong></td>
+<td><strong>4,711,500</strong></td>
+</tr>
+</tbody></table>
+<p>QA가 끝나고 일반 작업으로 돌아가도, 부풀어 오른 119k 컨텍스트를 매 턴 계속 끌고 다닌다. 세션이 길수록 손해가 복리로 커진다.</p>
+<h3>옵션 B — 스킬만 (메인에서 실행)</h3>
+<p>절차는 고정되지만(신뢰성↑), 도구 출력은 여전히 메인에 떨어진다. 토큰 문제는 풀지 못한다.</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>메인 최종 컨텍스트</td>
+<td>121,050</td>
+</tr>
+<tr>
+<td>QA 중 메인 빌링</td>
+<td>2,370,000</td>
+</tr>
+<tr>
+<td>QA 후 20턴 빌링</td>
+<td>2,421,000</td>
+</tr>
+<tr>
+<td><strong>총 빌링</strong></td>
+<td><strong>4,791,000</strong></td>
+</tr>
+</tbody></table>
+<p>스킬은 토큰 절감 수단이 아니라 절차 일관성 수단이다.</p>
+<h3>옵션 C — 서브에이전트 (격리)</h3>
+<p>노이즈(평균 33,850/회)는 서브에이전트의 격리된 컨텍스트에서 살다가 종료 시 폐기된다. 메인은 최종 리포트(800)만 수령한다.</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>메인 최종 컨텍스트</td>
+<td><strong>20,400</strong></td>
+</tr>
+<tr>
+<td>QA 중 메인 빌링</td>
+<td><strong>56,400</strong></td>
+</tr>
+<tr>
+<td>QA 중 서브 빌링 (폐기·병렬)</td>
+<td>906,450</td>
+</tr>
+<tr>
+<td>QA 후 20턴 빌링</td>
+<td><strong>408,000</strong></td>
+</tr>
+<tr>
+<td>총 빌링 (서브 포함)</td>
+<td>1,370,850</td>
+</tr>
+<tr>
+<td><strong>메인 부담 총 빌링 (서브 제외)</strong></td>
+<td><strong>464,400</strong></td>
+</tr>
+</tbody></table>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p>서브 빌링 906,450은 &quot;노이즈 처리의 본질 비용&quot;이라 어느 방식이든 발생한다. 차이는 — A는 그 비용을 메인에 영구 누적시키고, C는 격리 후 버린다는 점이다. 서브 빌링은 <strong>병렬 실행 가능 + 메인 추론 품질에 영향 0</strong>이라 질적으로 다른 비용이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>5. 결과 비교</h2>
+<table>
+<thead>
+<tr>
+<th>지표</th>
+<th>A</th>
+<th>C</th>
+<th>차이</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>메인 최종 컨텍스트</td>
+<td>119,550</td>
+<td>20,400</td>
+<td><strong>5.9배</strong></td>
+</tr>
+<tr>
+<td>QA 중 메인 빌링</td>
+<td>2,320,500</td>
+<td>56,400</td>
+<td><strong>41.1배</strong></td>
+</tr>
+<tr>
+<td>QA 후 20턴 빌링</td>
+<td>2,391,000</td>
+<td>408,000</td>
+<td><strong>5.9배</strong></td>
+</tr>
+<tr>
+<td>총 빌링 (서브 포함)</td>
+<td>4,711,500</td>
+<td>1,370,850</td>
+<td><strong>3.4배</strong></td>
+</tr>
+<tr>
+<td><strong>메인 부담 총 빌링</strong></td>
+<td>4,711,500</td>
+<td>464,400</td>
+<td><strong>10.1배</strong></td>
+</tr>
+</tbody></table>
+<pre><code class="language-text">메인 부담 총 빌링 (서브 격리 비용 제외):
+A  ████████████████████████████████████████  4,711,500
+B  ████████████████████████████████████████  4,791,000
+C  ████                                         464,400   (A의 1/10)
+</code></pre>
+<p>해석은 세 가지다.</p>
+<ol>
+<li><strong>메인 컨텍스트 오염 5.9배</strong> — 추론 품질에 직접 영향을 준다. QA 후에도 부푼 컨텍스트를 계속 끌고 다닌다.</li>
+<li><strong>QA 중 메인 빌링 41배</strong> — QA를 자주 돌릴수록 격차가 폭발적으로 커진다.</li>
+<li><strong>세션이 길수록 C 우위 확대</strong> — <code>POST_TURNS</code>(QA 후 작업 턴)가 늘면 A는 큰 컨텍스트를 매 턴 재청구하고, C는 작은 컨텍스트만 유지한다.</li>
+</ol>
+<hr>
+<h2>6. &quot;MCP 따로 빼기&quot;가 이 환경에선 거의 의미 없는 이유</h2>
+<p>이 환경의 MCP 도구는 <strong>deferred(지연 로딩)</strong> 상태다.<a href="https://docs.claude.com/en/docs/claude-code/mcp" target="_blank"><sup>[1]</sup></a></p>
+<pre><code class="language-text">The following deferred tools are now available via ToolSearch.
+Their schemas are NOT loaded — ... Use ToolSearch ... before calling.
+</code></pre>
+<p>Playwright MCP(약 25개 도구)가 연결돼 있어도 스키마가 컨텍스트에 올라오지 않는다. 이름 한 줄(약 10토큰)만 차지한다. 실제로 쓸 때는 <code>ToolSearch</code>로 그 도구만 on-demand 로딩한다.</p>
+<p>→ &quot;QA용 MCP를 별도 서버로 분리&quot;해서 얻는 스키마 절감 이득이 사실상 0이다.</p>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>진짜 레버는 <strong>격리(서브에이전트) + 지연 로딩(이미 적용됨)</strong>이지, 서버 분리가 아니다. 별도 MCP 서버 구축은 토큰 관점에서 투자 대비 이득이 없으므로 하지 않는다.</p>
+</div></div></aside></p>
+<hr>
+<h2>7. 권장 구성 — 세 가지를 레이어로 합친다</h2>
+<p>세 개를 대체재로 보지 말고 레이어로 합친다.</p>
+<pre><code class="language-text">오케스트레이터(메인)
+   └─ 서브에이전트(qa) 스폰  ← 격리 경계 (토큰 절감의 본질)
+        ├─ 절차: qa 스킬/qa.md 로 QA 순서 고정  ← 계획 재추론 절감
+        └─ 도구: Playwright MCP를 내부에서 on-demand fetch  ← 스키마 0 (deferred)
+   ← 받는 것: _workspace/03_qa_report.md (요약 ~800토큰) 만
+</code></pre>
+<p>이 구성의 토큰 효과는 다음과 같다.</p>
+<ul>
+<li><strong>노이즈</strong> = 서브에 격리 후 폐기 → 메인 5.9배 슬림, 메인 부담 10배 절감</li>
+<li><strong>스키마</strong> = deferred라 안 쓰면 0 → MCP 분리 불필요</li>
+<li><strong>절차</strong> = 스킬로 고정 → 매번 &quot;QA 뭐부터 하지&quot; 재추론 제거 (회당 1~3k 추가 절감)</li>
+</ul>
+<p>서브에이전트를 활용한 작업 분리에 대한 더 자세한 내용은 <a href="/post/context-engineering-prompts-rules-memory-skills">Context Engineering — 프롬프트, Rules, 메모리, Skill 시스템 →</a> 글에서 다뤘다.</p>
+<hr>
+<h2>8. 부록 — 계산 재현</h2>
+<p><code>PYTHONIOENCODING=utf-8 python</code> 로 3장 파라미터와 4장 <code>billed()</code> 함수를 사용, <code>RUNS=3</code> / <code>POST_TURNS=20</code>으로 산출했다.</p>
+<p>파라미터(snapshot 출력 크기, <code>POST_TURNS</code>)를 바꾸면 절감 배수는 달라지지만, <strong>C가 A·B를 항상 압도하는 방향성은 불변</strong>이다. 노이즈가 클수록, 세션이 길수록 격차는 더 벌어진다.</p>
+<h2>참고</h2>
+<ol>
+<li><a href="https://docs.claude.com/en/docs/claude-code/mcp" target="_blank">[1] Claude Code Docs — Connect Claude Code to tools via MCP</a></li>
+<li><a href="https://docs.claude.com/en/docs/claude-code/sub-agents" target="_blank">[2] Claude Code Docs — Subagents</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/context-engineering-prompts-rules-memory-skills">Context Engineering — 프롬프트, Rules, 메모리, Skill 시스템 →</a></li>
+<li><a href="/post/ai-development-process-spec-tdd-hooks">AI 개발 프로세스 — 작업 분할, Spec, TDD Workflow, Hook 설계 →</a></li>
+</ul>
+
+<ul><li>ai-agent</li><li>claude-code</li><li>subagent</li><li>mcp</li><li>token-economics</li><li>qa-automation</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

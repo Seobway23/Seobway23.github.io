@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="useInfiniteQuery의 페이지네이션 구조, useQueries로 동적 병렬 쿼리 실행, v5에서 안정화된 useSuspenseQuery, 커스텀 훅 패턴, v4→v5 전체 마이그레이션 가이드를 다룬다." />
+    <meta name="keywords" content="react-query, tanstack-query, useInfiniteQuery, useQueries, suspense, v5-migration, custom-hooks" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/react-query-advanced" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션" />
+    <meta property="og:description" content="useInfiniteQuery의 페이지네이션 구조, useQueries로 동적 병렬 쿼리 실행, v5에서 안정화된 useSuspenseQuery, 커스텀 훅 패턴, v4→v5 전체 마이그레이션 가이드를 다룬다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/react-query-advanced" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-28T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.310Z" />
+    <meta property="article:tag" content="react-query" />
+    <meta property="article:tag" content="tanstack-query" />
+    <meta property="article:tag" content="useInfiniteQuery" />
+    <meta property="article:tag" content="useQueries" />
+    <meta property="article:tag" content="suspense" />
+    <meta property="article:tag" content="v5-migration" />
+    <meta property="article:tag" content="custom-hooks" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션" />
+    <meta name="twitter:description" content="useInfiniteQuery의 페이지네이션 구조, useQueries로 동적 병렬 쿼리 실행, v5에서 안정화된 useSuspenseQuery, 커스텀 훅 패턴, v4→v5 전체 마이그레이션 가이드를 다룬다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션","description":"useInfiniteQuery의 페이지네이션 구조, useQueries로 동적 병렬 쿼리 실행, v5에서 안정화된 useSuspenseQuery, 커스텀 훅 패턴, v4→v5 전체 마이그레이션 가이드를 다룬다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-28T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.310Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/react-query-advanced"},"keywords":"react-query, tanstack-query, useInfiniteQuery, useQueries, suspense, v5-migration, custom-hooks","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":12321},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Freact-query"},{"@type":"ListItem","position":3,"name":"React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션","item":"https://seobway23.github.io/post/react-query-advanced"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션</h1>
+<p>useInfiniteQuery의 페이지네이션 구조, useQueries로 동적 병렬 쿼리 실행, v5에서 안정화된 useSuspenseQuery, 커스텀 훅 패턴, v4→v5 전체 마이그레이션 가이드를 다룬다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-03-28T00:00:00.000Z">2026-03-28</time> · <span>16분</span></p>
+<h2>useInfiniteQuery — 무한 스크롤 / Load More</h2>
+<p>페이지별 데이터를 순차적으로 로드한다. v5에서 <code>initialPageParam</code>이 필수가 됐다.<a href="https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries" target="_blank"><sup>[1]</sup></a></p>
+<pre><code class="language-tsx">import { useInfiniteQuery } from &#39;@tanstack/react-query&#39;
+
+function InfiniteTodoList() {
+  const {
+    data,
+    fetchNextPage,
+    fetchPreviousPage,
+    hasNextPage,
+    hasPreviousPage,
+    isFetchingNextPage,
+    isFetchingPreviousPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: [&#39;todos&#39;, &#39;infinite&#39;],
+    queryFn: ({ pageParam }) =&gt;
+      fetch(`/api/todos?cursor=${pageParam}`).then(res =&gt; res.json()),
+
+    // v5 필수 — 초기 pageParam 명시 (v4에서는 undefined가 기본값이었음)
+    initialPageParam: 0,
+
+    // 다음 페이지 커서 반환 — undefined면 hasNextPage: false
+    getNextPageParam: (lastPage, allPages) =&gt; lastPage.nextCursor ?? undefined,
+
+    // 이전 페이지 커서 (양방향 페이지네이션)
+    getPreviousPageParam: (firstPage) =&gt; firstPage.prevCursor ?? undefined,
+  })
+
+  if (status === &#39;pending&#39;) return &lt;Spinner /&gt;
+  if (status === &#39;error&#39;) return &lt;p&gt;에러 발생&lt;/p&gt;
+
+  return (
+    &lt;div&gt;
+      {data.pages.map((page, i) =&gt; (
+        &lt;Fragment key={i}&gt;
+          {page.todos.map(todo =&gt; (
+            &lt;TodoItem key={todo.id} todo={todo} /&gt;
+          ))}
+        &lt;/Fragment&gt;
+      ))}
+
+      &lt;button
+        onClick={() =&gt; fetchNextPage()}
+        disabled={!hasNextPage || isFetchingNextPage}
+      &gt;
+        {isFetchingNextPage ? &#39;로딩 중...&#39; : hasNextPage ? &#39;더 보기&#39; : &#39;끝&#39;}
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+<h3>data 구조</h3>
+<pre><code class="language-tsx">// data.pages — 각 페이지 응답의 배열
+// data.pageParams — 각 페이지를 fetch할 때 사용된 pageParam 배열
+
+data.pages[0]  // 첫 번째 페이지 응답
+data.pages[1]  // 두 번째 페이지 응답
+data.pageParams  // [0, &#39;cursor_abc&#39;, &#39;cursor_def&#39;, ...]
+</code></pre>
+<h3>maxPages — 메모리 관리 (v5 신규)</h3>
+<pre><code class="language-tsx">useInfiniteQuery({
+  queryKey: [&#39;todos&#39;],
+  queryFn: fetchTodos,
+  initialPageParam: 0,
+  getNextPageParam: (lastPage) =&gt; lastPage.nextCursor,
+
+  // 최대 3페이지만 캐시에 유지 — 메모리 절약
+  // 스크롤 뒤로 가면 자동으로 re-fetch
+  maxPages: 3,
+})
+</code></pre>
+<h3>무한 스크롤 — Intersection Observer</h3>
+<pre><code class="language-tsx">function InfiniteList() {
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({ /* ... */ })
+
+  const observerRef = useRef&lt;IntersectionObserver&gt;()
+  const bottomRef = useCallback((node: HTMLDivElement | null) =&gt; {
+    if (isFetchingNextPage) return
+    if (observerRef.current) observerRef.current.disconnect()
+
+    observerRef.current = new IntersectionObserver(entries =&gt; {
+      if (entries[0].isIntersecting &amp;&amp; hasNextPage) {
+        fetchNextPage()
+      }
+    })
+    if (node) observerRef.current.observe(node)
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage])
+
+  return (
+    &lt;div&gt;
+      {data?.pages.flatMap(page =&gt; page.items).map(item =&gt; (
+        &lt;Item key={item.id} item={item} /&gt;
+      ))}
+      &lt;div ref={bottomRef} /&gt;
+    &lt;/div&gt;
+  )
+}
+</code></pre>
+<blockquote>
+<p><strong>주의</strong>: <code>useQuery</code>와 <code>useInfiniteQuery</code>는 같은 쿼리 키를 공유할 수 없다. 서로 다른 캐시 구조를 가지기 때문이다.</p>
+</blockquote>
+<hr>
+<h2>useQueries — 동적 병렬 쿼리</h2>
+<p>쿼리 수가 런타임에 결정되는 경우. <code>useQuery</code>를 루프에서 쓸 수 없으므로 <code>useQueries</code>를 사용한다.<a href="https://tanstack.com/query/latest/docs/framework/react/guides/parallel-queries" target="_blank"><sup>[2]</sup></a></p>
+<pre><code class="language-tsx">import { useQueries } from &#39;@tanstack/react-query&#39;
+
+function TodoDetails({ ids }: { ids: number[] }) {
+  const results = useQueries({
+    queries: ids.map(id =&gt; ({
+      queryKey: [&#39;todo&#39;, id],
+      queryFn: () =&gt; fetchTodo(id),
+      staleTime: 1000 * 60,
+    })),
+  })
+
+  // results: QueryObserverResult[]
+  const allLoaded = results.every(r =&gt; r.status === &#39;success&#39;)
+  const hasError = results.some(r =&gt; r.status === &#39;error&#39;)
+
+  if (!allLoaded) return &lt;Spinner /&gt;
+
+  return (
+    &lt;ul&gt;
+      {results.map((result, i) =&gt; (
+        &lt;li key={ids[i]}&gt;{result.data?.title}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  )
+}
+</code></pre>
+<h3>combine 옵션 — 결과 합산</h3>
+<pre><code class="language-tsx">const { data, isPending } = useQueries({
+  queries: userIds.map(id =&gt; ({
+    queryKey: [&#39;user&#39;, id],
+    queryFn: () =&gt; fetchUser(id),
+  })),
+  // v5 — 모든 결과를 하나의 값으로 병합
+  combine: (results) =&gt; ({
+    data: results.map(r =&gt; r.data).filter(Boolean),
+    isPending: results.some(r =&gt; r.isPending),
+  }),
+})
+</code></pre>
+<hr>
+<h2>useSuspenseQuery — Suspense 통합 (v5 안정화)</h2>
+<p>v5에서 <code>suspense: true</code> 옵션이 제거되고 <code>useSuspenseQuery</code>로 분리됐다. 타입이 더 정확해졌다.<a href="https://tanstack.com/query/latest/docs/framework/react/guides/suspense" target="_blank"><sup>[3]</sup></a></p>
+<pre><code class="language-tsx">import { useSuspenseQuery } from &#39;@tanstack/react-query&#39;
+import { Suspense } from &#39;react&#39;
+
+// ① data가 항상 defined — isLoading 없음, isPending 없음
+function TodoList() {
+  const { data } = useSuspenseQuery({
+    queryKey: [&#39;todos&#39;],
+    queryFn: fetchTodos,
+  })
+
+  // data: Todo[] — null/undefined 없음
+  return &lt;ul&gt;{data.map(todo =&gt; &lt;li key={todo.id}&gt;{todo.title}&lt;/li&gt;)}&lt;/ul&gt;
+}
+
+// ② 부모에서 Suspense + ErrorBoundary로 감싸야 함
+function App() {
+  return (
+    &lt;ErrorBoundary fallback={&lt;p&gt;에러 발생&lt;/p&gt;}&gt;
+      &lt;Suspense fallback={&lt;Spinner /&gt;}&gt;
+        &lt;TodoList /&gt;
+      &lt;/Suspense&gt;
+    &lt;/ErrorBoundary&gt;
+  )
+}
+</code></pre>
+<pre><code class="language-mermaid">%% desc: useSuspenseQuery vs useQuery 데이터 흐름 차이
+flowchart LR
+  subgraph UQ[&quot;useQuery&quot;]
+    A1[&quot;isPending 체크\n→ 로딩 UI&quot;]
+    A2[&quot;isError 체크\n→ 에러 UI&quot;]
+    A3[&quot;data 렌더링\n(undefined 가능성 있음)&quot;]
+    A1 --&gt; A2 --&gt; A3
+  end
+
+  subgraph USQ[&quot;useSuspenseQuery&quot;]
+    B1[&quot;컴포넌트 일시 정지\n→ Suspense fallback&quot;]
+    B2[&quot;에러 throw\n→ ErrorBoundary&quot;]
+    B3[&quot;data 렌더링\n(항상 defined)&quot;]
+    B1 --&gt; B2 --&gt; B3
+  end
+</code></pre>
+<h3>useSuspenseInfiniteQuery</h3>
+<pre><code class="language-tsx">import { useSuspenseInfiniteQuery } from &#39;@tanstack/react-query&#39;
+
+function InfiniteList() {
+  const { data, fetchNextPage } = useSuspenseInfiniteQuery({
+    queryKey: [&#39;items&#39;],
+    queryFn: ({ pageParam }) =&gt; fetchItems(pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =&gt; lastPage.nextCursor,
+  })
+
+  // data 항상 defined
+  return &lt;&gt;{/* ... */}&lt;/&gt;
+}
+</code></pre>
+<hr>
+<h2>커스텀 훅 패턴</h2>
+<p>쿼리 키와 <code>queryFn</code>을 한 곳에서 관리한다. 기능별로 묶어 재사용성을 높인다.</p>
+<pre><code class="language-tsx">// hooks/useTodos.ts
+import { useQuery, useMutation, useQueryClient } from &#39;@tanstack/react-query&#39;
+
+// 쿼리 키 팩토리 — 이 파일에서만 관리
+const todoKeys = {
+  all: [&#39;todos&#39;] as const,
+  lists: () =&gt; [...todoKeys.all, &#39;list&#39;] as const,
+  list: (filters: string) =&gt; [...todoKeys.lists(), { filters }] as const,
+  details: () =&gt; [...todoKeys.all, &#39;detail&#39;] as const,
+  detail: (id: number) =&gt; [...todoKeys.details(), id] as const,
+}
+
+// useQuery 래핑
+export function useTodos(filters?: string) {
+  return useQuery({
+    queryKey: filters ? todoKeys.list(filters) : todoKeys.lists(),
+    queryFn: () =&gt; fetchTodos(filters),
+    staleTime: 1000 * 60,
+  })
+}
+
+export function useTodo(id: number) {
+  return useQuery({
+    queryKey: todoKeys.detail(id),
+    queryFn: () =&gt; fetchTodo(id),
+    enabled: id &gt; 0,
+  })
+}
+
+// useMutation 래핑
+export function useCreateTodo() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: createTodo,
+    onSuccess: () =&gt; {
+      queryClient.invalidateQueries({ queryKey: todoKeys.lists() })
+    },
+  })
+}
+
+export function useUpdateTodo() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: updateTodo,
+    onSuccess: (updatedTodo) =&gt; {
+      queryClient.setQueryData(todoKeys.detail(updatedTodo.id), updatedTodo)
+      queryClient.invalidateQueries({ queryKey: todoKeys.lists() })
+    },
+  })
+}
+</code></pre>
+<pre><code class="language-tsx">// 컴포넌트에서 사용 — queryKey/queryFn 모름, 캐시 구조 모름
+function TodoList() {
+  const { data, isLoading } = useTodos(&#39;active&#39;)
+  const createMutation = useCreateTodo()
+
+  // ...
+}
+</code></pre>
+<p><strong>장점</strong>:</p>
+<ul>
+<li>쿼리 키가 한 곳에서만 관리됨 → 오타·불일치 불가</li>
+<li>컴포넌트가 API 구조를 모름 → 관심사 분리</li>
+<li>테스트 시 훅만 mock하면 됨</li>
+</ul>
+<hr>
+<h2>v4 → v5 마이그레이션 가이드</h2>
+<pre><code class="language-mermaid">%% desc: v4에서 v5로 주요 변경사항 요약
+flowchart LR
+  subgraph V4[&quot;v4&quot;]
+    V4A[&quot;cacheTime&quot;]
+    V4B[&quot;status: &#39;loading&#39;&quot;]
+    V4C[&quot;isLoading (항상 pending+fetching)&quot;]
+    V4D[&quot;useErrorBoundary: true&quot;]
+    V4E[&quot;suspense: true (useQuery 옵션)&quot;]
+    V4F[&quot;onSuccess/onError/onSettled\n(useQuery 콜백)&quot;]
+    V4G[&quot;keepPreviousData: true&quot;]
+    V4H[&quot;getNextPageParam → undefined 가능&quot;]
+    V4I[&quot;refetchOnWindowFocus: focus 이벤트&quot;]
+  end
+
+  subgraph V5[&quot;v5&quot;]
+    V5A[&quot;gcTime&quot;]
+    V5B[&quot;status: &#39;pending&#39;&quot;]
+    V5C[&quot;isPending (pending 상태)\nisFetching (네트워크 요청 중)&quot;]
+    V5D[&quot;throwOnError: true&quot;]
+    V5E[&quot;useSuspenseQuery (별도 훅)&quot;]
+    V5F[&quot;제거됨 → useEffect/외부로 이동&quot;]
+    V5G[&quot;placeholderData: keepPreviousData&quot;]
+    V5H[&quot;initialPageParam 필수&quot;]
+    V5I[&quot;visibilitychange 이벤트&quot;]
+  end
+
+  V4A --&gt; V5A
+  V4B --&gt; V5B
+  V4C --&gt; V5C
+  V4D --&gt; V5D
+  V4E --&gt; V5E
+  V4F --&gt; V5F
+  V4G --&gt; V5G
+  V4H --&gt; V5H
+  V4I --&gt; V5I
+</code></pre>
+<h3>변경점 코드 예시</h3>
+<pre><code class="language-tsx">// ── cacheTime → gcTime ──────────────────────────────────────────────
+// v4
+useQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos, cacheTime: 1000 * 60 * 5 })
+// v5
+useQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos, gcTime: 1000 * 60 * 5 })
+
+// ── status: &#39;loading&#39; → &#39;pending&#39; ──────────────────────────────────
+// v4
+if (status === &#39;loading&#39;) { /* ... */ }
+// v5
+if (status === &#39;pending&#39;) { /* ... */ }
+
+// ── isLoading semantics ─────────────────────────────────────────────
+// v4: isLoading = (status === &#39;loading&#39;)
+// v5: isLoading = isPending &amp;&amp; isFetching (더 구체적)
+// 이전 v4 동작이 필요하면:
+const isLoading = isPending &amp;&amp; isFetching
+
+// ── useErrorBoundary → throwOnError ────────────────────────────────
+// v4
+useQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos, useErrorBoundary: true })
+// v5
+useQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos, throwOnError: true })
+
+// ── keepPreviousData → placeholderData ─────────────────────────────
+// v4
+useQuery({ queryKey: [&#39;todos&#39;, page], queryFn: fetchPage, keepPreviousData: true })
+// v5
+import { keepPreviousData } from &#39;@tanstack/react-query&#39;
+useQuery({
+  queryKey: [&#39;todos&#39;, page],
+  queryFn: fetchPage,
+  placeholderData: keepPreviousData,
+})
+
+// ── useQuery 콜백 제거 ───────────────────────────────────────────────
+// v4 (동작함)
+useQuery({
+  queryKey: [&#39;user&#39;],
+  queryFn: fetchUser,
+  onSuccess: (data) =&gt; { setUser(data) },  // ← v5에서 제거됨
+})
+// v5 — useEffect로 이동
+const { data } = useQuery({ queryKey: [&#39;user&#39;], queryFn: fetchUser })
+useEffect(() =&gt; {
+  if (data) setUser(data)
+}, [data])
+
+// ── suspense 옵션 → useSuspenseQuery ──────────────────────────────
+// v4
+useQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos, suspense: true })
+// v5
+import { useSuspenseQuery } from &#39;@tanstack/react-query&#39;
+useSuspenseQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos })
+
+// ── useInfiniteQuery initialPageParam 필수 ──────────────────────────
+// v4 (pageParam이 undefined로 시작)
+useInfiniteQuery({
+  queryKey: [&#39;pages&#39;],
+  queryFn: ({ pageParam = 0 }) =&gt; fetchPage(pageParam),
+  getNextPageParam: (lastPage) =&gt; lastPage.nextCursor,
+})
+// v5
+useInfiniteQuery({
+  queryKey: [&#39;pages&#39;],
+  queryFn: ({ pageParam }) =&gt; fetchPage(pageParam),
+  initialPageParam: 0,  // 필수
+  getNextPageParam: (lastPage) =&gt; lastPage.nextCursor,
+})
+</code></pre>
+<hr>
+<h2>흔한 실수 모음</h2>
+<h3>1. QueryClient를 컴포넌트 안에서 생성</h3>
+<pre><code class="language-tsx">// ❌ 잘못됨 — 렌더링마다 새 QueryClient 생성 → 캐시 초기화
+function App() {
+  const queryClient = new QueryClient()  // 매 렌더링마다 새로 만들어짐
+  return &lt;QueryClientProvider client={queryClient}&gt;...&lt;/QueryClientProvider&gt;
+}
+
+// ✅ 올바름 — 컴포넌트 밖에서 생성
+const queryClient = new QueryClient()
+function App() {
+  return &lt;QueryClientProvider client={queryClient}&gt;...&lt;/QueryClientProvider&gt;
+}
+</code></pre>
+<h3>2. useQuery 데이터를 useState 초기값으로</h3>
+<pre><code class="language-tsx">// ❌ 잘못됨 — data가 undefined일 때 초기값이 undefined로 고정됨
+const { data } = useQuery({ queryKey: [&#39;user&#39;], queryFn: fetchUser })
+const [user, setUser] = useState(data)  // data가 나중에 업데이트돼도 user는 안 바뀜
+
+// ✅ 올바름 — data를 직접 사용하거나, 파생 상태가 필요하면 useMemo
+const { data: user } = useQuery({ queryKey: [&#39;user&#39;], queryFn: fetchUser })
+const displayName = useMemo(
+  () =&gt; user ? `${user.firstName} ${user.lastName}` : &#39;&#39;,
+  [user]
+)
+</code></pre>
+<h3>3. staleTime 0 (기본값) 방치</h3>
+<pre><code class="language-tsx">// ❌ 잘못됨 — staleTime: 0이면 마운트마다, 포커스마다 refetch
+useQuery({ queryKey: [&#39;config&#39;], queryFn: fetchConfig })
+
+// ✅ 올바름 — 자주 변하지 않는 데이터는 staleTime 설정
+useQuery({
+  queryKey: [&#39;config&#39;],
+  queryFn: fetchConfig,
+  staleTime: 1000 * 60 * 10,  // 10분
+})
+</code></pre>
+<h3>4. useQuery와 useInfiniteQuery에 같은 키 사용</h3>
+<pre><code class="language-tsx">// ❌ 잘못됨 — 캐시 충돌
+useQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodos })
+useInfiniteQuery({ queryKey: [&#39;todos&#39;], queryFn: fetchTodosPage, /* ... */ })
+
+// ✅ 올바름 — 키 구분
+useQuery({ queryKey: [&#39;todos&#39;, &#39;list&#39;], queryFn: fetchTodos })
+useInfiniteQuery({ queryKey: [&#39;todos&#39;, &#39;infinite&#39;], /* ... */ })
+</code></pre>
+<h3>5. enabled 없이 조건부 queryFn</h3>
+<pre><code class="language-tsx">// ❌ 잘못됨 — userId가 undefined일 때 API 호출됨
+useQuery({
+  queryKey: [&#39;user&#39;, userId],
+  queryFn: () =&gt; fetchUser(userId!),  // userId가 없으면 에러
+})
+
+// ✅ 올바름 — enabled로 방어
+useQuery({
+  queryKey: [&#39;user&#39;, userId],
+  queryFn: () =&gt; fetchUser(userId!),
+  enabled: !!userId,
+})
+</code></pre>
+<hr>
+<h2>DevTools 설정</h2>
+<pre><code class="language-tsx">// main.tsx
+import { ReactQueryDevtools } from &#39;@tanstack/react-query-devtools&#39;
+
+function App() {
+  return (
+    &lt;QueryClientProvider client={queryClient}&gt;
+      &lt;Router /&gt;
+      {/* 개발 환경에서만 렌더링 */}
+      {process.env.NODE_ENV === &#39;development&#39; &amp;&amp; (
+        &lt;ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition=&quot;bottom-right&quot;  // 위치 조정
+        /&gt;
+      )}
+    &lt;/QueryClientProvider&gt;
+  )
+}
+</code></pre>
+<p><strong>DevTools에서 확인할 수 있는 것</strong>:</p>
+<ul>
+<li>모든 활성 쿼리와 상태 (fresh/stale/fetching/inactive)</li>
+<li>쿼리 키, 데이터, 에러</li>
+<li>gcTime 타이머</li>
+<li>쿼리 수동 무효화·삭제·refetch</li>
+</ul>
+<blockquote>
+<p><strong>팁</strong>: DevTools에서 특정 쿼리를 클릭하고 &quot;Invalidate&quot; 버튼으로 즉시 refetch 트리거가 가능하다. 로딩 상태 테스트에 유용하다.</p>
+</blockquote>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries" target="_blank">[1] Infinite Queries — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/parallel-queries" target="_blank">[2] Parallel Queries — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/suspense" target="_blank">[3] Suspense — TanStack Query Docs</a></li>
+<li><a href="https://tanstack.com/query/latest/docs/framework/react/guides/migrating-to-v5" target="_blank">[4] Migrating to v5 — TanStack Query Docs</a></li>
+<li><a href="https://tkdodo.eu/blog/react-query-fa-qs" target="_blank">[5] React Query FAQs — TkDodo</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-query-overview">TanStack Query 개요 →</a></li>
+<li><a href="/post/react-query-queries">useQuery 심층 →</a></li>
+<li><a href="/post/react-query-mutations">useMutation · Optimistic Updates →</a></li>
+<li><a href="/post/react-query-cache">캐시 · 무효화 · Prefetch →</a></li>
+</ul>
+
+<ul><li>react-query</li><li>tanstack-query</li><li>useInfiniteQuery</li><li>useQueries</li><li>suspense</li><li>v5-migration</li><li>custom-hooks</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

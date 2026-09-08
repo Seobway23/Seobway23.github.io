@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="TypeScript를 문법 모음이 아니라 의도를 코드에 남기는 도구로 이해한다. 기초 단계에서 가장 먼저 익혀야 할 타입, 유니온, 좁히기 개념을 정리한다." />
+    <meta name="keywords" content="typescript, type-system, any, unknown, union, narrowing" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/typescript-type-system-basics" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법" />
+    <meta property="og:description" content="TypeScript를 문법 모음이 아니라 의도를 코드에 남기는 도구로 이해한다. 기초 단계에서 가장 먼저 익혀야 할 타입, 유니온, 좁히기 개념을 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/typescript-type-system-basics" />
+    <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
+    <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.336Z" />
+    <meta property="article:tag" content="typescript" />
+    <meta property="article:tag" content="type-system" />
+    <meta property="article:tag" content="any" />
+    <meta property="article:tag" content="unknown" />
+    <meta property="article:tag" content="union" />
+    <meta property="article:tag" content="narrowing" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법" />
+    <meta name="twitter:description" content="TypeScript를 문법 모음이 아니라 의도를 코드에 남기는 도구로 이해한다. 기초 단계에서 가장 먼저 익혀야 할 타입, 유니온, 좁히기 개념을 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법","description":"TypeScript를 문법 모음이 아니라 의도를 코드에 남기는 도구로 이해한다. 기초 단계에서 가장 먼저 익혀야 할 타입, 유니온, 좁히기 개념을 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.336Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/typescript-type-system-basics"},"keywords":"typescript, type-system, any, unknown, union, narrowing","articleSection":"프론트엔드","inLanguage":"ko-KR","wordCount":2948},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"프론트엔드","item":"https://seobway23.github.io/?category=study%2Ffrontend%2Ftypescript"},{"@type":"ListItem","position":3,"name":"TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법","item":"https://seobway23.github.io/post/typescript-type-system-basics"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>프론트엔드</span></nav>
+<h1>TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법</h1>
+<p>TypeScript를 문법 모음이 아니라 의도를 코드에 남기는 도구로 이해한다. 기초 단계에서 가장 먼저 익혀야 할 타입, 유니온, 좁히기 개념을 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>10분</span></p>
+<h2>이 시리즈 구성</h2>
+<table>
+<thead>
+<tr>
+<th>포스트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/post/ai-webdev-roadmap-foundation">로드맵 인덱스 →</a></td>
+<td>01~19 전체 학습 경로</td>
+</tr>
+<tr>
+<td><a href="/post/js-event-loop-and-async">01-1. JS 이벤트 루프와 비동기 →</a></td>
+<td>콜스택, 큐, 마이크로태스크</td>
+</tr>
+<tr>
+<td><a href="/post/settimeout-vs-promise">01-2. setTimeout vs Promise →</a></td>
+<td>비동기 실행 순서 예측</td>
+</tr>
+<tr>
+<td><a href="/post/react-component-data-flow">01-3. React 단방향 데이터 흐름 →</a></td>
+<td>props/state, state 끌어올리기</td>
+</tr>
+<tr>
+<td><a href="/post/react-controlled-vs-uncontrolled">01-4. controlled vs uncontrolled →</a></td>
+<td>React 폼 설계</td>
+</tr>
+<tr>
+<td><a href="/post/typescript-type-system-basics">01-5. TypeScript 타입 시스템 기초 →</a></td>
+<td>any, unknown, union, narrowing</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>TypeScript를 왜 초반에 넣는가</h2>
+<p>TypeScript는 나중에 붙이는 장식이 아니다.</p>
+<p>기초 단계에서 TypeScript를 같이 익히면, 값이 어떤 형태인지 머릿속으로만 기억하지 않고 코드에 남길 수 있다. 그 결과 컴포넌트 props, API 응답, 함수 인자에서 실수가 줄어든다.</p>
+<hr>
+<h2>타입은 값의 의도다</h2>
+<pre><code class="language-ts">function formatPrice(price: number) {
+  return `${price.toLocaleString()}원`
+}
+</code></pre>
+<p>여기서 <code>price: number</code>는 단순 문법이 아니라 &quot;이 함수는 숫자를 기대한다&quot;는 의도다.</p>
+<p>JavaScript에서는 문자열이 들어와도 런타임에야 알 수 있지만, TypeScript는 그 전에 알려 줄 수 있다.</p>
+<hr>
+<h2>기초 단계에서 먼저 익힐 4가지</h2>
+<h3>1. 기본 타입</h3>
+<pre><code class="language-ts">let title: string = &#39;Hello&#39;
+let count: number = 3
+let isOpen: boolean = false
+</code></pre>
+<h3>2. 객체 타입</h3>
+<pre><code class="language-ts">const user: { id: number; name: string } = {
+  id: 1,
+  name: &#39;Seobway&#39;,
+}
+</code></pre>
+<h3>3. 유니온 타입</h3>
+<pre><code class="language-ts">let status: &#39;idle&#39; | &#39;loading&#39; | &#39;success&#39; | &#39;error&#39; = &#39;idle&#39;
+</code></pre>
+<p>가능한 값을 좁혀 두면 상태를 훨씬 안전하게 다룰 수 있다.</p>
+<h3>4. 좁히기(narrowing)</h3>
+<pre><code class="language-ts">function printValue(value: string | number) {
+  if (typeof value === &#39;string&#39;) {
+    console.log(value.toUpperCase())
+  } else {
+    console.log(value.toFixed(2))
+  }
+}
+</code></pre>
+<p>유니온 타입을 썼다면, 실제 분기에서 타입을 좁혀 가며 사용해야 한다.</p>
+<hr>
+<h2>any는 왜 조심해야 하는가</h2>
+<p><code>any</code>를 쓰면 일단 편해 보인다.</p>
+<pre><code class="language-ts">function logValue(value: any) {
+  console.log(value.trim())
+}
+</code></pre>
+<p>하지만 <code>any</code>는 TypeScript의 도움을 사실상 포기하는 선택에 가깝다. 그래서 기초 단계에서는 <code>any</code> 대신 <code>unknown</code>을 먼저 떠올리는 습관이 좋다.</p>
+<pre><code class="language-ts">function logValue(value: unknown) {
+  if (typeof value === &#39;string&#39;) {
+    console.log(value.trim())
+  }
+}
+</code></pre>
+<p><code>unknown</code>은 &quot;아직 모른다&quot;이고, <code>any</code>는 &quot;검사를 포기한다&quot;에 가깝다.</p>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>입문 단계에서 <code>any</code>가 많아지면, 타입 시스템이 실제로 어떤 실수를 막아 주는지 체감하기가 어려워진다. 초반에는 조금 불편하더라도 타입을 좁히는 습관을 먼저 들이는 편이 좋다.</p>
+</div></div></aside></p>
+<hr>
+<h2>React에서 TypeScript가 특히 좋은 이유</h2>
+<p>React에서는 props 구조가 자주 바뀌고, 상태도 여러 형태를 가진다.</p>
+<pre><code class="language-tsx">type PostCardProps = {
+  title: string
+  readTime: number
+  featured?: boolean
+}
+
+function PostCard({ title, readTime, featured = false }: PostCardProps) {
+  return &lt;div&gt;{title} · {readTime}분 · {featured ? &#39;추천&#39; : &#39;일반&#39;}&lt;/div&gt;
+}
+</code></pre>
+<p>이렇게 적어 두면 컴포넌트 사용법 자체가 더 분명해진다.</p>
+<hr>
+<h2>기초 단계에서는 여기까지면 충분하다</h2>
+<p>처음부터 복잡한 제네릭, 조건부 타입, 고급 유틸리티 타입까지 들어갈 필요는 없다.</p>
+<p>먼저 다음을 편하게 읽을 수 있으면 좋다.</p>
+<ul>
+<li>함수 인자의 타입</li>
+<li>객체와 배열 타입</li>
+<li>유니온 타입</li>
+<li><code>unknown</code>과 타입 좁히기</li>
+<li>React props 타입 선언</li>
+</ul>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>TypeScript 초반 목표는 &quot;어려운 문법 많이 알기&quot;가 아니라 <strong>자주 쓰는 데이터 모양을 안전하게 표현하기</strong>다.</p>
+</div></div></aside></p>
+<hr>
+<h2>마치며</h2>
+<p>TypeScript는 자바스크립트를 대체하는 언어가 아니라, 자바스크립트 코드에 <strong>설명서와 가드레일</strong>을 더해 주는 도구에 가깝다.</p>
+<p>그래서 기초 단계에서는 복잡한 기술보다, <code>any</code>를 줄이고 의도를 드러내는 기본 타입 감각부터 먼저 익히는 것이 좋다.</p>
+<h2>조금 더 깊게 보기</h2>
+<h3>TypeScript는 개발자의 두 번째 기억이다</h3>
+<p>프로젝트가 작을 때는 데이터 모양을 머리로 기억할 수 있다. 하지만 API 응답이 늘고 props가 많아지면 기억은 금방 틀린다. TypeScript는 이 기억을 코드에 남기는 도구다.</p>
+<h3>any가 위험한 진짜 이유</h3>
+<p><code>any</code>는 에러를 없애는 것이 아니라 경고등을 떼어내는 것에 가깝다. 특히 API 응답을 <code>any</code>로 받으면 백엔드 변경이 프론트에서 조용히 터질 수 있다.</p>
+<h3>unknown을 배우면 타입 감각이 좋아진다</h3>
+<p><code>unknown</code>은 아직 모르는 값이니 확인한 뒤 쓰라고 요구한다. 이 과정에서 <code>typeof</code>, <code>Array.isArray</code>, discriminated union 같은 좁히기 패턴을 자연스럽게 배우게 된다.</p>
+<hr>
+<h2>참고</h2>
+<ol>
+<li><a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html" target="_blank">[1] TypeScript Handbook — Everyday Types</a></li>
+<li><a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html" target="_blank">[2] TypeScript Handbook — Narrowing</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/react-component-data-flow">React 단방향 데이터 흐름 →</a></li>
+<li><a href="/post/react-controlled-vs-uncontrolled">controlled vs uncontrolled 컴포넌트 →</a></li>
+<li><a href="/post/js-runtime-node-bun-deno">Node.js · Bun · Deno 런타임 비교 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+</ul>
+
+<ul><li>typescript</li><li>type-system</li><li>any</li><li>unknown</li><li>union</li><li>narrowing</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

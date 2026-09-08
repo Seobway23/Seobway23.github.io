@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Docker Compose 기초 — env_file, 변수 치환, depends_on — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="env_file과 환경변수 치환(interpolation)의 차이, depends_on + healthcheck로 서비스 시작 순서를 제어하는 방법을 실제 에러 케이스와 함께 설명한다." />
+    <meta name="keywords" content="Docker, DockerCompose, envFile, Interpolation, DependsOn, Healthcheck, Environment" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/docker-compose-basics" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Docker Compose 기초 — env_file, 변수 치환, depends_on" />
+    <meta property="og:description" content="env_file과 환경변수 치환(interpolation)의 차이, depends_on + healthcheck로 서비스 시작 순서를 제어하는 방법을 실제 에러 케이스와 함께 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/docker-compose-basics" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-26T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.349Z" />
+    <meta property="article:tag" content="Docker" />
+    <meta property="article:tag" content="DockerCompose" />
+    <meta property="article:tag" content="envFile" />
+    <meta property="article:tag" content="Interpolation" />
+    <meta property="article:tag" content="DependsOn" />
+    <meta property="article:tag" content="Healthcheck" />
+    <meta property="article:tag" content="Environment" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Docker Compose 기초 — env_file, 변수 치환, depends_on" />
+    <meta name="twitter:description" content="env_file과 환경변수 치환(interpolation)의 차이, depends_on + healthcheck로 서비스 시작 순서를 제어하는 방법을 실제 에러 케이스와 함께 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Docker Compose 기초 — env_file, 변수 치환, depends_on","description":"env_file과 환경변수 치환(interpolation)의 차이, depends_on + healthcheck로 서비스 시작 순서를 제어하는 방법을 실제 에러 케이스와 함께 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-26T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.349Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/docker-compose-basics"},"keywords":"Docker, DockerCompose, envFile, Interpolation, DependsOn, Healthcheck, Environment","articleSection":"docker","inLanguage":"ko-KR","wordCount":4183},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"docker","item":"https://seobway23.github.io/?category=study%2Finfra%2Fdocker"},{"@type":"ListItem","position":3,"name":"Docker Compose 기초 — env_file, 변수 치환, depends_on","item":"https://seobway23.github.io/post/docker-compose-basics"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>docker</span></nav>
+<h1>Docker Compose 기초 — env_file, 변수 치환, depends_on</h1>
+<p>env_file과 환경변수 치환(interpolation)의 차이, depends_on + healthcheck로 서비스 시작 순서를 제어하는 방법을 실제 에러 케이스와 함께 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-26T00:00:00.000Z">2026-03-26</time> · <span>11분</span></p>
+<h2>가장 흔한 Compose 에러</h2>
+<pre><code>invalid interpolated value: ports: ${WEB_PORT}: mandatory variable &#39;WEB_PORT&#39; is not set
+</code></pre>
+<p>이 에러를 처음 보면 당황스럽다.<br><code>.env.local</code>에 <code>WEB_PORT=8000</code>이 분명히 있는데 왜 못 읽을까?</p>
+<p>원인은 <code>env_file</code>과 <strong>변수 치환(interpolation)</strong>의 차이를 몰랐기 때문이다.</p>
+<h2>Docker Compose 기본 구조</h2>
+<pre><code class="language-yaml"># docker-compose.yml
+version: &quot;3.9&quot;
+
+services:        # 실행할 서비스(컨테이너) 정의
+  web:
+    build: .     # Dockerfile로 이미지 빌드
+    ports:
+      - &quot;${WEB_PORT}:${WEB_PORT}&quot;
+    env_file:
+      - .env.local
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-h&quot;, &quot;localhost&quot;]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  mysql_data:
+</code></pre>
+<h2>env_file vs 변수 치환 — 핵심 차이</h2>
+<pre><code class="language-mermaid">%% desc: env_file은 컨테이너 내부에만 주입, 변수 치환은 Compose 실행 시점에 .env 파일에서 읽음
+flowchart TD
+  subgraph COMPOSE_TIME[&quot;Compose 실행 시점 (docker compose up)&quot;]
+    DOTENV[&quot;.env 파일\nWEB_PORT=8000&quot;]
+    SHELL[&quot;쉘 환경변수\nexport WEB_PORT=8000&quot;]
+    INTERP[&quot;Compose 변수 치환\n${WEB_PORT} → 8000\nposts: - &#39;8000:8000&#39;&quot;]
+    DOTENV &amp; SHELL --&gt; INTERP
+  end
+
+  subgraph CONTAINER_TIME[&quot;컨테이너 실행 시점&quot;]
+    ENVFILE[&quot;.env.local\nWEB_PORT=8000\nDJANGO_SECRET_KEY=...&quot;]
+    CONTAINER[&quot;컨테이너 내부\n환경변수로 주입&quot;]
+    ENVFILE --&gt; CONTAINER
+  end
+
+  COMPOSE_TIME --&gt; CONTAINER_TIME
+</code></pre>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>env_file:</code></th>
+<th>변수 치환 (<code>${VAR}</code>)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>읽는 시점</strong></td>
+<td>컨테이너 시작 시</td>
+<td><code>docker compose up</code> 명령 실행 시</td>
+</tr>
+<tr>
+<td><strong>적용 범위</strong></td>
+<td>컨테이너 내부 환경변수</td>
+<td><code>docker-compose.yml</code> 파일의 <code>${VAR}</code></td>
+</tr>
+<tr>
+<td><strong>읽는 파일</strong></td>
+<td><code>env_file:</code>에 명시한 파일</td>
+<td>프로젝트 루트의 <code>.env</code> 또는 쉘 환경변수</td>
+</tr>
+<tr>
+<td><strong>사용 예</strong></td>
+<td><code>DJANGO_SECRET_KEY</code>, <code>DATABASE_URL</code></td>
+<td><code>ports</code>, <code>image</code> 태그, <code>container_name</code></td>
+</tr>
+</tbody></table>
+<h3>해결책</h3>
+<pre><code class="language-bash"># 프로젝트 루트에 Compose 치환 전용 .env 파일 생성
+# (컨테이너 내부 값이 아닌, Compose 파일 렌더링용)
+cat &gt; .env &lt;&lt; EOF
+WEB_PORT=8000
+COMPOSE_PROJECT_NAME=myproject
+EOF
+</code></pre>
+<p><code>.env</code>는 <code>docker compose</code> 명령 실행 시 <strong>자동으로</strong> 읽힌다.<sup id="fnref-compose-env-file" style="scroll-margin-top: 96px;"><a href="#fn-compose-env-file" aria-label="각주 1">[1]</a></sup><br>별도 설정 없이 <code>${WEB_PORT}</code>가 <code>8000</code>으로 치환된다.</p>
+<pre><code>.
+├── .env              ← Compose 변수 치환용 (WEB_PORT 등)
+├── .env.local        ← 컨테이너 내부 환경변수용 (env_file:)
+└── docker-compose.yml
+</code></pre>
+<blockquote>
+<p><code>.env</code>는 보통 <code>.gitignore</code>에 포함되지 않는다(값이 단순한 포트 번호 등이므로).<br>반면 <code>.env.local</code>은 시크릿 키, DB 비밀번호를 포함하므로 반드시 <code>.gitignore</code>에 추가.</p>
+</blockquote>
+<h2>depends_on + healthcheck — 시작 순서 제어</h2>
+<p>서비스 간 의존성이 있을 때 사용한다.<br>예: Django는 MySQL이 준비된 후 시작해야 한다.</p>
+<h3>depends_on만 쓰면 부족하다</h3>
+<pre><code class="language-yaml"># 이것만으로는 부족하다
+depends_on:
+  - db
+</code></pre>
+<p><code>depends_on</code>만 사용하면 <strong>컨테이너가 시작된 시점</strong>을 기다릴 뿐,<br>MySQL이 실제로 연결을 받을 준비가 됐는지는 보장하지 않는다.</p>
+<h3>healthcheck + condition 조합</h3>
+<pre><code class="language-yaml">services:
+  web:
+    depends_on:
+      db:
+        condition: service_healthy   # DB가 healthy 상태일 때만 web 시작
+      redis:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-h&quot;, &quot;localhost&quot;, &quot;-u&quot;, &quot;root&quot;, &quot;-p${MYSQL_ROOT_PASSWORD}&quot;]
+      interval: 5s      # 5초마다 체크
+      timeout: 3s       # 3초 내 응답 없으면 실패
+      retries: 5        # 5번 실패하면 unhealthy
+      start_period: 10s # 처음 10초는 실패해도 카운트 안 함
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;redis-cli&quot;, &quot;ping&quot;]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+</code></pre>
+<pre><code class="language-mermaid">%% desc: depends_on + healthcheck 동작 흐름 — MySQL healthy 확인 후 Django 시작
+sequenceDiagram
+  participant DC as Docker Compose
+  participant MYSQL as MySQL Container
+  participant REDIS as Redis Container
+  participant WEB as Django Container
+
+  DC-&gt;&gt;MYSQL: 컨테이너 시작
+  DC-&gt;&gt;REDIS: 컨테이너 시작
+  DC-&gt;&gt;DC: web 시작 대기 (condition: service_healthy)
+
+  loop healthcheck (5초마다)
+    DC-&gt;&gt;MYSQL: mysqladmin ping
+    MYSQL--&gt;&gt;DC: 응답 없음 (초기화 중)
+  end
+
+  MYSQL--&gt;&gt;DC: pong ✅ (healthy)
+  REDIS--&gt;&gt;DC: pong ✅ (healthy)
+
+  DC-&gt;&gt;WEB: 컨테이너 시작 (둘 다 healthy 확인 후)
+</code></pre>
+<h2>자주 쓰는 Compose 키워드</h2>
+<pre><code class="language-yaml">services:
+  web:
+    # 이미지 빌드
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # 또는 기존 이미지 사용
+    image: python:3.12-slim
+
+    # 컨테이너 이름 명시
+    container_name: pms_v3-web
+
+    # 항상 재시작
+    restart: unless-stopped
+
+    # 볼륨 마운트
+    volumes:
+      - .:/app                        # Bind Mount (코드 동기화)
+      - static_files:/app/staticfiles  # Named Volume
+
+    # 환경변수 직접 정의
+    environment:
+      - DEBUG=true
+      - PYTHONUNBUFFERED=1
+
+    # 환경변수 파일 지정 (컨테이너 내부용)
+    env_file:
+      - .env.local
+
+    # 포트 매핑 (호스트:컨테이너)
+    ports:
+      - &quot;${WEB_PORT}:8000&quot;
+
+    # 실행 명령 오버라이드
+    command: python manage.py runserver 0.0.0.0:8000
+
+    # 네트워크 명시 (기본은 자동 생성)
+    networks:
+      - backend_network
+</code></pre>
+<h2>유용한 Compose 명령어</h2>
+<pre><code class="language-bash"># 서비스 시작 (백그라운드)
+docker compose up -d
+
+# 특정 서비스만 시작
+docker compose up -d web
+
+# 이미지 강제 재빌드
+docker compose up -d --build
+
+# 로그 확인
+docker compose logs -f web
+
+# 컨테이너 내 명령 실행
+docker compose exec web python manage.py migrate
+
+# 서비스 상태 확인
+docker compose ps
+
+# 중지 (컨테이너, 네트워크 삭제 / 볼륨은 유지)
+docker compose down
+
+# 중지 + 볼륨까지 삭제 (DB 초기화)
+docker compose down -v
+</code></pre>
+<h2>참고</h2>
+<ol>
+<li id="fn-compose-env-file" style="scroll-margin-top: 96px;">Docker Inc., <a href="https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/" target="_blank">Set environment variables in Compose — Docker Docs</a> <a href="#fnref-compose-env-file" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/docker-basics">Docker 기초 — Image, Container, Volume, Network →</a> — Compose 이전에 알아야 할 Docker 핵심 개념</li>
+<li><a href="/post/docker-compose-django">Docker Compose로 Django 5개 서비스 띄우기 →</a> — env_file과 healthcheck를 실전 프로젝트에 적용</li>
+</ul>
+<hr>
+
+<ul><li>Docker</li><li>DockerCompose</li><li>envFile</li><li>Interpolation</li><li>DependsOn</li><li>Healthcheck</li><li>Environment</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-BrYeR-ey.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CnWh_Pl1.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Django의 MTV 패턴이 MVC와 정확히 어떻게 다른지, Project와 App의 경계는 어디인지, settings.py가 어떻게 모든 컴포넌트를 연결하는 허브가 되는지 설명한다." />
+    <meta name="keywords" content="Django, MTV, MVC, Architecture, Project, App, AppConfig, WSGI, ASGI, Settings" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/django-architecture" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할" />
+    <meta property="og:description" content="Django의 MTV 패턴이 MVC와 정확히 어떻게 다른지, Project와 App의 경계는 어디인지, settings.py가 어떻게 모든 컴포넌트를 연결하는 허브가 되는지 설명한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/django-architecture" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-03-27T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-08T23:42:57.177Z" />
+    <meta property="article:tag" content="Django" />
+    <meta property="article:tag" content="MTV" />
+    <meta property="article:tag" content="MVC" />
+    <meta property="article:tag" content="Architecture" />
+    <meta property="article:tag" content="Project" />
+    <meta property="article:tag" content="App" />
+    <meta property="article:tag" content="AppConfig" />
+    <meta property="article:tag" content="WSGI" />
+    <meta property="article:tag" content="ASGI" />
+    <meta property="article:tag" content="Settings" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할" />
+    <meta name="twitter:description" content="Django의 MTV 패턴이 MVC와 정확히 어떻게 다른지, Project와 App의 경계는 어디인지, settings.py가 어떻게 모든 컴포넌트를 연결하는 허브가 되는지 설명한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할","description":"Django의 MTV 패턴이 MVC와 정확히 어떻게 다른지, Project와 App의 경계는 어디인지, settings.py가 어떻게 모든 컴포넌트를 연결하는 허브가 되는지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-27T00:00:00.000Z","dateModified":"2026-09-08T23:42:57.177Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-architecture"},"keywords":"Django, MTV, MVC, Architecture, Project, App, AppConfig, WSGI, ASGI, Settings","articleSection":"django","inLanguage":"ko-KR","wordCount":5893},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할","item":"https://seobway23.github.io/post/django-architecture"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>django</span></nav>
+<h1>Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할</h1>
+<p>Django의 MTV 패턴이 MVC와 정확히 어떻게 다른지, Project와 App의 경계는 어디인지, settings.py가 어떻게 모든 컴포넌트를 연결하는 허브가 되는지 설명한다.</p>
+<p><span>Seobway</span> · <time datetime="2026-03-27T00:00:00.000Z">2026-03-27</time> · <span>12분</span></p>
+<h2>MTV 패턴 — 이름이 다른 이유</h2>
+<p>Django를 처음 배울 때 혼란이 오는 지점이다. &quot;MVC인데 왜 View가 Controller 역할을 하지?&quot;</p>
+<p>Django 공식 FAQ의 답변:<sup id="fnref-django-faq" style="scroll-margin-top: 96px;"><a href="#fn-django-faq" aria-label="각주 1">[1]</a></sup></p>
+<blockquote>
+<p><em>&quot;Django appears to be an MVC framework, but it calls the Controller the &#39;view&#39;, and the View the &#39;template&#39;. Why does Django use these names?&quot;</em></p>
+</blockquote>
+<p>이름을 다르게 쓴 건 우연이 아니다. Django 팀은 용어를 <strong>역할 중심</strong>으로 재정의했다.</p>
+<pre><code class="language-mermaid">%% desc: MVC와 Django MTV의 역할 대응 — URL Dispatcher가 독립 레이어로 분리된 점이 핵심
+flowchart LR
+  subgraph MVC[&quot;전통적 MVC&quot;]
+    M1[&quot;Model\n데이터 + 비즈니스 로직&quot;]
+    V1[&quot;View\n화면 렌더링&quot;]
+    C1[&quot;Controller\n요청 처리 + 라우팅&quot;]
+    M1 &lt;--&gt; C1 &lt;--&gt; V1
+  end
+
+  subgraph MTV[&quot;Django MTV&quot;]
+    M2[&quot;Model\n데이터 + 비즈니스 로직&quot;]
+    T2[&quot;Template\n화면 렌더링 (HTML)&quot;]
+    V2[&quot;View\n요청 처리 + 데이터 선택&quot;]
+    U2[&quot;URL Dispatcher\n라우팅 (독립 레이어)&quot;]
+    U2 --&gt; V2 --&gt; M2
+    V2 --&gt; T2
+  end
+</code></pre>
+<p>핵심 차이: Django는 <strong>URL 라우팅을 Controller에서 분리</strong>해 독립 레이어로 만들었다. 덕분에 URL 설계가 View 코드와 완전히 분리되고, 같은 View를 여러 URL 패턴에 연결할 수 있다.</p>
+<table>
+<thead>
+<tr>
+<th>개념</th>
+<th>Django에서</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Model</strong></td>
+<td><code>models.py</code></td>
+<td>DB 스키마 정의, 데이터 접근, 비즈니스 로직</td>
+</tr>
+<tr>
+<td><strong>Template</strong></td>
+<td><code>templates/*.html</code></td>
+<td>화면 렌더링. context 데이터를 HTML로 변환</td>
+</tr>
+<tr>
+<td><strong>View</strong></td>
+<td><code>views.py</code></td>
+<td>요청을 받아 데이터 조회/처리 후 Template에 context 전달</td>
+</tr>
+<tr>
+<td><strong>URL Dispatcher</strong></td>
+<td><code>urls.py</code></td>
+<td>URL 패턴 → View 함수 매핑</td>
+</tr>
+</tbody></table>
+<h2>Model — 데이터와 로직의 집합</h2>
+<pre><code class="language-python"># articles/models.py
+from django.db import models
+
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    author = models.ForeignKey(&quot;auth.User&quot;, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = [&quot;-created_at&quot;]
+        verbose_name = &quot;기사&quot;
+
+    def __str__(self):
+        return self.title
+
+    def publish(self):
+        &quot;&quot;&quot;비즈니스 로직도 모델에 포함&quot;&quot;&quot;
+        self.is_published = True
+        self.save()
+</code></pre>
+<p>Model에서 정의한 내용이 파생시키는 것들:</p>
+<pre><code class="language-mermaid">%% desc: 모델 하나에서 Admin, Form, Migration, API Serializer가 자동 파생되는 DRY 원칙
+flowchart TD
+  MODEL[&quot;Article 모델\n(models.py)&quot;]
+
+  ADMIN[&quot;Admin 인터페이스\n(admin.site.register)&quot;]
+  FORM[&quot;ModelForm\n(자동 필드 검증)&quot;]
+  MIGRATION[&quot;Migration 파일\n(스키마 이력)&quot;]
+  SERIAL[&quot;ModelSerializer\n(DRF, 자동 직렬화)&quot;]
+
+  MODEL --&gt; ADMIN &amp; FORM &amp; MIGRATION &amp; SERIAL
+</code></pre>
+<h2>Template — 화면 렌더링 전용</h2>
+<p>Django Template Language(DTL)는 의도적으로 <strong>제한된</strong> 언어다.<sup id="fnref-dtl-docs" style="scroll-margin-top: 96px;"><a href="#fn-dtl-docs" aria-label="각주 2">[2]</a></sup></p>
+<pre><code class="language-django">{# articles/templates/articles/detail.html #}
+{% extends &quot;base.html&quot; %}
+
+{% block content %}
+  &lt;h1&gt;{{ article.title }}&lt;/h1&gt;
+  &lt;p&gt;{{ article.body }}&lt;/p&gt;
+
+  {% if article.is_published %}
+    &lt;span&gt;게시됨&lt;/span&gt;
+  {% endif %}
+
+  {% for comment in article.comments.all %}
+    &lt;p&gt;{{ comment.text }}&lt;/p&gt;
+  {% endfor %}
+{% endblock %}
+</code></pre>
+<p>DTL의 설계 원칙: &quot;프레젠테이션 관련 결정만 할 수 있을 정도의 로직만 허용한다.&quot;<br>DB 삭제, 파일 접근 같은 사이드이펙트 있는 작업은 Template에서 불가능하다.</p>
+<blockquote>
+<p>기본 Template 엔진은 DTL이지만, Jinja2로 교체 가능하다. Loose Coupling의 실제 사례다.</p>
+</blockquote>
+<h2>View — 요청 처리의 핵심</h2>
+<p>View는 <code>HttpRequest</code>를 받아 <code>HttpResponse</code>를 반환하는 callable이다.<sup id="fnref-view-docs" style="scroll-margin-top: 96px;"><a href="#fn-view-docs" aria-label="각주 3">[3]</a></sup></p>
+<pre><code class="language-python"># articles/views.py
+
+# Function-Based View (FBV) — 단순하고 명시적
+def article_list(request):
+    articles = Article.objects.filter(is_published=True)
+    return render(request, &quot;articles/list.html&quot;, {&quot;articles&quot;: articles})
+
+# Class-Based View (CBV) — 재사용 가능한 공통 패턴
+from django.views.generic import ListView, DetailView
+
+class ArticleListView(ListView):
+    model = Article
+    queryset = Article.objects.filter(is_published=True)
+    template_name = &quot;articles/list.html&quot;
+    context_object_name = &quot;articles&quot;
+    paginate_by = 20
+</code></pre>
+<p>FBV vs CBV:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>FBV</th>
+<th>CBV</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>코드 스타일</td>
+<td>함수</td>
+<td>클래스 (상속)</td>
+</tr>
+<tr>
+<td>가독성</td>
+<td>높음 (선형적)</td>
+<td>낮음 (메서드 분산)</td>
+</tr>
+<tr>
+<td>재사용</td>
+<td>mixins 필요</td>
+<td>상속으로 쉬움</td>
+</tr>
+<tr>
+<td>적합한 경우</td>
+<td>단순 뷰, 복잡한 커스텀 로직</td>
+<td>CRUD 반복 패턴</td>
+</tr>
+</tbody></table>
+<h2>Project vs App — 경계 나누는 기준</h2>
+<pre><code class="language-mermaid">%% desc: Project는 설정 허브, App은 독립 기능 단위 — 앱은 여러 프로젝트에서 재사용 가능
+flowchart TD
+  subgraph PROJECT[&quot;Django Project (mysite/)&quot;]
+    SETTINGS[&quot;settings.py&quot;]
+    ROOT_URL[&quot;urls.py (root)&quot;]
+    WSGI_FILE[&quot;wsgi.py&quot;]
+    MANAGE[&quot;manage.py&quot;]
+  end
+
+  subgraph APPS[&quot;Django Apps&quot;]
+    BLOG[&quot;blog app\nmodels.py\nviews.py\nurls.py\ntemplates/\nmigrations/\napps.py&quot;]
+    AUTH_APP[&quot;accounts app\n사용자 인증&quot;]
+    SHOP_APP[&quot;shop app\n상품/주문&quot;]
+  end
+
+  PROJECT --&gt; APPS
+
+  REUSE[&quot;다른 Project에서도\n이 앱을 그대로 재사용 가능\n(pip install my-blog-app)&quot;]
+  BLOG -.-&gt; REUSE
+</code></pre>
+<p><strong>앱 분리 기준</strong>: 한 앱이 &quot;하나의 명확한 역할&quot;을 담당해야 한다. 기능이 독립적으로 존재할 수 있는가? 다른 프로젝트에 복사해서 쓸 수 있는가?</p>
+<h3>apps.py — 앱 설정과 등록</h3>
+<pre><code class="language-python"># blog/apps.py
+from django.apps import AppConfig
+
+class BlogConfig(AppConfig):
+    default_auto_field = &quot;django.db.models.BigAutoField&quot;
+    name = &quot;blog&quot;
+    verbose_name = &quot;블로그&quot;
+
+    def ready(self):
+        &quot;&quot;&quot;앱이 로드될 때 실행 — 시그널 등록 등&quot;&quot;&quot;
+        import blog.signals  # noqa
+</code></pre>
+<pre><code class="language-python"># settings.py
+INSTALLED_APPS = [
+    &quot;django.contrib.admin&quot;,
+    &quot;django.contrib.auth&quot;,
+    ...
+    &quot;blog.apps.BlogConfig&quot;,   # 앱 등록
+]
+</code></pre>
+<p><code>INSTALLED_APPS</code>에 등록돼야 모델·Admin·시그널·관리명령어가 활성화된다.</p>
+<h2>settings.py — 모든 것의 허브</h2>
+<p><code>settings.py</code>는 INI나 YAML이 아니라 <strong>Python 모듈</strong>이다.<sup id="fnref-settings-docs" style="scroll-margin-top: 96px;"><a href="#fn-settings-docs" aria-label="각주 4">[4]</a></sup></p>
+<pre><code class="language-python"># settings.py는 실행되는 Python 코드
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 동적 설정 가능
+INSTALLED_APPS = [
+    &quot;django.contrib.admin&quot;,
+    ...
+]
+if os.environ.get(&quot;ENABLE_DEBUG_TOOLBAR&quot;):
+    INSTALLED_APPS += [&quot;debug_toolbar&quot;]
+</code></pre>
+<p>주요 설정:</p>
+<table>
+<thead>
+<tr>
+<th>설정키</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>INSTALLED_APPS</code></td>
+<td>활성화된 앱 목록 (모델·Admin·시그널 활성화)</td>
+</tr>
+<tr>
+<td><code>MIDDLEWARE</code></td>
+<td>요청/응답 파이프라인 구성</td>
+</tr>
+<tr>
+<td><code>DATABASES</code></td>
+<td>DB 연결 설정</td>
+</tr>
+<tr>
+<td><code>TEMPLATES</code></td>
+<td>템플릿 엔진과 경로</td>
+</tr>
+<tr>
+<td><code>ROOT_URLCONF</code></td>
+<td>URL 설정 파일 경로</td>
+</tr>
+<tr>
+<td><code>STATIC_URL</code></td>
+<td>정적 파일 URL</td>
+</tr>
+<tr>
+<td><code>SECRET_KEY</code></td>
+<td>암호화·세션·CSRF에 사용</td>
+</tr>
+<tr>
+<td><code>DEBUG</code></td>
+<td>개발/운영 모드 분리</td>
+</tr>
+</tbody></table>
+<h2>WSGI vs ASGI</h2>
+<pre><code class="language-mermaid">%% desc: WSGI는 동기 1요청=1스레드, ASGI는 비동기 이벤트 루프로 다수 동시 처리
+flowchart LR
+  subgraph WSGI[&quot;WSGI (동기)&quot;]
+    W_REQ1[&quot;요청 1&quot;] --&gt; W_T1[&quot;스레드 1\n처리 중...&quot;]
+    W_REQ2[&quot;요청 2&quot;] --&gt; W_T2[&quot;스레드 2\n처리 중...&quot;]
+    W_REQ3[&quot;요청 3&quot;] --&gt; W_T3[&quot;스레드 3 (대기)&quot;]
+    W_T1 &amp; W_T2 &amp; W_T3 --&gt; W_RES[&quot;응답&quot;]
+  end
+
+  subgraph ASGI[&quot;ASGI (비동기)&quot;]
+    A_REQ1[&quot;요청 1&quot;] --&gt; A_LOOP[&quot;이벤트 루프\n(단일 프로세스)&quot;]
+    A_REQ2[&quot;요청 2&quot;] --&gt; A_LOOP
+    A_REQ3[&quot;요청 3&quot;] --&gt; A_LOOP
+    A_LOOP -- &quot;I/O 대기 중 다른 요청 처리&quot; --&gt; A_RES[&quot;응답&quot;]
+  end
+</code></pre>
+<pre><code class="language-python"># config/asgi.py
+import os
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, &quot;config.settings.local&quot;)
+application = get_asgi_application()
+</code></pre>
+<p><strong>주의</strong>: ASGI 성능을 100% 이용하려면 <strong>미들웨어 전체</strong>가 async-compatible이어야 한다. 단 하나의 sync-only 미들웨어가 있으면 Django가 자동으로 스레드를 쓰게 돼 ASGI 이점이 사라진다.</p>
+<p>Django의 async 지원 진화:</p>
+<table>
+<thead>
+<tr>
+<th>버전</th>
+<th>변화</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3.0</td>
+<td>ASGI 진입점 지원 시작</td>
+</tr>
+<tr>
+<td>3.1</td>
+<td>async FBV / CBV 지원</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td>async ORM (<code>aget()</code>, <code>acreate()</code> 등)</td>
+</tr>
+<tr>
+<td>5.0</td>
+<td>async 시그널, async 인증</td>
+</tr>
+<tr>
+<td><strong>5.2 (현재 LTS)</strong></td>
+<td>async 전반 성숙 단계</td>
+</tr>
+</tbody></table>
+<h2>참고</h2>
+<ol>
+<li id="fn-django-faq" style="scroll-margin-top: 96px;">Django Project, <a href="https://docs.djangoproject.com/en/5.2/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template" target="_blank">FAQ: MVC — Django Docs</a> <a href="#fnref-django-faq" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-dtl-docs" style="scroll-margin-top: 96px;">Django Project, <a href="https://docs.djangoproject.com/en/5.2/ref/templates/language/" target="_blank">The Django template language — Django Docs</a> <a href="#fnref-dtl-docs" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-view-docs" style="scroll-margin-top: 96px;">Django Project, <a href="https://docs.djangoproject.com/en/5.2/topics/http/views/" target="_blank">Writing views — Django Docs</a> <a href="#fnref-view-docs" aria-label="본문으로 돌아가기">↩</a></li>
+<li id="fn-settings-docs" style="scroll-margin-top: 96px;">Django Project, <a href="https://docs.djangoproject.com/en/5.2/topics/settings/" target="_blank">Django settings — Django Docs</a> <a href="#fnref-settings-docs" aria-label="본문으로 돌아가기">↩</a></li>
+</ol>
+
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/django-overview">Django 프레임워크 큰 그림 →</a> — 전체 철학과 구조 개요</li>
+<li><a href="/post/django-lifecycle">Django 요청-응답 라이프사이클 →</a> — MTV 각 레이어가 요청 처리에서 어떤 순서로 개입하는가</li>
+<li><a href="/post/django-orm-deep">Django ORM — QuerySet과 지연 실행 →</a> — Model 레이어 심층 탐구</li>
+</ul>
+<hr>
+
+<ul><li>Django</li><li>MTV</li><li>MVC</li><li>Architecture</li><li>Project</li><li>App</li><li>AppConfig</li><li>WSGI</li><li>ASGI</li><li>Settings</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>
