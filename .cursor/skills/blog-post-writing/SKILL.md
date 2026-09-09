@@ -27,13 +27,13 @@ description: ModernDevBlog 포스트 작성·배포 전 가이드. frontmatter, 
 
 ## 2. Frontmatter (필수)
 
-레퍼런스: `posts/study/frontend/react-query/react-query-mutations.md`
+레퍼런스: `posts/frontend/react-query/react-query-mutations.md`
 
 ```yaml
 ---
 title: "글 제목"
 slug: slug-name # 파일명(확장자 제외)과 동일 권장
-category: study/frontend/xxx # 실제 폴더 경로와 맞출 것 (슬래시)
+category: frontend/xxx # 실제 폴더 경로와 맞출 것 (슬래시)
 tags: [tag1, tag2]
 author: Seobway
 readTime: N # 분

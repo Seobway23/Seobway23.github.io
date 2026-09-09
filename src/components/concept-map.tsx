@@ -32,7 +32,7 @@ interface Edge {
 }
 
 interface ConceptMapProps {
-  /** 이 카테고리 접두사에 속한 개념만 그린다 (예: "study/frontend"). 없으면 전체 */
+  /** 이 카테고리 접두사에 속한 개념만 그린다 (예: "frontend"). 없으면 전체 */
   categoryPrefix?: string;
   /** 트랙 필터 칩을 보여줄지 */
   showTrackFilter?: boolean;

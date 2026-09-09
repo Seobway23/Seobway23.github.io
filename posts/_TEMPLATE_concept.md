@@ -1,7 +1,7 @@
 ---
 title: "개념 이름 — 한 줄로 말하면 이것"
 slug: concept-slug
-category: study/frontend/js
+category: frontend/javascript
 concept: concept-id          # data/concepts.yml 의 id. 선행 관계는 거기서 관리한다
 tags: [javascript]
 author: Seobway

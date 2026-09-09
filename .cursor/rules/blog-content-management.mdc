@@ -16,7 +16,7 @@ alwaysApply: false
 
 **`posts/study/mechanics/`** 아래 역학·토압 글을 쓸 때는 추가로 **`docs/mechanics-post-principles.md`** 필독. (전용 규칙: `.cursor/rules/mechanics-blog.mdc` .)
 
-레퍼런스 예시 글: `posts/study/frontend/react-query/react-query-mutations.md`
+레퍼런스 예시 글: `posts/frontend/react-query/react-query-mutations.md`
 
 ## 2. 빠른 상기 (정본과 충돌 시 정본 우선)
 

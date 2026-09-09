@@ -39,13 +39,13 @@ const DOMAINS = new Set([
  * concepts.yml 에 `category:` 를 직접 적으면 그게 우선한다.
  */
 const DOMAIN_TO_CATEGORY = {
-  javascript: "study/frontend/js",
-  typescript: "study/frontend/typescript",
-  react: "study/frontend/react",
-  css: "study/frontend/styling",
-  build: "study/frontend/build",
-  perf: "study/frontend/performance",
-  a11y: "study/frontend/a11y",
+  javascript: "frontend/javascript",
+  typescript: "frontend/typescript",
+  react: "frontend/react",
+  css: "frontend/styling",
+  build: "frontend/build",
+  perf: "frontend/performance",
+  a11y: "frontend/a11y",
   test: "study/engineering/testing",
 };
 
