@@ -1528,6 +1528,70 @@ html:not(.dark) .glow-card:focus-within::after {
   opacity: 0.42;
 }
 
+/* ── 변형: 패널(사이드바 카드 등) ────────────────────────────────────
+   목록 카드와 달리 패널은 클릭 대상이 아니라 담는 그릇이다.
+   그래서 뜨지 않고(transform 없음) 테두리만 아주 옅게 둔다.
+   커서 추적도 하지 않는다 — 그릇이 반응하면 안쪽 내용과 경쟁한다. */
+.glow-card--panel::before {
+  opacity: 0.34;
+}
+
+.glow-card--panel::after {
+  display: none;
+}
+
+.glow-card--panel:hover,
+.glow-card--panel:focus-within {
+  transform: none;
+}
+
+.glow-card--panel:hover::before {
+  opacity: 0.5;
+}
+
+/* ── 카테고리 행 ─────────────────────────────────────────────────────
+   --row-c 는 그 카테고리의 색. 사이드바 점·카드 배지와 같은 값이다.
+   호버는 옅은 물듦, 선택은 진한 물듦 + 왼쪽 막대.
+   배경을 통째로 채우지 않는 이유: 색이 밝아 흰 글자가 안 읽히고,
+   어두운 글자를 쓰면 다크 테마에서 튄다. 물듦 + 색 글자가 양쪽에서 안전하다. */
+.category-row {
+  position: relative;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.category-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  border-radius: 999px;
+  background: var(--row-c);
+  transform: translateY(-50%);
+  transition: height 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.category-row:hover {
+  background: color-mix(in oklab, var(--row-c) 12%, transparent);
+}
+
+.category-row:hover::before {
+  height: 45%;
+}
+
+.category-row[data-selected="true"] {
+  background: color-mix(in oklab, var(--row-c) 20%, transparent);
+  color: var(--row-c);
+  font-weight: 600;
+}
+
+.category-row[data-selected="true"]::before {
+  height: 65%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .glow-card,
   .glow-card:hover,
