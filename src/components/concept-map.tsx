@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { Link } from "wouter";
 import { Check, Lock, PenLine } from "lucide-react";
 import {
   getConceptGraph,
@@ -48,7 +48,6 @@ export default function ConceptMap({
   showProgress = true,
   emptyFallback,
 }: ConceptMapProps) {
-  const [, navigate] = useLocation();
   const [graph, setGraph] = useState<ConceptGraph | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [read, setReadState] = useState<Set<string>>(() => new Set());
@@ -281,14 +280,16 @@ export default function ConceptMap({
         <div className="relative space-y-14">
           {levels.map((ids, i) => (
             <div key={i} className="relative">
-              <div className="mb-4 flex items-center gap-3">
-                <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+              {/* 페이지 배경은 사용자가 고른 그라데이션이라 어떤 색이 올지 모른다.
+                  라벨은 자체 배경을 깔아 어느 바탕에서도 읽히게 한다. */}
+              <div className="mb-4 flex items-center gap-2">
+                <span className="rounded-md bg-card/90 px-2 py-0.5 font-mono text-xs font-semibold text-foreground shadow-sm">
                   LV{i}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="rounded-md bg-card/80 px-2 py-0.5 text-xs text-muted-foreground">
                   {i === 0 ? "선행 없이 바로 읽을 수 있다" : `선행 ${i}단계를 거친다`}
                 </span>
-                <div className="h-px flex-1 bg-border" />
+                <div className="h-px flex-1 bg-foreground/10" />
               </div>
               <div className="relative z-10 flex flex-wrap justify-center gap-x-4 gap-y-8">
                 {ids.map((id) => {
@@ -301,7 +302,6 @@ export default function ConceptMap({
                       locked={isLocked(node, read)}
                       dimmed={!!hover && !relatedToHover(id)}
                       onHover={setHover}
-                      onOpen={() => node.post && navigate(`/post/${node.post}`)}
                       onToggleRead={() => setReadState(setRead(id, !read.has(id)))}
                       registerRef={(el) => {
                         if (el) nodeRefs.current.set(id, el);
@@ -367,7 +367,6 @@ function ConceptCard({
   locked,
   dimmed,
   onHover,
-  onOpen,
   onToggleRead,
   registerRef,
 }: {
@@ -376,43 +375,70 @@ function ConceptCard({
   locked: boolean;
   dimmed: boolean;
   onHover: (id: string | null) => void;
-  onOpen: () => void;
   onToggleRead: () => void;
   registerRef: (el: HTMLElement | null) => void;
 }) {
   const color = domainColor(node.domain);
-  const clickable = node.written;
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * 커서 위치를 CSS 변수로 넣는다. state 로 두면 포인터가 움직일 때마다
+   * 20개 카드가 전부 리렌더된다 — DOM 에 직접 쓴다.
+   */
+  const trackPointer = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--glow-x", `${((e.clientX - r.left) / r.width) * 100}%`);
+    el.style.setProperty("--glow-y", `${((e.clientY - r.top) / r.height) * 100}%`);
+  };
+
+  const resetPointer = () => {
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.removeProperty("--glow-x");
+    el.style.removeProperty("--glow-y");
+  };
 
   return (
     <div
-      ref={registerRef}
-      onMouseEnter={() => onHover(node.id)}
-      onMouseLeave={() => onHover(null)}
-      className={`relative w-[15.5rem] rounded-xl border bg-card p-3.5 shadow-sm transition-all duration-200 ${
-        dimmed ? "opacity-25" : "opacity-100"
-      } ${
-        node.written
-          ? "border-border hover:-translate-y-0.5 hover:shadow-md"
-          : "border-dashed border-border/70"
-      } ${locked && node.written ? "opacity-70" : ""}`}
-      // 도메인 색은 상단 테두리로만. 아직 글이 없는 개념은 흐리게 해서
-      // "쓴 것"과 "쓸 것"이 한눈에 갈리게 한다.
-      style={{
-        borderTopColor: node.written ? color : `${color}55`,
-        borderTopWidth: 3,
+      ref={(el) => {
+        cardRef.current = el;
+        registerRef(el);
       }}
+      onMouseEnter={() => onHover(node.id)}
+      onMouseLeave={() => {
+        onHover(null);
+        resetPointer();
+      }}
+      onPointerMove={node.written ? trackPointer : undefined}
+      className={`glow-card w-[15.5rem] p-3.5 transition-opacity duration-200 ${
+        node.written ? "" : "glow-card--muted"
+      } ${dimmed ? "opacity-25" : "opacity-100"} ${
+        locked && node.written ? "opacity-70" : ""
+      }`}
+      // 도메인 색이 테두리 그라데이션과 호버 빛의 주 색상이 된다.
+      style={{ "--glow-c": color } as React.CSSProperties}
     >
+      {/* 카드 전체를 누르면 글로 간다(stretched link). 진짜 <a> 라서
+          새 탭 열기·가운데 클릭·링크 복사가 전부 동작한다.
+          위에 얹히는 조작 요소는 z-10 으로 이 링크보다 앞에 둔다. */}
+      {node.written && node.post ? (
+        <Link
+          href={`/post/${node.post}`}
+          className="absolute inset-0 z-[2] rounded-[inherit]"
+          aria-label={`${node.label} 글 읽기`}
+        />
+      ) : null}
+
       <div className="mb-1 flex items-start justify-between gap-2">
-        <button
-          type="button"
-          onClick={clickable ? onOpen : undefined}
-          disabled={!clickable}
-          className={`min-w-0 text-left text-sm font-semibold leading-snug ${
-            clickable ? "hover:text-primary" : "cursor-default text-muted-foreground"
+        <span
+          className={`glow-card__title min-w-0 ${
+            node.written ? "" : "text-muted-foreground"
           }`}
         >
           {node.label}
-        </button>
+        </span>
 
         {node.written ? (
           <button
@@ -421,10 +447,10 @@ function ConceptCard({
             aria-pressed={read}
             aria-label={read ? "읽음 해제" : "읽음으로 표시"}
             title={read ? "읽음 해제" : "읽음으로 표시"}
-            className={`flex h-5 w-5 flex-none items-center justify-center rounded-full border transition-colors ${
+            className={`relative z-[3] flex h-5 w-5 flex-none items-center justify-center rounded-full border transition-colors ${
               read
                 ? "border-emerald-500 bg-emerald-500 text-white"
-                : "border-border text-transparent hover:border-emerald-500"
+                : "border-border bg-card text-transparent hover:border-emerald-500"
             }`}
           >
             <Check className="h-3 w-3" aria-hidden />
@@ -437,7 +463,7 @@ function ConceptCard({
         )}
       </div>
 
-      <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+      <p className="glow-card__summary mt-1 line-clamp-2 text-xs leading-relaxed">
         {node.summary}
       </p>
 

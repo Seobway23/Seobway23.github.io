@@ -1264,6 +1264,249 @@ html:not(.dark) .prose .post-callout--abstract {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   글로우 카드 — 테두리에만 그라데이션이 새어나오는 표면
+   ═══════════════════════════════════════════════════════════════════
+
+   기존 카드(.toss-card 등)를 대체하지 않는다. 강조하고 싶은 곳에만 덧붙이는
+   유틸리티다. 두 겹으로 만든다.
+
+     ::before  테두리 1px. 배경 그라데이션을 그린 뒤 마스크로 가운데를 뚫어
+               가장자리만 남긴다(border-image 로는 둥근 모서리가 안 먹는다).
+     ::after   카드 뒤로 깔리는 흐린 빛(블룸). blur 로 번지게 한다.
+
+   --glow-c  그 카드의 주 색상(개념 지도에서는 도메인 색). 기본은 primary.
+   --glow-x/y  마우스 위치. JS 가 포인터 이동 때 넣는다. 없으면 위쪽 가운데.
+
+   테두리 색은 **사용자가 화면 설정에서 고른 프리셋 그라데이션**
+   (--gradient-start / --gradient-end)을 쓴다. 배경을 바꾸면 카드도 따라 바뀐다.
+   고정된 무지개빛 팔레트를 쓰지 않는 이유: 그건 어느 사이트에나 있는 색이라
+   이 블로그의 것이 아니게 된다.
+
+   다만 프리셋 색을 그대로 쓰면 배경과 같은 색 계열이라 경계가 안 생긴다.
+   그래서 다크에서는 흰색을 섞어 테두리만 끌어올린다(color-mix).
+
+   호버 전에는 아주 옅은 띠만 보이고, 호버하면 커서를 따라오는 --glow-c 빛이 얹힌다.
+   커서 빛을 작게 유지하는 것이 중요하다 — 빛이 본문을 덮으면 글이 안 읽힌다.
+   ─────────────────────────────────────────────────────────────────── */
+
+.glow-card {
+  --glow-c: hsl(var(--primary));
+  --glow-x: 50%;
+  --glow-y: 0%;
+  position: relative;
+  border-radius: 1.05rem;
+  /* 페이지 바닥보다 살짝 더 가라앉은 면. 이 대비가 있어야 테두리 빛이 산다 */
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 45%),
+    hsl(var(--card));
+  /* ::after 블룸이 카드 밖으로 번지되 다른 카드 위로는 안 올라가게 */
+  isolation: isolate;
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.25s ease;
+}
+
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1.25px;
+  background:
+    /* 커서를 따라오는 빛 — 호버 때만 진해진다. 작게 유지해 본문을 안 덮는다 */
+    radial-gradient(
+      8rem 8rem at var(--glow-x) var(--glow-y),
+      var(--glow-c) 0%,
+      transparent 55%
+    ),
+    /* 프리셋 그라데이션 띠. 대각선으로 흘러 모서리에서 드러난다 */
+    linear-gradient(
+      125deg,
+      transparent 4%,
+      var(--gradient-start) 22%,
+      var(--gradient-start) 34%,
+      transparent 50%,
+      transparent 58%,
+      var(--gradient-end) 76%,
+      var(--gradient-end) 88%,
+      transparent 99%
+    );
+  /* 가운데를 뚫어 테두리만 남긴다 */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  /* 평소에는 있는 듯 없는 듯. 빛이 세면 시선이 테두리로 가서 제목을 덮는다.
+     주인공은 글이고 빛은 호버했을 때만 응답하는 것으로 둔다. */
+  opacity: 0.28;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* 카드 뒤로 번지는 빛. 테두리 색이 밖으로 새어나온 것처럼 보이게 한다 */
+.glow-card::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      7rem 7rem at var(--glow-x) var(--glow-y),
+      var(--glow-c) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      125deg,
+      transparent 10%,
+      var(--gradient-start) 28%,
+      transparent 50%,
+      var(--gradient-end) 76%,
+      transparent 94%
+    );
+  filter: blur(18px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.glow-card:hover,
+.glow-card:focus-within {
+  transform: translateY(-3px);
+}
+
+.glow-card:hover::before,
+.glow-card:focus-within::before {
+  opacity: 1;
+}
+
+.glow-card:hover::after,
+.glow-card:focus-within::after {
+  opacity: 0.32;
+}
+
+/* 다크 테마: 페이지 배경(사용자가 고른 그라데이션)보다 확실히 가라앉은 면을 만든다.
+   카드가 바탕과 같은 밝기면 테두리 빛이 묻혀 아무것도 안 보인다. */
+html.dark .glow-card {
+  /* 위쪽 흰 sheen 은 제목이 놓이는 자리를 뿌옇게 만든다. 아주 옅게만 남긴다 */
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.025), transparent 32%),
+    rgb(10 13 22 / 0.94);
+}
+
+/* 카드 안에서 읽는 순서를 만든다 — 제목이 가장 밝고, 요약은 한 단계 낮게.
+   테두리 빛보다 글자가 먼저 보여야 한다. */
+.glow-card__title {
+  font-size: 0.9rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: hsl(var(--foreground));
+}
+
+html.dark .glow-card__title {
+  /* 어두운 면 위에서 제목만 확실히 띄운다 */
+  color: rgb(241 245 249);
+}
+
+.glow-card__summary {
+  color: hsl(var(--muted-foreground));
+}
+
+html.dark .glow-card__summary {
+  color: rgb(148 163 184);
+}
+
+/* 다크 테마 테두리: 프리셋 색을 그대로 쓰면 같은 색 계열의 배경에 묻힌다.
+   흰색을 섞어 밝기만 끌어올린다 — 색상(hue)은 사용자가 고른 그대로 유지된다. */
+html.dark .glow-card::before {
+  background:
+    radial-gradient(
+      8rem 8rem at var(--glow-x) var(--glow-y),
+      var(--glow-c) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      125deg,
+      transparent 4%,
+      color-mix(in oklab, var(--gradient-start-dark) 62%, white) 22%,
+      color-mix(in oklab, var(--gradient-start-dark) 80%, white) 34%,
+      transparent 50%,
+      transparent 58%,
+      color-mix(in oklab, var(--gradient-end-dark) 70%, white) 76%,
+      color-mix(in oklab, var(--gradient-end-dark) 90%, white) 88%,
+      transparent 99%
+    );
+}
+
+html.dark .glow-card::after {
+  background:
+    radial-gradient(
+      7rem 7rem at var(--glow-x) var(--glow-y),
+      var(--glow-c) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      125deg,
+      transparent 10%,
+      color-mix(in oklab, var(--gradient-start-dark) 70%, white) 28%,
+      transparent 50%,
+      color-mix(in oklab, var(--gradient-end-dark) 75%, white) 76%,
+      transparent 94%
+    );
+}
+
+/* 라이트 테마: 무지개빛이 흰 배경에 뜨면 탁해 보인다. 띠는 진하게, 블룸은 옅게 */
+html:not(.dark) .glow-card {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.9), transparent 40%),
+    hsl(var(--card));
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+html:not(.dark) .glow-card::before {
+  opacity: 0.75;
+}
+
+html:not(.dark) .glow-card:hover::after,
+html:not(.dark) .glow-card:focus-within::after {
+  opacity: 0.22;
+}
+
+/* 아직 글이 없는(점선) 카드는 빛을 죽여 "쓸 자리"로만 남긴다 */
+.glow-card--muted::before {
+  background: none;
+  border: 1px dashed hsl(var(--border));
+  -webkit-mask: none;
+  mask: none;
+  padding: 0;
+  opacity: 1;
+}
+
+.glow-card--muted::after {
+  display: none;
+}
+
+.glow-card--muted:hover,
+.glow-card--muted:focus-within {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-card,
+  .glow-card:hover,
+  .glow-card:focus-within {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    본문 확장 블록 — ::: tabs / split / grid, ```seq, ```playground
    (생성: scripts/generate-posts-data.js, src/lib/post-sequence.ts,
           src/lib/post-playground.ts / 초기화: src/pages/post.tsx)
