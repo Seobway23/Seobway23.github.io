@@ -1478,16 +1478,19 @@ html:not(.dark) .glow-card:focus-within::after {
   opacity: 0.22;
 }
 
-/* 아직 글이 없는(점선) 카드는 빛을 죽여 "쓸 자리"로만 남긴다 */
-.glow-card--muted::before {
-  background: none;
+/* 아직 글이 없는 카드 — "여기에 글이 올 자리"로만 남긴다.
+   점선 테두리로 미완성임을 알리고, 살짝 투명하게 해서 뒤로 물린다.
+   빛은 완전히 끈다. ::before 의 background 만 되돌리려 하면
+   html.dark .glow-card::before (0,2,1) 가 이겨서 그라데이션이 카드 전체를
+   덮어 글자가 묻힌다 — 그래서 의사요소 자체를 없앤다.
+
+   투명도는 컴포넌트가 inline style 로 넣는다 — 흐림(호버 시 무관한 노드)과
+   미작성이 겹칠 때 Tailwind opacity 유틸리티끼리 충돌하기 때문이다. */
+.glow-card--muted {
   border: 1px dashed hsl(var(--border));
-  -webkit-mask: none;
-  mask: none;
-  padding: 0;
-  opacity: 1;
 }
 
+.glow-card--muted::before,
 .glow-card--muted::after {
   display: none;
 }
@@ -1495,6 +1498,34 @@ html:not(.dark) .glow-card:focus-within::after {
 .glow-card--muted:hover,
 .glow-card--muted:focus-within {
   transform: none;
+}
+
+/* ── 변형: 목록용 ────────────────────────────────────────────────────
+   글 목록은 썸네일·제목·발췌·태그·날짜가 다 들어간 밀도 높은 카드다.
+   스무 장에 테두리 빛을 상시로 두르면 목록이 크리스마스 트리가 된다.
+   그래서 평소에는 빛을 끄고, 호버했을 때만 켠다. */
+.glow-card--list::before {
+  opacity: 0;
+}
+
+.glow-card--list:hover::before,
+.glow-card--list:focus-within::before {
+  opacity: 0.9;
+}
+
+.glow-card--list:hover::after,
+.glow-card--list:focus-within::after {
+  opacity: 0.24;
+}
+
+.glow-card--list:hover,
+.glow-card--list:focus-within {
+  transform: translateY(-2px);
+}
+
+/* featured 글만 평소에도 은은하게 — 그 자체가 "추천" 표시가 된다 */
+.glow-card--featured::before {
+  opacity: 0.42;
 }
 
 @media (prefers-reduced-motion: reduce) {

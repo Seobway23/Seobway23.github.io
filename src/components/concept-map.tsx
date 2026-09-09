@@ -414,11 +414,23 @@ function ConceptCard({
       onPointerMove={node.written ? trackPointer : undefined}
       className={`glow-card w-[15.5rem] p-3.5 transition-opacity duration-200 ${
         node.written ? "" : "glow-card--muted"
-      } ${dimmed ? "opacity-25" : "opacity-100"} ${
-        locked && node.written ? "opacity-70" : ""
       }`}
-      // 도메인 색이 테두리 그라데이션과 호버 빛의 주 색상이 된다.
-      style={{ "--glow-c": color } as React.CSSProperties}
+      style={
+        {
+          // 도메인 색이 테두리 그라데이션과 호버 빛의 주 색상이 된다.
+          "--glow-c": color,
+          // 상태가 겹칠 수 있어(흐림 + 미작성 + 잠김) 한 값으로 계산한다.
+          // Tailwind opacity-* 를 여러 개 붙이면 어느 쪽이 이길지 소스 순서에
+          // 달려 예측이 안 된다.
+          opacity: dimmed
+            ? 0.22
+            : !node.written
+              ? 0.62
+              : locked
+                ? 0.72
+                : 1,
+        } as React.CSSProperties
+      }
     >
       {/* 카드 전체를 누르면 글로 간다(stretched link). 진짜 <a> 라서
           새 탭 열기·가운데 클릭·링크 복사가 전부 동작한다.

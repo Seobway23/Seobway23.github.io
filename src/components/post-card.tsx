@@ -1,32 +1,73 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Eye, MessageCircle, Clock } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Post } from "@shared/schema";
 import { getPostComments } from "@/lib/comments";
 import { highlightSearchMatch } from "@/lib/korean-search";
 import { formatReadTimeShort } from "@/lib/data";
 import { getPostCoverImageUrl } from "@/lib/post-cover";
+import { categoryColor } from "@/lib/category-color";
 
 interface PostCardProps {
   post: Post;
   searchQuery?: string;
 }
 
-const categoryLabels: Record<string, string> = {
-  react: "React",
+/** 마지막 칸만 보여준다. 경로 전체(frontend/javascript)는 배지에 넣기엔 길다. */
+const CATEGORY_LEAF_LABELS: Record<string, string> = {
+  javascript: "JavaScript",
   typescript: "TypeScript",
+  react: "React",
+  "react-query": "React Query",
+  threejs: "Three.js",
   css: "CSS",
-  performance: "Performance",
+  styling: "스타일링",
+  performance: "성능",
+  "data-fetching": "데이터 페칭",
   nextjs: "Next.js",
-  "study/ai/gstack": "gstack",
+  gstack: "gstack",
+  algorithm: "알고리즘",
+  mechanics: "역학",
+  network: "네트워크",
+  backend: "백엔드",
+  frontend: "프론트엔드",
+  infra: "인프라",
+  electron: "Electron",
+  engineering: "엔지니어링",
+  architecture: "아키텍처",
+  analysis: "분석",
+  testing: "테스트",
 };
 
+function categoryLabelOf(category: string): string {
+  const leaf = String(category || "").replace(/\\/g, "/").split("/").pop() || "";
+  return CATEGORY_LEAF_LABELS[leaf] || leaf;
+}
+
 export default function PostCard({ post, searchQuery }: PostCardProps) {
-  const categoryLabel = categoryLabels[post.category] || post.category;
+  const categoryLabel = categoryLabelOf(post.category);
   const imageUrl = getPostCoverImageUrl(post);
   const [commentCount, setCommentCount] = useState<number>(0);
+  const cardRef = useRef<HTMLElement | null>(null);
+  const accent = categoryColor(post.category);
+
+  /** 커서 위치를 CSS 변수로. state 로 두면 목록 전체가 리렌더된다. */
+  const trackPointer = (e: React.PointerEvent<HTMLElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--glow-x", `${((e.clientX - r.left) / r.width) * 100}%`);
+    el.style.setProperty("--glow-y", `${((e.clientY - r.top) / r.height) * 100}%`);
+  };
+
+  const resetPointer = () => {
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.removeProperty("--glow-x");
+    el.style.removeProperty("--glow-y");
+  };
 
   useEffect(() => {
     getPostComments(post.slug)
@@ -43,7 +84,17 @@ export default function PostCard({ post, searchQuery }: PostCardProps) {
     : [{ text: post.excerpt, match: false }];
 
   return (
-    <Card className="toss-card overflow-hidden hover:shadow-lg transition-all duration-300 group">
+    <article
+      ref={cardRef}
+      onPointerMove={trackPointer}
+      onPointerLeave={resetPointer}
+      className={`glow-card glow-card--list group overflow-hidden ${
+        post.featured ? "glow-card--featured" : ""
+      }`}
+      // 카테고리 색이 커서 하이라이트가 된다 — 목록을 훑을 때 색만으로
+      // 어느 분야 글인지 읽힌다.
+      style={{ "--glow-c": accent } as React.CSSProperties}
+    >
       <Link href={`/post/${post.slug}`}>
         <div className="aspect-video relative overflow-hidden">
           <img
@@ -52,12 +103,11 @@ export default function PostCard({ post, searchQuery }: PostCardProps) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-4 left-4">
+            {/* 배지도 카테고리 색을 쓴다. 프리셋 그라데이션을 쓰면 모든 글의
+                배지가 같은 색이라 아무 정보도 주지 못한다. */}
             <Badge
-              className="text-white"
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-              }}
+              className="border-0 font-semibold text-white shadow-sm"
+              style={{ background: accent }}
             >
               {categoryLabel}
             </Badge>
@@ -125,6 +175,6 @@ export default function PostCard({ post, searchQuery }: PostCardProps) {
           </div>
         </div>
       </CardContent>
-    </Card>
+    </article>
   );
 }

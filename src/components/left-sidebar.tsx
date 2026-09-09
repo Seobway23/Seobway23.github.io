@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { categoryColor } from "@/lib/category-color";
 import { getPopularPosts, getAllPosts } from "@/lib/posts";
 import { getRecentComments } from "@/lib/recent-comments";
 import type { Post } from "../../shared/schema";
@@ -170,6 +171,17 @@ function SidebarCategoryBranch({
               : undefined
           }
         >
+          {/* 카테고리 색 점 — 글 카드의 배지·하이라이트와 같은 색이다.
+              목록에서 색만 보고 어느 분야인지 알 수 있게 맞춰 둔다. */}
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{
+              background: categoryColor(node.fullName),
+              // 선택된 행은 배경이 그라데이션이라 점이 묻힌다
+              opacity: selectedCategory === node.fullName ? 0.9 : 1,
+            }}
+            aria-hidden
+          />
           <span className="flex-1 min-w-0 break-words">{node.label}</span>
           <span className="shrink-0 rounded-full bg-black/10 px-2 py-0.5 text-xs dark:bg-white/10">
             {node.count}
