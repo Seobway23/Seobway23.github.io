@@ -47,7 +47,7 @@ sources:
 :::
 
 시작은 `posts/_TEMPLATE_concept.md` 를 복사한다.
-본보기: `posts/study/frontend/js/closure.md`
+본보기: `posts/frontend/javascript/closure.md`
 
 ```bash
 npm run verify   # 출처 검사 + 그래프 빌드. 빌드에도 포함되어 있다
@@ -76,7 +76,7 @@ npm run verify   # 출처 검사 + 그래프 빌드. 빌드에도 포함되어 �
 ---
 title: "글 제목"
 slug: slug-name              # URL: /post/slug-name
-category: study/frontend/js  # posts/ 폴더 경로와 맞춘다
+category: frontend/javascript  # posts/ 폴더 경로와 맞춘다
 tags: [javascript, event-loop]
 author: Seobway
 readTime: 8

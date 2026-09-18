@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { categoryColor } from "@/lib/category-color";
 import { getPopularPosts, getAllPosts } from "@/lib/posts";
 import { getRecentComments } from "@/lib/recent-comments";
 import type { Post } from "../../shared/schema";
@@ -155,21 +156,21 @@ function SidebarCategoryBranch({
         <button
           type="button"
           onClick={pickCategory}
+          data-selected={selectedCategory === node.fullName}
           className={cn(
-            "flex min-h-9 w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
+            "category-row flex min-h-9 w-full items-center justify-between gap-2 rounded-lg py-1.5 pl-3 pr-2 text-left text-sm",
             selectedCategory === node.fullName
-              ? "text-white shadow-sm"
-              : "text-gray-700 dark:text-gray-300 hover-gradient-bg",
+              ? ""
+              : "text-gray-700 dark:text-gray-300",
           )}
-          style={
-            selectedCategory === node.fullName
-              ? {
-                  background:
-                    "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-                }
-              : undefined
-          }
+          // 이 카테고리의 색. 사이드바 점·글 카드 배지와 같은 값이다.
+          style={{ "--row-c": categoryColor(node.fullName) } as React.CSSProperties}
         >
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{ background: "var(--row-c)" }}
+            aria-hidden
+          />
           <span className="flex-1 min-w-0 break-words">{node.label}</span>
           <span className="shrink-0 rounded-full bg-black/10 px-2 py-0.5 text-xs dark:bg-white/10">
             {node.count}
@@ -365,7 +366,7 @@ export default function LeftSidebar({
   const sidebarContent = (
     <div className="space-y-6">
       {/* Categories */}
-      <Card className="toss-card">
+      <Card className="toss-card glow-card glow-card--panel">
         <CardContent className="p-6">
           <h3 className="flex items-center gap-2 font-semibold text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">
             <FolderOpen className="h-3.5 w-3.5" aria-hidden /> 카테고리
@@ -432,7 +433,7 @@ export default function LeftSidebar({
 
       {/* Popular Posts - 조회수 기반 (데이터 있을 때만 표시) */}
       {popularPosts.length > 0 && (
-        <Card className="toss-card">
+        <Card className="toss-card glow-card glow-card--panel">
           <CardContent className="p-6">
             <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">
               인기 글
@@ -545,7 +546,7 @@ function RecentCommentsSection({
   };
 
   return (
-    <Card className="toss-card">
+    <Card className="toss-card glow-card glow-card--panel">
       <CardContent className="p-6">
         <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">
           최신 댓글

@@ -34,7 +34,7 @@ const SITE_NAME = "Tech Blog — 모던 개발 블로그";
 const DEFAULT_OG = `${SITE_URL}/pwa-512x512.png`;
 
 const CATEGORY_LABELS = {
-  "study/frontend": "프론트엔드",
+  "frontend": "프론트엔드",
   "study/network": "네트워크",
   "study/mechanics": "역학",
   "study/algorithm": "알고리즘",

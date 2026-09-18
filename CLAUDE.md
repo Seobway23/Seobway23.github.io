@@ -8,7 +8,7 @@ Cursor·에이전트: **`posts/**/\*.md`를 쓰거나 고칠 때는 이 파일(�
 
 ## 블로그 포스트 포맷
 
-수동 참고·관련 글 패턴은 `posts/study/frontend/react-query/react-query-mutations.md` 를 본다. `[^id]` 각주를 빌드가 합치는 예시는 `posts/study/network/micro/` 글을 본다.
+수동 참고·관련 글 패턴은 `posts/frontend/react-query/react-query-mutations.md` 를 본다. `[^id]` 각주를 빌드가 합치는 예시는 `posts/study/network/micro/` 글을 본다.
 
 **역학·토질·토압 시리즈** (`posts/study/mechanics/` 에 넣는 글): 추가로 **`docs/mechanics-post-principles.md`** 를 반드시 참고한다 — 공식 유도 필수, 비전공자용 설명, 시각화 원칙, 시리즈 로드맵. (Cursor는 같은 경로 편집 시 `.cursor/rules/mechanics-blog.mdc` 가 이를 상기한다.)
 
@@ -18,7 +18,7 @@ Cursor·에이전트: **`posts/**/\*.md`를 쓰거나 고칠 때는 이 파일(�
 ---
 title: "글 제목"
 slug: slug-name
-category: study/frontend/xxx
+category: frontend/xxx
 tags: [tag1, tag2]
 author: Seobway
 readTime: N
