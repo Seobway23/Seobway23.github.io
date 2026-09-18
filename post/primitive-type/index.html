@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Ckep5sj6.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-EnCsMkA-.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>원시 타입 — 값 자체가 복사되는 것들 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입. 복사하면 서로 영향을 주지 않는다." />
+    <meta name="keywords" content="javascript, 타입, 원시타입" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/primitive-type" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="원시 타입 — 값 자체가 복사되는 것들" />
+    <meta property="og:description" content="숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입. 복사하면 서로 영향을 주지 않는다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/primitive-type" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-09-09T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-18T01:27:24.222Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="타입" />
+    <meta property="article:tag" content="원시타입" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="원시 타입 — 값 자체가 복사되는 것들" />
+    <meta name="twitter:description" content="숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입. 복사하면 서로 영향을 주지 않는다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"원시 타입 — 값 자체가 복사되는 것들","description":"숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입. 복사하면 서로 영향을 주지 않는다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-09-09T00:00:00.000Z","dateModified":"2026-09-18T01:27:24.222Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/primitive-type"},"keywords":"javascript, 타입, 원시타입","articleSection":"javascript","inLanguage":"ko-KR","wordCount":2321},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"원시 타입 — 값 자체가 복사되는 것들","item":"https://seobway23.github.io/post/primitive-type"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>원시 타입 — 값 자체가 복사되는 것들</h1>
+<p>숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입. 복사하면 서로 영향을 주지 않는다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-09T00:00:00.000Z">2026-09-09</time> · <span>6분</span></p>
+<h2>변수를 복사했는데 왜 어떤 건 같이 바뀌고 어떤 건 안 바뀌는가</h2>
+<p>아래 두 코드는 똑같이 &quot;복사&quot;했는데 결과가 반대다.</p>
+<pre><code class="language-js">let a = 1;
+let b = a;
+b = 2;
+console.log(a);        // 1     ← 안 바뀐다
+
+let x = { n: 1 };
+let y = x;
+y.n = 2;
+console.log(x.n);      // 2     ← 같이 바뀐다
+</code></pre>
+<p>이 차이를 만드는 것이 <strong>원시 타입이냐 아니냐</strong>다.</p>
+<hr>
+<h2>원시 타입은 무엇인가</h2>
+<p>원시 타입은 <strong>변수에 값 자체가 저장되는 타입</strong>이다. 자바스크립트에 7가지가 있다.</p>
+<table>
+<thead>
+<tr>
+<th>타입</th>
+<th>예</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>string</code></td>
+<td><code>&quot;안녕&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td><code>42</code>, <code>3.14</code>, <code>NaN</code></td>
+<td>정수·실수 구분 없음</td>
+</tr>
+<tr>
+<td><code>boolean</code></td>
+<td><code>true</code>, <code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>undefined</code></td>
+<td><code>undefined</code></td>
+<td>값을 아직 안 넣음</td>
+</tr>
+<tr>
+<td><code>null</code></td>
+<td><code>null</code></td>
+<td>값이 없음을 <strong>의도적으로</strong> 표시</td>
+</tr>
+<tr>
+<td><code>bigint</code></td>
+<td><code>9007199254740993n</code></td>
+<td><code>number</code> 로 표현 못 하는 큰 정수</td>
+</tr>
+<tr>
+<td><code>symbol</code></td>
+<td><code>Symbol(&quot;id&quot;)</code></td>
+<td>겹치지 않는 고유 키</td>
+</tr>
+</tbody></table>
+<p>이 7가지가 아닌 것은 전부 <a href="/post/reference-type">참조 타입</a>이다 — 객체·배열·함수.</p>
+<p>원시 타입의 값을 다른 변수에 넣으면 <strong>값이 통째로 복사</strong>된다. 두 변수는 각자 자기 값을<br>들고 있어서 한쪽을 바꿔도 다른 쪽은 그대로다.</p>
+<p>인터랙티브 다이어그램: 원시 타입은 값이 복사된다 (단계별로 재생할 수 있다)</p><ol><li>let a = 1 — a 라는 상자에 값 1 이 들어간다.</li><li>let b = a — a 의 값을 읽어 b 상자에 새로 넣는다. 상자가 두 개다.</li><li>b = 2 — b 의 상자만 바뀐다.</li><li>a 는 그대로다. 서로 다른 상자이기 때문이다.</li></ol>
+<hr>
+<h2>원시 타입은 바꿀 수 없다</h2>
+<p>원시 값 자체는 <strong>불변(immutable)</strong> 이다. 문자열의 글자 하나를 바꾸려 해도 무시된다.</p>
+<pre><code class="language-js">let s = &quot;hello&quot;;
+s[0] = &quot;H&quot;;
+console.log(s);            // &quot;hello&quot;   ← 안 바뀐다
+
+s = &quot;Hello&quot;;               // 이건 된다 — 새 값으로 &quot;교체&quot;한 것
+</code></pre>
+<p><code>s[0] = &quot;H&quot;</code> 는 문자열을 고치는 게 아니라 없는 속성에 값을 넣으려는 시도라 조용히 무시된다.<br><code>toUpperCase()</code> 같은 메서드도 원본을 고치지 않고 <strong>새 문자열을 만들어 돌려준다.</strong></p>
+<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p><code>&quot;hello&quot;.toUpperCase()</code> 처럼 원시 값에 메서드를 쓸 수 있는 것은, 그 순간에만 자바스크립트가<br>임시 래퍼 객체(<code>String</code>)를 만들어 주기 때문이다. 쓰고 나면 바로 버려진다.</p>
+</div></div></aside></p>
+<hr>
+<h2>직접 확인</h2>
+<p><code>typeof</code> 로 각 값의 타입을 찍어 보고, 값 복사가 독립적인지 확인해라.</p>
+<pre><code class="language-playground">const values = [
+  &quot;문자열&quot;, 42, true, undefined, null,
+  9007199254740993n, Symbol(&quot;id&quot;),
+  {}, [], function () {},
+];
+
+for (const v of values) {
+  console.log(String(typeof v).padEnd(10), &quot;|&quot;, typeof v === &quot;object&quot; || typeof v === &quot;function&quot; ? &quot;참조 타입&quot; : &quot;원시 타입&quot;);
+}
+
+// 값 복사는 독립적이다
+let a = 10;
+let b = a;
+b += 5;
+console.log(&quot;a =&quot;, a, &quot;/ b =&quot;, b);
+</code></pre>
+<p><code>typeof null</code> 이 <code>&quot;object&quot;</code> 로 나오는 것에 주목해라. 다음 절에서 다룬다.</p>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong><code>typeof null</code> 이 <code>&quot;object&quot;</code> 다</strong></p>
+<pre><code class="language-js">typeof null;        // &quot;object&quot;   ← null 은 원시 타입인데도
+</code></pre>
+<p>자바스크립트 초창기의 버그이고, 고치면 기존 코드가 깨져서 사양에 그대로 남았다.<br><code>null</code> 인지 확인하려면 <code>typeof</code> 말고 값을 직접 비교한다.</p>
+<pre><code class="language-js">value === null
+</code></pre>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong><code>null</code> 과 <code>undefined</code> 를 섞어 쓰는 것</strong></p>
+<p><code>undefined</code> 는 &quot;아직 값을 안 넣음&quot;(엔진이 넣는 기본값),<br><code>null</code> 은 &quot;값이 없음을 내가 정했음&quot;이다. 의미가 다르므로 섞지 않는 편이 낫다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p>원시 타입은 <strong>변수에 값 자체가 저장되는 7가지 타입</strong>(string · number · boolean ·<br>undefined · null · bigint · symbol)이고, 대입하면 값이 복사되어 서로 독립적이다.<br>값 자체는 바꿀 수 없고 교체만 된다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 원시 타입 7가지를 말할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>let b = a</code> 뒤에 <code>b</code> 를 바꿔도 <code>a</code> 가 그대로인 이유를 안다</li>
+<li><input disabled="" type="checkbox"> <code>typeof null</code> 이 <code>&quot;object&quot;</code> 인 이유를 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Glossary/Primitive" target="_blank">[1] Primitive — MDN Web Docs 용어 사전</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Data_structures" target="_blank">[2] JavaScript data types and data structures — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types" target="_blank">[3] ECMAScript Language Types — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/reference-type">참조 타입 — 주소가 복사되는 것들 →</a> — 나머지 절반</li>
+</ul>
+
+<ul><li>javascript</li><li>타입</li><li>원시타입</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

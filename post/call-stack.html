@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Ckep5sj6.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-EnCsMkA-.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="자바스크립트가 &quot;지금 어디를 실행 중인지&quot; 기억하는 방법. 에러 메시지의 스택 트레이스가 바로 이것이다." />
+    <meta name="keywords" content="javascript, 콜스택, 실행" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/call-stack" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳" />
+    <meta property="og:description" content="자바스크립트가 &quot;지금 어디를 실행 중인지&quot; 기억하는 방법. 에러 메시지의 스택 트레이스가 바로 이것이다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/call-stack" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-09-09T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-18T01:27:24.204Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="콜스택" />
+    <meta property="article:tag" content="실행" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳" />
+    <meta name="twitter:description" content="자바스크립트가 &quot;지금 어디를 실행 중인지&quot; 기억하는 방법. 에러 메시지의 스택 트레이스가 바로 이것이다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳","description":"자바스크립트가 \"지금 어디를 실행 중인지\" 기억하는 방법. 에러 메시지의 스택 트레이스가 바로 이것이다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-09-09T00:00:00.000Z","dateModified":"2026-09-18T01:27:24.204Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/call-stack"},"keywords":"javascript, 콜스택, 실행","articleSection":"javascript","inLanguage":"ko-KR","wordCount":2376},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳","item":"https://seobway23.github.io/post/call-stack"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳</h1>
+<p>자바스크립트가 &quot;지금 어디를 실행 중인지&quot; 기억하는 방법. 에러 메시지의 스택 트레이스가 바로 이것이다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-09T00:00:00.000Z">2026-09-09</time> · <span>6분</span></p>
+<h2>함수가 끝난 뒤 어디로 돌아가는지 누가 기억하는가</h2>
+<p><code>c()</code> 가 끝나면 <code>b()</code> 로, <code>b()</code> 가 끝나면 <code>a()</code> 로 돌아가야 한다. 이 &quot;돌아갈 자리&quot;를<br>기억하는 것이 <strong>콜 스택</strong>이다.</p>
+<pre><code class="language-js">function a() { b(); console.log(&quot;a 끝&quot;); }
+function b() { c(); console.log(&quot;b 끝&quot;); }
+function c() { console.log(&quot;c 실행&quot;); }
+
+a();
+// c 실행
+// b 끝
+// a 끝     ← 들어간 순서의 반대로 끝난다
+</code></pre>
+<p>들어간 순서와 끝나는 순서가 반대다. 이게 스택의 성질이다.</p>
+<hr>
+<h2>콜 스택은 어떻게 동작하는가</h2>
+<p>콜 스택은 <strong>실행 중인 함수 호출을 쌓아 두는 후입선출(LIFO) 자료구조</strong>다.<br>함수를 호출하면 위에 쌓이고(push), 반환하면 위에서 빠진다(pop).</p>
+<p>가장 위에 있는 것이 <strong>지금 실행 중인 함수</strong>다. 자바스크립트는 스레드가 하나라<br>콜 스택도 하나뿐이고, 따라서 한 번에 한 함수만 실행한다.</p>
+<p>인터랙티브 다이어그램: a() → b() → c() 가 쌓였다 빠지는 과정 (단계별로 재생할 수 있다)</p><ol><li>a() 를 호출한다. 스택 맨 아래에 쌓인다.</li><li>a 안에서 b() 를 호출한다. a 위에 쌓인다.</li><li>b 안에서 c() 를 호출한다. 맨 위가 c 다 — 지금 실행 중인 함수.</li><li>c 가 출력하고 반환한다. 맨 위에서 빠진다.</li><li>이제 맨 위는 다시 b 다. b 가 남은 줄을 실행하고 반환한다.</li><li>a 도 남은 줄을 실행하고 반환한다. 스택이 비었다.</li><li>스택이 비면 자바스크립트는 다음 할 일을 찾는다.</li></ol>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>스택이 비어야 비동기 작업이 시작된다.</strong> <code>setTimeout</code> 이 0ms 여도 콜 스택에 뭔가<br>쌓여 있는 동안에는 실행되지 않는다. 이것이 <a href="/post/event-loop-interactive">이벤트 루프</a>의<br>출발점이다.</p>
+</div></div></aside></p>
+<hr>
+<h2>에러 메시지의 스택 트레이스가 곧 콜 스택이다</h2>
+<p>에러가 났을 때 보이는 그 목록은 <strong>에러가 난 순간의 콜 스택을 위에서부터 찍은 것</strong>이다.</p>
+<pre><code>Uncaught TypeError: Cannot read properties of undefined
+    at c (app.js:9)      ← 여기서 터졌다
+    at b (app.js:5)      ← c 를 부른 곳
+    at a (app.js:1)      ← b 를 부른 곳
+</code></pre>
+<p>위에서 아래로 읽으면 <strong>터진 지점 → 그것을 부른 곳</strong> 순서다. 원인을 찾을 때는<br>맨 위부터 보고, 내 코드가 아닌 라이브러리 프레임은 건너뛴다.</p>
+<hr>
+<h2>직접 확인</h2>
+<p>스택은 무한하지 않다. 끝나지 않는 재귀를 넣으면 한계를 눈으로 볼 수 있다.</p>
+<pre><code class="language-playground">function depth(n = 1) {
+  return depth(n + 1);   // 반환하지 않으니 계속 쌓인다
+}
+
+try {
+  depth();
+} catch (e) {
+  console.log(e.constructor.name + &quot;:&quot;, e.message);
+}
+
+// 얼마나 깊이 쌓이는지 세어 보자
+let count = 0;
+function measure() {
+  count++;
+  measure();
+}
+try { measure(); } catch { console.log(&quot;최대 깊이 약&quot;, count);
+}
+</code></pre>
+<p>깊이는 브라우저와 상황에 따라 다르다. 값 자체보다 <strong>스택에 한계가 있다</strong>는 사실이 중요하다.</p>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>재귀의 종료 조건을 빠뜨리는 것</strong></p>
+<pre><code class="language-js">function factorial(n) {
+  return n * factorial(n - 1);   // 멈추지 않는다
+}
+</code></pre>
+<p><code>RangeError: Maximum call stack size exceeded</code> 가 난다. 스택이 한계까지 찼다는 뜻이다.<br>종료 조건을 넣어야 한다.</p>
+<pre><code class="language-js">function factorial(n) {
+  if (n &lt;= 1) return 1;          // 여기서 pop 이 시작된다
+  return n * factorial(n - 1);
+}
+</code></pre>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>긴 동기 작업이 화면을 멈추는 이유</strong></p>
+<p>콜 스택이 하나라서, 무거운 반복문이 도는 동안에는 클릭도 렌더링도 처리되지 않는다.<br>스택이 비어야 브라우저가 다음 일을 할 수 있다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p>콜 스택은 <strong>실행 중인 함수 호출을 쌓아 두는 후입선출 구조</strong>이고, 자바스크립트에는<br>하나뿐이다. 그래서 한 번에 한 함수만 실행되고, 스택이 비어야 비동기 작업이 시작된다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 왜 <code>a 끝</code> 이 <code>c 실행</code> 보다 나중에 찍히는지 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> 스택 트레이스를 위에서 아래로 읽는 법을 안다</li>
+<li><input disabled="" type="checkbox"> <code>Maximum call stack size exceeded</code> 가 무슨 뜻인지 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Glossary/Call_stack" target="_blank">[1] Call stack — MDN Web Docs 용어 사전</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Errors/Too_much_recursion" target="_blank">[2] RangeError: Maximum call stack size exceeded — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-execution-contexts" target="_blank">[3] Executable Code and Execution Contexts — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/execution-context">실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경 →</a> — 스택에 쌓이는 것의 정체</li>
+<li><a href="/post/event-loop-interactive">이벤트 루프, 눈으로 따라가기 →</a> — 스택이 빈 뒤에 일어나는 일</li>
+</ul>
+
+<ul><li>javascript</li><li>콜스택</li><li>실행</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

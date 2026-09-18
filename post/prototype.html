@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Ckep5sj6.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-EnCsMkA-.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>프로토타입 — 없으면 위에 물어보는 상속 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다." />
+    <meta name="keywords" content="javascript, 프로토타입, 상속, 객체" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/prototype" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="프로토타입 — 없으면 위에 물어보는 상속" />
+    <meta property="og:description" content="내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/prototype" />
+    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="article:published_time" content="2026-09-09T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-18T01:27:24.226Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="프로토타입" />
+    <meta property="article:tag" content="상속" />
+    <meta property="article:tag" content="객체" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="프로토타입 — 없으면 위에 물어보는 상속" />
+    <meta name="twitter:description" content="내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"프로토타입 — 없으면 위에 물어보는 상속","description":"내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-09-09T00:00:00.000Z","dateModified":"2026-09-18T01:27:24.226Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/prototype"},"keywords":"javascript, 프로토타입, 상속, 객체","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3953},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"프로토타입 — 없으면 위에 물어보는 상속","item":"https://seobway23.github.io/post/prototype"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>프로토타입 — 없으면 위에 물어보는 상속</h1>
+<p>내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-09T00:00:00.000Z">2026-09-09</time> · <span>8분</span></p>
+<h2>만든 적 없는 메서드를 왜 쓸 수 있는가</h2>
+<p>빈 객체를 만들었을 뿐인데 메서드가 딸려 온다.</p>
+<pre><code class="language-js">const obj = {};
+obj.toString();          // &quot;[object Object]&quot;   ← 만든 적 없다
+
+const arr = [1, 2, 3];
+arr.map((n) =&gt; n * 2);   // 이것도 만든 적 없다
+</code></pre>
+<p><code>obj</code> 에는 아무것도 없다. 그런데 <code>toString</code> 을 찾아 준다. <strong>자기한테 없으면 위에 물어보기<br>때문</strong>이다.</p>
+<hr>
+<h2>프로토타입은 무엇인가</h2>
+<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성을 여기서 찾는다.<br>모든 객체는 내부에 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 이라는 숨은 링크를 하나 갖고 있다.</p>
+<p>속성을 읽을 때 자바스크립트는 이렇게 움직인다.</p>
+<ol>
+<li>객체 자신에게 있나? 있으면 끝.</li>
+<li>없으면 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 을 따라 올라가 거기서 찾는다.</li>
+<li>거기도 없으면 또 올라간다.</li>
+<li>끝(<code>null</code>)까지 갔는데 없으면 <code>undefined</code>.</li>
+</ol>
+<p>이 사슬을 <strong>프로토타입 체인</strong>이라고 한다.</p>
+<p>인터랙티브 다이어그램: arr.map 을 찾아 위로 올라간다 (단계별로 재생할 수 있다)</p><ol><li>arr.map 을 읽는다. arr 자신에는 0,1,2 와 length 뿐이다.</li><li>없으니 [[Prototype]] 을 따라 Array.prototype 으로 올라간다.</li><li>Array.prototype 에 map 이 있다. 여기서 멈춘다.</li><li>만약 toString 이었다면 여기도 없어 한 칸 더 올라간다.</li><li>Object.prototype 에서 찾는다.</li><li>여기에도 없었다면 null 에 닿고 undefined 를 돌려준다.</li></ol>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>함수의 <code>prototype</code> 속성과 객체의 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 은 다른 것이다.</strong></p>
+<ul>
+<li><code>Foo.prototype</code> — <code>new Foo()</code> 로 만든 객체들이 <strong>참조하게 될</strong> 객체</li>
+<li><code>obj.__proto__</code> (= <code>Object.getPrototypeOf(obj)</code>) — 그 객체가 <strong>지금 참조 중인</strong> 객체</li>
+</ul>
+<p>이름이 비슷해서 가장 많이 헷갈린다.</p>
+</div></div></aside></p>
+<hr>
+<h2>어떻게 연결하는가</h2>
+<p><div class="post-tabs" data-post-tabs data-post-tabs-id="post-tabs-0"><div class="post-tabs__list" role="tablist"><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-0" aria-selected="true" aria-controls="post-tabs-0-panel-0" tabindex="0" data-tab-index="0">Object.create</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-1" aria-selected="false" aria-controls="post-tabs-0-panel-1" tabindex="-1" data-tab-index="1">생성자 함수</button><button type="button" class="post-tabs__trigger" role="tab" id="post-tabs-0-tab-2" aria-selected="false" aria-controls="post-tabs-0-panel-2" tabindex="-1" data-tab-index="2">class</button></div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-0" aria-labelledby="post-tabs-0-tab-0" data-panel-index="0"><p>가장 직접적이다. &quot;이 객체를 프로토타입으로 삼는 객체를 만들어라&quot;.</p>
+<pre><code class="language-js">const animal = {
+  speak() { return `${this.name} 이(가) 소리를 낸다`; },
+};
+
+const dog = Object.create(animal);
+dog.name = &quot;바둑이&quot;;
+dog.speak();     // &quot;바둑이 이(가) 소리를 낸다&quot;
+</code></pre>
+<p><code>dog</code> 에는 <code>name</code> 뿐이지만 <code>speak</code> 는 <code>animal</code> 에서 찾아 쓴다.</p>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-1" aria-labelledby="post-tabs-0-tab-1" data-panel-index="1" hidden><p><code>new</code> 를 쓰면 만들어진 객체의 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 이 <code>함수.prototype</code> 으로 연결된다.</p>
+<pre><code class="language-js">function Animal(name) {
+  this.name = name;
+}
+Animal.prototype.speak = function () {
+  return `${this.name} 이(가) 소리를 낸다`;
+};
+
+const dog = new Animal(&quot;바둑이&quot;);
+Object.getPrototypeOf(dog) === Animal.prototype;   // true
+</code></pre>
+<p><code>speak</code> 를 <code>this</code> 마다 만들지 않고 <strong>한 벌만</strong> 두는 것이 요점이다.</p>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-2" aria-labelledby="post-tabs-0-tab-2" data-panel-index="2" hidden><p>문법만 다르고 하는 일은 위와 같다. 자바스크립트에는 클래스 기반 상속이 따로 없다.</p>
+<pre><code class="language-js">class Animal {
+  constructor(name) { this.name = name; }
+  speak() { return `${this.name} 이(가) 소리를 낸다`; }
+}
+
+const dog = new Animal(&quot;바둑이&quot;);
+Object.getPrototypeOf(dog) === Animal.prototype;   // true
+</code></pre>
+<p>메서드는 인스턴스가 아니라 <code>Animal.prototype</code> 에 올라간다.</p>
+</div></div></p>
+<hr>
+<h2>직접 확인</h2>
+<p>체인을 끝까지 따라가 보면 구조가 한눈에 보인다.</p>
+<pre><code class="language-playground">function walk(label, value) {
+  const chain = [];
+  let cur = Object.getPrototypeOf(value);
+  while (cur) {
+    chain.push(cur.constructor ? cur.constructor.name : &quot;(익명)&quot;);
+    cur = Object.getPrototypeOf(cur);
+  }
+  console.log(label, &quot;→&quot;, chain.join(&quot; → &quot;), &quot;→ null&quot;);
+}
+
+walk(&quot;[1,2,3]  &quot;, [1, 2, 3]);
+walk(&quot;{}       &quot;, {});
+walk(&quot;&#39;문자열&#39; &quot;, &quot;문자열&quot;);
+walk(&quot;function &quot;, function () {});
+
+// 자기 것인지 물려받은 것인지 구분
+const dog = Object.create({ speak() {} });
+dog.name = &quot;바둑이&quot;;
+console.log(&quot;name 은 자기 것?&quot;, Object.hasOwn(dog, &quot;name&quot;));
+console.log(&quot;speak 은 자기 것?&quot;, Object.hasOwn(dog, &quot;speak&quot;));
+console.log(&quot;speak 을 쓸 수는 있나?&quot;, typeof dog.speak);
+</code></pre>
+<p><code>speak</code> 은 자기 것이 아닌데도 쓸 수 있다. 이것이 프로토타입 상속이다.</p>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong><code>for...in</code> 이 물려받은 속성까지 도는 것</strong></p>
+<pre><code class="language-js">const base = { shared: 1 };
+const obj = Object.create(base);
+obj.own = 2;
+
+for (const k in obj) console.log(k);   // own, shared  ← shared 도 나온다
+Object.keys(obj);                       // [&quot;own&quot;]      ← 자기 것만
+</code></pre>
+<p>자기 속성만 원하면 <code>Object.keys</code> · <code>Object.entries</code> 를 쓰거나<br><code>Object.hasOwn(obj, k)</code> 으로 거른다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>프로토타입에 객체를 두면 모두가 공유한다</strong></p>
+<pre><code class="language-js">function Cart() {}
+Cart.prototype.items = [];        // 위험
+
+const a = new Cart();
+const b = new Cart();
+a.items.push(&quot;사과&quot;);
+b.items;    // [&quot;사과&quot;]  ← b 것도 아니다
+</code></pre>
+<p>배열은 <a href="/post/reference-type">참조 타입</a>이라 <strong>하나를 모두가 가리킨다.</strong><br>인스턴스마다 따로 필요한 값은 <code>constructor</code> 안에서 <code>this.items = []</code> 로 만든다.<br>메서드처럼 공유해도 되는 것만 프로토타입에 둔다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--danger" data-callout="danger" role="note" aria-label="DANGER"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">DANGER</span><div class="post-callout__content"><p><strong>내장 프로토타입을 고치지 마라</strong></p>
+<pre><code class="language-js">Array.prototype.last = function () { return this[this.length - 1]; };
+</code></pre>
+<p>편해 보이지만 <code>for...in</code> 에 잡히고, 나중에 표준에 같은 이름이 생기면 충돌한다.<br>필요하면 일반 함수를 만들어 쓴다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성은 이 링크를 따라<br>위로 올라가며 찾는다. <code>class</code> 도 이 구조 위의 문법이고, 메서드를 한 벌만 두어<br>인스턴스가 공유하게 하는 것이 목적이다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>obj.toString()</code> 이 동작하는 이유를 체인으로 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>Foo.prototype</code> 과 <code>obj.__proto__</code> 의 차이를 말할 수 있다</li>
+<li><input disabled="" type="checkbox"> 프로토타입에 배열을 두면 안 되는 이유를 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain" target="_blank">[1] Inheritance and the prototype chain — MDN Web Docs</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf" target="_blank">[2] Object.getPrototypeOf() — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-objects" target="_blank">[3] Objects — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/reference-type">참조 타입 — 주소가 복사되는 것들 →</a> — 이 글의 선행</li>
+<li><a href="/post/execution-context">실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경 →</a></li>
+</ul>
+
+<ul><li>javascript</li><li>프로토타입</li><li>상속</li><li>객체</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

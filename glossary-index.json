@@ -1,4 +1,44 @@
 {
+  "call-stack": [
+    "call-stack",
+    "event-loop-interactive",
+    "execution-context",
+    "js-event-loop-and-async",
+    "settimeout-vs-promise",
+    "react-component-data-flow",
+    "react-controlled-vs-uncontrolled",
+    "typescript-type-system-basics",
+    "electron-nodejs-libuv-integration",
+    "micro-osi-7layer"
+  ],
+  "event-loop": [
+    "event-loop-interactive",
+    "js-event-loop-and-async",
+    "settimeout-vs-promise",
+    "django-lifecycle",
+    "django-settings",
+    "electron-native-layer-os-integration",
+    "electron-nodejs-libuv-integration",
+    "electron-renderer-chromium-rendering"
+  ],
+  "microtask": [
+    "event-loop-interactive",
+    "js-event-loop-and-async",
+    "settimeout-vs-promise",
+    "react-component-data-flow",
+    "react-controlled-vs-uncontrolled",
+    "typescript-type-system-basics",
+    "electron-nodejs-libuv-integration"
+  ],
+  "gc": [
+    "react-query-advanced",
+    "react-query-overview",
+    "react-query-queries",
+    "threejs-raycaster-picking-performance",
+    "electron-nodejs-libuv-integration",
+    "cdn-content-delivery-network",
+    "cache-overlay-timing-rca"
+  ],
   "abi": [
     "gstack-skills-ship",
     "django-version-compatibility",
@@ -32,16 +72,6 @@
     "micro-ip-arp",
     "micro-network-traffic",
     "micro-osi-7layer"
-  ],
-  "event-loop": [
-    "django-lifecycle",
-    "django-settings",
-    "electron-native-layer-os-integration",
-    "electron-nodejs-libuv-integration",
-    "electron-renderer-chromium-rendering",
-    "js-event-loop-and-async",
-    "settimeout-vs-promise",
-    "event-loop-interactive"
   ],
   "docker": [
     "django-migration",
@@ -87,34 +117,6 @@
   ],
   "heap": [
     "electron-nodejs-libuv-integration"
-  ],
-  "gc": [
-    "electron-nodejs-libuv-integration",
-    "react-query-advanced",
-    "react-query-overview",
-    "react-query-queries",
-    "threejs-raycaster-picking-performance",
-    "cdn-content-delivery-network",
-    "cache-overlay-timing-rca"
-  ],
-  "call-stack": [
-    "electron-nodejs-libuv-integration",
-    "js-event-loop-and-async",
-    "settimeout-vs-promise",
-    "event-loop-interactive",
-    "react-component-data-flow",
-    "react-controlled-vs-uncontrolled",
-    "typescript-type-system-basics",
-    "micro-osi-7layer"
-  ],
-  "microtask": [
-    "electron-nodejs-libuv-integration",
-    "js-event-loop-and-async",
-    "settimeout-vs-promise",
-    "event-loop-interactive",
-    "react-component-data-flow",
-    "react-controlled-vs-uncontrolled",
-    "typescript-type-system-basics"
   ],
   "libuv": [
     "electron-nodejs-libuv-integration",

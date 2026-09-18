@@ -1,5 +1,150 @@
 [
   {
+    "slug": "state-data-fetching-tanstack-zustand-server-actions",
+    "title": "상태 & 데이터 페칭 — TanStack Query, Zustand, Server Actions",
+    "path": "/post/frontend/data-fetching/state-data-fetching-tanstack-zustand-server-actions"
+  },
+  {
+    "slug": "call-stack",
+    "title": "콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳",
+    "path": "/post/frontend/javascript/call-stack"
+  },
+  {
+    "slug": "closure",
+    "title": "클로저 — 함수가 붙잡고 있는 변수",
+    "path": "/post/frontend/javascript/closure"
+  },
+  {
+    "slug": "event-loop-interactive",
+    "title": "이벤트 루프, 눈으로 따라가기",
+    "path": "/post/frontend/javascript/event-loop-interactive"
+  },
+  {
+    "slug": "execution-context",
+    "title": "실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경",
+    "path": "/post/frontend/javascript/execution-context"
+  },
+  {
+    "slug": "hoisting",
+    "title": "호이스팅 — 선언은 먼저 올라간다",
+    "path": "/post/frontend/javascript/hoisting"
+  },
+  {
+    "slug": "js-event-loop-and-async",
+    "title": "JS 이벤트 루프와 비동기 — 콜스택, 큐, 마이크로태스크를 한 번에 이해하기",
+    "path": "/post/frontend/javascript/js-event-loop-and-async"
+  },
+  {
+    "slug": "primitive-type",
+    "title": "원시 타입 — 값 자체가 복사되는 것들",
+    "path": "/post/frontend/javascript/primitive-type"
+  },
+  {
+    "slug": "prototype",
+    "title": "프로토타입 — 없으면 위에 물어보는 상속",
+    "path": "/post/frontend/javascript/prototype"
+  },
+  {
+    "slug": "reference-type",
+    "title": "참조 타입 — 주소가 복사되는 것들",
+    "path": "/post/frontend/javascript/reference-type"
+  },
+  {
+    "slug": "scope",
+    "title": "스코프 — 변수가 어디까지 보이는가",
+    "path": "/post/frontend/javascript/scope"
+  },
+  {
+    "slug": "settimeout-vs-promise",
+    "title": "setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습",
+    "path": "/post/frontend/javascript/settimeout-vs-promise"
+  },
+  {
+    "slug": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
+    "title": "빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG",
+    "path": "/post/frontend/performance/build-performance-a11y-vite-turbopack-lighthouse-wcag"
+  },
+  {
+    "slug": "react-component-data-flow",
+    "title": "React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가",
+    "path": "/post/frontend/react/react-component-data-flow"
+  },
+  {
+    "slug": "react-controlled-vs-uncontrolled",
+    "title": "controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가",
+    "path": "/post/frontend/react/react-controlled-vs-uncontrolled"
+  },
+  {
+    "slug": "react-query-advanced",
+    "title": "React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션",
+    "path": "/post/frontend/react-query/react-query-advanced"
+  },
+  {
+    "slug": "react-query-cache",
+    "title": "React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거",
+    "path": "/post/frontend/react-query/react-query-cache"
+  },
+  {
+    "slug": "react-query-mutations",
+    "title": "React Query useMutation 심층 — 라이프사이클, 콜백, 낙관적 업데이트",
+    "path": "/post/frontend/react-query/react-query-mutations"
+  },
+  {
+    "slug": "react-query-overview",
+    "title": "TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준",
+    "path": "/post/frontend/react-query/react-query-overview"
+  },
+  {
+    "slug": "react-query-queries",
+    "title": "React Query useQuery 심층 — QueryClient, 쿼리 키, 전체 옵션 완전 정리",
+    "path": "/post/frontend/react-query/react-query-queries"
+  },
+  {
+    "slug": "modern-css-tailwind-shadcn",
+    "title": "UI & 스타일링 기초 — 모던 CSS, Tailwind, shadcn/ui를 어떻게 볼 것인가",
+    "path": "/post/frontend/styling/modern-css-tailwind-shadcn"
+  },
+  {
+    "slug": "threejs-dpr-and-canvas-resolution",
+    "title": "devicePixelRatio, setPixelRatio, 캔버스 해상도: Three.js 선명도/성능의 본질",
+    "path": "/post/frontend/threejs/threejs-dpr-and-canvas-resolution"
+  },
+  {
+    "slug": "threejs-frustum-culling",
+    "title": "Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유",
+    "path": "/post/frontend/threejs/threejs-frustum-culling"
+  },
+  {
+    "slug": "threejs-gltf-loading",
+    "title": "glTF 모델을 Three.js에 올리는 방식: 로더, 씬 그래프, 렌더 타이밍",
+    "path": "/post/frontend/threejs/threejs-gltf-loading"
+  },
+  {
+    "slug": "threejs-portfolio-rendering-optimization-story",
+    "title": "Three.js 포트폴리오 렌더링 최적화 실전기: '버벅임'은 3D가 아니라 경쟁이었다",
+    "path": "/post/frontend/threejs/threejs-portfolio-rendering-optimization-story"
+  },
+  {
+    "slug": "threejs-raycaster-picking-performance",
+    "title": "Raycaster & Picking 성능: pointermove에서 바로 intersectObjects() 하면 왜 버벅일까?",
+    "path": "/post/frontend/threejs/threejs-raycaster-picking-performance"
+  },
+  {
+    "slug": "threejs-rendering-pipeline",
+    "title": "Three.js 렌더링 파이프라인: Scene → Camera → Renderer 한 번에 이해하기",
+    "path": "/post/frontend/threejs/threejs-rendering-pipeline"
+  },
+  {
+    "slug": "why-threejs-exists",
+    "title": "Three.js는 왜 만들어졌나: WebGL을 '직접' 쓰지 않기 위해",
+    "path": "/post/frontend/threejs/why-threejs-exists"
+  },
+  {
+    "slug": "typescript-type-system-basics",
+    "title": "TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법",
+    "path": "/post/frontend/typescript/typescript-type-system-basics"
+  },
+  {
     "slug": "claude-code-harness-leak-architecture",
     "title": "Claude Code 하네스 유출이 말해 주는 것 — 모델이 아니라 오케스트레이션",
     "path": "/post/study/ai/claude-code-harness-leak-architecture"
@@ -218,126 +363,6 @@
     "slug": "testing-vitest-playwright",
     "title": "테스트 기초 — 테스트 사고법, Vitest, Playwright",
     "path": "/post/study/engineering/testing/testing-vitest-playwright"
-  },
-  {
-    "slug": "state-data-fetching-tanstack-zustand-server-actions",
-    "title": "상태 & 데이터 페칭 — TanStack Query, Zustand, Server Actions",
-    "path": "/post/study/frontend/data-fetching/state-data-fetching-tanstack-zustand-server-actions"
-  },
-  {
-    "slug": "js-event-loop-and-async",
-    "title": "JS 이벤트 루프와 비동기 — 콜스택, 큐, 마이크로태스크를 한 번에 이해하기",
-    "path": "/post/study/frontend/javascript/js-event-loop-and-async"
-  },
-  {
-    "slug": "settimeout-vs-promise",
-    "title": "setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습",
-    "path": "/post/study/frontend/javascript/settimeout-vs-promise"
-  },
-  {
-    "slug": "closure",
-    "title": "클로저 — 함수가 붙잡고 있는 변수",
-    "path": "/post/study/frontend/js/closure"
-  },
-  {
-    "slug": "event-loop-interactive",
-    "title": "이벤트 루프, 눈으로 따라가기",
-    "path": "/post/study/frontend/js/event-loop-interactive"
-  },
-  {
-    "slug": "hoisting",
-    "title": "호이스팅 — 선언은 먼저 올라간다",
-    "path": "/post/study/frontend/js/hoisting"
-  },
-  {
-    "slug": "scope",
-    "title": "스코프 — 변수가 어디까지 보이는가",
-    "path": "/post/study/frontend/js/scope"
-  },
-  {
-    "slug": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
-    "title": "빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG",
-    "path": "/post/study/frontend/performance/build-performance-a11y-vite-turbopack-lighthouse-wcag"
-  },
-  {
-    "slug": "react-component-data-flow",
-    "title": "React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가",
-    "path": "/post/study/frontend/react/react-component-data-flow"
-  },
-  {
-    "slug": "react-controlled-vs-uncontrolled",
-    "title": "controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가",
-    "path": "/post/study/frontend/react/react-controlled-vs-uncontrolled"
-  },
-  {
-    "slug": "react-query-advanced",
-    "title": "React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션",
-    "path": "/post/study/frontend/react-query/react-query-advanced"
-  },
-  {
-    "slug": "react-query-cache",
-    "title": "React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거",
-    "path": "/post/study/frontend/react-query/react-query-cache"
-  },
-  {
-    "slug": "react-query-mutations",
-    "title": "React Query useMutation 심층 — 라이프사이클, 콜백, 낙관적 업데이트",
-    "path": "/post/study/frontend/react-query/react-query-mutations"
-  },
-  {
-    "slug": "react-query-overview",
-    "title": "TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준",
-    "path": "/post/study/frontend/react-query/react-query-overview"
-  },
-  {
-    "slug": "react-query-queries",
-    "title": "React Query useQuery 심층 — QueryClient, 쿼리 키, 전체 옵션 완전 정리",
-    "path": "/post/study/frontend/react-query/react-query-queries"
-  },
-  {
-    "slug": "modern-css-tailwind-shadcn",
-    "title": "UI & 스타일링 기초 — 모던 CSS, Tailwind, shadcn/ui를 어떻게 볼 것인가",
-    "path": "/post/study/frontend/styling/modern-css-tailwind-shadcn"
-  },
-  {
-    "slug": "threejs-dpr-and-canvas-resolution",
-    "title": "devicePixelRatio, setPixelRatio, 캔버스 해상도: Three.js 선명도/성능의 본질",
-    "path": "/post/study/frontend/threejs/threejs-dpr-and-canvas-resolution"
-  },
-  {
-    "slug": "threejs-frustum-culling",
-    "title": "Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유",
-    "path": "/post/study/frontend/threejs/threejs-frustum-culling"
-  },
-  {
-    "slug": "threejs-gltf-loading",
-    "title": "glTF 모델을 Three.js에 올리는 방식: 로더, 씬 그래프, 렌더 타이밍",
-    "path": "/post/study/frontend/threejs/threejs-gltf-loading"
-  },
-  {
-    "slug": "threejs-portfolio-rendering-optimization-story",
-    "title": "Three.js 포트폴리오 렌더링 최적화 실전기: '버벅임'은 3D가 아니라 경쟁이었다",
-    "path": "/post/study/frontend/threejs/threejs-portfolio-rendering-optimization-story"
-  },
-  {
-    "slug": "threejs-raycaster-picking-performance",
-    "title": "Raycaster & Picking 성능: pointermove에서 바로 intersectObjects() 하면 왜 버벅일까?",
-    "path": "/post/study/frontend/threejs/threejs-raycaster-picking-performance"
-  },
-  {
-    "slug": "threejs-rendering-pipeline",
-    "title": "Three.js 렌더링 파이프라인: Scene → Camera → Renderer 한 번에 이해하기",
-    "path": "/post/study/frontend/threejs/threejs-rendering-pipeline"
-  },
-  {
-    "slug": "why-threejs-exists",
-    "title": "Three.js는 왜 만들어졌나: WebGL을 '직접' 쓰지 않기 위해",
-    "path": "/post/study/frontend/threejs/why-threejs-exists"
-  },
-  {
-    "slug": "typescript-type-system-basics",
-    "title": "TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법",
-    "path": "/post/study/frontend/typescript/typescript-type-system-basics"
   },
   {
     "slug": "celery-beat",

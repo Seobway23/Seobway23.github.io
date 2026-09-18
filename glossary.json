@@ -215,7 +215,7 @@
       ],
       "categories": [
         "study/electron",
-        "study/frontend"
+        "frontend"
       ]
     },
     "call-stack": {
@@ -229,7 +229,7 @@
       ],
       "categories": [
         "study/electron",
-        "study/frontend"
+        "frontend"
       ]
     },
     "event-loop": {
@@ -242,7 +242,7 @@
       ],
       "categories": [
         "study/electron",
-        "study/frontend",
+        "frontend",
         "study/backend",
         "study/infra"
       ]
@@ -257,7 +257,7 @@
       ],
       "categories": [
         "study/electron",
-        "study/frontend"
+        "frontend"
       ]
     },
     "libuv": {
