@@ -1,5 +1,6 @@
 ---
 title: "참조 타입 — 주소가 복사되는 것들"
+coverImage: /post-thumbnails/reference-type.svg
 slug: reference-type
 category: frontend/javascript
 concept: reference-type

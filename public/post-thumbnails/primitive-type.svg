@@ -1,0 +1,227 @@
+<svg id="tb-primitive-type" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-primitive-type-t tb-primitive-type-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-primitive-type-t">원시 타입 — 값 자체가 복사되는 것들</title>
+  <desc id="tb-primitive-type-d">frontend/javascript — 숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입</desc>
+
+  <defs>
+    <linearGradient id="tb-primitive-type-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-primitive-type-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-primitive-type-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-primitive-type-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-primitive-type-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-primitive-type-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-primitive-type-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-primitive-type-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-primitive-type-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-primitive-type-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-primitive-type-glow-a { animation: tb-primitive-type-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-primitive-type-glow-b { animation: tb-primitive-type-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-primitive-type-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-primitive-type-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-primitive-type-spark { fill: #ffffff; opacity: 0; animation-name: tb-primitive-type-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-primitive-type-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-primitive-type-sheen-band { animation: tb-primitive-type-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-primitive-type-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-primitive-type-caret { animation: tb-primitive-type-blink 1.1s steps(1) infinite; }
+    @keyframes tb-primitive-type-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-primitive-type-halo { animation: tb-primitive-type-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-primitive-type-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-primitive-type-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-primitive-type-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-primitive-type-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-primitive-type-badge-ring { animation: tb-primitive-type-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-primitive-type-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-primitive-type-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-primitive-type-tshadow); transition: fill .35s ease; }
+    .tb-primitive-type-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-primitive-type-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-primitive-type-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-primitive-type-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-primitive-type-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-primitive-type-c-key    { fill: #f7df1e; }
+    .tb-primitive-type-c-string { fill: #86efac; }
+    .tb-primitive-type-c-number { fill: #fbbf24; }
+    .tb-primitive-type-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-primitive-type-c-ident  { fill: #cbd5e1; }
+    .tb-primitive-type-c-punct  { fill: #94a3b8; }
+    .tb-primitive-type-c-op     { fill: hsl(198 93% 70%); }
+    .tb-primitive-type-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-primitive-type:hover .tb-primitive-type-glow-a,
+    #tb-primitive-type:hover .tb-primitive-type-glow-b     { animation-duration: 6s; }
+    #tb-primitive-type:hover .tb-primitive-type-code       { opacity: .62; }
+    #tb-primitive-type:hover .tb-primitive-type-spark      { animation-duration: 1.4s !important; }
+    #tb-primitive-type:hover .tb-primitive-type-sheen-band { animation-duration: 2.6s; }
+    #tb-primitive-type:hover .tb-primitive-type-title      { fill: #ffffff; }
+    #tb-primitive-type:hover .tb-primitive-type-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-primitive-type:hover .tb-primitive-type-badge      { transform: translateY(-5px); }
+    .tb-primitive-type-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-primitive-type-glow-a, .tb-primitive-type-glow-b, .tb-primitive-type-spark, .tb-primitive-type-sheen-band, .tb-primitive-type-caret, .tb-primitive-type-halo, .tb-primitive-type-badge-ring, .tb-primitive-type-bracket {
+        animation: none !important;
+      }
+      .tb-primitive-type-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-primitive-type-frame)">
+    <rect width="1200" height="630" fill="url(#tb-primitive-type-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-primitive-type-grid)"/>
+
+    <circle class="tb-primitive-type-glow-a" cx="208" cy="242" r="383" fill="url(#tb-primitive-type-ga)"/>
+    <circle class="tb-primitive-type-glow-b" cx="1040" cy="487" r="425" fill="url(#tb-primitive-type-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-key" xml:space="preserve">let</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">a</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-number" xml:space="preserve">1</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="140.12" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-key" xml:space="preserve">let</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">b</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">a</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="176.24" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-ident" xml:space="preserve">b</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-number" xml:space="preserve">2</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-ident" xml:space="preserve">console</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">.</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">log</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">(</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">a</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">)</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve">        </tspan><tspan class="tb-primitive-type-c-comment" xml:space="preserve">// 1     ← 안 바뀐다</tspan></text>
+      <text x="64" y="248.48" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-key" xml:space="preserve">let</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">x</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">{</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">n</tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">:</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-number" xml:space="preserve">1</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">}</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="284.6" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-key" xml:space="preserve">let</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">y</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">x</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-ident" xml:space="preserve">y</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">.</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">n</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-number" xml:space="preserve">2</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="356.84" class="tb-primitive-type-code" font-size="21"><tspan class="tb-primitive-type-c-ident" xml:space="preserve">console</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">.</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">log</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">(</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">x</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">.</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">n</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">)</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve">      </tspan><tspan class="tb-primitive-type-c-comment" xml:space="preserve">// 2     ← 같이 바뀐다</tspan></text>
+      <rect class="tb-primitive-type-caret" x="572" y="340"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-primitive-type-code" font-size="17"><tspan class="tb-primitive-type-c-key" xml:space="preserve">let</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">a</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-number" xml:space="preserve">1</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="386.6" class="tb-primitive-type-code" font-size="17"><tspan class="tb-primitive-type-c-key" xml:space="preserve">let</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">b</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">a</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="417.2" class="tb-primitive-type-code" font-size="17"><tspan class="tb-primitive-type-c-ident" xml:space="preserve">b</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-op" xml:space="preserve">=</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve"> </tspan><tspan class="tb-primitive-type-c-number" xml:space="preserve">2</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="447.8" class="tb-primitive-type-code" font-size="17"><tspan class="tb-primitive-type-c-ident" xml:space="preserve">console</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">.</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">log</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">(</tspan><tspan class="tb-primitive-type-c-ident" xml:space="preserve">a</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">)</tspan><tspan class="tb-primitive-type-c-punct" xml:space="preserve">;</tspan><tspan class="tb-primitive-type-c-plain" xml:space="preserve">        </tspan><tspan class="tb-primitive-type-c-comment" xml:space="preserve">// 1     ← 안 바뀐다</tspan></text>
+    </g>
+
+    <circle class="tb-primitive-type-spark" cx="1002" cy="206" r="3.22" style="animation-delay:0.93s;animation-duration:4.34s"/>
+    <circle class="tb-primitive-type-spark" cx="72" cy="376" r="1.77" style="animation-delay:2.44s;animation-duration:6.34s"/>
+    <circle class="tb-primitive-type-spark" cx="1074" cy="340" r="2.30" style="animation-delay:4.60s;animation-duration:4.97s"/>
+    <circle class="tb-primitive-type-spark" cx="1040" cy="208" r="2.60" style="animation-delay:3.66s;animation-duration:3.91s"/>
+    <circle class="tb-primitive-type-spark" cx="271" cy="309" r="2.42" style="animation-delay:1.50s;animation-duration:5.35s"/>
+    <circle class="tb-primitive-type-spark" cx="152" cy="456" r="2.04" style="animation-delay:4.09s;animation-duration:6.08s"/>
+    <circle class="tb-primitive-type-spark" cx="1032" cy="512" r="2.48" style="animation-delay:2.55s;animation-duration:5.50s"/>
+    <circle class="tb-primitive-type-spark" cx="188" cy="124" r="3.07" style="animation-delay:4.37s;animation-duration:3.88s"/>
+    <circle class="tb-primitive-type-spark" cx="215" cy="510" r="2.34" style="animation-delay:0.35s;animation-duration:5.73s"/>
+    <circle class="tb-primitive-type-spark" cx="201" cy="165" r="3.60" style="animation-delay:1.59s;animation-duration:3.87s"/>
+    <circle class="tb-primitive-type-spark" cx="1015" cy="454" r="3.49" style="animation-delay:1.55s;animation-duration:4.76s"/>
+    <circle class="tb-primitive-type-spark" cx="1074" cy="124" r="2.63" style="animation-delay:4.85s;animation-duration:3.61s"/>
+    <circle class="tb-primitive-type-spark" cx="64" cy="266" r="2.05" style="animation-delay:3.03s;animation-duration:3.45s"/>
+    <circle class="tb-primitive-type-spark" cx="148" cy="114" r="2.05" style="animation-delay:1.70s;animation-duration:5.40s"/>
+    <circle class="tb-primitive-type-spark" cx="983" cy="246" r="1.61" style="animation-delay:3.13s;animation-duration:3.45s"/>
+    <circle class="tb-primitive-type-spark" cx="125" cy="58" r="2.06" style="animation-delay:5.10s;animation-duration:6.02s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-primitive-type-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-primitive-type-vignette)"/>
+
+    <g class="tb-primitive-type-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-primitive-type-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="166" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-primitive-type-chip-t" x="600" y="194" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-primitive-type-title" x="600" y="266" text-anchor="middle" font-size="62">원시 타입 — 값</text>
+      <text class="tb-primitive-type-title" x="600" y="345" text-anchor="middle" font-size="62">자체가 복사되는 것들</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-primitive-type-rule)"/>
+    <text class="tb-primitive-type-sub" x="600" y="455" text-anchor="middle" font-size="25">숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-primitive-type-badge">
+      <circle class="tb-primitive-type-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-primitive-type-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-primitive-type-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-primitive-type-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-primitive-type-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-primitive-type-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-primitive-type-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-primitive-type-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

@@ -6,7 +6,7 @@ tags: [javascript, event-loop, async, call-stack, microtask, macrotask, promise]
 author: Seobway
 readTime: 11
 featured: false
-coverImage: /roadmap-thumbnails/step-01-browser-client.svg
+coverImage: /post-thumbnails/js-event-loop-and-async.svg
 createdAt: 2026-04-16
 excerpt: >
   JavaScript의 콜스택, Web APIs, 태스크 큐, 마이크로태스크 큐가 어떻게 맞물려

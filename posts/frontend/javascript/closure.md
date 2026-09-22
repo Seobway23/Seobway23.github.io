@@ -1,5 +1,6 @@
 ---
 title: "클로저 — 함수가 붙잡고 있는 변수"
+coverImage: /post-thumbnails/closure.svg
 slug: closure
 category: frontend/javascript
 concept: closure

@@ -1,5 +1,6 @@
 ---
 title: "실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경"
+coverImage: /post-thumbnails/execution-context.svg
 slug: execution-context
 category: frontend/javascript
 concept: execution-context
