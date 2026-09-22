@@ -1,0 +1,227 @@
+<svg id="tb-event-loop-interactive" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-event-loop-interactive-t tb-event-loop-interactive-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-event-loop-interactive-t">이벤트 루프, 눈으로 따라가기</title>
+  <desc id="tb-event-loop-interactive-d">frontend/javascript — 콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다.</desc>
+
+  <defs>
+    <linearGradient id="tb-event-loop-interactive-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-event-loop-interactive-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-event-loop-interactive-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-event-loop-interactive-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-event-loop-interactive-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-event-loop-interactive-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-event-loop-interactive-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-event-loop-interactive-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-event-loop-interactive-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-event-loop-interactive-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-event-loop-interactive-glow-a { animation: tb-event-loop-interactive-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-event-loop-interactive-glow-b { animation: tb-event-loop-interactive-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-event-loop-interactive-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-event-loop-interactive-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-event-loop-interactive-spark { fill: #ffffff; opacity: 0; animation-name: tb-event-loop-interactive-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-event-loop-interactive-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-event-loop-interactive-sheen-band { animation: tb-event-loop-interactive-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-event-loop-interactive-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-event-loop-interactive-caret { animation: tb-event-loop-interactive-blink 1.1s steps(1) infinite; }
+    @keyframes tb-event-loop-interactive-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-event-loop-interactive-halo { animation: tb-event-loop-interactive-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-event-loop-interactive-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-event-loop-interactive-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-event-loop-interactive-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-event-loop-interactive-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-event-loop-interactive-badge-ring { animation: tb-event-loop-interactive-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-event-loop-interactive-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-event-loop-interactive-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-event-loop-interactive-tshadow); transition: fill .35s ease; }
+    .tb-event-loop-interactive-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-event-loop-interactive-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-event-loop-interactive-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-event-loop-interactive-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-event-loop-interactive-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-event-loop-interactive-c-key    { fill: #f7df1e; }
+    .tb-event-loop-interactive-c-string { fill: #86efac; }
+    .tb-event-loop-interactive-c-number { fill: #fbbf24; }
+    .tb-event-loop-interactive-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-event-loop-interactive-c-ident  { fill: #cbd5e1; }
+    .tb-event-loop-interactive-c-punct  { fill: #94a3b8; }
+    .tb-event-loop-interactive-c-op     { fill: hsl(198 93% 70%); }
+    .tb-event-loop-interactive-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-glow-a,
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-glow-b     { animation-duration: 6s; }
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-code       { opacity: .62; }
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-spark      { animation-duration: 1.4s !important; }
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-sheen-band { animation-duration: 2.6s; }
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-title      { fill: #ffffff; }
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-event-loop-interactive:hover .tb-event-loop-interactive-badge      { transform: translateY(-5px); }
+    .tb-event-loop-interactive-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-event-loop-interactive-glow-a, .tb-event-loop-interactive-glow-b, .tb-event-loop-interactive-spark, .tb-event-loop-interactive-sheen-band, .tb-event-loop-interactive-caret, .tb-event-loop-interactive-halo, .tb-event-loop-interactive-badge-ring, .tb-event-loop-interactive-bracket {
+        animation: none !important;
+      }
+      .tb-event-loop-interactive-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-event-loop-interactive-frame)">
+    <rect width="1200" height="630" fill="url(#tb-event-loop-interactive-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-event-loop-interactive-grid)"/>
+
+    <circle class="tb-event-loop-interactive-glow-a" cx="205" cy="263" r="355" fill="url(#tb-event-loop-interactive-ga)"/>
+    <circle class="tb-event-loop-interactive-glow-b" cx="1019" cy="476" r="392" fill="url(#tb-event-loop-interactive-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">---</tspan></text>
+      <text x="64" y="140.12" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">#</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">#</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">순</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">서</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">를</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">만</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">드</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">는</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">규</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">칙</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">세</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">가</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">지</tspan></text>
+      <text x="64" y="176.24" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">:::</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-ident" xml:space="preserve">tabs</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">==</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">콜</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">스</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">택</tspan></text>
+      <text x="64" y="248.48" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">함</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">수</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">를</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">호</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">출</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">하</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">면</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">스</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">택</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">에</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">쌓</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">이</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">고</tspan><tspan class="tb-event-loop-interactive-c-punct" xml:space="preserve">,</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">반</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">환</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">하</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">면</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">빠</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">진</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">다</tspan><tspan class="tb-event-loop-interactive-c-punct" xml:space="preserve">.</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">**</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">스</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">택</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">이</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">비</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">어</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">야</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">만</tspan><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">**</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">이</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">벤</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">트</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">루</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">프</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">…</tspan></text>
+      <text x="64" y="284.6" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">그</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">래</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">서</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">무</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">거</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">운</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">동</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">기</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">루</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">프</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">하</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">나</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">가</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">타</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">이</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">머</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">전</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">부</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">를</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">밀</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">어</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">버</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">린</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">다</tspan><tspan class="tb-event-loop-interactive-c-punct" xml:space="preserve">.</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">==</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">마</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">이</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">크</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">로</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">태</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">스</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">크</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">큐</tspan></text>
+      <text x="64" y="356.84" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-string" xml:space="preserve">`Promise.then`</tspan><tspan class="tb-event-loop-interactive-c-punct" xml:space="preserve">,</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-string" xml:space="preserve">`queueMicrotask`</tspan><tspan class="tb-event-loop-interactive-c-punct" xml:space="preserve">,</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-string" xml:space="preserve">`await`</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">뒤</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">의</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">코</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">드</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">…</tspan></text>
+      <text x="64" y="392.96" class="tb-event-loop-interactive-code" font-size="21"><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">스</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">택</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">이</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">비</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">면</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">**</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">큐</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">가</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">완</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">전</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">히</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">빌</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">때</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">까</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">지</tspan><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">**</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">연</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">달</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">아</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">실</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">행</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">한</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">다</tspan><tspan class="tb-event-loop-interactive-c-punct" xml:space="preserve">.</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">중</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">간</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">에</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">태</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">스</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">크</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">큐</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">로</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">넘</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">어</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">…</tspan></text>
+      <rect class="tb-event-loop-interactive-caret" x="673" y="376"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-event-loop-interactive-code" font-size="17"><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">---</tspan></text>
+      <text x="690" y="386.6" class="tb-event-loop-interactive-code" font-size="17"><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">#</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">#</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">순</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">서</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">를</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">만</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">드</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">는</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">규</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">칙</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">세</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">가</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">지</tspan></text>
+      <text x="690" y="417.2" class="tb-event-loop-interactive-code" font-size="17"><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">:::</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-ident" xml:space="preserve">tabs</tspan></text>
+      <text x="690" y="447.8" class="tb-event-loop-interactive-code" font-size="17"><tspan class="tb-event-loop-interactive-c-op" xml:space="preserve">==</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">콜</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve"> </tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">스</tspan><tspan class="tb-event-loop-interactive-c-plain" xml:space="preserve">택</tspan></text>
+    </g>
+
+    <circle class="tb-event-loop-interactive-spark" cx="1102" cy="540" r="2.88" style="animation-delay:2.77s;animation-duration:5.64s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="298" cy="185" r="3.58" style="animation-delay:4.57s;animation-duration:3.56s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="995" cy="229" r="2.89" style="animation-delay:1.84s;animation-duration:5.45s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="965" cy="530" r="3.03" style="animation-delay:2.95s;animation-duration:5.72s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="98" cy="502" r="2.63" style="animation-delay:1.62s;animation-duration:3.91s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="996" cy="446" r="2.44" style="animation-delay:4.10s;animation-duration:3.74s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="271" cy="454" r="3.57" style="animation-delay:0.31s;animation-duration:4.64s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="253" cy="79" r="2.35" style="animation-delay:5.24s;animation-duration:5.05s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="1112" cy="141" r="1.83" style="animation-delay:5.63s;animation-duration:3.78s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="100" cy="476" r="3.63" style="animation-delay:1.59s;animation-duration:3.74s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="212" cy="477" r="2.61" style="animation-delay:2.10s;animation-duration:6.47s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="1096" cy="393" r="2.74" style="animation-delay:2.49s;animation-duration:6.01s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="214" cy="181" r="2.04" style="animation-delay:3.72s;animation-duration:5.62s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="1035" cy="471" r="1.40" style="animation-delay:1.73s;animation-duration:3.26s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="963" cy="163" r="3.45" style="animation-delay:2.23s;animation-duration:6.39s"/>
+    <circle class="tb-event-loop-interactive-spark" cx="987" cy="303" r="3.48" style="animation-delay:3.40s;animation-duration:3.97s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-event-loop-interactive-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-event-loop-interactive-vignette)"/>
+
+    <g class="tb-event-loop-interactive-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-event-loop-interactive-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="206" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-event-loop-interactive-chip-t" x="600" y="234" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-event-loop-interactive-title" x="600" y="306" text-anchor="middle" font-size="62">이벤트 루프, 눈으로 따라가기</text>
+
+    <rect x="470" y="362" width="260" height="2" rx="1" fill="url(#tb-event-loop-interactive-rule)"/>
+    <text class="tb-event-loop-interactive-sub" x="600" y="416" text-anchor="middle" font-size="25">콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지…</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-event-loop-interactive-badge">
+      <circle class="tb-event-loop-interactive-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-event-loop-interactive-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-event-loop-interactive-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-event-loop-interactive-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-event-loop-interactive-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-event-loop-interactive-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-event-loop-interactive-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-event-loop-interactive-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>
