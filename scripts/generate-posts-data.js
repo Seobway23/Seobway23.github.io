@@ -716,12 +716,28 @@ function processDomainCards(markdown) {
  * - glossary([[termId]])보다 먼저 실행(둘의 정규식이 겹치지 않지만 순서를 명확히).
  * - 코드 펜스 내부 제외.
  */
+/**
+ * 마크다운을 "코드가 아닌 곳 / 코드인 곳" 으로 번갈아 쪼갠다. (홀수 칸이 코드)
+ *
+ * 왜 인라인 백틱까지 세는가: `[[Prototype]]` 은 자바스크립트가 객체 안에 숨겨 둔
+ * 내부 슬롯의 **표기법**이다. 용어 사전 문법(`[[termId]]`)과 글자가 똑같이 생겼다.
+ * 펜스만 건너뛰면 본문의 `` `[[Prototype]]` `` 이 용어 링크로 바뀌고, 그 <span> 이
+ * <code> 안으로 들어가 독자에게는 태그가 **글자 그대로** 보인다
+ * (2026-09-22, /post/prototype 에서 실제로 그랬다).
+ *
+ * 규칙은 KaTeX 와 같다 — 코드 안은 아무도 건드리지 않는다.
+ */
+function splitOutCode(markdown) {
+  // 펜스 → 이중 백틱 → 단일 백틱 순. 순서가 바뀌면 펜스가 백틱 셋으로 먼저 잘린다.
+  return String(markdown).split(/(```[\s\S]*?```|``[^\n]*?``|`[^`\n]*`)/g);
+}
+
 function applyDomainTriggerMarkup(markdown, cardIds, filePath) {
   if (!markdown || typeof markdown !== "string") return markdown || "";
-  const parts = markdown.split(/(```[\s\S]*?```)/g);
+  const parts = splitOutCode(markdown);
   return parts
     .map((part, i) => {
-      if (i % 2 === 1) return part; // 코드 블록
+      if (i % 2 === 1) return part; // 코드 — 펜스든 인라인이든 손대지 않는다
       return part.replace(
         /\[\[domain:([a-zA-Z0-9_-]+)(?:\|([^\]]+))?\]\]/g,
         (_m, id, label) => {
@@ -899,10 +915,10 @@ function indexTermMentionsInMarkdown(markdown, glossary) {
  */
 function applyGlossaryMarkup(markdown, glossary, filePath) {
   if (!markdown || typeof markdown !== "string") return markdown || "";
-  const parts = markdown.split(/(```[\s\S]*?```)/g);
+  const parts = splitOutCode(markdown);
   return parts
     .map((part, i) => {
-      if (i % 2 === 1) return part; // 코드 블록
+      if (i % 2 === 1) return part; // 코드 — 펜스든 인라인이든 손대지 않는다
       return part.replace(
         /\[\[([a-zA-Z0-9_-]+)(?:\|([^\]]+))?\]\]/g,
         (_m, termId, label) => {
