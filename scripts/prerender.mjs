@@ -73,6 +73,27 @@ function absoluteUrl(maybePath) {
   return `${SITE_URL}${maybePath.startsWith("/") ? "" : "/"}${maybePath}`;
 }
 
+/**
+ * 공유 카드에 쓸 이미지.
+ *
+ * 사이트 안에서는 SVG 표지를 쓰지만 og:image 는 다르다 — 카카오톡·트위터·페이스북·슬랙
+ * 어느 쪽도 SVG 를 그리지 않는다. 링크만 붙이면 표지 없는 카드가 나간다.
+ * 그래서 같은 이름의 PNG(`npm run thumb:png` 가 굽는다)가 있으면 그쪽을 쓴다.
+ * 없으면 SVG 그대로 — 적어도 경로는 맞고, PNG 를 구우면 그날부터 바로 반영된다.
+ */
+function ogImageFor(coverImage) {
+  if (!coverImage || !coverImage.endsWith(".svg") || !coverImage.startsWith("/")) {
+    return absoluteUrl(coverImage);
+  }
+  for (const ext of [".jpg", ".png"]) {
+    const candidate = coverImage.replace(/\.svg$/, ext);
+    if (fs.existsSync(path.join(ROOT, "public", candidate.replace(/^\//, "")))) {
+      return absoluteUrl(candidate);
+    }
+  }
+  return absoluteUrl(coverImage);
+}
+
 function categoryLabel(category) {
   if (!category) return "학습";
   if (CATEGORY_LABELS[category]) return CATEGORY_LABELS[category];
@@ -92,7 +113,7 @@ function buildHead(post) {
   const title = `${post.title} — ${SITE_NAME}`;
   const cleanContent = rewritePlaygroundBlocks(rewriteSeqBlocks(post.content || ""));
   const description = post.excerpt?.trim() || htmlToText(cleanContent, 160);
-  const image = absoluteUrl(post.coverImage);
+  const image = ogImageFor(post.coverImage);
   const published = isoDate(post.createdAt);
   const modified = isoDate(post.updatedAt || post.createdAt);
   const tags = Array.isArray(post.tags) ? post.tags : [];

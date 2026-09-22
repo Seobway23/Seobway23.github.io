@@ -8,6 +8,7 @@ import { getPostComments } from "@/lib/comments";
 import { highlightSearchMatch } from "@/lib/korean-search";
 import { formatReadTimeShort } from "@/lib/data";
 import { getPostCoverImageUrl } from "@/lib/post-cover";
+import CoverImage from "@/components/cover-image";
 import { categoryColor } from "@/lib/category-color";
 
 interface PostCardProps {
@@ -97,7 +98,7 @@ export default function PostCard({ post, searchQuery }: PostCardProps) {
     >
       <Link href={`/post/${post.slug}`}>
         <div className="aspect-video relative overflow-hidden">
-          <img
+          <CoverImage
             src={imageUrl}
             alt={post.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
