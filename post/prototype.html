@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/prototype" />
     <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/prototype.jpg" />
     <meta property="article:published_time" content="2026-09-09T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-22T04:15:47.234Z" />
+    <meta property="article:modified_time" content="2026-09-22T08:05:16.151Z" />
     <meta property="article:tag" content="javascript" />
     <meta property="article:tag" content="프로토타입" />
     <meta property="article:tag" content="상속" />
@@ -52,7 +52,7 @@
     <meta name="twitter:title" content="프로토타입 — 없으면 위에 물어보는 상속" />
     <meta name="twitter:description" content="내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다." />
     <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/prototype.jpg" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"프로토타입 — 없으면 위에 물어보는 상속","description":"내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다.","image":["https://seobway23.github.io/post-thumbnails/prototype.jpg"],"datePublished":"2026-09-09T00:00:00.000Z","dateModified":"2026-09-22T04:15:47.234Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/prototype"},"keywords":"javascript, 프로토타입, 상속, 객체","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3953},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"프로토타입 — 없으면 위에 물어보는 상속","item":"https://seobway23.github.io/post/prototype"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"프로토타입 — 없으면 위에 물어보는 상속","description":"내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다.","image":["https://seobway23.github.io/post-thumbnails/prototype.jpg"],"datePublished":"2026-09-09T00:00:00.000Z","dateModified":"2026-09-22T08:05:16.151Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/prototype"},"keywords":"javascript, 프로토타입, 상속, 객체","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3689},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"프로토타입 — 없으면 위에 물어보는 상속","item":"https://seobway23.github.io/post/prototype"}]}]}</script>
   </head>
   <body>
     <script>
@@ -82,17 +82,17 @@ arr.map((n) =&gt; n * 2);   // 이것도 만든 적 없다
 <p><code>obj</code> 에는 아무것도 없다. 그런데 <code>toString</code> 을 찾아 준다. <strong>자기한테 없으면 위에 물어보기<br>때문</strong>이다.</p>
 <hr>
 <h2>프로토타입은 무엇인가</h2>
-<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성을 여기서 찾는다.<br>모든 객체는 내부에 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 이라는 숨은 링크를 하나 갖고 있다.</p>
+<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성을 여기서 찾는다.<br>모든 객체는 내부에 <code>[[Prototype]]</code> 이라는 숨은 링크를 하나 갖고 있다.</p>
 <p>속성을 읽을 때 자바스크립트는 이렇게 움직인다.</p>
 <ol>
 <li>객체 자신에게 있나? 있으면 끝.</li>
-<li>없으면 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 을 따라 올라가 거기서 찾는다.</li>
+<li>없으면 <code>[[Prototype]]</code> 을 따라 올라가 거기서 찾는다.</li>
 <li>거기도 없으면 또 올라간다.</li>
 <li>끝(<code>null</code>)까지 갔는데 없으면 <code>undefined</code>.</li>
 </ol>
 <p>이 사슬을 <strong>프로토타입 체인</strong>이라고 한다.</p>
 <p>인터랙티브 다이어그램: arr.map 을 찾아 위로 올라간다 (단계별로 재생할 수 있다)</p><ol><li>arr.map 을 읽는다. arr 자신에는 0,1,2 와 length 뿐이다.</li><li>없으니 [[Prototype]] 을 따라 Array.prototype 으로 올라간다.</li><li>Array.prototype 에 map 이 있다. 여기서 멈춘다.</li><li>만약 toString 이었다면 여기도 없어 한 칸 더 올라간다.</li><li>Object.prototype 에서 찾는다.</li><li>여기에도 없었다면 null 에 닿고 undefined 를 돌려준다.</li></ol>
-<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>함수의 <code>prototype</code> 속성과 객체의 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 은 다른 것이다.</strong></p>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>함수의 <code>prototype</code> 속성과 객체의 <code>[[Prototype]]</code> 은 다른 것이다.</strong></p>
 <ul>
 <li><code>Foo.prototype</code> — <code>new Foo()</code> 로 만든 객체들이 <strong>참조하게 될</strong> 객체</li>
 <li><code>obj.__proto__</code> (= <code>Object.getPrototypeOf(obj)</code>) — 그 객체가 <strong>지금 참조 중인</strong> 객체</li>
@@ -111,7 +111,7 @@ dog.name = &quot;바둑이&quot;;
 dog.speak();     // &quot;바둑이 이(가) 소리를 낸다&quot;
 </code></pre>
 <p><code>dog</code> 에는 <code>name</code> 뿐이지만 <code>speak</code> 는 <code>animal</code> 에서 찾아 쓴다.</p>
-</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-1" aria-labelledby="post-tabs-0-tab-1" data-panel-index="1" hidden><p><code>new</code> 를 쓰면 만들어진 객체의 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 이 <code>함수.prototype</code> 으로 연결된다.</p>
+</div><div class="post-tabs__panel" role="tabpanel" id="post-tabs-0-panel-1" aria-labelledby="post-tabs-0-tab-1" data-panel-index="1" hidden><p><code>new</code> 를 쓰면 만들어진 객체의 <code>[[Prototype]]</code> 이 <code>함수.prototype</code> 으로 연결된다.</p>
 <pre><code class="language-js">function Animal(name) {
   this.name = name;
 }

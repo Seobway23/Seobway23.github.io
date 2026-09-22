@@ -18,14 +18,14 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.236Z"
+    "updatedAt": "2026-09-22T08:05:16.153Z"
   },
   {
     "id": "prototype",
     "title": "프로토타입 — 없으면 위에 물어보는 상속",
     "slug": "prototype",
     "excerpt": "내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다.\n",
-    "content": "<h2>만든 적 없는 메서드를 왜 쓸 수 있는가</h2>\n<p>빈 객체를 만들었을 뿐인데 메서드가 딸려 온다.</p>\n<pre><code class=\"language-js\">const obj = {};\nobj.toString();          // &quot;[object Object]&quot;   ← 만든 적 없다\n\nconst arr = [1, 2, 3];\narr.map((n) =&gt; n * 2);   // 이것도 만든 적 없다\n</code></pre>\n<p><code>obj</code> 에는 아무것도 없다. 그런데 <code>toString</code> 을 찾아 준다. <strong>자기한테 없으면 위에 물어보기<br>때문</strong>이다.</p>\n<hr>\n<h2>프로토타입은 무엇인가</h2>\n<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성을 여기서 찾는다.<br>모든 객체는 내부에 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 이라는 숨은 링크를 하나 갖고 있다.</p>\n<p>속성을 읽을 때 자바스크립트는 이렇게 움직인다.</p>\n<ol>\n<li>객체 자신에게 있나? 있으면 끝.</li>\n<li>없으면 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 을 따라 올라가 거기서 찾는다.</li>\n<li>거기도 없으면 또 올라간다.</li>\n<li>끝(<code>null</code>)까지 갔는데 없으면 <code>undefined</code>.</li>\n</ol>\n<p>이 사슬을 <strong>프로토타입 체인</strong>이라고 한다.</p>\n<pre><code class=\"language-seq\">title: arr.map 을 찾아 위로 올라간다\nspeed: 1500\ncaption: 자기한테 없으면 프로토타입을 따라 위로. 끝은 항상 null 이다.\n\nlane self  arr 자신\nlane aproto Array.prototype\nlane oproto Object.prototype\nlane end   null\nlane out   결과 #log\n\nstep arr.map 을 읽는다. arr 자신에는 0,1,2 와 length 뿐이다.\n  push self 0,1,2,length\n  mark self\nstep 없으니 [[Prototype]] 을 따라 Array.prototype 으로 올라간다.\n  move self aproto map 찾는 중\nstep Array.prototype 에 map 이 있다. 여기서 멈춘다.\n  log out map 발견 → 실행\nstep 만약 toString 이었다면 여기도 없어 한 칸 더 올라간다.\n  move aproto oproto toString 찾는 중\nstep Object.prototype 에서 찾는다.\n  log out toString 발견\nstep 여기에도 없었다면 null 에 닿고 undefined 를 돌려준다.\n  move oproto end 못 찾음\n  log out undefined\n</code></pre>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>함수의 <code>prototype</code> 속성과 객체의 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 은 다른 것이다.</strong></p>\n<ul>\n<li><code>Foo.prototype</code> — <code>new Foo()</code> 로 만든 객체들이 <strong>참조하게 될</strong> 객체</li>\n<li><code>obj.__proto__</code> (= <code>Object.getPrototypeOf(obj)</code>) — 그 객체가 <strong>지금 참조 중인</strong> 객체</li>\n</ul>\n<p>이름이 비슷해서 가장 많이 헷갈린다.</p>\n</div></div></aside></p>\n<hr>\n<h2>어떻게 연결하는가</h2>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">Object.create</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">생성자 함수</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">class</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p>가장 직접적이다. &quot;이 객체를 프로토타입으로 삼는 객체를 만들어라&quot;.</p>\n<pre><code class=\"language-js\">const animal = {\n  speak() { return `${this.name} 이(가) 소리를 낸다`; },\n};\n\nconst dog = Object.create(animal);\ndog.name = &quot;바둑이&quot;;\ndog.speak();     // &quot;바둑이 이(가) 소리를 낸다&quot;\n</code></pre>\n<p><code>dog</code> 에는 <code>name</code> 뿐이지만 <code>speak</code> 는 <code>animal</code> 에서 찾아 쓴다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p><code>new</code> 를 쓰면 만들어진 객체의 <code>&lt;span class=&quot;glossary-term&quot; data-term=&quot;Prototype&quot; tabindex=&quot;0&quot;&gt;Prototype&lt;/span&gt;</code> 이 <code>함수.prototype</code> 으로 연결된다.</p>\n<pre><code class=\"language-js\">function Animal(name) {\n  this.name = name;\n}\nAnimal.prototype.speak = function () {\n  return `${this.name} 이(가) 소리를 낸다`;\n};\n\nconst dog = new Animal(&quot;바둑이&quot;);\nObject.getPrototypeOf(dog) === Animal.prototype;   // true\n</code></pre>\n<p><code>speak</code> 를 <code>this</code> 마다 만들지 않고 <strong>한 벌만</strong> 두는 것이 요점이다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p>문법만 다르고 하는 일은 위와 같다. 자바스크립트에는 클래스 기반 상속이 따로 없다.</p>\n<pre><code class=\"language-js\">class Animal {\n  constructor(name) { this.name = name; }\n  speak() { return `${this.name} 이(가) 소리를 낸다`; }\n}\n\nconst dog = new Animal(&quot;바둑이&quot;);\nObject.getPrototypeOf(dog) === Animal.prototype;   // true\n</code></pre>\n<p>메서드는 인스턴스가 아니라 <code>Animal.prototype</code> 에 올라간다.</p>\n</div></div></p>\n<hr>\n<h2>직접 확인</h2>\n<p>체인을 끝까지 따라가 보면 구조가 한눈에 보인다.</p>\n<pre><code class=\"language-playground\">#! js title=prototype-chain.js height=280\nfunction walk(label, value) {\n  const chain = [];\n  let cur = Object.getPrototypeOf(value);\n  while (cur) {\n    chain.push(cur.constructor ? cur.constructor.name : &quot;(익명)&quot;);\n    cur = Object.getPrototypeOf(cur);\n  }\n  console.log(label, &quot;→&quot;, chain.join(&quot; → &quot;), &quot;→ null&quot;);\n}\n\nwalk(&quot;[1,2,3]  &quot;, [1, 2, 3]);\nwalk(&quot;{}       &quot;, {});\nwalk(&quot;&#39;문자열&#39; &quot;, &quot;문자열&quot;);\nwalk(&quot;function &quot;, function () {});\n\n// 자기 것인지 물려받은 것인지 구분\nconst dog = Object.create({ speak() {} });\ndog.name = &quot;바둑이&quot;;\nconsole.log(&quot;name 은 자기 것?&quot;, Object.hasOwn(dog, &quot;name&quot;));\nconsole.log(&quot;speak 은 자기 것?&quot;, Object.hasOwn(dog, &quot;speak&quot;));\nconsole.log(&quot;speak 을 쓸 수는 있나?&quot;, typeof dog.speak);\n</code></pre>\n<p><code>speak</code> 은 자기 것이 아닌데도 쓸 수 있다. 이것이 프로토타입 상속이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong><code>for...in</code> 이 물려받은 속성까지 도는 것</strong></p>\n<pre><code class=\"language-js\">const base = { shared: 1 };\nconst obj = Object.create(base);\nobj.own = 2;\n\nfor (const k in obj) console.log(k);   // own, shared  ← shared 도 나온다\nObject.keys(obj);                       // [&quot;own&quot;]      ← 자기 것만\n</code></pre>\n<p>자기 속성만 원하면 <code>Object.keys</code> · <code>Object.entries</code> 를 쓰거나<br><code>Object.hasOwn(obj, k)</code> 으로 거른다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>프로토타입에 객체를 두면 모두가 공유한다</strong></p>\n<pre><code class=\"language-js\">function Cart() {}\nCart.prototype.items = [];        // 위험\n\nconst a = new Cart();\nconst b = new Cart();\na.items.push(&quot;사과&quot;);\nb.items;    // [&quot;사과&quot;]  ← b 것도 아니다\n</code></pre>\n<p>배열은 <a href=\"/post/reference-type\">참조 타입</a>이라 <strong>하나를 모두가 가리킨다.</strong><br>인스턴스마다 따로 필요한 값은 <code>constructor</code> 안에서 <code>this.items = []</code> 로 만든다.<br>메서드처럼 공유해도 되는 것만 프로토타입에 둔다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--danger\" data-callout=\"danger\" role=\"note\" aria-label=\"DANGER\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">DANGER</span><div class=\"post-callout__content\"><p><strong>내장 프로토타입을 고치지 마라</strong></p>\n<pre><code class=\"language-js\">Array.prototype.last = function () { return this[this.length - 1]; };\n</code></pre>\n<p>편해 보이지만 <code>for...in</code> 에 잡히고, 나중에 표준에 같은 이름이 생기면 충돌한다.<br>필요하면 일반 함수를 만들어 쓴다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성은 이 링크를 따라<br>위로 올라가며 찾는다. <code>class</code> 도 이 구조 위의 문법이고, 메서드를 한 벌만 두어<br>인스턴스가 공유하게 하는 것이 목적이다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>obj.toString()</code> 이 동작하는 이유를 체인으로 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>Foo.prototype</code> 과 <code>obj.__proto__</code> 의 차이를 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 프로토타입에 배열을 두면 안 되는 이유를 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain\" target=\"_blank\">[1] Inheritance and the prototype chain — MDN Web Docs</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf\" target=\"_blank\">[2] Object.getPrototypeOf() — MDN Web Docs</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-objects\" target=\"_blank\">[3] Objects — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/reference-type\">참조 타입 — 주소가 복사되는 것들 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/execution-context\">실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경 →</a></li>\n</ul>\n",
+    "content": "<h2>만든 적 없는 메서드를 왜 쓸 수 있는가</h2>\n<p>빈 객체를 만들었을 뿐인데 메서드가 딸려 온다.</p>\n<pre><code class=\"language-js\">const obj = {};\nobj.toString();          // &quot;[object Object]&quot;   ← 만든 적 없다\n\nconst arr = [1, 2, 3];\narr.map((n) =&gt; n * 2);   // 이것도 만든 적 없다\n</code></pre>\n<p><code>obj</code> 에는 아무것도 없다. 그런데 <code>toString</code> 을 찾아 준다. <strong>자기한테 없으면 위에 물어보기<br>때문</strong>이다.</p>\n<hr>\n<h2>프로토타입은 무엇인가</h2>\n<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성을 여기서 찾는다.<br>모든 객체는 내부에 <code>[[Prototype]]</code> 이라는 숨은 링크를 하나 갖고 있다.</p>\n<p>속성을 읽을 때 자바스크립트는 이렇게 움직인다.</p>\n<ol>\n<li>객체 자신에게 있나? 있으면 끝.</li>\n<li>없으면 <code>[[Prototype]]</code> 을 따라 올라가 거기서 찾는다.</li>\n<li>거기도 없으면 또 올라간다.</li>\n<li>끝(<code>null</code>)까지 갔는데 없으면 <code>undefined</code>.</li>\n</ol>\n<p>이 사슬을 <strong>프로토타입 체인</strong>이라고 한다.</p>\n<pre><code class=\"language-seq\">title: arr.map 을 찾아 위로 올라간다\nspeed: 1500\ncaption: 자기한테 없으면 프로토타입을 따라 위로. 끝은 항상 null 이다.\n\nlane self  arr 자신\nlane aproto Array.prototype\nlane oproto Object.prototype\nlane end   null\nlane out   결과 #log\n\nstep arr.map 을 읽는다. arr 자신에는 0,1,2 와 length 뿐이다.\n  push self 0,1,2,length\n  mark self\nstep 없으니 [[Prototype]] 을 따라 Array.prototype 으로 올라간다.\n  move self aproto map 찾는 중\nstep Array.prototype 에 map 이 있다. 여기서 멈춘다.\n  log out map 발견 → 실행\nstep 만약 toString 이었다면 여기도 없어 한 칸 더 올라간다.\n  move aproto oproto toString 찾는 중\nstep Object.prototype 에서 찾는다.\n  log out toString 발견\nstep 여기에도 없었다면 null 에 닿고 undefined 를 돌려준다.\n  move oproto end 못 찾음\n  log out undefined\n</code></pre>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>함수의 <code>prototype</code> 속성과 객체의 <code>[[Prototype]]</code> 은 다른 것이다.</strong></p>\n<ul>\n<li><code>Foo.prototype</code> — <code>new Foo()</code> 로 만든 객체들이 <strong>참조하게 될</strong> 객체</li>\n<li><code>obj.__proto__</code> (= <code>Object.getPrototypeOf(obj)</code>) — 그 객체가 <strong>지금 참조 중인</strong> 객체</li>\n</ul>\n<p>이름이 비슷해서 가장 많이 헷갈린다.</p>\n</div></div></aside></p>\n<hr>\n<h2>어떻게 연결하는가</h2>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">Object.create</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">생성자 함수</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">class</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p>가장 직접적이다. &quot;이 객체를 프로토타입으로 삼는 객체를 만들어라&quot;.</p>\n<pre><code class=\"language-js\">const animal = {\n  speak() { return `${this.name} 이(가) 소리를 낸다`; },\n};\n\nconst dog = Object.create(animal);\ndog.name = &quot;바둑이&quot;;\ndog.speak();     // &quot;바둑이 이(가) 소리를 낸다&quot;\n</code></pre>\n<p><code>dog</code> 에는 <code>name</code> 뿐이지만 <code>speak</code> 는 <code>animal</code> 에서 찾아 쓴다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p><code>new</code> 를 쓰면 만들어진 객체의 <code>[[Prototype]]</code> 이 <code>함수.prototype</code> 으로 연결된다.</p>\n<pre><code class=\"language-js\">function Animal(name) {\n  this.name = name;\n}\nAnimal.prototype.speak = function () {\n  return `${this.name} 이(가) 소리를 낸다`;\n};\n\nconst dog = new Animal(&quot;바둑이&quot;);\nObject.getPrototypeOf(dog) === Animal.prototype;   // true\n</code></pre>\n<p><code>speak</code> 를 <code>this</code> 마다 만들지 않고 <strong>한 벌만</strong> 두는 것이 요점이다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p>문법만 다르고 하는 일은 위와 같다. 자바스크립트에는 클래스 기반 상속이 따로 없다.</p>\n<pre><code class=\"language-js\">class Animal {\n  constructor(name) { this.name = name; }\n  speak() { return `${this.name} 이(가) 소리를 낸다`; }\n}\n\nconst dog = new Animal(&quot;바둑이&quot;);\nObject.getPrototypeOf(dog) === Animal.prototype;   // true\n</code></pre>\n<p>메서드는 인스턴스가 아니라 <code>Animal.prototype</code> 에 올라간다.</p>\n</div></div></p>\n<hr>\n<h2>직접 확인</h2>\n<p>체인을 끝까지 따라가 보면 구조가 한눈에 보인다.</p>\n<pre><code class=\"language-playground\">#! js title=prototype-chain.js height=280\nfunction walk(label, value) {\n  const chain = [];\n  let cur = Object.getPrototypeOf(value);\n  while (cur) {\n    chain.push(cur.constructor ? cur.constructor.name : &quot;(익명)&quot;);\n    cur = Object.getPrototypeOf(cur);\n  }\n  console.log(label, &quot;→&quot;, chain.join(&quot; → &quot;), &quot;→ null&quot;);\n}\n\nwalk(&quot;[1,2,3]  &quot;, [1, 2, 3]);\nwalk(&quot;{}       &quot;, {});\nwalk(&quot;&#39;문자열&#39; &quot;, &quot;문자열&quot;);\nwalk(&quot;function &quot;, function () {});\n\n// 자기 것인지 물려받은 것인지 구분\nconst dog = Object.create({ speak() {} });\ndog.name = &quot;바둑이&quot;;\nconsole.log(&quot;name 은 자기 것?&quot;, Object.hasOwn(dog, &quot;name&quot;));\nconsole.log(&quot;speak 은 자기 것?&quot;, Object.hasOwn(dog, &quot;speak&quot;));\nconsole.log(&quot;speak 을 쓸 수는 있나?&quot;, typeof dog.speak);\n</code></pre>\n<p><code>speak</code> 은 자기 것이 아닌데도 쓸 수 있다. 이것이 프로토타입 상속이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong><code>for...in</code> 이 물려받은 속성까지 도는 것</strong></p>\n<pre><code class=\"language-js\">const base = { shared: 1 };\nconst obj = Object.create(base);\nobj.own = 2;\n\nfor (const k in obj) console.log(k);   // own, shared  ← shared 도 나온다\nObject.keys(obj);                       // [&quot;own&quot;]      ← 자기 것만\n</code></pre>\n<p>자기 속성만 원하면 <code>Object.keys</code> · <code>Object.entries</code> 를 쓰거나<br><code>Object.hasOwn(obj, k)</code> 으로 거른다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>프로토타입에 객체를 두면 모두가 공유한다</strong></p>\n<pre><code class=\"language-js\">function Cart() {}\nCart.prototype.items = [];        // 위험\n\nconst a = new Cart();\nconst b = new Cart();\na.items.push(&quot;사과&quot;);\nb.items;    // [&quot;사과&quot;]  ← b 것도 아니다\n</code></pre>\n<p>배열은 <a href=\"/post/reference-type\">참조 타입</a>이라 <strong>하나를 모두가 가리킨다.</strong><br>인스턴스마다 따로 필요한 값은 <code>constructor</code> 안에서 <code>this.items = []</code> 로 만든다.<br>메서드처럼 공유해도 되는 것만 프로토타입에 둔다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--danger\" data-callout=\"danger\" role=\"note\" aria-label=\"DANGER\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">DANGER</span><div class=\"post-callout__content\"><p><strong>내장 프로토타입을 고치지 마라</strong></p>\n<pre><code class=\"language-js\">Array.prototype.last = function () { return this[this.length - 1]; };\n</code></pre>\n<p>편해 보이지만 <code>for...in</code> 에 잡히고, 나중에 표준에 같은 이름이 생기면 충돌한다.<br>필요하면 일반 함수를 만들어 쓴다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>프로토타입은 <strong>객체가 참조하는 다른 객체</strong>이고, 자기한테 없는 속성은 이 링크를 따라<br>위로 올라가며 찾는다. <code>class</code> 도 이 구조 위의 문법이고, 메서드를 한 벌만 두어<br>인스턴스가 공유하게 하는 것이 목적이다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>obj.toString()</code> 이 동작하는 이유를 체인으로 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>Foo.prototype</code> 과 <code>obj.__proto__</code> 의 차이를 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 프로토타입에 배열을 두면 안 되는 이유를 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain\" target=\"_blank\">[1] Inheritance and the prototype chain — MDN Web Docs</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object/getPrototypeOf\" target=\"_blank\">[2] Object.getPrototypeOf() — MDN Web Docs</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-objects\" target=\"_blank\">[3] Objects — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/reference-type\">참조 타입 — 주소가 복사되는 것들 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/execution-context\">실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경 →</a></li>\n</ul>\n",
     "coverImage": "/post-thumbnails/prototype.svg",
     "category": "frontend/javascript",
     "tags": [
@@ -39,7 +39,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.234Z"
+    "updatedAt": "2026-09-22T08:05:16.151Z"
   },
   {
     "id": "primitive-type",
@@ -59,7 +59,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.230Z"
+    "updatedAt": "2026-09-22T08:05:16.147Z"
   },
   {
     "id": "execution-context",
@@ -79,7 +79,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.222Z"
+    "updatedAt": "2026-09-22T08:05:16.134Z"
   },
   {
     "id": "call-stack",
@@ -99,7 +99,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.213Z"
+    "updatedAt": "2026-09-22T08:05:16.124Z"
   },
   {
     "id": "scope",
@@ -119,7 +119,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.238Z"
+    "updatedAt": "2026-09-22T08:05:16.154Z"
   },
   {
     "id": "hoisting",
@@ -139,7 +139,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.224Z"
+    "updatedAt": "2026-09-22T08:05:16.137Z"
   },
   {
     "id": "event-loop-interactive",
@@ -159,7 +159,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.218Z"
+    "updatedAt": "2026-09-22T08:05:16.129Z"
   },
   {
     "id": "closure",
@@ -179,7 +179,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.216Z"
+    "updatedAt": "2026-09-22T08:05:16.127Z"
   },
   {
     "id": "cache-overlay-timing-rca",
@@ -206,7 +206,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-07-15T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.553Z"
+    "updatedAt": "2026-09-22T08:05:16.541Z"
   },
   {
     "id": "electron-python-sidecar-bundling",
@@ -228,7 +228,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-15T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.413Z"
+    "updatedAt": "2026-09-22T08:05:16.376Z"
   },
   {
     "id": "electron-packaging-asar",
@@ -251,7 +251,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-14T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.403Z"
+    "updatedAt": "2026-09-22T08:05:16.366Z"
   },
   {
     "id": "electron-ipc-security-model",
@@ -274,7 +274,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-13T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.375Z"
+    "updatedAt": "2026-09-22T08:05:16.331Z"
   },
   {
     "id": "electron-native-layer-os-integration",
@@ -296,7 +296,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-12T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.386Z"
+    "updatedAt": "2026-09-22T08:05:16.343Z"
   },
   {
     "id": "electron-nodejs-libuv-integration",
@@ -319,7 +319,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-11T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.396Z"
+    "updatedAt": "2026-09-22T08:05:16.356Z"
   },
   {
     "id": "ai-agent-qa-automation-token-economics",
@@ -342,7 +342,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-11T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.547Z"
+    "updatedAt": "2026-09-22T08:05:16.536Z"
   },
   {
     "id": "electron-renderer-chromium-rendering",
@@ -364,7 +364,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-10T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.419Z"
+    "updatedAt": "2026-09-22T08:05:16.384Z"
   },
   {
     "id": "electron-multi-process-architecture",
@@ -386,7 +386,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.380Z"
+    "updatedAt": "2026-09-22T08:05:16.337Z"
   },
   {
     "id": "typescript-type-system-basics",
@@ -409,7 +409,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.284Z"
+    "updatedAt": "2026-09-22T08:05:16.223Z"
   },
   {
     "id": "testing-vitest-playwright",
@@ -431,7 +431,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.433Z"
+    "updatedAt": "2026-09-22T08:05:16.397Z"
   },
   {
     "id": "state-data-fetching-tanstack-zustand-server-actions",
@@ -453,7 +453,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.205Z"
+    "updatedAt": "2026-09-22T08:05:16.116Z"
   },
   {
     "id": "sql-joins-where-having-group-by",
@@ -477,7 +477,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.371Z"
+    "updatedAt": "2026-09-22T08:05:16.327Z"
   },
   {
     "id": "settimeout-vs-promise",
@@ -500,7 +500,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.240Z"
+    "updatedAt": "2026-09-22T08:05:16.156Z"
   },
   {
     "id": "requirements-spec-user-story-tradeoff",
@@ -522,7 +522,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.323Z"
+    "updatedAt": "2026-09-22T08:05:16.275Z"
   },
   {
     "id": "react-controlled-vs-uncontrolled",
@@ -544,7 +544,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.245Z"
+    "updatedAt": "2026-09-22T08:05:16.162Z"
   },
   {
     "id": "react-component-data-flow",
@@ -567,7 +567,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.244Z"
+    "updatedAt": "2026-09-22T08:05:16.160Z"
   },
   {
     "id": "observability-security-sentry-posthog-otel-npm-audit",
@@ -590,7 +590,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.430Z"
+    "updatedAt": "2026-09-22T08:05:16.395Z"
   },
   {
     "id": "modern-css-tailwind-shadcn",
@@ -613,7 +613,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.265Z"
+    "updatedAt": "2026-09-22T08:05:16.193Z"
   },
   {
     "id": "js-runtime-node-bun-deno",
@@ -636,7 +636,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.367Z"
+    "updatedAt": "2026-09-22T08:05:16.323Z"
   },
   {
     "id": "js-event-loop-and-async",
@@ -660,7 +660,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.228Z"
+    "updatedAt": "2026-09-22T08:05:16.144Z"
   },
   {
     "id": "http-methods-and-status-codes",
@@ -686,7 +686,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.365Z"
+    "updatedAt": "2026-09-22T08:05:16.320Z"
   },
   {
     "id": "hono-rest-api-overview",
@@ -710,7 +710,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.363Z"
+    "updatedAt": "2026-09-22T08:05:16.318Z"
   },
   {
     "id": "git-branching-conventional-commits-husky",
@@ -733,7 +733,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.428Z"
+    "updatedAt": "2026-09-22T08:05:16.393Z"
   },
   {
     "id": "deployment-vercel-railway-github-actions",
@@ -755,7 +755,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.443Z"
+    "updatedAt": "2026-09-22T08:05:16.409Z"
   },
   {
     "id": "db-orm-postgres-drizzle-neon-supabase",
@@ -779,7 +779,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.325Z"
+    "updatedAt": "2026-09-22T08:05:16.277Z"
   },
   {
     "id": "context-engineering-prompts-rules-memory-skills",
@@ -802,7 +802,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.289Z"
+    "updatedAt": "2026-09-22T08:05:16.231Z"
   },
   {
     "id": "code-quality-eslint-prettier-biome",
@@ -826,7 +826,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.425Z"
+    "updatedAt": "2026-09-22T08:05:16.390Z"
   },
   {
     "id": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
@@ -852,7 +852,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.241Z"
+    "updatedAt": "2026-09-22T08:05:16.157Z"
   },
   {
     "id": "auth-security-authjs-owasp-passkeys",
@@ -875,7 +875,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.369Z"
+    "updatedAt": "2026-09-22T08:05:16.325Z"
   },
   {
     "id": "architecture-patterns-layered-component-clean",
@@ -896,7 +896,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.322Z"
+    "updatedAt": "2026-09-22T08:05:16.273Z"
   },
   {
     "id": "api-design-rest-openapi-rpc-server-actions",
@@ -918,7 +918,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.321Z"
+    "updatedAt": "2026-09-22T08:05:16.272Z"
   },
   {
     "id": "ai-webdev-roadmap-foundation",
@@ -944,7 +944,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.545Z"
+    "updatedAt": "2026-09-22T08:05:16.532Z"
   },
   {
     "id": "ai-development-process-spec-tdd-hooks",
@@ -966,7 +966,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.300Z"
+    "updatedAt": "2026-09-22T08:05:16.249Z"
   },
   {
     "id": "ai-coding-tools-cursor-copilot-claude-code-mcp",
@@ -990,7 +990,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.303Z"
+    "updatedAt": "2026-09-22T08:05:16.255Z"
   },
   {
     "id": "ai-code-verification-review-quality-security-performance-ux",
@@ -1013,7 +1013,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.301Z"
+    "updatedAt": "2026-09-22T08:05:16.252Z"
   },
   {
     "id": "mysql-restore-test",
@@ -1039,7 +1039,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.462Z"
+    "updatedAt": "2026-09-22T08:05:16.437Z"
   },
   {
     "id": "mysql-backup-k8s",
@@ -1065,7 +1065,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.460Z"
+    "updatedAt": "2026-09-22T08:05:16.434Z"
   },
   {
     "id": "kadane-algorithm",
@@ -1088,7 +1088,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.319Z"
+    "updatedAt": "2026-09-22T08:05:16.270Z"
   },
   {
     "id": "claude-code-harness-leak-architecture",
@@ -1113,7 +1113,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.287Z"
+    "updatedAt": "2026-09-22T08:05:16.226Z"
   },
   {
     "id": "micro-hub-and-switch",
@@ -1140,7 +1140,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.525Z"
+    "updatedAt": "2026-09-22T08:05:16.515Z"
   },
   {
     "id": "micro-ethernet-nic-cable",
@@ -1165,7 +1165,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.521Z"
+    "updatedAt": "2026-09-22T08:05:16.511Z"
   },
   {
     "id": "mechanics-force-equilibrium",
@@ -1189,7 +1189,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.500Z"
+    "updatedAt": "2026-09-22T08:05:16.486Z"
   },
   {
     "id": "mechanics-basics-moment-intro",
@@ -1211,7 +1211,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.465Z"
+    "updatedAt": "2026-09-22T08:05:16.444Z"
   },
   {
     "id": "mechanics-basics-forces-intro",
@@ -1233,7 +1233,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.464Z"
+    "updatedAt": "2026-09-22T08:05:16.440Z"
   },
   {
     "id": "earth-pressure-overview",
@@ -1257,7 +1257,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.472Z"
+    "updatedAt": "2026-09-22T08:05:16.452Z"
   },
   {
     "id": "kubectl-debugging",
@@ -1282,7 +1282,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.459Z"
+    "updatedAt": "2026-09-22T08:05:16.432Z"
   },
   {
     "id": "jenkins-argocd-gitops",
@@ -1308,7 +1308,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.452Z"
+    "updatedAt": "2026-09-22T08:05:16.420Z"
   },
   {
     "id": "drf-views",
@@ -1335,7 +1335,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.356Z"
+    "updatedAt": "2026-09-22T08:05:16.312Z"
   },
   {
     "id": "drf-serializer-validation",
@@ -1359,7 +1359,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.353Z"
+    "updatedAt": "2026-09-22T08:05:16.308Z"
   },
   {
     "id": "drf-overview",
@@ -1385,7 +1385,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.352Z"
+    "updatedAt": "2026-09-22T08:05:16.305Z"
   },
   {
     "id": "drf-authentication",
@@ -1411,7 +1411,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.350Z"
+    "updatedAt": "2026-09-22T08:05:16.302Z"
   },
   {
     "id": "django-urls",
@@ -1438,7 +1438,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.345Z"
+    "updatedAt": "2026-09-22T08:05:16.297Z"
   },
   {
     "id": "django-object-permissions",
@@ -1462,7 +1462,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.338Z"
+    "updatedAt": "2026-09-22T08:05:16.289Z"
   },
   {
     "id": "django-models",
@@ -1489,7 +1489,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.336Z"
+    "updatedAt": "2026-09-22T08:05:16.287Z"
   },
   {
     "id": "why-threejs-exists",
@@ -1510,7 +1510,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.283Z"
+    "updatedAt": "2026-09-22T08:05:16.221Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -1532,7 +1532,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.282Z"
+    "updatedAt": "2026-09-22T08:05:16.220Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -1554,7 +1554,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.276Z"
+    "updatedAt": "2026-09-22T08:05:16.212Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
@@ -1576,7 +1576,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.275Z"
+    "updatedAt": "2026-09-22T08:05:16.211Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -1598,7 +1598,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.272Z"
+    "updatedAt": "2026-09-22T08:05:16.200Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -1620,7 +1620,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.270Z"
+    "updatedAt": "2026-09-22T08:05:16.198Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -1642,7 +1642,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.268Z"
+    "updatedAt": "2026-09-22T08:05:16.196Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -1677,7 +1677,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.457Z"
+    "updatedAt": "2026-09-22T08:05:16.428Z"
   },
   {
     "id": "react-query-queries",
@@ -1702,7 +1702,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.262Z"
+    "updatedAt": "2026-09-22T08:05:16.187Z"
   },
   {
     "id": "react-query-overview",
@@ -1726,7 +1726,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.258Z"
+    "updatedAt": "2026-09-22T08:05:16.179Z"
   },
   {
     "id": "react-query-mutations",
@@ -1749,7 +1749,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.253Z"
+    "updatedAt": "2026-09-22T08:05:16.171Z"
   },
   {
     "id": "react-query-cache",
@@ -1773,7 +1773,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.250Z"
+    "updatedAt": "2026-09-22T08:05:16.168Z"
   },
   {
     "id": "react-query-advanced",
@@ -1797,7 +1797,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.248Z"
+    "updatedAt": "2026-09-22T08:05:16.165Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -1822,7 +1822,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.298Z"
+    "updatedAt": "2026-09-22T08:05:16.246Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -1845,7 +1845,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.296Z"
+    "updatedAt": "2026-09-22T08:05:16.243Z"
   },
   {
     "id": "gstack-overview",
@@ -1869,7 +1869,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.293Z"
+    "updatedAt": "2026-09-22T08:05:16.238Z"
   },
   {
     "id": "django-security",
@@ -1895,7 +1895,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.342Z"
+    "updatedAt": "2026-09-22T08:05:16.294Z"
   },
   {
     "id": "django-overview",
@@ -1921,7 +1921,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.359Z"
+    "updatedAt": "2026-09-22T08:05:16.314Z"
   },
   {
     "id": "django-orm-deep",
@@ -1947,7 +1947,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.339Z"
+    "updatedAt": "2026-09-22T08:05:16.291Z"
   },
   {
     "id": "django-lifecycle",
@@ -1974,7 +1974,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.331Z"
+    "updatedAt": "2026-09-22T08:05:16.282Z"
   },
   {
     "id": "django-architecture",
@@ -2001,7 +2001,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.328Z"
+    "updatedAt": "2026-09-22T08:05:16.280Z"
   },
   {
     "id": "docker-compose-django",
@@ -2026,7 +2026,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.447Z"
+    "updatedAt": "2026-09-22T08:05:16.413Z"
   },
   {
     "id": "docker-compose-basics",
@@ -2050,7 +2050,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.445Z"
+    "updatedAt": "2026-09-22T08:05:16.411Z"
   },
   {
     "id": "docker-basics",
@@ -2073,7 +2073,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.444Z"
+    "updatedAt": "2026-09-22T08:05:16.410Z"
   },
   {
     "id": "django-version-compatibility",
@@ -2098,7 +2098,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.347Z"
+    "updatedAt": "2026-09-22T08:05:16.300Z"
   },
   {
     "id": "django-settings",
@@ -2123,7 +2123,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.360Z"
+    "updatedAt": "2026-09-22T08:05:16.317Z"
   },
   {
     "id": "django-migration",
@@ -2148,7 +2148,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.333Z"
+    "updatedAt": "2026-09-22T08:05:16.284Z"
   },
   {
     "id": "celery-worker",
@@ -2175,7 +2175,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.440Z"
+    "updatedAt": "2026-09-22T08:05:16.405Z"
   },
   {
     "id": "celery-django",
@@ -2201,7 +2201,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.442Z"
+    "updatedAt": "2026-09-22T08:05:16.407Z"
   },
   {
     "id": "celery-broker",
@@ -2227,7 +2227,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.437Z"
+    "updatedAt": "2026-09-22T08:05:16.402Z"
   },
   {
     "id": "celery-beat",
@@ -2251,7 +2251,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.435Z"
+    "updatedAt": "2026-09-22T08:05:16.400Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -2275,7 +2275,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.518Z"
+    "updatedAt": "2026-09-22T08:05:16.507Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -2300,7 +2300,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.540Z"
+    "updatedAt": "2026-09-22T08:05:16.528Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -2323,7 +2323,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.537Z"
+    "updatedAt": "2026-09-22T08:05:16.526Z"
   },
   {
     "id": "micro-protocol",
@@ -2346,7 +2346,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.535Z"
+    "updatedAt": "2026-09-22T08:05:16.524Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -2374,7 +2374,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.533Z"
+    "updatedAt": "2026-09-22T08:05:16.522Z"
   },
   {
     "id": "micro-network-view",
@@ -2399,7 +2399,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.508Z"
+    "updatedAt": "2026-09-22T08:05:16.495Z"
   },
   {
     "id": "micro-network-traffic",
@@ -2424,7 +2424,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.531Z"
+    "updatedAt": "2026-09-22T08:05:16.519Z"
   },
   {
     "id": "micro-ip-arp",
@@ -2449,7 +2449,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.528Z"
+    "updatedAt": "2026-09-22T08:05:16.517Z"
   },
   {
     "id": "micro-http-https",
@@ -2476,7 +2476,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.524Z"
+    "updatedAt": "2026-09-22T08:05:16.513Z"
   },
   {
     "id": "micro-encapsulation",
@@ -2502,7 +2502,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.520Z"
+    "updatedAt": "2026-09-22T08:05:16.509Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -2525,7 +2525,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.517Z"
+    "updatedAt": "2026-09-22T08:05:16.506Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -2549,7 +2549,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.515Z"
+    "updatedAt": "2026-09-22T08:05:16.501Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -2571,7 +2571,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.514Z"
+    "updatedAt": "2026-09-22T08:05:16.499Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -2594,7 +2594,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.509Z"
+    "updatedAt": "2026-09-22T08:05:16.496Z"
   },
   {
     "id": "macro-network-view",
@@ -2617,7 +2617,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.502Z"
+    "updatedAt": "2026-09-22T08:05:16.491Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -2641,7 +2641,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.450Z"
+    "updatedAt": "2026-09-22T08:05:16.418Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -2664,6 +2664,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-09-22T04:15:47.448Z"
+    "updatedAt": "2026-09-22T08:05:16.414Z"
   }
 ]
