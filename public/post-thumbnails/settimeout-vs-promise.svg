@@ -1,0 +1,227 @@
+<svg id="tb-settimeout-vs-promise" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-settimeout-vs-promise-t tb-settimeout-vs-promise-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-settimeout-vs-promise-t">setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습</title>
+  <desc id="tb-settimeout-vs-promise-d">frontend/javascript — setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다</desc>
+
+  <defs>
+    <linearGradient id="tb-settimeout-vs-promise-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-settimeout-vs-promise-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-settimeout-vs-promise-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-settimeout-vs-promise-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-settimeout-vs-promise-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-settimeout-vs-promise-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-settimeout-vs-promise-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-settimeout-vs-promise-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-settimeout-vs-promise-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-settimeout-vs-promise-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-settimeout-vs-promise-glow-a { animation: tb-settimeout-vs-promise-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-settimeout-vs-promise-glow-b { animation: tb-settimeout-vs-promise-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-settimeout-vs-promise-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-settimeout-vs-promise-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-settimeout-vs-promise-spark { fill: #ffffff; opacity: 0; animation-name: tb-settimeout-vs-promise-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-settimeout-vs-promise-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-settimeout-vs-promise-sheen-band { animation: tb-settimeout-vs-promise-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-settimeout-vs-promise-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-settimeout-vs-promise-caret { animation: tb-settimeout-vs-promise-blink 1.1s steps(1) infinite; }
+    @keyframes tb-settimeout-vs-promise-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-settimeout-vs-promise-halo { animation: tb-settimeout-vs-promise-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-settimeout-vs-promise-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-settimeout-vs-promise-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-settimeout-vs-promise-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-settimeout-vs-promise-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-settimeout-vs-promise-badge-ring { animation: tb-settimeout-vs-promise-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-settimeout-vs-promise-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-settimeout-vs-promise-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-settimeout-vs-promise-tshadow); transition: fill .35s ease; }
+    .tb-settimeout-vs-promise-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-settimeout-vs-promise-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-settimeout-vs-promise-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-settimeout-vs-promise-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-settimeout-vs-promise-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-settimeout-vs-promise-c-key    { fill: #f7df1e; }
+    .tb-settimeout-vs-promise-c-string { fill: #86efac; }
+    .tb-settimeout-vs-promise-c-number { fill: #fbbf24; }
+    .tb-settimeout-vs-promise-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-settimeout-vs-promise-c-ident  { fill: #cbd5e1; }
+    .tb-settimeout-vs-promise-c-punct  { fill: #94a3b8; }
+    .tb-settimeout-vs-promise-c-op     { fill: hsl(198 93% 70%); }
+    .tb-settimeout-vs-promise-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-glow-a,
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-glow-b     { animation-duration: 6s; }
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-code       { opacity: .62; }
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-spark      { animation-duration: 1.4s !important; }
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-sheen-band { animation-duration: 2.6s; }
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-title      { fill: #ffffff; }
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-settimeout-vs-promise:hover .tb-settimeout-vs-promise-badge      { transform: translateY(-5px); }
+    .tb-settimeout-vs-promise-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-settimeout-vs-promise-glow-a, .tb-settimeout-vs-promise-glow-b, .tb-settimeout-vs-promise-spark, .tb-settimeout-vs-promise-sheen-band, .tb-settimeout-vs-promise-caret, .tb-settimeout-vs-promise-halo, .tb-settimeout-vs-promise-badge-ring, .tb-settimeout-vs-promise-bracket {
+        animation: none !important;
+      }
+      .tb-settimeout-vs-promise-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-settimeout-vs-promise-frame)">
+    <rect width="1200" height="630" fill="url(#tb-settimeout-vs-promise-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-settimeout-vs-promise-grid)"/>
+
+    <circle class="tb-settimeout-vs-promise-glow-a" cx="315" cy="261" r="354" fill="url(#tb-settimeout-vs-promise-ga)"/>
+    <circle class="tb-settimeout-vs-promise-glow-b" cx="857" cy="389" r="437" fill="url(#tb-settimeout-vs-promise-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-string" xml:space="preserve">&apos;A&apos;</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="64" y="140.12" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">setTimeout</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">{</tspan></text>
+      <text x="64" y="176.24" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-string" xml:space="preserve">&apos;B&apos;</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">}</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">,</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-number" xml:space="preserve">0</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="64" y="248.48" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">Promise</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">resolve</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">then</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">{</tspan></text>
+      <text x="64" y="284.6" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-string" xml:space="preserve">&apos;C&apos;</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">}</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="64" y="356.84" class="tb-settimeout-vs-promise-code" font-size="21"><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-string" xml:space="preserve">&apos;D&apos;</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <rect class="tb-settimeout-vs-promise-caret" x="270" y="340"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-settimeout-vs-promise-code" font-size="17"><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-string" xml:space="preserve">&apos;A&apos;</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="690" y="386.6" class="tb-settimeout-vs-promise-code" font-size="17"><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">setTimeout</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">{</tspan></text>
+      <text x="690" y="417.2" class="tb-settimeout-vs-promise-code" font-size="17"><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-settimeout-vs-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-settimeout-vs-promise-c-string" xml:space="preserve">&apos;B&apos;</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="690" y="447.8" class="tb-settimeout-vs-promise-code" font-size="17"><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">}</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">,</tspan><tspan class="tb-settimeout-vs-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-settimeout-vs-promise-c-number" xml:space="preserve">0</tspan><tspan class="tb-settimeout-vs-promise-c-punct" xml:space="preserve">)</tspan></text>
+    </g>
+
+    <circle class="tb-settimeout-vs-promise-spark" cx="318" cy="82" r="1.72" style="animation-delay:0.49s;animation-duration:5.85s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="288" cy="435" r="2.35" style="animation-delay:3.88s;animation-duration:4.78s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="946" cy="72" r="3.13" style="animation-delay:4.79s;animation-duration:4.00s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="1115" cy="67" r="3.97" style="animation-delay:3.95s;animation-duration:3.56s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="318" cy="487" r="3.70" style="animation-delay:5.35s;animation-duration:6.20s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="935" cy="69" r="2.01" style="animation-delay:5.07s;animation-duration:3.52s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="105" cy="371" r="3.52" style="animation-delay:4.47s;animation-duration:5.01s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="1005" cy="217" r="3.94" style="animation-delay:3.95s;animation-duration:4.04s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="104" cy="416" r="2.99" style="animation-delay:1.89s;animation-duration:6.47s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="973" cy="336" r="2.88" style="animation-delay:4.06s;animation-duration:3.71s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="1121" cy="152" r="3.85" style="animation-delay:0.74s;animation-duration:5.69s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="141" cy="238" r="3.28" style="animation-delay:2.77s;animation-duration:4.11s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="159" cy="545" r="1.63" style="animation-delay:1.97s;animation-duration:5.07s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="174" cy="491" r="1.45" style="animation-delay:4.49s;animation-duration:6.40s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="1075" cy="80" r="3.12" style="animation-delay:4.95s;animation-duration:3.36s"/>
+    <circle class="tb-settimeout-vs-promise-spark" cx="160" cy="219" r="2.51" style="animation-delay:1.03s;animation-duration:6.27s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-settimeout-vs-promise-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-settimeout-vs-promise-vignette)"/>
+
+    <g class="tb-settimeout-vs-promise-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-settimeout-vs-promise-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="186" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-settimeout-vs-promise-chip-t" x="600" y="214" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-settimeout-vs-promise-title" x="600" y="286" text-anchor="middle" font-size="46">setTimeout vs Promise — 실행</text>
+      <text class="tb-settimeout-vs-promise-title" x="600" y="345" text-anchor="middle" font-size="46">순서를 예측하는 가장 중요한 연습</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-settimeout-vs-promise-rule)"/>
+    <text class="tb-settimeout-vs-promise-sub" x="600" y="455" text-anchor="middle" font-size="25">setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지…</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-settimeout-vs-promise-badge">
+      <circle class="tb-settimeout-vs-promise-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-settimeout-vs-promise-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-settimeout-vs-promise-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-settimeout-vs-promise-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-settimeout-vs-promise-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-settimeout-vs-promise-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-settimeout-vs-promise-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-settimeout-vs-promise-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

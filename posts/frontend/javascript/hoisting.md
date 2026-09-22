@@ -1,5 +1,6 @@
 ---
 title: "호이스팅 — 선언은 먼저 올라간다"
+coverImage: /post-thumbnails/hoisting.svg
 slug: hoisting
 category: frontend/javascript
 concept: hoisting

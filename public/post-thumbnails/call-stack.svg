@@ -1,0 +1,226 @@
+<svg id="tb-call-stack" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-call-stack-t tb-call-stack-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-call-stack-t">콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳</title>
+  <desc id="tb-call-stack-d">frontend/javascript — 자바스크립트가 &quot;지금 어디를 실행 중인지&quot; 기억하는 방법</desc>
+
+  <defs>
+    <linearGradient id="tb-call-stack-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-call-stack-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-call-stack-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-call-stack-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-call-stack-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-call-stack-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-call-stack-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-call-stack-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-call-stack-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-call-stack-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-call-stack-glow-a { animation: tb-call-stack-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-call-stack-glow-b { animation: tb-call-stack-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-call-stack-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-call-stack-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-call-stack-spark { fill: #ffffff; opacity: 0; animation-name: tb-call-stack-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-call-stack-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-call-stack-sheen-band { animation: tb-call-stack-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-call-stack-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-call-stack-caret { animation: tb-call-stack-blink 1.1s steps(1) infinite; }
+    @keyframes tb-call-stack-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-call-stack-halo { animation: tb-call-stack-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-call-stack-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-call-stack-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-call-stack-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-call-stack-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-call-stack-badge-ring { animation: tb-call-stack-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-call-stack-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-call-stack-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-call-stack-tshadow); transition: fill .35s ease; }
+    .tb-call-stack-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-call-stack-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-call-stack-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-call-stack-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-call-stack-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-call-stack-c-key    { fill: #f7df1e; }
+    .tb-call-stack-c-string { fill: #86efac; }
+    .tb-call-stack-c-number { fill: #fbbf24; }
+    .tb-call-stack-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-call-stack-c-ident  { fill: #cbd5e1; }
+    .tb-call-stack-c-punct  { fill: #94a3b8; }
+    .tb-call-stack-c-op     { fill: hsl(198 93% 70%); }
+    .tb-call-stack-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-call-stack:hover .tb-call-stack-glow-a,
+    #tb-call-stack:hover .tb-call-stack-glow-b     { animation-duration: 6s; }
+    #tb-call-stack:hover .tb-call-stack-code       { opacity: .62; }
+    #tb-call-stack:hover .tb-call-stack-spark      { animation-duration: 1.4s !important; }
+    #tb-call-stack:hover .tb-call-stack-sheen-band { animation-duration: 2.6s; }
+    #tb-call-stack:hover .tb-call-stack-title      { fill: #ffffff; }
+    #tb-call-stack:hover .tb-call-stack-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-call-stack:hover .tb-call-stack-badge      { transform: translateY(-5px); }
+    .tb-call-stack-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-call-stack-glow-a, .tb-call-stack-glow-b, .tb-call-stack-spark, .tb-call-stack-sheen-band, .tb-call-stack-caret, .tb-call-stack-halo, .tb-call-stack-badge-ring, .tb-call-stack-bracket {
+        animation: none !important;
+      }
+      .tb-call-stack-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-call-stack-frame)">
+    <rect width="1200" height="630" fill="url(#tb-call-stack-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-call-stack-grid)"/>
+
+    <circle class="tb-call-stack-glow-a" cx="167" cy="176" r="336" fill="url(#tb-call-stack-ga)"/>
+    <circle class="tb-call-stack-glow-b" cx="987" cy="476" r="374" fill="url(#tb-call-stack-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-call-stack-code" font-size="21"><tspan class="tb-call-stack-c-key" xml:space="preserve">function</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">a</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">{</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">b</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">console</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">.</tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">log</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-string" xml:space="preserve">&quot;a 끝&quot;</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="64" y="140.12" class="tb-call-stack-code" font-size="21"><tspan class="tb-call-stack-c-key" xml:space="preserve">function</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">b</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">{</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">c</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">console</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">.</tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">log</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-string" xml:space="preserve">&quot;b 끝&quot;</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="64" y="176.24" class="tb-call-stack-code" font-size="21"><tspan class="tb-call-stack-c-key" xml:space="preserve">function</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">c</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">{</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">console</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">.</tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">log</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-string" xml:space="preserve">&quot;c 실행&quot;</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-call-stack-code" font-size="21"><tspan class="tb-call-stack-c-ident" xml:space="preserve">a</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="248.48" class="tb-call-stack-code" font-size="21"><tspan class="tb-call-stack-c-comment" xml:space="preserve">// c 실행</tspan></text>
+      <text x="64" y="284.6" class="tb-call-stack-code" font-size="21"><tspan class="tb-call-stack-c-comment" xml:space="preserve">// b 끝</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-call-stack-code" font-size="21"><tspan class="tb-call-stack-c-comment" xml:space="preserve">// a 끝     ← 들어간 순서의 반대로 끝난다</tspan></text>
+      <rect class="tb-call-stack-caret" x="421" y="304"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-call-stack-code" font-size="17"><tspan class="tb-call-stack-c-key" xml:space="preserve">function</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">a</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">{</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">b</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">console</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">.</tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">log</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-string" xml:space="preserve">&quot;a 끝&quot;</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="690" y="386.6" class="tb-call-stack-code" font-size="17"><tspan class="tb-call-stack-c-key" xml:space="preserve">function</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">b</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">{</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">c</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">console</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">.</tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">log</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-string" xml:space="preserve">&quot;b 끝&quot;</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="690" y="417.2" class="tb-call-stack-code" font-size="17"><tspan class="tb-call-stack-c-key" xml:space="preserve">function</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">c</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">{</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">console</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">.</tspan><tspan class="tb-call-stack-c-ident" xml:space="preserve">log</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-string" xml:space="preserve">&quot;c 실행&quot;</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan><tspan class="tb-call-stack-c-plain" xml:space="preserve"> </tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="690" y="447.8" class="tb-call-stack-code" font-size="17"><tspan class="tb-call-stack-c-ident" xml:space="preserve">a</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">(</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">)</tspan><tspan class="tb-call-stack-c-punct" xml:space="preserve">;</tspan></text>
+    </g>
+
+    <circle class="tb-call-stack-spark" cx="153" cy="442" r="3.79" style="animation-delay:3.08s;animation-duration:4.96s"/>
+    <circle class="tb-call-stack-spark" cx="159" cy="109" r="2.02" style="animation-delay:0.88s;animation-duration:5.62s"/>
+    <circle class="tb-call-stack-spark" cx="274" cy="154" r="1.62" style="animation-delay:1.78s;animation-duration:5.35s"/>
+    <circle class="tb-call-stack-spark" cx="75" cy="526" r="1.53" style="animation-delay:5.53s;animation-duration:5.40s"/>
+    <circle class="tb-call-stack-spark" cx="123" cy="505" r="3.45" style="animation-delay:1.64s;animation-duration:6.40s"/>
+    <circle class="tb-call-stack-spark" cx="279" cy="230" r="1.87" style="animation-delay:5.49s;animation-duration:6.35s"/>
+    <circle class="tb-call-stack-spark" cx="1068" cy="432" r="3.08" style="animation-delay:3.96s;animation-duration:4.55s"/>
+    <circle class="tb-call-stack-spark" cx="215" cy="274" r="1.88" style="animation-delay:1.90s;animation-duration:3.45s"/>
+    <circle class="tb-call-stack-spark" cx="1119" cy="475" r="3.07" style="animation-delay:1.67s;animation-duration:5.31s"/>
+    <circle class="tb-call-stack-spark" cx="1010" cy="466" r="3.58" style="animation-delay:4.07s;animation-duration:4.92s"/>
+    <circle class="tb-call-stack-spark" cx="957" cy="565" r="2.37" style="animation-delay:5.29s;animation-duration:4.48s"/>
+    <circle class="tb-call-stack-spark" cx="950" cy="148" r="3.86" style="animation-delay:3.22s;animation-duration:3.51s"/>
+    <circle class="tb-call-stack-spark" cx="1044" cy="181" r="3.10" style="animation-delay:4.40s;animation-duration:4.24s"/>
+    <circle class="tb-call-stack-spark" cx="905" cy="321" r="2.12" style="animation-delay:0.79s;animation-duration:4.61s"/>
+    <circle class="tb-call-stack-spark" cx="117" cy="96" r="3.38" style="animation-delay:1.12s;animation-duration:4.82s"/>
+    <circle class="tb-call-stack-spark" cx="204" cy="317" r="3.95" style="animation-delay:2.25s;animation-duration:3.86s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-call-stack-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-call-stack-vignette)"/>
+
+    <g class="tb-call-stack-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-call-stack-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="176" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-call-stack-chip-t" x="600" y="204" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-call-stack-title" x="600" y="276" text-anchor="middle" font-size="54">콜 스택 — 지금 실행 중인</text>
+      <text class="tb-call-stack-title" x="600" y="345" text-anchor="middle" font-size="54">함수를 쌓아 두는 곳</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-call-stack-rule)"/>
+    <text class="tb-call-stack-sub" x="600" y="455" text-anchor="middle" font-size="25">자바스크립트가 &quot;지금 어디를 실행 중인지&quot; 기억하는 방법</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-call-stack-badge">
+      <circle class="tb-call-stack-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-call-stack-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-call-stack-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-call-stack-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-call-stack-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-call-stack-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-call-stack-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-call-stack-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

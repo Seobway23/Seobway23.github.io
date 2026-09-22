@@ -1,5 +1,6 @@
 ---
 title: "원시 타입 — 값 자체가 복사되는 것들"
+coverImage: /post-thumbnails/primitive-type.svg
 slug: primitive-type
 category: frontend/javascript
 concept: primitive-type

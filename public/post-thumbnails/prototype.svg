@@ -1,0 +1,223 @@
+<svg id="tb-prototype" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-prototype-t tb-prototype-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-prototype-t">프로토타입 — 없으면 위에 물어보는 상속</title>
+  <desc id="tb-prototype-d">frontend/javascript — 내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유</desc>
+
+  <defs>
+    <linearGradient id="tb-prototype-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-prototype-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-prototype-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-prototype-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-prototype-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-prototype-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-prototype-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-prototype-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-prototype-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-prototype-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-prototype-glow-a { animation: tb-prototype-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-prototype-glow-b { animation: tb-prototype-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-prototype-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-prototype-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-prototype-spark { fill: #ffffff; opacity: 0; animation-name: tb-prototype-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-prototype-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-prototype-sheen-band { animation: tb-prototype-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-prototype-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-prototype-caret { animation: tb-prototype-blink 1.1s steps(1) infinite; }
+    @keyframes tb-prototype-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-prototype-halo { animation: tb-prototype-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-prototype-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-prototype-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-prototype-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-prototype-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-prototype-badge-ring { animation: tb-prototype-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-prototype-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-prototype-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-prototype-tshadow); transition: fill .35s ease; }
+    .tb-prototype-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-prototype-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-prototype-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-prototype-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-prototype-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-prototype-c-key    { fill: #f7df1e; }
+    .tb-prototype-c-string { fill: #86efac; }
+    .tb-prototype-c-number { fill: #fbbf24; }
+    .tb-prototype-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-prototype-c-ident  { fill: #cbd5e1; }
+    .tb-prototype-c-punct  { fill: #94a3b8; }
+    .tb-prototype-c-op     { fill: hsl(198 93% 70%); }
+    .tb-prototype-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-prototype:hover .tb-prototype-glow-a,
+    #tb-prototype:hover .tb-prototype-glow-b     { animation-duration: 6s; }
+    #tb-prototype:hover .tb-prototype-code       { opacity: .62; }
+    #tb-prototype:hover .tb-prototype-spark      { animation-duration: 1.4s !important; }
+    #tb-prototype:hover .tb-prototype-sheen-band { animation-duration: 2.6s; }
+    #tb-prototype:hover .tb-prototype-title      { fill: #ffffff; }
+    #tb-prototype:hover .tb-prototype-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-prototype:hover .tb-prototype-badge      { transform: translateY(-5px); }
+    .tb-prototype-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-prototype-glow-a, .tb-prototype-glow-b, .tb-prototype-spark, .tb-prototype-sheen-band, .tb-prototype-caret, .tb-prototype-halo, .tb-prototype-badge-ring, .tb-prototype-bracket {
+        animation: none !important;
+      }
+      .tb-prototype-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-prototype-frame)">
+    <rect width="1200" height="630" fill="url(#tb-prototype-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-prototype-grid)"/>
+
+    <circle class="tb-prototype-glow-a" cx="211" cy="158" r="404" fill="url(#tb-prototype-ga)"/>
+    <circle class="tb-prototype-glow-b" cx="1079" cy="439" r="436" fill="url(#tb-prototype-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-prototype-code" font-size="21"><tspan class="tb-prototype-c-key" xml:space="preserve">const</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">obj</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">=</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">{</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">}</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="140.12" class="tb-prototype-code" font-size="21"><tspan class="tb-prototype-c-ident" xml:space="preserve">obj</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">.</tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">toString</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">(</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">)</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve">          </tspan><tspan class="tb-prototype-c-comment" xml:space="preserve">// &quot;[object Object]&quot;  …</tspan></text>
+      <text x="64" y="176.24" class="tb-prototype-code" font-size="21"><tspan class="tb-prototype-c-key" xml:space="preserve">const</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">arr</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">=</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">[</tspan><tspan class="tb-prototype-c-number" xml:space="preserve">1</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">,</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-number" xml:space="preserve">2</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">,</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-number" xml:space="preserve">3</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">]</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-prototype-code" font-size="21"><tspan class="tb-prototype-c-ident" xml:space="preserve">arr</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">.</tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">map</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">(</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">(</tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">n</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">)</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">n</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">*</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-number" xml:space="preserve">2</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">)</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve">   </tspan><tspan class="tb-prototype-c-comment" xml:space="preserve">// 이것도 만든 적 없다</tspan></text>
+      <rect class="tb-prototype-caret" x="559" y="195"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-prototype-code" font-size="17"><tspan class="tb-prototype-c-key" xml:space="preserve">const</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">obj</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">=</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">{</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">}</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="386.6" class="tb-prototype-code" font-size="17"><tspan class="tb-prototype-c-ident" xml:space="preserve">obj</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">.</tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">toString</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">(</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">)</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve">          </tspan><tspan class="tb-prototype-c-comment" xml:space="preserve">// &quot;[object Object]&quot;  …</tspan></text>
+      <text x="690" y="417.2" class="tb-prototype-code" font-size="17"><tspan class="tb-prototype-c-key" xml:space="preserve">const</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">arr</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">=</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">[</tspan><tspan class="tb-prototype-c-number" xml:space="preserve">1</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">,</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-number" xml:space="preserve">2</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">,</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-number" xml:space="preserve">3</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">]</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="447.8" class="tb-prototype-code" font-size="17"><tspan class="tb-prototype-c-ident" xml:space="preserve">arr</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">.</tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">map</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">(</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">(</tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">n</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">)</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-ident" xml:space="preserve">n</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-op" xml:space="preserve">*</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve"> </tspan><tspan class="tb-prototype-c-number" xml:space="preserve">2</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">)</tspan><tspan class="tb-prototype-c-punct" xml:space="preserve">;</tspan><tspan class="tb-prototype-c-plain" xml:space="preserve">   </tspan><tspan class="tb-prototype-c-comment" xml:space="preserve">// 이것도 만든 적 없다</tspan></text>
+    </g>
+
+    <circle class="tb-prototype-spark" cx="90" cy="417" r="1.78" style="animation-delay:5.88s;animation-duration:5.78s"/>
+    <circle class="tb-prototype-spark" cx="1008" cy="226" r="1.52" style="animation-delay:4.19s;animation-duration:5.91s"/>
+    <circle class="tb-prototype-spark" cx="205" cy="200" r="1.48" style="animation-delay:5.13s;animation-duration:3.58s"/>
+    <circle class="tb-prototype-spark" cx="920" cy="105" r="3.97" style="animation-delay:4.02s;animation-duration:5.42s"/>
+    <circle class="tb-prototype-spark" cx="1098" cy="421" r="3.81" style="animation-delay:3.02s;animation-duration:4.96s"/>
+    <circle class="tb-prototype-spark" cx="147" cy="145" r="1.99" style="animation-delay:5.47s;animation-duration:5.92s"/>
+    <circle class="tb-prototype-spark" cx="237" cy="259" r="1.93" style="animation-delay:3.22s;animation-duration:4.45s"/>
+    <circle class="tb-prototype-spark" cx="175" cy="552" r="3.68" style="animation-delay:3.12s;animation-duration:5.98s"/>
+    <circle class="tb-prototype-spark" cx="316" cy="506" r="2.96" style="animation-delay:0.20s;animation-duration:3.90s"/>
+    <circle class="tb-prototype-spark" cx="185" cy="405" r="3.04" style="animation-delay:3.88s;animation-duration:5.01s"/>
+    <circle class="tb-prototype-spark" cx="261" cy="465" r="3.13" style="animation-delay:5.24s;animation-duration:3.71s"/>
+    <circle class="tb-prototype-spark" cx="180" cy="367" r="2.73" style="animation-delay:2.32s;animation-duration:4.02s"/>
+    <circle class="tb-prototype-spark" cx="901" cy="520" r="2.90" style="animation-delay:1.60s;animation-duration:4.08s"/>
+    <circle class="tb-prototype-spark" cx="234" cy="444" r="1.67" style="animation-delay:4.09s;animation-duration:5.26s"/>
+    <circle class="tb-prototype-spark" cx="1020" cy="457" r="3.91" style="animation-delay:5.97s;animation-duration:4.80s"/>
+    <circle class="tb-prototype-spark" cx="991" cy="503" r="2.34" style="animation-delay:4.91s;animation-duration:5.21s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-prototype-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-prototype-vignette)"/>
+
+    <g class="tb-prototype-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-prototype-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="166" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-prototype-chip-t" x="600" y="194" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-prototype-title" x="600" y="266" text-anchor="middle" font-size="62">프로토타입 — 없으면</text>
+      <text class="tb-prototype-title" x="600" y="345" text-anchor="middle" font-size="62">위에 물어보는 상속</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-prototype-rule)"/>
+    <text class="tb-prototype-sub" x="600" y="455" text-anchor="middle" font-size="25">내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-prototype-badge">
+      <circle class="tb-prototype-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-prototype-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-prototype-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-prototype-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-prototype-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-prototype-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-prototype-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-prototype-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

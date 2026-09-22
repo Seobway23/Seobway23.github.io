@@ -18,6 +18,7 @@ import { trackPostView } from "@/lib/analytics";
 import type { Post } from "../../shared/schema";
 import { formatReadTimeDetail } from "@/lib/data";
 import { getPostCoverImageUrl } from "@/lib/post-cover";
+import CoverImage from "@/components/cover-image";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
@@ -911,10 +912,10 @@ export default function Post() {
                     </span>
                   </div>
 
-                  <img
+                  <CoverImage
                     src={imageUrl}
                     alt={post.title}
-                    className="w-full h-64 object-cover rounded-xl mb-8"
+                    className="w-full h-64 object-cover rounded-xl mb-8 overflow-hidden"
                   />
                 </header>
 

@@ -1,5 +1,6 @@
 ---
 title: "이벤트 루프, 눈으로 따라가기"
+coverImage: /post-thumbnails/event-loop-interactive.svg
 slug: event-loop-interactive
 category: frontend/javascript
 concept: event-loop

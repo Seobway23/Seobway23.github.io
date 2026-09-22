@@ -1,5 +1,6 @@
 ---
 title: "스코프 — 변수가 어디까지 보이는가"
+coverImage: /post-thumbnails/scope.svg
 slug: scope
 category: frontend/javascript
 concept: scope

@@ -6,7 +6,7 @@ tags: [javascript, setTimeout, promise, microtask, macrotask, event-loop]
 author: Seobway
 readTime: 10
 featured: false
-coverImage: /roadmap-thumbnails/step-01-browser-client.svg
+coverImage: /post-thumbnails/settimeout-vs-promise.svg
 createdAt: 2026-04-16
 excerpt: >
   setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다.

@@ -1,5 +1,6 @@
 ---
 title: "콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳"
+coverImage: /post-thumbnails/call-stack.svg
 slug: call-stack
 category: frontend/javascript
 concept: call-stack

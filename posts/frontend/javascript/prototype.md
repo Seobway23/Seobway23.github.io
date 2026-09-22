@@ -1,5 +1,6 @@
 ---
 title: "프로토타입 — 없으면 위에 물어보는 상속"
+coverImage: /post-thumbnails/prototype.svg
 slug: prototype
 category: frontend/javascript
 concept: prototype

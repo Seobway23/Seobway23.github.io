@@ -1,0 +1,226 @@
+<svg id="tb-js-event-loop-and-async" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-js-event-loop-and-async-t tb-js-event-loop-and-async-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-js-event-loop-and-async-t">JS 이벤트 루프와 비동기 — 콜스택, 큐, 마이크로태스크를 한 번에 이해하기</title>
+  <desc id="tb-js-event-loop-and-async-d">frontend/javascript — JavaScript의 콜스택, Web APIs, 태스크 큐, 마이크로태스크 큐가 어떻게 맞물려 돌아가는지 큰 그림으로 정리한다</desc>
+
+  <defs>
+    <linearGradient id="tb-js-event-loop-and-async-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-js-event-loop-and-async-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-js-event-loop-and-async-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-js-event-loop-and-async-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-js-event-loop-and-async-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-js-event-loop-and-async-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-js-event-loop-and-async-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-js-event-loop-and-async-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-js-event-loop-and-async-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-js-event-loop-and-async-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-js-event-loop-and-async-glow-a { animation: tb-js-event-loop-and-async-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-js-event-loop-and-async-glow-b { animation: tb-js-event-loop-and-async-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-js-event-loop-and-async-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-js-event-loop-and-async-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-js-event-loop-and-async-spark { fill: #ffffff; opacity: 0; animation-name: tb-js-event-loop-and-async-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-js-event-loop-and-async-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-js-event-loop-and-async-sheen-band { animation: tb-js-event-loop-and-async-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-js-event-loop-and-async-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-js-event-loop-and-async-caret { animation: tb-js-event-loop-and-async-blink 1.1s steps(1) infinite; }
+    @keyframes tb-js-event-loop-and-async-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-js-event-loop-and-async-halo { animation: tb-js-event-loop-and-async-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-js-event-loop-and-async-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-js-event-loop-and-async-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-js-event-loop-and-async-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-js-event-loop-and-async-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-js-event-loop-and-async-badge-ring { animation: tb-js-event-loop-and-async-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-js-event-loop-and-async-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-js-event-loop-and-async-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-js-event-loop-and-async-tshadow); transition: fill .35s ease; }
+    .tb-js-event-loop-and-async-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-js-event-loop-and-async-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-js-event-loop-and-async-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-js-event-loop-and-async-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-js-event-loop-and-async-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-js-event-loop-and-async-c-key    { fill: #f7df1e; }
+    .tb-js-event-loop-and-async-c-string { fill: #86efac; }
+    .tb-js-event-loop-and-async-c-number { fill: #fbbf24; }
+    .tb-js-event-loop-and-async-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-js-event-loop-and-async-c-ident  { fill: #cbd5e1; }
+    .tb-js-event-loop-and-async-c-punct  { fill: #94a3b8; }
+    .tb-js-event-loop-and-async-c-op     { fill: hsl(198 93% 70%); }
+    .tb-js-event-loop-and-async-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-glow-a,
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-glow-b     { animation-duration: 6s; }
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-code       { opacity: .62; }
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-spark      { animation-duration: 1.4s !important; }
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-sheen-band { animation-duration: 2.6s; }
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-title      { fill: #ffffff; }
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-js-event-loop-and-async:hover .tb-js-event-loop-and-async-badge      { transform: translateY(-5px); }
+    .tb-js-event-loop-and-async-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-js-event-loop-and-async-glow-a, .tb-js-event-loop-and-async-glow-b, .tb-js-event-loop-and-async-spark, .tb-js-event-loop-and-async-sheen-band, .tb-js-event-loop-and-async-caret, .tb-js-event-loop-and-async-halo, .tb-js-event-loop-and-async-badge-ring, .tb-js-event-loop-and-async-bracket {
+        animation: none !important;
+      }
+      .tb-js-event-loop-and-async-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-js-event-loop-and-async-frame)">
+    <rect width="1200" height="630" fill="url(#tb-js-event-loop-and-async-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-js-event-loop-and-async-grid)"/>
+
+    <circle class="tb-js-event-loop-and-async-glow-a" cx="184" cy="166" r="322" fill="url(#tb-js-event-loop-and-async-ga)"/>
+    <circle class="tb-js-event-loop-and-async-glow-b" cx="977" cy="413" r="374" fill="url(#tb-js-event-loop-and-async-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-js-event-loop-and-async-code" font-size="21"><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">핵</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">심</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">은</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">네</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">가</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">지</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">다</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">.</tspan></text>
+      <text x="64" y="140.12" class="tb-js-event-loop-and-async-code" font-size="21"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">-</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">콜</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">스</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">택</tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**:</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">지</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">금</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">실</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">행</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">중</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">인</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">함</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">수</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">가</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">쌓</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">는</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">곳</tspan></text>
+      <text x="64" y="176.24" class="tb-js-event-loop-and-async-code" font-size="21"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">-</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">런</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">타</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">임</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-ident" xml:space="preserve">API</tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**:</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">타</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">머</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">,</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">네</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">트</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">워</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">크</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">,</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-ident" xml:space="preserve">DOM</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">벤</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">트</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">같</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">은</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">작</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">업</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">을</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">처</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">리</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">하</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">는</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">환</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">경</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-js-event-loop-and-async-code" font-size="21"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">-</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">태</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">스</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">크</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">큐</tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**:</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-string" xml:space="preserve">`setTimeout`</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">,</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-ident" xml:space="preserve">DOM</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">벤</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">트</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">같</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">은</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">작</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">업</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">대</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">기</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">하</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">는</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">곳</tspan></text>
+      <text x="64" y="248.48" class="tb-js-event-loop-and-async-code" font-size="21"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">-</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">마</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">크</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">로</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">태</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">스</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">크</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">큐</tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**:</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-string" xml:space="preserve">`Promise.then`</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">,</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">`</tspan><tspan class="tb-js-event-loop-and-async-c-ident" xml:space="preserve">queueMicrotas</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">…</tspan></text>
+      <text x="64" y="284.6" class="tb-js-event-loop-and-async-code" font-size="21"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">---</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-js-event-loop-and-async-code" font-size="21"><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">#</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">#</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">콜</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">스</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">택</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">은</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">지</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">금</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">실</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">행</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">중</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">인</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">일</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">감</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">다</tspan></text>
+      <rect class="tb-js-event-loop-and-async-caret" x="333" y="304"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-js-event-loop-and-async-code" font-size="17"><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">핵</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">심</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">은</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">네</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">가</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">지</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">다</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">.</tspan></text>
+      <text x="690" y="386.6" class="tb-js-event-loop-and-async-code" font-size="17"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">-</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">콜</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">스</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">택</tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**:</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">지</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">금</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">실</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">행</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">중</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">인</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">함</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">수</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">가</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">쌓</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">는</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">곳</tspan></text>
+      <text x="690" y="417.2" class="tb-js-event-loop-and-async-code" font-size="17"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">-</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">런</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">타</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">임</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-ident" xml:space="preserve">API</tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**:</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">타</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">머</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">,</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">네</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">트</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">워</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">크</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">,</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-ident" xml:space="preserve">DOM</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">벤</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">트</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">같</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">은</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">작</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">업</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">을</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">처</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">리</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">하</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">는</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">환</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">경</tspan></text>
+      <text x="690" y="447.8" class="tb-js-event-loop-and-async-code" font-size="17"><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">-</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">태</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">스</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">크</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">큐</tspan><tspan class="tb-js-event-loop-and-async-c-op" xml:space="preserve">**:</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-string" xml:space="preserve">`setTimeout`</tspan><tspan class="tb-js-event-loop-and-async-c-punct" xml:space="preserve">,</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-ident" xml:space="preserve">DOM</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">벤</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">트</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">같</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">은</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">작</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">업</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">이</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">대</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">기</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">하</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">는</tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve"> </tspan><tspan class="tb-js-event-loop-and-async-c-plain" xml:space="preserve">곳</tspan></text>
+    </g>
+
+    <circle class="tb-js-event-loop-and-async-spark" cx="881" cy="387" r="2.21" style="animation-delay:5.48s;animation-duration:4.13s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="299" cy="106" r="2.80" style="animation-delay:0.56s;animation-duration:4.86s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="185" cy="269" r="2.09" style="animation-delay:0.27s;animation-duration:6.00s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="229" cy="311" r="1.72" style="animation-delay:4.52s;animation-duration:5.01s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="959" cy="181" r="3.55" style="animation-delay:0.35s;animation-duration:5.44s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="306" cy="435" r="1.91" style="animation-delay:3.18s;animation-duration:3.63s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="227" cy="64" r="2.60" style="animation-delay:3.66s;animation-duration:3.67s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="315" cy="452" r="2.94" style="animation-delay:0.66s;animation-duration:3.51s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="1071" cy="257" r="1.66" style="animation-delay:3.73s;animation-duration:3.94s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="934" cy="306" r="2.90" style="animation-delay:4.43s;animation-duration:4.54s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="204" cy="167" r="3.98" style="animation-delay:4.25s;animation-duration:3.61s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="231" cy="351" r="2.31" style="animation-delay:2.02s;animation-duration:3.20s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="198" cy="429" r="2.41" style="animation-delay:3.45s;animation-duration:6.47s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="120" cy="158" r="1.65" style="animation-delay:1.16s;animation-duration:5.78s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="232" cy="366" r="3.89" style="animation-delay:2.05s;animation-duration:3.35s"/>
+    <circle class="tb-js-event-loop-and-async-spark" cx="1009" cy="247" r="3.98" style="animation-delay:4.09s;animation-duration:4.40s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-js-event-loop-and-async-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-js-event-loop-and-async-vignette)"/>
+
+    <g class="tb-js-event-loop-and-async-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-js-event-loop-and-async-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="186" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-js-event-loop-and-async-chip-t" x="600" y="214" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-js-event-loop-and-async-title" x="600" y="286" text-anchor="middle" font-size="46">JS 이벤트 루프와 비동기 — 콜스택,</text>
+      <text class="tb-js-event-loop-and-async-title" x="600" y="345" text-anchor="middle" font-size="46">큐, 마이크로태스크를 한 번에 이해하기</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-js-event-loop-and-async-rule)"/>
+    <text class="tb-js-event-loop-and-async-sub" x="600" y="455" text-anchor="middle" font-size="25">JavaScript의 콜스택, Web APIs, 태스크 큐, 마이크로태스크 큐가…</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-js-event-loop-and-async-badge">
+      <circle class="tb-js-event-loop-and-async-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-js-event-loop-and-async-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-js-event-loop-and-async-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-js-event-loop-and-async-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-js-event-loop-and-async-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-js-event-loop-and-async-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-js-event-loop-and-async-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-js-event-loop-and-async-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

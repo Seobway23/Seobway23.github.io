@@ -173,6 +173,43 @@ const RUNTIME_PRELUDE = `
   });
   window.addEventListener('error', function(e){ send('error', [e.message]); });
   window.addEventListener('unhandledrejection', function(e){ send('error', ['Unhandled rejection: ' + e.reason]); });
+
+  // 이 코드가 화면에 뭔가를 그렸는지 부모에게 알린다.
+  // 부모는 이 신호로 렌더 칸을 펴거나 접는다 — 콘솔만 쓰는 예제에 빈 검은 칸을
+  // 300px 씩 남기지 않기 위해서다. kind(js/react)로 미리 정하지 않는 이유는,
+  // js 예제도 DOM 을 그릴 수 있고 react 예제도 콘솔만 쓸 수 있기 때문이다.
+  var lastPainted = null;
+  var reportPaint = function(){
+    var painted = false;
+    var nodes = document.body ? document.body.children : [];
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.id === '__err') { painted = painted || n.textContent.trim().length > 0; continue; }
+      if (n.tagName === 'SCRIPT' || n.tagName === 'STYLE') continue;
+      if (n.id === 'root') { painted = painted || n.children.length > 0 || n.textContent.trim().length > 0; continue; }
+      painted = true;
+    }
+    if (painted === lastPainted) return;
+    lastPainted = painted;
+    try { parent.postMessage({ __pg: true, paint: painted }, '*'); } catch (e) {}
+  };
+
+  var tick = null;
+  var schedule = function(){
+    if (tick) return;
+    tick = setTimeout(function(){ tick = null; reportPaint(); }, 60);
+  };
+
+  if (document.body) {
+    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, characterData: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){
+      new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, characterData: true });
+      schedule();
+    });
+  }
+  // 비동기로 그리는 예제(setTimeout·fetch)도 잡히게 잠깐 더 본다
+  [0, 120, 400, 1200].forEach(function(ms){ setTimeout(reportPaint, ms); });
 })();
 `;
 
@@ -345,6 +382,20 @@ function buildPlayground(spec: PgSpec): HTMLElement {
   frame.style.height = `${spec.height}px`;
   preview.appendChild(frame);
 
+  /**
+   * 렌더 칸을 접고 편다.
+   *
+   * iframe 은 접혀도 살아 있다(높이 0) — 스크립트는 그대로 돌고 콘솔도 계속 올라온다.
+   * 처음에는 콘솔 전용으로 시작한다. 그려야 할 예제라면 iframe 이 곧 알려 주고,
+   * 그때 편다. 반대로 하면(펴 놓고 나중에 접으면) 콘솔 예제마다 빈 칸이 한 번 번쩍인다.
+   */
+  const setPainted = (painted: boolean) => {
+    preview.classList.toggle("post-pg__preview--console-only", !painted);
+    frame.style.height = painted ? `${spec.height}px` : "0px";
+    frame.setAttribute("aria-hidden", painted ? "false" : "true");
+  };
+  setPainted(false);
+
   const consoleBox = el("div", "post-pg__console");
   const consoleHead = el("div", "post-pg__console-head");
   consoleHead.appendChild(el("span", undefined, "콘솔"));
@@ -394,6 +445,10 @@ function buildPlayground(spec: PgSpec): HTMLElement {
     const d = e.data;
     if (!d || d.__pg !== true) return;
     if (e.source !== frame.contentWindow) return;
+    if (typeof d.paint === "boolean") {
+      setPainted(d.paint);
+      return;
+    }
     const line = el("div", `post-pg__line post-pg__line--${d.level}`, d.text);
     consoleOut.appendChild(line);
     consoleOut.scrollTop = consoleOut.scrollHeight;
