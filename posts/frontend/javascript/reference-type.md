@@ -130,7 +130,7 @@ console.log("같은 객체?", original === alias, original === shallow);
 ```
 
 3번이 핵심이다. `{ ...original }` 은 **최상위 속성만** 새로 만들고, 그 안의 배열은
-주소만 복사한다. 이것이 얕은 복사와 깊은 복사가 갈리는 지점이다.
+주소만 복사한다. 이것이 [얕은 복사와 깊은 복사](/post/shallow-deep-copy)가 갈리는 지점이다.
 
 ---
 
@@ -189,3 +189,4 @@ React 의 의존성 배열이나 `useMemo` 가 매번 다시 도는 이유가 �
 
 - [원시 타입 — 값 자체가 복사되는 것들 →](/post/primitive-type) — 이 글의 선행
 - [프로토타입 — 객체가 다른 객체를 참조해 상속받는 방식 →](/post/prototype)
+- [얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가 →](/post/shallow-deep-copy) — 다음 글

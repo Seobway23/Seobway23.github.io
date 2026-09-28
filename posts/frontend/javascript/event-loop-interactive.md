@@ -149,4 +149,5 @@ export default function App() {
 
 ## 관련 글
 
+- [태스크 큐 — setTimeout 콜백이 줄 서는 곳 →](/post/task-queue) — 다음 글
 - [React Query 개요 →](/post/react-query-overview)
