@@ -67,7 +67,7 @@ function hello() { console.log("안녕"); }
 :::
 
 `let` · `const` 가 등록은 됐지만 아직 쓸 수 없는 그 구간을
-**TDZ(Temporal Dead Zone, 일시적 사각지대)** 라고 한다.
+**TDZ(Temporal Dead Zone, 일시적 사각지대)** 라고 한다. 자세한 규칙은 [TDZ 글](/post/tdz)에서 따로 다룬다.
 
 ```seq
 title: 스코프에 들어가서 코드가 끝날 때까지
@@ -169,3 +169,4 @@ function hello() { console.log("fn   : 안녕"); }
 
 - [스코프 — 변수가 어디까지 보이는가 →](/post/scope) — 이 글의 선행
 - [클로저 — 함수가 붙잡고 있는 변수 →](/post/closure) — 스코프와 호이스팅이 만나는 곳
+- [TDZ — 등록은 됐지만 아직 쓸 수 없는 구간 →](/post/tdz) — 다음 글
