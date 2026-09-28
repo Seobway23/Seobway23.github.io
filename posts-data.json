@@ -60,6 +60,26 @@
     "path": "/post/frontend/javascript/settimeout-vs-promise"
   },
   {
+    "slug": "shallow-deep-copy",
+    "title": "얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가",
+    "path": "/post/frontend/javascript/shallow-deep-copy"
+  },
+  {
+    "slug": "task-queue",
+    "title": "태스크 큐 — setTimeout 콜백이 줄 서는 곳",
+    "path": "/post/frontend/javascript/task-queue"
+  },
+  {
+    "slug": "tdz",
+    "title": "TDZ — 등록은 됐지만 아직 쓸 수 없는 구간",
+    "path": "/post/frontend/javascript/tdz"
+  },
+  {
+    "slug": "this",
+    "title": "this — 어디서 만들었나가 아니라 어떻게 불렀나",
+    "path": "/post/frontend/javascript/this"
+  },
+  {
     "slug": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
     "title": "빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG",
     "path": "/post/frontend/performance/build-performance-a11y-vite-turbopack-lighthouse-wcag"

@@ -1,10 +1,100 @@
 [
   {
+    "id": "this",
+    "title": "this — 어디서 만들었나가 아니라 어떻게 불렀나",
+    "slug": "this",
+    "excerpt": "같은 함수인데 어떤 때는 객체를, 어떤 때는 undefined 를 가리키는 this. 함수를 부르는 모양 네 가지만 보면 값이 정해진다.\n",
+    "content": "<h2>같은 함수인데 this 가 바뀐다</h2>\n<p>함수는 하나다. 부르는 모양만 바꿨다. 그런데 결과가 다르다.</p>\n<pre><code class=\"language-js\">const user = {\n  name: &quot;민수&quot;,\n  hello() { return `안녕, ${this.name}`; },\n};\n\nuser.hello();            // &quot;안녕, 민수&quot;\n\nconst fn = user.hello;   // 같은 함수를 변수에 옮겨 담았을 뿐\nfn();                    // TypeError: Cannot read properties of undefined\n</code></pre>\n<p><code>fn</code> 과 <code>user.hello</code> 는 <strong>완전히 같은 함수</strong>다(<code>fn === user.hello</code> 는 <code>true</code>).<br>달라진 건 부른 모양뿐이다. <code>this</code> 는 그 모양을 보고 정해진다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p><a href=\"/post/execution-context\">실행 컨텍스트</a>에서 컨텍스트가 담는 것 세 가지를 봤다.<br>환경 레코드, 바깥 환경 참조, 그리고 <strong>this</strong>. 셋 중 둘은 <strong>코드를 쓴 위치</strong>로 정해지는데,<br><code>this</code> 만 다르다.</p>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>스코프(바깥 환경)는 &quot;어디서 만들었나&quot;로 정해진다.</strong><br><strong><code>this</code> 는 &quot;어떻게 불렀나&quot;로 정해진다.<strong> 함수를 호출하는 </strong>그 순간</strong>, 호출 모양을 보고<br>그 호출의 컨텍스트에 <code>this</code> 값을 넣는다.</p>\n</div></div></aside></p>\n<p>그러니 <code>this</code> 를 알고 싶으면 함수 정의를 볼 게 아니라 <strong>호출하는 줄</strong>을 봐야 한다.<br>호출 모양은 네 가지뿐이다.</p>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">1. 점 찍고 부르기</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">2. 그냥 부르기</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">3. 직접 지정하기</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-3\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-3\" tabindex=\"-1\" data-tab-index=\"3\">4. new 로 부르기</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p><code>객체.메서드()</code> — <strong>점 앞의 객체</strong>가 <code>this</code> 다.</p>\n<pre><code class=\"language-js\">user.hello();          // this = user\na.b.c.hello();         // this = a.b.c  (바로 앞 하나만 본다)\n</code></pre>\n<p>함수가 어느 객체 <strong>안에 적혀 있는지</strong>는 상관없다. 호출할 때 점 앞에 뭐가 있느냐만 본다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p><code>함수()</code> — 점 앞에 아무것도 없다. <code>this</code> 는 <strong><code>undefined</code></strong> 다.</p>\n<pre><code class=\"language-js\">const fn = user.hello;\nfn();                  // this = undefined  → this.name 에서 TypeError\n</code></pre>\n<p>엄격 모드(모듈·<code>class</code> 안은 자동으로 엄격 모드)의 규칙이다. 옛날식 비엄격 스크립트에서는<br><code>undefined</code> 대신 전역 객체(<code>window</code>)가 들어가는데, 이게 더 위험하다 — 에러 없이<br><code>window.name</code> 을 읽고 지나간다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p><code>call</code> · <code>apply</code> · <code>bind</code> — 원하는 값을 <code>this</code> 로 <strong>못박는다.</strong></p>\n<pre><code class=\"language-js\">function hello() { return `안녕, ${this.name}`; }\n\nhello.call({ name: &quot;영희&quot; });         // 지금 바로 부르면서 this 지정\nhello.apply({ name: &quot;영희&quot; }, []);    // call 과 같고 인자만 배열로\nconst bound = hello.bind({ name: &quot;철수&quot; });\nbound();                              // 나중에 몇 번을 불러도 this = 철수\n</code></pre>\n<p><code>bind</code> 는 <strong>this 가 고정된 새 함수</strong>를 돌려준다. 한 번 묶으면 점을 찍어 불러도 안 바뀐다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-3\" aria-labelledby=\"post-tabs-0-tab-3\" data-panel-index=\"3\" hidden><p><code>new 함수()</code> — 방금 <strong>새로 만든 빈 객체</strong>가 <code>this</code> 다.</p>\n<pre><code class=\"language-js\">function User(name) {\n  this.name = name;    // this = 새 객체\n}\nconst u = new User(&quot;민수&quot;);\nu.name;                // &quot;민수&quot;\n</code></pre>\n<p><code>class</code> 의 <code>constructor</code> 도 같다. 새 객체를 만들고, 그걸 <code>this</code> 로 넣고, 끝나면 돌려준다.</p>\n</div></div></p>\n<p>여러 개가 겹치면 <strong><code>new</code> &gt; <code>bind</code>·<code>call</code>·<code>apply</code> &gt; 점 찍고 부르기 &gt; 그냥 부르기</strong> 순으로 이긴다.</p>\n<pre><code class=\"language-seq\">title: 같은 함수를 세 가지 모양으로 부른다\nspeed: 1700\ncaption: 함수는 그대로다. 부르는 줄이 바뀌면 this 가 바뀐다.\n\nlane call  호출하는 줄\nlane stack 콜 스택 #stack\nlane out   this 값 #log\n\nstep user.hello() — 점 앞에 user 가 있다.\n  push call user.hello()\nstep 호출하는 순간 컨텍스트가 만들어지고 this 에 user 가 들어간다.\n  move call stack hello (this = user)\n  log out user.hello() → this = user\nstep 함수가 끝나면 컨텍스트가 빠진다. this 도 같이 사라진다.\n  pop stack\nstep fn() — 같은 함수지만 점 앞이 비어 있다.\n  push call fn()\nstep 이번 호출의 컨텍스트에는 this 로 undefined 가 들어간다.\n  move call stack hello (this = undefined)\n  log out fn() → this = undefined\nstep 끝나서 빠지고, fn.call(user) — 이번엔 호출하면서 this 를 직접 넣는다.\n  pop stack\n  push call fn.call(user)\nstep 같은 함수인데 이번 컨텍스트의 this 는 user 다.\n  move call stack hello (this = user)\n  log out fn.call(user) → this = user\n</code></pre>\n<hr>\n<h2>직접 확인</h2>\n<p><code>whoAmI</code> 는 자기 <code>this</code> 가 누군지 말하는 함수다. 호출 모양만 바꿔 가며 불러 본다.</p>\n<pre><code class=\"language-playground\">#! js title=this.js height=320\nfunction whoAmI() {\n  &quot;use strict&quot;;\n  return this === undefined ? &quot;undefined&quot; : this.label;\n}\n\nconst a = { label: &quot;a&quot;, whoAmI };\nconst b = { label: &quot;b&quot;, whoAmI };\n\nconsole.log(&quot;a.whoAmI()          →&quot;, a.whoAmI());\nconsole.log(&quot;b.whoAmI()          →&quot;, b.whoAmI());   // 같은 함수, 다른 this\nconsole.log(&quot;whoAmI()            →&quot;, whoAmI());\n\nconst taken = a.whoAmI;                            // 꺼내 담으면\nconsole.log(&quot;taken()             →&quot;, taken());     // a 를 잃는다\n\nconsole.log(&quot;whoAmI.call(b)      →&quot;, whoAmI.call(b));\n\nconst fixed = whoAmI.bind(a);\nb.fixed = fixed;\nconsole.log(&quot;b.fixed() (bind a)  →&quot;, b.fixed());   // bind 가 점보다 이긴다\n\n// 화살표 함수는 자기 this 가 없다 — 바깥 this 를 그대로 쓴다\nconst c = {\n  label: &quot;c&quot;,\n  later() {\n    return [1].map(() =&gt; this.label)[0];\n  },\n};\nconsole.log(&quot;화살표 안의 this    →&quot;, c.later());\n</code></pre>\n<p><code>a.whoAmI()</code> 와 <code>b.whoAmI()</code> 는 <strong>같은 함수</strong>를 부른다. 함수가 <code>a</code> 안에 먼저 적혔다는<br>사실은 아무 의미가 없다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>메서드를 콜백으로 넘기면 <code>this</code> 가 사라진다</strong></p>\n<pre><code class=\"language-js\">class Timer {\n  seconds = 0;\n  tick() { this.seconds++; }\n  start() {\n    setInterval(this.tick, 1000);   // tick 만 떼어서 넘겼다\n  }\n}\n</code></pre>\n<p><code>setInterval</code> 에 넘어가는 건 <strong>함수 하나</strong>다. 나중에 타이머가 그 함수를 부를 때<br><code>timer.tick()</code> 처럼 점을 찍어 주지 않는다. 맨 위 <code>fn()</code> 과 같은 상황이다.<br>(브라우저 타이머는 <code>this</code> 자리에 <code>window</code> 를 넣어 부르므로, 에러도 없이<br><code>window.seconds</code> 가 <code>NaN</code> 이 된다. 조용히 틀리는 쪽이라 더 찾기 어렵다.)</p>\n<p>고치는 방법은 둘이다.</p>\n<pre><code class=\"language-js\">setInterval(() =&gt; this.tick(), 1000);   // 화살표로 감싸 점 찍고 부른다\nsetInterval(this.tick.bind(this), 1000); // this 를 묶어서 넘긴다\n</code></pre>\n<p>이벤트 핸들러(<code>addEventListener</code>)·<code>arr.map(obj.method)</code> 도 전부 같은 이유다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>객체 리터럴 안의 화살표 함수</strong></p>\n<pre><code class=\"language-js\">const user = {\n  name: &quot;민수&quot;,\n  hello: () =&gt; `안녕, ${this.name}`,   // this 는 user 가 아니다\n};\n</code></pre>\n<p>화살표 함수는 <strong>자기 <code>this</code> 를 만들지 않고</strong> 만들어진 곳 바깥의 <code>this</code> 를 그대로 쓴다.<br>객체 리터럴 <code>{ }</code> 는 스코프가 아니므로 바깥은 파일 최상위다. 거기서 <code>this</code> 는<br>모듈이면 <code>undefined</code>, 옛 스크립트면 <code>window</code> 다. 어느 쪽이든 <code>user</code> 는 아니다.<br>메서드는 <code>hello() { }</code> 로 쓴다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--note\" data-callout=\"note\" role=\"note\" aria-label=\"NOTE\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">NOTE</span><div class=\"post-callout__content\"><p><strong><code>this</code> 는 &quot;그 함수가 들어 있는 객체&quot;가 아니다.</strong> 함수는 어느 객체에도 속하지 않는다.<br>객체는 함수의 주소를 들고 있을 뿐이고(<a href=\"/post/reference-type\">참조 타입</a>), 같은 함수를<br>여러 객체가 들고 있을 수 있다. 그래서 &quot;누가 들고 있나&quot;가 아니라 &quot;누가 불렀나&quot;를 본다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p><code>this</code> 는 함수를 <strong>정의할 때가 아니라 호출할 때</strong>, 호출하는 모양을 보고 정해진다.<br>점 앞의 객체 · <code>undefined</code> · <code>call</code>/<code>bind</code> 로 넣은 값 · <code>new</code> 가 만든 새 객체 — 네 가지 중 하나다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>user.hello()</code> 는 되고 <code>const fn = user.hello; fn()</code> 은 안 되는 이유를 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 스코프와 <code>this</code> 가 정해지는 기준이 어떻게 다른지 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 메서드를 콜백으로 넘길 때 <code>this</code> 를 지키는 방법 두 가지를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 객체 리터럴 메서드를 화살표 함수로 쓰면 안 되는 이유를 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/this\" target=\"_blank\">[1] this — MDN Web Docs</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Function/bind\" target=\"_blank\">[2] Function.prototype.bind() — MDN Web Docs</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-ordinarycallbindthis\" target=\"_blank\">[3] OrdinaryCallBindThis — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/execution-context\">실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — &quot;어디서 만들었나&quot; 로 정해지는 쪽</li>\n<li><a href=\"/post/prototype\">프로토타입 — 없으면 위에 물어보는 상속 →</a> — 물려받은 메서드 안의 <code>this</code> 도 호출한 객체다</li>\n</ul>\n",
+    "coverImage": "/post-thumbnails/this.svg",
+    "category": "frontend/javascript",
+    "tags": [
+      "javascript",
+      "this",
+      "bind",
+      "call",
+      "apply",
+      "실행 컨텍스트"
+    ],
+    "author": "Seobway",
+    "readTime": 8,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-28T00:00:00.000Z",
+    "updatedAt": "2026-09-28T09:38:13.485Z"
+  },
+  {
+    "id": "tdz",
+    "title": "TDZ — 등록은 됐지만 아직 쓸 수 없는 구간",
+    "slug": "tdz",
+    "excerpt": "바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다.\n",
+    "content": "<h2>바깥 변수가 있는데 왜 에러인가</h2>\n<p>바깥에 <code>x</code> 가 있다. 블록 안에서 <code>x</code> 를 읽는다. 스코프 체인을 따라 바깥 <code>x</code> 를<br>찾을 것 같은데, 에러가 난다.</p>\n<pre><code class=\"language-js\">let x = &quot;바깥&quot;;\n\n{\n  console.log(x);   // ReferenceError: Cannot access &#39;x&#39; before initialization\n  let x = &quot;안쪽&quot;;\n}\n</code></pre>\n<p><code>let x = &quot;안쪽&quot;</code> 줄을 지우면 <code>&quot;바깥&quot;</code> 이 잘 나온다. <strong>아래에 있는 줄 하나가 위의 줄을<br>망가뜨린다.</strong> 이게 TDZ 다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p><a href=\"/post/hoisting\">호이스팅</a>에서 본 규칙을 다시 꺼낸다. 스코프에 들어가면 코드를 실행하기<br><strong>전에</strong> 그 스코프의 선언을 먼저 등록한다. 여기까지는 <code>var</code> 든 <code>let</code> 이든 같다.</p>\n<p>다른 건 <strong>등록할 때 넣어 두는 값</strong>이다.</p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>등록 시점에 들어가는 것</th>\n<th>선언 전에 읽으면</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>var</code></td>\n<td><code>undefined</code></td>\n<td><code>undefined</code></td>\n</tr>\n<tr>\n<td><code>let</code> · <code>const</code> · <code>class</code></td>\n<td><strong>아무것도 없음</strong> (초기화 안 됨)</td>\n<td><code>ReferenceError</code></td>\n</tr>\n</tbody></table>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>TDZ(Temporal Dead Zone, 일시적 사각지대)<strong> — <code>let</code>·<code>const</code> 가 </strong>등록된 순간부터<br>선언문이 실행되는 순간까지</strong>의 구간. 이 구간에서는 이름은 있는데 값이 없어서 읽기도<br>쓰기도 금지된다.</p>\n</div></div></aside></p>\n<p>그래서 맨 위 예제가 이렇게 풀린다.</p>\n<ol>\n<li>블록에 들어간다. 블록 안의 <code>let x</code> 를 <strong>먼저 등록</strong>한다(값 없음).</li>\n<li><code>console.log(x)</code> — 이름을 찾는다. 블록 안에 <code>x</code> 가 <strong>이미 등록돼 있다.</strong> 바깥까지 갈 필요가 없다.</li>\n<li>찾은 <code>x</code> 는 아직 값이 없다 → TDZ → 에러.</li>\n</ol>\n<p>바깥 <code>x</code> 를 못 본 게 아니라, <strong>안쪽 <code>x</code> 가 먼저 잡혀서</strong> 바깥까지 안 간 것이다.</p>\n<pre><code class=\"language-seq\">title: 블록에 들어가서 let x 줄을 지날 때까지\nspeed: 1600\ncaption: 이름은 블록에 들어가자마자 생긴다. 값은 선언문에 닿아야 생긴다.\n\nlane outer 바깥 스코프\nlane inner 블록 스코프\nlane out   실행 #log\n\nstep 바깥에 x = &quot;바깥&quot; 이 있다.\n  push outer x = &quot;바깥&quot;\nstep 블록에 들어가자마자 안쪽 let x 를 등록한다. 이름만 있고 값은 없다.\n  push inner x (값 없음 · TDZ)\n  mark inner\nstep console.log(x) — 가장 가까운 블록 스코프에서 x 를 찾는다. 있다. 바깥까지 가지 않는다.\n  log out x 를 블록에서 찾음\nstep 찾은 x 가 TDZ 라서 읽을 수 없다.\n  log out ReferenceError\nstep (에러가 없었다면) let x = &quot;안쪽&quot; 줄에 닿는 순간 값이 들어가고 TDZ 가 끝난다.\n  clear inner\n  push inner x = &quot;안쪽&quot;\n</code></pre>\n<h3>&quot;시간&quot; 사각지대인 이유</h3>\n<p>TDZ 는 <strong>코드 위치가 아니라 실행 순서</strong>로 정해진다. 이름에 Temporal(시간)이 붙은 이유다.</p>\n<pre><code class=\"language-js\">function show() {\n  console.log(msg);    // 코드상으로는 선언보다 위에 있다\n}\n\nlet msg = &quot;안녕&quot;;\nshow();                // &quot;안녕&quot; — 에러가 아니다\n</code></pre>\n<p><code>show</code> 안의 <code>console.log(msg)</code> 는 글자로는 <code>let msg</code> 보다 위에 있다. 하지만 <strong>실행되는 시점</strong>은<br><code>let msg = &quot;안녕&quot;</code> 을 지난 뒤다. 그때는 TDZ 가 이미 끝났으니 문제없다.<br><code>show()</code> 를 <code>let msg</code> 위로 올리면 그때 에러가 난다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p>각 줄이 에러인지 아닌지 먼저 예측해 봐라. <code>try</code> 로 감싸 두었으니 에러가 나도 끝까지 돈다.</p>\n<pre><code class=\"language-playground\">#! js title=tdz.js height=320\nfunction check(label, fn) {\n  try {\n    console.log(label, &quot;→&quot;, fn());\n  } catch (e) {\n    console.log(label, &quot;→&quot;, e.name);\n  }\n}\n\n// 1. 선언된 적 없는 이름의 typeof 는 에러가 아니다\ncheck(&quot;typeof 없는이름&quot;, () =&gt; typeof neverDeclared);\n\n// 2. TDZ 안에서는 typeof 도 에러다\ncheck(&quot;TDZ 안 typeof&quot;, () =&gt; {\n  const t = typeof later;\n  let later = 1;\n  return t;\n});\n\n// 3. 위치는 위지만 실행은 선언 뒤 → 괜찮다\ncheck(&quot;나중에 호출&quot;, () =&gt; {\n  const read = () =&gt; value;\n  let value = 42;\n  return read();\n});\n\n// 4. 자기 자신으로 초기화 → 오른쪽을 계산할 때 아직 TDZ\ncheck(&quot;let n = n + 1&quot;, () =&gt; {\n  let n = n + 1;\n  return n;\n});\n\n// 5. class 도 TDZ 가 있다\ncheck(&quot;class 선언 전 new&quot;, () =&gt; {\n  const u = new User();\n  class User {}\n  return u;\n});\n</code></pre>\n<p>2번이 특히 의외다. <code>typeof</code> 는 &quot;없는 변수여도 에러 없이 <code>&quot;undefined&quot;</code>&quot; 로 알려져 있는데,<br>TDZ 안의 변수는 <strong>없는 게 아니라 있는데 못 쓰는 것</strong>이라 <code>typeof</code> 도 막힌다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>&quot;<code>let</code> 은 호이스팅이 안 된다&quot; 고 이해하는 것</strong></p>\n<p>호이스팅이 안 됐다면 맨 위 예제는 바깥 <code>x</code> 를 찾아 <code>&quot;바깥&quot;</code> 을 찍었어야 한다.<br>에러가 난다는 것 자체가 <strong>안쪽 <code>x</code> 가 이미 등록돼 있다는 증거</strong>다.<br>정확히는 &quot;등록은 되지만 <strong>초기화되지 않는다</strong>&quot; 이다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>함수 기본값 매개변수의 순서</strong></p>\n<pre><code class=\"language-js\">function range(start = end - 10, end = 100) {}   // 앞이 뒤를 참조\nrange();   // ReferenceError — start 를 계산할 때 end 는 아직 TDZ\n</code></pre>\n<p>매개변수도 왼쪽부터 차례로 초기화된다. 뒤쪽 매개변수를 앞에서 쓰면 TDZ 에 걸린다.<br>순서를 바꾸면(<code>end</code> 를 먼저) 해결된다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--tip\" data-callout=\"tip\" role=\"note\" aria-label=\"TIP\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">TIP</span><div class=\"post-callout__content\"><p>TDZ 는 귀찮은 규칙이 아니라 <strong>안전장치</strong>다. <code>var</code> 였다면 맨 위 예제는 에러 없이<br><code>undefined</code> 를 찍고 지나갔을 것이고, 그 <code>undefined</code> 는 한참 뒤 엉뚱한 곳에서 터진다.<br>선언을 쓰는 자리 <strong>바로 위</strong>에 두면 TDZ 에 걸릴 일 자체가 없다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p><code>let</code>·<code>const</code>·<code>class</code> 는 스코프에 들어가는 순간 <strong>이름만 등록되고 값은 비어 있다.</strong><br>선언문이 실행될 때까지 그 이름을 건드리면 <code>ReferenceError</code> 다. 기준은 코드 위치가 아니라<br><strong>실행 순서</strong>다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> 바깥에 같은 이름이 있는데도 에러가 나는 이유를 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> &quot;<code>let</code> 은 호이스팅되지 않는다&quot; 가 왜 틀린 말인지 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 선언보다 위에 적힌 코드가 에러 없이 도는 경우를 예로 들 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> TDZ 안에서 <code>typeof</code> 가 에러인 이유를 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let\" target=\"_blank\">[1] let — Temporal dead zone (MDN Web Docs)</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Errors/Cant_access_lexical_declaration_before_init\" target=\"_blank\">[2] ReferenceError: can't access lexical declaration before initialization — MDN Web Docs</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-let-and-const-declarations\" target=\"_blank\">[3] let and const Declarations — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/hoisting\">호이스팅 — 선언은 먼저 올라간다 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — 이름을 가장 가까운 스코프부터 찾는 규칙</li>\n<li><a href=\"/post/closure\">클로저 — 함수가 붙잡고 있는 변수 →</a></li>\n</ul>\n",
+    "coverImage": "/post-thumbnails/tdz.svg",
+    "category": "frontend/javascript",
+    "tags": [
+      "javascript",
+      "TDZ",
+      "let",
+      "const",
+      "호이스팅"
+    ],
+    "author": "Seobway",
+    "readTime": 6,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-28T00:00:00.000Z",
+    "updatedAt": "2026-09-28T09:38:13.481Z"
+  },
+  {
+    "id": "task-queue",
+    "title": "태스크 큐 — setTimeout 콜백이 줄 서는 곳",
+    "slug": "task-queue",
+    "excerpt": "setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다.\n",
+    "content": "<h2>0ms 라고 했는데 왜 나중에 도나</h2>\n<p><code>setTimeout</code> 에 0 을 줬다. &quot;0ms 뒤에 실행&quot; 이니 바로 돌 것 같다.</p>\n<pre><code class=\"language-js\">setTimeout(() =&gt; console.log(&quot;타이머&quot;), 0);\n\nconsole.log(&quot;동기 1&quot;);\nconsole.log(&quot;동기 2&quot;);\n\n// 출력: 동기 1 → 동기 2 → 타이머\n</code></pre>\n<p>아래 두 줄보다 <strong>위에</strong> 적었고 <strong>0ms</strong> 인데도 맨 마지막이다.<br><code>setTimeout</code> 의 숫자는 &quot;이만큼 뒤에 실행&quot; 이 아니라 <strong>&quot;이만큼 뒤에 줄을 세워라&quot;</strong> 이기 때문이다.<br>그 줄이 <strong>태스크 큐</strong>다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p>자바스크립트는 한 번에 하나만 실행한다. 지금 실행 중인 것은 <a href=\"/post/call-stack\">콜 스택</a>에<br>쌓여 있다. 콜 스택이 일하는 중에는 <strong>아무도 끼어들 수 없다.</strong></p>\n<p>그러면 &quot;1초 뒤에 이거 해 줘&quot; 나 &quot;클릭되면 이거 해 줘&quot; 는 어디서 기다리나?</p>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>태스크 큐(task queue)<strong> — 지금 당장은 못 돌지만 </strong>차례가 오면 실행할 콜백</strong>이 줄 서는 곳.<br><code>setTimeout</code>·<code>setInterval</code> 이 끝난 콜백, 클릭·키보드 같은 DOM 이벤트 콜백이 여기 들어간다.<br>&quot;매크로태스크 큐&quot; 라고도 부른다.</p>\n</div></div></aside></p>\n<p><code>setTimeout(cb, 100)</code> 한 줄은 세 구간을 지난다.</p>\n<ol>\n<li><strong>맡긴다<strong> — <code>setTimeout</code> 은 <code>cb</code> 를 </strong>브라우저의 타이머</strong>에 맡기고 곧바로 끝난다.<br>자바스크립트는 기다리지 않고 다음 줄로 간다.</li>\n<li><strong>줄 선다<strong> — 100ms 가 지나면 브라우저가 <code>cb</code> 를 </strong>태스크 큐에 넣는다.</strong> 아직 실행이 아니다.</li>\n<li><strong>꺼내 실행한다<strong> — <a href=\"/post/event-loop-interactive\">이벤트 루프</a>가 콜 스택이 </strong>비었을 때</strong><br>큐 맨 앞에서 <strong>하나를</strong> 꺼내 콜 스택에 올린다. 그때 비로소 실행된다.</li>\n</ol>\n<p>그래서 숫자는 <strong>최소 대기 시간</strong>이다. 100ms 가 지나 줄을 섰어도 콜 스택이 바쁘면 계속 기다린다.</p>\n<pre><code class=\"language-seq\">title: 타이머 두 개가 줄 서고 꺼내지는 과정\nspeed: 1700\ncaption: 시간이 지나면 줄을 서고, 콜 스택이 비어야 하나씩 꺼내진다.\n\nlane stack 콜 스택 #stack\nlane timer 브라우저 타이머 #stack\nlane queue 태스크 큐\nlane out   콘솔 #log\n\nstep setTimeout(A, 100) — A 를 브라우저 타이머에 맡기고 setTimeout 은 바로 끝난다.\n  push stack setTimeout(A, 100)\n  move stack timer A · 100ms\nstep setTimeout(B, 0) — B 도 맡긴다. 아직 아무것도 실행되지 않았다.\n  push stack setTimeout(B, 0)\n  move stack timer B · 0ms\nstep 동기 코드 console.log 가 먼저 돈다. 콜 스택이 쓰이는 동안 큐는 기다린다.\n  push stack console.log\n  log out 동기\nstep 0ms 가 지난 B 가 태스크 큐에 줄을 선다. 줄을 섰을 뿐 아직 실행 전이다.\n  pop stack\n  move timer queue B\nstep 콜 스택이 비었다. 이벤트 루프가 큐 맨 앞의 B 하나를 꺼내 올린다.\n  move queue stack B()\n  log out B\nstep B 가 끝나 빠진다. 100ms 가 지나 A 도 줄을 선다.\n  pop stack\n  move timer queue A\nstep 스택이 비어 있으니 A 를 꺼내 실행한다.\n  move queue stack A()\n  log out A\n</code></pre>\n<h3>한 번에 하나씩 꺼낸다</h3>\n<p>이벤트 루프는 태스크를 <strong>한 번에 하나만</strong> 꺼낸다. 하나를 끝까지 돌리고, 콜 스택이 빈 뒤에야<br>다음 것을 본다. 태스크와 태스크 <strong>사이</strong>에 브라우저는 화면을 다시 그릴 기회를 얻는다.</p>\n<p>그래서 태스크 하나가 오래 걸리면 그동안 <strong>다음 태스크도, 화면 갱신도 전부 멈춘다.</strong><br>버튼을 눌러도 반응이 없는 &quot;먹통&quot; 이 이것이다.</p>\n<p><aside class=\"post-callout post-callout--note\" data-callout=\"note\" role=\"note\" aria-label=\"NOTE\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">NOTE</span><div class=\"post-callout__content\"><p><strong>줄은 사실 여러 개다.</strong> 명세상 태스크 큐는 하나가 아니라 여러 줄(타이머, 사용자 입력,<br>네트워크 등)이고, 브라우저가 매번 어느 줄에서 꺼낼지 고른다. 사용자 입력을 먼저<br>처리하는 식이다. 다만 <strong>같은 줄 안에서는 들어온 순서</strong>를 지킨다. 처음 이해할 때는<br>&quot;하나의 줄&quot; 로 생각해도 결과 예측은 거의 틀리지 않는다.</p>\n</div></div></aside></p>\n<hr>\n<h2>직접 확인</h2>\n<p>먼저 출력 순서를 예측해 보고 돌려라. 두 번째 실험은 0ms 타이머가 <strong>실제로는 몇 ms 뒤에</strong><br>도는지 잰다.</p>\n<pre><code class=\"language-playground\">#! js title=task-queue.js height=300\n// 실험 1 — 순서\nsetTimeout(() =&gt; console.log(&quot;C (100ms)&quot;), 100);\nsetTimeout(() =&gt; console.log(&quot;A (0ms, 먼저 등록)&quot;), 0);\nsetTimeout(() =&gt; console.log(&quot;B (0ms, 나중 등록)&quot;), 0);\nconsole.log(&quot;동기 코드&quot;);\n\n// 실험 2 — 0ms 인데 얼마나 기다리나\nconst start = performance.now();\nsetTimeout(() =&gt; {\n  const waited = Math.round(performance.now() - start);\n  console.log(`0ms 타이머가 실제로 기다린 시간: ${waited}ms`);\n}, 0);\n\n// 콜 스택을 300ms 동안 붙잡는다 — 이 동안 큐는 한 줄도 줄지 않는다\nconst until = Date.now() + 300;\nwhile (Date.now() &lt; until) {}\nconsole.log(&quot;동기 루프 끝 (300ms 점거)&quot;);\n</code></pre>\n<p>같은 0ms 인 A 와 B 는 <strong>등록한 순서대로</strong> 나온다. 줄이니까. 그리고 0ms 타이머는<br>300ms 가량 기다린다. 그동안 콜 스택이 비지 않았기 때문이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong><code>setTimeout(fn, 1000)</code> 을 &quot;정확히 1초 뒤&quot; 로 믿는 것</strong></p>\n<p>1000 은 <strong>줄을 서기까지의 최소 시간</strong>이다. 그 뒤에 앞선 태스크가 끝나고 콜 스택이 비기를<br>또 기다린다. 무거운 작업이 있으면 1초가 1.5초가 된다. 정확한 시각이 중요하면<br><code>Date.now()</code> 나 <code>performance.now()</code> 로 실제 경과 시간을 재서 보정한다.</p>\n<p>또 <code>setTimeout</code> 을 안에서 계속 다시 거는 식으로 5번 넘게 중첩하면, 브라우저는<br>0 을 줘도 <strong>최소 4ms</strong> 로 올려 버린다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong><code>setTimeout(fn, 0)</code> 을 &quot;지금 당장&quot; 으로 쓰는 것</strong></p>\n<p>&quot;지금 코드 다 끝나고, 줄 선 것들 다음에&quot; 다. 게다가 태스크 큐보다 <strong>먼저 비워지는 줄</strong>이<br>하나 더 있다. <code>Promise.then</code> 콜백이 들어가는 마이크로태스크 큐다. 둘이 섞였을 때의 순서는<br><a href=\"/post/settimeout-vs-promise\">setTimeout vs Promise</a>에서 연습한다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--tip\" data-callout=\"tip\" role=\"note\" aria-label=\"TIP\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">TIP</span><div class=\"post-callout__content\"><p><strong>무거운 일을 잘게 쪼개 줄 세우면 화면이 안 멈춘다.</strong> 10만 개를 한 번에 처리하지 말고<br>1000 개씩 처리한 뒤 <code>setTimeout(다음 묶음, 0)</code> 으로 나머지를 다시 줄 세운다.<br>태스크와 태스크 사이마다 브라우저가 화면을 그리고 클릭을 처리할 틈이 생긴다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p><code>setTimeout</code>·DOM 이벤트의 콜백은 바로 실행되지 않고 <strong>태스크 큐에 줄을 선다.</strong><br>이벤트 루프는 콜 스택이 비었을 때 <strong>맨 앞 하나씩</strong> 꺼내 실행한다. 그래서 타이머 숫자는<br>&quot;정확한 시각&quot; 이 아니라 <strong>&quot;최소 대기 시간&quot;</strong> 이다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>setTimeout(fn, 0)</code> 이 아래 동기 코드보다 늦게 도는 이유를 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 타이머가 &quot;맡긴다 → 줄 선다 → 꺼내 실행한다&quot; 세 구간을 거치는 것을 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 긴 동기 작업이 클릭·화면 갱신까지 막는 이유를 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 같은 지연의 타이머 둘이 어떤 순서로 도는지 예측할 수 있다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Execution_model\" target=\"_blank\">[1] JavaScript execution model — MDN Web Docs</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/API/Window/setTimeout\" target=\"_blank\">[2] Window: setTimeout() — MDN Web Docs</a></li>\n<li><a href=\"https://html.spec.whatwg.org/multipage/webappapis.html#task-queue\" target=\"_blank\">[3] Event loops — task queue (HTML Standard, WHATWG)</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/event-loop-interactive\">이벤트 루프, 눈으로 따라가기 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/call-stack\">콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳 →</a> — 비어야 큐가 열린다</li>\n<li><a href=\"/post/settimeout-vs-promise\">setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습 →</a> — 마이크로태스크와 섞였을 때</li>\n</ul>\n",
+    "coverImage": "/post-thumbnails/task-queue.svg",
+    "category": "frontend/javascript",
+    "tags": [
+      "javascript",
+      "태스크 큐",
+      "매크로태스크",
+      "setTimeout",
+      "이벤트 루프",
+      "비동기"
+    ],
+    "author": "Seobway",
+    "readTime": 7,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-28T00:00:00.000Z",
+    "updatedAt": "2026-09-28T09:38:13.478Z"
+  },
+  {
+    "id": "shallow-deep-copy",
+    "title": "얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가",
+    "slug": "shallow-deep-copy",
+    "excerpt": "스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다.\n",
+    "content": "<h2>복사했는데 왜 원본이 바뀌나</h2>\n<p>스프레드(<code>...</code>)로 복사했다. 복사본만 고쳤다. 그런데 원본도 바뀌어 있다.</p>\n<pre><code class=\"language-js\">const user = { name: &quot;민수&quot;, address: { city: &quot;서울&quot; } };\nconst copy = { ...user };\n\ncopy.name = &quot;영희&quot;;           // 원본 그대로 — 여기까진 괜찮다\ncopy.address.city = &quot;부산&quot;;   // 원본도 부산이 된다 ← ?\n\nuser.name;          // &quot;민수&quot;\nuser.address.city;  // &quot;부산&quot;\n</code></pre>\n<p><code>name</code> 은 따로 놀고 <code>address</code> 는 같이 논다. 같은 복사인데 결과가 반반이다.<br>이 반반이 <strong>얕은 복사</strong>다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p>먼저 <a href=\"/post/reference-type\">참조 타입</a>에서 본 것 하나만 기억하면 된다.<br><strong>객체를 담은 변수에는 객체가 아니라 주소가 들어 있다.</strong></p>\n<p>그러면 <code>user</code> 는 이렇게 생겼다.</p>\n<pre><code class=\"language-text\">user ──▶ { name: &quot;민수&quot;, address: ──▶ { city: &quot;서울&quot; } }\n          ─────── 상자 A ───────        ─── 상자 B ───\n</code></pre>\n<p>상자가 <strong>두 개</strong>다. 바깥 상자 A 안에 <code>address</code> 라는 칸이 있고, 그 칸에는<br>상자 B 의 <strong>주소</strong>가 들어 있다.</p>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>얕은 복사 — 상자 A 만 새로 만든다.</strong> 칸의 내용은 그대로 옮겨 적는다.<br><code>name</code> 칸에는 <code>&quot;민수&quot;</code> 라는 값이, <code>address</code> 칸에는 <strong>B 의 주소</strong>가 그대로 복사된다.<br>그래서 새 상자 A&#39; 도 같은 B 를 가리킨다.</p>\n<p><strong>깊은 복사 — B 까지 새로 만든다.</strong> 안쪽 상자도 전부 새로 만들어<br>원본과 <strong>공유하는 상자가 하나도 없다.</strong></p>\n</div></div></aside></p>\n<pre><code class=\"language-seq\">title: 얕은 복사는 바깥 상자만 새로 만든다\nspeed: 1600\ncaption: 주소가 복사되면 같은 상자를 두 곳에서 가리킨다. 깊은 복사는 안쪽 상자까지 새로 만든다.\n\nlane orig  원본 user (상자 A)\nlane copy  복사본 copy (상자 A&#39;)\nlane inner 안쪽 상자 B\nlane inner2 새 상자 B&#39;\nlane out   결과 #log\n\nstep 원본 상자 A 에는 name 값과 B 의 주소가 들어 있다.\n  push orig name: &quot;민수&quot;\n  push orig address → B\n  push inner city: &quot;서울&quot;\nstep { ...user } 는 새 상자 A&#39; 를 만들고 칸을 하나씩 옮겨 적는다. name 은 값이 복사된다.\n  push copy name: &quot;민수&quot;\nstep address 칸에는 B 의 주소가 적혀 있으니 주소가 그대로 옮겨진다. B 는 새로 생기지 않는다.\n  push copy address → B\n  mark inner\nstep copy.address.city = &quot;부산&quot; 은 B 를 고친다. user 도 B 를 보고 있으니 같이 바뀐다.\n  clear inner\n  push inner city: &quot;부산&quot;\n  log out user.address.city → &quot;부산&quot;\nstep 처음부터 깊은 복사(structuredClone)였다면 B 도 새로 만들어 A&#39; 는 B&#39; 를 가리킨다.\n  clear copy\n  push copy name: &quot;민수&quot;\n  push copy address → B&#39;\n  push inner2 city: &quot;서울&quot;\n  log out 깊은 복사: 복사본을 고쳐도 원본은 그대로\n</code></pre>\n<p>정리하면 <strong>&quot;몇 층까지 새로 만드느냐&quot;</strong> 의 차이다.</p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>새로 만드는 범위</th>\n<th>대표 방법</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>얕은 복사</td>\n<td>맨 바깥 한 층</td>\n<td><code>{ ...obj }</code>, <code>[...arr]</code>, <code>Object.assign</code>, <code>arr.slice()</code>, <code>Array.from</code></td>\n</tr>\n<tr>\n<td>깊은 복사</td>\n<td>안쪽 끝까지 전부</td>\n<td><code>structuredClone(obj)</code></td>\n</tr>\n</tbody></table>\n<p>원시 값(<code>&quot;민수&quot;</code>, <code>3</code>)은 원래 값 자체가 복사되니 층이 없다.<br><strong>층이 생기는 건 객체 안에 객체가 있을 때뿐이다.</strong> 중첩이 없으면 얕은 복사로 충분하다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p><code>===</code> 는 두 객체가 <strong>같은 상자</strong>인지 묻는다. 층마다 물어보면 어디까지 새로 만들어졌는지 보인다.</p>\n<pre><code class=\"language-playground\">#! js title=copy-depth.js height=300\nconst user = {\n  name: &quot;민수&quot;,\n  address: { city: &quot;서울&quot; },\n  tags: [&quot;a&quot;, &quot;b&quot;],\n};\n\nconst shallow = { ...user };\nconst deep = structuredClone(user);\n\nconsole.log(&quot;바깥 상자가 같은가&quot;);\nconsole.log(&quot;  shallow:&quot;, shallow === user);                 // false\nconsole.log(&quot;  deep   :&quot;, deep === user);                    // false\n\nconsole.log(&quot;안쪽 address 가 같은가&quot;);\nconsole.log(&quot;  shallow:&quot;, shallow.address === user.address); // true  ← 공유\nconsole.log(&quot;  deep   :&quot;, deep.address === user.address);    // false\n\nshallow.address.city = &quot;부산&quot;;\nshallow.tags.push(&quot;c&quot;);\nconsole.log(&quot;얕은 복사를 고친 뒤 원본:&quot;, user.address.city, user.tags);\n\ndeep.address.city = &quot;대구&quot;;\nconsole.log(&quot;깊은 복사를 고친 뒤 원본:&quot;, user.address.city);  // 대구가 아니다\n</code></pre>\n<p><code>shallow === user</code> 는 <code>false</code> 인데 <code>shallow.address === user.address</code> 는 <code>true</code> 다.<br><strong>바깥은 새것, 안쪽은 같은 것</strong> — 얕은 복사를 한 줄로 보여준다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>React·상태 관리에서 중첩된 값을 한 층만 복사하는 것</strong></p>\n<pre><code class=\"language-js\">// 도시만 바꾸고 싶다\nconst next = { ...state };\nnext.address.city = &quot;부산&quot;;   // state.address 를 직접 고쳤다\nsetState(next);\n</code></pre>\n<p><code>next</code> 는 새 객체지만 <code>next.address</code> 는 원래 <code>state.address</code> 다.<br>원본을 고쳐 버렸으므로 &quot;이전 상태&quot;도 같이 바뀐다.<br><strong>바꾸는 경로에 있는 층마다 새로 만든다.</strong></p>\n<pre><code class=\"language-js\">setState({ ...state, address: { ...state.address, city: &quot;부산&quot; } });\n</code></pre>\n<p>전부 깊은 복사할 필요는 없다. 바꾸는 길목만 새로 만들고 나머지는 공유해도 된다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong><code>JSON.parse(JSON.stringify(obj))</code> 를 깊은 복사로 쓰는 것</strong></p>\n<p>예전에 많이 쓰던 방법인데 JSON 으로 표현 못 하는 값이 조용히 사라지거나 바뀐다.</p>\n<pre><code class=\"language-js\">const src = { when: new Date(), fn() {}, nothing: undefined, n: NaN };\nJSON.parse(JSON.stringify(src));\n// { when: &quot;2026-09-28T...&quot;, n: null }   ← Date 는 문자열, fn·nothing 은 사라짐, NaN 은 null\n</code></pre>\n<p><code>Map</code>·<code>Set</code> 은 빈 객체가 되고, 자기 자신을 가리키는(순환) 객체는 에러가 난다.<br>지금은 <code>structuredClone</code> 을 쓴다. <code>Date</code>·<code>Map</code>·<code>Set</code>·순환 참조까지 제대로 복사한다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--notice\" data-callout=\"notice\" role=\"note\" aria-label=\"NOTICE\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">NOTICE</span><div class=\"post-callout__content\"><p><strong><code>structuredClone</code> 도 전부 복사하지는 못한다.</strong></p>\n<ul>\n<li><strong>함수</strong>가 들어 있으면 <code>DataCloneError</code> 로 실패한다.</li>\n<li><strong>클래스 인스턴스</strong>는 속성만 복사되고 <a href=\"/post/prototype\">프로토타입</a> 연결은 끊긴다.<br>복사본은 그냥 <code>Object</code> 가 되어 클래스 메서드를 못 쓴다.</li>\n<li>DOM 노드도 복사하지 못한다.</li>\n</ul>\n<p>데이터(값 덩어리)를 복사하는 도구라고 생각하면 맞다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>얕은 복사는 <strong>맨 바깥 상자만<strong> 새로 만들고 안쪽 객체는 주소를 옮겨 적어 </strong>공유</strong>한다.<br>깊은 복사는 안쪽 상자까지 <strong>전부</strong> 새로 만든다. 중첩이 없으면 둘은 같다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>{ ...obj }</code> 로 복사한 뒤 중첩된 값을 고치면 왜 원본이 바뀌는지 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>shallow.address === user.address</code> 가 <code>true</code> 인 이유를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 중첩 상태를 바꿀 때 어느 층을 새로 만들어야 하는지 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>JSON</code> 복사 대신 <code>structuredClone</code> 을 쓰는 이유와 그 한계를 말할 수 있다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Shallow_copy\" target=\"_blank\">[1] Shallow copy — MDN Web Docs 용어 사전</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Deep_copy\" target=\"_blank\">[2] Deep copy — MDN Web Docs 용어 사전</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/API/Window/structuredClone\" target=\"_blank\">[3] structuredClone() — MDN Web Docs</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/reference-type\">참조 타입 — 주소가 복사되는 것들 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/primitive-type\">원시 타입 — 값 자체가 복사되는 것들 →</a></li>\n<li><a href=\"/post/prototype\">프로토타입 — 없으면 위에 물어보는 상속 →</a> — <code>structuredClone</code> 이 끊는 연결</li>\n</ul>\n",
+    "coverImage": "/post-thumbnails/shallow-deep-copy.svg",
+    "category": "frontend/javascript",
+    "tags": [
+      "javascript",
+      "얕은 복사",
+      "깊은 복사",
+      "structuredClone",
+      "참조 타입"
+    ],
+    "author": "Seobway",
+    "readTime": 7,
+    "views": 0,
+    "featured": false,
+    "createdAt": "2026-09-28T00:00:00.000Z",
+    "updatedAt": "2026-09-28T09:38:13.476Z"
+  },
+  {
     "id": "reference-type",
     "title": "참조 타입 — 주소가 복사되는 것들",
     "slug": "reference-type",
     "excerpt": "객체·배열·함수는 변수에 값이 아니라 주소가 담긴다. 복사해도 같은 것을 가리켜서 한쪽을 고치면 둘 다 바뀐다.\n",
-    "content": "<h2>복사한 객체를 고쳤는데 왜 원본까지 바뀌는가</h2>\n<p><a href=\"/post/primitive-type\">원시 타입</a>은 값이 복사되어 서로 독립적이었다. 객체는 다르다.</p>\n<pre><code class=\"language-js\">const original = { name: &quot;서브웨이&quot; };\nconst copy = original;\n\ncopy.name = &quot;바뀜&quot;;\nconsole.log(original.name);   // &quot;바뀜&quot;   ← 원본까지 바뀐다\n</code></pre>\n<p>복사한 것은 <strong>객체가 아니라 객체를 가리키는 주소</strong>이기 때문이다.</p>\n<hr>\n<h2>참조 타입은 무엇인가</h2>\n<p>참조 타입은 <strong>변수에 값이 아니라 메모리 주소(참조)가 저장되는 타입</strong>이다.<br><a href=\"/post/primitive-type\">원시 타입 7가지</a>가 아닌 것은 전부 참조 타입이다.</p>\n<ul>\n<li>객체 <code>{}</code></li>\n<li>배열 <code>[]</code></li>\n<li>함수 <code>function () {}</code></li>\n<li>그 밖에 <code>Date</code> · <code>Map</code> · <code>Set</code> · <code>RegExp</code> 등</li>\n</ul>\n<p>변수에 담기는 것은 실제 데이터가 아니라 <strong>&quot;그 데이터가 어디 있는지&quot;</strong> 다.<br>그래서 두 변수에 같은 주소가 들어가면 둘은 <strong>같은 하나</strong>를 본다.</p>\n<pre><code class=\"language-seq\">title: 참조 타입은 주소가 복사된다\nspeed: 1500\ncaption: 상자는 둘이지만 가리키는 것은 하나다.\n\nlane a    변수 original\nlane b    변수 copy\nlane heap 실제 객체가 있는 곳\nlane out  결과 #log\n\nstep const original = { name: &quot;서브웨이&quot; } — 객체가 어딘가에 만들어진다.\n  push heap { name: &quot;서브웨이&quot; }\nstep original 에는 객체가 아니라 그 객체의 주소가 담긴다.\n  push a 주소 → 객체\nstep const copy = original — 복사되는 것은 주소다. 객체는 그대로 하나다.\n  push b 주소 → 객체 (같은 곳)\nstep copy.name 을 고치면 주소를 따라가 그 하나뿐인 객체를 고친다.\n  move b heap name 수정\nstep original 로 읽어도 같은 객체라 바뀐 값이 보인다.\n  log out original.name === &quot;바뀜&quot;\n</code></pre>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><code>const</code> 로 선언해도 <strong>속성은 바꿀 수 있다.</strong> <code>const</code> 가 막는 것은 &quot;변수에 담긴 주소를<br>다른 주소로 바꾸는 것&quot;이지, &quot;그 주소에 있는 객체의 내용을 고치는 것&quot;이 아니다.</p>\n<pre><code class=\"language-js\">const obj = { n: 1 };\nobj.n = 2;          // 된다 — 객체 내용을 고침\nobj = { n: 3 };     // TypeError — 주소를 바꾸려 함\n</code></pre>\n</div></div></aside></p>\n<hr>\n<h2>비교도 주소로 한다</h2>\n<p><code>===</code> 는 참조 타입에서 <strong>내용이 같은지가 아니라 같은 객체인지</strong>를 본다.</p>\n<pre><code class=\"language-js\">{ a: 1 } === { a: 1 }    // false — 내용은 같지만 서로 다른 객체\n[1, 2] === [1, 2]        // false\n\nconst x = { a: 1 };\nconst y = x;\nx === y                  // true — 같은 주소\n</code></pre>\n<p>내용을 비교하려면 직접 비교하거나 <code>JSON.stringify</code> 같은 우회를 써야 한다<br>(중첩·순서·함수 때문에 완전하지는 않다).</p>\n<hr>\n<h2>직접 확인</h2>\n<p>같은 객체를 가리키는지, 따로인지 눈으로 확인해라.</p>\n<pre><code class=\"language-playground\">#! js title=reference.js height=260\nconst original = { name: &quot;서브웨이&quot;, tags: [&quot;js&quot;] };\n\nconst alias = original;              // 주소 복사 — 같은 객체\nconst shallow = { ...original };     // 얕은 복사 — 겉만 새 객체\n\nalias.name = &quot;별칭이 바꿈&quot;;\nconsole.log(&quot;1:&quot;, original.name);    // 바뀐다\n\nshallow.name = &quot;복사본이 바꿈&quot;;\nconsole.log(&quot;2:&quot;, original.name);    // 안 바뀐다\n\n// 그런데 중첩된 배열은 여전히 공유된다\nshallow.tags.push(&quot;ts&quot;);\nconsole.log(&quot;3:&quot;, original.tags);    // 같이 바뀐다!\n\nconsole.log(&quot;같은 객체?&quot;, original === alias, original === shallow);\n</code></pre>\n<p>3번이 핵심이다. <code>{ ...original }</code> 은 <strong>최상위 속성만</strong> 새로 만들고, 그 안의 배열은<br>주소만 복사한다. 이것이 얕은 복사와 깊은 복사가 갈리는 지점이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>함수 인자로 객체를 넘기고 원본이 안 바뀔 거라 믿는 것</strong></p>\n<pre><code class=\"language-js\">function reset(config) {\n  config.retry = 0;      // 호출한 쪽의 객체가 바뀐다\n}\n\nconst config = { retry: 3 };\nreset(config);\nconsole.log(config.retry);   // 0\n</code></pre>\n<p>인자로 넘어가는 것도 주소다. 원본을 지키려면 함수 안에서 복사본을 만들거나,<br>바꾼 값을 <strong>반환</strong>해서 호출한 쪽이 교체하게 한다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>배열을 <code>===</code> 로 비교하는 것</strong></p>\n<pre><code class=\"language-js\">[1, 2, 3] === [1, 2, 3]    // false\n</code></pre>\n<p>React 의 의존성 배열이나 <code>useMemo</code> 가 매번 다시 도는 이유가 대개 이것이다.<br>매 렌더마다 새 객체·새 배열이 만들어지면 주소가 달라 &quot;바뀐 것&quot;으로 취급된다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>참조 타입은 <strong>변수에 주소가 저장되는 타입</strong>(객체·배열·함수)이다. 대입·인자 전달은<br>주소를 복사하므로 여러 변수가 같은 하나를 가리키고, <code>===</code> 도 내용이 아니라 주소를 비교한다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>const</code> 객체의 속성을 바꿀 수 있는 이유를 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>{a:1} === {a:1}</code> 이 <code>false</code> 인 이유를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 스프레드로 복사해도 중첩된 값이 공유되는 이유를 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Data_structures\" target=\"_blank\">[1] JavaScript data types and data structures — MDN Web Docs</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object\" target=\"_blank\">[2] Object — MDN Web Docs</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-object-type\" target=\"_blank\">[3] The Object Type — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/primitive-type\">원시 타입 — 값 자체가 복사되는 것들 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/prototype\">프로토타입 — 객체가 다른 객체를 참조해 상속받는 방식 →</a></li>\n</ul>\n",
+    "content": "<h2>복사한 객체를 고쳤는데 왜 원본까지 바뀌는가</h2>\n<p><a href=\"/post/primitive-type\">원시 타입</a>은 값이 복사되어 서로 독립적이었다. 객체는 다르다.</p>\n<pre><code class=\"language-js\">const original = { name: &quot;서브웨이&quot; };\nconst copy = original;\n\ncopy.name = &quot;바뀜&quot;;\nconsole.log(original.name);   // &quot;바뀜&quot;   ← 원본까지 바뀐다\n</code></pre>\n<p>복사한 것은 <strong>객체가 아니라 객체를 가리키는 주소</strong>이기 때문이다.</p>\n<hr>\n<h2>참조 타입은 무엇인가</h2>\n<p>참조 타입은 <strong>변수에 값이 아니라 메모리 주소(참조)가 저장되는 타입</strong>이다.<br><a href=\"/post/primitive-type\">원시 타입 7가지</a>가 아닌 것은 전부 참조 타입이다.</p>\n<ul>\n<li>객체 <code>{}</code></li>\n<li>배열 <code>[]</code></li>\n<li>함수 <code>function () {}</code></li>\n<li>그 밖에 <code>Date</code> · <code>Map</code> · <code>Set</code> · <code>RegExp</code> 등</li>\n</ul>\n<p>변수에 담기는 것은 실제 데이터가 아니라 <strong>&quot;그 데이터가 어디 있는지&quot;</strong> 다.<br>그래서 두 변수에 같은 주소가 들어가면 둘은 <strong>같은 하나</strong>를 본다.</p>\n<pre><code class=\"language-seq\">title: 참조 타입은 주소가 복사된다\nspeed: 1500\ncaption: 상자는 둘이지만 가리키는 것은 하나다.\n\nlane a    변수 original\nlane b    변수 copy\nlane heap 실제 객체가 있는 곳\nlane out  결과 #log\n\nstep const original = { name: &quot;서브웨이&quot; } — 객체가 어딘가에 만들어진다.\n  push heap { name: &quot;서브웨이&quot; }\nstep original 에는 객체가 아니라 그 객체의 주소가 담긴다.\n  push a 주소 → 객체\nstep const copy = original — 복사되는 것은 주소다. 객체는 그대로 하나다.\n  push b 주소 → 객체 (같은 곳)\nstep copy.name 을 고치면 주소를 따라가 그 하나뿐인 객체를 고친다.\n  move b heap name 수정\nstep original 로 읽어도 같은 객체라 바뀐 값이 보인다.\n  log out original.name === &quot;바뀜&quot;\n</code></pre>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><code>const</code> 로 선언해도 <strong>속성은 바꿀 수 있다.</strong> <code>const</code> 가 막는 것은 &quot;변수에 담긴 주소를<br>다른 주소로 바꾸는 것&quot;이지, &quot;그 주소에 있는 객체의 내용을 고치는 것&quot;이 아니다.</p>\n<pre><code class=\"language-js\">const obj = { n: 1 };\nobj.n = 2;          // 된다 — 객체 내용을 고침\nobj = { n: 3 };     // TypeError — 주소를 바꾸려 함\n</code></pre>\n</div></div></aside></p>\n<hr>\n<h2>비교도 주소로 한다</h2>\n<p><code>===</code> 는 참조 타입에서 <strong>내용이 같은지가 아니라 같은 객체인지</strong>를 본다.</p>\n<pre><code class=\"language-js\">{ a: 1 } === { a: 1 }    // false — 내용은 같지만 서로 다른 객체\n[1, 2] === [1, 2]        // false\n\nconst x = { a: 1 };\nconst y = x;\nx === y                  // true — 같은 주소\n</code></pre>\n<p>내용을 비교하려면 직접 비교하거나 <code>JSON.stringify</code> 같은 우회를 써야 한다<br>(중첩·순서·함수 때문에 완전하지는 않다).</p>\n<hr>\n<h2>직접 확인</h2>\n<p>같은 객체를 가리키는지, 따로인지 눈으로 확인해라.</p>\n<pre><code class=\"language-playground\">#! js title=reference.js height=260\nconst original = { name: &quot;서브웨이&quot;, tags: [&quot;js&quot;] };\n\nconst alias = original;              // 주소 복사 — 같은 객체\nconst shallow = { ...original };     // 얕은 복사 — 겉만 새 객체\n\nalias.name = &quot;별칭이 바꿈&quot;;\nconsole.log(&quot;1:&quot;, original.name);    // 바뀐다\n\nshallow.name = &quot;복사본이 바꿈&quot;;\nconsole.log(&quot;2:&quot;, original.name);    // 안 바뀐다\n\n// 그런데 중첩된 배열은 여전히 공유된다\nshallow.tags.push(&quot;ts&quot;);\nconsole.log(&quot;3:&quot;, original.tags);    // 같이 바뀐다!\n\nconsole.log(&quot;같은 객체?&quot;, original === alias, original === shallow);\n</code></pre>\n<p>3번이 핵심이다. <code>{ ...original }</code> 은 <strong>최상위 속성만</strong> 새로 만들고, 그 안의 배열은<br>주소만 복사한다. 이것이 <a href=\"/post/shallow-deep-copy\">얕은 복사와 깊은 복사</a>가 갈리는 지점이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>함수 인자로 객체를 넘기고 원본이 안 바뀔 거라 믿는 것</strong></p>\n<pre><code class=\"language-js\">function reset(config) {\n  config.retry = 0;      // 호출한 쪽의 객체가 바뀐다\n}\n\nconst config = { retry: 3 };\nreset(config);\nconsole.log(config.retry);   // 0\n</code></pre>\n<p>인자로 넘어가는 것도 주소다. 원본을 지키려면 함수 안에서 복사본을 만들거나,<br>바꾼 값을 <strong>반환</strong>해서 호출한 쪽이 교체하게 한다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>배열을 <code>===</code> 로 비교하는 것</strong></p>\n<pre><code class=\"language-js\">[1, 2, 3] === [1, 2, 3]    // false\n</code></pre>\n<p>React 의 의존성 배열이나 <code>useMemo</code> 가 매번 다시 도는 이유가 대개 이것이다.<br>매 렌더마다 새 객체·새 배열이 만들어지면 주소가 달라 &quot;바뀐 것&quot;으로 취급된다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>참조 타입은 <strong>변수에 주소가 저장되는 타입</strong>(객체·배열·함수)이다. 대입·인자 전달은<br>주소를 복사하므로 여러 변수가 같은 하나를 가리키고, <code>===</code> 도 내용이 아니라 주소를 비교한다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>const</code> 객체의 속성을 바꿀 수 있는 이유를 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>{a:1} === {a:1}</code> 이 <code>false</code> 인 이유를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 스프레드로 복사해도 중첩된 값이 공유되는 이유를 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Data_structures\" target=\"_blank\">[1] JavaScript data types and data structures — MDN Web Docs</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object\" target=\"_blank\">[2] Object — MDN Web Docs</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-object-type\" target=\"_blank\">[3] The Object Type — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/primitive-type\">원시 타입 — 값 자체가 복사되는 것들 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/prototype\">프로토타입 — 객체가 다른 객체를 참조해 상속받는 방식 →</a></li>\n<li><a href=\"/post/shallow-deep-copy\">얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가 →</a> — 다음 글</li>\n</ul>\n",
     "coverImage": "/post-thumbnails/reference-type.svg",
     "category": "frontend/javascript",
     "tags": [
@@ -18,7 +108,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.721Z"
+    "updatedAt": "2026-09-28T09:38:13.469Z"
   },
   {
     "id": "prototype",
@@ -39,7 +129,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.719Z"
+    "updatedAt": "2026-09-28T09:38:13.467Z"
   },
   {
     "id": "primitive-type",
@@ -59,14 +149,14 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.716Z"
+    "updatedAt": "2026-09-28T09:38:13.464Z"
   },
   {
     "id": "execution-context",
     "title": "실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경",
     "slug": "execution-context",
     "excerpt": "콜 스택에 쌓이는 것의 정체. 변수·this·바깥 스코프로 가는 길이 여기에 담긴다.\n",
-    "content": "<h2>콜 스택에 쌓이는 것은 정확히 무엇인가</h2>\n<p><a href=\"/post/call-stack\">콜 스택</a>에 &quot;함수가 쌓인다&quot;고 했지만, 쌓이는 것은 함수 자체가 아니다.<br>쌓이는 것은 <strong>그 호출을 실행하는 데 필요한 환경 한 벌</strong>이고, 이것을 실행 컨텍스트라 부른다.</p>\n<p>같은 함수를 두 번 호출하면 환경도 두 벌 생긴다. 그래서 각 호출의 지역 변수가 섞이지 않는다.</p>\n<pre><code class=\"language-js\">function greet(name) {\n  const message = `안녕, ${name}`;\n  return message;\n}\n\ngreet(&quot;A&quot;);   // message = &quot;안녕, A&quot;   ← 이 호출만의 환경\ngreet(&quot;B&quot;);   // message = &quot;안녕, B&quot;   ← 별개의 환경\n</code></pre>\n<hr>\n<h2>실행 컨텍스트는 무엇을 담는가</h2>\n<p>실행 컨텍스트는 <strong>함수가 실행될 때 만들어지는 환경</strong>이고, 세 가지를 담는다.</p>\n<table>\n<thead>\n<tr>\n<th>담기는 것</th>\n<th>하는 일</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>환경 레코드</strong>(Environment Record)</td>\n<td>이 호출의 매개변수·지역 변수·함수 선언을 담는 장부</td>\n</tr>\n<tr>\n<td><strong>바깥 환경 참조</strong>(outer)</td>\n<td>여기 없는 이름을 찾으러 갈 다음 장소. 이게 이어지면 <a href=\"/post/scope\">스코프 체인</a></td>\n</tr>\n<tr>\n<td><strong>this 바인딩</strong></td>\n<td>이 호출에서 <code>this</code> 가 가리킬 값</td>\n</tr>\n</tbody></table>\n<p>핵심은 <strong><code>outer</code> 가 &quot;호출한 곳&quot;이 아니라 &quot;함수가 정의된 곳&quot;을 가리킨다</strong>는 것이다.<br>그래서 자바스크립트가 렉시컬 스코프를 따르고, 코드를 읽는 것만으로 어떤 변수가 쓰일지<br>확정할 수 있다.</p>\n<pre><code class=\"language-seq\">title: 컨텍스트가 만들어지고 이름을 찾는 과정\nspeed: 1500\ncaption: 스택에 쌓이는 한 칸이 곧 실행 컨텍스트 한 벌이다.\n\nlane global 전역 컨텍스트\nlane outer  outer() 컨텍스트\nlane inner  inner() 컨텍스트\nlane out    결과 #log\n\nstep 스크립트가 시작되면 전역 실행 컨텍스트부터 만들어진다.\n  push global 전역 변수 · this\nstep outer() 를 호출하면 그 호출만의 컨텍스트가 새로 생긴다.\n  push outer 지역변수 · outer→전역\nstep outer 안에서 inner() 를 호출한다. 또 한 벌이 생긴다.\n  push inner 지역변수 · outer→outer컨텍스트\nstep inner 안에서 이름을 찾는다. 자기 환경 레코드에 없다.\n  mark inner\nstep outer 참조를 따라 바깥으로 나간다. outer 컨텍스트에서 찾았다.\n  move inner outer 이름 찾는 중\n  log out outer 의 지역변수를 사용\nstep inner 가 반환되면 그 컨텍스트는 스택에서 사라진다.\n  pop inner\n</code></pre>\n<hr>\n<h2>만들어질 때 두 단계를 거친다</h2>\n<p>컨텍스트가 만들어지는 순간과 코드가 한 줄씩 도는 순간은 다르다.</p>\n<p><div class=\"post-split\" data-cols=\"2\"><div class=\"post-split__col\"><div class=\"post-split__label\">1. 생성 단계</div><p>스코프 안의 선언을 먼저 훑어 환경 레코드에 등록한다.<br><code>this</code> 도 이때 정해진다.</p>\n<ul>\n<li><code>var</code> → 등록 + <code>undefined</code></li>\n<li><code>let</code>·<code>const</code> → 등록만, 값 없음 → <strong>TDZ</strong></li>\n<li>함수 선언 → 몸통까지 통째로</li>\n</ul>\n</div><div class=\"post-split__col\"><div class=\"post-split__label\">2. 실행 단계</div><p>코드를 위에서부터 한 줄씩 실행하며 값을 채운다.</p>\n<p><code>let x = 1</code> 줄에 도달해야 비로소 <code>x</code> 를 쓸 수 있다.<br>그 전에 읽으면 <code>ReferenceError</code>.</p>\n</div></div></p>\n<p><a href=\"/post/hoisting\">호이스팅</a>이 &quot;선언이 위로 올라간 것처럼 보이는 현상&quot;인 이유가 이것이다.<br>올라가는 게 아니라 <strong>생성 단계에서 먼저 등록</strong>되는 것이다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p>같은 함수를 두 번 불러 환경이 따로인지, <code>outer</code> 가 정의된 위치를 따르는지 확인해라.</p>\n<pre><code class=\"language-playground\">#! js title=context.js height=240\nconst where = &quot;전역&quot;;\n\nfunction show() {\n  console.log(&quot;show 가 보는 where:&quot;, where);\n}\n\nfunction run() {\n  const where = &quot;run 안&quot;;      // show 와 무관하다\n  show();\n  console.log(&quot;run 이 보는 where:&quot;, where);\n}\n\nrun();\n\n// 호출마다 환경이 따로 생긴다\nfunction counter() {\n  let n = 0;\n  return () =&gt; ++n;\n}\nconst a = counter();\nconst b = counter();\nconsole.log(&quot;a:&quot;, a(), a());   // 1 2\nconsole.log(&quot;b:&quot;, b());        // 1  ← a 와 별개의 환경\n</code></pre>\n<p><code>show</code> 는 <code>run</code> 이 불렀는데도 <code>run</code> 의 <code>where</code> 를 보지 못한다. <code>outer</code> 가 <strong>정의된 위치</strong>인<br>전역을 가리키기 때문이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong><code>outer</code> 를 &quot;호출한 곳&quot;으로 오해하는 것</strong></p>\n<p>호출한 곳을 따라간다면 위 예제에서 <code>&quot;run 안&quot;</code> 이 찍혀야 한다. 그렇지 않다.<br>이름을 찾는 길은 <strong>코드를 쓴 위치</strong>로 정해지고, 실행 시점에 바뀌지 않는다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>컨텍스트가 사라지면 지역 변수도 사라진다고 믿는 것</strong></p>\n<p>보통은 맞다. 하지만 안쪽 함수가 그 환경을 붙잡고 있으면 컨텍스트가 스택에서 빠진 뒤에도<br>환경은 살아남는다. 위 <code>counter</code> 예제가 그렇고, 이것이 <a href=\"/post/closure\">클로저</a>다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>실행 컨텍스트는 <strong>함수 호출마다 만들어지는 환경 한 벌</strong>이고, 환경 레코드 · 바깥 환경 참조 ·<br><code>this</code> 를 담는다. 콜 스택에 쌓이는 것이 바로 이것이며, <code>outer</code> 는 호출한 곳이 아니라<br><strong>정의된 곳</strong>을 가리킨다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> 콜 스택에 쌓이는 것이 무엇인지 한 문장으로 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 생성 단계와 실행 단계가 나뉘는 이유를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>outer</code> 가 정의 위치를 따르는 것을 예제로 보일 수 있다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://tc39.es/ecma262/#sec-execution-contexts\" target=\"_blank\">[1] Executable Code and Execution Contexts — ECMAScript 사양</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-environment-records\" target=\"_blank\">[2] Environment Records — ECMAScript 사양</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Call_stack\" target=\"_blank\">[3] Call stack — MDN Web Docs 용어 사전</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/call-stack\">콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/closure\">클로저 — 함수가 붙잡고 있는 변수 →</a> — 컨텍스트가 사라져도 환경이 남는 경우</li>\n</ul>\n",
+    "content": "<h2>콜 스택에 쌓이는 것은 정확히 무엇인가</h2>\n<p><a href=\"/post/call-stack\">콜 스택</a>에 &quot;함수가 쌓인다&quot;고 했지만, 쌓이는 것은 함수 자체가 아니다.<br>쌓이는 것은 <strong>그 호출을 실행하는 데 필요한 환경 한 벌</strong>이고, 이것을 실행 컨텍스트라 부른다.</p>\n<p>같은 함수를 두 번 호출하면 환경도 두 벌 생긴다. 그래서 각 호출의 지역 변수가 섞이지 않는다.</p>\n<pre><code class=\"language-js\">function greet(name) {\n  const message = `안녕, ${name}`;\n  return message;\n}\n\ngreet(&quot;A&quot;);   // message = &quot;안녕, A&quot;   ← 이 호출만의 환경\ngreet(&quot;B&quot;);   // message = &quot;안녕, B&quot;   ← 별개의 환경\n</code></pre>\n<hr>\n<h2>실행 컨텍스트는 무엇을 담는가</h2>\n<p>실행 컨텍스트는 <strong>함수가 실행될 때 만들어지는 환경</strong>이고, 세 가지를 담는다.</p>\n<table>\n<thead>\n<tr>\n<th>담기는 것</th>\n<th>하는 일</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>환경 레코드</strong>(Environment Record)</td>\n<td>이 호출의 매개변수·지역 변수·함수 선언을 담는 장부</td>\n</tr>\n<tr>\n<td><strong>바깥 환경 참조</strong>(outer)</td>\n<td>여기 없는 이름을 찾으러 갈 다음 장소. 이게 이어지면 <a href=\"/post/scope\">스코프 체인</a></td>\n</tr>\n<tr>\n<td><strong>this 바인딩</strong></td>\n<td>이 호출에서 <code>this</code> 가 가리킬 값</td>\n</tr>\n</tbody></table>\n<p>핵심은 <strong><code>outer</code> 가 &quot;호출한 곳&quot;이 아니라 &quot;함수가 정의된 곳&quot;을 가리킨다</strong>는 것이다.<br>그래서 자바스크립트가 렉시컬 스코프를 따르고, 코드를 읽는 것만으로 어떤 변수가 쓰일지<br>확정할 수 있다.</p>\n<pre><code class=\"language-seq\">title: 컨텍스트가 만들어지고 이름을 찾는 과정\nspeed: 1500\ncaption: 스택에 쌓이는 한 칸이 곧 실행 컨텍스트 한 벌이다.\n\nlane global 전역 컨텍스트\nlane outer  outer() 컨텍스트\nlane inner  inner() 컨텍스트\nlane out    결과 #log\n\nstep 스크립트가 시작되면 전역 실행 컨텍스트부터 만들어진다.\n  push global 전역 변수 · this\nstep outer() 를 호출하면 그 호출만의 컨텍스트가 새로 생긴다.\n  push outer 지역변수 · outer→전역\nstep outer 안에서 inner() 를 호출한다. 또 한 벌이 생긴다.\n  push inner 지역변수 · outer→outer컨텍스트\nstep inner 안에서 이름을 찾는다. 자기 환경 레코드에 없다.\n  mark inner\nstep outer 참조를 따라 바깥으로 나간다. outer 컨텍스트에서 찾았다.\n  move inner outer 이름 찾는 중\n  log out outer 의 지역변수를 사용\nstep inner 가 반환되면 그 컨텍스트는 스택에서 사라진다.\n  pop inner\n</code></pre>\n<hr>\n<h2>만들어질 때 두 단계를 거친다</h2>\n<p>컨텍스트가 만들어지는 순간과 코드가 한 줄씩 도는 순간은 다르다.</p>\n<p><div class=\"post-split\" data-cols=\"2\"><div class=\"post-split__col\"><div class=\"post-split__label\">1. 생성 단계</div><p>스코프 안의 선언을 먼저 훑어 환경 레코드에 등록한다.<br><a href=\"/post/this\"><code>this</code></a> 도 이때 정해진다.</p>\n<ul>\n<li><code>var</code> → 등록 + <code>undefined</code></li>\n<li><code>let</code>·<code>const</code> → 등록만, 값 없음 → <strong>TDZ</strong></li>\n<li>함수 선언 → 몸통까지 통째로</li>\n</ul>\n</div><div class=\"post-split__col\"><div class=\"post-split__label\">2. 실행 단계</div><p>코드를 위에서부터 한 줄씩 실행하며 값을 채운다.</p>\n<p><code>let x = 1</code> 줄에 도달해야 비로소 <code>x</code> 를 쓸 수 있다.<br>그 전에 읽으면 <code>ReferenceError</code>.</p>\n</div></div></p>\n<p><a href=\"/post/hoisting\">호이스팅</a>이 &quot;선언이 위로 올라간 것처럼 보이는 현상&quot;인 이유가 이것이다.<br>올라가는 게 아니라 <strong>생성 단계에서 먼저 등록</strong>되는 것이다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p>같은 함수를 두 번 불러 환경이 따로인지, <code>outer</code> 가 정의된 위치를 따르는지 확인해라.</p>\n<pre><code class=\"language-playground\">#! js title=context.js height=240\nconst where = &quot;전역&quot;;\n\nfunction show() {\n  console.log(&quot;show 가 보는 where:&quot;, where);\n}\n\nfunction run() {\n  const where = &quot;run 안&quot;;      // show 와 무관하다\n  show();\n  console.log(&quot;run 이 보는 where:&quot;, where);\n}\n\nrun();\n\n// 호출마다 환경이 따로 생긴다\nfunction counter() {\n  let n = 0;\n  return () =&gt; ++n;\n}\nconst a = counter();\nconst b = counter();\nconsole.log(&quot;a:&quot;, a(), a());   // 1 2\nconsole.log(&quot;b:&quot;, b());        // 1  ← a 와 별개의 환경\n</code></pre>\n<p><code>show</code> 는 <code>run</code> 이 불렀는데도 <code>run</code> 의 <code>where</code> 를 보지 못한다. <code>outer</code> 가 <strong>정의된 위치</strong>인<br>전역을 가리키기 때문이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong><code>outer</code> 를 &quot;호출한 곳&quot;으로 오해하는 것</strong></p>\n<p>호출한 곳을 따라간다면 위 예제에서 <code>&quot;run 안&quot;</code> 이 찍혀야 한다. 그렇지 않다.<br>이름을 찾는 길은 <strong>코드를 쓴 위치</strong>로 정해지고, 실행 시점에 바뀌지 않는다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--caution\" data-callout=\"caution\" role=\"note\" aria-label=\"CAUTION\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">CAUTION</span><div class=\"post-callout__content\"><p><strong>컨텍스트가 사라지면 지역 변수도 사라진다고 믿는 것</strong></p>\n<p>보통은 맞다. 하지만 안쪽 함수가 그 환경을 붙잡고 있으면 컨텍스트가 스택에서 빠진 뒤에도<br>환경은 살아남는다. 위 <code>counter</code> 예제가 그렇고, 이것이 <a href=\"/post/closure\">클로저</a>다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>실행 컨텍스트는 <strong>함수 호출마다 만들어지는 환경 한 벌</strong>이고, 환경 레코드 · 바깥 환경 참조 ·<br><code>this</code> 를 담는다. 콜 스택에 쌓이는 것이 바로 이것이며, <code>outer</code> 는 호출한 곳이 아니라<br><strong>정의된 곳</strong>을 가리킨다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> 콜 스택에 쌓이는 것이 무엇인지 한 문장으로 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 생성 단계와 실행 단계가 나뉘는 이유를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>outer</code> 가 정의 위치를 따르는 것을 예제로 보일 수 있다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://tc39.es/ecma262/#sec-execution-contexts\" target=\"_blank\">[1] Executable Code and Execution Contexts — ECMAScript 사양</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-environment-records\" target=\"_blank\">[2] Environment Records — ECMAScript 사양</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Call_stack\" target=\"_blank\">[3] Call stack — MDN Web Docs 용어 사전</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/call-stack\">콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/this\">this — 어디서 만들었나가 아니라 어떻게 불렀나 →</a> — 다음 글</li>\n<li><a href=\"/post/closure\">클로저 — 함수가 붙잡고 있는 변수 →</a> — 컨텍스트가 사라져도 환경이 남는 경우</li>\n</ul>\n",
     "coverImage": "/post-thumbnails/execution-context.svg",
     "category": "frontend/javascript",
     "tags": [
@@ -79,7 +169,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.707Z"
+    "updatedAt": "2026-09-28T09:38:13.456Z"
   },
   {
     "id": "call-stack",
@@ -99,7 +189,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.698Z"
+    "updatedAt": "2026-09-28T09:38:13.446Z"
   },
   {
     "id": "scope",
@@ -119,14 +209,14 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.722Z"
+    "updatedAt": "2026-09-28T09:38:13.471Z"
   },
   {
     "id": "hoisting",
     "title": "호이스팅 — 선언은 먼저 올라간다",
     "slug": "hoisting",
     "excerpt": "선언하기 전에 쓴 변수가 왜 어떤 때는 undefined 고 어떤 때는 에러인지, 그 차이를 만드는 규칙.\n",
-    "content": "<h2>왜 이게 필요한가</h2>\n<p>똑같이 &quot;선언 전에 쓴&quot; 코드인데 결과가 셋 다 다르다.</p>\n<pre><code class=\"language-js\">console.log(a);   // undefined      — 에러가 아니다?\nvar a = 1;\n\nconsole.log(b);   // ReferenceError — 이건 에러다\nlet b = 1;\n\nhello();          // &quot;안녕&quot;          — 아예 잘 돈다?\nfunction hello() { console.log(&quot;안녕&quot;); }\n</code></pre>\n<p>셋을 구분하지 못하면 &quot;왜 여기선 되고 저기선 안 되지&quot;를 평생 겪는다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p>자바스크립트는 코드를 위에서부터 한 줄씩 실행하기 <strong>전에</strong>, 스코프를 한 번 훑어<br>그 안의 선언을 미리 등록한다. 이 등록 단계 때문에 &quot;선언이 위로 끌어올려진 것처럼&quot;<br>보이는 것이 호이스팅이다.</p>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>끌어올려지는 것은 &quot;선언&quot;이지 &quot;할당&quot;이 아니다.</strong> <code>var a = 1</code> 은<br><code>var a</code>(선언)와 <code>a = 1</code>(할당) 두 개다. 올라가는 건 앞쪽뿐이다.</p>\n</div></div></aside></p>\n<p>핵심은 <strong>선언마다 등록되는 초기값이 다르다</strong>는 것이다.</p>\n<p><div class=\"post-grid\" data-cols=\"3\"><div class=\"post-grid__card\"><div class=\"post-grid__title\">`var`</div><p>등록되면서 곧바로 <code>undefined</code> 가 들어간다. 그래서 읽어도 에러가 아니다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">`let` · `const`</div><p>등록은 되지만 <strong>값이 없는 상태</strong>로 남는다. 이 구간을 읽으면 에러다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">`function` 선언</div><p>함수 몸통까지 통째로 등록된다. 그래서 위에서 바로 호출된다.</p>\n</div></div></p>\n<p><code>let</code> · <code>const</code> 가 등록은 됐지만 아직 쓸 수 없는 그 구간을<br><strong>TDZ(Temporal Dead Zone, 일시적 사각지대)</strong> 라고 한다.</p>\n<pre><code class=\"language-seq\">title: 스코프에 들어가서 코드가 끝날 때까지\nspeed: 1600\ncaption: 등록은 함께 일어나지만, 들어가는 값이 다르다.\n\nlane reg    등록 단계\nlane var    var a\nlane let    let b\nlane fn     function hello\nlane out    실행 결과 #log\n\nstep 스코프에 들어가면 먼저 선언부터 훑어 등록한다.\n  push reg 선언 수집\nstep var 는 등록되면서 undefined 가 들어간다.\n  move reg var undefined\nstep let 은 등록되지만 값이 없다 — 여기부터 TDZ 다.\n  push let TDZ (값 없음)\nstep 함수 선언은 몸통까지 통째로 등록된다.\n  push fn 몸통 전체\nstep 이제 한 줄씩 실행한다. a 를 읽으면 undefined 가 나온다.\n  log out console.log(a) → undefined\nstep b 를 읽으면 TDZ 라서 ReferenceError 다.\n  log out console.log(b) → ReferenceError\nstep hello() 는 몸통이 이미 있으니 그냥 실행된다.\n  log out hello() → &quot;안녕&quot;\nstep let b = 1 줄에 도달하는 순간 TDZ 가 끝난다.\n  move let out b = 1 (이제 사용 가능)\n</code></pre>\n<p>TDZ 는 실수를 <strong>빨리</strong> 드러내려고 일부러 만든 장치다. <code>var</code> 였다면<br><code>undefined</code> 가 조용히 흘러다니다 한참 뒤 엉뚱한 곳에서 터진다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p>주석을 하나씩 풀어 가며 어디서 에러가 나는지 확인해라.</p>\n<pre><code class=\"language-playground\">#! js title=hoisting.js height=220\nconsole.log(&quot;var  :&quot;, typeof a);   // undefined — 에러가 아니다\nvar a = 1;\n\nhello();                            // 몸통까지 올라가 있어 잘 돈다\nfunction hello() { console.log(&quot;fn   : 안녕&quot;); }\n\n// 아래 두 줄의 주석을 풀면 TDZ 에 걸린다\n// console.log(&quot;let  :&quot;, b);\n// let b = 1;\n\n// 함수 &quot;표현식&quot; 은 변수 규칙을 따른다 — 이것도 풀어 봐라\n// bye();\n// var bye = function () { console.log(&quot;bye&quot;); };\n</code></pre>\n<p>마지막 것이 특히 헷갈린다. <code>var bye = function(){}</code> 은 <strong>함수 선언이 아니라 변수 선언</strong>이다.<br>등록될 때 <code>undefined</code> 가 들어가 있으므로 <code>bye()</code> 는 <code>TypeError: bye is not a function</code> 이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>호이스팅을 &quot;코드가 실제로 위로 옮겨진다&quot;로 이해하는 것</strong></p>\n<p>옮겨지지 않는다. 실행 전에 <strong>등록</strong>될 뿐이다. 이 차이가 중요한 이유는<br><code>let</code> 의 TDZ 를 설명할 수 있느냐로 갈린다. 옮겨진다고 믿으면<br>&quot;<code>let</code> 도 올라갔는데 왜 에러지?&quot;에서 막힌다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--tip\" data-callout=\"tip\" role=\"note\" aria-label=\"TIP\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">TIP</span><div class=\"post-callout__content\"><p>호이스팅에 기대지 마라. <strong>선언을 쓰는 자리 바로 위에 둔다.</strong><br><code>let</code>·<code>const</code> 만 쓰면 TDZ 가 대신 잔소리를 해 준다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>실행 전에 선언이 등록되고, <strong>등록될 때 들어가는 값이 <code>var</code>·<code>let</code>·<code>function</code> 마다 다르다.</strong><br><code>let</code>·<code>const</code> 는 값 없이 등록되며, 그 구간이 TDZ 다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>var</code> 는 <code>undefined</code>, <code>let</code> 은 에러인 이유를 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 함수 선언과 함수 표현식의 차이를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> TDZ 가 왜 도움이 되는지 설명할 수 있다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Hoisting\" target=\"_blank\">[1] Hoisting — MDN Web Docs 용어 사전</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let\" target=\"_blank\">[2] let — Temporal dead zone (MDN Web Docs)</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-let-and-const-declarations\" target=\"_blank\">[3] let and const Declarations — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/closure\">클로저 — 함수가 붙잡고 있는 변수 →</a> — 스코프와 호이스팅이 만나는 곳</li>\n</ul>\n",
+    "content": "<h2>왜 이게 필요한가</h2>\n<p>똑같이 &quot;선언 전에 쓴&quot; 코드인데 결과가 셋 다 다르다.</p>\n<pre><code class=\"language-js\">console.log(a);   // undefined      — 에러가 아니다?\nvar a = 1;\n\nconsole.log(b);   // ReferenceError — 이건 에러다\nlet b = 1;\n\nhello();          // &quot;안녕&quot;          — 아예 잘 돈다?\nfunction hello() { console.log(&quot;안녕&quot;); }\n</code></pre>\n<p>셋을 구분하지 못하면 &quot;왜 여기선 되고 저기선 안 되지&quot;를 평생 겪는다.</p>\n<hr>\n<h2>어떻게 동작하는가</h2>\n<p>자바스크립트는 코드를 위에서부터 한 줄씩 실행하기 <strong>전에</strong>, 스코프를 한 번 훑어<br>그 안의 선언을 미리 등록한다. 이 등록 단계 때문에 &quot;선언이 위로 끌어올려진 것처럼&quot;<br>보이는 것이 호이스팅이다.</p>\n<p><aside class=\"post-callout post-callout--important\" data-callout=\"important\" role=\"note\" aria-label=\"IMPORTANT\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">IMPORTANT</span><div class=\"post-callout__content\"><p><strong>끌어올려지는 것은 &quot;선언&quot;이지 &quot;할당&quot;이 아니다.</strong> <code>var a = 1</code> 은<br><code>var a</code>(선언)와 <code>a = 1</code>(할당) 두 개다. 올라가는 건 앞쪽뿐이다.</p>\n</div></div></aside></p>\n<p>핵심은 <strong>선언마다 등록되는 초기값이 다르다</strong>는 것이다.</p>\n<p><div class=\"post-grid\" data-cols=\"3\"><div class=\"post-grid__card\"><div class=\"post-grid__title\">`var`</div><p>등록되면서 곧바로 <code>undefined</code> 가 들어간다. 그래서 읽어도 에러가 아니다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">`let` · `const`</div><p>등록은 되지만 <strong>값이 없는 상태</strong>로 남는다. 이 구간을 읽으면 에러다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">`function` 선언</div><p>함수 몸통까지 통째로 등록된다. 그래서 위에서 바로 호출된다.</p>\n</div></div></p>\n<p><code>let</code> · <code>const</code> 가 등록은 됐지만 아직 쓸 수 없는 그 구간을<br><strong>TDZ(Temporal Dead Zone, 일시적 사각지대)</strong> 라고 한다. 자세한 규칙은 <a href=\"/post/tdz\">TDZ 글</a>에서 따로 다룬다.</p>\n<pre><code class=\"language-seq\">title: 스코프에 들어가서 코드가 끝날 때까지\nspeed: 1600\ncaption: 등록은 함께 일어나지만, 들어가는 값이 다르다.\n\nlane reg    등록 단계\nlane var    var a\nlane let    let b\nlane fn     function hello\nlane out    실행 결과 #log\n\nstep 스코프에 들어가면 먼저 선언부터 훑어 등록한다.\n  push reg 선언 수집\nstep var 는 등록되면서 undefined 가 들어간다.\n  move reg var undefined\nstep let 은 등록되지만 값이 없다 — 여기부터 TDZ 다.\n  push let TDZ (값 없음)\nstep 함수 선언은 몸통까지 통째로 등록된다.\n  push fn 몸통 전체\nstep 이제 한 줄씩 실행한다. a 를 읽으면 undefined 가 나온다.\n  log out console.log(a) → undefined\nstep b 를 읽으면 TDZ 라서 ReferenceError 다.\n  log out console.log(b) → ReferenceError\nstep hello() 는 몸통이 이미 있으니 그냥 실행된다.\n  log out hello() → &quot;안녕&quot;\nstep let b = 1 줄에 도달하는 순간 TDZ 가 끝난다.\n  move let out b = 1 (이제 사용 가능)\n</code></pre>\n<p>TDZ 는 실수를 <strong>빨리</strong> 드러내려고 일부러 만든 장치다. <code>var</code> 였다면<br><code>undefined</code> 가 조용히 흘러다니다 한참 뒤 엉뚱한 곳에서 터진다.</p>\n<hr>\n<h2>직접 확인</h2>\n<p>주석을 하나씩 풀어 가며 어디서 에러가 나는지 확인해라.</p>\n<pre><code class=\"language-playground\">#! js title=hoisting.js height=220\nconsole.log(&quot;var  :&quot;, typeof a);   // undefined — 에러가 아니다\nvar a = 1;\n\nhello();                            // 몸통까지 올라가 있어 잘 돈다\nfunction hello() { console.log(&quot;fn   : 안녕&quot;); }\n\n// 아래 두 줄의 주석을 풀면 TDZ 에 걸린다\n// console.log(&quot;let  :&quot;, b);\n// let b = 1;\n\n// 함수 &quot;표현식&quot; 은 변수 규칙을 따른다 — 이것도 풀어 봐라\n// bye();\n// var bye = function () { console.log(&quot;bye&quot;); };\n</code></pre>\n<p>마지막 것이 특히 헷갈린다. <code>var bye = function(){}</code> 은 <strong>함수 선언이 아니라 변수 선언</strong>이다.<br>등록될 때 <code>undefined</code> 가 들어가 있으므로 <code>bye()</code> 는 <code>TypeError: bye is not a function</code> 이다.</p>\n<hr>\n<h2>흔한 실수</h2>\n<p><aside class=\"post-callout post-callout--warning\" data-callout=\"warning\" role=\"note\" aria-label=\"WARNING\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">WARNING</span><div class=\"post-callout__content\"><p><strong>호이스팅을 &quot;코드가 실제로 위로 옮겨진다&quot;로 이해하는 것</strong></p>\n<p>옮겨지지 않는다. 실행 전에 <strong>등록</strong>될 뿐이다. 이 차이가 중요한 이유는<br><code>let</code> 의 TDZ 를 설명할 수 있느냐로 갈린다. 옮겨진다고 믿으면<br>&quot;<code>let</code> 도 올라갔는데 왜 에러지?&quot;에서 막힌다.</p>\n</div></div></aside></p>\n<p><aside class=\"post-callout post-callout--tip\" data-callout=\"tip\" role=\"note\" aria-label=\"TIP\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">TIP</span><div class=\"post-callout__content\"><p>호이스팅에 기대지 마라. <strong>선언을 쓰는 자리 바로 위에 둔다.</strong><br><code>let</code>·<code>const</code> 만 쓰면 TDZ 가 대신 잔소리를 해 준다.</p>\n</div></div></aside></p>\n<hr>\n<h2>한 줄 정리</h2>\n<p>실행 전에 선언이 등록되고, <strong>등록될 때 들어가는 값이 <code>var</code>·<code>let</code>·<code>function</code> 마다 다르다.</strong><br><code>let</code>·<code>const</code> 는 값 없이 등록되며, 그 구간이 TDZ 다.</p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> <code>var</code> 는 <code>undefined</code>, <code>let</code> 은 에러인 이유를 말할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 함수 선언과 함수 표현식의 차이를 안다</li>\n<li><input disabled=\"\" type=\"checkbox\"> TDZ 가 왜 도움이 되는지 설명할 수 있다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Glossary/Hoisting\" target=\"_blank\">[1] Hoisting — MDN Web Docs 용어 사전</a></li>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let\" target=\"_blank\">[2] let — Temporal dead zone (MDN Web Docs)</a></li>\n<li><a href=\"https://tc39.es/ecma262/#sec-let-and-const-declarations\" target=\"_blank\">[3] let and const Declarations — ECMAScript 사양</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/scope\">스코프 — 변수가 어디까지 보이는가 →</a> — 이 글의 선행</li>\n<li><a href=\"/post/closure\">클로저 — 함수가 붙잡고 있는 변수 →</a> — 스코프와 호이스팅이 만나는 곳</li>\n<li><a href=\"/post/tdz\">TDZ — 등록은 됐지만 아직 쓸 수 없는 구간 →</a> — 다음 글</li>\n</ul>\n",
     "coverImage": "/post-thumbnails/hoisting.svg",
     "category": "frontend/javascript",
     "tags": [
@@ -139,14 +229,14 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.709Z"
+    "updatedAt": "2026-09-28T09:38:13.457Z"
   },
   {
     "id": "event-loop-interactive",
     "title": "이벤트 루프, 눈으로 따라가기",
     "slug": "event-loop-interactive",
     "excerpt": "콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다.\n",
-    "content": "<p>자바스크립트는 한 번에 하나만 실행한다. 그런데도 타이머와 네트워크 요청이 화면을 멈추지 않는다. 그 사이를 메우는 게 <strong>이벤트 루프</strong>다.</p>\n<p>말로 읽으면 헷갈린다. 아래를 직접 돌려 봐라. <code>▶</code> 를 누르거나, 상자를 클릭한 뒤 <code>→</code> 키를 눌러 한 단계씩 넘길 수 있다.</p>\n<pre><code class=\"language-seq\">preset: event-loop\n</code></pre>\n<hr>\n<h2>순서를 만드는 규칙 세 가지</h2>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">콜 스택</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">마이크로태스크 큐</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">태스크 큐</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p>함수를 호출하면 스택에 쌓이고, 반환하면 빠진다. <strong>스택이 비어야만</strong> 이벤트 루프가 큐를 들여다본다.</p>\n<p>그래서 무거운 동기 루프 하나가 타이머 전부를 밀어버린다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p><code>Promise.then</code>, <code>queueMicrotask</code>, <code>await</code> 뒤의 코드가 여기 들어간다.</p>\n<p>스택이 비면 <strong>큐가 완전히 빌 때까지</strong> 연달아 실행한다. 중간에 태스크 큐로 넘어가지 않는다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p><code>setTimeout</code>, <code>setInterval</code>, DOM 이벤트 콜백이 여기 들어간다.</p>\n<p>마이크로태스크를 전부 비운 <strong>뒤에</strong>, 한 번에 <strong>하나만</strong> 꺼낸다. 그리고 다시 마이크로태스크부터 확인한다.</p>\n</div></div></p>\n<p><aside class=\"post-callout post-callout--notice\" data-callout=\"notice\" role=\"note\" aria-label=\"NOTICE\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">NOTICE</span><div class=\"post-callout__content\"><p><code>setTimeout(fn, 0)</code> 은 &quot;지금 당장&quot;이 아니라 &quot;가능한 가장 빠른 다음 태스크&quot;다. 마이크로태스크가 남아 있으면 그것들이 먼저다.</p>\n</div></div></aside></p>\n<p><div class=\"post-split\" data-cols=\"2\"><div class=\"post-split__col\"><div class=\"post-split__label\">무슨 일이 일어나는가</div><p><code>await</code> 는 문법 설탕이다. 오른쪽 코드는 아래와 같이 읽어야 한다.</p>\n<ul>\n<li><code>await</code> 를 만나면 함수가 <strong>거기서 멈추고 반환</strong>한다.</li>\n<li>나머지 몸통은 <code>.then</code> 콜백이 되어 <strong>마이크로태스크 큐</strong>로 간다.</li>\n<li>그래서 <code>await</code> 뒤 줄은 <code>setTimeout(…, 0)</code> 보다 항상 먼저 실행된다.</li>\n</ul>\n</div><div class=\"post-split__col\"><div class=\"post-split__label\">코드</div><pre><code class=\"language-js\">async function run() {\n  console.log(&quot;1&quot;);\n  await null;        // ← 여기서 반환\n  console.log(&quot;3&quot;);  // ← 마이크로태스크로 예약\n}\n\nrun();\nconsole.log(&quot;2&quot;);\n</code></pre>\n</div></div></p>\n<hr>\n<h2>직접 고쳐 보기</h2>\n<p>아래 코드의 출력 순서를 먼저 예측하고, 실행해서 맞는지 확인해라. 값을 바꿔 가며 다시 돌려도 된다 (<code>Ctrl+Enter</code>).</p>\n<pre><code class=\"language-playground\">#! js title=order.js height=180\nconsole.log(&quot;1 동기&quot;);\n\nsetTimeout(() =&gt; console.log(&quot;4 타이머&quot;), 0);\n\nPromise.resolve().then(() =&gt; console.log(&quot;3 마이크로태스크&quot;));\n\nconsole.log(&quot;2 동기&quot;);\n</code></pre>\n<p>버튼을 눌러 무거운 동기 루프를 돌려 보면, 그 동안 타이머가 밀리는 걸 눈으로 볼 수 있다.</p>\n<pre><code class=\"language-playground\">#! react title=BlockingLoop.jsx height=260\nimport { useState } from &quot;react&quot;;\n\nexport default function App() {\n  const [log, setLog] = useState([]);\n  const add = (m) =&gt; setLog((prev) =&gt; [...prev, m]);\n\n  const run = () =&gt; {\n    setLog([]);\n    add(&quot;시작&quot;);\n    setTimeout(() =&gt; add(&quot;타이머 콜백 (0ms 로 예약했다)&quot;), 0);\n    const until = Date.now() + 600;\n    while (Date.now() &lt; until) {} // 동기로 600ms 점거\n    add(&quot;동기 루프 끝 — 이제야 스택이 빈다&quot;);\n  };\n\n  return (\n    &lt;div&gt;\n      &lt;button onClick={run}&gt;600ms 막고 타이머 보기&lt;/button&gt;\n      &lt;ul&gt;{log.map((l, i) =&gt; &lt;li key={i}&gt;{l}&lt;/li&gt;)}&lt;/ul&gt;\n    &lt;/div&gt;\n  );\n}\n</code></pre>\n<hr>\n<h2>정리</h2>\n<p><div class=\"post-grid\" data-cols=\"3\"><div class=\"post-grid__card\"><div class=\"post-grid__title\">스택이 먼저다</div><p>큐는 스택이 빈 뒤에야 열린다. 동기 코드가 길면 비동기도 늦는다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">마이크로 &gt; 매크로</div><p>마이크로태스크 큐를 다 비운 다음에 태스크 큐를 하나 꺼낸다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">하나씩</div><p>태스크는 한 번에 하나. 그 사이마다 렌더 기회가 생긴다.</p>\n</div></div></p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> 스택이 비어야 큐를 본다는 걸 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>Promise.then</code> 과 <code>setTimeout(…, 0)</code> 의 순서를 예측할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 마이크로태스크가 무한히 쌓이면 왜 화면이 멈추는지 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Event_loop\" target=\"_blank\">[1] Event loop — MDN Web Docs</a></li>\n<li><a href=\"https://html.spec.whatwg.org/multipage/webappapis.html#event-loops\" target=\"_blank\">[2] Event loops — HTML Standard (WHATWG)</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/react-query-overview\">React Query 개요 →</a></li>\n</ul>\n",
+    "content": "<p>자바스크립트는 한 번에 하나만 실행한다. 그런데도 타이머와 네트워크 요청이 화면을 멈추지 않는다. 그 사이를 메우는 게 <strong>이벤트 루프</strong>다.</p>\n<p>말로 읽으면 헷갈린다. 아래를 직접 돌려 봐라. <code>▶</code> 를 누르거나, 상자를 클릭한 뒤 <code>→</code> 키를 눌러 한 단계씩 넘길 수 있다.</p>\n<pre><code class=\"language-seq\">preset: event-loop\n</code></pre>\n<hr>\n<h2>순서를 만드는 규칙 세 가지</h2>\n<p><div class=\"post-tabs\" data-post-tabs data-post-tabs-id=\"post-tabs-0\"><div class=\"post-tabs__list\" role=\"tablist\"><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-0\" aria-selected=\"true\" aria-controls=\"post-tabs-0-panel-0\" tabindex=\"0\" data-tab-index=\"0\">콜 스택</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-1\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-1\" tabindex=\"-1\" data-tab-index=\"1\">마이크로태스크 큐</button><button type=\"button\" class=\"post-tabs__trigger\" role=\"tab\" id=\"post-tabs-0-tab-2\" aria-selected=\"false\" aria-controls=\"post-tabs-0-panel-2\" tabindex=\"-1\" data-tab-index=\"2\">태스크 큐</button></div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-0\" aria-labelledby=\"post-tabs-0-tab-0\" data-panel-index=\"0\"><p>함수를 호출하면 스택에 쌓이고, 반환하면 빠진다. <strong>스택이 비어야만</strong> 이벤트 루프가 큐를 들여다본다.</p>\n<p>그래서 무거운 동기 루프 하나가 타이머 전부를 밀어버린다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-1\" aria-labelledby=\"post-tabs-0-tab-1\" data-panel-index=\"1\" hidden><p><code>Promise.then</code>, <code>queueMicrotask</code>, <code>await</code> 뒤의 코드가 여기 들어간다.</p>\n<p>스택이 비면 <strong>큐가 완전히 빌 때까지</strong> 연달아 실행한다. 중간에 태스크 큐로 넘어가지 않는다.</p>\n</div><div class=\"post-tabs__panel\" role=\"tabpanel\" id=\"post-tabs-0-panel-2\" aria-labelledby=\"post-tabs-0-tab-2\" data-panel-index=\"2\" hidden><p><code>setTimeout</code>, <code>setInterval</code>, DOM 이벤트 콜백이 여기 들어간다.</p>\n<p>마이크로태스크를 전부 비운 <strong>뒤에</strong>, 한 번에 <strong>하나만</strong> 꺼낸다. 그리고 다시 마이크로태스크부터 확인한다.</p>\n</div></div></p>\n<p><aside class=\"post-callout post-callout--notice\" data-callout=\"notice\" role=\"note\" aria-label=\"NOTICE\"><div class=\"post-callout__accent\" aria-hidden=\"true\"></div><div class=\"post-callout__frame\"><span class=\"post-callout__label\">NOTICE</span><div class=\"post-callout__content\"><p><code>setTimeout(fn, 0)</code> 은 &quot;지금 당장&quot;이 아니라 &quot;가능한 가장 빠른 다음 태스크&quot;다. 마이크로태스크가 남아 있으면 그것들이 먼저다.</p>\n</div></div></aside></p>\n<p><div class=\"post-split\" data-cols=\"2\"><div class=\"post-split__col\"><div class=\"post-split__label\">무슨 일이 일어나는가</div><p><code>await</code> 는 문법 설탕이다. 오른쪽 코드는 아래와 같이 읽어야 한다.</p>\n<ul>\n<li><code>await</code> 를 만나면 함수가 <strong>거기서 멈추고 반환</strong>한다.</li>\n<li>나머지 몸통은 <code>.then</code> 콜백이 되어 <strong>마이크로태스크 큐</strong>로 간다.</li>\n<li>그래서 <code>await</code> 뒤 줄은 <code>setTimeout(…, 0)</code> 보다 항상 먼저 실행된다.</li>\n</ul>\n</div><div class=\"post-split__col\"><div class=\"post-split__label\">코드</div><pre><code class=\"language-js\">async function run() {\n  console.log(&quot;1&quot;);\n  await null;        // ← 여기서 반환\n  console.log(&quot;3&quot;);  // ← 마이크로태스크로 예약\n}\n\nrun();\nconsole.log(&quot;2&quot;);\n</code></pre>\n</div></div></p>\n<hr>\n<h2>직접 고쳐 보기</h2>\n<p>아래 코드의 출력 순서를 먼저 예측하고, 실행해서 맞는지 확인해라. 값을 바꿔 가며 다시 돌려도 된다 (<code>Ctrl+Enter</code>).</p>\n<pre><code class=\"language-playground\">#! js title=order.js height=180\nconsole.log(&quot;1 동기&quot;);\n\nsetTimeout(() =&gt; console.log(&quot;4 타이머&quot;), 0);\n\nPromise.resolve().then(() =&gt; console.log(&quot;3 마이크로태스크&quot;));\n\nconsole.log(&quot;2 동기&quot;);\n</code></pre>\n<p>버튼을 눌러 무거운 동기 루프를 돌려 보면, 그 동안 타이머가 밀리는 걸 눈으로 볼 수 있다.</p>\n<pre><code class=\"language-playground\">#! react title=BlockingLoop.jsx height=260\nimport { useState } from &quot;react&quot;;\n\nexport default function App() {\n  const [log, setLog] = useState([]);\n  const add = (m) =&gt; setLog((prev) =&gt; [...prev, m]);\n\n  const run = () =&gt; {\n    setLog([]);\n    add(&quot;시작&quot;);\n    setTimeout(() =&gt; add(&quot;타이머 콜백 (0ms 로 예약했다)&quot;), 0);\n    const until = Date.now() + 600;\n    while (Date.now() &lt; until) {} // 동기로 600ms 점거\n    add(&quot;동기 루프 끝 — 이제야 스택이 빈다&quot;);\n  };\n\n  return (\n    &lt;div&gt;\n      &lt;button onClick={run}&gt;600ms 막고 타이머 보기&lt;/button&gt;\n      &lt;ul&gt;{log.map((l, i) =&gt; &lt;li key={i}&gt;{l}&lt;/li&gt;)}&lt;/ul&gt;\n    &lt;/div&gt;\n  );\n}\n</code></pre>\n<hr>\n<h2>정리</h2>\n<p><div class=\"post-grid\" data-cols=\"3\"><div class=\"post-grid__card\"><div class=\"post-grid__title\">스택이 먼저다</div><p>큐는 스택이 빈 뒤에야 열린다. 동기 코드가 길면 비동기도 늦는다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">마이크로 &gt; 매크로</div><p>마이크로태스크 큐를 다 비운 다음에 태스크 큐를 하나 꺼낸다.</p>\n</div><div class=\"post-grid__card\"><div class=\"post-grid__title\">하나씩</div><p>태스크는 한 번에 하나. 그 사이마다 렌더 기회가 생긴다.</p>\n</div></div></p>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> 스택이 비어야 큐를 본다는 걸 설명할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> <code>Promise.then</code> 과 <code>setTimeout(…, 0)</code> 의 순서를 예측할 수 있다</li>\n<li><input disabled=\"\" type=\"checkbox\"> 마이크로태스크가 무한히 쌓이면 왜 화면이 멈추는지 안다</li>\n</ul>\n<h2>참고</h2>\n<ol>\n<li><a href=\"https://developer.mozilla.org/ko/docs/Web/JavaScript/Event_loop\" target=\"_blank\">[1] Event loop — MDN Web Docs</a></li>\n<li><a href=\"https://html.spec.whatwg.org/multipage/webappapis.html#event-loops\" target=\"_blank\">[2] Event loops — HTML Standard (WHATWG)</a></li>\n</ol>\n\n<hr>\n<h2>관련 글</h2>\n<ul>\n<li><a href=\"/post/task-queue\">태스크 큐 — setTimeout 콜백이 줄 서는 곳 →</a> — 다음 글</li>\n<li><a href=\"/post/react-query-overview\">React Query 개요 →</a></li>\n</ul>\n",
     "coverImage": "/post-thumbnails/event-loop-interactive.svg",
     "category": "frontend/javascript",
     "tags": [
@@ -159,7 +249,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.703Z"
+    "updatedAt": "2026-09-28T09:38:13.452Z"
   },
   {
     "id": "closure",
@@ -179,7 +269,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-09-07T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.701Z"
+    "updatedAt": "2026-09-28T09:38:13.449Z"
   },
   {
     "id": "cache-overlay-timing-rca",
@@ -206,7 +296,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-07-15T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.046Z"
+    "updatedAt": "2026-09-28T09:38:13.799Z"
   },
   {
     "id": "electron-python-sidecar-bundling",
@@ -228,7 +318,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-15T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.900Z"
+    "updatedAt": "2026-09-28T09:38:13.666Z"
   },
   {
     "id": "electron-packaging-asar",
@@ -251,7 +341,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-14T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.893Z"
+    "updatedAt": "2026-09-28T09:38:13.655Z"
   },
   {
     "id": "electron-ipc-security-model",
@@ -274,7 +364,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-13T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.864Z"
+    "updatedAt": "2026-09-28T09:38:13.630Z"
   },
   {
     "id": "electron-native-layer-os-integration",
@@ -296,7 +386,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-12T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.877Z"
+    "updatedAt": "2026-09-28T09:38:13.641Z"
   },
   {
     "id": "electron-nodejs-libuv-integration",
@@ -319,7 +409,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-11T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.886Z"
+    "updatedAt": "2026-09-28T09:38:13.648Z"
   },
   {
     "id": "ai-agent-qa-automation-token-economics",
@@ -342,7 +432,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-11T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.041Z"
+    "updatedAt": "2026-09-28T09:38:13.792Z"
   },
   {
     "id": "electron-renderer-chromium-rendering",
@@ -364,7 +454,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-10T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.905Z"
+    "updatedAt": "2026-09-28T09:38:13.671Z"
   },
   {
     "id": "electron-multi-process-architecture",
@@ -386,7 +476,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-06-09T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.870Z"
+    "updatedAt": "2026-09-28T09:38:13.635Z"
   },
   {
     "id": "typescript-type-system-basics",
@@ -409,7 +499,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.774Z"
+    "updatedAt": "2026-09-28T09:38:13.532Z"
   },
   {
     "id": "testing-vitest-playwright",
@@ -431,7 +521,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.918Z"
+    "updatedAt": "2026-09-28T09:38:13.679Z"
   },
   {
     "id": "state-data-fetching-tanstack-zustand-server-actions",
@@ -453,7 +543,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.690Z"
+    "updatedAt": "2026-09-28T09:38:13.438Z"
   },
   {
     "id": "sql-joins-where-having-group-by",
@@ -477,7 +567,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.861Z"
+    "updatedAt": "2026-09-28T09:38:13.626Z"
   },
   {
     "id": "settimeout-vs-promise",
@@ -500,7 +590,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.724Z"
+    "updatedAt": "2026-09-28T09:38:13.473Z"
   },
   {
     "id": "requirements-spec-user-story-tradeoff",
@@ -522,7 +612,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.815Z"
+    "updatedAt": "2026-09-28T09:38:13.576Z"
   },
   {
     "id": "react-controlled-vs-uncontrolled",
@@ -544,7 +634,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.730Z"
+    "updatedAt": "2026-09-28T09:38:13.492Z"
   },
   {
     "id": "react-component-data-flow",
@@ -567,7 +657,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.728Z"
+    "updatedAt": "2026-09-28T09:38:13.489Z"
   },
   {
     "id": "observability-security-sentry-posthog-otel-npm-audit",
@@ -590,7 +680,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.916Z"
+    "updatedAt": "2026-09-28T09:38:13.678Z"
   },
   {
     "id": "modern-css-tailwind-shadcn",
@@ -613,7 +703,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.751Z"
+    "updatedAt": "2026-09-28T09:38:13.514Z"
   },
   {
     "id": "js-runtime-node-bun-deno",
@@ -636,7 +726,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.858Z"
+    "updatedAt": "2026-09-28T09:38:13.622Z"
   },
   {
     "id": "js-event-loop-and-async",
@@ -660,7 +750,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.714Z"
+    "updatedAt": "2026-09-28T09:38:13.462Z"
   },
   {
     "id": "http-methods-and-status-codes",
@@ -686,7 +776,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.855Z"
+    "updatedAt": "2026-09-28T09:38:13.620Z"
   },
   {
     "id": "hono-rest-api-overview",
@@ -710,7 +800,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.853Z"
+    "updatedAt": "2026-09-28T09:38:13.618Z"
   },
   {
     "id": "git-branching-conventional-commits-husky",
@@ -733,7 +823,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.914Z"
+    "updatedAt": "2026-09-28T09:38:13.676Z"
   },
   {
     "id": "deployment-vercel-railway-github-actions",
@@ -755,7 +845,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.929Z"
+    "updatedAt": "2026-09-28T09:38:13.686Z"
   },
   {
     "id": "db-orm-postgres-drizzle-neon-supabase",
@@ -779,7 +869,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.817Z"
+    "updatedAt": "2026-09-28T09:38:13.578Z"
   },
   {
     "id": "context-engineering-prompts-rules-memory-skills",
@@ -802,7 +892,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.780Z"
+    "updatedAt": "2026-09-28T09:38:13.536Z"
   },
   {
     "id": "code-quality-eslint-prettier-biome",
@@ -826,7 +916,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.911Z"
+    "updatedAt": "2026-09-28T09:38:13.675Z"
   },
   {
     "id": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
@@ -852,7 +942,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.726Z"
+    "updatedAt": "2026-09-28T09:38:13.487Z"
   },
   {
     "id": "auth-security-authjs-owasp-passkeys",
@@ -875,7 +965,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.859Z"
+    "updatedAt": "2026-09-28T09:38:13.624Z"
   },
   {
     "id": "architecture-patterns-layered-component-clean",
@@ -896,7 +986,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.813Z"
+    "updatedAt": "2026-09-28T09:38:13.574Z"
   },
   {
     "id": "api-design-rest-openapi-rpc-server-actions",
@@ -918,7 +1008,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.812Z"
+    "updatedAt": "2026-09-28T09:38:13.573Z"
   },
   {
     "id": "ai-webdev-roadmap-foundation",
@@ -944,7 +1034,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.038Z"
+    "updatedAt": "2026-09-28T09:38:13.789Z"
   },
   {
     "id": "ai-development-process-spec-tdd-hooks",
@@ -966,7 +1056,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.792Z"
+    "updatedAt": "2026-09-28T09:38:13.547Z"
   },
   {
     "id": "ai-coding-tools-cursor-copilot-claude-code-mcp",
@@ -990,7 +1080,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.795Z"
+    "updatedAt": "2026-09-28T09:38:13.552Z"
   },
   {
     "id": "ai-code-verification-review-quality-security-performance-ux",
@@ -1013,7 +1103,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-16T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.793Z"
+    "updatedAt": "2026-09-28T09:38:13.549Z"
   },
   {
     "id": "mysql-restore-test",
@@ -1039,7 +1129,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.956Z"
+    "updatedAt": "2026-09-28T09:38:13.707Z"
   },
   {
     "id": "mysql-backup-k8s",
@@ -1065,7 +1155,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.954Z"
+    "updatedAt": "2026-09-28T09:38:13.706Z"
   },
   {
     "id": "kadane-algorithm",
@@ -1088,7 +1178,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.811Z"
+    "updatedAt": "2026-09-28T09:38:13.571Z"
   },
   {
     "id": "claude-code-harness-leak-architecture",
@@ -1113,7 +1203,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-06T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.777Z"
+    "updatedAt": "2026-09-28T09:38:13.534Z"
   },
   {
     "id": "micro-hub-and-switch",
@@ -1140,7 +1230,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.019Z"
+    "updatedAt": "2026-09-28T09:38:13.772Z"
   },
   {
     "id": "micro-ethernet-nic-cable",
@@ -1165,7 +1255,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.015Z"
+    "updatedAt": "2026-09-28T09:38:13.767Z"
   },
   {
     "id": "mechanics-force-equilibrium",
@@ -1189,7 +1279,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.994Z"
+    "updatedAt": "2026-09-28T09:38:13.752Z"
   },
   {
     "id": "mechanics-basics-moment-intro",
@@ -1211,7 +1301,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.963Z"
+    "updatedAt": "2026-09-28T09:38:13.711Z"
   },
   {
     "id": "mechanics-basics-forces-intro",
@@ -1233,7 +1323,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.961Z"
+    "updatedAt": "2026-09-28T09:38:13.710Z"
   },
   {
     "id": "earth-pressure-overview",
@@ -1257,7 +1347,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-05T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.968Z"
+    "updatedAt": "2026-09-28T09:38:13.717Z"
   },
   {
     "id": "kubectl-debugging",
@@ -1282,7 +1372,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.952Z"
+    "updatedAt": "2026-09-28T09:38:13.705Z"
   },
   {
     "id": "jenkins-argocd-gitops",
@@ -1308,7 +1398,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.940Z"
+    "updatedAt": "2026-09-28T09:38:13.696Z"
   },
   {
     "id": "drf-views",
@@ -1335,7 +1425,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.847Z"
+    "updatedAt": "2026-09-28T09:38:13.612Z"
   },
   {
     "id": "drf-serializer-validation",
@@ -1359,7 +1449,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.844Z"
+    "updatedAt": "2026-09-28T09:38:13.608Z"
   },
   {
     "id": "drf-overview",
@@ -1385,7 +1475,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.843Z"
+    "updatedAt": "2026-09-28T09:38:13.606Z"
   },
   {
     "id": "drf-authentication",
@@ -1411,7 +1501,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.840Z"
+    "updatedAt": "2026-09-28T09:38:13.601Z"
   },
   {
     "id": "django-urls",
@@ -1438,7 +1528,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.836Z"
+    "updatedAt": "2026-09-28T09:38:13.596Z"
   },
   {
     "id": "django-object-permissions",
@@ -1462,7 +1552,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.829Z"
+    "updatedAt": "2026-09-28T09:38:13.590Z"
   },
   {
     "id": "django-models",
@@ -1489,7 +1579,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-03T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.827Z"
+    "updatedAt": "2026-09-28T09:38:13.588Z"
   },
   {
     "id": "why-threejs-exists",
@@ -1510,7 +1600,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.772Z"
+    "updatedAt": "2026-09-28T09:38:13.531Z"
   },
   {
     "id": "threejs-rendering-pipeline",
@@ -1532,7 +1622,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.770Z"
+    "updatedAt": "2026-09-28T09:38:13.528Z"
   },
   {
     "id": "threejs-raycaster-picking-performance",
@@ -1554,7 +1644,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.763Z"
+    "updatedAt": "2026-09-28T09:38:13.522Z"
   },
   {
     "id": "threejs-portfolio-rendering-optimization-story",
@@ -1576,7 +1666,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.761Z"
+    "updatedAt": "2026-09-28T09:38:13.521Z"
   },
   {
     "id": "threejs-gltf-loading",
@@ -1598,7 +1688,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.758Z"
+    "updatedAt": "2026-09-28T09:38:13.519Z"
   },
   {
     "id": "threejs-frustum-culling",
@@ -1620,7 +1710,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.756Z"
+    "updatedAt": "2026-09-28T09:38:13.517Z"
   },
   {
     "id": "threejs-dpr-and-canvas-resolution",
@@ -1642,7 +1732,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.754Z"
+    "updatedAt": "2026-09-28T09:38:13.516Z"
   },
   {
     "id": "k8s-zero-downtime-deployment",
@@ -1677,7 +1767,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-04-01T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.948Z"
+    "updatedAt": "2026-09-28T09:38:13.702Z"
   },
   {
     "id": "react-query-queries",
@@ -1702,7 +1792,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.748Z"
+    "updatedAt": "2026-09-28T09:38:13.512Z"
   },
   {
     "id": "react-query-overview",
@@ -1726,7 +1816,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.743Z"
+    "updatedAt": "2026-09-28T09:38:13.508Z"
   },
   {
     "id": "react-query-mutations",
@@ -1749,7 +1839,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.739Z"
+    "updatedAt": "2026-09-28T09:38:13.503Z"
   },
   {
     "id": "react-query-cache",
@@ -1773,7 +1863,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.736Z"
+    "updatedAt": "2026-09-28T09:38:13.500Z"
   },
   {
     "id": "react-query-advanced",
@@ -1797,7 +1887,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-28T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.733Z"
+    "updatedAt": "2026-09-28T09:38:13.496Z"
   },
   {
     "id": "gstack-skills-ship",
@@ -1822,7 +1912,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.790Z"
+    "updatedAt": "2026-09-28T09:38:13.544Z"
   },
   {
     "id": "gstack-skills-plan",
@@ -1845,7 +1935,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.788Z"
+    "updatedAt": "2026-09-28T09:38:13.542Z"
   },
   {
     "id": "gstack-overview",
@@ -1869,7 +1959,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.784Z"
+    "updatedAt": "2026-09-28T09:38:13.539Z"
   },
   {
     "id": "django-security",
@@ -1895,7 +1985,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.833Z"
+    "updatedAt": "2026-09-28T09:38:13.594Z"
   },
   {
     "id": "django-overview",
@@ -1921,7 +2011,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.848Z"
+    "updatedAt": "2026-09-28T09:38:13.615Z"
   },
   {
     "id": "django-orm-deep",
@@ -1947,7 +2037,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.830Z"
+    "updatedAt": "2026-09-28T09:38:13.592Z"
   },
   {
     "id": "django-lifecycle",
@@ -1974,7 +2064,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.822Z"
+    "updatedAt": "2026-09-28T09:38:13.583Z"
   },
   {
     "id": "django-architecture",
@@ -2001,7 +2091,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-27T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.820Z"
+    "updatedAt": "2026-09-28T09:38:13.581Z"
   },
   {
     "id": "docker-compose-django",
@@ -2026,7 +2116,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.933Z"
+    "updatedAt": "2026-09-28T09:38:13.691Z"
   },
   {
     "id": "docker-compose-basics",
@@ -2050,7 +2140,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.931Z"
+    "updatedAt": "2026-09-28T09:38:13.690Z"
   },
   {
     "id": "docker-basics",
@@ -2073,7 +2163,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.930Z"
+    "updatedAt": "2026-09-28T09:38:13.688Z"
   },
   {
     "id": "django-version-compatibility",
@@ -2098,7 +2188,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.838Z"
+    "updatedAt": "2026-09-28T09:38:13.598Z"
   },
   {
     "id": "django-settings",
@@ -2123,7 +2213,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.851Z"
+    "updatedAt": "2026-09-28T09:38:13.617Z"
   },
   {
     "id": "django-migration",
@@ -2148,7 +2238,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.824Z"
+    "updatedAt": "2026-09-28T09:38:13.584Z"
   },
   {
     "id": "celery-worker",
@@ -2175,7 +2265,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.925Z"
+    "updatedAt": "2026-09-28T09:38:13.684Z"
   },
   {
     "id": "celery-django",
@@ -2201,7 +2291,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.927Z"
+    "updatedAt": "2026-09-28T09:38:13.685Z"
   },
   {
     "id": "celery-broker",
@@ -2227,7 +2317,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.923Z"
+    "updatedAt": "2026-09-28T09:38:13.682Z"
   },
   {
     "id": "celery-beat",
@@ -2251,7 +2341,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-26T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.921Z"
+    "updatedAt": "2026-09-28T09:38:13.681Z"
   },
   {
     "id": "unicast-and-broadcast",
@@ -2275,7 +2365,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.012Z"
+    "updatedAt": "2026-09-28T09:38:13.763Z"
   },
   {
     "id": "micro-tcp-udp",
@@ -2300,7 +2390,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.034Z"
+    "updatedAt": "2026-09-28T09:38:13.786Z"
   },
   {
     "id": "micro-tcp-ip-model",
@@ -2323,7 +2413,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.031Z"
+    "updatedAt": "2026-09-28T09:38:13.784Z"
   },
   {
     "id": "micro-protocol",
@@ -2346,7 +2436,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.029Z"
+    "updatedAt": "2026-09-28T09:38:13.782Z"
   },
   {
     "id": "micro-osi-7layer",
@@ -2374,7 +2464,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.027Z"
+    "updatedAt": "2026-09-28T09:38:13.781Z"
   },
   {
     "id": "micro-network-view",
@@ -2399,7 +2489,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.003Z"
+    "updatedAt": "2026-09-28T09:38:13.756Z"
   },
   {
     "id": "micro-network-traffic",
@@ -2424,7 +2514,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.025Z"
+    "updatedAt": "2026-09-28T09:38:13.779Z"
   },
   {
     "id": "micro-ip-arp",
@@ -2449,7 +2539,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.022Z"
+    "updatedAt": "2026-09-28T09:38:13.775Z"
   },
   {
     "id": "micro-http-https",
@@ -2476,7 +2566,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.017Z"
+    "updatedAt": "2026-09-28T09:38:13.770Z"
   },
   {
     "id": "micro-encapsulation",
@@ -2502,7 +2592,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.013Z"
+    "updatedAt": "2026-09-28T09:38:13.765Z"
   },
   {
     "id": "ixp-internet-exchange-point",
@@ -2525,7 +2615,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.010Z"
+    "updatedAt": "2026-09-28T09:38:13.761Z"
   },
   {
     "id": "isp-internet-service-provider",
@@ -2549,7 +2639,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.009Z"
+    "updatedAt": "2026-09-28T09:38:13.760Z"
   },
   {
     "id": "circuit-vs-packet-switching",
@@ -2571,7 +2661,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.008Z"
+    "updatedAt": "2026-09-28T09:38:13.759Z"
   },
   {
     "id": "cdn-content-delivery-network",
@@ -2594,7 +2684,7 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-25T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:12.006Z"
+    "updatedAt": "2026-09-28T09:38:13.757Z"
   },
   {
     "id": "macro-network-view",
@@ -2617,7 +2707,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.999Z"
+    "updatedAt": "2026-09-28T09:38:13.754Z"
   },
   {
     "id": "gitlab-cicd-guide",
@@ -2641,7 +2731,7 @@
     "views": 0,
     "featured": true,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.937Z"
+    "updatedAt": "2026-09-28T09:38:13.694Z"
   },
   {
     "id": "gitlab-artifacts-vs-cache",
@@ -2664,6 +2754,6 @@
     "views": 0,
     "featured": false,
     "createdAt": "2026-03-19T00:00:00.000Z",
-    "updatedAt": "2026-09-22T08:06:11.934Z"
+    "updatedAt": "2026-09-28T09:38:13.693Z"
   }
 ]

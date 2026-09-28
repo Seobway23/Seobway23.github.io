@@ -1,0 +1,225 @@
+<svg id="tb-shallow-deep-copy" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-shallow-deep-copy-t tb-shallow-deep-copy-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-shallow-deep-copy-t">얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가</title>
+  <desc id="tb-shallow-deep-copy-d">frontend/javascript — 스프레드로 복사했는데 원본이 같이 바뀌는 이유</desc>
+
+  <defs>
+    <linearGradient id="tb-shallow-deep-copy-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-shallow-deep-copy-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-shallow-deep-copy-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-shallow-deep-copy-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-shallow-deep-copy-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-shallow-deep-copy-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-shallow-deep-copy-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-shallow-deep-copy-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-shallow-deep-copy-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-shallow-deep-copy-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-shallow-deep-copy-glow-a { animation: tb-shallow-deep-copy-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-shallow-deep-copy-glow-b { animation: tb-shallow-deep-copy-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-shallow-deep-copy-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-shallow-deep-copy-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-shallow-deep-copy-spark { fill: #ffffff; opacity: 0; animation-name: tb-shallow-deep-copy-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-shallow-deep-copy-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-shallow-deep-copy-sheen-band { animation: tb-shallow-deep-copy-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-shallow-deep-copy-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-shallow-deep-copy-caret { animation: tb-shallow-deep-copy-blink 1.1s steps(1) infinite; }
+    @keyframes tb-shallow-deep-copy-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-shallow-deep-copy-halo { animation: tb-shallow-deep-copy-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-shallow-deep-copy-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-shallow-deep-copy-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-shallow-deep-copy-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-shallow-deep-copy-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-shallow-deep-copy-badge-ring { animation: tb-shallow-deep-copy-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-shallow-deep-copy-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-shallow-deep-copy-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-shallow-deep-copy-tshadow); transition: fill .35s ease; }
+    .tb-shallow-deep-copy-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-shallow-deep-copy-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-shallow-deep-copy-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-shallow-deep-copy-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-shallow-deep-copy-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-shallow-deep-copy-c-key    { fill: #f7df1e; }
+    .tb-shallow-deep-copy-c-string { fill: #86efac; }
+    .tb-shallow-deep-copy-c-number { fill: #fbbf24; }
+    .tb-shallow-deep-copy-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-shallow-deep-copy-c-ident  { fill: #cbd5e1; }
+    .tb-shallow-deep-copy-c-punct  { fill: #94a3b8; }
+    .tb-shallow-deep-copy-c-op     { fill: hsl(198 93% 70%); }
+    .tb-shallow-deep-copy-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-glow-a,
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-glow-b     { animation-duration: 6s; }
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-code       { opacity: .62; }
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-spark      { animation-duration: 1.4s !important; }
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-sheen-band { animation-duration: 2.6s; }
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-title      { fill: #ffffff; }
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-shallow-deep-copy:hover .tb-shallow-deep-copy-badge      { transform: translateY(-5px); }
+    .tb-shallow-deep-copy-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-shallow-deep-copy-glow-a, .tb-shallow-deep-copy-glow-b, .tb-shallow-deep-copy-spark, .tb-shallow-deep-copy-sheen-band, .tb-shallow-deep-copy-caret, .tb-shallow-deep-copy-halo, .tb-shallow-deep-copy-badge-ring, .tb-shallow-deep-copy-bracket {
+        animation: none !important;
+      }
+      .tb-shallow-deep-copy-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-shallow-deep-copy-frame)">
+    <rect width="1200" height="630" fill="url(#tb-shallow-deep-copy-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-shallow-deep-copy-grid)"/>
+
+    <circle class="tb-shallow-deep-copy-glow-a" cx="223" cy="226" r="334" fill="url(#tb-shallow-deep-copy-ga)"/>
+    <circle class="tb-shallow-deep-copy-glow-b" cx="1068" cy="466" r="331" fill="url(#tb-shallow-deep-copy-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-shallow-deep-copy-code" font-size="21"><tspan class="tb-shallow-deep-copy-c-key" xml:space="preserve">const</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">user</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">{</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">name</tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">:</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-string" xml:space="preserve">&quot;민수&quot;</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">,</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">address</tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">:</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">{</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">city</tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">:</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">&quot;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">서</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">울</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">…</tspan></text>
+      <text x="64" y="140.12" class="tb-shallow-deep-copy-code" font-size="21"><tspan class="tb-shallow-deep-copy-c-key" xml:space="preserve">const</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">copy</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">{</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">user</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">}</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="176.24" class="tb-shallow-deep-copy-code" font-size="21"><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">copy</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">name</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-string" xml:space="preserve">&quot;영희&quot;</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">           </tspan><tspan class="tb-shallow-deep-copy-c-comment" xml:space="preserve">// 원본 그대로 — 여기까진 괜찮다</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-shallow-deep-copy-code" font-size="21"><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">copy</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">address</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">city</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-string" xml:space="preserve">&quot;부산&quot;</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">   </tspan><tspan class="tb-shallow-deep-copy-c-comment" xml:space="preserve">// 원본도 부산이 된다 ← ?</tspan></text>
+      <text x="64" y="248.48" class="tb-shallow-deep-copy-code" font-size="21"><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">user</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">name</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">          </tspan><tspan class="tb-shallow-deep-copy-c-comment" xml:space="preserve">// &quot;민수&quot;</tspan></text>
+      <text x="64" y="284.6" class="tb-shallow-deep-copy-code" font-size="21"><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">user</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">address</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">city</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">  </tspan><tspan class="tb-shallow-deep-copy-c-comment" xml:space="preserve">// &quot;부산&quot;</tspan></text>
+      <rect class="tb-shallow-deep-copy-caret" x="408" y="268"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-shallow-deep-copy-code" font-size="17"><tspan class="tb-shallow-deep-copy-c-key" xml:space="preserve">const</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">user</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">{</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">name</tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">:</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-string" xml:space="preserve">&quot;민수&quot;</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">,</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">address</tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">:</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">{</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">city</tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">:</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">&quot;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">서</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">울</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">…</tspan></text>
+      <text x="690" y="386.6" class="tb-shallow-deep-copy-code" font-size="17"><tspan class="tb-shallow-deep-copy-c-key" xml:space="preserve">const</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">copy</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">{</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">user</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">}</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="417.2" class="tb-shallow-deep-copy-code" font-size="17"><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">copy</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">name</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-string" xml:space="preserve">&quot;영희&quot;</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">           </tspan><tspan class="tb-shallow-deep-copy-c-comment" xml:space="preserve">// 원본 그대로 — 여기까진 괜찮다</tspan></text>
+      <text x="690" y="447.8" class="tb-shallow-deep-copy-code" font-size="17"><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">copy</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">address</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">.</tspan><tspan class="tb-shallow-deep-copy-c-ident" xml:space="preserve">city</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-op" xml:space="preserve">=</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve"> </tspan><tspan class="tb-shallow-deep-copy-c-string" xml:space="preserve">&quot;부산&quot;</tspan><tspan class="tb-shallow-deep-copy-c-punct" xml:space="preserve">;</tspan><tspan class="tb-shallow-deep-copy-c-plain" xml:space="preserve">   </tspan><tspan class="tb-shallow-deep-copy-c-comment" xml:space="preserve">// 원본도 부산이 된다 ← ?</tspan></text>
+    </g>
+
+    <circle class="tb-shallow-deep-copy-spark" cx="62" cy="209" r="3.26" style="animation-delay:3.41s;animation-duration:5.97s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="127" cy="579" r="3.62" style="animation-delay:3.26s;animation-duration:4.74s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="242" cy="383" r="3.38" style="animation-delay:5.53s;animation-duration:6.26s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="945" cy="327" r="3.71" style="animation-delay:3.59s;animation-duration:4.54s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="115" cy="431" r="2.58" style="animation-delay:1.62s;animation-duration:3.32s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="883" cy="402" r="2.99" style="animation-delay:0.65s;animation-duration:6.20s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="319" cy="178" r="3.99" style="animation-delay:0.45s;animation-duration:5.16s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="1079" cy="251" r="3.87" style="animation-delay:0.62s;animation-duration:3.21s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="300" cy="533" r="2.66" style="animation-delay:0.80s;animation-duration:5.01s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="949" cy="165" r="3.21" style="animation-delay:1.96s;animation-duration:5.32s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="943" cy="524" r="3.45" style="animation-delay:2.61s;animation-duration:3.42s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="234" cy="476" r="2.37" style="animation-delay:0.52s;animation-duration:6.37s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="93" cy="61" r="2.29" style="animation-delay:1.89s;animation-duration:4.22s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="256" cy="533" r="1.70" style="animation-delay:3.05s;animation-duration:4.47s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="882" cy="173" r="2.26" style="animation-delay:0.08s;animation-duration:5.94s"/>
+    <circle class="tb-shallow-deep-copy-spark" cx="926" cy="351" r="3.07" style="animation-delay:1.66s;animation-duration:4.31s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-shallow-deep-copy-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-shallow-deep-copy-vignette)"/>
+
+    <g class="tb-shallow-deep-copy-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-shallow-deep-copy-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="186" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-shallow-deep-copy-chip-t" x="600" y="214" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-shallow-deep-copy-title" x="600" y="286" text-anchor="middle" font-size="46">얕은 복사와 깊은 복사 — 겉만 새로</text>
+      <text class="tb-shallow-deep-copy-title" x="600" y="345" text-anchor="middle" font-size="46">만드는가, 속까지 새로 만드는가</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-shallow-deep-copy-rule)"/>
+    <text class="tb-shallow-deep-copy-sub" x="600" y="455" text-anchor="middle" font-size="25">스프레드로 복사했는데 원본이 같이 바뀌는 이유</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-shallow-deep-copy-badge">
+      <circle class="tb-shallow-deep-copy-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-shallow-deep-copy-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-shallow-deep-copy-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-shallow-deep-copy-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-shallow-deep-copy-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-shallow-deep-copy-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-shallow-deep-copy-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-shallow-deep-copy-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

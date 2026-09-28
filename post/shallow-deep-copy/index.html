@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다." />
+    <meta name="keywords" content="javascript, 얕은 복사, 깊은 복사, structuredClone, 참조 타입" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/shallow-deep-copy" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가" />
+    <meta property="og:description" content="스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/shallow-deep-copy" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/shallow-deep-copy.jpg" />
+    <meta property="article:published_time" content="2026-09-28T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-28T09:38:13.476Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="얕은 복사" />
+    <meta property="article:tag" content="깊은 복사" />
+    <meta property="article:tag" content="structuredClone" />
+    <meta property="article:tag" content="참조 타입" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가" />
+    <meta name="twitter:description" content="스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/shallow-deep-copy.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가","description":"스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다.","image":["https://seobway23.github.io/post-thumbnails/shallow-deep-copy.jpg"],"datePublished":"2026-09-28T00:00:00.000Z","dateModified":"2026-09-28T09:38:13.476Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/shallow-deep-copy"},"keywords":"javascript, 얕은 복사, 깊은 복사, structuredClone, 참조 타입","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3625},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가","item":"https://seobway23.github.io/post/shallow-deep-copy"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가</h1>
+<p>스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-28T00:00:00.000Z">2026-09-28</time> · <span>7분</span></p>
+<h2>복사했는데 왜 원본이 바뀌나</h2>
+<p>스프레드(<code>...</code>)로 복사했다. 복사본만 고쳤다. 그런데 원본도 바뀌어 있다.</p>
+<pre><code class="language-js">const user = { name: &quot;민수&quot;, address: { city: &quot;서울&quot; } };
+const copy = { ...user };
+
+copy.name = &quot;영희&quot;;           // 원본 그대로 — 여기까진 괜찮다
+copy.address.city = &quot;부산&quot;;   // 원본도 부산이 된다 ← ?
+
+user.name;          // &quot;민수&quot;
+user.address.city;  // &quot;부산&quot;
+</code></pre>
+<p><code>name</code> 은 따로 놀고 <code>address</code> 는 같이 논다. 같은 복사인데 결과가 반반이다.<br>이 반반이 <strong>얕은 복사</strong>다.</p>
+<hr>
+<h2>어떻게 동작하는가</h2>
+<p>먼저 <a href="/post/reference-type">참조 타입</a>에서 본 것 하나만 기억하면 된다.<br><strong>객체를 담은 변수에는 객체가 아니라 주소가 들어 있다.</strong></p>
+<p>그러면 <code>user</code> 는 이렇게 생겼다.</p>
+<pre><code class="language-text">user ──▶ { name: &quot;민수&quot;, address: ──▶ { city: &quot;서울&quot; } }
+          ─────── 상자 A ───────        ─── 상자 B ───
+</code></pre>
+<p>상자가 <strong>두 개</strong>다. 바깥 상자 A 안에 <code>address</code> 라는 칸이 있고, 그 칸에는<br>상자 B 의 <strong>주소</strong>가 들어 있다.</p>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>얕은 복사 — 상자 A 만 새로 만든다.</strong> 칸의 내용은 그대로 옮겨 적는다.<br><code>name</code> 칸에는 <code>&quot;민수&quot;</code> 라는 값이, <code>address</code> 칸에는 <strong>B 의 주소</strong>가 그대로 복사된다.<br>그래서 새 상자 A&#39; 도 같은 B 를 가리킨다.</p>
+<p><strong>깊은 복사 — B 까지 새로 만든다.</strong> 안쪽 상자도 전부 새로 만들어<br>원본과 <strong>공유하는 상자가 하나도 없다.</strong></p>
+</div></div></aside></p>
+<p>인터랙티브 다이어그램: 얕은 복사는 바깥 상자만 새로 만든다 (단계별로 재생할 수 있다)</p><ol><li>원본 상자 A 에는 name 값과 B 의 주소가 들어 있다.</li><li>{ ...user } 는 새 상자 A&amp;#39; 를 만들고 칸을 하나씩 옮겨 적는다. name 은 값이 복사된다.</li><li>address 칸에는 B 의 주소가 적혀 있으니 주소가 그대로 옮겨진다. B 는 새로 생기지 않는다.</li><li>copy.address.city = &quot;부산&quot; 은 B 를 고친다. user 도 B 를 보고 있으니 같이 바뀐다.</li><li>처음부터 깊은 복사(structuredClone)였다면 B 도 새로 만들어 A&amp;#39; 는 B&amp;#39; 를 가리킨다.</li></ol>
+<p>정리하면 <strong>&quot;몇 층까지 새로 만드느냐&quot;</strong> 의 차이다.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>새로 만드는 범위</th>
+<th>대표 방법</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>얕은 복사</td>
+<td>맨 바깥 한 층</td>
+<td><code>{ ...obj }</code>, <code>[...arr]</code>, <code>Object.assign</code>, <code>arr.slice()</code>, <code>Array.from</code></td>
+</tr>
+<tr>
+<td>깊은 복사</td>
+<td>안쪽 끝까지 전부</td>
+<td><code>structuredClone(obj)</code></td>
+</tr>
+</tbody></table>
+<p>원시 값(<code>&quot;민수&quot;</code>, <code>3</code>)은 원래 값 자체가 복사되니 층이 없다.<br><strong>층이 생기는 건 객체 안에 객체가 있을 때뿐이다.</strong> 중첩이 없으면 얕은 복사로 충분하다.</p>
+<hr>
+<h2>직접 확인</h2>
+<p><code>===</code> 는 두 객체가 <strong>같은 상자</strong>인지 묻는다. 층마다 물어보면 어디까지 새로 만들어졌는지 보인다.</p>
+<pre><code class="language-playground">const user = {
+  name: &quot;민수&quot;,
+  address: { city: &quot;서울&quot; },
+  tags: [&quot;a&quot;, &quot;b&quot;],
+};
+
+const shallow = { ...user };
+const deep = structuredClone(user);
+
+console.log(&quot;바깥 상자가 같은가&quot;);
+console.log(&quot;  shallow:&quot;, shallow === user);                 // false
+console.log(&quot;  deep   :&quot;, deep === user);                    // false
+
+console.log(&quot;안쪽 address 가 같은가&quot;);
+console.log(&quot;  shallow:&quot;, shallow.address === user.address); // true  ← 공유
+console.log(&quot;  deep   :&quot;, deep.address === user.address);    // false
+
+shallow.address.city = &quot;부산&quot;;
+shallow.tags.push(&quot;c&quot;);
+console.log(&quot;얕은 복사를 고친 뒤 원본:&quot;, user.address.city, user.tags);
+
+deep.address.city = &quot;대구&quot;;
+console.log(&quot;깊은 복사를 고친 뒤 원본:&quot;, user.address.city);  // 대구가 아니다
+</code></pre>
+<p><code>shallow === user</code> 는 <code>false</code> 인데 <code>shallow.address === user.address</code> 는 <code>true</code> 다.<br><strong>바깥은 새것, 안쪽은 같은 것</strong> — 얕은 복사를 한 줄로 보여준다.</p>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>React·상태 관리에서 중첩된 값을 한 층만 복사하는 것</strong></p>
+<pre><code class="language-js">// 도시만 바꾸고 싶다
+const next = { ...state };
+next.address.city = &quot;부산&quot;;   // state.address 를 직접 고쳤다
+setState(next);
+</code></pre>
+<p><code>next</code> 는 새 객체지만 <code>next.address</code> 는 원래 <code>state.address</code> 다.<br>원본을 고쳐 버렸으므로 &quot;이전 상태&quot;도 같이 바뀐다.<br><strong>바꾸는 경로에 있는 층마다 새로 만든다.</strong></p>
+<pre><code class="language-js">setState({ ...state, address: { ...state.address, city: &quot;부산&quot; } });
+</code></pre>
+<p>전부 깊은 복사할 필요는 없다. 바꾸는 길목만 새로 만들고 나머지는 공유해도 된다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong><code>JSON.parse(JSON.stringify(obj))</code> 를 깊은 복사로 쓰는 것</strong></p>
+<p>예전에 많이 쓰던 방법인데 JSON 으로 표현 못 하는 값이 조용히 사라지거나 바뀐다.</p>
+<pre><code class="language-js">const src = { when: new Date(), fn() {}, nothing: undefined, n: NaN };
+JSON.parse(JSON.stringify(src));
+// { when: &quot;2026-09-28T...&quot;, n: null }   ← Date 는 문자열, fn·nothing 은 사라짐, NaN 은 null
+</code></pre>
+<p><code>Map</code>·<code>Set</code> 은 빈 객체가 되고, 자기 자신을 가리키는(순환) 객체는 에러가 난다.<br>지금은 <code>structuredClone</code> 을 쓴다. <code>Date</code>·<code>Map</code>·<code>Set</code>·순환 참조까지 제대로 복사한다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p><strong><code>structuredClone</code> 도 전부 복사하지는 못한다.</strong></p>
+<ul>
+<li><strong>함수</strong>가 들어 있으면 <code>DataCloneError</code> 로 실패한다.</li>
+<li><strong>클래스 인스턴스</strong>는 속성만 복사되고 <a href="/post/prototype">프로토타입</a> 연결은 끊긴다.<br>복사본은 그냥 <code>Object</code> 가 되어 클래스 메서드를 못 쓴다.</li>
+<li>DOM 노드도 복사하지 못한다.</li>
+</ul>
+<p>데이터(값 덩어리)를 복사하는 도구라고 생각하면 맞다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p>얕은 복사는 <strong>맨 바깥 상자만<strong> 새로 만들고 안쪽 객체는 주소를 옮겨 적어 </strong>공유</strong>한다.<br>깊은 복사는 안쪽 상자까지 <strong>전부</strong> 새로 만든다. 중첩이 없으면 둘은 같다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>{ ...obj }</code> 로 복사한 뒤 중첩된 값을 고치면 왜 원본이 바뀌는지 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>shallow.address === user.address</code> 가 <code>true</code> 인 이유를 안다</li>
+<li><input disabled="" type="checkbox"> 중첩 상태를 바꿀 때 어느 층을 새로 만들어야 하는지 안다</li>
+<li><input disabled="" type="checkbox"> <code>JSON</code> 복사 대신 <code>structuredClone</code> 을 쓰는 이유와 그 한계를 말할 수 있다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Glossary/Shallow_copy" target="_blank">[1] Shallow copy — MDN Web Docs 용어 사전</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Glossary/Deep_copy" target="_blank">[2] Deep copy — MDN Web Docs 용어 사전</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/API/Window/structuredClone" target="_blank">[3] structuredClone() — MDN Web Docs</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/reference-type">참조 타입 — 주소가 복사되는 것들 →</a> — 이 글의 선행</li>
+<li><a href="/post/primitive-type">원시 타입 — 값 자체가 복사되는 것들 →</a></li>
+<li><a href="/post/prototype">프로토타입 — 없으면 위에 물어보는 상속 →</a> — <code>structuredClone</code> 이 끊는 연결</li>
+</ul>
+
+<ul><li>javascript</li><li>얕은 복사</li><li>깊은 복사</li><li>structuredClone</li><li>참조 타입</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

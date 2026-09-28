@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T08:07:08.775Z",
+  "generatedAt": "2026-09-28T09:40:13.810Z",
   "nodes": [
     {
       "id": "arrow-function",
@@ -409,11 +409,11 @@
       "level": 2,
       "track": "js-core",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "shallow-deep-copy",
+      "postTitle": "얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가",
+      "readTime": 7,
+      "excerpt": "스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다.",
       "chain": [
         "primitive-type",
         "reference-type",
@@ -434,11 +434,11 @@
       "level": 2,
       "track": "js-async",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "task-queue",
+      "postTitle": "태스크 큐 — setTimeout 콜백이 줄 서는 곳",
+      "readTime": 7,
+      "excerpt": "setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다.",
       "chain": [
         "call-stack",
         "event-loop",
@@ -457,11 +457,11 @@
       "level": 2,
       "track": "js-core",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "tdz",
+      "postTitle": "TDZ — 등록은 됐지만 아직 쓸 수 없는 구간",
+      "readTime": 6,
+      "excerpt": "바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다.",
       "chain": [
         "scope",
         "hoisting",
@@ -482,11 +482,11 @@
       "level": 2,
       "track": "js-core",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "this",
+      "postTitle": "this — 어디서 만들었나가 아니라 어떻게 불렀나",
+      "readTime": 8,
+      "excerpt": "같은 함수인데 어떤 때는 객체를, 어떤 때는 undefined 를 가리키는 this. 함수를 부르는 모양 네 가지만 보면 값이 정해진다.",
       "chain": [
         "scope",
         "execution-context",
@@ -546,7 +546,7 @@
         "prototype",
         "shallow-deep-copy"
       ],
-      "written": 8,
+      "written": 11,
       "total": 12
     },
     "js-async": {
@@ -559,7 +559,7 @@
         "promise",
         "async-await"
       ],
-      "written": 1,
+      "written": 2,
       "total": 5
     },
     "js-functional": {
@@ -576,7 +576,7 @@
   },
   "stats": {
     "concepts": 20,
-    "written": 9,
+    "written": 13,
     "depth": 6,
     "tracks": 3
   }

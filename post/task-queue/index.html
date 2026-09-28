@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>태스크 큐 — setTimeout 콜백이 줄 서는 곳 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다." />
+    <meta name="keywords" content="javascript, 태스크 큐, 매크로태스크, setTimeout, 이벤트 루프, 비동기" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/task-queue" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="태스크 큐 — setTimeout 콜백이 줄 서는 곳" />
+    <meta property="og:description" content="setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/task-queue" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/task-queue.jpg" />
+    <meta property="article:published_time" content="2026-09-28T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-28T09:38:13.478Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="태스크 큐" />
+    <meta property="article:tag" content="매크로태스크" />
+    <meta property="article:tag" content="setTimeout" />
+    <meta property="article:tag" content="이벤트 루프" />
+    <meta property="article:tag" content="비동기" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="태스크 큐 — setTimeout 콜백이 줄 서는 곳" />
+    <meta name="twitter:description" content="setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/task-queue.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"태스크 큐 — setTimeout 콜백이 줄 서는 곳","description":"setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다.","image":["https://seobway23.github.io/post-thumbnails/task-queue.jpg"],"datePublished":"2026-09-28T00:00:00.000Z","dateModified":"2026-09-28T09:38:13.478Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/task-queue"},"keywords":"javascript, 태스크 큐, 매크로태스크, setTimeout, 이벤트 루프, 비동기","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3455},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"태스크 큐 — setTimeout 콜백이 줄 서는 곳","item":"https://seobway23.github.io/post/task-queue"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>태스크 큐 — setTimeout 콜백이 줄 서는 곳</h1>
+<p>setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-28T00:00:00.000Z">2026-09-28</time> · <span>7분</span></p>
+<h2>0ms 라고 했는데 왜 나중에 도나</h2>
+<p><code>setTimeout</code> 에 0 을 줬다. &quot;0ms 뒤에 실행&quot; 이니 바로 돌 것 같다.</p>
+<pre><code class="language-js">setTimeout(() =&gt; console.log(&quot;타이머&quot;), 0);
+
+console.log(&quot;동기 1&quot;);
+console.log(&quot;동기 2&quot;);
+
+// 출력: 동기 1 → 동기 2 → 타이머
+</code></pre>
+<p>아래 두 줄보다 <strong>위에</strong> 적었고 <strong>0ms</strong> 인데도 맨 마지막이다.<br><code>setTimeout</code> 의 숫자는 &quot;이만큼 뒤에 실행&quot; 이 아니라 <strong>&quot;이만큼 뒤에 줄을 세워라&quot;</strong> 이기 때문이다.<br>그 줄이 <strong>태스크 큐</strong>다.</p>
+<hr>
+<h2>어떻게 동작하는가</h2>
+<p>자바스크립트는 한 번에 하나만 실행한다. 지금 실행 중인 것은 <a href="/post/call-stack">콜 스택</a>에<br>쌓여 있다. 콜 스택이 일하는 중에는 <strong>아무도 끼어들 수 없다.</strong></p>
+<p>그러면 &quot;1초 뒤에 이거 해 줘&quot; 나 &quot;클릭되면 이거 해 줘&quot; 는 어디서 기다리나?</p>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>태스크 큐(task queue)<strong> — 지금 당장은 못 돌지만 </strong>차례가 오면 실행할 콜백</strong>이 줄 서는 곳.<br><code>setTimeout</code>·<code>setInterval</code> 이 끝난 콜백, 클릭·키보드 같은 DOM 이벤트 콜백이 여기 들어간다.<br>&quot;매크로태스크 큐&quot; 라고도 부른다.</p>
+</div></div></aside></p>
+<p><code>setTimeout(cb, 100)</code> 한 줄은 세 구간을 지난다.</p>
+<ol>
+<li><strong>맡긴다<strong> — <code>setTimeout</code> 은 <code>cb</code> 를 </strong>브라우저의 타이머</strong>에 맡기고 곧바로 끝난다.<br>자바스크립트는 기다리지 않고 다음 줄로 간다.</li>
+<li><strong>줄 선다<strong> — 100ms 가 지나면 브라우저가 <code>cb</code> 를 </strong>태스크 큐에 넣는다.</strong> 아직 실행이 아니다.</li>
+<li><strong>꺼내 실행한다<strong> — <a href="/post/event-loop-interactive">이벤트 루프</a>가 콜 스택이 </strong>비었을 때</strong><br>큐 맨 앞에서 <strong>하나를</strong> 꺼내 콜 스택에 올린다. 그때 비로소 실행된다.</li>
+</ol>
+<p>그래서 숫자는 <strong>최소 대기 시간</strong>이다. 100ms 가 지나 줄을 섰어도 콜 스택이 바쁘면 계속 기다린다.</p>
+<p>인터랙티브 다이어그램: 타이머 두 개가 줄 서고 꺼내지는 과정 (단계별로 재생할 수 있다)</p><ol><li>setTimeout(A, 100) — A 를 브라우저 타이머에 맡기고 setTimeout 은 바로 끝난다.</li><li>setTimeout(B, 0) — B 도 맡긴다. 아직 아무것도 실행되지 않았다.</li><li>동기 코드 console.log 가 먼저 돈다. 콜 스택이 쓰이는 동안 큐는 기다린다.</li><li>0ms 가 지난 B 가 태스크 큐에 줄을 선다. 줄을 섰을 뿐 아직 실행 전이다.</li><li>콜 스택이 비었다. 이벤트 루프가 큐 맨 앞의 B 하나를 꺼내 올린다.</li><li>B 가 끝나 빠진다. 100ms 가 지나 A 도 줄을 선다.</li><li>스택이 비어 있으니 A 를 꺼내 실행한다.</li></ol>
+<h3>한 번에 하나씩 꺼낸다</h3>
+<p>이벤트 루프는 태스크를 <strong>한 번에 하나만</strong> 꺼낸다. 하나를 끝까지 돌리고, 콜 스택이 빈 뒤에야<br>다음 것을 본다. 태스크와 태스크 <strong>사이</strong>에 브라우저는 화면을 다시 그릴 기회를 얻는다.</p>
+<p>그래서 태스크 하나가 오래 걸리면 그동안 <strong>다음 태스크도, 화면 갱신도 전부 멈춘다.</strong><br>버튼을 눌러도 반응이 없는 &quot;먹통&quot; 이 이것이다.</p>
+<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p><strong>줄은 사실 여러 개다.</strong> 명세상 태스크 큐는 하나가 아니라 여러 줄(타이머, 사용자 입력,<br>네트워크 등)이고, 브라우저가 매번 어느 줄에서 꺼낼지 고른다. 사용자 입력을 먼저<br>처리하는 식이다. 다만 <strong>같은 줄 안에서는 들어온 순서</strong>를 지킨다. 처음 이해할 때는<br>&quot;하나의 줄&quot; 로 생각해도 결과 예측은 거의 틀리지 않는다.</p>
+</div></div></aside></p>
+<hr>
+<h2>직접 확인</h2>
+<p>먼저 출력 순서를 예측해 보고 돌려라. 두 번째 실험은 0ms 타이머가 <strong>실제로는 몇 ms 뒤에</strong><br>도는지 잰다.</p>
+<pre><code class="language-playground">// 실험 1 — 순서
+setTimeout(() =&gt; console.log(&quot;C (100ms)&quot;), 100);
+setTimeout(() =&gt; console.log(&quot;A (0ms, 먼저 등록)&quot;), 0);
+setTimeout(() =&gt; console.log(&quot;B (0ms, 나중 등록)&quot;), 0);
+console.log(&quot;동기 코드&quot;);
+
+// 실험 2 — 0ms 인데 얼마나 기다리나
+const start = performance.now();
+setTimeout(() =&gt; {
+  const waited = Math.round(performance.now() - start);
+  console.log(`0ms 타이머가 실제로 기다린 시간: ${waited}ms`);
+}, 0);
+
+// 콜 스택을 300ms 동안 붙잡는다 — 이 동안 큐는 한 줄도 줄지 않는다
+const until = Date.now() + 300;
+while (Date.now() &lt; until) {}
+console.log(&quot;동기 루프 끝 (300ms 점거)&quot;);
+</code></pre>
+<p>같은 0ms 인 A 와 B 는 <strong>등록한 순서대로</strong> 나온다. 줄이니까. 그리고 0ms 타이머는<br>300ms 가량 기다린다. 그동안 콜 스택이 비지 않았기 때문이다.</p>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong><code>setTimeout(fn, 1000)</code> 을 &quot;정확히 1초 뒤&quot; 로 믿는 것</strong></p>
+<p>1000 은 <strong>줄을 서기까지의 최소 시간</strong>이다. 그 뒤에 앞선 태스크가 끝나고 콜 스택이 비기를<br>또 기다린다. 무거운 작업이 있으면 1초가 1.5초가 된다. 정확한 시각이 중요하면<br><code>Date.now()</code> 나 <code>performance.now()</code> 로 실제 경과 시간을 재서 보정한다.</p>
+<p>또 <code>setTimeout</code> 을 안에서 계속 다시 거는 식으로 5번 넘게 중첩하면, 브라우저는<br>0 을 줘도 <strong>최소 4ms</strong> 로 올려 버린다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong><code>setTimeout(fn, 0)</code> 을 &quot;지금 당장&quot; 으로 쓰는 것</strong></p>
+<p>&quot;지금 코드 다 끝나고, 줄 선 것들 다음에&quot; 다. 게다가 태스크 큐보다 <strong>먼저 비워지는 줄</strong>이<br>하나 더 있다. <code>Promise.then</code> 콜백이 들어가는 마이크로태스크 큐다. 둘이 섞였을 때의 순서는<br><a href="/post/settimeout-vs-promise">setTimeout vs Promise</a>에서 연습한다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p><strong>무거운 일을 잘게 쪼개 줄 세우면 화면이 안 멈춘다.</strong> 10만 개를 한 번에 처리하지 말고<br>1000 개씩 처리한 뒤 <code>setTimeout(다음 묶음, 0)</code> 으로 나머지를 다시 줄 세운다.<br>태스크와 태스크 사이마다 브라우저가 화면을 그리고 클릭을 처리할 틈이 생긴다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p><code>setTimeout</code>·DOM 이벤트의 콜백은 바로 실행되지 않고 <strong>태스크 큐에 줄을 선다.</strong><br>이벤트 루프는 콜 스택이 비었을 때 <strong>맨 앞 하나씩</strong> 꺼내 실행한다. 그래서 타이머 숫자는<br>&quot;정확한 시각&quot; 이 아니라 <strong>&quot;최소 대기 시간&quot;</strong> 이다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> <code>setTimeout(fn, 0)</code> 이 아래 동기 코드보다 늦게 도는 이유를 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> 타이머가 &quot;맡긴다 → 줄 선다 → 꺼내 실행한다&quot; 세 구간을 거치는 것을 안다</li>
+<li><input disabled="" type="checkbox"> 긴 동기 작업이 클릭·화면 갱신까지 막는 이유를 말할 수 있다</li>
+<li><input disabled="" type="checkbox"> 같은 지연의 타이머 둘이 어떤 순서로 도는지 예측할 수 있다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Execution_model" target="_blank">[1] JavaScript execution model — MDN Web Docs</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/API/Window/setTimeout" target="_blank">[2] Window: setTimeout() — MDN Web Docs</a></li>
+<li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#task-queue" target="_blank">[3] Event loops — task queue (HTML Standard, WHATWG)</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/event-loop-interactive">이벤트 루프, 눈으로 따라가기 →</a> — 이 글의 선행</li>
+<li><a href="/post/call-stack">콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳 →</a> — 비어야 큐가 열린다</li>
+<li><a href="/post/settimeout-vs-promise">setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습 →</a> — 마이크로태스크와 섞였을 때</li>
+</ul>
+
+<ul><li>javascript</li><li>태스크 큐</li><li>매크로태스크</li><li>setTimeout</li><li>이벤트 루프</li><li>비동기</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

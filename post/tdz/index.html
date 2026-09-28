@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>TDZ — 등록은 됐지만 아직 쓸 수 없는 구간 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다." />
+    <meta name="keywords" content="javascript, TDZ, let, const, 호이스팅" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/tdz" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="TDZ — 등록은 됐지만 아직 쓸 수 없는 구간" />
+    <meta property="og:description" content="바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/tdz" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/tdz.jpg" />
+    <meta property="article:published_time" content="2026-09-28T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-09-28T09:38:13.481Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="TDZ" />
+    <meta property="article:tag" content="let" />
+    <meta property="article:tag" content="const" />
+    <meta property="article:tag" content="호이스팅" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TDZ — 등록은 됐지만 아직 쓸 수 없는 구간" />
+    <meta name="twitter:description" content="바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/tdz.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TDZ — 등록은 됐지만 아직 쓸 수 없는 구간","description":"바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다.","image":["https://seobway23.github.io/post-thumbnails/tdz.jpg"],"datePublished":"2026-09-28T00:00:00.000Z","dateModified":"2026-09-28T09:38:13.481Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/tdz"},"keywords":"javascript, TDZ, let, const, 호이스팅","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3248},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"TDZ — 등록은 됐지만 아직 쓸 수 없는 구간","item":"https://seobway23.github.io/post/tdz"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>TDZ — 등록은 됐지만 아직 쓸 수 없는 구간</h1>
+<p>바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-09-28T00:00:00.000Z">2026-09-28</time> · <span>6분</span></p>
+<h2>바깥 변수가 있는데 왜 에러인가</h2>
+<p>바깥에 <code>x</code> 가 있다. 블록 안에서 <code>x</code> 를 읽는다. 스코프 체인을 따라 바깥 <code>x</code> 를<br>찾을 것 같은데, 에러가 난다.</p>
+<pre><code class="language-js">let x = &quot;바깥&quot;;
+
+{
+  console.log(x);   // ReferenceError: Cannot access &#39;x&#39; before initialization
+  let x = &quot;안쪽&quot;;
+}
+</code></pre>
+<p><code>let x = &quot;안쪽&quot;</code> 줄을 지우면 <code>&quot;바깥&quot;</code> 이 잘 나온다. <strong>아래에 있는 줄 하나가 위의 줄을<br>망가뜨린다.</strong> 이게 TDZ 다.</p>
+<hr>
+<h2>어떻게 동작하는가</h2>
+<p><a href="/post/hoisting">호이스팅</a>에서 본 규칙을 다시 꺼낸다. 스코프에 들어가면 코드를 실행하기<br><strong>전에</strong> 그 스코프의 선언을 먼저 등록한다. 여기까지는 <code>var</code> 든 <code>let</code> 이든 같다.</p>
+<p>다른 건 <strong>등록할 때 넣어 두는 값</strong>이다.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>등록 시점에 들어가는 것</th>
+<th>선언 전에 읽으면</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>var</code></td>
+<td><code>undefined</code></td>
+<td><code>undefined</code></td>
+</tr>
+<tr>
+<td><code>let</code> · <code>const</code> · <code>class</code></td>
+<td><strong>아무것도 없음</strong> (초기화 안 됨)</td>
+<td><code>ReferenceError</code></td>
+</tr>
+</tbody></table>
+<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>TDZ(Temporal Dead Zone, 일시적 사각지대)<strong> — <code>let</code>·<code>const</code> 가 </strong>등록된 순간부터<br>선언문이 실행되는 순간까지</strong>의 구간. 이 구간에서는 이름은 있는데 값이 없어서 읽기도<br>쓰기도 금지된다.</p>
+</div></div></aside></p>
+<p>그래서 맨 위 예제가 이렇게 풀린다.</p>
+<ol>
+<li>블록에 들어간다. 블록 안의 <code>let x</code> 를 <strong>먼저 등록</strong>한다(값 없음).</li>
+<li><code>console.log(x)</code> — 이름을 찾는다. 블록 안에 <code>x</code> 가 <strong>이미 등록돼 있다.</strong> 바깥까지 갈 필요가 없다.</li>
+<li>찾은 <code>x</code> 는 아직 값이 없다 → TDZ → 에러.</li>
+</ol>
+<p>바깥 <code>x</code> 를 못 본 게 아니라, <strong>안쪽 <code>x</code> 가 먼저 잡혀서</strong> 바깥까지 안 간 것이다.</p>
+<p>인터랙티브 다이어그램: 블록에 들어가서 let x 줄을 지날 때까지 (단계별로 재생할 수 있다)</p><ol><li>바깥에 x = &quot;바깥&quot; 이 있다.</li><li>블록에 들어가자마자 안쪽 let x 를 등록한다. 이름만 있고 값은 없다.</li><li>console.log(x) — 가장 가까운 블록 스코프에서 x 를 찾는다. 있다. 바깥까지 가지 않는다.</li><li>찾은 x 가 TDZ 라서 읽을 수 없다.</li><li>(에러가 없었다면) let x = &quot;안쪽&quot; 줄에 닿는 순간 값이 들어가고 TDZ 가 끝난다.</li></ol>
+<h3>&quot;시간&quot; 사각지대인 이유</h3>
+<p>TDZ 는 <strong>코드 위치가 아니라 실행 순서</strong>로 정해진다. 이름에 Temporal(시간)이 붙은 이유다.</p>
+<pre><code class="language-js">function show() {
+  console.log(msg);    // 코드상으로는 선언보다 위에 있다
+}
+
+let msg = &quot;안녕&quot;;
+show();                // &quot;안녕&quot; — 에러가 아니다
+</code></pre>
+<p><code>show</code> 안의 <code>console.log(msg)</code> 는 글자로는 <code>let msg</code> 보다 위에 있다. 하지만 <strong>실행되는 시점</strong>은<br><code>let msg = &quot;안녕&quot;</code> 을 지난 뒤다. 그때는 TDZ 가 이미 끝났으니 문제없다.<br><code>show()</code> 를 <code>let msg</code> 위로 올리면 그때 에러가 난다.</p>
+<hr>
+<h2>직접 확인</h2>
+<p>각 줄이 에러인지 아닌지 먼저 예측해 봐라. <code>try</code> 로 감싸 두었으니 에러가 나도 끝까지 돈다.</p>
+<pre><code class="language-playground">function check(label, fn) {
+  try {
+    console.log(label, &quot;→&quot;, fn());
+  } catch (e) {
+    console.log(label, &quot;→&quot;, e.name);
+  }
+}
+
+// 1. 선언된 적 없는 이름의 typeof 는 에러가 아니다
+check(&quot;typeof 없는이름&quot;, () =&gt; typeof neverDeclared);
+
+// 2. TDZ 안에서는 typeof 도 에러다
+check(&quot;TDZ 안 typeof&quot;, () =&gt; {
+  const t = typeof later;
+  let later = 1;
+  return t;
+});
+
+// 3. 위치는 위지만 실행은 선언 뒤 → 괜찮다
+check(&quot;나중에 호출&quot;, () =&gt; {
+  const read = () =&gt; value;
+  let value = 42;
+  return read();
+});
+
+// 4. 자기 자신으로 초기화 → 오른쪽을 계산할 때 아직 TDZ
+check(&quot;let n = n + 1&quot;, () =&gt; {
+  let n = n + 1;
+  return n;
+});
+
+// 5. class 도 TDZ 가 있다
+check(&quot;class 선언 전 new&quot;, () =&gt; {
+  const u = new User();
+  class User {}
+  return u;
+});
+</code></pre>
+<p>2번이 특히 의외다. <code>typeof</code> 는 &quot;없는 변수여도 에러 없이 <code>&quot;undefined&quot;</code>&quot; 로 알려져 있는데,<br>TDZ 안의 변수는 <strong>없는 게 아니라 있는데 못 쓰는 것</strong>이라 <code>typeof</code> 도 막힌다.</p>
+<hr>
+<h2>흔한 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>&quot;<code>let</code> 은 호이스팅이 안 된다&quot; 고 이해하는 것</strong></p>
+<p>호이스팅이 안 됐다면 맨 위 예제는 바깥 <code>x</code> 를 찾아 <code>&quot;바깥&quot;</code> 을 찍었어야 한다.<br>에러가 난다는 것 자체가 <strong>안쪽 <code>x</code> 가 이미 등록돼 있다는 증거</strong>다.<br>정확히는 &quot;등록은 되지만 <strong>초기화되지 않는다</strong>&quot; 이다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>함수 기본값 매개변수의 순서</strong></p>
+<pre><code class="language-js">function range(start = end - 10, end = 100) {}   // 앞이 뒤를 참조
+range();   // ReferenceError — start 를 계산할 때 end 는 아직 TDZ
+</code></pre>
+<p>매개변수도 왼쪽부터 차례로 초기화된다. 뒤쪽 매개변수를 앞에서 쓰면 TDZ 에 걸린다.<br>순서를 바꾸면(<code>end</code> 를 먼저) 해결된다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>TDZ 는 귀찮은 규칙이 아니라 <strong>안전장치</strong>다. <code>var</code> 였다면 맨 위 예제는 에러 없이<br><code>undefined</code> 를 찍고 지나갔을 것이고, 그 <code>undefined</code> 는 한참 뒤 엉뚱한 곳에서 터진다.<br>선언을 쓰는 자리 <strong>바로 위</strong>에 두면 TDZ 에 걸릴 일 자체가 없다.</p>
+</div></div></aside></p>
+<hr>
+<h2>한 줄 정리</h2>
+<p><code>let</code>·<code>const</code>·<code>class</code> 는 스코프에 들어가는 순간 <strong>이름만 등록되고 값은 비어 있다.</strong><br>선언문이 실행될 때까지 그 이름을 건드리면 <code>ReferenceError</code> 다. 기준은 코드 위치가 아니라<br><strong>실행 순서</strong>다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 바깥에 같은 이름이 있는데도 에러가 나는 이유를 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> &quot;<code>let</code> 은 호이스팅되지 않는다&quot; 가 왜 틀린 말인지 안다</li>
+<li><input disabled="" type="checkbox"> 선언보다 위에 적힌 코드가 에러 없이 도는 경우를 예로 들 수 있다</li>
+<li><input disabled="" type="checkbox"> TDZ 안에서 <code>typeof</code> 가 에러인 이유를 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let" target="_blank">[1] let — Temporal dead zone (MDN Web Docs)</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Errors/Cant_access_lexical_declaration_before_init" target="_blank">[2] ReferenceError: can't access lexical declaration before initialization — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-let-and-const-declarations" target="_blank">[3] let and const Declarations — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/hoisting">호이스팅 — 선언은 먼저 올라간다 →</a> — 이 글의 선행</li>
+<li><a href="/post/scope">스코프 — 변수가 어디까지 보이는가 →</a> — 이름을 가장 가까운 스코프부터 찾는 규칙</li>
+<li><a href="/post/closure">클로저 — 함수가 붙잡고 있는 변수 →</a></li>
+</ul>
+
+<ul><li>javascript</li><li>TDZ</li><li>let</li><li>const</li><li>호이스팅</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>
