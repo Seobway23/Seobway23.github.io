@@ -21,6 +21,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { categoryColor } from "@/lib/category-color";
+import { segmentLabel } from "@/lib/category-label";
 import { getPopularPosts, getAllPosts } from "@/lib/posts";
 import { getRecentComments } from "@/lib/recent-comments";
 import type { Post } from "../../shared/schema";
@@ -101,7 +102,8 @@ function SidebarCategoryBranch({
   }
 
   const hasKids = sortedKids.length > 0;
-  const open = treeOpen[node.fullName] ?? false;
+  // 최상위는 처음부터 펼쳐 하위 카테고리가 보이게 한다. 더 깊은 단계는 접어 둔다.
+  const open = treeOpen[node.fullName] ?? depth === 0;
 
   const pickCategory = () => {
     onCategoryChange?.(node.fullName);
@@ -258,7 +260,7 @@ export default function LeftSidebar({
     return Array.from(map.entries()).map(([name, count]) => ({
       name,
       // 표시용 라벨은 경로의 마지막 세그먼트
-      label: name.split(/[/\\]/).pop() || name,
+      label: segmentLabel(name.split(/[/\\]/).pop() || name),
       count,
     }));
   }, [posts]);
@@ -278,7 +280,7 @@ export default function LeftSidebar({
     const findLabel = (fullName: string, segment: string) => {
       const found = categories.find((c) => c.name === fullName);
       // 라벨이 없으면 마지막 세그먼트 사용
-      return found?.label || fullName.split(/[/\\]/).pop() || segment;
+      return found?.label || segmentLabel(fullName.split(/[/\\]/).pop() || segment);
     };
 
     categories.forEach((cat) => {

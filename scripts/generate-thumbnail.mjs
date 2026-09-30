@@ -55,6 +55,7 @@ const TOPIC_ACCENTS = {
   mechanics: "#f472b6",
   network: "#34d399",
   database: "#38bdf8",
+  RAG: "#fb923c",
 };
 
 /** 배지에 박을 짧은 글자 — 없으면 카테고리 앞 두 글자 */
@@ -69,6 +70,7 @@ const TOPIC_MARKS = {
   mechanics: "∑",
   network: "NET",
   database: "DB",
+  RAG: "RAG",
 };
 
 function hexToHsl(hex) {

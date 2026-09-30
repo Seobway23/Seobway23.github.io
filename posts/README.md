@@ -344,6 +344,47 @@ x = 1
 | 배경 카드 | `::: domain id="foo" title="제목" … :::` + 본문 `[[domain:foo]]` |
 | 역학 시각화 | ` ```diagramatics ` / ` ```jsxgraph ` / ` ```three ` + `{"preset":"…"}` |
 | 같은 저장소 글 링크 | `[제목 →](./파일명.md)` → 빌드 시 `/post/slug` 로 변환 |
+| 캡션 달린 그림 | `![대체 텍스트](/post-assets/…/x.png "캡션. 출처: 문서명, 쪽·표 번호")` → `<figure>` + 「그림 N.」 |
+
+---
+
+## 9-A. 그림과 차트 — 「그림 N.」 자동 번호
+
+이미지(캡션 있는 것)와 ` ```chart ` 가 본문 순서대로 **그림 1, 그림 2 …** 번호를 공유한다.
+
+**이미지** — 마크다운 이미지의 제목(`"…"`)이 캡션이 된다. 제목이 없으면 번호 없는 일반 이미지다.
+외부 자료를 캡처했으면 캡션 끝에 `출처: 문서명, 표·쪽 번호` 를 적는다. 원본 파일(PDF 등)은 올리지 않는다.
+
+```markdown
+![표 3.6.2 원문](/post-assets/work/rag/figures/table.png "같은 표의 원문 영역. 출처: 도로교 설계기준 2016, 표 3.6.2")
+```
+
+**차트** — 빌드할 때 인라인 SVG 로 그린다(`scripts/post-chart.mjs`). 숫자를 본문에 적지 않고
+`public/` 아래 **원시 데이터 JSON 을 가리킨다.** 부록에 링크한 파일과 그림이 어긋날 수 없다.
+가리킨 값이 없으면 빌드가 멈춘다. 색은 테마 변수라 다크/라이트를 따른다.
+
+````markdown
+```chart
+{
+  "type": "bar",
+  "caption": "그림 설명. 표본 크기 같은 조건도 여기에.",
+  "source": "/post-assets/work/rag/symbol-retrieval/exp_result4.json",
+  "value": "variants.H2.{bar}.{panel}.Hit@3",
+  "panels": [{ "key": "A", "label": "A 기호" }],
+  "bars":   [{ "key": "bm25", "label": "BM25" }, { "key": "dense", "label": "dense" }]
+}
+```
+````
+
+`value` · `path` 는 점으로 이은 JSON 경로이고, `{panel}` `{bar}` `{step}` `{row}` `{col}` 은 각 항목의 `key` 로 바뀐다.
+배열 원소는 숫자 칸(`grid.1.prod9`)으로 가리킨다.
+
+| type | 모양 | 필드 |
+|---|---|---|
+| `bar` | 패널마다 가로 막대 | `panels`, `bars`(`style: "base"` 면 주황), `value`, `max`(기본 1) |
+| `multiples` | 패널마다 세로 막대(단계별 추세) | `panels`, `steps`(`style`: `base` 주황 · `on` 채움 · `off` 빈 막대, `legend` 범례 이름), `value`, `columns`(기본 3) |
+| `dumbbell` | 행마다 전 → 후 | `rows`, `from`/`to` = `{label, source, path}` (각자 다른 파일 가능) |
+| `heatmap` | 행 × 열, 칸 = 순위 | `columns`, `cell`(열마다 배열), `rowLabels` = `{path, filter, field, maxChars}` |
 
 ---
 
@@ -484,5 +525,7 @@ node -e "const s=require('fs').readFileSync('dist/post/closure.html','utf8'); co
 | 플레이그라운드 실행 환경·편집기 하이라이팅 | `src/lib/post-playground.ts` |
 | 코드 색상 테마 목록 추가 | `src/lib/code-theme.ts` (`CODE_THEMES`) |
 | 용어 툴팁 동작(호버 유예·클릭 고정) | `src/components/post-glossary-layer.tsx` |
+| ` ```chart ` 형식 추가·모양 | `scripts/post-chart.mjs` (그림), `src/index.css` 「그림(figure) · chart」 구역 (색) |
+| 그림 번호 · 이미지 캡션 | `scripts/generate-posts-data.js` (`renderer.image`, `numberFigures`) |
 | 위 블록들의 모양 | `src/index.css` 맨 아래 "본문 확장 블록" 구역 |
 | SEO 메타·sitemap | `scripts/prerender.mjs` |

@@ -10,6 +10,7 @@ import matter from "gray-matter";
 import { marked } from "marked";
 import yaml from "js-yaml";
 import katex from "katex";
+import { processChartBlocks, injectChartsIntoHtml, numberFigures } from "./post-chart.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -475,7 +476,7 @@ const CALLOUT_LABELS = {
   warning: "WARNING",
   danger: "DANGER",
   caution: "CAUTION",
-  abstract: "TL;DR",
+  abstract: "ABSTRACT",
 };
 
 function buildCalloutAsideHtml(kind, innerHtml) {
@@ -1084,6 +1085,12 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     let processedContent = content.replace(/\\`/g, "`");
     // 각주 문법([^1], [^1]: ...)을 HTML 앵커 링크로 변환
     processedContent = processMarkdownFootnotes(processedContent).content;
+    // ```chart 펜스 → 빌드 시 인라인 SVG (scripts/post-chart.mjs). 다른 처리가 JSON 을 건드리기 전에 뺀다.
+    const { markdown: mdWithCharts, slots: chartSlots } = processChartBlocks(processedContent, {
+      publicDir,
+      file: filePath,
+    });
+    processedContent = mdWithCharts;
     // 표 셀 안의 **볼드** → <strong> (fixBoldBeforeCJK·marked가 표에서 ** 짝을 셀 너머로 잘못 맞추는 것을 사전 차단)
     processedContent = convertTableBoldToStrong(processedContent);
     // marked v12+: **text**한글 볼드 인식 실패 보정
@@ -1151,6 +1158,13 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
       const titleAttr = title ? ` title="${title}"` : "";
       return `<a href="${finalHref}"${titleAttr}>${text}</a>`;
     };
+    // ![설명](경로 "캡션") → 번호 붙는 <figure>. 캡션(title)이 없으면 평범한 <img>.
+    renderer.image = function (href, title, text) {
+      const alt = String(text || "").replace(/"/g, "&quot;");
+      const img = `<img src="${href}" alt="${alt}" loading="lazy">`;
+      if (!title) return img;
+      return `<figure class="post-figure post-figure--image">${img}<figcaption><span class="post-figure__no"></span> ${title}</figcaption></figure>`;
+    };
 
     // 마크다운을 HTML로 변환 후 수식 플레이스홀더를 KaTeX로 복원 + 코드탭 + 콜아웃 내부 마크다운 치환
     const htmlWithMath = injectKatexPlaceholdersIntoHtml(marked.parse(mdForMarked, { renderer }), mathSlots);
@@ -1176,6 +1190,9 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     };
     const htmlAfterSections = injectSectionsIntoHtml(htmlAfterCodeTabs, sectionSlots, renderFragmentHtml);
     let htmlContent = injectCalloutsIntoHtml(htmlAfterSections, calloutSlots, renderFragmentHtml);
+    htmlContent = injectChartsIntoHtml(htmlContent, chartSlots);
+    // 이미지 figure 와 차트 figure 에 본문 순서대로 「그림 N.」
+    htmlContent = numberFigures(htmlContent);
     // 도메인 배경 카드(숨은 template)를 본문 뒤에 붙인다.
     htmlContent += buildDomainCardsHtml(domainCards, renderFragmentHtml);
 
@@ -1228,6 +1245,8 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
         : new Date().toISOString(),
     };
   } catch (error) {
+    // 차트 데이터 오류는 글을 조용히 빼지 않고 빌드를 멈춘다. 그림 숫자가 틀린 채 배포되면 안 된다.
+    if (String(error?.message || "").startsWith("chart")) throw error;
     console.error(`파일 파싱 오류: ${filePath}`, error);
     return null;
   }

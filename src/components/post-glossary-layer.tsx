@@ -14,6 +14,8 @@ interface PostGlossaryLayerProps {
 
 type OpenState = {
   termId: string;
+  /** 본문에 보이는 표시어. 제목에 내부 id(camelCase) 대신 이것을 쓴다. */
+  label: string;
   text: string;
   anchorRect: DOMRect;
 } | null;
@@ -180,7 +182,8 @@ export function PostGlossaryLayer({
     if (!entry?.description) return;
     cancelClose();
     const anchorRect = termEl.getBoundingClientRect();
-    setOpen({ termId, text: entry.description, anchorRect });
+    const label = (termEl.textContent || "").trim() || termId;
+    setOpen({ termId, label, text: entry.description, anchorRect });
     setPos(computePanelPosition(anchorRect));
   };
 
@@ -477,7 +480,7 @@ export function PostGlossaryLayer({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xs text-muted-foreground mb-1">{open.termId}</div>
+          <div className="text-xs text-muted-foreground mb-1">{open.label}</div>
           <div className="leading-relaxed break-words">{open.text}</div>
           {related.length > 0 ? (
             <div className="mt-3 pt-3 border-t border-border/60">
