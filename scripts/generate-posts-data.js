@@ -24,6 +24,17 @@ if (!fs.existsSync(publicDir)) {
   fs.mkdirSync(publicDir, { recursive: true });
 }
 
+/**
+ * 표를 스크롤 상자로 감싼다.
+ *
+ * 예전에는 표 자체를 `display: block; width: max-content` 로 바꿔 넘침을 막았다. 그러면 칸이 짧은 표는
+ * 내용 폭으로 줄어 본문 왼쪽에 쏠렸다. 이제 넘침은 바깥 상자가 맡고, 표는 본문 폭을 채운다.
+ * 코드 블록 안의 `<table>` 은 이미 `&lt;table` 로 이스케이프돼 있어 건드리지 않는다.
+ */
+function wrapTables(html) {
+  return html.replace(/<table\b/g, '<div class="post-table-wrap"><table').replace(/<\/table>/g, "</table></div>");
+}
+
 /** 코드 펜스 밖에서 첫 `![](url)` / `![alt](url)` URL 추출 */
 function firstMarkdownImageOutsideFences(markdown) {
   if (!markdown || typeof markdown !== "string") return null;
@@ -1195,6 +1206,8 @@ function parseMarkdownFile(filePath, categoryFromPath, filenameToSlug = new Map(
     htmlContent = numberFigures(htmlContent);
     // 도메인 배경 카드(숨은 template)를 본문 뒤에 붙인다.
     htmlContent += buildDomainCardsHtml(domainCards, renderFragmentHtml);
+    // 표를 가로 스크롤 상자로 감싼다 — 카드 속 표까지 포함하려고 카드를 붙인 뒤에
+    htmlContent = wrapTables(htmlContent);
 
     // excerpt 생성 (frontmatter에 없으면 content에서 추출)
     let excerpt = data.excerpt || "";
