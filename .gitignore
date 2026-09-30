@@ -19,6 +19,8 @@ ga-service-account-key.json
 !package-lock.json
 !yarn.lock
 !pnpm-lock.yaml
+# 글의 원시 데이터 — ```chart 가 빌드 때 읽는다. 빠지면 CI 빌드가 「chart source 없음」 으로 멈춘다
+!public/post-assets/**/*.json
 
 /docs/*
 
