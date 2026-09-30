@@ -1,7 +1,7 @@
 <svg id="tb-task-queue" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
      role="img" aria-labelledby="tb-task-queue-t tb-task-queue-d" preserveAspectRatio="xMidYMid slice">
-  <title id="tb-task-queue-t">태스크 큐 — setTimeout 콜백이 줄 서는 곳</title>
-  <desc id="tb-task-queue-d">frontend/javascript — setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유</desc>
+  <title id="tb-task-queue-t">태스크 큐와 setTimeout 실행 시점</title>
+  <desc id="tb-task-queue-d">frontend/javascript — setTimeout(fn, 0) 이 즉시 실행되지 않는 이유</desc>
 
   <defs>
     <linearGradient id="tb-task-queue-bg" x1="0" y1="0" x2="1" y2="1">
@@ -185,16 +185,16 @@
 
     <!-- 카테고리 칩 -->
     <g>
-      <rect x="446" y="176" width="309" height="42" rx="21"
+      <rect x="446" y="166" width="309" height="42" rx="21"
             fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
-      <text class="tb-task-queue-chip-t" x="600" y="204" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+      <text class="tb-task-queue-chip-t" x="600" y="194" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
     </g>
 
-    <text class="tb-task-queue-title" x="600" y="276" text-anchor="middle" font-size="54">태스크 큐 — setTimeout</text>
-      <text class="tb-task-queue-title" x="600" y="345" text-anchor="middle" font-size="54">콜백이 줄 서는 곳</text>
+    <text class="tb-task-queue-title" x="600" y="266" text-anchor="middle" font-size="62">태스크 큐와</text>
+      <text class="tb-task-queue-title" x="600" y="345" text-anchor="middle" font-size="62">setTimeout 실행 시점</text>
 
     <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-task-queue-rule)"/>
-    <text class="tb-task-queue-sub" x="600" y="455" text-anchor="middle" font-size="25">setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유</text>
+    <text class="tb-task-queue-sub" x="600" y="455" text-anchor="middle" font-size="25">setTimeout(fn, 0) 이 즉시 실행되지 않는 이유</text>
 
     <!-- 왼쪽 아래 배지 -->
     <g class="tb-task-queue-badge">
