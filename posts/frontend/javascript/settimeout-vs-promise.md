@@ -1,5 +1,5 @@
-﻿---
-title: "setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습"
+---
+title: "setTimeout과 Promise의 실행 순서"
 slug: settimeout-vs-promise
 category: frontend/javascript
 tags: [javascript, setTimeout, promise, microtask, macrotask, event-loop]
@@ -9,8 +9,8 @@ featured: false
 coverImage: /post-thumbnails/settimeout-vs-promise.svg
 createdAt: 2026-04-16
 excerpt: >
-  setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다.
-  마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다.
+  setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다.
+  마이크로태스크와 태스크의 처리 우선순위를 기준으로 출력 순서를 예측하는 연습이다.
 ---
 
 ## 이 시리즈 구성
@@ -19,45 +19,40 @@ excerpt: >
 |---|---|
 | [로드맵 인덱스 →](/post/ai-webdev-roadmap-foundation) | 01~19 전체 학습 경로 |
 | [01-1. JS 이벤트 루프와 비동기 →](/post/js-event-loop-and-async) | 콜스택, 큐, 마이크로태스크 |
-| [01-2. setTimeout vs Promise →](/post/settimeout-vs-promise) | 비동기 실행 순서 예측 |
+| [01-2. setTimeout과 Promise →](/post/settimeout-vs-promise) | 비동기 실행 순서 예측 |
 | [01-3. React 단방향 데이터 흐름 →](/post/react-component-data-flow) | props/state, state 끌어올리기 |
 | [01-4. controlled vs uncontrolled →](/post/react-controlled-vs-uncontrolled) | React 폼 설계 |
 | [01-5. TypeScript 타입 시스템 기초 →](/post/typescript-type-system-basics) | any, unknown, union, narrowing |
 
 ---
 
-## 왜 이 문제를 따로 연습해야 하는가
+## 다루는 내용
 
-이벤트 루프를 글로 이해했다고 해서, 실제 코드의 실행 순서를 바로 예측할 수 있는 것은 아니다.
+이벤트 루프의 구조를 알아도 실제 코드의 출력 순서를 바로 예측하기는 어렵다.
+이 글은 다음 세 가지 경우를 예제로 확인한다.
 
-특히 많은 사람이 여기서 헷갈린다.
-
-- `setTimeout(..., 0)`이면 바로 실행되는가
-- `Promise.then()`은 언제 끼어드는가
-- Promise 안의 `setTimeout`과 setTimeout 안의 Promise는 누가 먼저인가
-
-이 글은 그 감각을 짧은 예제로 잡는 데 집중한다.
+- `setTimeout(..., 0)` 콜백의 실행 시점
+- `Promise.then()` 콜백이 실행되는 시점
+- Promise 콜백 안의 `setTimeout`, `setTimeout` 콜백 안의 Promise 의 순서
 
 ---
 
-## 규칙 하나 먼저
+## 처리 규칙
 
-먼저 이 규칙만 고정해 두자.
+예제는 모두 다음 규칙으로 설명된다.
 
-1. 동기 코드를 먼저 끝낸다
-2. 콜스택이 비면 **마이크로태스크**를 먼저 모두 처리한다
-3. 그다음 **태스크**를 처리한다
+1. 현재 실행 중인 동기 코드를 끝낸다.
+2. 콜 스택이 비면 마이크로태스크 큐를 빌 때까지 처리한다.
+3. 태스크 큐에서 태스크 하나를 꺼내 실행하고, 다시 2번으로 돌아간다.
 
-여기서 보통
+API 별 분류는 다음과 같다.
 
-- `Promise.then`, `catch`, `finally` → 마이크로태스크
-- `setTimeout`, DOM 이벤트 → 태스크
-
-로 보면 된다.
+- `Promise.then`, `catch`, `finally`, `queueMicrotask`: 마이크로태스크
+- `setTimeout`, `setInterval`, DOM 이벤트 콜백: 태스크
 
 ---
 
-## 예제 1 — 가장 기본
+## 예제 1: 기본 순서
 
 ```js
 console.log('A')
@@ -73,17 +68,16 @@ Promise.resolve().then(() => {
 console.log('D')
 ```
 
-정답은 `A`, `D`, `C`, `B`다.
+출력은 `A`, `D`, `C`, `B` 다.
 
-이유:
-
-- `A`, `D`는 동기 코드라서 먼저 실행
-- Promise 콜백 `C`는 마이크로태스크
-- 타이머 콜백 `B`는 태스크
+- `A`, `D` 는 동기 코드이므로 먼저 실행된다.
+- `C` 는 마이크로태스크 큐에 등록된다.
+- `B` 는 타이머 만료 후 태스크 큐에 등록된다.
+- 동기 코드가 끝나면 마이크로태스크(`C`)를 먼저 처리하고, 이후 태스크(`B`)를 처리한다.
 
 ---
 
-## 예제 2 — Promise 안에 setTimeout
+## 예제 2: Promise 콜백 안의 setTimeout
 
 ```js
 console.log('1')
@@ -98,20 +92,18 @@ setTimeout(() => console.log('4'), 0)
 console.log('5')
 ```
 
-정답은 `1`, `5`, `2`, `4`, `3`이다.
+출력은 `1`, `5`, `2`, `4`, `3` 이다.
 
-왜 그런가:
+1. 동기 코드 `1`, `5` 가 실행된다.
+2. 마이크로태스크 `2` 가 실행된다.
+3. `2` 를 실행하는 중에 `3` 의 타이머가 등록된다.
+4. `4` 의 타이머가 먼저 등록되었으므로 태스크 큐에서도 `4` 가 `3` 보다 앞선다.
 
-1. 동기 코드 `1`, `5`
-2. 마이크로태스크 `2`
-3. 그 안에서 새 `setTimeout`이 등록됨
-4. 태스크 큐에는 먼저 등록된 `4`, 그다음 `3`
-
-즉 **태스크끼리는 먼저 들어온 것이 먼저 실행**된다.
+같은 종류의 태스크는 등록된 순서대로 실행된다.
 
 ---
 
-## 예제 3 — setTimeout 안에 Promise
+## 예제 3: setTimeout 콜백 안의 Promise
 
 ```js
 console.log('a')
@@ -126,9 +118,10 @@ setTimeout(() => console.log('d'), 0)
 console.log('e')
 ```
 
-정답은 `a`, `e`, `b`, `c`, `d`다.
+출력은 `a`, `e`, `b`, `c`, `d` 다.
 
-핵심은 첫 번째 타이머 콜백 안에서 `Promise.then()`이 등록되면, 그 타이머 콜백이 끝난 직후 **마이크로태스크인 `c`를 먼저 처리**한다는 점이다.
+첫 번째 타이머 콜백(`b`) 안에서 `Promise.then()` 으로 등록한 `c` 는 마이크로태스크다.
+이벤트 루프는 태스크 하나를 끝낸 직후 마이크로태스크 큐를 먼저 비우므로, `c` 가 다음 태스크인 `d` 보다 먼저 실행된다.
 
 ```mermaid
 %% desc: 첫 번째 setTimeout 콜백 안에서 생성된 Promise.then은 다음 태스크보다 먼저 실행된다
@@ -141,7 +134,7 @@ flowchart TD
 
 ---
 
-## 예제 4 — 마이크로태스크는 모두 비운다
+## 예제 4: 마이크로태스크 큐는 빌 때까지 처리된다
 
 ```js
 console.log('start')
@@ -154,56 +147,56 @@ Promise.resolve().then(() => {
 setTimeout(() => console.log('t1'), 0)
 ```
 
-정답은 `start`, `m1`, `m2`, `t1`이다.
+출력은 `start`, `m1`, `m2`, `t1` 이다.
 
-마이크로태스크를 하나만 처리하고 끝내는 것이 아니라, **큐가 빌 때까지** 계속 처리한다.
+`m1` 실행 중에 등록된 `m2` 도 같은 마이크로태스크 처리 단계에서 실행된다.
+이벤트 루프는 마이크로태스크 큐가 완전히 빌 때까지 태스크로 넘어가지 않는다.
 
 ::: warning
-그래서 마이크로태스크를 너무 많이 연쇄 등록하면, 태스크 큐에 있는 작업들이 계속 밀릴 수 있다. "Promise는 가볍다"만 기억하면 이 부분을 놓치기 쉽다.
+마이크로태스크가 계속 새 마이크로태스크를 등록하면 태스크 큐의 작업과 렌더링이 그만큼 지연된다.
+연쇄가 끝나지 않으면 페이지가 응답하지 않는다.
 :::
 
 ---
 
-## 실전에서 어떻게 써먹는가
+## 실무에서 관련되는 부분
 
-이 연습은 단순 콘솔 문제 풀이가 아니다.
+- React 이벤트 핸들러 이후 이어지는 비동기 처리 순서
+- 테스트 코드에서 비동기 작업의 완료 시점
+- 타이머, API 응답, 상태 업데이트가 섞인 코드의 디버깅
 
-- React 이벤트 핸들러 뒤에 붙는 비동기 흐름 이해
-- 테스트 코드에서 비동기 완료 시점 예측
-- 타이머와 API 응답, 상태 업데이트가 섞일 때 디버깅
-
-여기서 막히면 "렌더링 버그"처럼 보이는 문제도 사실은 이벤트 루프 이해 부족인 경우가 많다.
+렌더링 문제처럼 보이는 버그가 실제로는 콜백 실행 순서 문제인 경우가 있다.
 
 ---
 
 ## 연습 방법
 
-가장 좋은 연습은 다음 순서다.
+1. 코드를 읽고 출력 순서를 적는다.
+2. 각 줄이 동기, 마이크로태스크, 태스크 중 어디에 속하는지 표시한다.
+3. 실제 실행 결과와 비교한다.
 
-1. 코드를 본다
-2. 출력 순서를 종이에 적는다
-3. 이유를 "동기 → 마이크로태스크 → 태스크"로 설명한다
-4. 실제 실행 결과와 비교한다
-
-설명을 못 하면 아직 외운 것이다. 설명이 되면 이해한 것이다.
+2번에서 분류를 설명할 수 없다면 규칙을 다시 확인한다.
 
 ::: tip
-다음 단계에서는 각 예제를 Node.js 콘솔이나 브라우저 콘솔에서 직접 돌려 보자. "왜 그런지"를 말로 설명할 수 있을 때 비동기 기초가 훨씬 단단해진다.
+각 예제를 Node.js 나 브라우저 콘솔에서 실행해 결과를 비교할 수 있다.
 :::
 
-## 조금 더 깊게 보기
+## 추가 내용
 
-### 왜 이 문제는 면접 단골인가
+### 면접에서 자주 나오는 이유
 
-`setTimeout`과 `Promise` 실행 순서는 단순 암기 문제가 아니다. 이 문제는 지원자가 JavaScript를 "위에서 아래로만 실행되는 코드"로 보는지, 아니면 런타임과 큐까지 포함한 실행 모델로 이해하는지 확인하기 좋다.
+`setTimeout` 과 `Promise` 의 실행 순서 문제는 JavaScript 를 순차 실행 코드로만 이해하는지,
+런타임의 큐와 이벤트 루프를 포함한 실행 모델로 이해하는지 확인하는 데 쓰인다.
 
-### 개발자가 주의해야 할 포인트
+### 테스트 코드에서 주의할 점
 
-실무에서는 이 순서가 테스트에서 많이 드러난다. 컴포넌트 테스트에서 클릭 직후 바로 값을 확인하면 아직 Promise 콜백이 반영되지 않았을 수 있다. 반대로 타이머 기반 UI는 fake timer를 쓰지 않으면 테스트가 불안정해진다.
+컴포넌트 테스트에서 클릭 직후 바로 값을 검사하면 Promise 콜백이 아직 실행되지 않았을 수 있다.
+타이머 기반 UI 는 fake timer 를 쓰지 않으면 테스트 결과가 실행 환경에 따라 달라질 수 있다.
 
-### 디버깅 팁
+### 디버깅
 
-비동기 순서가 헷갈릴 때는 로그에 숫자만 찍지 말고 "sync start", "microtask", "timer"처럼 큐의 성격을 같이 적는다. 등록 순서와 실행 우선순위는 다르다.
+로그에 숫자만 남기지 말고 `"sync start"`, `"microtask"`, `"timer"` 처럼 어느 큐에서 실행된 코드인지 함께 남긴다.
+등록 순서와 실행 순서는 다르다.
 
 ---
 
@@ -218,7 +211,7 @@ setTimeout(() => console.log('t1'), 0)
 
 ## 관련 글
 
-- [JS 이벤트 루프와 비동기 큰 그림 →](/post/js-event-loop-and-async)
+- [JS 이벤트 루프와 비동기 처리 구조 →](/post/js-event-loop-and-async)
 - [React 단방향 데이터 흐름 →](/post/react-component-data-flow)
 - [Node.js · Bun · Deno 런타임 비교 →](/post/js-runtime-node-bun-deno)
-- [AI 웹개발자 로드맵 — Foundation 01~19 →](/post/ai-webdev-roadmap-foundation)
+- [AI 웹개발자 로드맵 (Foundation 01~19) →](/post/ai-webdev-roadmap-foundation)

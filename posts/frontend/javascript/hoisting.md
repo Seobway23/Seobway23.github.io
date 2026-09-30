@@ -1,5 +1,5 @@
 ---
-title: "호이스팅 — 선언은 먼저 올라간다"
+title: "호이스팅과 선언 초기화 방식"
 coverImage: /post-thumbnails/hoisting.svg
 slug: hoisting
 category: frontend/javascript
@@ -10,7 +10,7 @@ readTime: 7
 featured: false
 createdAt: 2026-09-07
 excerpt: >
-  선언하기 전에 쓴 변수가 왜 어떤 때는 undefined 고 어떤 때는 에러인지, 그 차이를 만드는 규칙.
+  선언보다 앞에서 변수를 읽을 때 var 는 undefined, let 은 ReferenceError, 함수 선언은 정상 호출되는 이유를 선언별 초기화 방식으로 정리한다.
 sources:
   - url: https://developer.mozilla.org/ko/docs/Glossary/Hoisting
     title: "Hoisting — MDN Web Docs 용어 사전"
@@ -23,137 +23,141 @@ sources:
     checked: 2026-09-07
 ---
 
-## 왜 이게 필요한가
+## 문제 상황
 
-똑같이 "선언 전에 쓴" 코드인데 결과가 셋 다 다르다.
+아래 세 코드는 모두 선언보다 앞에서 식별자를 참조하지만 결과가 각각 다르다.
 
 ```js
-console.log(a);   // undefined      — 에러가 아니다?
+console.log(a);   // undefined
 var a = 1;
 
-console.log(b);   // ReferenceError — 이건 에러다
+console.log(b);   // ReferenceError
 let b = 1;
 
-hello();          // "안녕"          — 아예 잘 돈다?
+hello();          // "안녕"
 function hello() { console.log("안녕"); }
 ```
 
-셋을 구분하지 못하면 "왜 여기선 되고 저기선 안 되지"를 평생 겪는다.
+`var` 는 값 없이 읽히고, `let` 은 에러가 나고, 함수 선언은 정상 호출된다.
+이 차이는 선언 종류마다 초기화 시점이 다르기 때문에 생긴다.
 
 ---
 
-## 어떻게 동작하는가
+## 동작 원리
 
-자바스크립트는 코드를 위에서부터 한 줄씩 실행하기 **전에**, 스코프를 한 번 훑어
-그 안의 선언을 미리 등록한다. 이 등록 단계 때문에 "선언이 위로 끌어올려진 것처럼"
-보이는 것이 호이스팅이다.
+자바스크립트 엔진은 함수나 블록을 실행하기 전에 생성 단계를 거친다. 이 단계에서
+스코프 안의 선언을 모두 찾아 환경 레코드(Environment Record)에 식별자를 등록한다.
+코드를 한 줄씩 실행하는 것은 그다음이다. 선언이 코드 맨 위로 옮겨진 것처럼 보이는
+이 현상을 호이스팅(Hoisting)이라고 부른다.
 
 ::: important
-**끌어올려지는 것은 "선언"이지 "할당"이 아니다.** `var a = 1` 은
-`var a`(선언)와 `a = 1`(할당) 두 개다. 올라가는 건 앞쪽뿐이다.
+생성 단계에서 등록되는 것은 선언이고, 할당은 실행 단계에서 해당 줄에 도달할 때 일어난다.
+`var a = 1` 은 선언 `var a` 와 할당 `a = 1` 로 나뉘며, 생성 단계에서 처리되는 것은 선언뿐이다.
 :::
 
-핵심은 **선언마다 등록되는 초기값이 다르다**는 것이다.
+선언 종류마다 등록할 때 넣는 초기값이 다르다.
 
 ::: grid
 == `var`
-등록되면서 곧바로 `undefined` 가 들어간다. 그래서 읽어도 에러가 아니다.
+등록과 동시에 `undefined` 로 초기화된다. 선언 전에 읽어도 에러 없이 `undefined` 가 나온다.
 
 == `let` · `const`
-등록은 되지만 **값이 없는 상태**로 남는다. 이 구간을 읽으면 에러다.
+식별자는 등록되지만 초기화되지 않은 상태로 남는다. 이 상태에서 접근하면 `ReferenceError` 가 발생한다.
 
 == `function` 선언
-함수 몸통까지 통째로 등록된다. 그래서 위에서 바로 호출된다.
+함수 객체 전체가 생성되어 식별자에 바인딩된다. 선언보다 앞에서 호출할 수 있다.
 :::
 
-`let` · `const` 가 등록은 됐지만 아직 쓸 수 없는 그 구간을
-**TDZ(Temporal Dead Zone, 일시적 사각지대)** 라고 한다. 자세한 규칙은 [TDZ 글](/post/tdz)에서 따로 다룬다.
+`let` · `const` 가 등록된 시점부터 선언문이 실행되기 전까지의 구간을
+TDZ(Temporal Dead Zone)라고 한다. 세부 규칙은 [TDZ(Temporal Dead Zone)](/post/tdz)에서 다룬다.
 
 ```seq
-title: 스코프에 들어가서 코드가 끝날 때까지
+title: 생성 단계와 실행 단계의 식별자 상태
 speed: 1600
-caption: 등록은 함께 일어나지만, 들어가는 값이 다르다.
+caption: 세 선언 모두 생성 단계에서 등록되지만 초기값이 다르다.
 
-lane reg    등록 단계
+lane reg    생성 단계
 lane var    var a
 lane let    let b
 lane fn     function hello
 lane out    실행 결과 #log
 
-step 스코프에 들어가면 먼저 선언부터 훑어 등록한다.
+step 스코프에 진입하면 선언을 먼저 수집해 환경 레코드에 등록한다.
   push reg 선언 수집
-step var 는 등록되면서 undefined 가 들어간다.
+step var a 는 등록과 동시에 undefined 로 초기화된다.
   move reg var undefined
-step let 은 등록되지만 값이 없다 — 여기부터 TDZ 다.
-  push let TDZ (값 없음)
-step 함수 선언은 몸통까지 통째로 등록된다.
-  push fn 몸통 전체
-step 이제 한 줄씩 실행한다. a 를 읽으면 undefined 가 나온다.
+step let b 는 등록되지만 초기화되지 않는다. 이 시점부터 TDZ 이다.
+  push let TDZ (초기화 전)
+step 함수 선언은 함수 객체까지 생성되어 바인딩된다.
+  push fn 함수 객체
+step 실행 단계에서 a 를 읽으면 undefined 가 반환된다.
   log out console.log(a) → undefined
-step b 를 읽으면 TDZ 라서 ReferenceError 다.
+step b 는 초기화 전이므로 ReferenceError 가 발생한다.
   log out console.log(b) → ReferenceError
-step hello() 는 몸통이 이미 있으니 그냥 실행된다.
+step hello 는 이미 함수 객체가 바인딩되어 있어 정상 호출된다.
   log out hello() → "안녕"
-step let b = 1 줄에 도달하는 순간 TDZ 가 끝난다.
-  move let out b = 1 (이제 사용 가능)
+step let b = 1 이 실행되면 b 가 초기화되고 TDZ 가 끝난다.
+  move let out b = 1 (접근 가능)
 ```
 
-TDZ 는 실수를 **빨리** 드러내려고 일부러 만든 장치다. `var` 였다면
-`undefined` 가 조용히 흘러다니다 한참 뒤 엉뚱한 곳에서 터진다.
+`var` 는 선언 전 접근이 `undefined` 로 조용히 통과하기 때문에, 잘못된 참조가 실행 후반에
+다른 형태의 버그로 나타난다. `let` · `const` 의 TDZ 는 초기화 전 접근을 즉시 런타임 에러로
+드러낸다.
 
 ---
 
-## 직접 확인
+## 예제
 
-주석을 하나씩 풀어 가며 어디서 에러가 나는지 확인해라.
+주석 처리된 줄을 하나씩 해제하면 각 경우의 에러를 확인할 수 있다.
 
 ```playground
 #! js title=hoisting.js height=220
-console.log("var  :", typeof a);   // undefined — 에러가 아니다
+console.log("var  :", typeof a);   // undefined (에러 아님)
 var a = 1;
 
-hello();                            // 몸통까지 올라가 있어 잘 돈다
+hello();                            // 함수 객체가 이미 바인딩되어 있음
 function hello() { console.log("fn   : 안녕"); }
 
-// 아래 두 줄의 주석을 풀면 TDZ 에 걸린다
+// 아래 두 줄을 해제하면 TDZ 에서 ReferenceError
 // console.log("let  :", b);
 // let b = 1;
 
-// 함수 "표현식" 은 변수 규칙을 따른다 — 이것도 풀어 봐라
+// 함수 표현식은 변수 선언 규칙을 따른다
 // bye();
 // var bye = function () { console.log("bye"); };
 ```
 
-마지막 것이 특히 헷갈린다. `var bye = function(){}` 은 **함수 선언이 아니라 변수 선언**이다.
-등록될 때 `undefined` 가 들어가 있으므로 `bye()` 는 `TypeError: bye is not a function` 이다.
+`var bye = function(){}` 은 함수 선언이 아니라 변수 선언이다. 생성 단계에서 `bye` 는
+`undefined` 로 초기화되므로 `bye()` 는 `TypeError: bye is not a function` 이 된다.
 
 ---
 
-## 흔한 실수
+## 자주 하는 실수
 
 ::: warning
-**호이스팅을 "코드가 실제로 위로 옮겨진다"로 이해하는 것**
+호이스팅을 코드가 실제로 위로 이동하는 것으로 이해하는 경우
 
-옮겨지지 않는다. 실행 전에 **등록**될 뿐이다. 이 차이가 중요한 이유는
-`let` 의 TDZ 를 설명할 수 있느냐로 갈린다. 옮겨진다고 믿으면
-"`let` 도 올라갔는데 왜 에러지?"에서 막힌다.
+소스 코드는 이동하지 않는다. 생성 단계에서 식별자가 환경 레코드에 먼저 등록될 뿐이다.
+이동 모델로 이해하면 `let` 도 호이스팅되는데 왜 에러가 나는지 설명할 수 없다.
+`let` 은 등록은 되지만 초기화되지 않는다는 점이 차이다.
 :::
 
 ::: tip
-호이스팅에 기대지 마라. **선언을 쓰는 자리 바로 위에 둔다.**
-`let`·`const` 만 쓰면 TDZ 가 대신 잔소리를 해 준다.
+호이스팅에 의존하는 코드는 읽기 어렵다. 선언은 사용하는 위치보다 앞에 두고,
+`var` 대신 `let` · `const` 를 쓰면 초기화 전 접근이 에러로 바로 드러난다.
 :::
 
 ---
 
-## 한 줄 정리
+## 정리
 
-실행 전에 선언이 등록되고, **등록될 때 들어가는 값이 `var`·`let`·`function` 마다 다르다.**
-`let`·`const` 는 값 없이 등록되며, 그 구간이 TDZ 다.
+실행 전에 생성 단계에서 선언이 등록되며, 등록 시 초기값이 `var` 는 `undefined`,
+`let` · `const` 는 초기화 안 됨, 함수 선언은 함수 객체로 서로 다르다.
+`let` · `const` 가 초기화되기 전까지의 구간이 TDZ 다.
 
 - [ ] `var` 는 `undefined`, `let` 은 에러인 이유를 말할 수 있다
 - [ ] 함수 선언과 함수 표현식의 차이를 안다
-- [ ] TDZ 가 왜 도움이 되는지 설명할 수 있다
+- [ ] TDZ 가 초기화 전 접근을 에러로 만드는 이유를 설명할 수 있다
 
 ## 참고
 
@@ -167,6 +171,6 @@ function hello() { console.log("fn   : 안녕"); }
 
 ## 관련 글
 
-- [스코프 — 변수가 어디까지 보이는가 →](/post/scope) — 이 글의 선행
-- [클로저 — 함수가 붙잡고 있는 변수 →](/post/closure) — 스코프와 호이스팅이 만나는 곳
-- [TDZ — 등록은 됐지만 아직 쓸 수 없는 구간 →](/post/tdz) — 다음 글
+- [스코프와 스코프 체인 →](/post/scope) (선행 개념)
+- [클로저와 렉시컬 환경 →](/post/closure)
+- [TDZ(Temporal Dead Zone) →](/post/tdz) (다음 글)
