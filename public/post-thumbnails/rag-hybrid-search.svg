@@ -1,0 +1,228 @@
+<svg id="tb-rag-hybrid-search" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-rag-hybrid-search-t tb-rag-hybrid-search-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-rag-hybrid-search-t">설계기준 RAG의 하이브리드 검색 구현</title>
+  <desc id="tb-rag-hybrid-search-d">work/RAG — dense + BM25 → RRF → 리랭커, Hit@3 0.35 → 0.90</desc>
+
+  <defs>
+    <linearGradient id="tb-rag-hybrid-search-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-rag-hybrid-search-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(158 64% 61%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(158 64% 61%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-rag-hybrid-search-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-rag-hybrid-search-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#fb923c" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-rag-hybrid-search-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(158 64% 61%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(158 64% 61%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(158 64% 61%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-rag-hybrid-search-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-rag-hybrid-search-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-rag-hybrid-search-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-rag-hybrid-search-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-rag-hybrid-search-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-rag-hybrid-search-glow-a { animation: tb-rag-hybrid-search-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-rag-hybrid-search-glow-b { animation: tb-rag-hybrid-search-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-rag-hybrid-search-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-rag-hybrid-search-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-rag-hybrid-search-spark { fill: #ffffff; opacity: 0; animation-name: tb-rag-hybrid-search-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-rag-hybrid-search-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-rag-hybrid-search-sheen-band { animation: tb-rag-hybrid-search-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-rag-hybrid-search-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-rag-hybrid-search-caret { animation: tb-rag-hybrid-search-blink 1.1s steps(1) infinite; }
+    @keyframes tb-rag-hybrid-search-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-rag-hybrid-search-halo { animation: tb-rag-hybrid-search-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-rag-hybrid-search-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-rag-hybrid-search-bracket { stroke: hsl(158 64% 61%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-rag-hybrid-search-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-rag-hybrid-search-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-rag-hybrid-search-badge-ring { animation: tb-rag-hybrid-search-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-rag-hybrid-search-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-rag-hybrid-search-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-rag-hybrid-search-tshadow); transition: fill .35s ease; }
+    .tb-rag-hybrid-search-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-rag-hybrid-search-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(158 64% 61%); letter-spacing: 2.6px; }
+    .tb-rag-hybrid-search-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-rag-hybrid-search-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-rag-hybrid-search-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-rag-hybrid-search-c-key    { fill: #fb923c; }
+    .tb-rag-hybrid-search-c-string { fill: #86efac; }
+    .tb-rag-hybrid-search-c-number { fill: #fbbf24; }
+    .tb-rag-hybrid-search-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-rag-hybrid-search-c-ident  { fill: #cbd5e1; }
+    .tb-rag-hybrid-search-c-punct  { fill: #94a3b8; }
+    .tb-rag-hybrid-search-c-op     { fill: hsl(158 64% 61%); }
+    .tb-rag-hybrid-search-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-glow-a,
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-glow-b     { animation-duration: 6s; }
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-code       { opacity: .62; }
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-spark      { animation-duration: 1.4s !important; }
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-sheen-band { animation-duration: 2.6s; }
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-title      { fill: #ffffff; }
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-rag-hybrid-search:hover .tb-rag-hybrid-search-badge      { transform: translateY(-5px); }
+    .tb-rag-hybrid-search-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-rag-hybrid-search-glow-a, .tb-rag-hybrid-search-glow-b, .tb-rag-hybrid-search-spark, .tb-rag-hybrid-search-sheen-band, .tb-rag-hybrid-search-caret, .tb-rag-hybrid-search-halo, .tb-rag-hybrid-search-badge-ring, .tb-rag-hybrid-search-bracket {
+        animation: none !important;
+      }
+      .tb-rag-hybrid-search-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-rag-hybrid-search-frame)">
+    <rect width="1200" height="630" fill="url(#tb-rag-hybrid-search-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-rag-hybrid-search-grid)"/>
+
+    <circle class="tb-rag-hybrid-search-glow-a" cx="232" cy="109" r="393" fill="url(#tb-rag-hybrid-search-ga)"/>
+    <circle class="tb-rag-hybrid-search-glow-b" cx="900" cy="494" r="336" fill="url(#tb-rag-hybrid-search-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">def</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">_rrf</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">rankings</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">k</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">60</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">:</tspan></text>
+      <text x="64" y="140.12" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">scores</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">{</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="64" y="176.24" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-hybrid-search-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">ranking</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">rankings</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">:</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">        </tspan><tspan class="tb-rag-hybrid-search-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">rank</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">doc</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">enumerate</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">ranking</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">1</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">:</tspan></text>
+      <text x="64" y="248.48" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">            </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">scores</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">[</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">doc</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">]</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">scores</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">.</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">get</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">doc</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">0</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">+</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">1</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">/</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">k</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">+</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">rank</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="64" y="284.6" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-hybrid-search-c-key" xml:space="preserve">return</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">scores</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-rag-hybrid-search-code" font-size="21"></text>
+      <text x="64" y="356.84" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">dense</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">store</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">.</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">search</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">query</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">k</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">20</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan></text>
+      <text x="64" y="392.96" class="tb-rag-hybrid-search-code" font-size="21"><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">bm25</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">  </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">lexical</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">.</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">search</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">query</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">k</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">20</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan></text>
+      <rect class="tb-rag-hybrid-search-caret" x="509" y="376"
+            width="10" height="25" fill="#fb923c" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-rag-hybrid-search-code" font-size="17"><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">def</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">_rrf</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">rankings</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">k</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">60</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">:</tspan></text>
+      <text x="690" y="386.6" class="tb-rag-hybrid-search-code" font-size="17"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">scores</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">{</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">}</tspan></text>
+      <text x="690" y="417.2" class="tb-rag-hybrid-search-code" font-size="17"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-hybrid-search-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">ranking</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">rankings</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">:</tspan></text>
+      <text x="690" y="447.8" class="tb-rag-hybrid-search-code" font-size="17"><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve">        </tspan><tspan class="tb-rag-hybrid-search-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">rank</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">doc</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">enumerate</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-hybrid-search-c-ident" xml:space="preserve">ranking</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-hybrid-search-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-hybrid-search-c-number" xml:space="preserve">1</tspan><tspan class="tb-rag-hybrid-search-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-hybrid-search-c-op" xml:space="preserve">:</tspan></text>
+    </g>
+
+    <circle class="tb-rag-hybrid-search-spark" cx="1040" cy="94" r="1.59" style="animation-delay:4.53s;animation-duration:5.88s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="956" cy="381" r="1.71" style="animation-delay:4.02s;animation-duration:4.47s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="938" cy="83" r="1.66" style="animation-delay:1.67s;animation-duration:5.20s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="172" cy="371" r="2.25" style="animation-delay:0.83s;animation-duration:3.53s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="141" cy="55" r="3.65" style="animation-delay:3.17s;animation-duration:4.00s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="197" cy="487" r="1.85" style="animation-delay:3.57s;animation-duration:5.48s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="186" cy="201" r="2.54" style="animation-delay:0.22s;animation-duration:5.54s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="217" cy="413" r="2.41" style="animation-delay:3.55s;animation-duration:3.69s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="1009" cy="502" r="3.52" style="animation-delay:3.00s;animation-duration:5.51s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="251" cy="323" r="3.03" style="animation-delay:4.86s;animation-duration:3.67s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="162" cy="181" r="1.51" style="animation-delay:5.59s;animation-duration:3.86s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="239" cy="322" r="2.97" style="animation-delay:3.92s;animation-duration:6.40s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="936" cy="269" r="2.68" style="animation-delay:0.12s;animation-duration:5.47s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="278" cy="488" r="1.72" style="animation-delay:2.83s;animation-duration:4.52s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="967" cy="360" r="2.14" style="animation-delay:1.24s;animation-duration:5.75s"/>
+    <circle class="tb-rag-hybrid-search-spark" cx="915" cy="331" r="2.88" style="animation-delay:2.70s;animation-duration:4.42s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-rag-hybrid-search-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-rag-hybrid-search-vignette)"/>
+
+    <g class="tb-rag-hybrid-search-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-rag-hybrid-search-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="509" y="166" width="183" height="42" rx="21"
+            fill="hsl(158 64% 61%)" fill-opacity="0.13" stroke="hsl(158 64% 61%)" stroke-opacity="0.55"/>
+      <text class="tb-rag-hybrid-search-chip-t" x="600" y="194" text-anchor="middle" font-size="19">WORK / RAG</text>
+    </g>
+
+    <text class="tb-rag-hybrid-search-title" x="600" y="266" text-anchor="middle" font-size="62">설계기준 RAG의</text>
+      <text class="tb-rag-hybrid-search-title" x="600" y="345" text-anchor="middle" font-size="62">하이브리드 검색 구현</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-rag-hybrid-search-rule)"/>
+    <text class="tb-rag-hybrid-search-sub" x="600" y="455" text-anchor="middle" font-size="25">dense + BM25 → RRF → 리랭커, Hit@3 0.35 → 0.90</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-rag-hybrid-search-badge">
+      <circle class="tb-rag-hybrid-search-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#fb923c" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#fb923c" fill-opacity="0.92"/>
+      <text class="tb-rag-hybrid-search-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">RAG</text>
+    </g>
+
+    <text class="tb-rag-hybrid-search-foot" x="1128" y="540" text-anchor="end" font-size="17">WORK/RAG</text>
+    <text class="tb-rag-hybrid-search-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-rag-hybrid-search-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-rag-hybrid-search-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-rag-hybrid-search-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-rag-hybrid-search-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(158 64% 61%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

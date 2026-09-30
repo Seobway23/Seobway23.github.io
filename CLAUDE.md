@@ -12,6 +12,18 @@ Cursor·에이전트: **`posts/**/\*.md`를 쓰거나 고칠 때는 이 파일(�
 
 **역학·토질·토압 시리즈** (`posts/study/mechanics/` 에 넣는 글): 추가로 **`docs/mechanics-post-principles.md`** 를 반드시 참고한다 — 공식 유도 필수, 비전공자용 설명, 시각화 원칙, 시리즈 로드맵. (Cursor는 같은 경로 편집 시 `.cursor/rules/mechanics-blog.mdc` 가 이를 상기한다.)
 
+### 0. 글 종류별 구조
+
+| 카테고리 | 형식 | 템플릿 |
+| --- | --- | --- |
+| `work/*` (실험·구현·원인 분석) | 연구 논문: 초록 → 1. 배경 → 2. 방법 → 3. 결과 → 4. 논의 → 5. 결론 → 부록 A. 원시 데이터 | `posts/_TEMPLATE_work.md` |
+| `frontend/*`, `study/*` 단일 개념 | 교과서형: 요약 → 1. 문제 상황 → 2. 정의 → 3. 동작 원리 → 4. 예제 → 5. 자주 하는 실수 → 6. 정리 | `posts/_TEMPLATE_concept.md` |
+| 여러 개념을 묶는 개요·로드맵 | 리뷰형: 초록 → 1. 범위 → 2. 분류 → 3. 개념별 요약 → 4. 개념 간 관계 → 5. 흔한 오해 → 6. 결론과 학습 순서 | `posts/_TEMPLATE_review.md` |
+
+- `work` 글: H2 는 번호 붙은 장(`## 1. 배경`), H3 는 절(`### 1.1 문제 상황`). `---` 는 H2 사이에만. 맨 위 `::: abstract` 에 핵심 수치.
+- 그림: 수치 그래프는 ` ```chart `(원시 데이터 JSON 경로를 가리킴), 캡처는 `![설명](경로 "캡션. 출처: …")`. 둘 다 「그림 N.」 자동 번호. 외부 문서 캡처는 캡션에 출처를 적고 원본 파일(PDF 등)은 절대 올리지 않는다. 문법: `posts/README.md` 9-A.
+- 모든 새 글: `scripts/generate-thumbnail.mjs --write-frontmatter` 로 SVG 표지, 일반 독자가 모를 용어는 `glossary` + `[[id|표시어]]` (표 셀 안에는 넣지 않는다).
+
 ### 1. Frontmatter
 
 ```yaml

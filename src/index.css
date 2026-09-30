@@ -1039,13 +1039,19 @@ html:not(.dark) .prose .post-callout--abstract {
   width: 100% !important;
 }
 
-/* ─── prose 내 table overflow (이미지 4개짜리 table 등 PC에서 깨짐 방지) ─── */
-.prose table {
-  display: block;
-  width: max-content;
+/* ─── prose 내 table: 표는 본문 폭을 채우고, 넘침(이미지 4개짜리 표 등)은 바깥 상자가 스크롤 ───
+   빌드 스크립트(generate-posts-data.js wrapTables)가 모든 <table> 을 .post-table-wrap 으로 감싼다.
+   예전처럼 표 자체를 display:block + max-content 로 두면 짧은 표가 내용 폭으로 줄어 왼쪽에 쏠린다. */
+.prose .post-table-wrap {
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  margin: 2em 0;
+}
+.prose .post-table-wrap > table {
+  display: table;
+  width: 100%;
+  margin: 0;
 }
 
 /* SVG 렌더링 품질 */
@@ -1662,6 +1668,88 @@ html:not(.dark) .glow-card:focus-within::after {
    (생성: scripts/generate-posts-data.js, src/lib/post-sequence.ts,
           src/lib/post-playground.ts / 초기화: src/pages/post.tsx)
    ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── 그림(figure) · ```chart ───────────────────────────────────────
+   생성: scripts/post-chart.mjs (차트 SVG), scripts/generate-posts-data.js (이미지 figure, 번호)
+   차트 색은 여기 변수만 바꾸면 된다. SVG 가 인라인이라 테마 전환을 그대로 따른다. */
+.prose {
+  --pc-on: #2563eb;
+  --pc-base: #ea580c;
+  --pc-h1: #1d4ed8;
+  --pc-h2: #60a5fa;
+  --pc-h3: #dbeafe;
+}
+.dark .prose {
+  --pc-on: #3b82f6;
+  --pc-base: #fb923c;
+  --pc-h1: #3b82f6;
+  --pc-h2: #1e4fae;
+  --pc-h3: #1e3350;
+}
+
+.prose .post-figure {
+  margin: 1.75rem 0;
+}
+.prose .post-figure img {
+  margin: 0 auto;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: #fff; /* 원문 캡처는 흰 종이라 다크 테마에서도 그대로 둔다 */
+}
+.prose .post-figure figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+}
+.prose .post-figure__no {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+.prose .post-figure__src {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+}
+
+.prose .post-chart {
+  padding: 1rem 1rem 0.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  background: hsl(var(--background));
+}
+.prose .post-chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: inherit;
+}
+.post-chart__svg .pc-on { fill: var(--pc-on); }
+.post-chart__svg .pc-base { fill: var(--pc-base); }
+.post-chart__svg .pc-off { fill: none; stroke: var(--pc-on); stroke-width: 1.5; }
+.post-chart__svg .pc-h1 { fill: var(--pc-h1); }
+.post-chart__svg .pc-h2 { fill: var(--pc-h2); }
+.post-chart__svg .pc-h3 { fill: var(--pc-h3); }
+.post-chart__svg .pc-h0 { fill: none; stroke: hsl(var(--muted-foreground)); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.7; }
+.post-chart__svg .pc-link { stroke: hsl(var(--muted-foreground)); stroke-width: 2; opacity: 0.55; }
+.post-chart__svg .pc-grid { stroke: hsl(var(--border)); stroke-width: 1; }
+.post-chart__svg .pc-axis { stroke: hsl(var(--muted-foreground)); stroke-width: 1; opacity: 0.6; }
+.post-chart__svg text { fill: hsl(var(--foreground)); font-size: 12px; }
+.post-chart__svg .pc-title { font-size: 13px; font-weight: 600; }
+.post-chart__svg .pc-label { font-size: 12px; }
+.post-chart__svg .pc-legend,
+.post-chart__svg .pc-tick { fill: hsl(var(--muted-foreground)); font-size: 11px; }
+.post-chart__svg .pc-value { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.post-chart__svg .pc-value--sm { font-size: 10.5px; }
+.post-chart__svg .pc-cell { font-size: 11px; font-variant-numeric: tabular-nums; }
+.post-chart__svg .pc-cell--strong { fill: #fff; font-weight: 700; }
+.post-chart__svg .pc-cell--miss { fill: hsl(var(--muted-foreground)); }
+@media (max-width: 640px) {
+  /* 통째로 줄이면 글자가 6px 이하가 된다. 최소 폭을 두고 가로로 스크롤한다. */
+  .prose .post-chart { padding: 0.75rem 0.5rem 0.5rem; overflow-x: auto; }
+  .prose .post-chart__svg { min-width: 560px; }
+}
 
 /* ─── ::: tabs — 본문 탭 ─────────────────────────────────────────── */
 .prose .post-tabs {

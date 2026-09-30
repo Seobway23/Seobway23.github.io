@@ -7,6 +7,8 @@ import { useIsMobile } from "../hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { categoryTrail } from "@/lib/category-label";
+import { categoryColor } from "@/lib/category-color";
 import RightSidebar from "../components/right-sidebar";
 import UtterancesComments from "../components/utterances-comments";
 import { PostGlossaryLayer } from "@/components/post-glossary-layer";
@@ -56,22 +58,6 @@ hljs.registerLanguage("go", go);
 hljs.registerLanguage("plaintext", plaintext);
 hljs.registerLanguage("shell", shell);
 hljs.registerLanguage("nginx", nginx);
-
-const categoryLabels: Record<string, string> = {
-  react: "React",
-  typescript: "TypeScript",
-  css: "CSS",
-  performance: "Performance",
-  nextjs: "Next.js",
-  mechanics: "역학",
-  "study/mechanics": "역학",
-  "study/mechanics/basics": "역학 · 기초",
-  "study/mechanics/earth-pressure": "역학 · 토압",
-  work: "Work",
-  "work/analysis": "Work · 분석",
-  electron: "Electron",
-  "study/electron": "Electron",
-};
 
 export default function Post() {
   const [, params] = useRoute("/post/:slug");
@@ -695,7 +681,7 @@ export default function Post() {
     );
   }
 
-  const categoryLabel = categoryLabels[post.category] || post.category.split("/").pop() || post.category;
+  const categoryCrumbs = categoryTrail(post.category);
   const imageUrl = getPostCoverImageUrl(post);
 
   return (
@@ -870,17 +856,37 @@ export default function Post() {
               <CardContent className="p-6 sm:p-8">
                 {/* Post Header */}
                 <header className="mb-8">
-                  <div className="mb-4">
-                    <Badge
-                      className="text-white"
-                      style={{
-                        background:
-                          "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))",
-                      }}
-                    >
-                      {categoryLabel}
-                    </Badge>
-                  </div>
+                  {/* 카테고리 경로. 조각마다 그 카테고리 목록으로 간다. */}
+                  <nav aria-label="카테고리 경로" className="mb-4 flex flex-wrap items-center gap-1.5 text-sm">
+                    {categoryCrumbs.map((c, i) => (
+                      <span key={c.path} className="flex items-center gap-1.5">
+                        {i > 0 && (
+                          <span className="text-muted-foreground" aria-hidden>
+                            ›
+                          </span>
+                        )}
+                        <a
+                          href={`/?category=${encodeURIComponent(c.path)}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            navigate(`/?category=${encodeURIComponent(c.path)}`);
+                          }}
+                        >
+                          <Badge
+                            className="text-white"
+                            style={{
+                              background:
+                                i === categoryCrumbs.length - 1
+                                  ? "linear-gradient(135deg, var(--gradient-start), var(--gradient-end))"
+                                  : categoryColor(c.path),
+                            }}
+                          >
+                            {c.label}
+                          </Badge>
+                        </a>
+                      </span>
+                    ))}
+                  </nav>
 
                   <h1 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight">
                     {post.title}
@@ -912,10 +918,12 @@ export default function Post() {
                     </span>
                   </div>
 
+                  {/* 표지 SVG 는 1200×630(og:image 비율)으로 그린다. 고정 높이(h-64)로 자르면
+                      아래쪽 주제 배지와 오른쪽 아래 라벨이 잘려 나가므로 같은 비율로 보여 준다. */}
                   <CoverImage
                     src={imageUrl}
                     alt={post.title}
-                    className="w-full h-64 object-cover rounded-xl mb-8 overflow-hidden"
+                    className="w-full aspect-[1200/630] object-cover rounded-xl mb-8 overflow-hidden"
                   />
                 </header>
 

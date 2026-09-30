@@ -1,0 +1,1885 @@
+{
+  "about": "노코드 모델러 캔버스 최적화 ablation. 프로덕션 빌드 1개, 스위치만 바꿔 18 버전, 버전마다 3회 중앙값. 최대화 창 1920×1032, 60 Hz.",
+  "metric": "updatesPerSec = 직전 프레임 구간에 React 커밋이 든 프레임 수 / 초. updateRatio = updatesPerSec / 60.",
+  "measuredAt": "2026-09-30T08:21:32.567Z",
+  "repeat": 3,
+  "refreshHz": 59.9,
+  "variants": {
+    "base": {
+      "opts": [],
+      "svgNodes3D": 5237,
+      "polygons": 4086,
+      "ssim": 1,
+      "code": {
+        "add": 0,
+        "del": 0,
+        "files": []
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 7.8,
+          "updateP95": 150.1,
+          "fps": 20.7,
+          "frameP95": 116.6,
+          "commitsPerSec": 7.9,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 12354.8,
+          "longTaskMs": 4694,
+          "taskMsPerSec": 996.6,
+          "scriptMsPerSec": 439,
+          "styleMsPerSec": 296.5,
+          "layoutMsPerSec": 40.6,
+          "movesPerSec": 19.9,
+          "inputToFrameP95": 41.8,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            20.8,
+            20.7,
+            20.5
+          ],
+          "updatesAll": [
+            7.8,
+            7.8,
+            7.9
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 15.8,
+          "updateP95": 83.3,
+          "fps": 17.1,
+          "frameP95": 83.3,
+          "commitsPerSec": 16.1,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6074.4,
+          "longTaskMs": 219,
+          "taskMsPerSec": 997.5,
+          "scriptMsPerSec": 557.6,
+          "styleMsPerSec": 57.5,
+          "layoutMsPerSec": 84.7,
+          "movesPerSec": 16.1,
+          "inputToFrameP95": 36,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            17.1,
+            17.1,
+            17.4
+          ],
+          "updatesAll": [
+            15.7,
+            15.9,
+            15.8
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 8.7,
+          "updateP95": 183.2,
+          "fps": 20.4,
+          "frameP95": 116.7,
+          "commitsPerSec": 8.9,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 9972.3,
+          "longTaskMs": 2032,
+          "taskMsPerSec": 852.7,
+          "scriptMsPerSec": 391.2,
+          "styleMsPerSec": 248,
+          "layoutMsPerSec": 39.6,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            20.4,
+            18.6,
+            20.8
+          ],
+          "updatesAll": [
+            8.7,
+            8.3,
+            8.9
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.13,
+        "pan": 0.263,
+        "viewTween": 0.145
+      }
+    },
+    "cull": {
+      "opts": [
+        "cull"
+      ],
+      "svgNodes3D": 3413,
+      "polygons": 2262,
+      "ssim": 0.9996,
+      "code": {
+        "add": 36,
+        "del": 5,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 12.1,
+          "updateP95": 100,
+          "fps": 30,
+          "frameP95": 66.7,
+          "commitsPerSec": 12.1,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 7376.3,
+          "longTaskMs": 4362,
+          "taskMsPerSec": 987.2,
+          "scriptMsPerSec": 480.2,
+          "styleMsPerSec": 234.8,
+          "layoutMsPerSec": 45.1,
+          "movesPerSec": 28.5,
+          "inputToFrameP95": 14.4,
+          "svgNodesMidDrag": 3413,
+          "fpsAll": [
+            30.7,
+            30,
+            29.5
+          ],
+          "updatesAll": [
+            12.1,
+            11.9,
+            12.2
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 20.8,
+          "updateP95": 83.3,
+          "fps": 24.6,
+          "frameP95": 50.1,
+          "commitsPerSec": 22.5,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 4295.4,
+          "longTaskMs": 61,
+          "taskMsPerSec": 980.8,
+          "scriptMsPerSec": 571.4,
+          "styleMsPerSec": 53.1,
+          "layoutMsPerSec": 84.6,
+          "movesPerSec": 22.5,
+          "inputToFrameP95": 8.3,
+          "svgNodesMidDrag": 3413,
+          "fpsAll": [
+            24.6,
+            24.7,
+            24.6
+          ],
+          "updatesAll": [
+            20.8,
+            20.2,
+            21.7
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 12.1,
+          "updateP95": 250,
+          "fps": 31.7,
+          "frameP95": 66.7,
+          "commitsPerSec": 12.3,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6036,
+          "longTaskMs": 63,
+          "taskMsPerSec": 751.8,
+          "scriptMsPerSec": 380.2,
+          "styleMsPerSec": 176.1,
+          "layoutMsPerSec": 38.3,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            31.3,
+            31.8,
+            31.7
+          ],
+          "updatesAll": [
+            12.8,
+            11.8,
+            12.1
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.202,
+        "pan": 0.347,
+        "viewTween": 0.202
+      }
+    },
+    "pipeSeg": {
+      "opts": [
+        "pipeSeg"
+      ],
+      "svgNodes3D": 3413,
+      "polygons": 2262,
+      "ssim": 0.9998,
+      "code": {
+        "add": 5,
+        "del": 2,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 13.2,
+          "updateP95": 100,
+          "fps": 32.7,
+          "frameP95": 66.6,
+          "commitsPerSec": 13.2,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 7442.7,
+          "longTaskMs": 3502,
+          "taskMsPerSec": 989.6,
+          "scriptMsPerSec": 471,
+          "styleMsPerSec": 239.8,
+          "layoutMsPerSec": 45.1,
+          "movesPerSec": 31.6,
+          "inputToFrameP95": 15,
+          "svgNodesMidDrag": 3413,
+          "fpsAll": [
+            32.7,
+            31.2,
+            34.3
+          ],
+          "updatesAll": [
+            13.2,
+            12.7,
+            13.5
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 20.6,
+          "updateP95": 83.4,
+          "fps": 27,
+          "frameP95": 66.6,
+          "commitsPerSec": 24.9,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 4299.7,
+          "longTaskMs": 0,
+          "taskMsPerSec": 981.2,
+          "scriptMsPerSec": 532.6,
+          "styleMsPerSec": 54.2,
+          "layoutMsPerSec": 86.4,
+          "movesPerSec": 24.9,
+          "inputToFrameP95": 11.9,
+          "svgNodesMidDrag": 3413,
+          "fpsAll": [
+            25.9,
+            27,
+            27.1
+          ],
+          "updatesAll": [
+            20.4,
+            20.6,
+            21.7
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 13.8,
+          "updateP95": 249.9,
+          "fps": 34.3,
+          "frameP95": 66.7,
+          "commitsPerSec": 14.2,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6055.4,
+          "longTaskMs": 0,
+          "taskMsPerSec": 731.3,
+          "scriptMsPerSec": 353.3,
+          "styleMsPerSec": 169,
+          "layoutMsPerSec": 39.7,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            33.1,
+            34.8,
+            34.3
+          ],
+          "updatesAll": [
+            12.1,
+            14.2,
+            13.8
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.22,
+        "pan": 0.343,
+        "viewTween": 0.23
+      }
+    },
+    "capJoin": {
+      "opts": [
+        "capJoin"
+      ],
+      "svgNodes3D": 3509,
+      "polygons": 2358,
+      "ssim": 1,
+      "code": {
+        "add": 30,
+        "del": 1,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 13.7,
+          "updateP95": 100,
+          "fps": 34.6,
+          "frameP95": 50.2,
+          "commitsPerSec": 13.9,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 7628.1,
+          "longTaskMs": 2542,
+          "taskMsPerSec": 986.4,
+          "scriptMsPerSec": 489.6,
+          "styleMsPerSec": 215.5,
+          "layoutMsPerSec": 40.6,
+          "movesPerSec": 33.3,
+          "inputToFrameP95": 21.6,
+          "svgNodesMidDrag": 3509,
+          "fpsAll": [
+            32.8,
+            34.6,
+            35.4
+          ],
+          "updatesAll": [
+            12.9,
+            13.7,
+            13.9
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 19,
+          "updateP95": 83.4,
+          "fps": 25.2,
+          "frameP95": 66.6,
+          "commitsPerSec": 22.8,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 4390.8,
+          "longTaskMs": 0,
+          "taskMsPerSec": 979.9,
+          "scriptMsPerSec": 530,
+          "styleMsPerSec": 53.2,
+          "layoutMsPerSec": 85.6,
+          "movesPerSec": 22.8,
+          "inputToFrameP95": 14.2,
+          "svgNodesMidDrag": 3509,
+          "fpsAll": [
+            25.7,
+            24.4,
+            25.2
+          ],
+          "updatesAll": [
+            18.8,
+            19,
+            19.5
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 13.1,
+          "updateP95": 266.6,
+          "fps": 33,
+          "frameP95": 66.7,
+          "commitsPerSec": 13.5,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6444.9,
+          "longTaskMs": 0,
+          "taskMsPerSec": 740.5,
+          "scriptMsPerSec": 361.7,
+          "styleMsPerSec": 177.8,
+          "layoutMsPerSec": 36.7,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            32.2,
+            33.3,
+            33
+          ],
+          "updatesAll": [
+            11.7,
+            13.1,
+            13.2
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.228,
+        "pan": 0.317,
+        "viewTween": 0.218
+      }
+    },
+    "panXform": {
+      "opts": [
+        "panXform"
+      ],
+      "svgNodes3D": 5237,
+      "polygons": 4086,
+      "ssim": 1,
+      "code": {
+        "add": 61,
+        "del": 35,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 8.1,
+          "updateP95": 166.7,
+          "fps": 21.2,
+          "frameP95": 116.7,
+          "commitsPerSec": 8.2,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 12276.3,
+          "longTaskMs": 4672,
+          "taskMsPerSec": 995.4,
+          "scriptMsPerSec": 462.3,
+          "styleMsPerSec": 261.5,
+          "layoutMsPerSec": 38.3,
+          "movesPerSec": 20.4,
+          "inputToFrameP95": 43.8,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            18.9,
+            21.2,
+            21.8
+          ],
+          "updatesAll": [
+            6.7,
+            8.1,
+            8.2
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 19.7,
+          "updateP95": 66.7,
+          "fps": 20.9,
+          "frameP95": 66.7,
+          "commitsPerSec": 20.4,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1,
+          "longTaskMs": 118,
+          "taskMsPerSec": 248.1,
+          "scriptMsPerSec": 101.5,
+          "styleMsPerSec": 26.8,
+          "layoutMsPerSec": 8,
+          "movesPerSec": 20.2,
+          "inputToFrameP95": 50.8,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            18,
+            20.9,
+            23
+          ],
+          "updatesAll": [
+            16.8,
+            19.7,
+            21.5
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 9,
+          "updateP95": 166.6,
+          "fps": 21.1,
+          "frameP95": 116.7,
+          "commitsPerSec": 9.2,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 9926.5,
+          "longTaskMs": 1796,
+          "taskMsPerSec": 858.9,
+          "scriptMsPerSec": 405,
+          "styleMsPerSec": 239,
+          "layoutMsPerSec": 40.7,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            17.5,
+            21.2,
+            21.1
+          ],
+          "updatesAll": [
+            8.3,
+            9,
+            9.5
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.135,
+        "pan": 0.328,
+        "viewTween": 0.15
+      }
+    },
+    "camLocal": {
+      "opts": [
+        "camLocal"
+      ],
+      "svgNodes3D": 5237,
+      "polygons": 4086,
+      "ssim": 1,
+      "code": {
+        "add": 5,
+        "del": 1,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 8.2,
+          "updateP95": 150,
+          "fps": 20.4,
+          "frameP95": 116.7,
+          "commitsPerSec": 8.5,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 12217,
+          "longTaskMs": 4230,
+          "taskMsPerSec": 1009.2,
+          "scriptMsPerSec": 448.1,
+          "styleMsPerSec": 307.5,
+          "layoutMsPerSec": 38.8,
+          "movesPerSec": 19.6,
+          "inputToFrameP95": 14.5,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            20.4,
+            10.6,
+            20.8
+          ],
+          "updatesAll": [
+            8.2,
+            9.3,
+            8.2
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 15.1,
+          "updateP95": 83.4,
+          "fps": 16.7,
+          "frameP95": 83.4,
+          "commitsPerSec": 15.4,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6070.2,
+          "longTaskMs": 196,
+          "taskMsPerSec": 983.3,
+          "scriptMsPerSec": 548.8,
+          "styleMsPerSec": 53.6,
+          "layoutMsPerSec": 84.9,
+          "movesPerSec": 15.4,
+          "inputToFrameP95": 30.3,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            16.5,
+            17.5,
+            16.7
+          ],
+          "updatesAll": [
+            14.9,
+            15.6,
+            15.1
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 8.7,
+          "updateP95": 150,
+          "fps": 20.3,
+          "frameP95": 116.7,
+          "commitsPerSec": 9.1,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 10056.7,
+          "longTaskMs": 1879,
+          "taskMsPerSec": 859.3,
+          "scriptMsPerSec": 398.4,
+          "styleMsPerSec": 257.5,
+          "layoutMsPerSec": 37.2,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            20.3,
+            20.3,
+            19.6
+          ],
+          "updatesAll": [
+            8.7,
+            8.4,
+            9
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.137,
+        "pan": 0.252,
+        "viewTween": 0.145
+      }
+    },
+    "rafMove": {
+      "opts": [
+        "rafMove"
+      ],
+      "svgNodes3D": 5237,
+      "polygons": 4086,
+      "ssim": 1,
+      "code": {
+        "add": 39,
+        "del": 7,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 6.8,
+          "updateP95": 166.7,
+          "fps": 19.9,
+          "frameP95": 116.7,
+          "commitsPerSec": 7,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 12320.9,
+          "longTaskMs": 4577,
+          "taskMsPerSec": 1000.4,
+          "scriptMsPerSec": 432.1,
+          "styleMsPerSec": 294.4,
+          "layoutMsPerSec": 42.7,
+          "movesPerSec": 19,
+          "inputToFrameP95": 44.7,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            12,
+            20,
+            19.9
+          ],
+          "updatesAll": [
+            6.7,
+            6.8,
+            7.1
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 14.3,
+          "updateP95": 83.4,
+          "fps": 15.7,
+          "frameP95": 83.4,
+          "commitsPerSec": 14.5,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6064,
+          "longTaskMs": 276,
+          "taskMsPerSec": 992.6,
+          "scriptMsPerSec": 540.8,
+          "styleMsPerSec": 56.9,
+          "layoutMsPerSec": 84.5,
+          "movesPerSec": 14.5,
+          "inputToFrameP95": 28.1,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            15.4,
+            15.7,
+            15.8
+          ],
+          "updatesAll": [
+            14.2,
+            14.3,
+            14.4
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 7.8,
+          "updateP95": 164,
+          "fps": 16.9,
+          "frameP95": 133.4,
+          "commitsPerSec": 8,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 10286.5,
+          "longTaskMs": 2720,
+          "taskMsPerSec": 879.3,
+          "scriptMsPerSec": 388.7,
+          "styleMsPerSec": 257.6,
+          "layoutMsPerSec": 44.5,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            15,
+            16.9,
+            17.8
+          ],
+          "updatesAll": [
+            7.3,
+            7.8,
+            7.8
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.113,
+        "pan": 0.238,
+        "viewTween": 0.13
+      }
+    },
+    "lod": {
+      "opts": [
+        "lod"
+      ],
+      "svgNodes3D": 5237,
+      "polygons": 4086,
+      "ssim": 1,
+      "code": {
+        "add": 17,
+        "del": 3,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 23.1,
+          "updateP95": 66.7,
+          "fps": 51.8,
+          "frameP95": 33.4,
+          "commitsPerSec": 23.4,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3457.7,
+          "longTaskMs": 294,
+          "taskMsPerSec": 992.9,
+          "scriptMsPerSec": 499.8,
+          "styleMsPerSec": 222.2,
+          "layoutMsPerSec": 36.2,
+          "movesPerSec": 50.9,
+          "inputToFrameP95": 14.8,
+          "svgNodesMidDrag": 1424,
+          "fpsAll": [
+            48.6,
+            51.8,
+            52.4
+          ],
+          "updatesAll": [
+            22.2,
+            23.1,
+            23.6
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 31.9,
+          "updateP95": 50.1,
+          "fps": 44.9,
+          "frameP95": 33.4,
+          "commitsPerSec": 42.8,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1916.4,
+          "longTaskMs": 81,
+          "taskMsPerSec": 984.4,
+          "scriptMsPerSec": 581.6,
+          "styleMsPerSec": 75.1,
+          "layoutMsPerSec": 49.4,
+          "movesPerSec": 42.6,
+          "inputToFrameP95": 4.6,
+          "svgNodesMidDrag": 1424,
+          "fpsAll": [
+            42.2,
+            44.9,
+            45
+          ],
+          "updatesAll": [
+            29.4,
+            31.9,
+            33.1
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 17.7,
+          "updateP95": 133.4,
+          "fps": 38.2,
+          "frameP95": 50,
+          "commitsPerSec": 18.7,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3243.2,
+          "longTaskMs": 379,
+          "taskMsPerSec": 723.8,
+          "scriptMsPerSec": 361.5,
+          "styleMsPerSec": 182.7,
+          "layoutMsPerSec": 25.6,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            37.7,
+            38.2,
+            39
+          ],
+          "updatesAll": [
+            17.7,
+            16.4,
+            17.8
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.385,
+        "pan": 0.532,
+        "viewTween": 0.295
+      }
+    },
+    "geomCache": {
+      "opts": [
+        "geomCache"
+      ],
+      "svgNodes3D": 5237,
+      "polygons": 4086,
+      "ssim": 1,
+      "code": {
+        "add": 28,
+        "del": 2,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 7.4,
+          "updateP95": 183.3,
+          "fps": 19.4,
+          "frameP95": 133.3,
+          "commitsPerSec": 7.7,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 12326.2,
+          "longTaskMs": 4668,
+          "taskMsPerSec": 999.8,
+          "scriptMsPerSec": 428.4,
+          "styleMsPerSec": 300.3,
+          "layoutMsPerSec": 42.1,
+          "movesPerSec": 19,
+          "inputToFrameP95": 42.1,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            19.3,
+            19.9,
+            19.4
+          ],
+          "updatesAll": [
+            7.3,
+            7.5,
+            7.4
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 14.7,
+          "updateP95": 100,
+          "fps": 16.6,
+          "frameP95": 99.9,
+          "commitsPerSec": 15.2,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6068.8,
+          "longTaskMs": 280,
+          "taskMsPerSec": 997.6,
+          "scriptMsPerSec": 546.7,
+          "styleMsPerSec": 58.7,
+          "layoutMsPerSec": 83.2,
+          "movesPerSec": 15.2,
+          "inputToFrameP95": 32.5,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            15.8,
+            18,
+            16.6
+          ],
+          "updatesAll": [
+            14.1,
+            15.4,
+            14.7
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 8.2,
+          "updateP95": 183.3,
+          "fps": 20.4,
+          "frameP95": 116.8,
+          "commitsPerSec": 8.9,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 9971.4,
+          "longTaskMs": 1988,
+          "taskMsPerSec": 858.4,
+          "scriptMsPerSec": 386.7,
+          "styleMsPerSec": 240.8,
+          "layoutMsPerSec": 39.3,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            20.4,
+            21.7,
+            19.6
+          ],
+          "updatesAll": [
+            8.2,
+            8,
+            9.3
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.123,
+        "pan": 0.245,
+        "viewTween": 0.137
+      }
+    },
+    "stage1": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin",
+        "panXform",
+        "camLocal",
+        "rafMove"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 176,
+        "del": 51,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 25.5,
+          "updateP95": 66.6,
+          "fps": 30.8,
+          "frameP95": 50,
+          "commitsPerSec": 25.8,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3775.8,
+          "longTaskMs": 0,
+          "taskMsPerSec": 1002.4,
+          "scriptMsPerSec": 462.9,
+          "styleMsPerSec": 174.7,
+          "layoutMsPerSec": 72.8,
+          "movesPerSec": 29.7,
+          "inputToFrameP95": 13,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            30.8,
+            30.1,
+            40.8
+          ],
+          "updatesAll": [
+            28.6,
+            23.9,
+            25.5
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 34.8,
+          "updateP95": 50,
+          "fps": 45.2,
+          "frameP95": 33.4,
+          "commitsPerSec": 43.3,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1,
+          "longTaskMs": 0,
+          "taskMsPerSec": 416.2,
+          "scriptMsPerSec": 218.1,
+          "styleMsPerSec": 15.4,
+          "layoutMsPerSec": 6.3,
+          "movesPerSec": 43.1,
+          "inputToFrameP95": 19.3,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            49.6,
+            43.2,
+            45.2
+          ],
+          "updatesAll": [
+            39.1,
+            34.8,
+            34.7
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 18.1,
+          "updateP95": 66.7,
+          "fps": 43.6,
+          "frameP95": 33.5,
+          "commitsPerSec": 19.1,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3334.9,
+          "longTaskMs": 0,
+          "taskMsPerSec": 677.9,
+          "scriptMsPerSec": 338.2,
+          "styleMsPerSec": 96.6,
+          "layoutMsPerSec": 50.5,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            43.9,
+            42.3,
+            43.6
+          ],
+          "updatesAll": [
+            18.2,
+            18.1,
+            17.7
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.425,
+        "pan": 0.58,
+        "viewTween": 0.302
+      }
+    },
+    "all": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin",
+        "panXform",
+        "camLocal",
+        "rafMove",
+        "lod",
+        "geomCache"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 221,
+        "del": 56,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 47.5,
+          "updateP95": 33.4,
+          "fps": 59.7,
+          "frameP95": 16.8,
+          "commitsPerSec": 50.3,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1548.3,
+          "longTaskMs": 0,
+          "taskMsPerSec": 978.6,
+          "scriptMsPerSec": 460.1,
+          "styleMsPerSec": 186.7,
+          "layoutMsPerSec": 48.6,
+          "movesPerSec": 57.7,
+          "inputToFrameP95": 14.1,
+          "svgNodesMidDrag": 740,
+          "fpsAll": [
+            59.7,
+            59.8,
+            59.7
+          ],
+          "updatesAll": [
+            46.3,
+            49.1,
+            47.5
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 56.4,
+          "updateP95": 16.9,
+          "fps": 60.4,
+          "frameP95": 16.8,
+          "commitsPerSec": 57.6,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 4.5,
+          "longTaskMs": 0,
+          "taskMsPerSec": 395.7,
+          "scriptMsPerSec": 204.6,
+          "styleMsPerSec": 15.8,
+          "layoutMsPerSec": 7.7,
+          "movesPerSec": 57.1,
+          "inputToFrameP95": 14.7,
+          "svgNodesMidDrag": 740,
+          "fpsAll": [
+            60.4,
+            60.2,
+            60.4
+          ],
+          "updatesAll": [
+            56.4,
+            56.3,
+            56.9
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 27.7,
+          "updateP95": 50,
+          "fps": 56.6,
+          "frameP95": 28.4,
+          "commitsPerSec": 31.5,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1458.5,
+          "longTaskMs": 0,
+          "taskMsPerSec": 649.8,
+          "scriptMsPerSec": 310.9,
+          "styleMsPerSec": 119.8,
+          "layoutMsPerSec": 29.3,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            56,
+            57,
+            56.6
+          ],
+          "updatesAll": [
+            26.8,
+            28.6,
+            27.7
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.792,
+        "pan": 0.94,
+        "viewTween": 0.462
+      }
+    },
+    "faces": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 71,
+        "del": 8,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 20.8,
+          "updateP95": 66.7,
+          "fps": 46.1,
+          "frameP95": 33.4,
+          "commitsPerSec": 21,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3785.9,
+          "longTaskMs": 0,
+          "taskMsPerSec": 981,
+          "scriptMsPerSec": 506,
+          "styleMsPerSec": 144.2,
+          "layoutMsPerSec": 66.2,
+          "movesPerSec": 44.3,
+          "inputToFrameP95": 14.2,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            46.1,
+            45.7,
+            48.3
+          ],
+          "updatesAll": [
+            20.6,
+            20.8,
+            22
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 26.9,
+          "updateP95": 50.1,
+          "fps": 35.7,
+          "frameP95": 39.2,
+          "commitsPerSec": 33.3,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 2975.6,
+          "longTaskMs": 0,
+          "taskMsPerSec": 979.2,
+          "scriptMsPerSec": 498.6,
+          "styleMsPerSec": 63.6,
+          "layoutMsPerSec": 87.9,
+          "movesPerSec": 33.3,
+          "inputToFrameP95": 5.8,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            35.7,
+            31,
+            38
+          ],
+          "updatesAll": [
+            29,
+            26.9,
+            26.6
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 17.8,
+          "updateP95": 150,
+          "fps": 42.8,
+          "frameP95": 50,
+          "commitsPerSec": 18.9,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3338.5,
+          "longTaskMs": 0,
+          "taskMsPerSec": 686.8,
+          "scriptMsPerSec": 336.3,
+          "styleMsPerSec": 96.3,
+          "layoutMsPerSec": 48.7,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            42.8,
+            40.2,
+            44.4
+          ],
+          "updatesAll": [
+            17.8,
+            16.1,
+            18
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.347,
+        "pan": 0.448,
+        "viewTween": 0.297
+      }
+    },
+    "facesLod": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin",
+        "lod"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 88,
+        "del": 11,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 41.8,
+          "updateP95": 33.4,
+          "fps": 59.8,
+          "frameP95": 16.8,
+          "commitsPerSec": 42,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1572,
+          "longTaskMs": 0,
+          "taskMsPerSec": 979,
+          "scriptMsPerSec": 518.4,
+          "styleMsPerSec": 147.5,
+          "layoutMsPerSec": 47.9,
+          "movesPerSec": 57.8,
+          "inputToFrameP95": 14.5,
+          "svgNodesMidDrag": 740,
+          "fpsAll": [
+            60,
+            59.8,
+            59.4
+          ],
+          "updatesAll": [
+            41,
+            44.8,
+            41.8
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 55.2,
+          "updateP95": 21.7,
+          "fps": 60.1,
+          "frameP95": 16.8,
+          "commitsPerSec": 57.5,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1194.1,
+          "longTaskMs": 0,
+          "taskMsPerSec": 814.5,
+          "scriptMsPerSec": 411,
+          "styleMsPerSec": 91.6,
+          "layoutMsPerSec": 36,
+          "movesPerSec": 57.3,
+          "inputToFrameP95": 13.4,
+          "svgNodesMidDrag": 740,
+          "fpsAll": [
+            60.3,
+            60.1,
+            60.1
+          ],
+          "updatesAll": [
+            54.9,
+            55.2,
+            55.2
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 28.6,
+          "updateP95": 33.4,
+          "fps": 58.1,
+          "frameP95": 20.1,
+          "commitsPerSec": 31.7,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1483.3,
+          "longTaskMs": 0,
+          "taskMsPerSec": 627.4,
+          "scriptMsPerSec": 309.4,
+          "styleMsPerSec": 108.7,
+          "layoutMsPerSec": 26.9,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            58.6,
+            58.1,
+            58.1
+          ],
+          "updatesAll": [
+            29.3,
+            28,
+            28.6
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.697,
+        "pan": 0.92,
+        "viewTween": 0.477
+      }
+    },
+    "facesLodPan": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin",
+        "lod",
+        "panXform"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 149,
+        "del": 46,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 40.4,
+          "updateP95": 33.4,
+          "fps": 59.7,
+          "frameP95": 16.8,
+          "commitsPerSec": 40.4,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1572,
+          "longTaskMs": 0,
+          "taskMsPerSec": 985.3,
+          "scriptMsPerSec": 516.1,
+          "styleMsPerSec": 148.9,
+          "layoutMsPerSec": 47.6,
+          "movesPerSec": 57.3,
+          "inputToFrameP95": 14.6,
+          "svgNodesMidDrag": 740,
+          "fpsAll": [
+            59.5,
+            59.7,
+            59.9
+          ],
+          "updatesAll": [
+            40.4,
+            40,
+            41.4
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 57,
+          "updateP95": 16.8,
+          "fps": 60.3,
+          "frameP95": 16.8,
+          "commitsPerSec": 57.5,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 4.5,
+          "longTaskMs": 0,
+          "taskMsPerSec": 351.6,
+          "scriptMsPerSec": 181.8,
+          "styleMsPerSec": 14.7,
+          "layoutMsPerSec": 6.5,
+          "movesPerSec": 57,
+          "inputToFrameP95": 15,
+          "svgNodesMidDrag": 740,
+          "fpsAll": [
+            60.3,
+            60.1,
+            60.4
+          ],
+          "updatesAll": [
+            57,
+            56.8,
+            57
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 28.3,
+          "updateP95": 49.9,
+          "fps": 57.3,
+          "frameP95": 25.9,
+          "commitsPerSec": 31.3,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1451.3,
+          "longTaskMs": 0,
+          "taskMsPerSec": 633.5,
+          "scriptMsPerSec": 320.1,
+          "styleMsPerSec": 109.7,
+          "layoutMsPerSec": 27.9,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            58,
+            57.3,
+            56.7
+          ],
+          "updatesAll": [
+            29.4,
+            28.3,
+            26.5
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.673,
+        "pan": 0.95,
+        "viewTween": 0.472
+      }
+    },
+    "facesPan": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin",
+        "panXform"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 132,
+        "del": 43,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 23.2,
+          "updateP95": 66.7,
+          "fps": 50.8,
+          "frameP95": 33.4,
+          "commitsPerSec": 23.6,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3774.9,
+          "longTaskMs": 58,
+          "taskMsPerSec": 983.5,
+          "scriptMsPerSec": 510.1,
+          "styleMsPerSec": 141.9,
+          "layoutMsPerSec": 65.4,
+          "movesPerSec": 48.7,
+          "inputToFrameP95": 15.3,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            52,
+            48,
+            50.8
+          ],
+          "updatesAll": [
+            23.4,
+            22,
+            23.2
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 38.2,
+          "updateP95": 50,
+          "fps": 48.8,
+          "frameP95": 33.4,
+          "commitsPerSec": 46.6,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 1,
+          "longTaskMs": 0,
+          "taskMsPerSec": 393.4,
+          "scriptMsPerSec": 210.2,
+          "styleMsPerSec": 14.6,
+          "layoutMsPerSec": 6.7,
+          "movesPerSec": 46.6,
+          "inputToFrameP95": 18.6,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            50.2,
+            48.8,
+            46.4
+          ],
+          "updatesAll": [
+            39.5,
+            38.2,
+            34.2
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 17.6,
+          "updateP95": 66.8,
+          "fps": 44.5,
+          "frameP95": 33.5,
+          "commitsPerSec": 20.1,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3401.2,
+          "longTaskMs": 0,
+          "taskMsPerSec": 672.8,
+          "scriptMsPerSec": 337.4,
+          "styleMsPerSec": 98.5,
+          "layoutMsPerSec": 47.8,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            44.3,
+            44.5,
+            45.4
+          ],
+          "updatesAll": [
+            17.2,
+            17.6,
+            18
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.387,
+        "pan": 0.637,
+        "viewTween": 0.293
+      }
+    },
+    "facesCam": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin",
+        "camLocal"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 76,
+        "del": 9,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 27.5,
+          "updateP95": 50.1,
+          "fps": 32.9,
+          "frameP95": 50,
+          "commitsPerSec": 28.6,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3766.9,
+          "longTaskMs": 0,
+          "taskMsPerSec": 1001.4,
+          "scriptMsPerSec": 463.2,
+          "styleMsPerSec": 179.2,
+          "layoutMsPerSec": 75.2,
+          "movesPerSec": 31.8,
+          "inputToFrameP95": 13.1,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            32.9,
+            30.1,
+            37.2
+          ],
+          "updatesAll": [
+            26.8,
+            27.5,
+            28.4
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 27.8,
+          "updateP95": 50.1,
+          "fps": 37.1,
+          "frameP95": 33.8,
+          "commitsPerSec": 34.4,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 2976.2,
+          "longTaskMs": 0,
+          "taskMsPerSec": 980.6,
+          "scriptMsPerSec": 498.3,
+          "styleMsPerSec": 63.4,
+          "layoutMsPerSec": 84.6,
+          "movesPerSec": 34.4,
+          "inputToFrameP95": 5.9,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            37.1,
+            37.2,
+            35.9
+          ],
+          "updatesAll": [
+            28.1,
+            27.2,
+            27.8
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 17.7,
+          "updateP95": 116.6,
+          "fps": 43.4,
+          "frameP95": 36.3,
+          "commitsPerSec": 19.3,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3344.2,
+          "longTaskMs": 0,
+          "taskMsPerSec": 680.9,
+          "scriptMsPerSec": 338.1,
+          "styleMsPerSec": 98.9,
+          "layoutMsPerSec": 48,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            43,
+            43.4,
+            43.4
+          ],
+          "updatesAll": [
+            17.7,
+            17.3,
+            18
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.458,
+        "pan": 0.463,
+        "viewTween": 0.295
+      }
+    },
+    "facesRaf": {
+      "opts": [
+        "cull",
+        "pipeSeg",
+        "capJoin",
+        "rafMove"
+      ],
+      "svgNodes3D": 2069,
+      "polygons": 918,
+      "ssim": 0.9991,
+      "code": {
+        "add": 110,
+        "del": 15,
+        "files": [
+          "src/renderer/src/studio/model/Canvas.tsx"
+        ]
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 22.4,
+          "updateP95": 66.7,
+          "fps": 49.2,
+          "frameP95": 33.4,
+          "commitsPerSec": 22.7,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3758.9,
+          "longTaskMs": 0,
+          "taskMsPerSec": 979.7,
+          "scriptMsPerSec": 506.9,
+          "styleMsPerSec": 142.6,
+          "layoutMsPerSec": 63.8,
+          "movesPerSec": 47.6,
+          "inputToFrameP95": 14.8,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            50.3,
+            49.2,
+            48.7
+          ],
+          "updatesAll": [
+            22.5,
+            22.4,
+            21.8
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 27.2,
+          "updateP95": 50.1,
+          "fps": 37,
+          "frameP95": 33.6,
+          "commitsPerSec": 34.2,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 2976.1,
+          "longTaskMs": 0,
+          "taskMsPerSec": 972.5,
+          "scriptMsPerSec": 497.8,
+          "styleMsPerSec": 62.3,
+          "layoutMsPerSec": 85.7,
+          "movesPerSec": 34.2,
+          "inputToFrameP95": 6,
+          "svgNodesMidDrag": 2069,
+          "fpsAll": [
+            37,
+            34.8,
+            37.1
+          ],
+          "updatesAll": [
+            27.2,
+            27.9,
+            26.7
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 17.9,
+          "updateP95": 99.9,
+          "fps": 42.8,
+          "frameP95": 34.3,
+          "commitsPerSec": 19.2,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 3387,
+          "longTaskMs": 0,
+          "taskMsPerSec": 683.6,
+          "scriptMsPerSec": 339,
+          "styleMsPerSec": 98.8,
+          "layoutMsPerSec": 47.7,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            42.8,
+            43.5,
+            42.5
+          ],
+          "updatesAll": [
+            17.9,
+            18.2,
+            17.7
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.373,
+        "pan": 0.453,
+        "viewTween": 0.298
+      }
+    },
+    "baseEnd": {
+      "opts": [],
+      "svgNodes3D": 5237,
+      "polygons": 4086,
+      "ssim": 1,
+      "code": {
+        "add": 0,
+        "del": 0,
+        "files": []
+      },
+      "scenarios": {
+        "orbit": {
+          "updatesPerSec": 6.9,
+          "updateP95": 166.8,
+          "fps": 18.6,
+          "frameP95": 133.3,
+          "commitsPerSec": 7.1,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 12293.8,
+          "longTaskMs": 4652,
+          "taskMsPerSec": 997.8,
+          "scriptMsPerSec": 436.5,
+          "styleMsPerSec": 295,
+          "layoutMsPerSec": 43.8,
+          "movesPerSec": 18.2,
+          "inputToFrameP95": 44.5,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            17.8,
+            19.2,
+            18.6
+          ],
+          "updatesAll": [
+            6.8,
+            7.1,
+            6.9
+          ]
+        },
+        "pan": {
+          "updatesPerSec": 14.4,
+          "updateP95": 83.5,
+          "fps": 15.9,
+          "frameP95": 83.5,
+          "commitsPerSec": 14.4,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 6064,
+          "longTaskMs": 300,
+          "taskMsPerSec": 994.2,
+          "scriptMsPerSec": 548.2,
+          "styleMsPerSec": 54.6,
+          "layoutMsPerSec": 85.9,
+          "movesPerSec": 14.4,
+          "inputToFrameP95": 22.8,
+          "svgNodesMidDrag": 5237,
+          "fpsAll": [
+            15.9,
+            15.5,
+            15.9
+          ],
+          "updatesAll": [
+            14.7,
+            14.1,
+            14.4
+          ]
+        },
+        "viewTween": {
+          "updatesPerSec": 8.1,
+          "updateP95": 166.6,
+          "fps": 16.9,
+          "frameP95": 133.3,
+          "commitsPerSec": 8.7,
+          "commitMsAvg": null,
+          "domMutationsPerCommit": 9948.8,
+          "longTaskMs": 2458,
+          "taskMsPerSec": 897.1,
+          "scriptMsPerSec": 410.5,
+          "styleMsPerSec": 254.1,
+          "layoutMsPerSec": 41.2,
+          "movesPerSec": 0,
+          "inputToFrameP95": null,
+          "svgNodesMidDrag": null,
+          "fpsAll": [
+            16.9,
+            15.8,
+            20.1
+          ],
+          "updatesAll": [
+            7.7,
+            8.1,
+            8.2
+          ]
+        }
+      },
+      "updateRatio": {
+        "orbit": 0.115,
+        "pan": 0.24,
+        "viewTween": 0.135
+      }
+    }
+  }
+}

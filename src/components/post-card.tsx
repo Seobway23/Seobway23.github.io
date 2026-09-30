@@ -10,45 +10,16 @@ import { formatReadTimeShort } from "@/lib/data";
 import { getPostCoverImageUrl } from "@/lib/post-cover";
 import CoverImage from "@/components/cover-image";
 import { categoryColor } from "@/lib/category-color";
+import { categoryBadgeLabel } from "@/lib/category-label";
 
 interface PostCardProps {
   post: Post;
   searchQuery?: string;
 }
 
-/** 마지막 칸만 보여준다. 경로 전체(frontend/javascript)는 배지에 넣기엔 길다. */
-const CATEGORY_LEAF_LABELS: Record<string, string> = {
-  javascript: "JavaScript",
-  typescript: "TypeScript",
-  react: "React",
-  "react-query": "React Query",
-  threejs: "Three.js",
-  css: "CSS",
-  styling: "스타일링",
-  performance: "성능",
-  "data-fetching": "데이터 페칭",
-  nextjs: "Next.js",
-  gstack: "gstack",
-  algorithm: "알고리즘",
-  mechanics: "역학",
-  network: "네트워크",
-  backend: "백엔드",
-  frontend: "프론트엔드",
-  infra: "인프라",
-  electron: "Electron",
-  engineering: "엔지니어링",
-  architecture: "아키텍처",
-  analysis: "분석",
-  testing: "테스트",
-};
-
-function categoryLabelOf(category: string): string {
-  const leaf = String(category || "").replace(/\\/g, "/").split("/").pop() || "";
-  return CATEGORY_LEAF_LABELS[leaf] || leaf;
-}
-
 export default function PostCard({ post, searchQuery }: PostCardProps) {
-  const categoryLabel = categoryLabelOf(post.category);
+  // 최상위와 마지막 조각을 같이 보여 준다. 마지막 조각만 쓰면 어느 분야의 하위인지 알 수 없다.
+  const categoryLabel = categoryBadgeLabel(post.category);
   const imageUrl = getPostCoverImageUrl(post);
   const [commentCount, setCommentCount] = useState<number>(0);
   const cardRef = useRef<HTMLElement | null>(null);

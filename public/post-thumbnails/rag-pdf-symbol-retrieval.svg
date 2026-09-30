@@ -1,0 +1,228 @@
+<svg id="tb-rag-pdf-symbol-retrieval" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-rag-pdf-symbol-retrieval-t tb-rag-pdf-symbol-retrieval-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-rag-pdf-symbol-retrieval-t">설계기준 PDF 색인과 수식 기호 검색 실험</title>
+  <desc id="tb-rag-pdf-symbol-retrieval-d">work/RAG — PUA 수식 글자 복원 · 표 추출 · 기호 검색 Hit@3 0.03 → 0.83</desc>
+
+  <defs>
+    <linearGradient id="tb-rag-pdf-symbol-retrieval-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-rag-pdf-symbol-retrieval-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(158 64% 61%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(158 64% 61%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-rag-pdf-symbol-retrieval-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-rag-pdf-symbol-retrieval-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#fb923c" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-rag-pdf-symbol-retrieval-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(158 64% 61%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(158 64% 61%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(158 64% 61%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-rag-pdf-symbol-retrieval-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-rag-pdf-symbol-retrieval-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-rag-pdf-symbol-retrieval-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-rag-pdf-symbol-retrieval-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-rag-pdf-symbol-retrieval-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-rag-pdf-symbol-retrieval-glow-a { animation: tb-rag-pdf-symbol-retrieval-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-rag-pdf-symbol-retrieval-glow-b { animation: tb-rag-pdf-symbol-retrieval-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-rag-pdf-symbol-retrieval-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-rag-pdf-symbol-retrieval-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-rag-pdf-symbol-retrieval-spark { fill: #ffffff; opacity: 0; animation-name: tb-rag-pdf-symbol-retrieval-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-rag-pdf-symbol-retrieval-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-rag-pdf-symbol-retrieval-sheen-band { animation: tb-rag-pdf-symbol-retrieval-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-rag-pdf-symbol-retrieval-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-rag-pdf-symbol-retrieval-caret { animation: tb-rag-pdf-symbol-retrieval-blink 1.1s steps(1) infinite; }
+    @keyframes tb-rag-pdf-symbol-retrieval-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-rag-pdf-symbol-retrieval-halo { animation: tb-rag-pdf-symbol-retrieval-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-rag-pdf-symbol-retrieval-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-rag-pdf-symbol-retrieval-bracket { stroke: hsl(158 64% 61%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-rag-pdf-symbol-retrieval-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-rag-pdf-symbol-retrieval-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-rag-pdf-symbol-retrieval-badge-ring { animation: tb-rag-pdf-symbol-retrieval-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-rag-pdf-symbol-retrieval-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-rag-pdf-symbol-retrieval-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-rag-pdf-symbol-retrieval-tshadow); transition: fill .35s ease; }
+    .tb-rag-pdf-symbol-retrieval-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-rag-pdf-symbol-retrieval-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(158 64% 61%); letter-spacing: 2.6px; }
+    .tb-rag-pdf-symbol-retrieval-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-rag-pdf-symbol-retrieval-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-rag-pdf-symbol-retrieval-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-rag-pdf-symbol-retrieval-c-key    { fill: #fb923c; }
+    .tb-rag-pdf-symbol-retrieval-c-string { fill: #86efac; }
+    .tb-rag-pdf-symbol-retrieval-c-number { fill: #fbbf24; }
+    .tb-rag-pdf-symbol-retrieval-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-rag-pdf-symbol-retrieval-c-ident  { fill: #cbd5e1; }
+    .tb-rag-pdf-symbol-retrieval-c-punct  { fill: #94a3b8; }
+    .tb-rag-pdf-symbol-retrieval-c-op     { fill: hsl(158 64% 61%); }
+    .tb-rag-pdf-symbol-retrieval-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-glow-a,
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-glow-b     { animation-duration: 6s; }
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-code       { opacity: .62; }
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-spark      { animation-duration: 1.4s !important; }
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-sheen-band { animation-duration: 2.6s; }
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-title      { fill: #ffffff; }
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-rag-pdf-symbol-retrieval:hover .tb-rag-pdf-symbol-retrieval-badge      { transform: translateY(-5px); }
+    .tb-rag-pdf-symbol-retrieval-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-rag-pdf-symbol-retrieval-glow-a, .tb-rag-pdf-symbol-retrieval-glow-b, .tb-rag-pdf-symbol-retrieval-spark, .tb-rag-pdf-symbol-retrieval-sheen-band, .tb-rag-pdf-symbol-retrieval-caret, .tb-rag-pdf-symbol-retrieval-halo, .tb-rag-pdf-symbol-retrieval-badge-ring, .tb-rag-pdf-symbol-retrieval-bracket {
+        animation: none !important;
+      }
+      .tb-rag-pdf-symbol-retrieval-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-rag-pdf-symbol-retrieval-frame)">
+    <rect width="1200" height="630" fill="url(#tb-rag-pdf-symbol-retrieval-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-rag-pdf-symbol-retrieval-grid)"/>
+
+    <circle class="tb-rag-pdf-symbol-retrieval-glow-a" cx="335" cy="109" r="387" fill="url(#tb-rag-pdf-symbol-retrieval-ga)"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-glow-b" cx="897" cy="456" r="374" fill="url(#tb-rag-pdf-symbol-retrieval-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">#</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">HyhwpEQ</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">PUA</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">→</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">Unicode</tspan></text>
+      <text x="64" y="140.12" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">enumerate</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-string" xml:space="preserve">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">:</tspan></text>
+      <text x="64" y="176.24" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">m</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">[</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">0</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">xE000</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">+</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">]</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">enumerate</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-string" xml:space="preserve">&quot;αβγδεζηθικλμνξοπρστυφχψω&quot;</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">:</tspan></text>
+      <text x="64" y="248.48" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">m</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">[</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">0</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">xE09D</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">+</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">]</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan></text>
+      <text x="64" y="284.6" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">enumerate</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-string" xml:space="preserve">&quot;abcdefghijklmnopqrstuvwxyz&quot;</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">:</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">m</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">[</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">0</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">xE0E5</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">+</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">]</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan></text>
+      <text x="64" y="356.84" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"></text>
+      <text x="64" y="392.96" class="tb-rag-pdf-symbol-retrieval-code" font-size="21"><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">decode</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-string" xml:space="preserve">&quot;\uE0B4\uE047\uE034\uE035\uE053\uE03A&quot;</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">)</tspan></text>
+      <rect class="tb-rag-pdf-symbol-retrieval-caret" x="648" y="376"
+            width="10" height="25" fill="#fb923c" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-rag-pdf-symbol-retrieval-code" font-size="17"><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">#</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">HyhwpEQ</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">PUA</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">→</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">Unicode</tspan></text>
+      <text x="690" y="386.6" class="tb-rag-pdf-symbol-retrieval-code" font-size="17"><tspan class="tb-rag-pdf-symbol-retrieval-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">enumerate</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-string" xml:space="preserve">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">:</tspan></text>
+      <text x="690" y="417.2" class="tb-rag-pdf-symbol-retrieval-code" font-size="17"><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">    </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">m</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">[</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve">0</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">xE000</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">+</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">]</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">=</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan></text>
+      <text x="690" y="447.8" class="tb-rag-pdf-symbol-retrieval-code" font-size="17"><tspan class="tb-rag-pdf-symbol-retrieval-c-key" xml:space="preserve">for</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">i</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">,</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">ch</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">in</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-plain" xml:space="preserve"> </tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-ident" xml:space="preserve">enumerate</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">(</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-string" xml:space="preserve">&quot;αβγδεζηθικλμνξοπρστυφχψω&quot;</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-punct" xml:space="preserve">)</tspan><tspan class="tb-rag-pdf-symbol-retrieval-c-op" xml:space="preserve">:</tspan></text>
+    </g>
+
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="303" cy="61" r="1.73" style="animation-delay:0.64s;animation-duration:3.49s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="134" cy="67" r="2.26" style="animation-delay:3.09s;animation-duration:3.63s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="74" cy="211" r="2.81" style="animation-delay:4.92s;animation-duration:3.52s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="211" cy="438" r="3.28" style="animation-delay:2.70s;animation-duration:6.15s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="310" cy="426" r="1.53" style="animation-delay:0.41s;animation-duration:6.33s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="1044" cy="249" r="2.83" style="animation-delay:4.30s;animation-duration:5.88s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="204" cy="467" r="2.58" style="animation-delay:5.82s;animation-duration:6.27s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="256" cy="363" r="1.91" style="animation-delay:1.21s;animation-duration:4.60s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="149" cy="573" r="2.41" style="animation-delay:4.44s;animation-duration:4.44s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="146" cy="110" r="3.78" style="animation-delay:2.49s;animation-duration:5.91s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="247" cy="536" r="2.96" style="animation-delay:5.14s;animation-duration:5.73s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="200" cy="498" r="3.32" style="animation-delay:3.12s;animation-duration:4.77s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="892" cy="349" r="3.61" style="animation-delay:3.96s;animation-duration:3.51s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="1048" cy="185" r="3.11" style="animation-delay:5.05s;animation-duration:5.24s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="149" cy="559" r="3.97" style="animation-delay:3.28s;animation-duration:6.40s"/>
+    <circle class="tb-rag-pdf-symbol-retrieval-spark" cx="961" cy="134" r="2.32" style="animation-delay:4.29s;animation-duration:6.03s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-rag-pdf-symbol-retrieval-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-rag-pdf-symbol-retrieval-vignette)"/>
+
+    <g class="tb-rag-pdf-symbol-retrieval-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-rag-pdf-symbol-retrieval-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="509" y="166" width="183" height="42" rx="21"
+            fill="hsl(158 64% 61%)" fill-opacity="0.13" stroke="hsl(158 64% 61%)" stroke-opacity="0.55"/>
+      <text class="tb-rag-pdf-symbol-retrieval-chip-t" x="600" y="194" text-anchor="middle" font-size="19">WORK / RAG</text>
+    </g>
+
+    <text class="tb-rag-pdf-symbol-retrieval-title" x="600" y="266" text-anchor="middle" font-size="62">설계기준 PDF 색인과</text>
+      <text class="tb-rag-pdf-symbol-retrieval-title" x="600" y="345" text-anchor="middle" font-size="62">수식 기호 검색 실험</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-rag-pdf-symbol-retrieval-rule)"/>
+    <text class="tb-rag-pdf-symbol-retrieval-sub" x="600" y="455" text-anchor="middle" font-size="25">PUA 수식 글자 복원 · 표 추출 · 기호 검색 Hit@3 0.03 → 0.83</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-rag-pdf-symbol-retrieval-badge">
+      <circle class="tb-rag-pdf-symbol-retrieval-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#fb923c" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#fb923c" fill-opacity="0.92"/>
+      <text class="tb-rag-pdf-symbol-retrieval-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">RAG</text>
+    </g>
+
+    <text class="tb-rag-pdf-symbol-retrieval-foot" x="1128" y="540" text-anchor="end" font-size="17">WORK/RAG</text>
+    <text class="tb-rag-pdf-symbol-retrieval-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-rag-pdf-symbol-retrieval-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-rag-pdf-symbol-retrieval-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-rag-pdf-symbol-retrieval-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-rag-pdf-symbol-retrieval-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(158 64% 61%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>
