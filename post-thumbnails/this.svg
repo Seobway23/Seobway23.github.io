@@ -1,7 +1,7 @@
 <svg id="tb-this" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
      role="img" aria-labelledby="tb-this-t tb-this-d" preserveAspectRatio="xMidYMid slice">
-  <title id="tb-this-t">this — 어디서 만들었나가 아니라 어떻게 불렀나</title>
-  <desc id="tb-this-d">frontend/javascript — 같은 함수인데 어떤 때는 객체를, 어떤 때는 undefined 를 가리키는 this</desc>
+  <title id="tb-this-t">this 바인딩 규칙</title>
+  <desc id="tb-this-d">frontend/javascript — 같은 함수에서 this 가 객체를 가리키기도 하고 undefined 가 되기도 하는 이유</desc>
 
   <defs>
     <linearGradient id="tb-this-bg" x1="0" y1="0" x2="1" y2="1">
@@ -149,7 +149,7 @@
       <text x="64" y="176.24" class="tb-this-code" font-size="21"><tspan class="tb-this-c-plain" xml:space="preserve">  </tspan><tspan class="tb-this-c-ident" xml:space="preserve">hello</tspan><tspan class="tb-this-c-punct" xml:space="preserve">(</tspan><tspan class="tb-this-c-punct" xml:space="preserve">)</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-punct" xml:space="preserve">{</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-key" xml:space="preserve">return</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-string" xml:space="preserve">`안녕, ${this.name}`</tspan><tspan class="tb-this-c-punct" xml:space="preserve">;</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-punct" xml:space="preserve">}</tspan><tspan class="tb-this-c-punct" xml:space="preserve">,</tspan></text>
       <text x="64" y="212.35999999999999" class="tb-this-code" font-size="21"><tspan class="tb-this-c-punct" xml:space="preserve">}</tspan><tspan class="tb-this-c-punct" xml:space="preserve">;</tspan></text>
       <text x="64" y="248.48" class="tb-this-code" font-size="21"><tspan class="tb-this-c-ident" xml:space="preserve">user</tspan><tspan class="tb-this-c-punct" xml:space="preserve">.</tspan><tspan class="tb-this-c-ident" xml:space="preserve">hello</tspan><tspan class="tb-this-c-punct" xml:space="preserve">(</tspan><tspan class="tb-this-c-punct" xml:space="preserve">)</tspan><tspan class="tb-this-c-punct" xml:space="preserve">;</tspan><tspan class="tb-this-c-plain" xml:space="preserve">            </tspan><tspan class="tb-this-c-comment" xml:space="preserve">// &quot;안녕, 민수&quot;</tspan></text>
-      <text x="64" y="284.6" class="tb-this-code" font-size="21"><tspan class="tb-this-c-key" xml:space="preserve">const</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-ident" xml:space="preserve">fn</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-op" xml:space="preserve">=</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-ident" xml:space="preserve">user</tspan><tspan class="tb-this-c-punct" xml:space="preserve">.</tspan><tspan class="tb-this-c-ident" xml:space="preserve">hello</tspan><tspan class="tb-this-c-punct" xml:space="preserve">;</tspan><tspan class="tb-this-c-plain" xml:space="preserve">   </tspan><tspan class="tb-this-c-comment" xml:space="preserve">// 같은 함수를 변수에 옮겨 담았을 뿐</tspan></text>
+      <text x="64" y="284.6" class="tb-this-code" font-size="21"><tspan class="tb-this-c-key" xml:space="preserve">const</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-ident" xml:space="preserve">fn</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-op" xml:space="preserve">=</tspan><tspan class="tb-this-c-plain" xml:space="preserve"> </tspan><tspan class="tb-this-c-ident" xml:space="preserve">user</tspan><tspan class="tb-this-c-punct" xml:space="preserve">.</tspan><tspan class="tb-this-c-ident" xml:space="preserve">hello</tspan><tspan class="tb-this-c-punct" xml:space="preserve">;</tspan><tspan class="tb-this-c-plain" xml:space="preserve">   </tspan><tspan class="tb-this-c-comment" xml:space="preserve">// 같은 함수의 참조를 변수에 할당</tspan></text>
       <text x="64" y="320.71999999999997" class="tb-this-code" font-size="21"><tspan class="tb-this-c-ident" xml:space="preserve">fn</tspan><tspan class="tb-this-c-punct" xml:space="preserve">(</tspan><tspan class="tb-this-c-punct" xml:space="preserve">)</tspan><tspan class="tb-this-c-punct" xml:space="preserve">;</tspan><tspan class="tb-this-c-plain" xml:space="preserve">                    </tspan><tspan class="tb-this-c-comment" xml:space="preserve">// TypeError: Cannot r…</tspan></text>
       <rect class="tb-this-caret" x="673" y="304"
             width="10" height="25" fill="#f7df1e" opacity=".8"/>
@@ -188,16 +188,15 @@
 
     <!-- 카테고리 칩 -->
     <g>
-      <rect x="446" y="176" width="309" height="42" rx="21"
+      <rect x="446" y="198" width="309" height="42" rx="21"
             fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
-      <text class="tb-this-chip-t" x="600" y="204" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+      <text class="tb-this-chip-t" x="600" y="226" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
     </g>
 
-    <text class="tb-this-title" x="600" y="276" text-anchor="middle" font-size="54">this — 어디서 만들었나가</text>
-      <text class="tb-this-title" x="600" y="345" text-anchor="middle" font-size="54">아니라 어떻게 불렀나</text>
+    <text class="tb-this-title" x="600" y="298" text-anchor="middle" font-size="74">this 바인딩 규칙</text>
 
-    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-this-rule)"/>
-    <text class="tb-this-sub" x="600" y="455" text-anchor="middle" font-size="25">같은 함수인데 어떤 때는 객체를, 어떤 때는 undefined 를 가리키는 this</text>
+    <rect x="470" y="354" width="260" height="2" rx="1" fill="url(#tb-this-rule)"/>
+    <text class="tb-this-sub" x="600" y="408" text-anchor="middle" font-size="25">같은 함수에서 this 가 객체를 가리키기도 하고 undefined 가 되기도…</text>
 
     <!-- 왼쪽 아래 배지 -->
     <g class="tb-this-badge">

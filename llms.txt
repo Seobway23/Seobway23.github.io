@@ -9,19 +9,19 @@
 선행 관계를 담은 그래프: https://seobway23.github.io/concept-graph.json
 사람이 보는 지도: https://seobway23.github.io/roadmap
 
-- [원시 타입 — 값 자체가 복사되는 것들](https://seobway23.github.io/post/primitive-type): 숫자·문자열·불리언처럼 변수에 값이 그대로 담기는 7가지 타입. 복사하면 서로 영향을 주지 않는다.
-- [콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳](https://seobway23.github.io/post/call-stack): 자바스크립트가 "지금 어디를 실행 중인지" 기억하는 방법. 에러 메시지의 스택 트레이스가 바로 이것이다.
-- [스코프 — 변수가 어디까지 보이는가](https://seobway23.github.io/post/scope): 같은 이름의 변수가 왜 어떤 곳에서는 보이고 어떤 곳에서는 안 보이는지, 그 경계를 정하는 규칙.
-- [참조 타입 — 주소가 복사되는 것들](https://seobway23.github.io/post/reference-type): 객체·배열·함수는 변수에 값이 아니라 주소가 담긴다. 복사해도 같은 것을 가리켜서 한쪽을 고치면 둘 다 바뀐다. (선행: 원시 타입)
-- [실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경](https://seobway23.github.io/post/execution-context): 콜 스택에 쌓이는 것의 정체. 변수·this·바깥 스코프로 가는 길이 여기에 담긴다. (선행: 스코프, 콜 스택)
-- [호이스팅 — 선언은 먼저 올라간다](https://seobway23.github.io/post/hoisting): 선언하기 전에 쓴 변수가 왜 어떤 때는 undefined 고 어떤 때는 에러인지, 그 차이를 만드는 규칙. (선행: 스코프)
-- [이벤트 루프, 눈으로 따라가기](https://seobway23.github.io/post/event-loop-interactive): 콜 스택·마이크로태스크 큐·태스크 큐가 어떤 순서로 비워지는지 재생 버튼을 눌러 확인한다. (선행: 콜 스택)
-- [this — 어디서 만들었나가 아니라 어떻게 불렀나](https://seobway23.github.io/post/this): 같은 함수인데 어떤 때는 객체를, 어떤 때는 undefined 를 가리키는 this. 함수를 부르는 모양 네 가지만 보면 값이 정해진다. (선행: 실행 컨텍스트)
-- [TDZ — 등록은 됐지만 아직 쓸 수 없는 구간](https://seobway23.github.io/post/tdz): 바깥에 분명히 있는 변수를 읽었는데 ReferenceError 가 나는 이유. let·const 는 스코프에 들어가는 순간 등록되지만 선언문을 지나기 전까지는 손댈 수 없다. (선행: 호이스팅)
-- [태스크 큐 — setTimeout 콜백이 줄 서는 곳](https://seobway23.github.io/post/task-queue): setTimeout(fn, 0) 이 0ms 뒤에 돌지 않는 이유. 타이머가 끝난 콜백과 클릭 이벤트는 태스크 큐에 줄을 서고, 콜 스택이 빌 때 하나씩 꺼내진다. (선행: 이벤트 루프)
-- [얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가](https://seobway23.github.io/post/shallow-deep-copy): 스프레드로 복사했는데 원본이 같이 바뀌는 이유. 복사가 최상위 상자만 새로 만드는지, 안에 든 객체까지 새로 만드는지의 차이다. (선행: 참조 타입)
-- [프로토타입 — 없으면 위에 물어보는 상속](https://seobway23.github.io/post/prototype): 내가 만들지도 않은 toString·map 같은 메서드를 쓸 수 있는 이유. 객체가 다른 객체를 참조해 속성을 물려받는 구조다. (선행: 참조 타입)
-- [클로저 — 함수가 붙잡고 있는 변수](https://seobway23.github.io/post/closure): 함수가 끝났는데도 그 안의 변수가 살아 있는 이유. 카운터·모듈·이벤트 핸들러가 전부 이것으로 돈다. (선행: 스코프, 호이스팅)
+- [원시 타입과 값 복사](https://seobway23.github.io/post/primitive-type): string·number·boolean·undefined·null·bigint·symbol 7가지 원시 타입은 대입할 때 값 자체가 복사되어 변수끼리 서로 영향을 주지 않는다.
+- [콜 스택과 함수 호출 순서](https://seobway23.github.io/post/call-stack): 자바스크립트 엔진이 현재 실행 중인 함수와 반환 위치를 관리하는 자료구조. 에러 메시지의 스택 트레이스는 이 콜 스택을 출력한 것이다.
+- [스코프와 스코프 체인](https://seobway23.github.io/post/scope): 식별자에 접근할 수 있는 범위를 정하는 규칙. 전역·함수·블록 스코프의 경계와, 식별자를 안쪽에서 바깥쪽으로 탐색하는 스코프 체인을 정리한다.
+- [참조 타입과 참조 복사](https://seobway23.github.io/post/reference-type): 객체·배열·함수를 담은 변수에는 값이 아니라 객체의 참조가 저장된다. 대입하면 참조가 복사되므로 두 변수가 같은 객체를 가리킨다. (선행: 원시 타입)
+- [실행 컨텍스트의 구성과 생성 과정](https://seobway23.github.io/post/execution-context): 콜 스택에 push 되는 단위인 실행 컨텍스트의 구성 요소(환경 레코드, 외부 환경 참조, this 바인딩)와 생성 단계·실행 단계를 정리한다. (선행: 스코프, 콜 스택)
+- [호이스팅과 선언 초기화 방식](https://seobway23.github.io/post/hoisting): 선언보다 앞에서 변수를 읽을 때 var 는 undefined, let 은 ReferenceError, 함수 선언은 정상 호출되는 이유를 선언별 초기화 방식으로 정리한다. (선행: 스코프)
+- [이벤트 루프 동작 과정](https://seobway23.github.io/post/event-loop-interactive): 콜 스택, 마이크로태스크 큐, 태스크 큐가 처리되는 순서를 단계별 애니메이션과 실행 가능한 예제로 정리한다. (선행: 콜 스택)
+- [this 바인딩 규칙](https://seobway23.github.io/post/this): 같은 함수에서 this 가 객체를 가리키기도 하고 undefined 가 되기도 하는 이유. this 는 함수 정의가 아니라 호출 방식에 따라 결정되며, 호출 방식은 네 가지로 구분된다. (선행: 실행 컨텍스트)
+- [TDZ(Temporal Dead Zone)](https://seobway23.github.io/post/tdz): 외부 스코프에 같은 이름의 변수가 있어도 ReferenceError 가 발생하는 이유. let·const 는 스코프 진입 시 환경 레코드에 등록되지만, 선언문이 실행되기 전까지는 초기화되지 않은 상태로 남는다. (선행: 호이스팅)
+- [태스크 큐와 setTimeout 실행 시점](https://seobway23.github.io/post/task-queue): setTimeout(fn, 0) 이 즉시 실행되지 않는 이유. 타이머가 만료된 콜백과 DOM 이벤트 콜백은 태스크 큐에 추가되고, 이벤트 루프가 콜 스택이 비었을 때 하나씩 꺼내 실행한다. (선행: 이벤트 루프)
+- [얕은 복사와 깊은 복사](https://seobway23.github.io/post/shallow-deep-copy): 스프레드로 복사한 객체의 중첩 속성을 수정하면 원본도 바뀐다. 얕은 복사는 최상위 속성만 새 객체로 복사하고, 깊은 복사는 중첩 객체까지 재귀적으로 새로 만든다. (선행: 참조 타입)
+- [프로토타입과 프로토타입 체인](https://seobway23.github.io/post/prototype): 직접 정의하지 않은 toString·map 을 호출할 수 있는 이유. 객체는 [[Prototype]] 링크로 다른 객체를 참조하고, 속성 조회 시 이 링크를 따라 탐색한다. (선행: 참조 타입)
+- [클로저와 렉시컬 환경](https://seobway23.github.io/post/closure): 함수 실행이 끝난 뒤에도 내부 변수가 유지되는 이유. 함수가 정의된 렉시컬 환경에 대한 참조를 유지하기 때문이며, 카운터·모듈 패턴·이벤트 핸들러가 이 구조를 사용한다. (선행: 스코프, 호이스팅)
 
 ## 네트워크
 
@@ -127,8 +127,8 @@
 
 ## javascript
 
-- [setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습](https://seobway23.github.io/post/settimeout-vs-promise): setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다. 마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다.
-- [JS 이벤트 루프와 비동기 — 콜스택, 큐, 마이크로태스크를 한 번에 이해하기](https://seobway23.github.io/post/js-event-loop-and-async): JavaScript의 콜스택, Web APIs, 태스크 큐, 마이크로태스크 큐가 어떻게 맞물려 돌아가는지 큰 그림으로 정리한다. 비동기 실행 순서를 예측하기 위한 출발점이다.
+- [setTimeout과 Promise의 실행 순서](https://seobway23.github.io/post/settimeout-vs-promise): setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다. 마이크로태스크와 태스크의 처리 우선순위를 기준으로 출력 순서를 예측하는 연습이다.
+- [JS 이벤트 루프와 비동기 처리 구조](https://seobway23.github.io/post/js-event-loop-and-async): JavaScript의 콜 스택, Web API, 태스크 큐, 마이크로태스크 큐가 어떤 순서로 맞물려 동작하는지 정리한다. 비동기 코드의 실행 순서를 예측하기 위한 기본 구조다.
 
 ## react
 

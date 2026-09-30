@@ -30,20 +30,20 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
-  <link rel="manifest" href="/manifest.webmanifest">    <title>setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습 — Tech Blog — 모던 개발 블로그</title>
-    <meta name="description" content="setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다. 마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다." />
+  <link rel="manifest" href="/manifest.webmanifest">    <title>setTimeout과 Promise의 실행 순서 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다. 마이크로태스크와 태스크의 처리 우선순위를 기준으로 출력 순서를 예측하는 연습이다." />
     <meta name="keywords" content="javascript, setTimeout, promise, microtask, macrotask, event-loop" />
     <meta name="author" content="Seobway" />
     <link rel="canonical" href="https://seobway23.github.io/post/settimeout-vs-promise" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="og:title" content="setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습" />
-    <meta property="og:description" content="setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다. 마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다." />
+    <meta property="og:title" content="setTimeout과 Promise의 실행 순서" />
+    <meta property="og:description" content="setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다. 마이크로태스크와 태스크의 처리 우선순위를 기준으로 출력 순서를 예측하는 연습이다." />
     <meta property="og:url" content="https://seobway23.github.io/post/settimeout-vs-promise" />
     <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/settimeout-vs-promise.jpg" />
     <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-28T09:38:13.473Z" />
+    <meta property="article:modified_time" content="2026-09-30T01:44:31.746Z" />
     <meta property="article:tag" content="javascript" />
     <meta property="article:tag" content="setTimeout" />
     <meta property="article:tag" content="promise" />
@@ -51,10 +51,10 @@
     <meta property="article:tag" content="macrotask" />
     <meta property="article:tag" content="event-loop" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습" />
-    <meta name="twitter:description" content="setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다. 마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다." />
+    <meta name="twitter:title" content="setTimeout과 Promise의 실행 순서" />
+    <meta name="twitter:description" content="setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다. 마이크로태스크와 태스크의 처리 우선순위를 기준으로 출력 순서를 예측하는 연습이다." />
     <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/settimeout-vs-promise.jpg" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습","description":"setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다. 마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다.","image":["https://seobway23.github.io/post-thumbnails/settimeout-vs-promise.jpg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-28T09:38:13.473Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/settimeout-vs-promise"},"keywords":"javascript, setTimeout, promise, microtask, macrotask, event-loop","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3261},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습","item":"https://seobway23.github.io/post/settimeout-vs-promise"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"setTimeout과 Promise의 실행 순서","description":"setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다. 마이크로태스크와 태스크의 처리 우선순위를 기준으로 출력 순서를 예측하는 연습이다.","image":["https://seobway23.github.io/post-thumbnails/settimeout-vs-promise.jpg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.746Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/settimeout-vs-promise"},"keywords":"javascript, setTimeout, promise, microtask, macrotask, event-loop","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3311},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"setTimeout과 Promise의 실행 순서","item":"https://seobway23.github.io/post/settimeout-vs-promise"}]}]}</script>
   </head>
   <body>
     <script>
@@ -69,8 +69,8 @@
     </script>
     <div id="root"><article data-prerendered="true">
 <nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
-<h1>setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습</h1>
-<p>setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다. 마이크로태스크와 태스크의 우선순위를 손으로 예측하는 연습용 글이다.
+<h1>setTimeout과 Promise의 실행 순서</h1>
+<p>setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다. 마이크로태스크와 태스크의 처리 우선순위를 기준으로 출력 순서를 예측하는 연습이다.
 </p>
 <p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>10분</span></p>
 <h2>이 시리즈 구성</h2>
@@ -90,7 +90,7 @@
 <td>콜스택, 큐, 마이크로태스크</td>
 </tr>
 <tr>
-<td><a href="/post/settimeout-vs-promise">01-2. setTimeout vs Promise →</a></td>
+<td><a href="/post/settimeout-vs-promise">01-2. setTimeout과 Promise →</a></td>
 <td>비동기 실행 순서 예측</td>
 </tr>
 <tr>
@@ -107,31 +107,28 @@
 </tr>
 </tbody></table>
 <hr>
-<h2>왜 이 문제를 따로 연습해야 하는가</h2>
-<p>이벤트 루프를 글로 이해했다고 해서, 실제 코드의 실행 순서를 바로 예측할 수 있는 것은 아니다.</p>
-<p>특히 많은 사람이 여기서 헷갈린다.</p>
+<h2>다루는 내용</h2>
+<p>이벤트 루프의 구조를 알아도 실제 코드의 출력 순서를 바로 예측하기는 어렵다.<br>이 글은 다음 세 가지 경우를 예제로 확인한다.</p>
 <ul>
-<li><code>setTimeout(..., 0)</code>이면 바로 실행되는가</li>
-<li><code>Promise.then()</code>은 언제 끼어드는가</li>
-<li>Promise 안의 <code>setTimeout</code>과 setTimeout 안의 Promise는 누가 먼저인가</li>
+<li><code>setTimeout(..., 0)</code> 콜백의 실행 시점</li>
+<li><code>Promise.then()</code> 콜백이 실행되는 시점</li>
+<li>Promise 콜백 안의 <code>setTimeout</code>, <code>setTimeout</code> 콜백 안의 Promise 의 순서</li>
 </ul>
-<p>이 글은 그 감각을 짧은 예제로 잡는 데 집중한다.</p>
 <hr>
-<h2>규칙 하나 먼저</h2>
-<p>먼저 이 규칙만 고정해 두자.</p>
+<h2>처리 규칙</h2>
+<p>예제는 모두 다음 규칙으로 설명된다.</p>
 <ol>
-<li>동기 코드를 먼저 끝낸다</li>
-<li>콜스택이 비면 <strong>마이크로태스크</strong>를 먼저 모두 처리한다</li>
-<li>그다음 <strong>태스크</strong>를 처리한다</li>
+<li>현재 실행 중인 동기 코드를 끝낸다.</li>
+<li>콜 스택이 비면 마이크로태스크 큐를 빌 때까지 처리한다.</li>
+<li>태스크 큐에서 태스크 하나를 꺼내 실행하고, 다시 2번으로 돌아간다.</li>
 </ol>
-<p>여기서 보통</p>
+<p>API 별 분류는 다음과 같다.</p>
 <ul>
-<li><code>Promise.then</code>, <code>catch</code>, <code>finally</code> → 마이크로태스크</li>
-<li><code>setTimeout</code>, DOM 이벤트 → 태스크</li>
+<li><code>Promise.then</code>, <code>catch</code>, <code>finally</code>, <code>queueMicrotask</code>: 마이크로태스크</li>
+<li><code>setTimeout</code>, <code>setInterval</code>, DOM 이벤트 콜백: 태스크</li>
 </ul>
-<p>로 보면 된다.</p>
 <hr>
-<h2>예제 1 — 가장 기본</h2>
+<h2>예제 1: 기본 순서</h2>
 <pre><code class="language-js">console.log(&#39;A&#39;)
 
 setTimeout(() =&gt; {
@@ -144,15 +141,15 @@ Promise.resolve().then(() =&gt; {
 
 console.log(&#39;D&#39;)
 </code></pre>
-<p>정답은 <code>A</code>, <code>D</code>, <code>C</code>, <code>B</code>다.</p>
-<p>이유:</p>
+<p>출력은 <code>A</code>, <code>D</code>, <code>C</code>, <code>B</code> 다.</p>
 <ul>
-<li><code>A</code>, <code>D</code>는 동기 코드라서 먼저 실행</li>
-<li>Promise 콜백 <code>C</code>는 마이크로태스크</li>
-<li>타이머 콜백 <code>B</code>는 태스크</li>
+<li><code>A</code>, <code>D</code> 는 동기 코드이므로 먼저 실행된다.</li>
+<li><code>C</code> 는 마이크로태스크 큐에 등록된다.</li>
+<li><code>B</code> 는 타이머 만료 후 태스크 큐에 등록된다.</li>
+<li>동기 코드가 끝나면 마이크로태스크(<code>C</code>)를 먼저 처리하고, 이후 태스크(<code>B</code>)를 처리한다.</li>
 </ul>
 <hr>
-<h2>예제 2 — Promise 안에 setTimeout</h2>
+<h2>예제 2: Promise 콜백 안의 setTimeout</h2>
 <pre><code class="language-js">console.log(&#39;1&#39;)
 
 Promise.resolve().then(() =&gt; {
@@ -164,17 +161,16 @@ setTimeout(() =&gt; console.log(&#39;4&#39;), 0)
 
 console.log(&#39;5&#39;)
 </code></pre>
-<p>정답은 <code>1</code>, <code>5</code>, <code>2</code>, <code>4</code>, <code>3</code>이다.</p>
-<p>왜 그런가:</p>
+<p>출력은 <code>1</code>, <code>5</code>, <code>2</code>, <code>4</code>, <code>3</code> 이다.</p>
 <ol>
-<li>동기 코드 <code>1</code>, <code>5</code></li>
-<li>마이크로태스크 <code>2</code></li>
-<li>그 안에서 새 <code>setTimeout</code>이 등록됨</li>
-<li>태스크 큐에는 먼저 등록된 <code>4</code>, 그다음 <code>3</code></li>
+<li>동기 코드 <code>1</code>, <code>5</code> 가 실행된다.</li>
+<li>마이크로태스크 <code>2</code> 가 실행된다.</li>
+<li><code>2</code> 를 실행하는 중에 <code>3</code> 의 타이머가 등록된다.</li>
+<li><code>4</code> 의 타이머가 먼저 등록되었으므로 태스크 큐에서도 <code>4</code> 가 <code>3</code> 보다 앞선다.</li>
 </ol>
-<p>즉 <strong>태스크끼리는 먼저 들어온 것이 먼저 실행</strong>된다.</p>
+<p>같은 종류의 태스크는 등록된 순서대로 실행된다.</p>
 <hr>
-<h2>예제 3 — setTimeout 안에 Promise</h2>
+<h2>예제 3: setTimeout 콜백 안의 Promise</h2>
 <pre><code class="language-js">console.log(&#39;a&#39;)
 
 setTimeout(() =&gt; {
@@ -186,8 +182,8 @@ setTimeout(() =&gt; console.log(&#39;d&#39;), 0)
 
 console.log(&#39;e&#39;)
 </code></pre>
-<p>정답은 <code>a</code>, <code>e</code>, <code>b</code>, <code>c</code>, <code>d</code>다.</p>
-<p>핵심은 첫 번째 타이머 콜백 안에서 <code>Promise.then()</code>이 등록되면, 그 타이머 콜백이 끝난 직후 <strong>마이크로태스크인 <code>c</code>를 먼저 처리</strong>한다는 점이다.</p>
+<p>출력은 <code>a</code>, <code>e</code>, <code>b</code>, <code>c</code>, <code>d</code> 다.</p>
+<p>첫 번째 타이머 콜백(<code>b</code>) 안에서 <code>Promise.then()</code> 으로 등록한 <code>c</code> 는 마이크로태스크다.<br>이벤트 루프는 태스크 하나를 끝낸 직후 마이크로태스크 큐를 먼저 비우므로, <code>c</code> 가 다음 태스크인 <code>d</code> 보다 먼저 실행된다.</p>
 <pre><code class="language-mermaid">%% desc: 첫 번째 setTimeout 콜백 안에서 생성된 Promise.then은 다음 태스크보다 먼저 실행된다
 flowchart TD
   S[&quot;동기 코드 실행&quot;] --&gt; T1[&quot;첫 번째 setTimeout 콜백&quot;]
@@ -196,7 +192,7 @@ flowchart TD
   C --&gt; T2[&quot;두 번째 setTimeout 콜백&quot;]
 </code></pre>
 <hr>
-<h2>예제 4 — 마이크로태스크는 모두 비운다</h2>
+<h2>예제 4: 마이크로태스크 큐는 빌 때까지 처리된다</h2>
 <pre><code class="language-js">console.log(&#39;start&#39;)
 
 Promise.resolve().then(() =&gt; {
@@ -206,38 +202,35 @@ Promise.resolve().then(() =&gt; {
 
 setTimeout(() =&gt; console.log(&#39;t1&#39;), 0)
 </code></pre>
-<p>정답은 <code>start</code>, <code>m1</code>, <code>m2</code>, <code>t1</code>이다.</p>
-<p>마이크로태스크를 하나만 처리하고 끝내는 것이 아니라, <strong>큐가 빌 때까지</strong> 계속 처리한다.</p>
-<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>그래서 마이크로태스크를 너무 많이 연쇄 등록하면, 태스크 큐에 있는 작업들이 계속 밀릴 수 있다. &quot;Promise는 가볍다&quot;만 기억하면 이 부분을 놓치기 쉽다.</p>
+<p>출력은 <code>start</code>, <code>m1</code>, <code>m2</code>, <code>t1</code> 이다.</p>
+<p><code>m1</code> 실행 중에 등록된 <code>m2</code> 도 같은 마이크로태스크 처리 단계에서 실행된다.<br>이벤트 루프는 마이크로태스크 큐가 완전히 빌 때까지 태스크로 넘어가지 않는다.</p>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>마이크로태스크가 계속 새 마이크로태스크를 등록하면 태스크 큐의 작업과 렌더링이 그만큼 지연된다.<br>연쇄가 끝나지 않으면 페이지가 응답하지 않는다.</p>
 </div></div></aside></p>
 <hr>
-<h2>실전에서 어떻게 써먹는가</h2>
-<p>이 연습은 단순 콘솔 문제 풀이가 아니다.</p>
+<h2>실무에서 관련되는 부분</h2>
 <ul>
-<li>React 이벤트 핸들러 뒤에 붙는 비동기 흐름 이해</li>
-<li>테스트 코드에서 비동기 완료 시점 예측</li>
-<li>타이머와 API 응답, 상태 업데이트가 섞일 때 디버깅</li>
+<li>React 이벤트 핸들러 이후 이어지는 비동기 처리 순서</li>
+<li>테스트 코드에서 비동기 작업의 완료 시점</li>
+<li>타이머, API 응답, 상태 업데이트가 섞인 코드의 디버깅</li>
 </ul>
-<p>여기서 막히면 &quot;렌더링 버그&quot;처럼 보이는 문제도 사실은 이벤트 루프 이해 부족인 경우가 많다.</p>
+<p>렌더링 문제처럼 보이는 버그가 실제로는 콜백 실행 순서 문제인 경우가 있다.</p>
 <hr>
 <h2>연습 방법</h2>
-<p>가장 좋은 연습은 다음 순서다.</p>
 <ol>
-<li>코드를 본다</li>
-<li>출력 순서를 종이에 적는다</li>
-<li>이유를 &quot;동기 → 마이크로태스크 → 태스크&quot;로 설명한다</li>
-<li>실제 실행 결과와 비교한다</li>
+<li>코드를 읽고 출력 순서를 적는다.</li>
+<li>각 줄이 동기, 마이크로태스크, 태스크 중 어디에 속하는지 표시한다.</li>
+<li>실제 실행 결과와 비교한다.</li>
 </ol>
-<p>설명을 못 하면 아직 외운 것이다. 설명이 되면 이해한 것이다.</p>
-<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>다음 단계에서는 각 예제를 Node.js 콘솔이나 브라우저 콘솔에서 직접 돌려 보자. &quot;왜 그런지&quot;를 말로 설명할 수 있을 때 비동기 기초가 훨씬 단단해진다.</p>
+<p>2번에서 분류를 설명할 수 없다면 규칙을 다시 확인한다.</p>
+<p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>각 예제를 Node.js 나 브라우저 콘솔에서 실행해 결과를 비교할 수 있다.</p>
 </div></div></aside></p>
-<h2>조금 더 깊게 보기</h2>
-<h3>왜 이 문제는 면접 단골인가</h3>
-<p><code>setTimeout</code>과 <code>Promise</code> 실행 순서는 단순 암기 문제가 아니다. 이 문제는 지원자가 JavaScript를 &quot;위에서 아래로만 실행되는 코드&quot;로 보는지, 아니면 런타임과 큐까지 포함한 실행 모델로 이해하는지 확인하기 좋다.</p>
-<h3>개발자가 주의해야 할 포인트</h3>
-<p>실무에서는 이 순서가 테스트에서 많이 드러난다. 컴포넌트 테스트에서 클릭 직후 바로 값을 확인하면 아직 Promise 콜백이 반영되지 않았을 수 있다. 반대로 타이머 기반 UI는 fake timer를 쓰지 않으면 테스트가 불안정해진다.</p>
-<h3>디버깅 팁</h3>
-<p>비동기 순서가 헷갈릴 때는 로그에 숫자만 찍지 말고 &quot;sync start&quot;, &quot;microtask&quot;, &quot;timer&quot;처럼 큐의 성격을 같이 적는다. 등록 순서와 실행 우선순위는 다르다.</p>
+<h2>추가 내용</h2>
+<h3>면접에서 자주 나오는 이유</h3>
+<p><code>setTimeout</code> 과 <code>Promise</code> 의 실행 순서 문제는 JavaScript 를 순차 실행 코드로만 이해하는지,<br>런타임의 큐와 이벤트 루프를 포함한 실행 모델로 이해하는지 확인하는 데 쓰인다.</p>
+<h3>테스트 코드에서 주의할 점</h3>
+<p>컴포넌트 테스트에서 클릭 직후 바로 값을 검사하면 Promise 콜백이 아직 실행되지 않았을 수 있다.<br>타이머 기반 UI 는 fake timer 를 쓰지 않으면 테스트 결과가 실행 환경에 따라 달라질 수 있다.</p>
+<h3>디버깅</h3>
+<p>로그에 숫자만 남기지 말고 <code>&quot;sync start&quot;</code>, <code>&quot;microtask&quot;</code>, <code>&quot;timer&quot;</code> 처럼 어느 큐에서 실행된 코드인지 함께 남긴다.<br>등록 순서와 실행 순서는 다르다.</p>
 <hr>
 <h2>참고</h2>
 <ol>
@@ -248,10 +241,10 @@ setTimeout(() =&gt; console.log(&#39;t1&#39;), 0)
 <hr>
 <h2>관련 글</h2>
 <ul>
-<li><a href="/post/js-event-loop-and-async">JS 이벤트 루프와 비동기 큰 그림 →</a></li>
+<li><a href="/post/js-event-loop-and-async">JS 이벤트 루프와 비동기 처리 구조 →</a></li>
 <li><a href="/post/react-component-data-flow">React 단방향 데이터 흐름 →</a></li>
 <li><a href="/post/js-runtime-node-bun-deno">Node.js · Bun · Deno 런타임 비교 →</a></li>
-<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 — Foundation 01~19 →</a></li>
+<li><a href="/post/ai-webdev-roadmap-foundation">AI 웹개발자 로드맵 (Foundation 01~19) →</a></li>
 </ul>
 
 <ul><li>javascript</li><li>setTimeout</li><li>promise</li><li>microtask</li><li>macrotask</li><li>event-loop</li></ul>

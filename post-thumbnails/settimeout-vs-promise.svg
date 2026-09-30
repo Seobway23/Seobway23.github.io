@@ -1,7 +1,7 @@
 <svg id="tb-settimeout-vs-promise" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
      role="img" aria-labelledby="tb-settimeout-vs-promise-t tb-settimeout-vs-promise-d" preserveAspectRatio="xMidYMid slice">
-  <title id="tb-settimeout-vs-promise-t">setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습</title>
-  <desc id="tb-settimeout-vs-promise-d">frontend/javascript — setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지 예제로 익힌다</desc>
+  <title id="tb-settimeout-vs-promise-t">setTimeout과 Promise의 실행 순서</title>
+  <desc id="tb-settimeout-vs-promise-d">frontend/javascript — setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다</desc>
 
   <defs>
     <linearGradient id="tb-settimeout-vs-promise-bg" x1="0" y1="0" x2="1" y2="1">
@@ -189,16 +189,15 @@
 
     <!-- 카테고리 칩 -->
     <g>
-      <rect x="446" y="186" width="309" height="42" rx="21"
+      <rect x="446" y="211" width="309" height="42" rx="21"
             fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
-      <text class="tb-settimeout-vs-promise-chip-t" x="600" y="214" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+      <text class="tb-settimeout-vs-promise-chip-t" x="600" y="239" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
     </g>
 
-    <text class="tb-settimeout-vs-promise-title" x="600" y="286" text-anchor="middle" font-size="46">setTimeout vs Promise — 실행</text>
-      <text class="tb-settimeout-vs-promise-title" x="600" y="345" text-anchor="middle" font-size="46">순서를 예측하는 가장 중요한 연습</text>
+    <text class="tb-settimeout-vs-promise-title" x="600" y="311" text-anchor="middle" font-size="54">setTimeout과 Promise의 실행 순서</text>
 
-    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-settimeout-vs-promise-rule)"/>
-    <text class="tb-settimeout-vs-promise-sub" x="600" y="455" text-anchor="middle" font-size="25">setTimeout과 Promise.then이 함께 있을 때 어떤 순서로 실행되는지…</text>
+    <rect x="470" y="367" width="260" height="2" rx="1" fill="url(#tb-settimeout-vs-promise-rule)"/>
+    <text class="tb-settimeout-vs-promise-sub" x="600" y="421" text-anchor="middle" font-size="25">setTimeout과 Promise.then이 함께 있을 때의 실행 순서를 예제로 정리한다</text>
 
     <!-- 왼쪽 아래 배지 -->
     <g class="tb-settimeout-vs-promise-badge">

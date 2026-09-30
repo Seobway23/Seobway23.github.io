@@ -1,6 +1,7 @@
 {
   "call-stack": [
     "call-stack",
+    "closure",
     "event-loop-interactive",
     "execution-context",
     "js-event-loop-and-async",
@@ -11,6 +12,16 @@
     "typescript-type-system-basics",
     "electron-nodejs-libuv-integration",
     "micro-osi-7layer"
+  ],
+  "gc": [
+    "closure",
+    "react-query-advanced",
+    "react-query-overview",
+    "react-query-queries",
+    "threejs-raycaster-picking-performance",
+    "electron-nodejs-libuv-integration",
+    "cdn-content-delivery-network",
+    "cache-overlay-timing-rca"
   ],
   "event-loop": [
     "event-loop-interactive",
@@ -33,14 +44,10 @@
     "typescript-type-system-basics",
     "electron-nodejs-libuv-integration"
   ],
-  "gc": [
-    "react-query-advanced",
-    "react-query-overview",
-    "react-query-queries",
-    "threejs-raycaster-picking-performance",
-    "electron-nodejs-libuv-integration",
-    "cdn-content-delivery-network",
-    "cache-overlay-timing-rca"
+  "heap": [
+    "reference-type",
+    "shallow-deep-copy",
+    "electron-nodejs-libuv-integration"
   ],
   "abi": [
     "gstack-skills-ship",
@@ -117,9 +124,6 @@
     "celery-worker",
     "macro-network-view",
     "circuit-vs-packet-switching"
-  ],
-  "heap": [
-    "electron-nodejs-libuv-integration"
   ],
   "libuv": [
     "electron-nodejs-libuv-integration",

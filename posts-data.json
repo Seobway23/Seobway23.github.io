@@ -6,77 +6,77 @@
   },
   {
     "slug": "call-stack",
-    "title": "콜 스택 — 지금 실행 중인 함수를 쌓아 두는 곳",
+    "title": "콜 스택과 함수 호출 순서",
     "path": "/post/frontend/javascript/call-stack"
   },
   {
     "slug": "closure",
-    "title": "클로저 — 함수가 붙잡고 있는 변수",
+    "title": "클로저와 렉시컬 환경",
     "path": "/post/frontend/javascript/closure"
   },
   {
     "slug": "event-loop-interactive",
-    "title": "이벤트 루프, 눈으로 따라가기",
+    "title": "이벤트 루프 동작 과정",
     "path": "/post/frontend/javascript/event-loop-interactive"
   },
   {
     "slug": "execution-context",
-    "title": "실행 컨텍스트 — 함수가 실행될 때 만들어지는 환경",
+    "title": "실행 컨텍스트의 구성과 생성 과정",
     "path": "/post/frontend/javascript/execution-context"
   },
   {
     "slug": "hoisting",
-    "title": "호이스팅 — 선언은 먼저 올라간다",
+    "title": "호이스팅과 선언 초기화 방식",
     "path": "/post/frontend/javascript/hoisting"
   },
   {
     "slug": "js-event-loop-and-async",
-    "title": "JS 이벤트 루프와 비동기 — 콜스택, 큐, 마이크로태스크를 한 번에 이해하기",
+    "title": "JS 이벤트 루프와 비동기 처리 구조",
     "path": "/post/frontend/javascript/js-event-loop-and-async"
   },
   {
     "slug": "primitive-type",
-    "title": "원시 타입 — 값 자체가 복사되는 것들",
+    "title": "원시 타입과 값 복사",
     "path": "/post/frontend/javascript/primitive-type"
   },
   {
     "slug": "prototype",
-    "title": "프로토타입 — 없으면 위에 물어보는 상속",
+    "title": "프로토타입과 프로토타입 체인",
     "path": "/post/frontend/javascript/prototype"
   },
   {
     "slug": "reference-type",
-    "title": "참조 타입 — 주소가 복사되는 것들",
+    "title": "참조 타입과 참조 복사",
     "path": "/post/frontend/javascript/reference-type"
   },
   {
     "slug": "scope",
-    "title": "스코프 — 변수가 어디까지 보이는가",
+    "title": "스코프와 스코프 체인",
     "path": "/post/frontend/javascript/scope"
   },
   {
     "slug": "settimeout-vs-promise",
-    "title": "setTimeout vs Promise — 실행 순서를 예측하는 가장 중요한 연습",
+    "title": "setTimeout과 Promise의 실행 순서",
     "path": "/post/frontend/javascript/settimeout-vs-promise"
   },
   {
     "slug": "shallow-deep-copy",
-    "title": "얕은 복사와 깊은 복사 — 겉만 새로 만드는가, 속까지 새로 만드는가",
+    "title": "얕은 복사와 깊은 복사",
     "path": "/post/frontend/javascript/shallow-deep-copy"
   },
   {
     "slug": "task-queue",
-    "title": "태스크 큐 — setTimeout 콜백이 줄 서는 곳",
+    "title": "태스크 큐와 setTimeout 실행 시점",
     "path": "/post/frontend/javascript/task-queue"
   },
   {
     "slug": "tdz",
-    "title": "TDZ — 등록은 됐지만 아직 쓸 수 없는 구간",
+    "title": "TDZ(Temporal Dead Zone)",
     "path": "/post/frontend/javascript/tdz"
   },
   {
     "slug": "this",
-    "title": "this — 어디서 만들었나가 아니라 어떻게 불렀나",
+    "title": "this 바인딩 규칙",
     "path": "/post/frontend/javascript/this"
   },
   {
