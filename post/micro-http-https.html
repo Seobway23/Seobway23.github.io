@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>HTTP와 HTTPS — 웹을 움직이는 프로토콜 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="Tim Berners-Lee가 1991년 발명한 HTTP가 어떻게 진화해 HTTP/3까지 왔는지, 그리고 HTTPS가 왜 필요하고 TLS 핸드셰이크가 어떻게 동작하는지 설명한다." />
     <meta name="keywords" content="HTTP, HTTPS, TLS, SSL, HTTP2, HTTP3, QUIC, RFC 2616, Web, Protocol" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/micro-http-https" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:32.052Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.538Z" />
     <meta property="article:tag" content="HTTP" />
     <meta property="article:tag" content="HTTPS" />
     <meta property="article:tag" content="TLS" />
@@ -58,7 +58,7 @@
     <meta name="twitter:title" content="HTTP와 HTTPS — 웹을 움직이는 프로토콜" />
     <meta name="twitter:description" content="Tim Berners-Lee가 1991년 발명한 HTTP가 어떻게 진화해 HTTP/3까지 왔는지, 그리고 HTTPS가 왜 필요하고 TLS 핸드셰이크가 어떻게 동작하는지 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"HTTP와 HTTPS — 웹을 움직이는 프로토콜","description":"Tim Berners-Lee가 1991년 발명한 HTTP가 어떻게 진화해 HTTP/3까지 왔는지, 그리고 HTTPS가 왜 필요하고 TLS 핸드셰이크가 어떻게 동작하는지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T01:44:32.052Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-http-https"},"keywords":"HTTP, HTTPS, TLS, SSL, HTTP2, HTTP3, QUIC, RFC 2616, Web, Protocol","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":5216},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"HTTP와 HTTPS — 웹을 움직이는 프로토콜","item":"https://seobway23.github.io/post/micro-http-https"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"HTTP와 HTTPS — 웹을 움직이는 프로토콜","description":"Tim Berners-Lee가 1991년 발명한 HTTP가 어떻게 진화해 HTTP/3까지 왔는지, 그리고 HTTPS가 왜 필요하고 TLS 핸드셰이크가 어떻게 동작하는지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.538Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-http-https"},"keywords":"HTTP, HTTPS, TLS, SSL, HTTP2, HTTP3, QUIC, RFC 2616, Web, Protocol","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":5216},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"HTTP와 HTTPS — 웹을 움직이는 프로토콜","item":"https://seobway23.github.io/post/micro-http-https"}]}]}</script>
   </head>
   <body>
     <script>
@@ -155,7 +155,7 @@ sequenceDiagram
 <p>한계: TCP 레벨의 <strong>헤드-오브-라인(HOL) 블로킹</strong>은 여전히 존재.<br>TCP 패킷 하나가 손실되면 그 연결의 모든 스트림이 대기한다.</p>
 <h3>HTTP/3 — RFC 9114 (2022)</h3>
 <p>TCP HOL 블로킹을 근본적으로 해결하기 위해 TCP를 버리고 <strong>QUIC(RFC 9000)</strong> 위에서 동작한다.<br>QUIC은 UDP 기반이지만 신뢰성·순서·혼잡 제어를 user space에서 구현한다.<sup id="fnref-http3" style="scroll-margin-top: 96px;"><a href="#fn-http3" aria-label="각주 2">[2]</a></sup></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th></th>
@@ -200,13 +200,13 @@ sequenceDiagram
 <td>불가</td>
 <td>Connection ID로 가능</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h2>HTTPS — 왜 암호화가 필요한가</h2>
 <p>HTTP는 모든 데이터를 <strong>평문(Plaintext)</strong>으로 전송한다.<br>중간에서 패킷을 가로채면 로그인 정보, 카드 번호, 개인 정보가 그대로 노출된다.</p>
 <p>이를 해결하기 위해 <strong>Netscape</strong>가 1994년 <strong>SSL(Secure Sockets Layer)</strong>을 개발했다.<br>이후 IETF가 SSL을 계승해 <strong>TLS(Transport Layer Security)</strong>로 표준화했다.<sup id="fnref-tls" style="scroll-margin-top: 96px;"><a href="#fn-tls" aria-label="각주 3">[3]</a></sup></p>
 <p><strong>HTTPS = HTTP + TLS</strong></p>
 <p>TLS는 세 가지를 보장한다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>보장</th>
@@ -225,7 +225,7 @@ sequenceDiagram
 <td><strong>인증(Authentication)</strong></td>
 <td>서버가 진짜 해당 도메인의 서버임을 인증서로 증명한다</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>TLS 핸드셰이크 (TLS 1.2 기준)</h3>
 <pre><code class="language-mermaid">%% desc: TLS 1.2 핸드셰이크 — 클라이언트와 서버가 세션 키를 협상하는 4단계 과정
 sequenceDiagram
@@ -256,7 +256,7 @@ flowchart TD
 </code></pre>
 <h2>HTTP 메서드와 상태 코드</h2>
 <h3>주요 메서드</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>메서드</th>
@@ -299,9 +299,9 @@ flowchart TD
 <td>지원 메서드 조회</td>
 <td>✓</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>주요 상태 코드</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>범위</th>
@@ -329,7 +329,7 @@ flowchart TD
 <td>서버 오류</td>
 <td>500 Internal Server Error, 503 Service Unavailable</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h2>참고</h2>
 <ol>
 <li id="fn-http" style="scroll-margin-top: 96px;">Hypertext Transfer Protocol, <a href="https://en.wikipedia.org/wiki/HTTP" target="_blank">Wikipedia</a> <a href="#fnref-http" aria-label="본문으로 돌아가기">↩</a></li>

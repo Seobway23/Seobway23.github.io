@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>Electron 네이티브 계층 — OS 통합과 C++ 바인딩 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="BrowserWindow·dialog·Tray 같은 Electron API가 실제로는 OS 네이티브 API를 호출하는 C++ 바인딩이라는 점과, 직접 만든 네이티브 노드 모듈을 Electron ABI에 맞춰 재빌드해야 하는 이유를 정리한다." />
     <meta name="keywords" content="electron, native-modules, c++, abi, os-integration" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/electron-native-layer-os-integration" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-06-12T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.920Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.407Z" />
     <meta property="article:tag" content="electron" />
     <meta property="article:tag" content="native-modules" />
     <meta property="article:tag" content="c++" />
@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Electron 네이티브 계층 — OS 통합과 C++ 바인딩" />
     <meta name="twitter:description" content="BrowserWindow·dialog·Tray 같은 Electron API가 실제로는 OS 네이티브 API를 호출하는 C++ 바인딩이라는 점과, 직접 만든 네이티브 노드 모듈을 Electron ABI에 맞춰 재빌드해야 하는 이유를 정리한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Electron 네이티브 계층 — OS 통합과 C++ 바인딩","description":"BrowserWindow·dialog·Tray 같은 Electron API가 실제로는 OS 네이티브 API를 호출하는 C++ 바인딩이라는 점과, 직접 만든 네이티브 노드 모듈을 Electron ABI에 맞춰 재빌드해야 하는 이유를 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-12T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.920Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-native-layer-os-integration"},"keywords":"electron, native-modules, c++, abi, os-integration","articleSection":"electron","inLanguage":"ko-KR","wordCount":11519},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"Electron 네이티브 계층 — OS 통합과 C++ 바인딩","item":"https://seobway23.github.io/post/electron-native-layer-os-integration"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Electron 네이티브 계층 — OS 통합과 C++ 바인딩","description":"BrowserWindow·dialog·Tray 같은 Electron API가 실제로는 OS 네이티브 API를 호출하는 C++ 바인딩이라는 점과, 직접 만든 네이티브 노드 모듈을 Electron ABI에 맞춰 재빌드해야 하는 이유를 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-12T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.407Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-native-layer-os-integration"},"keywords":"electron, native-modules, c++, abi, os-integration","articleSection":"electron","inLanguage":"ko-KR","wordCount":11519},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"Electron 네이티브 계층 — OS 통합과 C++ 바인딩","item":"https://seobway23.github.io/post/electron-native-layer-os-integration"}]}]}</script>
   </head>
   <body>
     <script>
@@ -99,7 +99,7 @@ flowchart TD
 <hr>
 <h2>OS 통합 API — 어떤 JS가 어떤 OS를 건드리나</h2>
 <p>대표적인 OS 통합 API와 그 아래에서 실제로 호출되는 네이티브 대상을 표로 정리하면 다음과 같다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>JS API</th>
@@ -174,7 +174,7 @@ flowchart TD
 <td>디스플레이 개수·해상도·DPI·배치·커서 위치</td>
 <td>디스플레이 서버/그래픽 드라이버 질의</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>각 API의 동작 차이는 공식 문서에 명시돼 있다.<a href="https://www.electronjs.org/docs/latest/api/browser-window" target="_blank"><sup>[2]</sup></a><a href="https://www.electronjs.org/docs/latest/api/dialog" target="_blank"><sup>[3]</sup></a><a href="https://www.electronjs.org/docs/latest/api/tray" target="_blank"><sup>[4]</sup></a><a href="https://www.electronjs.org/docs/latest/api/notification" target="_blank"><sup>[5]</sup></a><a href="https://www.electronjs.org/docs/latest/api/native-image" target="_blank"><sup>[6]</sup></a></p>
 <h3>BrowserWindow — 가장 대표적인 &quot;C++ → 플랫폼 창&quot;</h3>
 <p><code>BrowserWindow</code>는 <code>BaseWindow</code>를 확장한 클래스이며, <code>app</code>의 <code>ready</code> 이벤트 이후에만 생성할 수 있다. 렌더 스택 초기화에 의존하기 때문이다. 옵션 중 상당수가 <strong>특정 OS에서만 의미를 갖는다</strong>는 점이, 내부에 C++ 플랫폼 분기가 존재한다는 직접적인 증거다.</p>
@@ -240,7 +240,7 @@ new Notification({ title: &#39;빌드 완료&#39;, body: &#39;DXF 변환이 끝�
 <p>Electron 공식 문서는 애드온 작성을 &quot;Native Node.js Addons 위에 구축하는 것&quot;으로 설명하며, <strong>Node-API 애드온 + context-aware 선언</strong>을 권장 패턴으로 제시한다<a href="https://www.electronjs.org/docs/latest/tutorial/native-code-and-electron" target="_blank"><sup>[8]</sup></a>.</p>
 <h3>빌드 도구 체인</h3>
 <p>네이티브 애드온을 실제로 컴파일·배포하기 위한 도구들은 역할이 조금씩 다르다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>도구</th>
@@ -267,7 +267,7 @@ new Notification({ title: &#39;빌드 완료&#39;, body: &#39;DXF 변환이 끝�
 <td><strong>prebuildify</strong></td>
 <td>node-gyp 기반, 빌드 바이너리를 <strong>npm 패키지에 동봉</strong>해 설치 즉시 사용 가능(런타임 빌드 불필요)</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>이 도구들의 차이는 한 줄로 요약하면 &quot;<strong>누가, 언제, 어디서 빌드 바이너리를 만드느냐</strong>&quot;의 문제다<a href="https://www.electronjs.org/docs/latest/tutorial/native-code-and-electron" target="_blank"><sup>[8]</sup></a><a href="https://www.electronjs.org/docs/latest/tutorial/using-native-node-modules" target="_blank"><sup>[9]</sup></a>.</p>
 <h3>최소 C++ 애드온 흐름 (Node-API / context-aware)</h3>
 <p>간단한 Node-API 애드온의 골격은 다음과 같다.</p>
@@ -355,7 +355,7 @@ flowchart LR
 <hr>
 <h2>플랫폼별 차이 요약</h2>
 <p>지금까지 살펴본 OS별 차이를 영역별로 한눈에 정리하면 다음과 같다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>영역</th>
@@ -418,7 +418,7 @@ flowchart LR
 <td>동일</td>
 <td>동일</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>macOS 전용 기능(vibrancy, titleBarStyle, template image)과 Linux 트레이 폴백, 투명도 조회 차이는 모두 공식 문서에 명시된 사항이다.</p>
 <hr>
 <h2>실무 체크리스트</h2>

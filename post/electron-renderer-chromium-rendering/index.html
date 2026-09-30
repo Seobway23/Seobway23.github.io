@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다." />
     <meta name="keywords" content="electron, chromium, blink, v8, rendering-pipeline" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/electron-renderer-chromium-rendering" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-06-10T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.946Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.439Z" />
     <meta property="article:tag" content="electron" />
     <meta property="article:tag" content="chromium" />
     <meta property="article:tag" content="blink" />
@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인" />
     <meta name="twitter:description" content="Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인","description":"Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-10T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.946Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-renderer-chromium-rendering"},"keywords":"electron, chromium, blink, v8, rendering-pipeline","articleSection":"electron","inLanguage":"ko-KR","wordCount":11949},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인","item":"https://seobway23.github.io/post/electron-renderer-chromium-rendering"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인","description":"Electron의 renderer 프로세스 안에서 Blink와 V8이 HTML/CSS/JS를 화면 픽셀로 바꾸는 Parse-Style-Layout-Paint-Composite 파이프라인을 따라가며, main thread 병목과 컴포지터 스레드가 부드러운 애니메이션을 만드는 원리를 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-10T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.439Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-renderer-chromium-rendering"},"keywords":"electron, chromium, blink, v8, rendering-pipeline","articleSection":"electron","inLanguage":"ko-KR","wordCount":11949},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인","item":"https://seobway23.github.io/post/electron-renderer-chromium-rendering"}]}]}</script>
   </head>
   <body>
     <script>
@@ -107,7 +107,7 @@
 <hr>
 <h2>renderer를 구동하는 두 엔진 — Blink와 V8</h2>
 <p>renderer 프로세스 안에는 두 개의 Chromium 엔진이 함께 들어 있다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>엔진</th>
@@ -125,7 +125,7 @@
 <td>자바스크립트(+WebAssembly) 엔진. React 코드를 실제로 실행한다</td>
 <td>생각하고 명령하는 머리</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>Blink는 Chromium의 렌더링 엔진, V8은 Chromium의 자바스크립트 엔진이라는 구분은 Electron과 Chromium 문서 전반에서 일관되게 쓰인다 <a href="https://www.electronjs.org/docs/latest/tutorial/process-model" target="_blank"><sup>[3]</sup></a><a href="https://v8.dev/docs" target="_blank"><sup>[4]</sup></a>. 1편에서 확인했던 &quot;각 <code>BrowserWindow</code>는 웹 표준을 사용해 페이지를 렌더링한다&quot;는 설명이 바로 &quot;renderer 안에서 Blink와 V8이 함께 돈다&quot;는 뜻이다.</p>
 <p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p>V8은 renderer뿐 아니라 <strong>main 프로세스(Node.js)에도</strong> 들어 있다. 같은 V8 엔진이 양쪽에서 돌지만, renderer의 V8은 <strong>Node API가 차단된</strong> 웹 표준 환경에서, main의 V8은 <strong>Node 전권</strong> 환경에서 동작한다. 엔진은 같고 권한이 다르다 — 이것이 Electron 보안 설계의 뿌리다. 다음 글에서 이 두 V8과 두 이벤트 루프의 통합을 자세히 다룬다.</p>
 </div></div></aside></p>
@@ -265,7 +265,7 @@ flowchart TD
 <p>즉 <code>transform</code>이나 <code>opacity</code>처럼 <strong>compositor만 건드리는 속성</strong>으로 애니메이션을 구현하면, main thread가 무거운 JS로 막혀 있어도 스크롤과 애니메이션은 부드럽게 동작한다. 반대로 <code>top</code>/<code>left</code>/<code>width</code>/<code>height</code>를 애니메이션으로 바꾸면 매 프레임마다 <strong>Layout → Paint → Composite 전체를 main thread에서 다시</strong> 돌려야 해서 버벅인다(jank).</p>
 <hr>
 <h2>한눈에 보는 요약표</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>단계</th>
@@ -310,7 +310,7 @@ flowchart TD
 <td><code>transform</code>, <code>opacity</code>, 스크롤</td>
 <td>낮음(부드러움)</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p><aside class="post-callout post-callout--tip" data-callout="tip" role="note" aria-label="TIP"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">TIP</span><div class="post-callout__content"><p>황금률: 애니메이션은 <strong>compositor-only 속성(<code>transform</code>, <code>opacity</code>)</strong>으로 만든다. Layout을 건드리는 속성을 애니메이션하면 main thread가 매 프레임 점유된다.</p>
 </div></div></aside></p>
 <hr>

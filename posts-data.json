@@ -570,6 +570,16 @@
     "path": "/post/study/roadmap/ai-webdev-roadmap-foundation"
   },
   {
+    "slug": "rag-hybrid-search",
+    "title": "설계기준 RAG의 하이브리드 검색 구현",
+    "path": "/post/work/RAG/rag-hybrid-search"
+  },
+  {
+    "slug": "rag-pdf-symbol-retrieval",
+    "title": "설계기준 PDF 색인과 수식 기호 검색 실험",
+    "path": "/post/work/RAG/rag-pdf-symbol-retrieval"
+  },
+  {
     "slug": "ai-agent-qa-automation-token-economics",
     "title": "AI 에이전트 QA 자동화 — 토큰 경제 분석",
     "path": "/post/work/analysis/ai-agent-qa-automation-token-economics"
@@ -578,5 +588,10 @@
     "slug": "cache-overlay-timing-rca",
     "title": "저장은 됐는데 화면이 한 박자 늦는 이유 — 캐시가 옛 값을 먼저 준다",
     "path": "/post/work/analysis/cache-overlay-timing-rca"
+  },
+  {
+    "slug": "modeler-canvas-render-ablation",
+    "title": "3D 캔버스 렌더 최적화 8가지를 하나씩 켜서 잰 결과",
+    "path": "/post/work/performance/modeler-canvas-render-ablation"
   }
 ]

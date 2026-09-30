@@ -1,0 +1,492 @@
+{
+  "at": "2026-09-30T05:34:56.327Z",
+  "mode": "dev",
+  "label": "dev-before",
+  "refreshHz": 59.9,
+  "viewport": {
+    "w": 1280,
+    "h": 820,
+    "dpr": 1
+  },
+  "canvas": {
+    "x": 249,
+    "y": 253.390625,
+    "w": 1004,
+    "h": 576.40625
+  },
+  "svgNodes3D": 5236,
+  "svgTags3D": {
+    "polygon": 4086,
+    "g": 504,
+    "line": 410,
+    "circle": 116,
+    "text": 98,
+    "title": 11,
+    "polyline": 11
+  },
+  "domNodes": 6572,
+  "input": "125 Hz CDP Input.dispatchMouseEvent, 8자 경로 3초/바퀴",
+  "scenarios": {
+    "idle": {
+      "title": "가만히 (기준선)",
+      "secs": 2.2,
+      "fps": 60,
+      "frameMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "p99": 19.9,
+        "max": 24.1
+      },
+      "jankFrames": 0,
+      "droppedFrames": 0,
+      "commitsPerSec": 0,
+      "commitMs": null,
+      "renderShare": null,
+      "movesPerSec": 0,
+      "inputToFrameMs": {
+        "p50": null,
+        "p95": null,
+        "max": null
+      },
+      "longTasks": {
+        "n": 0,
+        "totalMs": 0,
+        "maxMs": null
+      },
+      "domMutationsPerSec": 0,
+      "domMutationsPerCommit": null,
+      "mainThreadMsPerSec": {
+        "script": 101.1,
+        "layout": 0,
+        "style": 0,
+        "task": 131.9
+      },
+      "topRenders": []
+    },
+    "orbit": {
+      "title": "3D 궤도 회전 (좌클릭 드래그)",
+      "secs": 6.4,
+      "fps": 10.5,
+      "frameMs": {
+        "p50": 33.4,
+        "p95": 266.7,
+        "p99": 316.8,
+        "max": 350
+      },
+      "jankFrames": 34,
+      "droppedFrames": 310,
+      "commitsPerSec": 4.5,
+      "commitMs": {
+        "avg": 91.9,
+        "p95": 179.3,
+        "max": 198.3,
+        "total": 2666.5
+      },
+      "renderShare": 41.8,
+      "movesPerSec": 10,
+      "inputToFrameMs": {
+        "p50": 7.2,
+        "p95": 42.7,
+        "max": 302.6
+      },
+      "longTasks": {
+        "n": 28,
+        "totalMs": 5277,
+        "maxMs": 366
+      },
+      "domMutationsPerSec": 54715.4,
+      "domMutationsPerCommit": 12038.3,
+      "mainThreadMsPerSec": {
+        "script": 649.3,
+        "layout": 26.4,
+        "style": 189.6,
+        "task": 1047.4
+      },
+      "topRenders": [
+        {
+          "name": "ModelCanvas",
+          "n": 27,
+          "ms": 1111.6,
+          "perSec": 4.2
+        },
+        {
+          "name": "(anon)",
+          "n": 1306,
+          "ms": 34.4,
+          "perSec": 204.7
+        },
+        {
+          "name": "LeftPanel",
+          "n": 27,
+          "ms": 21.7,
+          "perSec": 4.2
+        },
+        {
+          "name": "Modeler",
+          "n": 27,
+          "ms": 21,
+          "perSec": 4.2
+        },
+        {
+          "name": "motion.span",
+          "n": 626,
+          "ms": 20.5,
+          "perSec": 98.1
+        },
+        {
+          "name": "T",
+          "n": 4237,
+          "ms": 13.1,
+          "perSec": 664.1
+        },
+        {
+          "name": "AnimatePresence",
+          "n": 462,
+          "ms": 12.7,
+          "perSec": 72.4
+        },
+        {
+          "name": "Field",
+          "n": 621,
+          "ms": 11.7,
+          "perSec": 97.3
+        },
+        {
+          "name": "I",
+          "n": 1294,
+          "ms": 8.2,
+          "perSec": 202.8
+        },
+        {
+          "name": "NumCell",
+          "n": 621,
+          "ms": 7,
+          "perSec": 97.3
+        },
+        {
+          "name": "motion.button",
+          "n": 143,
+          "ms": 4.5,
+          "perSec": 22.4
+        },
+        {
+          "name": "motion.div",
+          "n": 55,
+          "ms": 3.8,
+          "perSec": 8.6
+        },
+        {
+          "name": "FloatPanel",
+          "n": 54,
+          "ms": 2.5,
+          "perSec": 8.5
+        },
+        {
+          "name": "ChevronRight",
+          "n": 245,
+          "ms": 2.4,
+          "perSec": 38.4
+        },
+        {
+          "name": "MeasureLayout",
+          "n": 191,
+          "ms": 1.6,
+          "perSec": 29.9
+        }
+      ],
+      "engaged": true
+    },
+    "pan": {
+      "title": "화면 이동 (가운데 버튼 드래그)",
+      "secs": 4.6,
+      "fps": 4.6,
+      "frameMs": {
+        "p50": 266.6,
+        "p95": 349.3,
+        "p99": 349.9,
+        "max": 349.9
+      },
+      "jankFrames": 18,
+      "droppedFrames": 249,
+      "commitsPerSec": 3.7,
+      "commitMs": {
+        "avg": 147.6,
+        "p95": 199.4,
+        "max": 234.4,
+        "total": 2508.4
+      },
+      "renderShare": 54.9,
+      "movesPerSec": 3.7,
+      "inputToFrameMs": {
+        "p50": 15.5,
+        "p95": 26.2,
+        "max": 87.5
+      },
+      "longTasks": {
+        "n": 28,
+        "totalMs": 4490,
+        "maxMs": 278
+      },
+      "domMutationsPerSec": 21589.3,
+      "domMutationsPerCommit": 5802.6,
+      "mainThreadMsPerSec": {
+        "script": 809.7,
+        "layout": 56.8,
+        "style": 56.8,
+        "task": 1087.9
+      },
+      "topRenders": [
+        {
+          "name": "ModelCanvas",
+          "n": 16,
+          "ms": 1202.1,
+          "perSec": 3.5
+        },
+        {
+          "name": "(anon)",
+          "n": 309,
+          "ms": 10.8,
+          "perSec": 67.6
+        },
+        {
+          "name": "Modeler",
+          "n": 1,
+          "ms": 3.6,
+          "perSec": 0.2
+        },
+        {
+          "name": "T",
+          "n": 566,
+          "ms": 3.2,
+          "perSec": 123.9
+        },
+        {
+          "name": "I",
+          "n": 297,
+          "ms": 2.4,
+          "perSec": 65
+        },
+        {
+          "name": "motion.span",
+          "n": 29,
+          "ms": 2,
+          "perSec": 6.3
+        },
+        {
+          "name": "Check",
+          "n": 129,
+          "ms": 1.6,
+          "perSec": 28.2
+        },
+        {
+          "name": "AnimatePresence",
+          "n": 35,
+          "ms": 1.4,
+          "perSec": 7.7
+        },
+        {
+          "name": "Box",
+          "n": 19,
+          "ms": 1.1,
+          "perSec": 4.2
+        },
+        {
+          "name": "LeftPanel",
+          "n": 1,
+          "ms": 1.1,
+          "perSec": 0.2
+        },
+        {
+          "name": "Field",
+          "n": 23,
+          "ms": 0.8,
+          "perSec": 5
+        },
+        {
+          "name": "RotateCw",
+          "n": 16,
+          "ms": 0.7,
+          "perSec": 3.5
+        },
+        {
+          "name": "Hash",
+          "n": 16,
+          "ms": 0.5,
+          "perSec": 3.5
+        },
+        {
+          "name": "motion.button",
+          "n": 13,
+          "ms": 0.5,
+          "perSec": 2.8
+        },
+        {
+          "name": "NumCell",
+          "n": 23,
+          "ms": 0.4,
+          "perSec": 5
+        }
+      ],
+      "engaged": true
+    },
+    "viewTween": {
+      "title": "뷰 버튼 전환 애니메이션",
+      "secs": 5.5,
+      "fps": 7.2,
+      "frameMs": {
+        "p50": 146.5,
+        "p95": 366.8,
+        "p99": 467,
+        "max": 467
+      },
+      "jankFrames": 26,
+      "droppedFrames": 295,
+      "commitsPerSec": 4.5,
+      "commitMs": {
+        "avg": 101.7,
+        "p95": 166.6,
+        "max": 176.9,
+        "total": 2543.1
+      },
+      "renderShare": 45.9,
+      "movesPerSec": 0,
+      "inputToFrameMs": {
+        "p50": null,
+        "p95": null,
+        "max": null
+      },
+      "longTasks": {
+        "n": 40,
+        "totalMs": 5091,
+        "maxMs": 332
+      },
+      "domMutationsPerSec": 45418.2,
+      "domMutationsPerCommit": 10067.4,
+      "mainThreadMsPerSec": {
+        "script": 670.5,
+        "layout": 28.1,
+        "style": 166.5,
+        "task": 973.1
+      },
+      "topRenders": [
+        {
+          "name": "ModelCanvas",
+          "n": 25,
+          "ms": 1137.1,
+          "perSec": 4.5
+        },
+        {
+          "name": "(anon)",
+          "n": 604,
+          "ms": 11.4,
+          "perSec": 109
+        },
+        {
+          "name": "T",
+          "n": 1428,
+          "ms": 6.8,
+          "perSec": 257.7
+        },
+        {
+          "name": "motion.span",
+          "n": 149,
+          "ms": 5.8,
+          "perSec": 26.9
+        },
+        {
+          "name": "LeftPanel",
+          "n": 6,
+          "ms": 5.6,
+          "perSec": 1.1
+        },
+        {
+          "name": "Modeler",
+          "n": 6,
+          "ms": 4.2,
+          "perSec": 1.1
+        },
+        {
+          "name": "I",
+          "n": 592,
+          "ms": 3.8,
+          "perSec": 106.8
+        },
+        {
+          "name": "Field",
+          "n": 138,
+          "ms": 3.6,
+          "perSec": 24.9
+        },
+        {
+          "name": "AnimatePresence",
+          "n": 124,
+          "ms": 3,
+          "perSec": 22.4
+        },
+        {
+          "name": "NumCell",
+          "n": 138,
+          "ms": 1.8,
+          "perSec": 24.9
+        },
+        {
+          "name": "motion.button",
+          "n": 38,
+          "ms": 1.7,
+          "perSec": 6.9
+        },
+        {
+          "name": "Box",
+          "n": 33,
+          "ms": 1,
+          "perSec": 6
+        },
+        {
+          "name": "Check",
+          "n": 201,
+          "ms": 0.9,
+          "perSec": 36.3
+        },
+        {
+          "name": "ChevronRight",
+          "n": 56,
+          "ms": 0.9,
+          "perSec": 10.1
+        },
+        {
+          "name": "motion.div",
+          "n": 13,
+          "ms": 0.7,
+          "perSec": 2.3
+        }
+      ]
+    }
+  },
+  "videos": {
+    "idle": {
+      "file": "idle.mp4",
+      "frames": 152,
+      "capturedFps": 58.9,
+      "sizeKB": 55
+    },
+    "orbit": {
+      "file": "orbit.mp4",
+      "frames": 99,
+      "capturedFps": 14.9,
+      "sizeKB": 363
+    },
+    "pan": {
+      "file": "pan.mp4",
+      "frames": 49,
+      "capturedFps": 10.4,
+      "sizeKB": 273
+    },
+    "viewTween": {
+      "file": "viewTween.mp4",
+      "frames": 35,
+      "capturedFps": 5.3,
+      "sizeKB": 169
+    }
+  },
+  "svgNodesAfter": 5236
+}

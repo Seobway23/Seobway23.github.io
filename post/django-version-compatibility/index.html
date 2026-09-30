@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="Django 5.2에서 queries_logged 속성 setter가 막히며 /api/docs가 500 에러를 낸 실제 사례를 분석하고, 내부 API 의존의 위험성과 협업 환경에서 버전을 고정해야 하는 이유를 설명한다." />
     <meta name="keywords" content="Django, VersionCompatibility, InternalAPI, Deprecation, Django5, Middleware, Python, Collaboration" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/django-version-compatibility" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-03-26T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.876Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.367Z" />
     <meta property="article:tag" content="Django" />
     <meta property="article:tag" content="VersionCompatibility" />
     <meta property="article:tag" content="InternalAPI" />
@@ -56,7 +56,7 @@
     <meta name="twitter:title" content="Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈" />
     <meta name="twitter:description" content="Django 5.2에서 queries_logged 속성 setter가 막히며 /api/docs가 500 에러를 낸 실제 사례를 분석하고, 내부 API 의존의 위험성과 협업 환경에서 버전을 고정해야 하는 이유를 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈","description":"Django 5.2에서 queries_logged 속성 setter가 막히며 /api/docs가 500 에러를 낸 실제 사례를 분석하고, 내부 API 의존의 위험성과 협업 환경에서 버전을 고정해야 하는 이유를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-26T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.876Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-version-compatibility"},"keywords":"Django, VersionCompatibility, InternalAPI, Deprecation, Django5, Middleware, Python, Collaboration","articleSection":"django","inLanguage":"ko-KR","wordCount":4526},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈","item":"https://seobway23.github.io/post/django-version-compatibility"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈","description":"Django 5.2에서 queries_logged 속성 setter가 막히며 /api/docs가 500 에러를 낸 실제 사례를 분석하고, 내부 API 의존의 위험성과 협업 환경에서 버전을 고정해야 하는 이유를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-26T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.367Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-version-compatibility"},"keywords":"Django, VersionCompatibility, InternalAPI, Deprecation, Django5, Middleware, Python, Collaboration","articleSection":"django","inLanguage":"ko-KR","wordCount":4526},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈","item":"https://seobway23.github.io/post/django-version-compatibility"}]}]}</script>
   </head>
   <body>
     <script>
@@ -119,7 +119,7 @@ class QueryLoggingMiddleware:
 <p><code>connection.queries</code>는 공식 Django 문서에 명시된 공개 API다.<sup id="fnref-django-db-connection" style="scroll-margin-top: 96px;"><a href="#fn-django-db-connection" aria-label="각주 1">[1]</a></sup><br><code>queries_logged</code>는 내부 구현이므로 절대 대입하지 않는다.</p>
 <h2>내부 API 의존의 위험성</h2>
 <h3>Django 공식 API vs 비공식 내부 구현</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>구분</th>
@@ -137,7 +137,7 @@ class QueryLoggingMiddleware:
 <td><code>connection.queries_logged</code>, <code>connection._queries</code>, <code>Model._meta.pk</code></td>
 <td>버전 업 시 깨질 수 있음</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>Django는 공식 API에 대해서만 하위 호환성을 보장한다.<sup id="fnref-django-api-stability" style="scroll-margin-top: 96px;"><a href="#fn-django-api-stability" aria-label="각주 2">[2]</a></sup><br>내부 속성(<code>_</code> 접두사, 문서에 없는 것)은 예고 없이 바뀔 수 있다.</p>
 <h3>자주 보이는 위험 패턴</h3>
 <pre><code class="language-python"># ❌ 위험: 비공식 내부 속성 직접 접근
@@ -198,7 +198,7 @@ pip-sync requirements.txt       # 환경을 requirements.txt와 동기화
 </code></pre>
 <h2>Django LTS 버전</h2>
 <p>Django는 2년마다 LTS(Long-Term Support) 버전을 출시한다.<sup id="fnref-django-lts" style="scroll-margin-top: 96px;"><a href="#fn-django-lts" aria-label="각주 3">[3]</a></sup></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>버전</th>
@@ -231,7 +231,7 @@ pip-sync requirements.txt       # 환경을 requirements.txt와 동기화
 <td>2028.04</td>
 <td>✅ LTS</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>운영 환경에서는 LTS 버전을 사용하는 것이 안전하다.<br>LTS 버전은 보안 패치와 버그 수정이 더 오래 제공된다.</p>
 <h2>버전 업그레이드 전 체크리스트</h2>
 <p>Django 버전 업그레이드 전에 반드시 확인해야 할 것들:</p>

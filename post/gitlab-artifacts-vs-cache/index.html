@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>GitLab CI/CD — artifacts vs cache — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다." />
     <meta name="keywords" content="GitLab, CI/CD, DevOps, artifacts, cache, 인프라" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/gitlab-artifacts-vs-cache" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-03-19T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.969Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.460Z" />
     <meta property="article:tag" content="GitLab" />
     <meta property="article:tag" content="CI/CD" />
     <meta property="article:tag" content="DevOps" />
@@ -54,7 +54,7 @@
     <meta name="twitter:title" content="GitLab CI/CD — artifacts vs cache" />
     <meta name="twitter:description" content="GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"GitLab CI/CD — artifacts vs cache","description":"GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-19T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.969Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/gitlab-artifacts-vs-cache"},"keywords":"GitLab, CI/CD, DevOps, artifacts, cache, 인프라","articleSection":"infra","inLanguage":"ko-KR","wordCount":7325},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"infra","item":"https://seobway23.github.io/?category=study%2Finfra"},{"@type":"ListItem","position":3,"name":"GitLab CI/CD — artifacts vs cache","item":"https://seobway23.github.io/post/gitlab-artifacts-vs-cache"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"GitLab CI/CD — artifacts vs cache","description":"GitLab CI에서 가장 자주 혼동되는 artifacts와 cache의 차이를 개념부터 실전 설정까지 한 번에 정리합니다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-19T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.460Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/gitlab-artifacts-vs-cache"},"keywords":"GitLab, CI/CD, DevOps, artifacts, cache, 인프라","articleSection":"infra","inLanguage":"ko-KR","wordCount":7325},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"infra","item":"https://seobway23.github.io/?category=study%2Finfra"},{"@type":"ListItem","position":3,"name":"GitLab CI/CD — artifacts vs cache","item":"https://seobway23.github.io/post/gitlab-artifacts-vs-cache"}]}]}</script>
   </head>
   <body>
     <script>
@@ -100,7 +100,7 @@ flowchart LR
 <p>이 문제를 해결하는 두 가지 방법이 <code>artifacts</code>와 <code>cache</code>입니다.<br>하지만 <strong>용도가 다릅니다.</strong></p>
 <hr>
 <h2>2. 핵심 차이 한눈에 보기</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th></th>
@@ -138,7 +138,7 @@ flowchart LR
 <td>빌드 산출물, 테스트 리포트, 커버리지</td>
 <td><code>node_modules</code>, <code>.gradle</code>, <code>~/.pip</code></td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>3. <code>artifacts</code> — 잡 간 파일 전달</h2>
 <h3>개념</h3>
@@ -468,7 +468,7 @@ cache:
 </code></pre>
 <hr>
 <h2>9. 한 줄 요약</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th></th>
@@ -483,7 +483,7 @@ cache:
 <td><code>cache</code></td>
 <td><strong>&quot;이 폴더, 다음 파이프라인에서 재사용&quot;</strong> — 설치 시간 단축, 미스 가능</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 
 <ul><li>GitLab</li><li>CI/CD</li><li>DevOps</li><li>artifacts</li><li>cache</li><li>인프라</li></ul>
 </article></div>

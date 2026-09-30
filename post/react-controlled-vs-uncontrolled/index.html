@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다." />
     <meta name="keywords" content="react, forms, controlled-component, uncontrolled-component, ref" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/react-controlled-vs-uncontrolled" />
     <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
     <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.763Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.273Z" />
     <meta property="article:tag" content="react" />
     <meta property="article:tag" content="forms" />
     <meta property="article:tag" content="controlled-component" />
@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가" />
     <meta name="twitter:description" content="controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가","description":"controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.763Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/react-controlled-vs-uncontrolled"},"keywords":"react, forms, controlled-component, uncontrolled-component, ref","articleSection":"react","inLanguage":"ko-KR","wordCount":2864},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"react","item":"https://seobway23.github.io/?category=frontend%2Freact"},{"@type":"ListItem","position":3,"name":"controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가","item":"https://seobway23.github.io/post/react-controlled-vs-uncontrolled"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가","description":"controlled 컴포넌트와 uncontrolled 컴포넌트의 차이, 각각의 장단점, 그리고 언제 어떤 방식을 선택하면 좋은지 React 폼 예제로 설명한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-01-browser-client.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.273Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/react-controlled-vs-uncontrolled"},"keywords":"react, forms, controlled-component, uncontrolled-component, ref","articleSection":"react","inLanguage":"ko-KR","wordCount":2864},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"react","item":"https://seobway23.github.io/?category=frontend%2Freact"},{"@type":"ListItem","position":3,"name":"controlled vs uncontrolled 컴포넌트 — React 폼 입력을 어떻게 다뤄야 하는가","item":"https://seobway23.github.io/post/react-controlled-vs-uncontrolled"}]}]}</script>
   </head>
   <body>
     <script>
@@ -73,7 +73,7 @@
 </p>
 <p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>10분</span></p>
 <h2>이 시리즈 구성</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>포스트</th>
@@ -104,7 +104,7 @@
 <td><a href="/post/typescript-type-system-basics">01-5. TypeScript 타입 시스템 기초 →</a></td>
 <td>any, unknown, union, narrowing</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>왜 폼에서 갑자기 복잡해지는가</h2>
 <p>React 초반에 많이 헷갈리는 지점이 폼이다.</p>

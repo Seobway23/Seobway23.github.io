@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>원시 타입과 값 복사 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="string·number·boolean·undefined·null·bigint·symbol 7가지 원시 타입은 대입할 때 값 자체가 복사되어 변수끼리 서로 영향을 주지 않는다." />
     <meta name="keywords" content="javascript, 타입, 원시타입" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/primitive-type" />
     <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/primitive-type.jpg" />
     <meta property="article:published_time" content="2026-09-09T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.737Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.249Z" />
     <meta property="article:tag" content="javascript" />
     <meta property="article:tag" content="타입" />
     <meta property="article:tag" content="원시타입" />
@@ -51,7 +51,7 @@
     <meta name="twitter:title" content="원시 타입과 값 복사" />
     <meta name="twitter:description" content="string·number·boolean·undefined·null·bigint·symbol 7가지 원시 타입은 대입할 때 값 자체가 복사되어 변수끼리 서로 영향을 주지 않는다." />
     <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/primitive-type.jpg" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"원시 타입과 값 복사","description":"string·number·boolean·undefined·null·bigint·symbol 7가지 원시 타입은 대입할 때 값 자체가 복사되어 변수끼리 서로 영향을 주지 않는다.","image":["https://seobway23.github.io/post-thumbnails/primitive-type.jpg"],"datePublished":"2026-09-09T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.737Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/primitive-type"},"keywords":"javascript, 타입, 원시타입","articleSection":"javascript","inLanguage":"ko-KR","wordCount":2525},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"원시 타입과 값 복사","item":"https://seobway23.github.io/post/primitive-type"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"원시 타입과 값 복사","description":"string·number·boolean·undefined·null·bigint·symbol 7가지 원시 타입은 대입할 때 값 자체가 복사되어 변수끼리 서로 영향을 주지 않는다.","image":["https://seobway23.github.io/post-thumbnails/primitive-type.jpg"],"datePublished":"2026-09-09T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.249Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/primitive-type"},"keywords":"javascript, 타입, 원시타입","articleSection":"javascript","inLanguage":"ko-KR","wordCount":2525},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"원시 타입과 값 복사","item":"https://seobway23.github.io/post/primitive-type"}]}]}</script>
   </head>
   <body>
     <script>
@@ -86,7 +86,7 @@ console.log(x.n);      // 2 (함께 변경됨)
 <hr>
 <h2>원시 타입의 종류</h2>
 <p>원시 타입(Primitive Type)은 변수에 값 자체가 저장되는 타입이다. ECMAScript 에는 7가지가 있다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>타입</th>
@@ -129,7 +129,7 @@ console.log(x.n);      // 2 (함께 변경됨)
 <td><code>Symbol(&quot;id&quot;)</code></td>
 <td>유일한 값. 주로 충돌하지 않는 속성 키로 사용</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>이 7가지를 제외한 객체·배열·함수는 모두 <a href="/post/reference-type">참조 타입</a>이다.</p>
 <p>원시 값을 다른 변수에 대입하면 값이 복사된다. 두 변수는 각각 독립된 값을 가지므로<br>한쪽을 재할당해도 다른 쪽에 영향이 없다.</p>
 <p>인터랙티브 다이어그램: 원시 값의 대입과 복사 (단계별로 재생할 수 있다)</p><ol><li>let a = 1 이 실행되어 a 에 값 1 이 저장된다.</li><li>let b = a 는 a 의 값을 읽어 b 에 복사한다. 값이 두 개 존재한다.</li><li>b = 2 는 b 에 새 값을 재할당한다.</li><li>a 는 별도의 값이므로 영향을 받지 않는다.</li></ol>

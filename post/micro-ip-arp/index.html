@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>IP와 ARP — 주소와 경로의 언어 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="인터넷의 기본 언어인 IPv4의 헤더 구조와 라우팅 원리, 그리고 IP 주소를 MAC 주소로 변환하는 ARP 프로토콜의 동작 방식을 설명한다." />
     <meta name="keywords" content="IP, IPv4, ARP, RFC 791, RFC 826, Network Layer, Addressing, Routing" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/micro-ip-arp" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:32.057Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.542Z" />
     <meta property="article:tag" content="IP" />
     <meta property="article:tag" content="IPv4" />
     <meta property="article:tag" content="ARP" />
@@ -56,7 +56,7 @@
     <meta name="twitter:title" content="IP와 ARP — 주소와 경로의 언어" />
     <meta name="twitter:description" content="인터넷의 기본 언어인 IPv4의 헤더 구조와 라우팅 원리, 그리고 IP 주소를 MAC 주소로 변환하는 ARP 프로토콜의 동작 방식을 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"IP와 ARP — 주소와 경로의 언어","description":"인터넷의 기본 언어인 IPv4의 헤더 구조와 라우팅 원리, 그리고 IP 주소를 MAC 주소로 변환하는 ARP 프로토콜의 동작 방식을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T01:44:32.057Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-ip-arp"},"keywords":"IP, IPv4, ARP, RFC 791, RFC 826, Network Layer, Addressing, Routing","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":5227},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"IP와 ARP — 주소와 경로의 언어","item":"https://seobway23.github.io/post/micro-ip-arp"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"IP와 ARP — 주소와 경로의 언어","description":"인터넷의 기본 언어인 IPv4의 헤더 구조와 라우팅 원리, 그리고 IP 주소를 MAC 주소로 변환하는 ARP 프로토콜의 동작 방식을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.542Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-ip-arp"},"keywords":"IP, IPv4, ARP, RFC 791, RFC 826, Network Layer, Addressing, Routing","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":5227},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"IP와 ARP — 주소와 경로의 언어","item":"https://seobway23.github.io/post/micro-ip-arp"}]}]}</script>
   </head>
   <body>
     <script>
@@ -100,7 +100,7 @@ flowchart TD
     W6[&quot;옵션 (가변) | 패딩&quot;]
   end
 </code></pre>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>필드</th>
@@ -168,13 +168,13 @@ flowchart TD
 <td>32비트</td>
 <td>수신자 IPv4 주소</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>TTL의 역할</h3>
 <p>TTL(Time to Live)은 패킷이 라우팅 루프에 빠졌을 때 무한히 떠돌지 않도록 막는다.<br>라우터를 거칠 때마다 1씩 감소하며, 0이 되면 패킷을 폐기하고 ICMP &quot;Time Exceeded&quot; 메시지를 보낸다.<br><code>traceroute</code> 명령은 이 원리를 이용해 경로상의 각 라우터를 식별한다.</p>
 <h2>IP 주소 체계</h2>
 <p>IPv4는 <strong>32비트</strong> 주소를 사용해 최대 약 42억(2³²)개의 주소를 표현한다.<br>일반적으로 점으로 구분된 8비트 4개로 표기한다: <code>192.168.1.1</code></p>
 <h3>공인 vs 사설 주소 (RFC 1918)</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>범위</th>
@@ -193,7 +193,7 @@ flowchart TD
 <td><code>192.168.0.0/16</code></td>
 <td>사설 주소 (가정/소규모 네트워크)</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>사설 주소는 인터넷에서 라우팅되지 않으며, NAT를 통해 공인 주소로 변환된다.</p>
 <h3>CIDR 표기</h3>
 <p>1993년 <strong>CIDR(Classless Inter-Domain Routing, RFC 1517)</strong>이 등장하면서<br><code>192.168.1.0/24</code>처럼 슬래시 뒤 숫자로 서브넷 마스크를 표기한다.<br><code>/24</code>는 앞 24비트가 네트워크 부분이고, 남은 8비트(256개)가 호스트 주소임을 의미한다.</p>
@@ -247,7 +247,7 @@ sequenceDiagram
 <li><strong>캐시 저장</strong>: 결과를 ARP 캐시에 저장 (일반적으로 2~20분 유효)</li>
 </ol>
 <h3>ARP 패킷 구조</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>필드</th>
@@ -300,9 +300,9 @@ sequenceDiagram
 <td>32비트</td>
 <td>대상 IP 주소</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>ARP 변형</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>유형</th>
@@ -321,7 +321,7 @@ sequenceDiagram
 <td><strong>ARP Spoofing</strong></td>
 <td>악의적으로 잘못된 IP→MAC 매핑을 주입 → 중간자(MitM) 공격</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <blockquote>
 <p>ARP는 인증 기능이 없어 보안에 취약하다.<br>관리형 스위치의 <strong>DAI(Dynamic ARP Inspection)</strong>가 대표적 방어 수단이다.<br>IPv6에서는 ARP가 <strong>NDP(Neighbor Discovery Protocol, RFC 4861)</strong>로 대체됐다.</p>
 </blockquote>

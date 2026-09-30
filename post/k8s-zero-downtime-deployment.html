@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>Jenkins + ArgoCD로 구현하는 K8s 무중단 배포 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다." />
     <meta name="keywords" content="Jenkins, Kubernetes, CI/CD, DevOps, ArgoCD, GitOps, Docker, Kustomize, 인프라" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/k8s-zero-downtime-deployment" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-04-01T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.979Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.469Z" />
     <meta property="article:tag" content="Jenkins" />
     <meta property="article:tag" content="Kubernetes" />
     <meta property="article:tag" content="CI/CD" />
@@ -57,7 +57,7 @@
     <meta name="twitter:title" content="Jenkins + ArgoCD로 구현하는 K8s 무중단 배포" />
     <meta name="twitter:description" content="Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Jenkins + ArgoCD로 구현하는 K8s 무중단 배포","description":"Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-01T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.979Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/k8s-zero-downtime-deployment"},"keywords":"Jenkins, Kubernetes, CI/CD, DevOps, ArgoCD, GitOps, Docker, Kustomize, 인프라","articleSection":"infra","inLanguage":"ko-KR","wordCount":25587},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"infra","item":"https://seobway23.github.io/?category=study%2Finfra"},{"@type":"ListItem","position":3,"name":"Jenkins + ArgoCD로 구현하는 K8s 무중단 배포","item":"https://seobway23.github.io/post/k8s-zero-downtime-deployment"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Jenkins + ArgoCD로 구현하는 K8s 무중단 배포","description":"Jenkins CI 파이프라인으로 Docker 이미지를 빌드·푸시하고, ArgoCD GitOps로 K8s 롤링 업데이트를 자동화하는 전체 무중단 배포 흐름을 용어 설명부터 단계별로 정리합니다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-01T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.469Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/k8s-zero-downtime-deployment"},"keywords":"Jenkins, Kubernetes, CI/CD, DevOps, ArgoCD, GitOps, Docker, Kustomize, 인프라","articleSection":"infra","inLanguage":"ko-KR","wordCount":25587},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"infra","item":"https://seobway23.github.io/?category=study%2Finfra"},{"@type":"ListItem","position":3,"name":"Jenkins + ArgoCD로 구현하는 K8s 무중단 배포","item":"https://seobway23.github.io/post/k8s-zero-downtime-deployment"}]}]}</script>
   </head>
   <body>
     <script>
@@ -131,7 +131,7 @@ flowchart LR
     SYNC --&gt;|&quot;kubectl apply&quot;| K8S
 </code></pre>
 <p><strong>흐름 요약:</strong></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>단계</th>
@@ -164,7 +164,7 @@ flowchart LR
 <td>Kubernetes</td>
 <td>무중단 롤링 업데이트로 새 Pod 교체</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>2. Jenkins 파이프라인 — CI 자동화</h2>
 <h3>Jenkinsfile이란?</h3>
@@ -209,7 +209,7 @@ flowchart LR
 }
 </code></pre>
 <p><strong>왜 커밋 SHA를 태그로 쓰나요?</strong></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>태그 방식</th>
@@ -237,7 +237,7 @@ flowchart LR
 <td><code>app:abc1d2e-42</code></td>
 <td>동일 커밋을 두 번 빌드해도 구별 가능 ✅</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <blockquote>
 <p><strong>장애 발생 시:</strong> 실행 중인 이미지 태그 <code>abc1d2e-42</code>를 보고 → Git에서 커밋 <code>abc1d2e</code>를 찾으면 → 어떤 코드 변경이 문제였는지 바로 확인 가능</p>
 </blockquote>
@@ -359,7 +359,7 @@ flowchart TD
     CHECK --&gt;|&quot;있음&quot;| SKIP
 </code></pre>
 <p><strong>Deployment vs StatefulSet — 언제 무엇을 쓰나?</strong></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>비교 항목</th>
@@ -392,7 +392,7 @@ flowchart TD
 <td>웹 앱, API 서버</td>
 <td>MySQL, Redis, Elasticsearch 등</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p><strong>왜 MySQL은 고정 DNS가 필요한가?</strong></p>
 <p>MySQL을 Primary 1대 + Replica 2대로 구성하면, Replica는 Primary의 주소를 설정 파일에 써야 합니다.</p>
 <pre><code class="language-yaml"># MySQL Replica 설정 예시
@@ -709,7 +709,7 @@ spec:
         maxDuration: 3m # 최대 3분까지만
 </code></pre>
 <p><strong>Auto-Sync vs Manual Sync</strong></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th></th>
@@ -737,7 +737,7 @@ spec:
 <td>잘못된 코드가 바로 배포될 수 있음</td>
 <td>배포가 느림, 사람 개입 필요</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>4. K8s 무중단 배포 — Rolling Update 상세</h2>
 <h3>4-1. Rolling Update란?</h3>
@@ -754,7 +754,7 @@ flowchart LR
 </code></pre>
 <p>이 과정에서 서비스가 중단되지 않으려면, <strong>항상 Ready 상태의 Pod가 요청을 처리할 수 있어야</strong> 합니다.</p>
 <h3>4-2. maxSurge &amp; maxUnavailable — 교체 속도 조절</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>파라미터</th>
@@ -772,7 +772,7 @@ flowchart LR
 <td>원래 Pod 수보다 얼마나 줄어들 수 있나</td>
 <td><code>0</code> → 항상 3개 유지 (무중단 보장)</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p><strong>무중단 설정: <code>maxUnavailable: 0</code></strong></p>
 <pre><code class="language-yaml">strategy:
   type: RollingUpdate
@@ -826,7 +826,7 @@ flowchart LR
     NEW_NO -.-&gt;|&quot;Endpoint 등록 안 됨&quot;| EP
 </code></pre>
 <p><strong>Probe 3종 역할 비교</strong></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>Probe 종류</th>
@@ -849,7 +849,7 @@ flowchart LR
 <td>livenessProbe 비활성화 (시작 시간만큼 여유)</td>
 <td>JVM처럼 시작이 느린 앱 보호</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>4-4. 완전한 Deployment YAML — 실전 설정</h3>
 <pre><code class="language-yaml">apiVersion: apps/v1
 kind: Deployment
@@ -977,7 +977,7 @@ flowchart LR
     AVAIL[&quot;Available 상태\n다음 Pod 교체 시작&quot;]
     START --&gt; INIT --&gt; PROBE --&gt; MIN --&gt; AVAIL
 </code></pre>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>파라미터</th>
@@ -998,7 +998,7 @@ flowchart LR
 <td>600초</td>
 <td>Probe 설정에 맞게 조정</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>5-3. kubectl rollout 명령어 완전 정리</h3>
 <pre><code class="language-bash"># 배포 진행 상황 실시간 확인
 # &quot;successfully rolled out&quot; 메시지가 나올 때까지 대기
@@ -1109,7 +1109,7 @@ flowchart TD
     WORKER --&gt;|&quot;redis.databases.svc.cluster.local:6379&quot;| REDIS
 </code></pre>
 <p><strong>왜 Namespace를 분리하나요?</strong></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>이유</th>
@@ -1132,7 +1132,7 @@ flowchart TD
 <td><strong>보안</strong></td>
 <td>NetworkPolicy로 <code>app-prod</code>에서 <code>databases</code>로만 접근 허용</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p><strong>Namespace 간 통신 주소 (FQDN)</strong></p>
 <p>FQDN(Fully Qualified Domain Name, 완전한 도메인 이름)은 Namespace를 포함한 전체 DNS 주소입니다.</p>
 <pre><code>형식: [서비스 이름].[네임스페이스].svc.cluster.local:[포트]
@@ -1144,7 +1144,7 @@ flowchart TD
 같은 Namespace 내에서는 서비스 이름만으로 접근 가능:
   mysql:3306
 </code></pre>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>계층</th>
@@ -1165,7 +1165,7 @@ flowchart TD
 <td>매 커밋마다</td>
 <td>Stateless (상태 없음)</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>8. 전체 파이프라인 타이밍</h2>
 <pre><code class="language-mermaid">%% desc: Jenkins → ArgoCD 전체 파이프라인 타이밍 — 각 단계별 흐름과 자동화 포인트
@@ -1200,7 +1200,7 @@ flowchart TD
 </code></pre>
 <hr>
 <h2>9. 핵심 개념 요약</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>개념</th>
@@ -1255,7 +1255,7 @@ flowchart TD
 <td><strong>Namespace</strong></td>
 <td>K8s 클러스터 안에서 리소스를 논리 분리</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>체크리스트</h2>
 <p><strong>Jenkins 파이프라인</strong></p>

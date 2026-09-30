@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다." />
     <meta name="keywords" content="Network Traffic, Bandwidth, Throughput, Packet Loss, Congestion, Latency, QoS, Network Performance" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/micro-network-traffic" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:32.062Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.545Z" />
     <meta property="article:tag" content="Network Traffic" />
     <meta property="article:tag" content="Bandwidth" />
     <meta property="article:tag" content="Throughput" />
@@ -56,7 +56,7 @@
     <meta name="twitter:title" content="트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡" />
     <meta name="twitter:description" content="네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡","description":"네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T01:44:32.062Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-network-traffic"},"keywords":"Network Traffic, Bandwidth, Throughput, Packet Loss, Congestion, Latency, QoS, Network Performance","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":4707},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡","item":"https://seobway23.github.io/post/micro-network-traffic"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡","description":"네트워크 성능을 측정하는 핵심 지표들. 대역폭과 처리율의 차이, 패킷 손실이 발생하는 원인, 혼잡이 왜 생기고 어떻게 다루는지를 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.545Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-network-traffic"},"keywords":"Network Traffic, Bandwidth, Throughput, Packet Loss, Congestion, Latency, QoS, Network Performance","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":4707},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"트래픽 — 대역폭, 처리율, 패킷 손실, 혼잡","item":"https://seobway23.github.io/post/micro-network-traffic"}]}]}</script>
   </head>
   <body>
     <script>
@@ -77,7 +77,7 @@
 <h2>네트워크 성능을 어떻게 측정하는가</h2>
 <p>인터넷이 빠른지 느린지는 어떻게 판단할까?<br>단순히 &quot;빠르다 / 느리다&quot;는 모호하다.</p>
 <p>네트워크 엔지니어는 아래 네 가지 지표로 성능을 정량화한다.<sup id="fnref-network-performance" style="scroll-margin-top: 96px;"><a href="#fn-network-performance" aria-label="각주 1">[1]</a></sup></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>지표</th>
@@ -105,7 +105,7 @@
 <td>전송 중 유실된 패킷의 비율</td>
 <td>%</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h2>대역폭 (Bandwidth)</h2>
 <p><strong>대역폭</strong>은 네트워크 링크가 단위 시간에 전달할 수 있는 <strong>최대</strong> 데이터 양이다.<sup id="fnref-bandwidth" style="scroll-margin-top: 96px;"><a href="#fn-bandwidth" aria-label="각주 2">[2]</a></sup><br>이것은 이론적 상한(upper bound)이며, 물리적 매체와 기술 규격으로 결정된다.</p>
 <pre><code class="language-mermaid">%% desc: 대역폭을 도로 차선 수에 비유한 개념 — 차선이 많을수록 더 많은 차가 동시에 이동 가능
@@ -129,7 +129,7 @@ flowchart LR
   end
 </code></pre>
 <p><strong>대역폭 예시</strong></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>매체</th>
@@ -160,7 +160,7 @@ flowchart LR
 <td>Wi-Fi 6 (802.11ax)</td>
 <td>최대 9.6 Gbps</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h2>처리율 (Throughput)</h2>
 <p><strong>처리율</strong>은 실제로 전달된 데이터 양이다.<sup id="fnref-throughput" style="scroll-margin-top: 96px;"><a href="#fn-throughput" aria-label="각주 3">[3]</a></sup><br>대역폭은 파이프의 굵기, 처리율은 파이프 안을 실제로 흐르는 물의 양이다.</p>
 <pre><code>처리율 ≤ 대역폭
@@ -187,7 +187,7 @@ flowchart LR
 <h2>지연 (Latency)</h2>
 <p><strong>지연</strong>은 패킷이 출발지에서 목적지까지 이동하는 데 걸리는 시간이다.<br>일반적으로 <strong>RTT(Round-Trip Time)</strong> — 요청 전송부터 응답 수신까지의 왕복 시간 — 으로 측정한다.</p>
 <p>지연의 구성 요소:</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>종류</th>
@@ -210,7 +210,7 @@ flowchart LR
 <td><strong>큐잉 지연</strong></td>
 <td>라우터 큐에서 대기하는 시간. 혼잡도에 따라 크게 변동</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h2>패킷 손실 (Packet Loss)</h2>
 <p><strong>패킷 손실</strong>은 전송된 패킷이 목적지에 도달하지 못하는 비율이다.<sup id="fnref-packet-loss" style="scroll-margin-top: 96px;"><a href="#fn-packet-loss" aria-label="각주 4">[4]</a></sup></p>
 <pre><code>패킷 손실률 = (손실된 패킷 수 / 전송된 패킷 수) × 100%
@@ -238,7 +238,7 @@ flowchart TD
 <li><strong>정책 필터링</strong>: 방화벽, ACL로 의도적으로 차단.</li>
 </ol>
 <h3>패킷 손실의 영향</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>프로토콜</th>
@@ -257,7 +257,7 @@ flowchart TD
 <td>QUIC</td>
 <td>스트림 단위로 독립 관리. TCP보다 손실 영향 범위가 좁음</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>1~2% 손실은 TCP 재전송으로 처리 가능하지만, 5% 이상이면 성능이 급격히 저하된다.</p>
 <h2>혼잡과 과부하 (Congestion &amp; Overload)</h2>
 <p><strong>혼잡(Congestion)</strong>은 네트워크 링크나 라우터가 처리할 수 있는 것보다 더 많은 트래픽이 몰릴 때 발생한다.<sup id="fnref-congestion" style="scroll-margin-top: 96px;"><a href="#fn-congestion" aria-label="각주 5">[5]</a></sup></p>

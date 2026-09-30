@@ -120,6 +120,16 @@
 - [Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초](https://seobway23.github.io/post/celery-broker): Celery 브로커가 하는 일, Redis와 RabbitMQ의 차이, AMQP 메시지 보장(Durability, Acknowledgment)이 태스크 손실을 어떻게 방지하는지 설명한다.
 - [Celery Beat — 주기적 태스크 스케줄링](https://seobway23.github.io/post/celery-beat): Celery Beat가 어떻게 주기적 태스크를 발행하는지, crontab 문법과 timedelta 설정, django-celery-beat로 DB에서 동적으로 스케줄을 관리하는 방법을 설명한다.
 
+## RAG
+
+- [설계기준 PDF 색인과 수식 기호 검색 실험](https://seobway23.github.io/post/rag-pdf-symbol-retrieval): 한글(HWP)로 만든 설계기준 PDF는 수식 글자를 유니코드 개인용 영역(PUA) 코드로 내보낸다. PUA 대응표를 만들어 95.6%를 복원하고, 표를 캡션과 가로 규선으로 추출하고, 기호 토큰과 질의 유형별 라우팅을 더했다. 자동 생성한 질의 752개로 가설 H1~H9를 하나씩 측정한 결과와 원시 데이터를 싣는다.
+- [설계기준 RAG의 하이브리드 검색 구현](https://seobway23.github.io/post/rag-hybrid-search): 건설 설계기준 검색에서 dense 검색만으로는 Hit@3 0.35에 머물렀다. kiwipiepy 형태소 BM25를 붙여 RRF로 합치고 교차 인코더 리랭커로 후보 20개를 재정렬해 0.90이 됐다. 질의 20개의 순위 원본과 RRF가 순위를 바꾸는 조건, 기호 질의에서 리랭커를 끄게 된 측정값을 함께 싣는다.
+
+## performance
+
+- [3D 캔버스 렌더 최적화 8가지를 하나씩 켜서 잰 결과](https://seobway23.github.io/post/modeler-canvas-render-ablation): SVG 로 그리는 구조 모델 3D 캔버스를 마우스로 돌리면 그림이 초당 7.8번만 바뀌었다. 최적화 후보 8개를 실행 시 스위치로 넣고 같은 빌드에서 18가지 조합을 3회씩 재, 3D 회전을 초당 47.5번까지 올렸다. 효과는 그리는 면 수를 줄인 것에서만 나왔고, 입력 합치기와 형상 캐시는 효과가 없었다.
+- [빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG](https://seobway23.github.io/post/build-performance-a11y-vite-turbopack-lighthouse-wcag): Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어 프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다.
+
 ## analysis
 
 - [저장은 됐는데 화면이 한 박자 늦는 이유 — 캐시가 옛 값을 먼저 준다](https://seobway23.github.io/post/cache-overlay-timing-rca): 건설 작업일보 "설계량" 기능에서, 저장 후 다음 날로 넘기면 옛 값이 보였다. 도메인 로직(effective-dated)은 정확히 맞았고, 문제는 프론트의 캐시 ↔ 백엔드 데이터 동기화 한 겹 — stale-while-revalidate가 옛값을 먼저 주는 사이 "1회 오버레이" 게이트가 옛값으로 소진된 타이밍 레이스였다.
@@ -204,10 +214,6 @@
 ## code-quality
 
 - [코드 품질 기초 — 가독성, 리팩토링, ESLint, Prettier, Biome](https://seobway23.github.io/post/code-quality-eslint-prettier-biome): Foundation 03 단계에서 필요한 코드 품질의 기준을 정리한다. 가독성·리팩토링 사고법, ESLint와 Prettier의 역할 분리, Biome을 언제 고려하면 좋은지까지 한 번에 본다.
-
-## performance
-
-- [빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG](https://seobway23.github.io/post/build-performance-a11y-vite-turbopack-lighthouse-wcag): Building 14 단계. 번들러, 렌더링 전략, 성능 측정, 접근성을 한 흐름으로 묶어 프론트엔드 기능을 사용자에게 빠르고 접근 가능하게 전달하는 법을 정리한다.
 
 ## security
 

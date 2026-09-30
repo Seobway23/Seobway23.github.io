@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>Electron 패키징과 asar — electron-builder로 배포하기 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다." />
     <meta name="keywords" content="electron, asar, packaging, electron-builder, code-signing, auto-update" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/electron-packaging-asar" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-06-14T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.934Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.423Z" />
     <meta property="article:tag" content="electron" />
     <meta property="article:tag" content="asar" />
     <meta property="article:tag" content="packaging" />
@@ -54,7 +54,7 @@
     <meta name="twitter:title" content="Electron 패키징과 asar — electron-builder로 배포하기" />
     <meta name="twitter:description" content="Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Electron 패키징과 asar — electron-builder로 배포하기","description":"Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-14T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.934Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-packaging-asar"},"keywords":"electron, asar, packaging, electron-builder, code-signing, auto-update","articleSection":"electron","inLanguage":"ko-KR","wordCount":16843},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"Electron 패키징과 asar — electron-builder로 배포하기","item":"https://seobway23.github.io/post/electron-packaging-asar"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Electron 패키징과 asar — electron-builder로 배포하기","description":"Electron 앱이 app.asar 아카이브와 Chromium+Node 런타임을 한 덩어리로 묶어 인스톨러가 되는 과정을, asarUnpack·extraResources로 네이티브 바이너리를 분리하는 방법부터 electron-builder 설정, 코드 서명·자동 업데이트까지 정리한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-14T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.423Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/electron-packaging-asar"},"keywords":"electron, asar, packaging, electron-builder, code-signing, auto-update","articleSection":"electron","inLanguage":"ko-KR","wordCount":16843},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"electron","item":"https://seobway23.github.io/?category=study%2Felectron"},{"@type":"ListItem","position":3,"name":"Electron 패키징과 asar — electron-builder로 배포하기","item":"https://seobway23.github.io/post/electron-packaging-asar"}]}]}</script>
   </head>
   <body>
     <script>
@@ -149,7 +149,7 @@ electron/Electron.app/Contents/Resources/
 <p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>asar는 <strong>무압축·무암호화</strong> 포맷이다. <code>npx asar extract app.asar out/</code> 한 줄이면 누구나 원본 소스를 그대로 복원할 수 있다. 따라서 <strong>API 키, 비밀번호, 라이선스 검증 로직 같은 민감 정보를 asar에 넣어도 전혀 안전하지 않다.</strong> 보안이 필요하면 서버 측 처리, 네이티브 모듈, 별도 암호화가 필요하다. asar는 &quot;패키징 편의(파일 수↓·경로 문제↓·로딩↑) + 약한 난독화&quot;일 뿐, 절대 보안 경계가 아니다.</p>
 </div></div></aside></p>
 <p>asar에는 Node API 레벨에서도 몇 가지 한계가 있다.<a href="https://www.electronjs.org/docs/latest/tutorial/asar-archives" target="_blank"><sup>[3]</sup></a></p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>한계</th>
@@ -176,7 +176,7 @@ electron/Electron.app/Contents/Resources/
 <td>바이너리 실행 제약</td>
 <td>asar 내부 바이너리는 <code>execFile</code>만 실행 가능하다. <code>exec</code>/<code>spawn</code>은 셸 명령이라 asar 경로 치환이 불가능해 지원되지 않는다.</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>asar 안에서 <code>require</code>가 동작하는 원리</h3>
 <p>순정 Node.js는 asar를 모른다. <strong>Electron이 Node와 Chromium에 특수 패치</strong>를 넣어, asar 아카이브를 &quot;가상 디렉터리&quot;로, 그 안의 파일을 &quot;보통 파일&quot;처럼 다루게 만든다.</p>
 <blockquote>
@@ -247,7 +247,7 @@ flowchart TD
 <p>패키징이란 <code>electron-forge package</code>(또는 electron-builder의 내부 packager)가 <strong>우리 앱 코드를 Electron 바이너리와 함께 묶는 것</strong>이다. 여기서 Electron 바이너리는 Chromium(렌더링/웹 API) + Node.js(시스템/파일/프로세스 API) + Electron 자체 네이티브로 구성된다.</p>
 <p>그래서 앞서 본 디렉터리 트리의 <code>*.dll</code>/<code>*.pak</code>/<code>locales/</code>/<code>Frameworks/</code>가 <strong>전부 동봉</strong>된다. 결과적으로 사용자 PC에 Node.js나 Chrome을 따로 설치할 필요가 없다. 앱이 자기 전용 Chromium+Node를 들고 다니기 때문이다. 대가는 용량(빈 앱도 100~200MB대)과 앱마다 런타임이 중복된다는 점이다. &quot;한 번 설치/실행에 모든 의존성이 봉인되어 환경 편차가 없다&quot;는 이점을 용량으로 사는 셈이다.</p>
 <p>Docker와 비교하면 대응 관계가 뚜렷하다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>Docker</th>
@@ -278,7 +278,7 @@ flowchart TD
 <td><code>docker pull</code> 새 태그</td>
 <td>electron-updater 자동 업데이트</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>electron-builder 설정 항목 해설</h2>
 <p>electron-builder 설정은 <code>package.json</code>의 <code>build</code> 키 또는 별도 <code>electron-builder.yml</code> 파일로 정의한다(json/json5/toml/js/ts도 지원).<a href="https://www.electron.build/configuration" target="_blank"><sup>[4]</sup></a></p>

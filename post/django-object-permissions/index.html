@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="IsAuthenticated만으로는 &quot;내 일정을 남이 수정하는 것&quot;을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다." />
     <meta name="keywords" content="Django, DRF, Permissions, ObjectPermission, RBAC, Authorization, 권한시스템" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/django-object-permissions" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.868Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.359Z" />
     <meta property="article:tag" content="Django" />
     <meta property="article:tag" content="DRF" />
     <meta property="article:tag" content="Permissions" />
@@ -55,7 +55,7 @@
     <meta name="twitter:title" content="Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어" />
     <meta name="twitter:description" content="IsAuthenticated만으로는 &quot;내 일정을 남이 수정하는 것&quot;을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어","description":"IsAuthenticated만으로는 \"내 일정을 남이 수정하는 것\"을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.868Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-object-permissions"},"keywords":"Django, DRF, Permissions, ObjectPermission, RBAC, Authorization, 권한시스템","articleSection":"django","inLanguage":"ko-KR","wordCount":8508},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어","item":"https://seobway23.github.io/post/django-object-permissions"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어","description":"IsAuthenticated만으로는 \"내 일정을 남이 수정하는 것\"을 막을 수 없다. created_by 패턴으로 소유권을 확립하고, 팀 기반 상위 권한을 추가하는  실전 권한 시스템 설계를 단계별로 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.359Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-object-permissions"},"keywords":"Django, DRF, Permissions, ObjectPermission, RBAC, Authorization, 권한시스템","articleSection":"django","inLanguage":"ko-KR","wordCount":8508},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어","item":"https://seobway23.github.io/post/django-object-permissions"}]}]}</script>
   </head>
   <body>
     <script>
@@ -288,7 +288,7 @@ flowchart LR
     G2[&quot;타인 Task 수정 ❌ → 403&quot;]
   end
 </code></pre>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>액션</th>
@@ -327,7 +327,7 @@ flowchart LR
 <td>✅</td>
 <td>❌ 403</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>Step 4: Serializer에서 created_by 읽기 전용 처리</h2>
 <pre><code class="language-python">class TaskModelSerializer(serializers.ModelSerializer):

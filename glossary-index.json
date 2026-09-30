@@ -21,7 +21,8 @@
     "threejs-raycaster-picking-performance",
     "electron-nodejs-libuv-integration",
     "cdn-content-delivery-network",
-    "cache-overlay-timing-rca"
+    "cache-overlay-timing-rca",
+    "modeler-canvas-render-ablation"
   ],
   "event-loop": [
     "event-loop-interactive",
@@ -57,7 +58,9 @@
     "electron-nodejs-libuv-integration",
     "celery-broker",
     "micro-ethernet-nic-cable",
-    "micro-network-traffic"
+    "micro-network-traffic",
+    "rag-hybrid-search",
+    "rag-pdf-symbol-retrieval"
   ],
   "service": [
     "architecture-patterns-layered-component-clean",

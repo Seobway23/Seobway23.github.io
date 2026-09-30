@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다." />
     <meta name="keywords" content="javascript, runtime, nodejs, bun, deno, backend" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/js-runtime-node-bun-deno" />
     <meta property="og:image" content="https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg" />
     <meta property="article:published_time" content="2026-04-16T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.896Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.389Z" />
     <meta property="article:tag" content="javascript" />
     <meta property="article:tag" content="runtime" />
     <meta property="article:tag" content="nodejs" />
@@ -54,7 +54,7 @@
     <meta name="twitter:title" content="Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가" />
     <meta name="twitter:description" content="브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가","description":"브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.896Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/js-runtime-node-bun-deno"},"keywords":"javascript, runtime, nodejs, bun, deno, backend","articleSection":"runtime","inLanguage":"ko-KR","wordCount":2404},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"runtime","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fruntime"},{"@type":"ListItem","position":3,"name":"Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가","item":"https://seobway23.github.io/post/js-runtime-node-bun-deno"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가","description":"브라우저 밖에서 JavaScript를 실행하는 대표 런타임인 Node.js, Bun, Deno를 비교한다. 각 런타임이 어떤 철학과 장점을 가지는지 기초 단계에서 필요한 만큼만 정리한다.","image":["https://seobway23.github.io/roadmap-thumbnails/step-02-server-data.svg"],"datePublished":"2026-04-16T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.389Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/js-runtime-node-bun-deno"},"keywords":"javascript, runtime, nodejs, bun, deno, backend","articleSection":"runtime","inLanguage":"ko-KR","wordCount":2404},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"runtime","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fruntime"},{"@type":"ListItem","position":3,"name":"Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가","item":"https://seobway23.github.io/post/js-runtime-node-bun-deno"}]}]}</script>
   </head>
   <body>
     <script>
@@ -74,7 +74,7 @@
 </p>
 <p><span>Seobway</span> · <time datetime="2026-04-16T00:00:00.000Z">2026-04-16</time> · <span>11분</span></p>
 <h2>이 시리즈 구성</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>포스트</th>
@@ -101,7 +101,7 @@
 <td><a href="/post/sql-joins-where-having-group-by">02-4. SQL JOIN · WHERE · HAVING · GROUP BY →</a></td>
 <td>쿼리 결과 예측과 집계</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>브라우저 JavaScript와 서버 JavaScript는 무엇이 다른가</h2>
 <p>문법 자체는 같아 보여도, JavaScript가 어디서 실행되느냐에 따라 할 수 있는 일이 달라진다.</p>
@@ -138,7 +138,7 @@
 <p>즉 Deno는 &quot;처음부터 다시 설계한 서버 JavaScript 환경&quot;에 가깝다.</p>
 <hr>
 <h2>한 장으로 비교</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th></th>
@@ -165,7 +165,7 @@
 <td>실험/개인 프로젝트</td>
 <td>설계 철학 학습용</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <pre><code class="language-mermaid">%% desc: Node.js는 생태계, Bun은 속도와 통합, Deno는 보안과 Web API 방향성이 강하다
 flowchart LR
   N[&quot;Node.js\n생태계·안정성&quot;] --&gt; J[&quot;서버 JavaScript&quot;]

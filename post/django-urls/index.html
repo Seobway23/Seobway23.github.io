@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="Django URL 라우팅이 어떻게 동작하는지, path()와 re_path()의 차이, include()로 앱별 URL을 분리하는 방법, namespace로 URL 이름 충돌을 방지하는 방법, DRF Router가 ViewSet URL을 자동 생성하는 방식을 설명한다." />
     <meta name="keywords" content="Django, URL, URLconf, path, include, namespace, Router, DRF, Routing, Python" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/django-urls" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-04-03T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.874Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.366Z" />
     <meta property="article:tag" content="Django" />
     <meta property="article:tag" content="URL" />
     <meta property="article:tag" content="URLconf" />
@@ -58,7 +58,7 @@
     <meta name="twitter:title" content="Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router" />
     <meta name="twitter:description" content="Django URL 라우팅이 어떻게 동작하는지, path()와 re_path()의 차이, include()로 앱별 URL을 분리하는 방법, namespace로 URL 이름 충돌을 방지하는 방법, DRF Router가 ViewSet URL을 자동 생성하는 방식을 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router","description":"Django URL 라우팅이 어떻게 동작하는지, path()와 re_path()의 차이, include()로 앱별 URL을 분리하는 방법, namespace로 URL 이름 충돌을 방지하는 방법, DRF Router가 ViewSet URL을 자동 생성하는 방식을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.874Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-urls"},"keywords":"Django, URL, URLconf, path, include, namespace, Router, DRF, Routing, Python","articleSection":"django","inLanguage":"ko-KR","wordCount":7899},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router","item":"https://seobway23.github.io/post/django-urls"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router","description":"Django URL 라우팅이 어떻게 동작하는지, path()와 re_path()의 차이, include()로 앱별 URL을 분리하는 방법, namespace로 URL 이름 충돌을 방지하는 방법, DRF Router가 ViewSet URL을 자동 생성하는 방식을 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-04-03T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.366Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/django-urls"},"keywords":"Django, URL, URLconf, path, include, namespace, Router, DRF, Routing, Python","articleSection":"django","inLanguage":"ko-KR","wordCount":7899},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"django","item":"https://seobway23.github.io/?category=study%2Fbackend%2Fdjango"},{"@type":"ListItem","position":3,"name":"Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router","item":"https://seobway23.github.io/post/django-urls"}]}]}</script>
   </head>
   <body>
     <script>
@@ -87,7 +87,7 @@ ROOT_URLCONF = &#39;config.urls&#39;
 </code></pre>
 <hr>
 <h2>시리즈 구성</h2>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>순서</th>
@@ -150,7 +150,7 @@ ROOT_URLCONF = &#39;config.urls&#39;
 <td>Django 보안</td>
 <td>CSRF, XSS, SQL Injection</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <hr>
 <h2>path() 기초</h2>
 <p><code>path(route, view, kwargs=None, name=None)</code> — 가장 일반적인 URL 등록 방법이다.</p>
@@ -176,7 +176,7 @@ urlpatterns = [
 </code></pre>
 <h3>타입 컨버터</h3>
 <p><code>&lt;타입:변수명&gt;</code> 형태로 URL 파라미터를 자동으로 변환한다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>컨버터</th>
@@ -209,7 +209,7 @@ urlpatterns = [
 <td><code>uploads/2026/04/file.pdf</code> (<code>/</code> 포함)</td>
 <td><code>str</code></td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <pre><code class="language-python"># int 컨버터 — pk가 정수로 자동 변환
 path(&#39;tasks/&lt;int:pk&gt;/&#39;, views.TaskDetailView.as_view())
 
@@ -336,7 +336,7 @@ urlpatterns = [
 ]
 </code></pre>
 <p><code>router.register(&#39;tasks&#39;, TaskViewSet)</code>가 자동 생성하는 URL:</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>URL 패턴</th>
@@ -381,7 +381,7 @@ urlpatterns = [
 <td><code>destroy</code></td>
 <td><code>task-detail</code></td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p><code>@action</code> 데코레이터로 커스텀 엔드포인트를 추가하면 Router가 이것도 자동으로 URL에 포함한다.</p>
 <pre><code class="language-python"># views.py
 from rest_framework.decorators import action

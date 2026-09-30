@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>TDZ(Temporal Dead Zone) — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="외부 스코프에 같은 이름의 변수가 있어도 ReferenceError 가 발생하는 이유. let·const 는 스코프 진입 시 환경 레코드에 등록되지만, 선언문이 실행되기 전까지는 초기화되지 않은 상태로 남는다." />
     <meta name="keywords" content="javascript, TDZ, let, const, 호이스팅" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/tdz" />
     <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/tdz.jpg" />
     <meta property="article:published_time" content="2026-09-28T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:31.752Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.262Z" />
     <meta property="article:tag" content="javascript" />
     <meta property="article:tag" content="TDZ" />
     <meta property="article:tag" content="let" />
@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="TDZ(Temporal Dead Zone)" />
     <meta name="twitter:description" content="외부 스코프에 같은 이름의 변수가 있어도 ReferenceError 가 발생하는 이유. let·const 는 스코프 진입 시 환경 레코드에 등록되지만, 선언문이 실행되기 전까지는 초기화되지 않은 상태로 남는다." />
     <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/tdz.jpg" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TDZ(Temporal Dead Zone)","description":"외부 스코프에 같은 이름의 변수가 있어도 ReferenceError 가 발생하는 이유. let·const 는 스코프 진입 시 환경 레코드에 등록되지만, 선언문이 실행되기 전까지는 초기화되지 않은 상태로 남는다.","image":["https://seobway23.github.io/post-thumbnails/tdz.jpg"],"datePublished":"2026-09-28T00:00:00.000Z","dateModified":"2026-09-30T01:44:31.752Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/tdz"},"keywords":"javascript, TDZ, let, const, 호이스팅","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3554},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"TDZ(Temporal Dead Zone)","item":"https://seobway23.github.io/post/tdz"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TDZ(Temporal Dead Zone)","description":"외부 스코프에 같은 이름의 변수가 있어도 ReferenceError 가 발생하는 이유. let·const 는 스코프 진입 시 환경 레코드에 등록되지만, 선언문이 실행되기 전까지는 초기화되지 않은 상태로 남는다.","image":["https://seobway23.github.io/post-thumbnails/tdz.jpg"],"datePublished":"2026-09-28T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.262Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/tdz"},"keywords":"javascript, TDZ, let, const, 호이스팅","articleSection":"javascript","inLanguage":"ko-KR","wordCount":3554},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"TDZ(Temporal Dead Zone)","item":"https://seobway23.github.io/post/tdz"}]}]}</script>
   </head>
   <body>
     <script>
@@ -86,7 +86,7 @@
 <h2>동작 원리</h2>
 <p><a href="/post/hoisting">호이스팅</a>에서 다룬 것처럼, 스코프에 진입하면 코드를 실행하기 전에<br>해당 스코프의 선언이 환경 레코드(Environment Record)에 먼저 등록된다. 이 단계는 <code>var</code> 와<br><code>let</code> 이 동일하다.</p>
 <p>차이는 등록 시점의 초기값이다.</p>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>선언</th>
@@ -104,7 +104,7 @@
 <td>초기화되지 않음(uninitialized)</td>
 <td><code>ReferenceError</code></td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p><strong>TDZ(Temporal Dead Zone, 일시적 사각지대)</strong>: <code>let</code>·<code>const</code>·<code>class</code> 바인딩이 환경 레코드에<br>등록된 시점부터 선언문이 실행되어 초기화되는 시점까지의 구간. 이 구간에서는 바인딩이<br>존재하지만 초기화되지 않았으므로 읽기와 쓰기 모두 <code>ReferenceError</code> 를 발생시킨다.</p>
 </div></div></aside></p>
 <p>앞의 예제는 다음 순서로 실행된다.</p>

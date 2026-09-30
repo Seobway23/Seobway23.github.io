@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DSlg_KVY.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CmrWR0LR.css">
+    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>TCP와 UDP — 신뢰성과 속도의 트레이드오프 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="전송 계층의 두 핵심 프로토콜. TCP는 신뢰성과 순서를 보장하지만 오버헤드가 크고, UDP는 빠르지만 보장이 없다. 언제 무엇을 써야 하는지 3-way 핸드셰이크부터 혼잡 제어까지 설명한다." />
     <meta name="keywords" content="TCP, UDP, RFC 793, RFC 768, Transport Layer, 3-way Handshake, Congestion Control, Flow Control" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/micro-tcp-udp" />
     <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
     <meta property="article:published_time" content="2026-03-25T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T01:44:32.069Z" />
+    <meta property="article:modified_time" content="2026-09-30T09:49:24.553Z" />
     <meta property="article:tag" content="TCP" />
     <meta property="article:tag" content="UDP" />
     <meta property="article:tag" content="RFC 793" />
@@ -56,7 +56,7 @@
     <meta name="twitter:title" content="TCP와 UDP — 신뢰성과 속도의 트레이드오프" />
     <meta name="twitter:description" content="전송 계층의 두 핵심 프로토콜. TCP는 신뢰성과 순서를 보장하지만 오버헤드가 크고, UDP는 빠르지만 보장이 없다. 언제 무엇을 써야 하는지 3-way 핸드셰이크부터 혼잡 제어까지 설명한다." />
     <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TCP와 UDP — 신뢰성과 속도의 트레이드오프","description":"전송 계층의 두 핵심 프로토콜. TCP는 신뢰성과 순서를 보장하지만 오버헤드가 크고, UDP는 빠르지만 보장이 없다. 언제 무엇을 써야 하는지 3-way 핸드셰이크부터 혼잡 제어까지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T01:44:32.069Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-tcp-udp"},"keywords":"TCP, UDP, RFC 793, RFC 768, Transport Layer, 3-way Handshake, Congestion Control, Flow Control","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":5442},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"TCP와 UDP — 신뢰성과 속도의 트레이드오프","item":"https://seobway23.github.io/post/micro-tcp-udp"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"TCP와 UDP — 신뢰성과 속도의 트레이드오프","description":"전송 계층의 두 핵심 프로토콜. TCP는 신뢰성과 순서를 보장하지만 오버헤드가 크고, UDP는 빠르지만 보장이 없다. 언제 무엇을 써야 하는지 3-way 핸드셰이크부터 혼잡 제어까지 설명한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-03-25T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.553Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/micro-tcp-udp"},"keywords":"TCP, UDP, RFC 793, RFC 768, Transport Layer, 3-way Handshake, Congestion Control, Flow Control","articleSection":"네트워크","inLanguage":"ko-KR","wordCount":5442},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"네트워크","item":"https://seobway23.github.io/?category=study%2Fnetwork%2Fmicro"},{"@type":"ListItem","position":3,"name":"TCP와 UDP — 신뢰성과 속도의 트레이드오프","item":"https://seobway23.github.io/post/micro-tcp-udp"}]}]}</script>
   </head>
   <body>
     <script>
@@ -105,7 +105,7 @@ sequenceDiagram
 </code></pre>
 <p>왜 3단계인가?<br>논리적으로는 4단계(SYN → SYN, ACK)지만,<br>서버의 SYN과 클라이언트에 대한 ACK를 하나의 메시지(SYN-ACK)로 합칠 수 있어 3단계가 된다.<br>3단계는 또한 <strong>오래된 중복 SYN 패킷</strong>이 새 연결을 방해하는 것을 방지한다.</p>
 <h3>TCP 세그먼트 헤더</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>필드</th>
@@ -158,7 +158,7 @@ sequenceDiagram
 <td>16비트</td>
 <td>긴급 데이터 위치 (URG 플래그 시 유효)</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>흐름 제어 — 슬라이딩 윈도우</h3>
 <p>수신자가 처리할 수 있는 속도보다 빠르게 보내면 버퍼가 넘친다.<br>TCP의 <strong>흐름 제어(Flow Control)</strong>는 수신자가 <strong>rwnd(Receive Window)</strong>를 ACK에 담아 광고하는 방식으로 동작한다.</p>
 <pre><code class="language-mermaid">%% desc: 슬라이딩 윈도우 흐름 제어 — 수신자의 버퍼 상태에 따라 전송량을 조절하는 원리
@@ -224,7 +224,7 @@ flowchart LR
     SP --- DP --- LEN --- CHK
   end
 </code></pre>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>필드</th>
@@ -252,10 +252,10 @@ flowchart LR
 <td>16비트</td>
 <td>IPv4에서 선택적, IPv6에서 필수</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>TCP 헤더가 최소 20바이트인 것에 비해 UDP는 8바이트다.<br>핸드셰이크 없이 즉시 전송, ACK 없음, 재전송 없음, 흐름 제어 없음.</p>
 <h3>TCP vs UDP 비교</h3>
-<table>
+<div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>특성</th>
@@ -308,7 +308,7 @@ flowchart LR
 <td>파일 전송, 웹, 이메일</td>
 <td>스트리밍, DNS, 게임</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <h3>UDP가 선택받는 이유</h3>
 <p><strong>DNS</strong>: 쿼리와 응답이 각각 단 하나의 패킷. TCP 핸드셰이크를 하면 왕복 시간이 두 배 이상 걸린다.</p>
 <p><strong>실시간 스트리밍 (RTP over UDP)</strong>: 늦게 도착한 오디오 패킷은 버린다.<br>TCP의 재전송을 기다리면 끊김이 더 심해진다.</p>
