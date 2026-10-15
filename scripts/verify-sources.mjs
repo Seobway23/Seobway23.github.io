@@ -57,6 +57,8 @@ const ALLOWED_HOSTS = [
   "cva.style",       // class-variance-authority 공식 문서 (패키지 README 가 가리키는 사이트)
   "emotion.sh",      // Emotion 공식 문서 (emotion-js 저장소 README 가 가리키는 사이트)
   "nextjs.org",      // Next.js 공식 문서 (프레임워크별 CSS-in-JS 지원 현황)
+  "code.claude.com", // Claude Code 공식 문서 (docs.claude.com/en/docs/claude-code 가 이리로 넘어간다)
+  "platform.claude.com", // Claude API 공식 문서 (프롬프트 캐시 단가)
   "yarnpkg.com", "docs.npmjs.com", "www.npmjs.com",
   "git-scm.com", "docs.github.com",
   "zustand.docs.pmnd.rs", "redux.js.org",

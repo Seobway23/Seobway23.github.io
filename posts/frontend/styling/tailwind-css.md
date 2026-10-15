@@ -154,8 +154,8 @@ lane cand  후보 토큰
 lane css   생성된 CSS #log
 
 step Button.tsx 를 텍스트로 읽는다. 클래스 속성에 적힌 문자열과 템플릿 리터럴이 그대로 보인다.
-  push src "p-4 bg-blue-500"
-  push src `text-${color}-500`
+  push src p-4 bg-blue-500
+  push src text-${color}-500
 step 공백과 따옴표를 기준으로 토큰을 잘라 후보 목록을 만든다.
   move src cand p-4
   push cand bg-blue-500

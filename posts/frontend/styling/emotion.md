@@ -161,7 +161,7 @@ step 렌더가 시작된다. css prop 에 [base, danger] 배열이 들어 있다
 step 배열 순서대로 이어 붙여 문자열 하나로 직렬화하고, MurmurHash2 로 1gic02d 를 얻는다.
   pop input
   pop input
-  push input "…hotpink;background:crimson;"
+  push input …hotpink;background:crimson;
 step 캐시에 1gic02d 가 없다. 해시를 기록하고 style 요소에 규칙을 넣는다.
   move input cache 1gic02d
   log dom .css-1gic02d { … } 삽입

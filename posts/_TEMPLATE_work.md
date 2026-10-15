@@ -95,7 +95,7 @@ glossary:                       # 일반 독자가 모를 용어 전부. 본문 
 <li><a href="/post-assets/work/TOPIC/file.json" target="_blank">file.json</a>: 무엇이 들어 있는지</li>
 </ul>
 
-비ASCII 가 있는 .txt · .csv 는 UTF-8 BOM 을 넣는다(브라우저가 CP949 로 읽는다).
+비ASCII 가 있는 .txt · .csv · .mjs · .js 등 텍스트 파일은 UTF-8 BOM 을 넣는다(charset 없이 내려가면 브라우저가 CP949 로 읽는다). 한글 주석이 있는 스크립트도 해당한다. JSON 은 BOM 을 넣으면 파싱이 깨지므로 ASCII 로 쓴다.
 
 ## 참고
 

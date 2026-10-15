@@ -1,0 +1,202 @@
+{
+  "model": "token-model.mjs",
+  "params": {
+    "BASE_MAIN": 18000,
+    "BASE_SUB": 9000,
+    "SKILL": 1500,
+    "REPORT": 800,
+    "RUNS": 3,
+    "POST_TURNS": 20
+  },
+  "flowSum": {
+    "min": 11600,
+    "avg": 33850,
+    "max": 56100
+  },
+  "noCache": {
+    "A": {
+      "finalCtx": 119550,
+      "qaMain": 2320500,
+      "qaSub": 0,
+      "post": 2391000,
+      "main": 4711500,
+      "total": 4711500
+    },
+    "B": {
+      "finalCtx": 121050,
+      "qaMain": 2370000,
+      "qaSub": 0,
+      "post": 2421000,
+      "main": 4791000,
+      "total": 4791000
+    },
+    "C": {
+      "finalCtx": 20400,
+      "qaMain": 56400,
+      "qaSub": 906450,
+      "post": 408000,
+      "main": 464400,
+      "total": 1370850
+    },
+    "C_skill": {
+      "finalCtx": 20400,
+      "qaMain": 56400,
+      "qaSub": 955950,
+      "post": 408000,
+      "main": 464400,
+      "total": 1420350
+    }
+  },
+  "ratioToA": {
+    "finalCtx": {
+      "A": 1,
+      "B": 1.013,
+      "C": 0.171
+    },
+    "qaMain": {
+      "A": 1,
+      "B": 1.021,
+      "C": 0.024
+    },
+    "main": {
+      "A": 1,
+      "B": 1.017,
+      "C": 0.099
+    },
+    "total": {
+      "A": 1,
+      "B": 1.017,
+      "C": 0.291
+    }
+  },
+  "cache": {
+    "read010": {
+      "A": {
+        "finalCtx": 119550,
+        "qaMain": 369533,
+        "qaSub": 0,
+        "post": 239100,
+        "main": 608633,
+        "total": 608633
+      },
+      "B": {
+        "finalCtx": 121050,
+        "qaMain": 376208,
+        "qaSub": 0,
+        "post": 242100,
+        "main": 618308,
+        "total": 618308
+      },
+      "C": {
+        "finalCtx": 20400,
+        "qaMain": 28180,
+        "qaSub": 238478,
+        "post": 41720,
+        "main": 69900,
+        "total": 308378
+      },
+      "C_skill": {
+        "finalCtx": 20400,
+        "qaMain": 28180,
+        "qaSub": 248603,
+        "post": 41720,
+        "main": 69900,
+        "total": 318503
+      },
+      "mainRatio": 8.7,
+      "totalRatio": 2
+    },
+    "read005": {
+      "A": {
+        "finalCtx": 119550,
+        "qaMain": 259485,
+        "qaSub": 0,
+        "post": 119550,
+        "main": 379035,
+        "total": 379035
+      },
+      "B": {
+        "finalCtx": 121050,
+        "qaMain": 263760,
+        "qaSub": 0,
+        "post": 121050,
+        "main": 384810,
+        "total": 384810
+      },
+      "C": {
+        "finalCtx": 20400,
+        "qaMain": 26340,
+        "qaSub": 199583,
+        "post": 21360,
+        "main": 47700,
+        "total": 247283
+      },
+      "C_skill": {
+        "finalCtx": 20400,
+        "qaMain": 26340,
+        "qaSub": 207458,
+        "post": 21360,
+        "main": 47700,
+        "total": 255158
+      },
+      "mainRatio": 7.9,
+      "totalRatio": 1.5
+    }
+  },
+  "sensitivity": {
+    "min_0": {
+      "A_main": 1185000,
+      "C_main": 56400,
+      "mainRatio": 21,
+      "totalRatio": 2.1
+    },
+    "min_20": {
+      "A_main": 2241000,
+      "C_main": 464400,
+      "mainRatio": 4.8,
+      "totalRatio": 2.3
+    },
+    "min_100": {
+      "A_main": 6465000,
+      "C_main": 2096400,
+      "mainRatio": 3.1,
+      "totalRatio": 2.5
+    },
+    "avg_0": {
+      "A_main": 2320500,
+      "C_main": 56400,
+      "mainRatio": 41.1,
+      "totalRatio": 2.4
+    },
+    "avg_20": {
+      "A_main": 4711500,
+      "C_main": 464400,
+      "mainRatio": 10.1,
+      "totalRatio": 3.4
+    },
+    "avg_100": {
+      "A_main": 14275500,
+      "C_main": 2096400,
+      "mainRatio": 6.8,
+      "totalRatio": 4.8
+    },
+    "max_0": {
+      "A_main": 3456000,
+      "C_main": 56400,
+      "mainRatio": 61.3,
+      "totalRatio": 2.5
+    },
+    "max_20": {
+      "A_main": 7182000,
+      "C_main": 464400,
+      "mainRatio": 15.5,
+      "totalRatio": 4.1
+    },
+    "max_100": {
+      "A_main": 22086000,
+      "C_main": 2096400,
+      "mainRatio": 10.5,
+      "totalRatio": 6.5
+    }
+  }
+}
