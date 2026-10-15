@@ -131,7 +131,10 @@ function frameCss(dark: boolean): string {
         link: "#3b5bdb", err: "#dc2626",
         track: "#eef1f5", thumb: "#c3cad6", thumbHover: "#a4adbd",
       };
+  // 기본 모양은 가장 먼저 선언한 레이어에 둔다. 레이어 밖에 두면 독자 코드의
+  // 레이어 안 스타일(Tailwind 의 utilities 등)을 이겨 버튼 색 같은 것이 안 바뀐다.
   return `
+@layer playground-base {
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{font:14px/1.6 Pretendard,system-ui,-apple-system,sans-serif;padding:14px;color:${c.fg};background:transparent}
@@ -139,6 +142,7 @@ button{font:inherit;padding:6px 12px;border-radius:8px;border:1px solid ${c.bord
 button:hover{border-color:#6c8cff}
 input,select,textarea{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid ${c.border};background:${c.field};color:${c.fg}}
 a{color:${c.link}}
+}
 #__err{white-space:pre-wrap;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:${c.err}}
 
 /* iframe 은 별도 문서라 부모의 스크롤바 스타일이 안 닿는다.

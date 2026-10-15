@@ -21,6 +21,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
 import matter from "gray-matter";
+import { isPublishedPath } from "./published-categories.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -91,6 +92,7 @@ function collectPostFiles(dir, out = []) {
 function readPostsByConcept() {
   const byConcept = new Map();
   for (const file of collectPostFiles(POSTS_DIR)) {
+    if (!isPublishedPath(path.relative(POSTS_DIR, file))) continue;
     const { data } = matter(fs.readFileSync(file, "utf-8"));
     const concept = typeof data.concept === "string" ? data.concept.trim() : "";
     if (!concept) continue;

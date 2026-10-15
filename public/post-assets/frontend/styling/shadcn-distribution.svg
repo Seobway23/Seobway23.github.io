@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" role="img" aria-labelledby="t d">
+  <title id="t">패키지 배포 방식과 shadcn/ui 배포 방식 비교</title>
+  <desc id="d">패키지 방식은 컴포넌트 소스가 node_modules 안에 있어 앱은 바깥에서 스타일을 덮어쓴다. shadcn/ui는 CLI가 레지스트리에서 컴포넌트 소스를 받아 프로젝트의 components/ui 폴더에 파일로 쓰고, cva, cn, Radix UI 또는 Base UI 같은 하위 의존성만 패키지로 설치한다.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#e4e4e7"/>
+    </marker>
+    <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#fca5a5"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 18px; font-weight: 700; }
+    .t { fill: #cbd5e1; font-size: 13.5px; }
+    .c { fill: #e4e4e7; font-size: 13px; }
+    .dim { fill: #94a3b8; font-size: 12.5px; }
+  </style>
+
+  <rect width="960" height="440" rx="20" fill="#09090b"/>
+
+  <!-- 왼쪽: 패키지 방식 -->
+  <text class="h" x="40" y="52">패키지로 받는 컴포넌트</text>
+  <rect x="40" y="76" width="400" height="120" rx="12" fill="#18181b" stroke="#3f3f46"/>
+  <text class="dim mono" x="58" y="102">src/</text>
+  <text class="c mono" x="58" y="130">&lt;Button className="my-btn" /&gt;</text>
+  <text class="c mono" x="58" y="158">.my-btn { ... !important }</text>
+
+  <rect x="40" y="240" width="400" height="120" rx="12" fill="#18181b" stroke="#3f3f46" stroke-dasharray="5 5"/>
+  <text class="dim mono" x="58" y="266">node_modules/ui-lib/</text>
+  <text class="c mono" x="58" y="294">Button.js  (빌드된 결과물)</text>
+  <text class="c mono" x="58" y="322">styles.css (라이브러리 명시도)</text>
+  <text class="dim" x="58" y="346">직접 고치면 다음 설치 때 사라진다</text>
+
+  <path d="M240 236 L240 202" stroke="#fca5a5" stroke-width="2" marker-end="url(#arrR)"/>
+  <text class="t" x="252" y="224" fill="#fca5a5">바깥에서 덮어쓰기</text>
+
+  <line x1="480" y1="40" x2="480" y2="400" stroke="#27272a" stroke-width="2"/>
+
+  <!-- 오른쪽: shadcn/ui -->
+  <text class="h" x="520" y="52">shadcn/ui</text>
+  <rect x="520" y="76" width="180" height="62" rx="12" fill="#18181b" stroke="#3f3f46"/>
+  <text class="c" x="540" y="102">레지스트리</text>
+  <text class="dim mono" x="540" y="124">button.json</text>
+
+  <rect x="740" y="76" width="180" height="62" rx="12" fill="#e4e4e7"/>
+  <text x="760" y="102" fill="#09090b" font-size="13" font-weight="700" class="mono">npx shadcn add</text>
+  <text x="760" y="124" fill="#3f3f46" font-size="12.5" class="mono">button</text>
+  <path d="M704 107 L736 107" stroke="#e4e4e7" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="520" y="176" width="400" height="110" rx="12" fill="#18181b" stroke="#e4e4e7" stroke-width="1.5"/>
+  <text class="dim mono" x="538" y="202">src/components/ui/</text>
+  <text class="c mono" x="538" y="230">button.tsx  (내 저장소의 소스)</text>
+  <text class="t" x="538" y="258">variant 추가 · 클래스 변경은</text>
+  <text class="t" x="538" y="278">이 파일을 직접 고친다</text>
+  <path d="M830 142 L830 172" stroke="#e4e4e7" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="520" y="306" width="400" height="80" rx="12" fill="#18181b" stroke="#3f3f46" stroke-dasharray="5 5"/>
+  <text class="dim mono" x="538" y="332">node_modules/</text>
+  <text class="c mono" x="538" y="360">class-variance-authority · cn</text>
+  <text class="c mono" x="538" y="380">radix-ui 또는 @base-ui/react</text>
+</svg>

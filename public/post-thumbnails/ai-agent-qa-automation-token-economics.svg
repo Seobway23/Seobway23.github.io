@@ -1,0 +1,217 @@
+<svg id="tb-ai-agent-qa-automation-token-economics" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-ai-agent-qa-automation-token-economics-t tb-ai-agent-qa-automation-token-economics-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-ai-agent-qa-automation-token-economics-t">QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델</title>
+  <desc id="tb-ai-agent-qa-automation-token-economics-d">work/analysis — Claude Code 에서 Playwright MCP 로 QA 를 돌릴 때, 메인 에이전트가 직접 호출하는 방식과 스킬, 서브에이전트 위임을 토큰 비용 모델로 비교했다</desc>
+
+  <defs>
+    <linearGradient id="tb-ai-agent-qa-automation-token-economics-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-ai-agent-qa-automation-token-economics-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(158 64% 57%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(158 64% 57%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-ai-agent-qa-automation-token-economics-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D97757" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#D97757" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-ai-agent-qa-automation-token-economics-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#D97757" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-ai-agent-qa-automation-token-economics-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(158 64% 57%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(158 64% 57%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(158 64% 57%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-ai-agent-qa-automation-token-economics-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-ai-agent-qa-automation-token-economics-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-ai-agent-qa-automation-token-economics-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-ai-agent-qa-automation-token-economics-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-ai-agent-qa-automation-token-economics-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-ai-agent-qa-automation-token-economics-glow-a { animation: tb-ai-agent-qa-automation-token-economics-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-ai-agent-qa-automation-token-economics-glow-b { animation: tb-ai-agent-qa-automation-token-economics-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-ai-agent-qa-automation-token-economics-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-ai-agent-qa-automation-token-economics-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-ai-agent-qa-automation-token-economics-spark { fill: #ffffff; opacity: 0; animation-name: tb-ai-agent-qa-automation-token-economics-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-ai-agent-qa-automation-token-economics-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-ai-agent-qa-automation-token-economics-sheen-band { animation: tb-ai-agent-qa-automation-token-economics-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-ai-agent-qa-automation-token-economics-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-ai-agent-qa-automation-token-economics-caret { animation: tb-ai-agent-qa-automation-token-economics-blink 1.1s steps(1) infinite; }
+    @keyframes tb-ai-agent-qa-automation-token-economics-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-ai-agent-qa-automation-token-economics-halo { animation: tb-ai-agent-qa-automation-token-economics-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-ai-agent-qa-automation-token-economics-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-ai-agent-qa-automation-token-economics-bracket { stroke: hsl(158 64% 57%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-ai-agent-qa-automation-token-economics-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-ai-agent-qa-automation-token-economics-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-ai-agent-qa-automation-token-economics-badge-ring { animation: tb-ai-agent-qa-automation-token-economics-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-ai-agent-qa-automation-token-economics-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-ai-agent-qa-automation-token-economics-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-ai-agent-qa-automation-token-economics-tshadow); transition: fill .35s ease; }
+    .tb-ai-agent-qa-automation-token-economics-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-ai-agent-qa-automation-token-economics-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(158 64% 57%); letter-spacing: 2.6px; }
+    .tb-ai-agent-qa-automation-token-economics-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-ai-agent-qa-automation-token-economics-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-ai-agent-qa-automation-token-economics-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-ai-agent-qa-automation-token-economics-c-key    { fill: #D97757; }
+    .tb-ai-agent-qa-automation-token-economics-c-string { fill: #86efac; }
+    .tb-ai-agent-qa-automation-token-economics-c-number { fill: #fbbf24; }
+    .tb-ai-agent-qa-automation-token-economics-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-ai-agent-qa-automation-token-economics-c-ident  { fill: #cbd5e1; }
+    .tb-ai-agent-qa-automation-token-economics-c-punct  { fill: #94a3b8; }
+    .tb-ai-agent-qa-automation-token-economics-c-op     { fill: hsl(158 64% 57%); }
+    .tb-ai-agent-qa-automation-token-economics-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-glow-a,
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-glow-b     { animation-duration: 6s; }
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-code       { opacity: .62; }
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-spark      { animation-duration: 1.4s !important; }
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-sheen-band { animation-duration: 2.6s; }
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-title      { fill: #ffffff; }
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-ai-agent-qa-automation-token-economics:hover .tb-ai-agent-qa-automation-token-economics-badge      { transform: translateY(-5px); }
+    .tb-ai-agent-qa-automation-token-economics-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-ai-agent-qa-automation-token-economics-glow-a, .tb-ai-agent-qa-automation-token-economics-glow-b, .tb-ai-agent-qa-automation-token-economics-spark, .tb-ai-agent-qa-automation-token-economics-sheen-band, .tb-ai-agent-qa-automation-token-economics-caret, .tb-ai-agent-qa-automation-token-economics-halo, .tb-ai-agent-qa-automation-token-economics-badge-ring, .tb-ai-agent-qa-automation-token-economics-bracket {
+        animation: none !important;
+      }
+      .tb-ai-agent-qa-automation-token-economics-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-ai-agent-qa-automation-token-economics-frame)">
+    <rect width="1200" height="630" fill="url(#tb-ai-agent-qa-automation-token-economics-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-ai-agent-qa-automation-token-economics-grid)"/>
+
+    <circle class="tb-ai-agent-qa-automation-token-economics-glow-a" cx="260" cy="207" r="417" fill="url(#tb-ai-agent-qa-automation-token-economics-ga)"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-glow-b" cx="981" cy="527" r="435" fill="url(#tb-ai-agent-qa-automation-token-economics-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-ai-agent-qa-automation-token-economics-code" font-size="21"><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">billed</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-op" xml:space="preserve">+=</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">meter</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">(</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">ctx</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">)</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">;</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-comment" xml:space="preserve">// 지금까지의 컨텍스트 전체</tspan></text>
+      <text x="64" y="140.12" class="tb-ai-agent-qa-automation-token-economics-code" font-size="21"><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">ctx</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-op" xml:space="preserve">+=</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">o</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">;</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve">             </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-comment" xml:space="preserve">// 도구 출력이 쌓인다</tspan></text>
+      <rect class="tb-ai-agent-qa-automation-token-economics-caret" x="509" y="123"
+            width="10" height="25" fill="#D97757" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-ai-agent-qa-automation-token-economics-code" font-size="17"><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">billed</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-op" xml:space="preserve">+=</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">meter</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">(</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">ctx</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">)</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">;</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-comment" xml:space="preserve">// 지금까지의 컨텍스트 전체</tspan></text>
+      <text x="690" y="386.6" class="tb-ai-agent-qa-automation-token-economics-code" font-size="17"><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">ctx</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-op" xml:space="preserve">+=</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve"> </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-ident" xml:space="preserve">o</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-punct" xml:space="preserve">;</tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-plain" xml:space="preserve">             </tspan><tspan class="tb-ai-agent-qa-automation-token-economics-c-comment" xml:space="preserve">// 도구 출력이 쌓인다</tspan></text>
+    </g>
+
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="891" cy="160" r="3.93" style="animation-delay:3.49s;animation-duration:3.99s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="1096" cy="227" r="3.44" style="animation-delay:0.93s;animation-duration:4.23s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="1024" cy="73" r="2.78" style="animation-delay:4.23s;animation-duration:3.91s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="94" cy="218" r="2.22" style="animation-delay:4.54s;animation-duration:3.57s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="1127" cy="470" r="3.95" style="animation-delay:2.24s;animation-duration:6.01s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="890" cy="229" r="1.53" style="animation-delay:0.43s;animation-duration:5.37s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="277" cy="563" r="3.78" style="animation-delay:0.28s;animation-duration:5.68s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="150" cy="553" r="1.89" style="animation-delay:5.56s;animation-duration:3.47s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="152" cy="380" r="1.52" style="animation-delay:4.99s;animation-duration:5.44s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="1040" cy="330" r="2.46" style="animation-delay:1.26s;animation-duration:3.46s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="1103" cy="575" r="2.52" style="animation-delay:2.65s;animation-duration:5.44s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="79" cy="218" r="2.30" style="animation-delay:4.26s;animation-duration:4.09s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="988" cy="363" r="1.93" style="animation-delay:2.55s;animation-duration:5.56s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="211" cy="385" r="3.15" style="animation-delay:3.51s;animation-duration:6.55s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="136" cy="68" r="3.25" style="animation-delay:5.32s;animation-duration:3.80s"/>
+    <circle class="tb-ai-agent-qa-automation-token-economics-spark" cx="956" cy="126" r="1.80" style="animation-delay:2.70s;animation-duration:6.56s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-ai-agent-qa-automation-token-economics-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-ai-agent-qa-automation-token-economics-vignette)"/>
+
+    <g class="tb-ai-agent-qa-automation-token-economics-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-ai-agent-qa-automation-token-economics-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="483" y="176" width="234" height="42" rx="21"
+            fill="hsl(158 64% 57%)" fill-opacity="0.13" stroke="hsl(158 64% 57%)" stroke-opacity="0.55"/>
+      <text class="tb-ai-agent-qa-automation-token-economics-chip-t" x="600" y="204" text-anchor="middle" font-size="19">WORK/ANALYSIS</text>
+    </g>
+
+    <text class="tb-ai-agent-qa-automation-token-economics-title" x="600" y="276" text-anchor="middle" font-size="54">QA 브라우저 자동화를 서브에이전트로</text>
+      <text class="tb-ai-agent-qa-automation-token-economics-title" x="600" y="345" text-anchor="middle" font-size="54">분리할 때의 토큰 비용 모델</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-ai-agent-qa-automation-token-economics-rule)"/>
+    <text class="tb-ai-agent-qa-automation-token-economics-sub" x="600" y="455" text-anchor="middle" font-size="25">Claude Code 에서 Playwright MCP 로 QA 를 돌릴 때, 메인 에이전트가…</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-ai-agent-qa-automation-token-economics-badge">
+      <circle class="tb-ai-agent-qa-automation-token-economics-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#D97757" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16" fill="#f8fafc"/>
+      <path transform="translate(78 516) scale(1.5)" fill="#D97757" d="M21 10.5h3v3h-3v3h-1.5v3H18v-3h-1.5v3H15v-3H9v3H7.5v-3H6v3H4.5v-3H3v-3H0v-3h3v-6h18Zm-15 0h1.5v-3H6Zm10.5 0H18v-3h-1.5z"/>
+    </g>
+
+    <text class="tb-ai-agent-qa-automation-token-economics-foot" x="1128" y="540" text-anchor="end" font-size="17">WORK/ANALYSIS</text>
+    <text class="tb-ai-agent-qa-automation-token-economics-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-ai-agent-qa-automation-token-economics-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-ai-agent-qa-automation-token-economics-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-ai-agent-qa-automation-token-economics-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-ai-agent-qa-automation-token-economics-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(158 64% 57%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

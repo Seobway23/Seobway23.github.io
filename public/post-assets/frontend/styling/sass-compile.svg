@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-labelledby="t d">
+  <title id="t">Sass 컴파일 시점과 브라우저 실행 시점</title>
+  <desc id="d">빌드 시점에 Dart Sass가 @use로 연결된 SCSS 모듈을 읽어 CSS 파일 하나로 컴파일한다. Sass 변수, 믹스인, 함수는 이 단계에서 값으로 치환되고 사라진다. 브라우저는 CSS만 받으며, 런타임에 바꿀 수 있는 것은 CSS 사용자 정의 속성이다.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f472b6"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 17px; font-weight: 700; }
+    .zone { font-size: 13px; font-weight: 800; letter-spacing: .1em; }
+    .t { fill: #cbd5e1; font-size: 13.5px; }
+    .c { fill: #e2e8f0; font-size: 13px; }
+    .file { fill: #f9a8d4; font-size: 13px; font-weight: 700; }
+  </style>
+
+  <rect width="960" height="420" rx="20" fill="#0f172a"/>
+
+  <!-- 빌드 시점 영역 -->
+  <rect x="24" y="24" width="590" height="300" rx="16" fill="none" stroke="#cc6699" stroke-opacity=".55" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text class="zone" x="44" y="52" fill="#f472b6">BUILD TIME</text>
+  <text class="h" x="160" y="52">Dart Sass 컴파일</text>
+
+  <rect x="44" y="72" width="200" height="94" rx="10" fill="#111827" stroke="#334155"/>
+  <text class="file mono" x="58" y="96">_tokens.scss</text>
+  <text class="c mono" x="58" y="122">$brand: #7c3aed;</text>
+  <text class="c mono" x="58" y="144">$space: 24px;</text>
+
+  <rect x="44" y="188" width="200" height="116" rx="10" fill="#111827" stroke="#334155"/>
+  <text class="file mono" x="58" y="212">card.scss</text>
+  <text class="c mono" x="58" y="238">@use "tokens";</text>
+  <text class="c mono" x="58" y="260">.card {</text>
+  <text class="c mono" x="58" y="282">  color: tokens.$brand;</text>
+
+  <path d="M144 170 L144 184" stroke="#f472b6" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="296" y="140" width="110" height="64" rx="12" fill="#cc6699"/>
+  <text x="351" y="168" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">sass</text>
+  <text x="351" y="190" text-anchor="middle" fill="#fdf2f8" font-size="12">compile</text>
+  <path d="M248 246 C 270 246, 270 172, 292 172" fill="none" stroke="#f472b6" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="446" y="100" width="150" height="144" rx="10" fill="#111827" stroke="#334155"/>
+  <text class="file mono" x="460" y="124" fill="#93c5fd">card.css</text>
+  <text class="c mono" x="460" y="150">.card {</text>
+  <text class="c mono" x="460" y="172">  color:</text>
+  <text class="c mono" x="460" y="194">   #7c3aed;</text>
+  <text class="c mono" x="460" y="216">}</text>
+  <path d="M410 172 L440 172" stroke="#f472b6" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 런타임 영역 -->
+  <rect x="640" y="24" width="296" height="300" rx="16" fill="none" stroke="#60a5fa" stroke-opacity=".55" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text class="zone" x="660" y="52" fill="#60a5fa">RUNTIME</text>
+  <text class="h" x="752" y="52">브라우저</text>
+  <path d="M600 172 L670 172" stroke="#60a5fa" stroke-width="2" marker-end="url(#arr)"/>
+  <text class="t" x="676" y="120">받는 것은 CSS 뿐이다</text>
+  <text class="t" x="676" y="160">$brand 는 존재하지 않는다</text>
+  <text class="t" x="676" y="200">런타임에 바꿀 수 있는 값은</text>
+  <text class="t mono" x="676" y="224">var(--brand)</text>
+  <text class="t" x="676" y="248">같은 CSS 사용자 정의 속성이다</text>
+
+  <rect x="24" y="344" width="912" height="56" rx="12" fill="#0b1220" stroke="#1e293b"/>
+  <text class="t" x="44" y="378">Sass 변수 · 믹스인 · 함수는 컴파일 단계에서 값으로 바뀌고 출력 CSS에 남지 않는다. (Dart Sass 1.105.1 기준)</text>
+</svg>

@@ -166,7 +166,7 @@ console.log("동기 루프 끝 (300ms 점거)");
 **`setTimeout(fn, 0)` 을 즉시 실행 용도로 사용**
 
 `setTimeout(fn, 0)` 은 현재 실행 중인 코드와 이미 큐에 있는 태스크가 끝난 뒤에 실행된다.
-또한 `Promise.then` 콜백이 들어가는 마이크로태스크 큐는 태스크 큐보다 먼저 처리된다.
+또한 `Promise.then` 콜백이 들어가는 [마이크로태스크 큐](/post/microtask)는 태스크 큐보다 먼저 처리된다.
 두 큐가 섞인 경우의 순서는 [setTimeout과 Promise의 실행 순서](/post/settimeout-vs-promise)에서 다룬다.
 :::
 
@@ -204,3 +204,4 @@ console.log("동기 루프 끝 (300ms 점거)");
 - [이벤트 루프 동작 과정 →](/post/event-loop-interactive) (선행 개념)
 - [콜 스택과 함수 호출 순서 →](/post/call-stack)
 - [setTimeout과 Promise의 실행 순서 →](/post/settimeout-vs-promise)
+- [마이크로태스크 큐와 실행 시점 →](/post/microtask) (다음 개념)

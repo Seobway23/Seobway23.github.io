@@ -1,0 +1,223 @@
+<svg id="tb-immutability" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-immutability-t tb-immutability-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-immutability-t">불변성과 새 값으로 교체하기</title>
+  <desc id="tb-immutability-d">frontend/javascript — 불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다</desc>
+
+  <defs>
+    <linearGradient id="tb-immutability-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-immutability-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-immutability-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-immutability-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-immutability-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-immutability-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-immutability-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-immutability-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-immutability-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-immutability-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-immutability-glow-a { animation: tb-immutability-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-immutability-glow-b { animation: tb-immutability-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-immutability-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-immutability-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-immutability-spark { fill: #ffffff; opacity: 0; animation-name: tb-immutability-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-immutability-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-immutability-sheen-band { animation: tb-immutability-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-immutability-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-immutability-caret { animation: tb-immutability-blink 1.1s steps(1) infinite; }
+    @keyframes tb-immutability-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-immutability-halo { animation: tb-immutability-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-immutability-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-immutability-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-immutability-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-immutability-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-immutability-badge-ring { animation: tb-immutability-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-immutability-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-immutability-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-immutability-tshadow); transition: fill .35s ease; }
+    .tb-immutability-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-immutability-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-immutability-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-immutability-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-immutability-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-immutability-c-key    { fill: #f7df1e; }
+    .tb-immutability-c-string { fill: #86efac; }
+    .tb-immutability-c-number { fill: #fbbf24; }
+    .tb-immutability-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-immutability-c-ident  { fill: #cbd5e1; }
+    .tb-immutability-c-punct  { fill: #94a3b8; }
+    .tb-immutability-c-op     { fill: hsl(198 93% 70%); }
+    .tb-immutability-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-immutability:hover .tb-immutability-glow-a,
+    #tb-immutability:hover .tb-immutability-glow-b     { animation-duration: 6s; }
+    #tb-immutability:hover .tb-immutability-code       { opacity: .62; }
+    #tb-immutability:hover .tb-immutability-spark      { animation-duration: 1.4s !important; }
+    #tb-immutability:hover .tb-immutability-sheen-band { animation-duration: 2.6s; }
+    #tb-immutability:hover .tb-immutability-title      { fill: #ffffff; }
+    #tb-immutability:hover .tb-immutability-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-immutability:hover .tb-immutability-badge      { transform: translateY(-5px); }
+    .tb-immutability-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-immutability-glow-a, .tb-immutability-glow-b, .tb-immutability-spark, .tb-immutability-sheen-band, .tb-immutability-caret, .tb-immutability-halo, .tb-immutability-badge-ring, .tb-immutability-bracket {
+        animation: none !important;
+      }
+      .tb-immutability-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-immutability-frame)">
+    <rect width="1200" height="630" fill="url(#tb-immutability-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-immutability-grid)"/>
+
+    <circle class="tb-immutability-glow-a" cx="146" cy="260" r="333" fill="url(#tb-immutability-ga)"/>
+    <circle class="tb-immutability-glow-b" cx="983" cy="524" r="326" fill="url(#tb-immutability-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-immutability-code" font-size="21"><tspan class="tb-immutability-c-key" xml:space="preserve">const</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">[</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">todos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">,</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">setTodos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">]</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-op" xml:space="preserve">=</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">useState</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">[</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">]</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="140.12" class="tb-immutability-code" font-size="21"><tspan class="tb-immutability-c-key" xml:space="preserve">function</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">add</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">text</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">{</tspan></text>
+      <text x="64" y="176.24" class="tb-immutability-code" font-size="21"><tspan class="tb-immutability-c-plain" xml:space="preserve">  </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">todos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">.</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">push</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">{</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">text</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">}</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">;</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve">   </tspan><tspan class="tb-immutability-c-comment" xml:space="preserve">// 기존 배열을 고친다</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-immutability-code" font-size="21"><tspan class="tb-immutability-c-plain" xml:space="preserve">  </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">setTodos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">todos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">;</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve">        </tspan><tspan class="tb-immutability-c-comment" xml:space="preserve">// 같은 배열을 다시 넘긴다</tspan></text>
+      <text x="64" y="248.48" class="tb-immutability-code" font-size="21"><tspan class="tb-immutability-c-punct" xml:space="preserve">}</tspan></text>
+      <rect class="tb-immutability-caret" x="81" y="231"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-immutability-code" font-size="17"><tspan class="tb-immutability-c-key" xml:space="preserve">const</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">[</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">todos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">,</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">setTodos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">]</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-op" xml:space="preserve">=</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">useState</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">[</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">]</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="386.6" class="tb-immutability-code" font-size="17"><tspan class="tb-immutability-c-key" xml:space="preserve">function</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">add</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">text</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">{</tspan></text>
+      <text x="690" y="417.2" class="tb-immutability-code" font-size="17"><tspan class="tb-immutability-c-plain" xml:space="preserve">  </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">todos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">.</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">push</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">{</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">text</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve"> </tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">}</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">;</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve">   </tspan><tspan class="tb-immutability-c-comment" xml:space="preserve">// 기존 배열을 고친다</tspan></text>
+      <text x="690" y="447.8" class="tb-immutability-code" font-size="17"><tspan class="tb-immutability-c-plain" xml:space="preserve">  </tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">setTodos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">(</tspan><tspan class="tb-immutability-c-ident" xml:space="preserve">todos</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">)</tspan><tspan class="tb-immutability-c-punct" xml:space="preserve">;</tspan><tspan class="tb-immutability-c-plain" xml:space="preserve">        </tspan><tspan class="tb-immutability-c-comment" xml:space="preserve">// 같은 배열을 다시 넘긴다</tspan></text>
+    </g>
+
+    <circle class="tb-immutability-spark" cx="1034" cy="229" r="3.06" style="animation-delay:3.12s;animation-duration:6.09s"/>
+    <circle class="tb-immutability-spark" cx="1135" cy="366" r="1.92" style="animation-delay:4.03s;animation-duration:4.21s"/>
+    <circle class="tb-immutability-spark" cx="266" cy="175" r="1.82" style="animation-delay:2.70s;animation-duration:6.57s"/>
+    <circle class="tb-immutability-spark" cx="197" cy="345" r="3.45" style="animation-delay:1.57s;animation-duration:4.70s"/>
+    <circle class="tb-immutability-spark" cx="1010" cy="331" r="1.94" style="animation-delay:0.70s;animation-duration:4.73s"/>
+    <circle class="tb-immutability-spark" cx="983" cy="100" r="3.10" style="animation-delay:0.99s;animation-duration:5.25s"/>
+    <circle class="tb-immutability-spark" cx="905" cy="490" r="1.77" style="animation-delay:4.46s;animation-duration:5.22s"/>
+    <circle class="tb-immutability-spark" cx="1070" cy="462" r="2.96" style="animation-delay:5.55s;animation-duration:6.03s"/>
+    <circle class="tb-immutability-spark" cx="971" cy="279" r="3.06" style="animation-delay:3.81s;animation-duration:6.49s"/>
+    <circle class="tb-immutability-spark" cx="108" cy="515" r="1.64" style="animation-delay:5.92s;animation-duration:3.43s"/>
+    <circle class="tb-immutability-spark" cx="919" cy="368" r="3.04" style="animation-delay:5.17s;animation-duration:5.78s"/>
+    <circle class="tb-immutability-spark" cx="268" cy="537" r="1.98" style="animation-delay:2.98s;animation-duration:4.14s"/>
+    <circle class="tb-immutability-spark" cx="964" cy="441" r="3.53" style="animation-delay:2.25s;animation-duration:5.86s"/>
+    <circle class="tb-immutability-spark" cx="932" cy="196" r="1.85" style="animation-delay:1.77s;animation-duration:3.40s"/>
+    <circle class="tb-immutability-spark" cx="1058" cy="292" r="2.91" style="animation-delay:3.80s;animation-duration:4.35s"/>
+    <circle class="tb-immutability-spark" cx="112" cy="467" r="1.60" style="animation-delay:4.10s;animation-duration:4.81s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-immutability-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-immutability-vignette)"/>
+
+    <g class="tb-immutability-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-immutability-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="206" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-immutability-chip-t" x="600" y="234" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-immutability-title" x="600" y="306" text-anchor="middle" font-size="62">불변성과 새 값으로 교체하기</text>
+
+    <rect x="470" y="362" width="260" height="2" rx="1" fill="url(#tb-immutability-rule)"/>
+    <text class="tb-immutability-sub" x="600" y="416" text-anchor="middle" font-size="25">불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어…</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-immutability-badge">
+      <circle class="tb-immutability-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-immutability-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-immutability-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-immutability-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-immutability-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-immutability-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-immutability-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-immutability-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" role="img" aria-labelledby="t d">
+  <title id="t">QA 3회 뒤 컨텍스트 구성</title>
+  <desc id="d">막대 길이는 토큰 수에 비례한다. A 방식은 메인 컨텍스트에 시작 컨텍스트 18,000 토큰과 QA 도구 출력 33,850 토큰이 세 번 쌓여 119,550 토큰이 된다. C 방식의 메인 컨텍스트는 시작 18,000 토큰에 요약 800 토큰이 세 번 붙어 20,400 토큰이다. 도구 출력은 서브에이전트 세 개의 컨텍스트에 각각 쌓였다가 서브에이전트가 끝나면 메인으로 오지 않는다.</desc>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .h { fill: #f8fafc; font-size: 17px; font-weight: 700; }
+    .lab { fill: #f8fafc; font-size: 14px; font-weight: 700; }
+    .sub { fill: #94a3b8; font-size: 12.5px; }
+    .val { fill: #e2e8f0; font-size: 13.5px; font-weight: 700; }
+    .in { fill: #0f172a; font-size: 12px; font-weight: 700; }
+    .leg { fill: #cbd5e1; font-size: 12.5px; }
+    .note { fill: #cbd5e1; font-size: 13.5px; }
+  </style>
+
+  <rect width="960" height="440" rx="20" fill="#0f172a"/>
+  <text class="h" x="44" y="50">QA 3회를 마친 시점의 컨텍스트 (막대 길이 = 토큰 수)</text>
+
+  <!-- 범례 -->
+  <rect x="44" y="68" width="12" height="12" rx="2" fill="#64748b"/>
+  <text class="leg" x="62" y="79">시작 컨텍스트</text>
+  <rect x="166" y="68" width="12" height="12" rx="2" fill="#f97316"/>
+  <text class="leg" x="184" y="79">QA 도구 출력</text>
+  <rect x="284" y="68" width="12" height="12" rx="2" fill="#34d399"/>
+  <text class="leg" x="302" y="79">서브에이전트 요약</text>
+
+  <!-- A -->
+  <text class="lab" x="44" y="124">A 메인</text>
+  <text class="sub" x="44" y="143">MCP 직접 호출</text>
+  <rect x="200" y="108" width="105" height="34" rx="4" fill="#64748b"/>
+  <rect x="305" y="108" width="198" height="34" fill="#f97316"/>
+  <rect x="503" y="108" width="198" height="34" fill="#fb923c"/>
+  <rect x="701" y="108" width="198" height="34" fill="#f97316"/>
+  <text class="in" x="404" y="130" text-anchor="middle">1회 33,850</text>
+  <text class="in" x="602" y="130" text-anchor="middle">2회 33,850</text>
+  <text class="in" x="800" y="130" text-anchor="middle">3회 33,850</text>
+  <text class="val" x="899" y="162" text-anchor="end">119,550</text>
+
+  <!-- C 메인 -->
+  <text class="lab" x="44" y="204">C 메인</text>
+  <text class="sub" x="44" y="223">서브에이전트에 위임</text>
+  <rect x="200" y="188" width="105" height="34" rx="4" fill="#64748b"/>
+  <rect x="305" y="188" width="4.7" height="34" fill="#34d399"/>
+  <rect x="310.5" y="188" width="4.7" height="34" fill="#6ee7b7"/>
+  <rect x="316" y="188" width="4.7" height="34" fill="#34d399"/>
+  <text class="val" x="332" y="210">20,400</text>
+  <text class="sub" x="404" y="210">요약 800 × 3 만 붙는다</text>
+
+  <path d="M44 250 L916 250" stroke="#1e293b"/>
+
+  <!-- C 서브 -->
+  <text class="lab" x="44" y="284">C 서브에이전트</text>
+  <text class="sub" x="44" y="303">QA 1회마다 새로 시작</text>
+
+  <rect x="200" y="270" width="52.7" height="22" rx="3" fill="#475569"/>
+  <rect x="252.7" y="270" width="198" height="22" fill="#f97316" fill-opacity=".75"/>
+  <text class="sub" x="462" y="286">서브 1 · 42,850 · 끝나면 메인에 오지 않음</text>
+
+  <rect x="200" y="302" width="52.7" height="22" rx="3" fill="#475569"/>
+  <rect x="252.7" y="302" width="198" height="22" fill="#f97316" fill-opacity=".75"/>
+  <text class="sub" x="462" y="318">서브 2 · 42,850</text>
+
+  <rect x="200" y="334" width="52.7" height="22" rx="3" fill="#475569"/>
+  <rect x="252.7" y="334" width="198" height="22" fill="#f97316" fill-opacity=".75"/>
+  <text class="sub" x="462" y="350">서브 3 · 42,850</text>
+
+  <rect x="24" y="378" width="912" height="44" rx="12" fill="#0b1220" stroke="#1e293b"/>
+  <text class="note" x="44" y="406">QA 뒤 메인의 모든 턴은 이 컨텍스트 전체를 입력으로 다시 보낸다. 평균 출력 기준, B 는 A 에 스킬 1,500 이 더해진 121,050.</text>
+</svg>

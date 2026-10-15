@@ -501,4 +501,5 @@ runs[시나리오] = [회차마다 {
 ## 관련 글
 
 - [설계기준 PDF 색인과 수식 기호 검색 실험 →](/post/rag-pdf-symbol-retrieval) (같은 앱, 가설을 하나씩 켜서 잰 절제 실험)
-- [저장은 됐는데 화면이 한 박자 늦는 이유 →](/post/cache-overlay-timing-rca) (화면 반영 타이밍 문제의 원인 분석)
+- [저장한 설계량이 다음 날짜 화면에 늦게 반영된 원인 분석 →](/post/cache-overlay-timing-rca) (화면 반영 타이밍 문제의 원인 분석)
+- [QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델 →](/post/ai-agent-qa-automation-token-economics) (변수를 바꿔 가며 계산한 비용 모델)

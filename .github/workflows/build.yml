@@ -1,8 +1,11 @@
 name: Build and Deploy
 
+# 2026-10-15: 글 전면 개편 중이라 push 자동 배포를 끈다.
+# 배포가 필요하면 Actions 탭 → Build and Deploy → Run workflow 로 수동 실행한다.
+# 다시 켜려면 아래 push 블록 주석을 푼다.
 on:
-  push:
-    branches: [main, master]
+  # push:
+  #   branches: [main, master]
   workflow_dispatch:
 
 # [404 /src/main.tsx] GitHub 저장소 Settings → Pages → Build and deployment 에서

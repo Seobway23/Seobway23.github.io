@@ -225,3 +225,4 @@ fns.map((f) => f());   // [3, 3, 3]
 - [스코프와 스코프 체인 →](/post/scope) (선행 개념)
 - [호이스팅과 선언 초기화 방식 →](/post/hoisting) (선행 개념)
 - [이벤트 루프 동작 과정 →](/post/event-loop-interactive) (비동기 콜백도 클로저로 값을 참조한다)
+- [고차 함수와 콜백 →](/post/higher-order-function) (다음 개념, 함수를 반환하는 함수)

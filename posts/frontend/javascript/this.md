@@ -225,7 +225,7 @@ const user = {
 };
 ```
 
-화살표 함수는 자체 `this` 바인딩을 만들지 않고 정의된 위치의 외부 스코프 `this` 를 사용한다.
+[화살표 함수](/post/arrow-function)는 자체 `this` 바인딩을 만들지 않고 정의된 위치의 외부 스코프 `this` 를 사용한다.
 객체 리터럴은 스코프를 만들지 않으므로 외부 스코프는 파일 최상위다. 그곳의 `this` 는 모듈이면
 `undefined`, 비엄격 스크립트면 `window` 다. 메서드는 `hello() { }` 형태로 정의한다.
 :::
@@ -264,3 +264,4 @@ const user = {
 - [실행 컨텍스트의 구성과 생성 과정 →](/post/execution-context) (선행 개념)
 - [스코프와 스코프 체인 →](/post/scope)
 - [프로토타입과 프로토타입 체인 →](/post/prototype)
+- [화살표 함수의 this 와 일반 함수와의 차이 →](/post/arrow-function) (다음 개념)
