@@ -23,6 +23,7 @@
  *   --subtitle <s>    가운데 제목 아래 한 줄 (기본: excerpt 첫 문장)
  *   --kicker <s>      제목 위 라벨 (기본: 카테고리)
  *   --code <s>        배경 코드 (기본: 본문 첫 코드 펜스). \n 으로 줄바꿈
+ *   --logo <key>      배지에 글자 대신 브랜드 로고 (css | sass | tailwind | shadcn | emotion)
  *   --write-frontmatter   생성 후 md 의 coverImage 를 이 파일로 채운다
  *   --dry             파일 쓰지 않고 경로만 출력
  */
@@ -72,6 +73,57 @@ const TOPIC_MARKS = {
   database: "DB",
   RAG: "RAG",
 };
+
+/**
+ * 배지에 글자 대신 넣는 브랜드 로고 (`--logo <key>`).
+ * 경로는 Simple Icons(CC0, 24×24 viewBox) 에서 가져왔다. color 는 각 브랜드 공식 색이다.
+ * 배지 바탕을 밝게 깔고 로고를 브랜드 색으로 그리면 원래 로고 모양이 된다.
+ */
+const BRAND_LOGOS = {
+  css: {
+    color: "#663399",
+    d: "M0 0v20.16A3.84 3.84 0 0 0 3.84 24h16.32A3.84 3.84 0 0 0 24 20.16V3.84A3.84 3.84 0 0 0 20.16 0Zm14.256 13.08c1.56 0 2.28 1.08 2.304 2.64h-1.608c.024-.288-.048-.6-.144-.84-.096-.192-.288-.264-.552-.264-.456 0-.696.264-.696.84-.024.576.288.888.768 1.08.72.288 1.608.744 1.92 1.296q.432.648.432 1.656c0 1.608-.912 2.592-2.496 2.592-1.656 0-2.4-1.032-2.424-2.688h1.68c0 .792.264 1.176.792 1.176.264 0 .456-.072.552-.24.192-.312.24-1.176-.048-1.512-.312-.408-.912-.6-1.32-.816q-.828-.396-1.224-.936c-.24-.36-.36-.888-.36-1.536 0-1.44.936-2.472 2.424-2.448m5.4 0c1.584 0 2.304 1.08 2.328 2.64h-1.608c0-.288-.048-.6-.168-.84-.096-.192-.264-.264-.528-.264-.48 0-.72.264-.72.84s.288.888.792 1.08c.696.288 1.608.744 1.92 1.296.264.432.408.984.408 1.656.024 1.608-.888 2.592-2.472 2.592-1.68 0-2.424-1.056-2.448-2.688h1.68c0 .744.264 1.176.792 1.176.264 0 .456-.072.552-.24.216-.312.264-1.176-.048-1.512-.288-.408-.888-.6-1.32-.816-.552-.264-.96-.576-1.2-.936s-.36-.888-.36-1.536c-.024-1.44.912-2.472 2.4-2.448m-11.031.018c.711-.006 1.419.198 1.839.63.432.432.672 1.128.648 1.992H9.336c.024-.456-.096-.792-.432-.96-.312-.144-.768-.048-.888.24-.12.264-.192.576-.168.864v3.504c0 .744.264 1.128.768 1.128a.65.65 0 0 0 .552-.264c.168-.24.192-.552.168-.84h1.776c.096 1.632-.984 2.712-2.568 2.688-1.536 0-2.496-.864-2.472-2.472v-4.032c0-.816.24-1.44.696-1.848.432-.408 1.146-.624 1.857-.63",
+  },
+  sass: {
+    color: "#CC6699",
+    d: "M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zM9.615 15.998c.175.645.156 1.248-.024 1.792l-.065.18c-.024.061-.052.12-.078.176-.14.29-.326.56-.555.81-.698.759-1.672 1.047-2.09.805-.45-.262-.226-1.335.584-2.19.871-.918 2.12-1.509 2.12-1.509v-.003l.108-.061zm9.911-10.861c-.542-2.133-4.077-2.834-7.422-1.645-1.989.707-4.144 1.818-5.693 3.267C4.568 8.48 4.275 9.98 4.396 10.607c.427 2.211 3.457 3.657 4.703 4.73v.006c-.367.18-3.056 1.529-3.686 2.925-.675 1.47.105 2.521.615 2.655 1.575.436 3.195-.36 4.065-1.649.84-1.261.766-2.881.404-3.676.496-.135 1.08-.195 1.83-.104 2.101.24 2.521 1.56 2.43 2.1-.09.539-.523.854-.674.944-.15.091-.195.12-.181.181.015.09.091.09.21.075.165-.03 1.096-.45 1.141-1.471.045-1.29-1.186-2.729-3.375-2.7-.9.016-1.471.091-1.875.256-.03-.045-.061-.075-.105-.105-1.35-1.455-3.855-2.475-3.75-4.41.03-.705.285-2.564 4.8-4.814 3.705-1.846 6.661-1.335 7.171-.21.733 1.604-1.576 4.59-5.431 5.024-1.47.165-2.235-.404-2.431-.615-.209-.225-.239-.24-.314-.194-.12.06-.045.255 0 .375.12.3.585.825 1.396 1.095.704.225 2.43.359 4.5-.45 2.324-.899 4.139-3.405 3.614-5.505l.073.067z",
+  },
+  tailwind: {
+    color: "#06B6D4",
+    d: "M12.001,4.8c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 C13.666,10.618,15.027,12,18.001,12c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C16.337,6.182,14.976,4.8,12.001,4.8z M6.001,12c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 c1.177,1.194,2.538,2.576,5.512,2.576c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C10.337,13.382,8.976,12,6.001,12z",
+  },
+  shadcn: {
+    color: "#09090B",
+    // 링·글로우는 검정이면 어두운 배경에 묻힌다
+    accent: "#e4e4e7",
+    d: "M22.219 11.784 11.784 22.219c-.407.407-.407 1.068 0 1.476.407.407 1.068.407 1.476 0L23.695 13.26c.407-.408.407-1.069 0-1.476-.408-.407-1.069-.407-1.476 0ZM20.132.305.305 20.132c-.407.407-.407 1.068 0 1.476.408.407 1.069.407 1.476 0L21.608 1.781c.407-.407.407-1.068 0-1.476-.408-.407-1.069-.407-1.476 0Z",
+  },
+  // Simple Icons 에 없다. emotion-js/emotion 저장소(MIT)의 emotion.png 를 128px 로 줄여 data URI 로 넣는다.
+  emotion: {
+    color: "#D26AC2",
+    image: "scripts/brand-logos/emotion.png",
+  },
+};
+
+/** 래스터 로고는 SVG 하나로 끝나도록 data URI 로 박는다 */
+function logoMarkup(logo) {
+  if (logo.image) {
+    const b64 = fs.readFileSync(path.resolve(logo.image)).toString("base64");
+    return `<image x="70" y="508" width="52" height="52" href="data:image/png;base64,${b64}"/>`;
+  }
+  return `<path transform="translate(78 516) scale(1.5)" fill="${logo.color}" d="${logo.d}"/>`;
+}
+
+/** --logo 가 있으면 배지 색을 그 브랜드 색으로 바꾼다 */
+function brandOf(key) {
+  if (!key) return null;
+  const logo = BRAND_LOGOS[key];
+  if (!logo) {
+    console.error(`알 수 없는 --logo: ${key} (가능: ${Object.keys(BRAND_LOGOS).join(", ")})`);
+    process.exit(1);
+  }
+  return logo;
+}
 
 function hexToHsl(hex) {
   const m = hex.replace("#", "");
@@ -342,7 +394,7 @@ function uidFor(slug) {
   return `tb-${clean || "thumb"}`;
 }
 
-function buildSvg({ title, subtitle, kicker, category, slug, codeLines, accent, topicColor, mark }) {
+function buildSvg({ title, subtitle, kicker, category, slug, codeLines, accent, topicColor, mark, logo }) {
   const rand = seededRandom(slug || title);
 
   // 제목 길이에 따라 급을 낮춘다 — 세 줄까지만 허용하고 그 아래는 줄인다.
@@ -607,10 +659,15 @@ function buildSvg({ title, subtitle, kicker, category, slug, codeLines, accent, 
       <circle class="badge-ring" cx="96" cy="534" r="44" fill="none"
               stroke="${topicColor}" stroke-opacity="0.45" stroke-width="2"
               stroke-dasharray="10 14" stroke-linecap="round"/>
-      <rect x="66" y="504" width="60" height="60" rx="16"
+      ${
+        logo
+          ? `<rect x="66" y="504" width="60" height="60" rx="16" fill="#f8fafc"/>
+      ${logoMarkup(logo)}`
+          : `<rect x="66" y="504" width="60" height="60" rx="16"
             fill="${topicColor}" fill-opacity="0.92"/>
       <text class="mark" x="96" y="546" text-anchor="middle" font-size="26"
-            fill="#0b1220">${esc(mark)}</text>
+            fill="#0b1220">${esc(mark)}</text>`
+      }
     </g>
 
     <text class="foot" x="${W - 72}" y="${540}" text-anchor="end" font-size="17">${esc(
@@ -669,7 +726,7 @@ function readFrontmatter(rawInput) {
 /** 본문 첫 코드 펜스 — 표지에 깔 코드. 없으면 빈 배열. */
 function firstCodeBlock(rawInput) {
   const body = stripBom(rawInput).replace(/^---[\s\S]*?\r?\n---/, "");
-  const m = body.match(/```(js|javascript|ts|typescript|jsx|tsx)?\r?\n([\s\S]*?)```/);
+  const m = body.match(/```(js|javascript|ts|typescript|jsx|tsx|css|scss|html)?\r?\n([\s\S]*?)```/);
   if (!m) return [];
   return m[2]
     .split(/\r?\n/)
@@ -696,6 +753,7 @@ function planFromPost(file, overrides) {
   const codeLines = overrides.code
     ? overrides.code.split("\\n")
     : firstCodeBlock(raw);
+  const logo = brandOf(overrides.logo);
 
   return {
     file,
@@ -706,10 +764,13 @@ function planFromPost(file, overrides) {
     kicker: overrides.kicker || category,
     codeLines: codeLines.length ? codeLines : defaultCode(topic),
     accent: categoryColor(category),
-    topicColor: TOPIC_ACCENTS[topic] || categoryColor(category),
+    topicColor: logoColor(logo) || TOPIC_ACCENTS[topic] || categoryColor(category),
     mark: TOPIC_MARKS[topic] || topic.slice(0, 2).toUpperCase() || "··",
+    logo,
   };
 }
+
+const logoColor = (logo) => logo && (logo.accent || logo.color);
 
 /** 코드 블록이 없는 글에도 뭔가는 깔아 준다. */
 function defaultCode(topic) {
@@ -781,7 +842,9 @@ function main() {
     }
     const topic = topicOf(opts.category);
     const slug = opts.slug || "thumbnail";
+    const logo = brandOf(opts.logo);
     const plan = {
+      logo,
       title: opts.title,
       slug,
       category: opts.category || "",
@@ -789,7 +852,7 @@ function main() {
       kicker: opts.kicker || opts.category || "",
       codeLines: opts.code ? opts.code.split("\\n") : defaultCode(topic),
       accent: categoryColor(opts.category),
-      topicColor: TOPIC_ACCENTS[topic] || categoryColor(opts.category),
+      topicColor: logoColor(logo) || TOPIC_ACCENTS[topic] || categoryColor(opts.category),
       mark: TOPIC_MARKS[topic] || topic.slice(0, 2).toUpperCase() || "··",
     };
     const out = opts.out || path.join(outDirDefault, `${slug}.svg`);

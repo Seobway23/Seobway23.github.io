@@ -54,7 +54,52 @@ tracks:
       - pure-function
       - higher-order-function
 
+  styling:
+    label: 스타일링
+    summary: 브라우저가 선언 하나를 고르는 규칙에서 시작해, 그 규칙 위에 만든 도구들로 넘어간다.
+    order:
+      - css-cascade
+      - sass
+      - tailwind-css
+      - shadcn-ui
+      - emotion
+
 concepts:
+  # ── 스타일링 ──────────────────────────────────────────────────
+  css-cascade:
+    label: CSS 캐스케이드
+    domain: css
+    summary: 한 속성의 선언 여러 개 중 하나를 출처·레이어·명시도·순서로 고르는 규칙.
+    aliases: ["캐스케이드", "명시도", "specificity", "cascade"]
+
+  sass:
+    label: Sass
+    domain: css
+    summary: 빌드 시점에 CSS로 컴파일되는 스타일시트 언어. 변수·믹스인·모듈은 출력에 남지 않는다.
+    prereq: [css-cascade]
+    aliases: ["Sass", "SCSS"]
+
+  tailwind-css:
+    label: Tailwind CSS
+    domain: css
+    summary: 소스를 스캔해 쓰인 유틸리티 클래스만 CSS로 생성하는 프레임워크.
+    prereq: [css-cascade]
+    aliases: ["Tailwind", "tailwindcss"]
+
+  shadcn-ui:
+    label: shadcn/ui
+    domain: css
+    summary: 컴포넌트 소스를 CLI로 프로젝트에 복사하는 React 컴포넌트 모음. cva variant 와 cn 병합으로 구성된다.
+    prereq: [tailwind-css]
+    aliases: ["shadcn", "shadcn/ui"]
+
+  emotion:
+    label: Emotion
+    domain: css
+    summary: 렌더 시점에 스타일을 직렬화·해시해 class 를 만들고 처음 보는 규칙만 문서에 넣는 CSS-in-JS 라이브러리.
+    prereq: [css-cascade]
+    aliases: ["Emotion", "CSS-in-JS", "@emotion/react"]
+
   # ── 값과 참조 ────────────────────────────────────────────────
   primitive-type:
     label: 원시 타입

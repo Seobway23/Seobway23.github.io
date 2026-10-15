@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" width="960" height="500" role="img" aria-labelledby="t d">
+  <title id="t">캐스케이드 정렬 기준 6단계</title>
+  <desc id="d">후보 선언이 출처와 중요도, 컨텍스트, 요소에 붙은 스타일, 레이어, 명시도, 등장 순서 순으로 비교되고, 앞 단계에서 결정되면 뒤 단계는 비교하지 않는다.</desc>
+  <defs>
+    <linearGradient id="bar" x1="0" x2="1">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 20px; font-weight: 700; }
+    .lab { fill: #ffffff; font-size: 17px; font-weight: 700; }
+    .ex { fill: #e0e7ff; font-size: 13.5px; }
+    .note { fill: #cbd5e1; font-size: 14.5px; }
+    .num { fill: #0f172a; font-size: 14px; font-weight: 800; }
+  </style>
+
+  <rect width="960" height="500" rx="20" fill="#0f172a"/>
+  <text class="h" x="40" y="50">같은 속성에 선언이 여러 개일 때 비교하는 순서</text>
+  <text class="note" x="40" y="76">위 단계에서 차이가 나면 그 자리에서 결정된다. 같을 때만 다음 단계로 내려간다.</text>
+
+  <!-- 단계 막대: 아래로 갈수록 좁아진다 -->
+  <g>
+    <rect x="40"  y="104" width="600" height="50" rx="10" fill="url(#bar)" opacity="1"/>
+    <rect x="70"  y="166" width="540" height="50" rx="10" fill="url(#bar)" opacity=".92"/>
+    <rect x="100" y="228" width="480" height="50" rx="10" fill="url(#bar)" opacity=".84"/>
+    <rect x="130" y="290" width="420" height="50" rx="10" fill="url(#bar)" opacity=".76"/>
+    <rect x="160" y="352" width="360" height="50" rx="10" fill="url(#bar)" opacity=".68"/>
+    <rect x="190" y="414" width="300" height="50" rx="10" fill="url(#bar)" opacity=".6"/>
+
+    <circle cx="68"  cy="129" r="13" fill="#f8fafc"/><text class="num" x="68"  y="134" text-anchor="middle">1</text>
+    <circle cx="98"  cy="191" r="13" fill="#f8fafc"/><text class="num" x="98"  y="196" text-anchor="middle">2</text>
+    <circle cx="128" cy="253" r="13" fill="#f8fafc"/><text class="num" x="128" y="258" text-anchor="middle">3</text>
+    <circle cx="158" cy="315" r="13" fill="#f8fafc"/><text class="num" x="158" y="320" text-anchor="middle">4</text>
+    <circle cx="188" cy="377" r="13" fill="#f8fafc"/><text class="num" x="188" y="382" text-anchor="middle">5</text>
+    <circle cx="218" cy="439" r="13" fill="#f8fafc"/><text class="num" x="218" y="444" text-anchor="middle">6</text>
+
+    <text class="lab" x="92"  y="135">출처와 중요도</text>
+    <text class="ex mono" x="260" y="135">UA · user · author, !important</text>
+    <text class="lab" x="122" y="197">컨텍스트</text>
+    <text class="ex" x="260" y="197">섀도 DOM 안과 밖</text>
+    <text class="lab" x="152" y="259">요소에 붙은 스타일</text>
+    <text class="ex mono" x="330" y="259">style="..."</text>
+    <text class="lab" x="182" y="321">레이어</text>
+    <text class="ex mono" x="260" y="321">@layer 선언 순서</text>
+    <text class="lab" x="212" y="383">명시도</text>
+    <text class="ex mono" x="290" y="383">(ID, 클래스, 타입)</text>
+    <text class="lab" x="242" y="445">등장 순서</text>
+    <text class="ex" x="330" y="445">나중 선언</text>
+  </g>
+
+  <!-- 오른쪽 설명 -->
+  <line x1="670" y1="110" x2="670" y2="460" stroke="#334155" stroke-width="2"/>
+  <text class="h" x="700" y="134" font-size="17">작성자가 주로 다루는 단계</text>
+  <text class="note" x="700" y="166">4 레이어</text>
+  <text class="note" x="700" y="190">5 명시도</text>
+  <text class="note" x="700" y="214">6 등장 순서</text>
+
+  <text class="h" x="700" y="270" font-size="17">자주 틀리는 지점</text>
+  <text class="note" x="700" y="302">명시도가 다르면</text>
+  <text class="note" x="700" y="326">선언 순서는 비교하지 않는다.</text>
+  <text class="note" x="700" y="362">레이어가 다르면</text>
+  <text class="note" x="700" y="386">명시도는 비교하지 않는다.</text>
+</svg>
