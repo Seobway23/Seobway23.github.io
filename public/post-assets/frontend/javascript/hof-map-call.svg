@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-labelledby="t d">
+  <title id="t">map 이 콜백을 호출하는 방식</title>
+  <desc id="d">원본 배열 [3, 1, 2] 의 각 인덱스마다 map 이 callback(요소, 인덱스, 원본 배열) 을 호출한다. 반환값 30, 10, 20 은 새 배열의 같은 인덱스에 들어가고 원본은 바뀌지 않는다.</desc>
+  <defs>
+    <marker id="ay" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f7df1e"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 16px; font-weight: 700; }
+    .cell { fill: #f8fafc; font-size: 20px; font-weight: 700; }
+    .idx { fill: #94a3b8; font-size: 12px; }
+    .call { fill: #fde047; font-size: 13.5px; }
+    .note { fill: #94a3b8; font-size: 12.5px; }
+  </style>
+
+  <rect width="960" height="400" rx="20" fill="#0f172a"/>
+
+  <text class="h" x="40" y="46">원본 배열 O</text>
+  <text class="note mono" x="40" y="68">const O = [3, 1, 2]</text>
+
+  <text class="h" x="40" y="250">새 배열 A</text>
+  <text class="note mono" x="40" y="272">const A = O.map((x) =&gt; x * 10)</text>
+
+  <!-- 원본 칸 -->
+  <g>
+    <rect x="300" y="36" width="90" height="56" rx="8" fill="#111827" stroke="#334155"/>
+    <text class="cell mono" x="335" y="72">3</text>
+    <text class="idx" x="304" y="108">k = 0</text>
+    <rect x="530" y="36" width="90" height="56" rx="8" fill="#111827" stroke="#334155"/>
+    <text class="cell mono" x="565" y="72">1</text>
+    <text class="idx" x="534" y="108">k = 1</text>
+    <rect x="760" y="36" width="90" height="56" rx="8" fill="#111827" stroke="#334155"/>
+    <text class="cell mono" x="795" y="72">2</text>
+    <text class="idx" x="764" y="108">k = 2</text>
+  </g>
+
+  <!-- 호출 -->
+  <g>
+    <rect x="250" y="132" width="190" height="44" rx="8" fill="#1c1a0b" stroke="#f7df1e" stroke-opacity=".7"/>
+    <text class="call mono" x="262" y="159">callback(3, 0, O)</text>
+    <rect x="480" y="132" width="190" height="44" rx="8" fill="#1c1a0b" stroke="#f7df1e" stroke-opacity=".7"/>
+    <text class="call mono" x="492" y="159">callback(1, 1, O)</text>
+    <rect x="710" y="132" width="190" height="44" rx="8" fill="#1c1a0b" stroke="#f7df1e" stroke-opacity=".7"/>
+    <text class="call mono" x="722" y="159">callback(2, 2, O)</text>
+  </g>
+
+  <g stroke="#f7df1e" stroke-width="1.8" fill="none" marker-end="url(#ay)">
+    <path d="M345 112 L345 128"/>
+    <path d="M575 112 L575 128"/>
+    <path d="M805 112 L805 128"/>
+    <path d="M345 180 L345 226"/>
+    <path d="M575 180 L575 226"/>
+    <path d="M805 180 L805 226"/>
+  </g>
+  <text class="note" x="352" y="210">반환 30</text>
+  <text class="note" x="582" y="210">반환 10</text>
+  <text class="note" x="812" y="210">반환 20</text>
+
+  <!-- 결과 칸 -->
+  <g>
+    <rect x="300" y="232" width="90" height="56" rx="8" fill="#111827" stroke="#f7df1e" stroke-opacity=".8"/>
+    <text class="cell mono" x="323" y="268">30</text>
+    <rect x="530" y="232" width="90" height="56" rx="8" fill="#111827" stroke="#f7df1e" stroke-opacity=".8"/>
+    <text class="cell mono" x="553" y="268">10</text>
+    <rect x="760" y="232" width="90" height="56" rx="8" fill="#111827" stroke="#f7df1e" stroke-opacity=".8"/>
+    <text class="cell mono" x="783" y="268">20</text>
+  </g>
+
+  <line x1="40" y1="316" x2="920" y2="316" stroke="#334155"/>
+  <text class="note" x="40" y="344">1. IsCallable(callback) 이 false 면 TypeError.   2. 길이 3 인 새 배열 A 를 만든다.</text>
+  <text class="note" x="40" y="368">3. k 마다 Call(callback, thisArg, « O[k], k, O ») 의 반환값을 A[k] 에 넣는다.   4. A 를 반환한다. O 는 그대로다.</text>
+</svg>

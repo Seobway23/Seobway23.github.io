@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" width="960" height="360" role="img" aria-labelledby="t d">
+  <title id="t">이벤트 루프 한 번의 반복</title>
+  <desc id="d">태스크 큐에서 가장 오래된 태스크 하나를 실행하고, 마이크로태스크 체크포인트에서 마이크로태스크 큐가 빌 때까지 실행한 뒤, 필요하면 렌더링하고 다음 반복으로 돌아간다.</desc>
+  <defs>
+    <marker id="ay" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f7df1e"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .num { fill: #0f172a; font-size: 14px; font-weight: 800; }
+    .step { fill: #f8fafc; font-size: 16px; font-weight: 700; }
+    .sub { fill: #cbd5e1; font-size: 12.5px; }
+    .hl { fill: #fde047; font-size: 12.5px; font-weight: 700; }
+    .note { fill: #94a3b8; font-size: 12.5px; }
+  </style>
+
+  <rect width="960" height="360" rx="20" fill="#0f172a"/>
+
+  <!-- 1. 태스크 -->
+  <rect x="40" y="60" width="250" height="150" rx="14" fill="#111827" stroke="#475569"/>
+  <circle cx="68" cy="88" r="14" fill="#94a3b8"/>
+  <text class="num" x="63" y="93">1</text>
+  <text class="step" x="92" y="94">태스크 하나 실행</text>
+  <text class="sub" x="62" y="126">태스크 큐에서 가장 오래된 것 1개</text>
+  <text class="sub mono" x="62" y="152">setTimeout 콜백, 클릭 이벤트,</text>
+  <text class="sub mono" x="62" y="172">스크립트 첫 실행</text>
+
+  <!-- 2. 체크포인트 -->
+  <rect x="355" y="60" width="270" height="150" rx="14" fill="#1c1a0b" stroke="#f7df1e" stroke-width="1.8"/>
+  <circle cx="383" cy="88" r="14" fill="#f7df1e"/>
+  <text class="num" x="378" y="93">2</text>
+  <text class="step" x="407" y="94">마이크로태스크 체크포인트</text>
+  <text class="hl" x="377" y="126">큐가 빌 때까지 반복</text>
+  <text class="sub mono" x="377" y="152">then·catch·finally, await 다음,</text>
+  <text class="sub mono" x="377" y="172">queueMicrotask, MutationObserver</text>
+  <path d="M560 210 C 600 262, 520 262, 500 214" fill="none" stroke="#f7df1e" stroke-width="1.8" marker-end="url(#ay)"/>
+  <text class="hl" x="520" y="276">새로 추가된 것도 여기서 실행</text>
+
+  <!-- 3. 렌더링 -->
+  <rect x="690" y="60" width="230" height="150" rx="14" fill="#111827" stroke="#475569"/>
+  <circle cx="718" cy="88" r="14" fill="#94a3b8"/>
+  <text class="num" x="713" y="93">3</text>
+  <text class="step" x="742" y="94">렌더링 기회</text>
+  <text class="sub" x="712" y="126">브라우저가 필요하다고 판단하면</text>
+  <text class="sub mono" x="712" y="152">requestAnimationFrame,</text>
+  <text class="sub mono" x="712" y="172">스타일·레이아웃·페인트</text>
+
+  <g stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#ag)">
+    <path d="M292 135 L350 135"/>
+    <path d="M627 135 L685 135"/>
+    <path d="M805 214 C 805 320, 165 320, 165 216"/>
+  </g>
+  <text class="note" x="400" y="312">다음 반복</text>
+
+  <text class="note" x="40" y="40">이벤트 루프 한 번의 반복 (HTML 표준 처리 모델을 줄인 것)</text>
+  <text class="note" x="40" y="344">2단계가 끝나지 않으면 3단계와 다음 1단계로 넘어가지 못한다.</text>
+</svg>

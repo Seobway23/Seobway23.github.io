@@ -157,4 +157,4 @@ export default function App() {
 ## 관련 글
 
 - [태스크 큐와 setTimeout 실행 시점 →](/post/task-queue) (다음 글)
-- [React Query 개요 →](/post/react-query-overview)
+- [마이크로태스크 큐와 실행 시점 →](/post/microtask)

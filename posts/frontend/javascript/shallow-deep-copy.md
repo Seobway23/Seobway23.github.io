@@ -219,3 +219,4 @@ structured clone 알고리즘은 직렬화 가능한 데이터를 복사하는 �
 - [참조 타입과 참조 복사 →](/post/reference-type) (선행 개념)
 - [원시 타입과 값 복사 →](/post/primitive-type)
 - [프로토타입과 프로토타입 체인 →](/post/prototype) (`structuredClone` 이 유지하지 않는 연결)
+- [불변성과 새 값으로 교체하기 →](/post/immutability) (다음 개념, 바뀐 경로만 새로 만들기)

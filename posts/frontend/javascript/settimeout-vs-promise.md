@@ -17,7 +17,6 @@ excerpt: >
 
 | 포스트 | 내용 |
 |---|---|
-| [로드맵 인덱스 →](/post/ai-webdev-roadmap-foundation) | 01~19 전체 학습 경로 |
 | [01-1. JS 이벤트 루프와 비동기 →](/post/js-event-loop-and-async) | 콜스택, 큐, 마이크로태스크 |
 | [01-2. setTimeout과 Promise →](/post/settimeout-vs-promise) | 비동기 실행 순서 예측 |
 | [01-3. React 단방향 데이터 흐름 →](/post/react-component-data-flow) | props/state, state 끌어올리기 |
@@ -212,6 +211,5 @@ setTimeout(() => console.log('t1'), 0)
 ## 관련 글
 
 - [JS 이벤트 루프와 비동기 처리 구조 →](/post/js-event-loop-and-async)
+- [마이크로태스크 큐와 실행 시점 →](/post/microtask) (체크포인트가 큐를 비우는 방식)
 - [React 단방향 데이터 흐름 →](/post/react-component-data-flow)
-- [Node.js · Bun · Deno 런타임 비교 →](/post/js-runtime-node-bun-deno)
-- [AI 웹개발자 로드맵 (Foundation 01~19) →](/post/ai-webdev-roadmap-foundation)
