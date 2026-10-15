@@ -11,6 +11,7 @@ import { marked } from "marked";
 import yaml from "js-yaml";
 import katex from "katex";
 import { processChartBlocks, injectChartsIntoHtml, numberFigures } from "./post-chart.mjs";
+import { isPublishedPath } from "./published-categories.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1306,8 +1307,13 @@ function generatePostsData() {
   }
 
   // 모든 마크다운 파일 찾기
-  const markdownFiles = getAllMarkdownFiles(postsDir);
-  console.log(`📄 ${markdownFiles.length}개의 마크다운 파일 발견`);
+  const allMarkdownFiles = getAllMarkdownFiles(postsDir);
+  const markdownFiles = allMarkdownFiles.filter((f) =>
+    isPublishedPath(path.relative(postsDir, f))
+  );
+  console.log(
+    `📄 ${allMarkdownFiles.length}개의 마크다운 파일 발견 (공개 ${markdownFiles.length}개, 비활성 ${allMarkdownFiles.length - markdownFiles.length}개)`
+  );
 
   const globalGlossary = loadGlobalGlossary();
   const glossaryIndex = Object.create(null);
