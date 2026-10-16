@@ -212,4 +212,5 @@ setTimeout(() => console.log('t1'), 0)
 
 - [JS 이벤트 루프와 비동기 처리 구조 →](/post/js-event-loop-and-async)
 - [마이크로태스크 큐와 실행 시점 →](/post/microtask) (체크포인트가 큐를 비우는 방식)
+- [async/await 와 실행 재개 시점 →](/post/async-await) (await 다음 코드가 실행되는 순서)
 - [React 단방향 데이터 흐름 →](/post/react-component-data-flow)

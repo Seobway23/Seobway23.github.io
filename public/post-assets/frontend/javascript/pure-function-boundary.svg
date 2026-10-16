@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-labelledby="t d">
+  <title id="t">순수 함수와 순수하지 않은 함수의 경계</title>
+  <desc id="d">왼쪽 순수 함수는 인자만 읽고 반환값만 내보낸다. 오른쪽 함수는 바깥 변수, 인자로 받은 객체, DOM, 현재 시각, 네트워크를 읽거나 바꾼다.</desc>
+  <defs>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="ay" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f7df1e"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f87171"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 16px; font-weight: 700; }
+    .k { fill: #e2e8f0; font-size: 14px; font-weight: 700; }
+    .v { fill: #cbd5e1; font-size: 12.5px; }
+    .bad { fill: #fca5a5; font-size: 12.5px; }
+    .note { fill: #94a3b8; font-size: 12.5px; }
+  </style>
+
+  <rect width="960" height="400" rx="20" fill="#0f172a"/>
+
+  <!-- 왼쪽: 순수 -->
+  <text class="h" x="40" y="44">순수 함수</text>
+  <rect x="40" y="70" width="400" height="230" rx="14" fill="#111827" stroke="#475569" stroke-dasharray="6 5"/>
+  <text class="note" x="56" y="92">함수가 닿는 범위</text>
+  <rect x="160" y="150" width="160" height="70" rx="12" fill="#1c1a0b" stroke="#f7df1e" stroke-width="1.6"/>
+  <text class="k mono" x="178" y="182">total(items)</text>
+  <text class="v" x="178" y="204">인자만 읽는다</text>
+  <text class="v mono" x="56" y="140">items</text>
+  <path d="M100 145 C 130 150, 140 165, 156 175" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ag)"/>
+  <path d="M322 185 L 380 185" fill="none" stroke="#f7df1e" stroke-width="1.8" marker-end="url(#ay)"/>
+  <text class="v mono" x="384" y="190">합계</text>
+  <text class="note" x="56" y="276">같은 items 면 항상 같은 합계, 바깥은 그대로</text>
+
+  <!-- 오른쪽: 순수하지 않음 -->
+  <text class="h" x="500" y="44">순수하지 않은 함수</text>
+  <rect x="500" y="70" width="420" height="230" rx="14" fill="#111827" stroke="#475569" stroke-dasharray="6 5"/>
+  <rect x="630" y="150" width="160" height="70" rx="12" fill="#1f1315" stroke="#f87171" stroke-width="1.6"/>
+  <text class="k mono" x="648" y="182">addItem(cart)</text>
+  <text class="v" x="648" y="204">바깥을 읽고 바꾼다</text>
+
+  <g class="bad">
+    <text class="bad mono" x="520" y="104">count++</text>
+    <text class="bad mono" x="800" y="104">cart.items.push</text>
+    <text class="bad mono" x="520" y="268">Date.now()</text>
+    <text class="bad mono" x="800" y="268">fetch, DOM</text>
+  </g>
+  <g stroke="#f87171" stroke-width="1.6" fill="none" marker-end="url(#ar)">
+    <path d="M660 148 C 640 120, 610 110, 585 106"/>
+    <path d="M760 148 C 780 120, 790 110, 798 108"/>
+    <path d="M590 262 C 610 245, 630 232, 650 222"/>
+    <path d="M770 222 C 790 240, 800 252, 806 258"/>
+  </g>
+
+  <line x1="40" y1="330" x2="920" y2="330" stroke="#334155"/>
+  <text class="note" x="40" y="358">조건 1. 같은 인자면 같은 반환값. 조건 2. 바깥에서 관찰할 수 있는 변경(부수 효과)이 없다.</text>
+  <text class="note" x="40" y="380">오른쪽은 호출 횟수, 호출 시각, 네트워크 상태에 따라 결과가 바뀌고, 호출만 해도 바깥 상태가 달라진다.</text>
+</svg>

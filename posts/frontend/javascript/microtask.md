@@ -289,3 +289,4 @@ loop();
 - [이벤트 루프 동작 과정 →](/post/event-loop-interactive) (선행 개념)
 - [태스크 큐와 setTimeout 실행 시점 →](/post/task-queue) (선행 개념)
 - [setTimeout과 Promise의 실행 순서 →](/post/settimeout-vs-promise) (출력 순서 예측 연습)
+- [Promise 의 상태와 then 체인 →](/post/promise) (다음 개념, then 콜백이 큐에 들어가는 조건)

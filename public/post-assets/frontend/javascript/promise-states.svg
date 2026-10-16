@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-labelledby="t d">
+  <title id="t">Promise 의 상태와 반응 목록</title>
+  <desc id="d">pending 상태의 Promise 는 then 으로 등록된 반응을 목록에 모아 둔다. resolve 나 reject 가 처음 호출되면 fulfilled 또는 rejected 로 한 번만 바뀌고, 모아 둔 반응이 마이크로태스크 큐에 들어간다. 이후 호출은 무시된다.</desc>
+  <defs>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="ay" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f7df1e"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f87171"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 16px; font-weight: 700; }
+    .k { fill: #e2e8f0; font-size: 14px; font-weight: 700; }
+    .v { fill: #cbd5e1; font-size: 12.5px; }
+    .hl { fill: #fde047; font-size: 12.5px; font-weight: 700; }
+    .bad { fill: #fca5a5; font-size: 12.5px; font-weight: 700; }
+    .note { fill: #94a3b8; font-size: 12.5px; }
+  </style>
+
+  <rect width="960" height="420" rx="20" fill="#0f172a"/>
+  <text class="note" x="40" y="40">Promise 객체 하나의 내부 슬롯 [[PromiseState]] 와 반응 목록</text>
+
+  <!-- pending -->
+  <rect x="40" y="70" width="270" height="200" rx="14" fill="#111827" stroke="#475569"/>
+  <text class="h" x="60" y="102">pending</text>
+  <text class="v" x="60" y="128">결과가 아직 없다</text>
+  <text class="k" x="60" y="164">반응 목록</text>
+  <rect x="60" y="176" width="230" height="30" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text class="v mono" x="74" y="196">then(r1)</text>
+  <rect x="60" y="214" width="230" height="30" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text class="v mono" x="74" y="234">then(r2)</text>
+
+  <!-- fulfilled -->
+  <rect x="440" y="70" width="230" height="110" rx="14" fill="#1c1a0b" stroke="#f7df1e" stroke-width="1.6"/>
+  <text class="h" x="460" y="102">fulfilled</text>
+  <text class="v mono" x="460" y="128">[[PromiseResult]] = 값</text>
+  <text class="hl" x="460" y="156">resolve(값) 첫 호출</text>
+
+  <!-- rejected -->
+  <rect x="440" y="200" width="230" height="110" rx="14" fill="#1f1315" stroke="#f87171" stroke-width="1.6"/>
+  <text class="h" x="460" y="232">rejected</text>
+  <text class="v mono" x="460" y="258">[[PromiseResult]] = 이유</text>
+  <text class="bad" x="460" y="286">reject(이유) 또는 throw</text>
+
+  <path d="M312 140 C 370 130, 390 120, 436 122" fill="none" stroke="#f7df1e" stroke-width="1.8" marker-end="url(#ay)"/>
+  <path d="M312 220 C 370 230, 390 250, 436 252" fill="none" stroke="#f87171" stroke-width="1.8" marker-end="url(#ar)"/>
+
+  <!-- microtask queue -->
+  <rect x="740" y="70" width="180" height="240" rx="14" fill="#111827" stroke="#475569"/>
+  <text class="k" x="760" y="100">마이크로태스크 큐</text>
+  <rect x="760" y="120" width="140" height="30" rx="8" fill="#1e293b" stroke="#f7df1e"/>
+  <text class="v mono" x="774" y="140">r1(값)</text>
+  <rect x="760" y="158" width="140" height="30" rx="8" fill="#1e293b" stroke="#f7df1e"/>
+  <text class="v mono" x="774" y="178">r2(값)</text>
+  <text class="note" x="760" y="214">등록한 순서대로</text>
+  <text class="note" x="760" y="234">들어간다</text>
+
+  <path d="M672 125 L 736 135" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ag)"/>
+  <path d="M672 255 L 736 205" fill="none" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ag)"/>
+
+  <line x1="40" y1="340" x2="920" y2="340" stroke="#334155"/>
+  <text class="note" x="40" y="368">fulfilled 와 rejected 를 합쳐 settled 라고 한다. settled 가 된 뒤의 resolve·reject 호출은 무시된다.</text>
+  <text class="note" x="40" y="392">이미 settled 인 Promise 에 then 을 붙이면 반응이 곧바로 마이크로태스크 큐에 들어간다.</text>
+</svg>

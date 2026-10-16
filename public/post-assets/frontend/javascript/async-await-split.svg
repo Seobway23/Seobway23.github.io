@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" role="img" aria-labelledby="t d">
+  <title id="t">async 함수가 await 에서 나뉘는 방식</title>
+  <desc id="d">async 함수 load 를 호출하면 첫 await 까지 동기로 실행되고, pending 상태의 Promise 를 호출한 쪽에 반환한다. 호출한 쪽은 다음 줄을 계속 실행한다. await 한 Promise 가 이행되면 나머지 본문이 마이크로태스크로 재개되고, return 값으로 반환한 Promise 가 이행된다.</desc>
+  <defs>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="ay" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#f7df1e"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .lane { fill: #e2e8f0; font-size: 14px; font-weight: 700; }
+    .v { fill: #cbd5e1; font-size: 12.5px; }
+    .hl { fill: #fde047; font-size: 12.5px; font-weight: 700; }
+    .note { fill: #94a3b8; font-size: 12.5px; }
+  </style>
+
+  <rect width="960" height="400" rx="20" fill="#0f172a"/>
+  <text class="note" x="40" y="40">const p = load(); console.log("다음 줄");     async function load() { 앞부분; await fetch(...); 뒷부분; return data; }</text>
+
+  <!-- 레인 -->
+  <text class="lane" x="40" y="96">호출한 쪽</text>
+  <text class="lane" x="40" y="186">load 본문</text>
+  <text class="lane" x="40" y="276">Promise p</text>
+  <line x1="150" y1="91" x2="920" y2="91" stroke="#1e293b" stroke-width="22"/>
+  <line x1="150" y1="181" x2="920" y2="181" stroke="#1e293b" stroke-width="22"/>
+  <line x1="150" y1="271" x2="920" y2="271" stroke="#1e293b" stroke-width="22"/>
+
+  <!-- 호출한 쪽 -->
+  <rect x="160" y="78" width="90" height="26" rx="6" fill="#334155"/>
+  <text class="v mono" x="172" y="96">load()</text>
+  <rect x="410" y="78" width="150" height="26" rx="6" fill="#334155"/>
+  <text class="v mono" x="422" y="96">"다음 줄" 실행</text>
+
+  <!-- 본문 1 -->
+  <rect x="250" y="168" width="150" height="26" rx="6" fill="#475569"/>
+  <text class="v mono" x="262" y="186">앞부분 (동기)</text>
+  <text class="hl" x="404" y="160">await: 여기서 멈춤</text>
+  <line x1="402" y1="166" x2="402" y2="196" stroke="#f7df1e" stroke-width="2"/>
+
+  <!-- 본문 2 -->
+  <rect x="700" y="168" width="140" height="26" rx="6" fill="#1c1a0b" stroke="#f7df1e"/>
+  <text class="v mono" x="712" y="186">뒷부분, return</text>
+  <text class="hl" x="640" y="160">마이크로태스크로 재개</text>
+
+  <!-- 대기 구간 -->
+  <line x1="404" y1="181" x2="696" y2="181" stroke="#64748b" stroke-width="1.6" stroke-dasharray="6 5"/>
+  <text class="note" x="490" y="214">fetch 결과를 기다리는 동안 콜 스택은 비어 있다</text>
+
+  <!-- Promise -->
+  <rect x="400" y="258" width="300" height="26" rx="6" fill="#334155"/>
+  <text class="v mono" x="412" y="276">pending</text>
+  <rect x="840" y="258" width="80" height="26" rx="6" fill="#1c1a0b" stroke="#f7df1e"/>
+  <text class="v mono" x="850" y="276">fulfilled</text>
+
+  <g stroke="#94a3b8" stroke-width="1.6" fill="none" marker-end="url(#ag)">
+    <path d="M250 104 C 252 130, 255 150, 258 166"/>
+    <path d="M400 196 C 400 230, 402 240, 404 255"/>
+    <path d="M404 256 C 404 140, 420 120, 430 106"/>
+  </g>
+  <path d="M840 196 C 860 225, 870 240, 876 255" fill="none" stroke="#f7df1e" stroke-width="1.8" marker-end="url(#ay)"/>
+
+  <line x1="40" y1="320" x2="920" y2="320" stroke="#334155"/>
+  <text class="note" x="40" y="348">1. 첫 await 까지는 호출과 같은 흐름에서 동기로 실행된다.  2. await 에서 pending Promise 를 반환하고 호출한 쪽이 이어서 실행된다.</text>
+  <text class="note" x="40" y="372">3. 기다리던 값이 준비되면 뒷부분이 마이크로태스크로 실행되고, return 값으로 p 가 이행된다. throw 하면 p 가 거부된다.</text>
+</svg>

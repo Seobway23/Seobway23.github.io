@@ -254,3 +254,4 @@ function Ranking({ scores }) {
 - [얕은 복사와 깊은 복사 →](/post/shallow-deep-copy) (선행 개념)
 - [참조 타입과 참조 복사 →](/post/reference-type)
 - [고차 함수와 콜백 →](/post/higher-order-function) (원본을 두고 새 배열을 반환하는 map, filter)
+- [순수 함수와 부수 효과 →](/post/pure-function) (다음 개념, 바깥을 바꾸지 않는 함수)
