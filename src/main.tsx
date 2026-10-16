@@ -63,6 +63,21 @@ const initializeBackground = async () => {
   }
 };
 
+// 배포마다 해시가 바뀐 chunk 가 교체된다. 배포 전에 받아 둔 app.js 가 지운 chunk 를
+// import 하면 404 가 나서 seq·playground 가 원문 그대로 남는다. 새 index.html 을 받도록
+// 한 번만 새로고침한다(같은 경로에서 반복 새로고침은 막는다).
+window.addEventListener("vite:preloadError", (event) => {
+  const key = `chunk-reload:${location.pathname}`;
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+  } catch {
+    return;
+  }
+  event.preventDefault();
+  location.reload();
+});
+
 initializeTheme();
 initializeBackground();
 
