@@ -1,0 +1,227 @@
+<svg id="tb-promise" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-promise-t tb-promise-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-promise-t">Promise 의 상태와 then 체인</title>
+  <desc id="tb-promise-d">frontend/javascript — Promise 는 pending 에서 fulfilled 나 rejected 로 한 번만 바뀌는 객체다</desc>
+
+  <defs>
+    <linearGradient id="tb-promise-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-promise-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-promise-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f7df1e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#f7df1e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-promise-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#f7df1e" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-promise-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 70%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 70%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-promise-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-promise-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-promise-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-promise-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-promise-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-promise-glow-a { animation: tb-promise-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-promise-glow-b { animation: tb-promise-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-promise-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-promise-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-promise-spark { fill: #ffffff; opacity: 0; animation-name: tb-promise-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-promise-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-promise-sheen-band { animation: tb-promise-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-promise-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-promise-caret { animation: tb-promise-blink 1.1s steps(1) infinite; }
+    @keyframes tb-promise-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-promise-halo { animation: tb-promise-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-promise-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-promise-bracket { stroke: hsl(198 93% 70%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-promise-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-promise-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-promise-badge-ring { animation: tb-promise-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-promise-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-promise-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-promise-tshadow); transition: fill .35s ease; }
+    .tb-promise-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-promise-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 70%); letter-spacing: 2.6px; }
+    .tb-promise-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-promise-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-promise-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-promise-c-key    { fill: #f7df1e; }
+    .tb-promise-c-string { fill: #86efac; }
+    .tb-promise-c-number { fill: #fbbf24; }
+    .tb-promise-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-promise-c-ident  { fill: #cbd5e1; }
+    .tb-promise-c-punct  { fill: #94a3b8; }
+    .tb-promise-c-op     { fill: hsl(198 93% 70%); }
+    .tb-promise-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-promise:hover .tb-promise-glow-a,
+    #tb-promise:hover .tb-promise-glow-b     { animation-duration: 6s; }
+    #tb-promise:hover .tb-promise-code       { opacity: .62; }
+    #tb-promise:hover .tb-promise-spark      { animation-duration: 1.4s !important; }
+    #tb-promise:hover .tb-promise-sheen-band { animation-duration: 2.6s; }
+    #tb-promise:hover .tb-promise-title      { fill: #ffffff; }
+    #tb-promise:hover .tb-promise-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-promise:hover .tb-promise-badge      { transform: translateY(-5px); }
+    .tb-promise-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-promise-glow-a, .tb-promise-glow-b, .tb-promise-spark, .tb-promise-sheen-band, .tb-promise-caret, .tb-promise-halo, .tb-promise-badge-ring, .tb-promise-bracket {
+        animation: none !important;
+      }
+      .tb-promise-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-promise-frame)">
+    <rect width="1200" height="630" fill="url(#tb-promise-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-promise-grid)"/>
+
+    <circle class="tb-promise-glow-a" cx="201" cy="95" r="332" fill="url(#tb-promise-ga)"/>
+    <circle class="tb-promise-glow-b" cx="986" cy="482" r="327" fill="url(#tb-promise-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-key" xml:space="preserve">const</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">p</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-op" xml:space="preserve">=</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-key" xml:space="preserve">new</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">Promise</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">resolve</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">,</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">reject</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-punct" xml:space="preserve">{</tspan></text>
+      <text x="64" y="140.12" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-string" xml:space="preserve">&quot;executor&quot;</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="176.24" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">resolve</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-number" xml:space="preserve">1</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="212.35999999999999" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">resolve</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-number" xml:space="preserve">2</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="248.48" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">reject</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-key" xml:space="preserve">new</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">Error</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-string" xml:space="preserve">&quot;x&quot;</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="284.6" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-punct" xml:space="preserve">}</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="320.71999999999997" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-string" xml:space="preserve">&quot;after new&quot;</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="356.84" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-ident" xml:space="preserve">p</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">then</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">v</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-string" xml:space="preserve">&quot;then&quot;</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">,</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">v</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="392.96" class="tb-promise-code" font-size="21"><tspan class="tb-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-string" xml:space="preserve">&quot;sync end&quot;</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <rect class="tb-promise-caret" x="370" y="376"
+            width="10" height="25" fill="#f7df1e" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-promise-code" font-size="17"><tspan class="tb-promise-c-key" xml:space="preserve">const</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">p</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-op" xml:space="preserve">=</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-key" xml:space="preserve">new</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">Promise</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">resolve</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">,</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">reject</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-op" xml:space="preserve">=&gt;</tspan><tspan class="tb-promise-c-plain" xml:space="preserve"> </tspan><tspan class="tb-promise-c-punct" xml:space="preserve">{</tspan></text>
+      <text x="690" y="386.6" class="tb-promise-code" font-size="17"><tspan class="tb-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">console</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">.</tspan><tspan class="tb-promise-c-ident" xml:space="preserve">log</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-string" xml:space="preserve">&quot;executor&quot;</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="417.2" class="tb-promise-code" font-size="17"><tspan class="tb-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">resolve</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-number" xml:space="preserve">1</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="447.8" class="tb-promise-code" font-size="17"><tspan class="tb-promise-c-plain" xml:space="preserve">  </tspan><tspan class="tb-promise-c-ident" xml:space="preserve">resolve</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">(</tspan><tspan class="tb-promise-c-number" xml:space="preserve">2</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">)</tspan><tspan class="tb-promise-c-punct" xml:space="preserve">;</tspan></text>
+    </g>
+
+    <circle class="tb-promise-spark" cx="927" cy="251" r="3.18" style="animation-delay:0.18s;animation-duration:4.00s"/>
+    <circle class="tb-promise-spark" cx="1071" cy="398" r="2.44" style="animation-delay:5.82s;animation-duration:3.89s"/>
+    <circle class="tb-promise-spark" cx="1024" cy="520" r="2.18" style="animation-delay:4.93s;animation-duration:5.11s"/>
+    <circle class="tb-promise-spark" cx="916" cy="400" r="2.12" style="animation-delay:4.39s;animation-duration:3.23s"/>
+    <circle class="tb-promise-spark" cx="895" cy="383" r="2.84" style="animation-delay:3.91s;animation-duration:4.88s"/>
+    <circle class="tb-promise-spark" cx="978" cy="528" r="2.90" style="animation-delay:0.19s;animation-duration:4.06s"/>
+    <circle class="tb-promise-spark" cx="1020" cy="66" r="2.00" style="animation-delay:2.49s;animation-duration:4.13s"/>
+    <circle class="tb-promise-spark" cx="1037" cy="208" r="1.61" style="animation-delay:5.47s;animation-duration:4.53s"/>
+    <circle class="tb-promise-spark" cx="898" cy="225" r="2.81" style="animation-delay:1.02s;animation-duration:6.51s"/>
+    <circle class="tb-promise-spark" cx="282" cy="79" r="2.48" style="animation-delay:0.16s;animation-duration:3.53s"/>
+    <circle class="tb-promise-spark" cx="946" cy="169" r="3.02" style="animation-delay:2.27s;animation-duration:6.59s"/>
+    <circle class="tb-promise-spark" cx="123" cy="283" r="2.72" style="animation-delay:1.18s;animation-duration:4.06s"/>
+    <circle class="tb-promise-spark" cx="900" cy="294" r="1.92" style="animation-delay:2.86s;animation-duration:3.66s"/>
+    <circle class="tb-promise-spark" cx="1026" cy="288" r="3.44" style="animation-delay:5.18s;animation-duration:4.61s"/>
+    <circle class="tb-promise-spark" cx="976" cy="239" r="1.55" style="animation-delay:0.78s;animation-duration:5.11s"/>
+    <circle class="tb-promise-spark" cx="308" cy="163" r="2.78" style="animation-delay:4.32s;animation-duration:4.29s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-promise-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-promise-vignette)"/>
+
+    <g class="tb-promise-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-promise-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="446" y="206" width="309" height="42" rx="21"
+            fill="hsl(198 93% 70%)" fill-opacity="0.13" stroke="hsl(198 93% 70%)" stroke-opacity="0.55"/>
+      <text class="tb-promise-chip-t" x="600" y="234" text-anchor="middle" font-size="19">FRONTEND/JAVASCRIPT</text>
+    </g>
+
+    <text class="tb-promise-title" x="600" y="306" text-anchor="middle" font-size="62">Promise 의 상태와 then 체인</text>
+
+    <rect x="470" y="362" width="260" height="2" rx="1" fill="url(#tb-promise-rule)"/>
+    <text class="tb-promise-sub" x="600" y="416" text-anchor="middle" font-size="25">Promise 는 pending 에서 fulfilled 나 rejected 로 한 번만 바뀌는 객체다</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-promise-badge">
+      <circle class="tb-promise-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#f7df1e" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16"
+            fill="#f7df1e" fill-opacity="0.92"/>
+      <text class="tb-promise-mark" x="96" y="546" text-anchor="middle" font-size="26"
+            fill="#0b1220">JS</text>
+    </g>
+
+    <text class="tb-promise-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/JAVASCRIPT</text>
+    <text class="tb-promise-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-promise-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-promise-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-promise-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-promise-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 70%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

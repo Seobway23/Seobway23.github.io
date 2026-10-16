@@ -215,4 +215,6 @@ React 의 상태 업데이트, effect 실행, 비동기 데이터 로딩도 모�
 
 - [setTimeout과 Promise의 실행 순서 →](/post/settimeout-vs-promise)
 - [마이크로태스크 큐와 실행 시점 →](/post/microtask)
+- [Promise 의 상태와 then 체인 →](/post/promise)
+- [async/await 와 실행 재개 시점 →](/post/async-await)
 - [React 단방향 데이터 흐름 →](/post/react-component-data-flow)

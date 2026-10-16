@@ -168,8 +168,13 @@ export default function Post() {
   // ── Mermaid Modal: SVG 자연 크기 읽기 ────────────────────────────────────────
   const getSvgNaturalSize = (container: HTMLElement) => {
     const svgEl = container.querySelector("svg");
+    const imgEl = container.querySelector("img");
     let svgW = 900, svgH = 500;
-    if (svgEl) {
+    if (!svgEl && imgEl) {
+      // 본문 그림(<img>) 확대: 원본 크기를 width/height 속성에 넣어 둔다
+      svgW = Number(imgEl.getAttribute("width")) || imgEl.naturalWidth || svgW;
+      svgH = Number(imgEl.getAttribute("height")) || imgEl.naturalHeight || svgH;
+    } else if (svgEl) {
       const vb = svgEl.getAttribute("viewBox");
       if (vb) {
         const parts = vb.trim().split(/[\s,]+/);
@@ -452,6 +457,32 @@ export default function Post() {
 
         initPostTabs(contentRoot);
 
+        // 본문 그림 클릭 → 확대 모달 (mermaid 모달을 같이 쓴다: 휠 확대, 드래그 이동, ESC 닫기)
+        contentRoot.querySelectorAll<HTMLImageElement>(".post-figure img, p > img").forEach((img) => {
+          if (img.dataset.zoomBound === "true") return;
+          img.dataset.zoomBound = "true";
+          img.classList.add("post-figure__zoomable");
+          img.setAttribute("role", "button");
+          img.setAttribute("tabindex", "0");
+          img.setAttribute("aria-label", `${img.alt || "그림"} 확대해서 보기`);
+          const open = () => {
+            const w = img.naturalWidth || img.width;
+            const h = img.naturalHeight || img.height;
+            const src = img.currentSrc || img.src;
+            const alt = (img.alt || "").replace(/"/g, "&quot;");
+            setMermaidModal(
+              `<img src="${src}" alt="${alt}" width="${w}" height="${h}" style="display:block;max-width:none" draggable="false">`
+            );
+          };
+          img.addEventListener("click", open);
+          img.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              open();
+            }
+          });
+        });
+
         // 1) hljs: mermaid 블록 제외하고 하이라이팅
         const codeBlocks = contentRef.current?.querySelectorAll("pre code");
         if (codeBlocks) {
@@ -490,8 +521,13 @@ export default function Post() {
         const mermaidBlocks = contentRef.current?.querySelectorAll(
           "code.language-mermaid"
         );
-        if (mermaidBlocks && mermaidBlocks.length > 0) {
-          const { default: mermaid } = await import("mermaid");
+        const mermaid = mermaidBlocks && mermaidBlocks.length > 0
+          ? await import("mermaid").then((m) => m.default).catch((e) => {
+              console.error("Mermaid load error:", e);
+              return null;
+            })
+          : null;
+        if (mermaidBlocks && mermaid) {
           mermaid.initialize({
             startOnLoad: false,
             theme: "dark",
@@ -606,17 +642,30 @@ export default function Post() {
           }
         }
 
-        const { hydrateMechanicsVisualizations } = await import("@/lib/post-mechanics-viz");
-        await hydrateMechanicsVisualizations(contentRef.current);
+        // 블록 종류마다 따로 감싼다. 하나가 실패해도 뒤의 seq·playground 는 그려진다.
+        try {
+          const { hydrateMechanicsVisualizations } = await import("@/lib/post-mechanics-viz");
+          await hydrateMechanicsVisualizations(contentRef.current);
+        } catch (e) {
+          console.error("Mechanics viz hydrate error:", e);
+        }
 
         // ```seq / ```playground — 해당 블록이 있는 글에서만 코드를 내려받는다
         if (contentRef.current?.querySelector("code.language-seq, code.language-sequence")) {
-          const { hydrateSequences } = await import("@/lib/post-sequence");
-          hydrateSequences(contentRef.current);
+          try {
+            const { hydrateSequences } = await import("@/lib/post-sequence");
+            hydrateSequences(contentRef.current);
+          } catch (e) {
+            console.error("Sequence hydrate error:", e);
+          }
         }
         if (contentRef.current?.querySelector("code.language-playground")) {
-          const { hydratePlaygrounds } = await import("@/lib/post-playground");
-          hydratePlaygrounds(contentRef.current);
+          try {
+            const { hydratePlaygrounds } = await import("@/lib/post-playground");
+            hydratePlaygrounds(contentRef.current);
+          } catch (e) {
+            console.error("Playground hydrate error:", e);
+          }
         }
 
         // 도메인 배경 트리거([[domain:id]]) → 클릭 시 모달 열기
