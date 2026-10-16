@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Byl4dKfM.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-ChijrJ7O.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>순수 함수와 부수 효과 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="순수 함수는 같은 인자면 항상 같은 값을 반환하고, 바깥에서 관찰할 수 있는 변경을 남기지 않는다. React 는 컴포넌트가 순수하다고 가정하고, Strict Mode 는 개발 중에 컴포넌트를 두 번 호출해 이 가정이 깨진 곳을 드러낸다." />
+    <meta name="keywords" content="javascript, pure-function, side-effect, react, strict-mode, 순수함수, 부수효과" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/pure-function" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="순수 함수와 부수 효과" />
+    <meta property="og:description" content="순수 함수는 같은 인자면 항상 같은 값을 반환하고, 바깥에서 관찰할 수 있는 변경을 남기지 않는다. React 는 컴포넌트가 순수하다고 가정하고, Strict Mode 는 개발 중에 컴포넌트를 두 번 호출해 이 가정이 깨진 곳을 드러낸다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/pure-function" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/pure-function.svg" />
+    <meta property="article:published_time" content="2026-10-16T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-10-16T08:53:10.872Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="pure-function" />
+    <meta property="article:tag" content="side-effect" />
+    <meta property="article:tag" content="react" />
+    <meta property="article:tag" content="strict-mode" />
+    <meta property="article:tag" content="순수함수" />
+    <meta property="article:tag" content="부수효과" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="순수 함수와 부수 효과" />
+    <meta name="twitter:description" content="순수 함수는 같은 인자면 항상 같은 값을 반환하고, 바깥에서 관찰할 수 있는 변경을 남기지 않는다. React 는 컴포넌트가 순수하다고 가정하고, Strict Mode 는 개발 중에 컴포넌트를 두 번 호출해 이 가정이 깨진 곳을 드러낸다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/pure-function.svg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"순수 함수와 부수 효과","description":"순수 함수는 같은 인자면 항상 같은 값을 반환하고, 바깥에서 관찰할 수 있는 변경을 남기지 않는다. React 는 컴포넌트가 순수하다고 가정하고, Strict Mode 는 개발 중에 컴포넌트를 두 번 호출해 이 가정이 깨진 곳을 드러낸다.","image":["https://seobway23.github.io/post-thumbnails/pure-function.svg"],"datePublished":"2026-10-16T00:00:00.000Z","dateModified":"2026-10-16T08:53:10.872Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/pure-function"},"keywords":"javascript, pure-function, side-effect, react, strict-mode, 순수함수, 부수효과","articleSection":"javascript","inLanguage":"ko-KR","wordCount":5382},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"순수 함수와 부수 효과","item":"https://seobway23.github.io/post/pure-function"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>순수 함수와 부수 효과</h1>
+<p>순수 함수는 같은 인자면 항상 같은 값을 반환하고, 바깥에서 관찰할 수 있는 변경을 남기지 않는다. React 는 컴포넌트가 순수하다고 가정하고, Strict Mode 는 개발 중에 컴포넌트를 두 번 호출해 이 가정이 깨진 곳을 드러낸다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-10-16T00:00:00.000Z">2026-10-16</time> · <span>8분</span></p>
+<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="ABSTRACT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">ABSTRACT</span><div class="post-callout__content"><p><strong>순수 함수</strong>는 두 조건을 만족한다. (1) 같은 인자면 항상 같은 값을 반환한다. (2) 바깥에서 관찰할 수 있는 변경, 즉 <span class="glossary-term" data-term="side-effect" tabindex="0">부수 효과</span>가 없다. 순수 함수는 호출 횟수와 순서에 결과가 영향을 받지 않아서 테스트, 캐싱, 재실행이 안전하다. React 는 컴포넌트가 순수하다고 가정하고 렌더링을 몇 번이든 다시 호출한다.</p>
+</div></div></aside></p>
+<h2>1. 문제 상황</h2>
+<p>정렬된 목록을 화면에 보여 주는 함수다. 호출할 때마다 원래 배열의 순서가 바뀐다.</p>
+<pre><code class="language-js">const scores = [3, 1, 2];
+
+function sortedView(list) {
+  return list.sort();
+}
+
+const view = sortedView(scores);
+console.log(scores);          // [1, 2, 3]  원본이 바뀌었다
+console.log(view === scores); // true       같은 배열이다
+</code></pre>
+<p><code>sortedView</code> 는 매번 같은 결과를 반환하지만, 호출만 해도 <code>scores</code> 가 바뀐다. 다른 곳에서 <code>scores</code> 를 입력 순서대로 쓰고 있었다면 그쪽이 깨진다. 반대로 바깥을 바꾸지 않아도 결과가 매번 다른 함수도 있다.</p>
+<pre><code class="language-js">let count = 0;
+const label = (x) =&gt; { count++; return x + count; };
+
+label(1); // 2
+label(1); // 3
+label(1); // 4
+</code></pre>
+<p>두 함수 모두 「인자만 보고는 무슨 일이 일어날지 알 수 없다」는 같은 문제를 가진다.</p>
+<hr>
+<h2>2. 정의</h2>
+<h3>2.1 정의</h3>
+<p>함수가 다음 두 조건을 모두 만족하면 순수 함수라고 한다.</p>
+<ol>
+<li><strong>결정성</strong>: 같은 인자로 호출하면 항상 같은 값을 반환한다. 바깥 변수, 현재 시각, 난수, 네트워크 응답처럼 인자 밖에서 바뀌는 값을 읽지 않는다.</li>
+<li><strong>부수 효과 없음</strong>: 호출 전에 있던 객체나 변수를 바꾸지 않는다. DOM 변경, 요청 전송, 로그 출력도 하지 않는다.</li>
+</ol>
+<p>React 문서는 이를 「자기 일만 한다(호출 전에 있던 객체나 변수를 바꾸지 않는다)」와 「같은 입력, 같은 출력」으로 설명한다<a href="https://react.dev/learn/keeping-components-pure" target="_blank"><sup>[1]</sup></a>. 순수 함수 호출은 그 결과값으로 바꿔 써도 동작이 같다. 이 성질을 <span class="glossary-term" data-term="referential-transparency" tabindex="0">참조 투명성</span>이라고 한다.</p>
+<p>함수 안에서 새로 만든 변수나 객체를 바꾸는 것은 부수 효과가 아니다. 바깥에서 관찰할 수 없기 때문이다.</p>
+<pre><code class="language-js">function total(items) {
+  let sum = 0;                    // 지역 변수 변경은 괜찮다
+  for (const it of items) sum += it.price;
+  return sum;
+}
+</code></pre>
+<h3>2.2 사양에서의 위치</h3>
+<p>ECMAScript 사양에는 「순수 함수」라는 분류가 없다. 대신 각 내장 메서드가 무엇을 바꾸는지 알고리즘으로 적혀 있다. <code>Array.prototype.sort</code> 는 <code>this</code> 배열의 요소를 정렬된 순서로 다시 쓰고 그 배열을 반환한다<a href="https://tc39.es/ecma262/#sec-array.prototype.sort" target="_blank"><sup>[5]</sup></a>. ES2023 에 추가된 <code>toSorted</code> 는 새 배열을 만들어 반환하고 원본은 그대로 둔다<a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted" target="_blank"><sup>[4]</sup></a>.</p>
+<div class="post-table-wrap"><table>
+<thead>
+<tr>
+<th>원본을 바꾸는 메서드</th>
+<th>새 배열을 반환하는 메서드</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sort</code></td>
+<td><code>toSorted</code></td>
+</tr>
+<tr>
+<td><code>reverse</code></td>
+<td><code>toReversed</code></td>
+</tr>
+<tr>
+<td><code>splice</code></td>
+<td><code>toSpliced</code></td>
+</tr>
+<tr>
+<td><code>arr[i] = v</code></td>
+<td><code>with(i, v)</code></td>
+</tr>
+<tr>
+<td><code>push</code>, <code>pop</code>, <code>shift</code>, <code>unshift</code></td>
+<td><code>concat</code>, <code>slice</code>, 전개 구문</td>
+</tr>
+</tbody></table></div>
+<p>순수 함수를 쓰려면 오른쪽 열을 쓰거나, 왼쪽을 쓰기 전에 복사본을 만든다. <a href="/post/immutability">불변성</a> 글의 「새 값으로 교체하기」가 이 선택이다.</p>
+<hr>
+<h2>3. 동작 원리</h2>
+<h3>3.1 함수가 닿는 범위</h3>
+<figure class="post-figure post-figure--image"><img src="/post-assets/frontend/javascript/pure-function-boundary.svg" alt="순수 함수와 순수하지 않은 함수의 경계" loading="lazy"><figcaption><span class="post-figure__no">그림 1.</span> 순수 함수는 인자에서 반환값으로만 흐른다. 순수하지 않은 함수는 바깥 변수, 인자로 받은 객체, 시각, 네트워크, DOM 을 읽거나 바꾼다.</figcaption></figure>
+<p>순수 함수의 결과는 인자로만 정해진다. 그래서 다음이 성립한다.</p>
+<ul>
+<li><strong>테스트</strong>: 인자와 기대값만 있으면 된다. 전역 상태를 준비하거나 정리할 필요가 없다.</li>
+<li><strong>캐싱</strong>: 같은 인자의 결과를 저장해 두고 다시 써도 된다. React 의 <code>useMemo</code> 가 이 전제를 쓴다.</li>
+<li><strong>재실행</strong>: 몇 번을 호출해도 바깥이 그대로라 결과가 같다.</li>
+</ul>
+<h3>3.2 React 는 컴포넌트를 여러 번 호출한다</h3>
+<p>React 는 컴포넌트 함수가 순수하다고 가정한다. 같은 props, state, context 면 같은 JSX 를 반환해야 하고, 렌더링 중에 바깥을 바꾸면 안 된다<a href="https://react.dev/learn/keeping-components-pure" target="_blank"><sup>[1]</sup></a>. <span class="glossary-term" data-term="strict-mode" tabindex="0">Strict Mode</span> 는 개발 중에 컴포넌트 함수를 두 번 호출해서 이 가정이 깨진 곳을 드러낸다<a href="https://react.dev/reference/react/StrictMode" target="_blank"><sup>[2]</sup></a>.</p>
+<p>React 문서의 예다. 렌더링 중에 바깥 변수 <code>guest</code> 를 1 늘리는 <code>Cup</code> 컴포넌트를 세 번 그린다.</p>
+<pre><code class="language-jsx">let guest = 0;
+
+function Cup() {
+  guest = guest + 1;                     // 렌더링 중 바깥 변수 변경
+  return &lt;h2&gt;Tea cup for guest #{guest}&lt;/h2&gt;;
+}
+
+export default function TeaSet() {
+  return (&lt;&gt;&lt;Cup /&gt;&lt;Cup /&gt;&lt;Cup /&gt;&lt;/&gt;);
+}
+</code></pre>
+<p>Strict Mode 에서 이 화면은 #1, #2, #3 이 아니라 #2, #4, #6 을 보여 준다<a href="https://react.dev/learn/keeping-components-pure" target="_blank"><sup>[1]</sup></a>.</p>
+<p>인터랙티브 다이어그램: Strict Mode 에서 순수하지 않은 Cup 을 세 번 렌더링하기 (단계별로 재생할 수 있다)</p><ol><li>첫 번째 Cup 을 렌더링한다. Strict Mode 가 함수를 한 번 호출한다.</li><li>같은 Cup 을 한 번 더 호출한다. 바깥 변수가 이미 바뀌어 있어 결과가 달라진다.</li><li>두 번째 Cup 도 두 번 호출된다.</li><li>세 번째도 같다. 순수한 컴포넌트였다면 #1, #2, #3 이 나왔을 것이다.</li></ol>
+<p><code>guest</code> 변수를 지우고 번호를 props 로 받으면 몇 번을 호출해도 결과가 같다.</p>
+<pre><code class="language-jsx">function Cup({ guest }) {
+  return &lt;h2&gt;Tea cup for guest #{guest}&lt;/h2&gt;;
+}
+</code></pre>
+<h3>3.3 부수 효과는 어디에 두나</h3>
+<p>프로그램은 결국 화면을 바꾸고 요청을 보내야 한다. 부수 효과를 없애는 것이 아니라, 결과를 계산하는 순수한 부분과 바깥을 바꾸는 부분을 나눈다. React 에서는 렌더링(컴포넌트 함수 본문)을 순수하게 두고, 부수 효과는 이벤트 핸들러에 둔다. 이벤트 핸들러로 해결할 수 없을 때 <code>useEffect</code> 를 쓴다<a href="https://react.dev/learn/keeping-components-pure" target="_blank"><sup>[1]</sup></a>.</p>
+<hr>
+<h2>4. 예제</h2>
+<h3>4.1 기본</h3>
+<p><code>sort</code> 와 <code>toSorted</code>, 바깥 카운터를 쓰는 함수와 인자만 쓰는 함수를 비교한다. 실행 전에 각 줄의 출력을 예측해 본다.</p>
+<pre><code class="language-playground">const a = [3, 1, 2];
+const sortedA = a.sort();
+console.log(&quot;sort:&quot;, a, a === sortedA);
+
+const b = [3, 1, 2];
+const sortedB = b.toSorted();
+console.log(&quot;toSorted:&quot;, b, sortedB, b === sortedB);
+
+let count = 0;
+const impure = (x) =&gt; { count++; return x + count; };
+console.log(&quot;impure:&quot;, impure(1), impure(1), impure(1));
+
+const pure = (x, c) =&gt; x + c;
+console.log(&quot;pure:&quot;, pure(1, 1), pure(1, 1), pure(1, 1));
+</code></pre>
+<p>Node 22 에서 실행한 결과는 다음과 같다.</p>
+<pre><code class="language-text">sort: [ 1, 2, 3 ] true
+toSorted: [ 3, 1, 2 ] [ 1, 2, 3 ] false
+impure: 2 3 4
+pure: 2 2 2
+</code></pre>
+<h3>4.2 실무 패턴</h3>
+<p>장바구니에 상품을 담는 함수를 순수 계산과 부수 효과로 나눈다.</p>
+<pre><code class="language-js">// 순수: 새 장바구니를 계산만 한다
+function addItem(cart, item) {
+  return { ...cart, items: [...cart.items, item] };
+}
+
+function totalPrice(cart) {
+  return cart.items.reduce((sum, it) =&gt; sum + it.price, 0);
+}
+
+// 부수 효과: 이벤트 핸들러에서 상태를 바꾸고 저장한다
+function onAdd(item) {
+  setCart((prev) =&gt; addItem(prev, item));
+  localStorage.setItem(&quot;lastAdded&quot;, item.id);
+}
+</code></pre>
+<p><code>addItem</code> 과 <code>totalPrice</code> 는 인자와 기대값만으로 테스트할 수 있다. 저장 방식이 바뀌어도 <code>onAdd</code> 만 고치면 된다.</p>
+<hr>
+<h2>5. 자주 하는 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>props 로 받은 배열을 렌더링 중에 정렬한다</strong></p>
+<pre><code class="language-jsx">function List({ items }) {
+  items.sort((a, b) =&gt; a.order - b.order);   // 부모의 배열이 바뀐다
+  return &lt;ul&gt;{items.map((it) =&gt; &lt;li key={it.id}&gt;{it.name}&lt;/li&gt;)}&lt;/ul&gt;;
+}
+</code></pre>
+<p><code>sort</code> 는 원본을 바꾸므로 부모 컴포넌트의 state 배열이 직접 바뀐다. React 는 배열 참조가 같아서 변경을 감지하지 못한다. <code>items.toSorted(...)</code> 나 <code>[...items].sort(...)</code> 로 새 배열을 만든다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>렌더링 중에 현재 시각이나 난수를 읽는다</strong></p>
+<pre><code class="language-jsx">function Greeting() {
+  const id = Math.random();          // 렌더링마다 다른 값
+  return &lt;p data-id={id}&gt;{new Date().toLocaleTimeString()}&lt;/p&gt;;
+}
+</code></pre>
+<p>같은 props 로 렌더링해도 결과가 매번 다르다. 서버 렌더링 결과와 브라우저의 결과가 달라 hydration 오류가 나기도 한다. 고정 id 가 필요하면 <code>useId</code>, 시각은 state 나 effect 에서 갱신한다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p><code>console.log</code> 도 엄밀히는 부수 효과다. 개발 중 디버깅 로그는 결과에 영향을 주지 않아 문제가 되지 않지만, Strict Mode 에서는 로그가 두 번 찍힐 수 있다.</p>
+</div></div></aside></p>
+<hr>
+<h2>6. 정리</h2>
+<p>순수 함수는 같은 인자면 같은 값을 반환하고 바깥을 바꾸지 않는다. 그래서 몇 번을 호출해도 안전하고, React 는 이 전제로 컴포넌트를 다시 호출한다. 부수 효과는 없애는 것이 아니라 이벤트 핸들러나 effect 처럼 정해진 곳으로 모은다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 순수 함수의 두 조건을 말할 수 있다</li>
+<li><input disabled="" type="checkbox"> 지역 변수를 바꾸는 것이 부수 효과가 아닌 이유를 안다</li>
+<li><input disabled="" type="checkbox"> sort 와 toSorted 의 차이를 원본 기준으로 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> Strict Mode 에서 Cup 이 #2, #4, #6 을 출력하는 이유를 안다</li>
+<li><input disabled="" type="checkbox"> 부수 효과를 렌더링 밖 어디에 두는지 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://react.dev/learn/keeping-components-pure" target="_blank">[1] Keeping Components Pure — React</a></li>
+<li><a href="https://react.dev/reference/react/StrictMode" target="_blank">[2] &lt;StrictMode&gt; — React</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/sort" target="_blank">[3] Array.prototype.sort() — MDN Web Docs</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted" target="_blank">[4] Array.prototype.toSorted() — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-array.prototype.sort" target="_blank">[5] Array.prototype.sort — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/immutability">불변성과 새 값으로 교체하기 →</a> (선행 개념)</li>
+<li><a href="/post/higher-order-function">고차 함수와 콜백 →</a> (map, filter, reduce 에 넘기는 콜백도 순수하게 쓴다)</li>
+<li><a href="/post/shallow-deep-copy">얕은 복사와 깊은 복사 →</a> (원본을 두고 복사본을 바꾸는 방법)</li>
+</ul>
+
+<ul><li>javascript</li><li>pure-function</li><li>side-effect</li><li>react</li><li>strict-mode</li><li>순수함수</li><li>부수효과</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

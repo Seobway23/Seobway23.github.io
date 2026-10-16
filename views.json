@@ -1,5 +1,6 @@
 {
   "arrow-function": 0,
+  "async-await": 0,
   "call-stack": 0,
   "closure": 0,
   "event-loop-interactive": 0,
@@ -10,7 +11,9 @@
   "js-event-loop-and-async": 0,
   "microtask": 0,
   "primitive-type": 0,
+  "promise": 0,
   "prototype": 0,
+  "pure-function": 0,
   "reference-type": 0,
   "scope": 0,
   "settimeout-vs-promise": 0,

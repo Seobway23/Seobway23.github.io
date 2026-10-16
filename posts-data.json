@@ -5,6 +5,11 @@
     "path": "/post/frontend/javascript/arrow-function"
   },
   {
+    "slug": "async-await",
+    "title": "async/await 와 실행 재개 시점",
+    "path": "/post/frontend/javascript/async-await"
+  },
+  {
     "slug": "call-stack",
     "title": "콜 스택과 함수 호출 순서",
     "path": "/post/frontend/javascript/call-stack"
@@ -55,9 +60,19 @@
     "path": "/post/frontend/javascript/primitive-type"
   },
   {
+    "slug": "promise",
+    "title": "Promise 의 상태와 then 체인",
+    "path": "/post/frontend/javascript/promise"
+  },
+  {
     "slug": "prototype",
     "title": "프로토타입과 프로토타입 체인",
     "path": "/post/frontend/javascript/prototype"
+  },
+  {
+    "slug": "pure-function",
+    "title": "순수 함수와 부수 효과",
+    "path": "/post/frontend/javascript/pure-function"
   },
   {
     "slug": "reference-type",

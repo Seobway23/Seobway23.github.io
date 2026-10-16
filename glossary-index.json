@@ -1,5 +1,6 @@
 {
   "call-stack": [
+    "async-await",
     "call-stack",
     "closure",
     "event-loop-interactive",
@@ -14,14 +15,8 @@
     "electron-nodejs-libuv-integration",
     "micro-osi-7layer"
   ],
-  "gc": [
-    "closure",
-    "electron-nodejs-libuv-integration",
-    "cdn-content-delivery-network",
-    "cache-overlay-timing-rca",
-    "modeler-canvas-render-ablation"
-  ],
   "event-loop": [
+    "async-await",
     "event-loop-interactive",
     "js-event-loop-and-async",
     "microtask",
@@ -32,15 +27,34 @@
     "electron-renderer-chromium-rendering"
   ],
   "microtask": [
+    "async-await",
     "event-loop-interactive",
     "js-event-loop-and-async",
     "microtask",
+    "promise",
     "settimeout-vs-promise",
     "task-queue",
     "react-component-data-flow",
     "react-controlled-vs-uncontrolled",
     "typescript-type-system-basics",
     "electron-nodejs-libuv-integration"
+  ],
+  "abi": [
+    "async-await",
+    "electron-multi-process-architecture",
+    "electron-native-layer-os-integration",
+    "electron-nodejs-libuv-integration",
+    "micro-ethernet-nic-cable",
+    "micro-network-traffic",
+    "rag-hybrid-search",
+    "rag-pdf-symbol-retrieval"
+  ],
+  "gc": [
+    "closure",
+    "electron-nodejs-libuv-integration",
+    "cdn-content-delivery-network",
+    "cache-overlay-timing-rca",
+    "modeler-canvas-render-ablation"
   ],
   "heap": [
     "reference-type",
@@ -75,15 +89,6 @@
     "electron-native-layer-os-integration",
     "electron-nodejs-libuv-integration",
     "electron-renderer-chromium-rendering"
-  ],
-  "abi": [
-    "electron-multi-process-architecture",
-    "electron-native-layer-os-integration",
-    "electron-nodejs-libuv-integration",
-    "micro-ethernet-nic-cable",
-    "micro-network-traffic",
-    "rag-hybrid-search",
-    "rag-pdf-symbol-retrieval"
   ],
   "node-api": [
     "electron-native-layer-os-integration",

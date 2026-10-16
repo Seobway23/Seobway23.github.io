@@ -28,8 +28,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-DsdTv-Pl.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
+    <script type="module" crossorigin src="/assets/app-Byl4dKfM.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-ChijrJ7O.css">
   <link rel="manifest" href="/manifest.webmanifest">    <title>마이크로태스크 큐와 실행 시점 — Tech Blog — 모던 개발 블로그</title>
     <meta name="description" content="Promise.then 콜백과 queueMicrotask 는 태스크 큐가 아니라 마이크로태스크 큐에 들어간다. 이벤트 루프는 태스크 하나가 끝날 때마다 마이크로태스크 큐를 완전히 비운 뒤에 렌더링과 다음 태스크로 넘어간다." />
     <meta name="keywords" content="javascript, microtask, promise, queueMicrotask, event-loop, 마이크로태스크" />
@@ -43,7 +43,7 @@
     <meta property="og:url" content="https://seobway23.github.io/post/microtask" />
     <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/microtask.jpg" />
     <meta property="article:published_time" content="2026-10-15T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-10-16T00:18:07.248Z" />
+    <meta property="article:modified_time" content="2026-10-16T08:53:10.860Z" />
     <meta property="article:tag" content="javascript" />
     <meta property="article:tag" content="microtask" />
     <meta property="article:tag" content="promise" />
@@ -54,7 +54,7 @@
     <meta name="twitter:title" content="마이크로태스크 큐와 실행 시점" />
     <meta name="twitter:description" content="Promise.then 콜백과 queueMicrotask 는 태스크 큐가 아니라 마이크로태스크 큐에 들어간다. 이벤트 루프는 태스크 하나가 끝날 때마다 마이크로태스크 큐를 완전히 비운 뒤에 렌더링과 다음 태스크로 넘어간다." />
     <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/microtask.jpg" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"마이크로태스크 큐와 실행 시점","description":"Promise.then 콜백과 queueMicrotask 는 태스크 큐가 아니라 마이크로태스크 큐에 들어간다. 이벤트 루프는 태스크 하나가 끝날 때마다 마이크로태스크 큐를 완전히 비운 뒤에 렌더링과 다음 태스크로 넘어간다.","image":["https://seobway23.github.io/post-thumbnails/microtask.jpg"],"datePublished":"2026-10-15T00:00:00.000Z","dateModified":"2026-10-16T00:18:07.248Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/microtask"},"keywords":"javascript, microtask, promise, queueMicrotask, event-loop, 마이크로태스크","articleSection":"javascript","inLanguage":"ko-KR","wordCount":5701},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"마이크로태스크 큐와 실행 시점","item":"https://seobway23.github.io/post/microtask"}]}]}</script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"마이크로태스크 큐와 실행 시점","description":"Promise.then 콜백과 queueMicrotask 는 태스크 큐가 아니라 마이크로태스크 큐에 들어간다. 이벤트 루프는 태스크 하나가 끝날 때마다 마이크로태스크 큐를 완전히 비운 뒤에 렌더링과 다음 태스크로 넘어간다.","image":["https://seobway23.github.io/post-thumbnails/microtask.jpg"],"datePublished":"2026-10-15T00:00:00.000Z","dateModified":"2026-10-16T08:53:10.860Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/microtask"},"keywords":"javascript, microtask, promise, queueMicrotask, event-loop, 마이크로태스크","articleSection":"javascript","inLanguage":"ko-KR","wordCount":5754},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"마이크로태스크 큐와 실행 시점","item":"https://seobway23.github.io/post/microtask"}]}]}</script>
   </head>
   <body>
     <script>
@@ -268,6 +268,7 @@ loop();
 <li><a href="/post/event-loop-interactive">이벤트 루프 동작 과정 →</a> (선행 개념)</li>
 <li><a href="/post/task-queue">태스크 큐와 setTimeout 실행 시점 →</a> (선행 개념)</li>
 <li><a href="/post/settimeout-vs-promise">setTimeout과 Promise의 실행 순서 →</a> (출력 순서 예측 연습)</li>
+<li><a href="/post/promise">Promise 의 상태와 then 체인 →</a> (다음 개념, then 콜백이 큐에 들어가는 조건)</li>
 </ul>
 
 <ul><li>javascript</li><li>microtask</li><li>promise</li><li>queueMicrotask</li><li>event-loop</li><li>마이크로태스크</li></ul>
