@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Sfqxeyxs.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>shadcn/ui 컴포넌트 배포 방식과 구조 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="shadcn/ui는 컴포넌트를 패키지로 설치하지 않고 CLI가 소스 파일을 프로젝트에 복사해 넣는 React 컴포넌트 모음이다. 각 컴포넌트는 headless primitive, Tailwind CSS 클래스, cva 로 만든 variant, cn 클래스 병합 함수로 구성되며 색은 CSS 변수로 바꾼다." />
+    <meta name="keywords" content="shadcn-ui, react, tailwindcss, cva, radix-ui, 디자인시스템" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/shadcn-ui" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="shadcn/ui 컴포넌트 배포 방식과 구조" />
+    <meta property="og:description" content="shadcn/ui는 컴포넌트를 패키지로 설치하지 않고 CLI가 소스 파일을 프로젝트에 복사해 넣는 React 컴포넌트 모음이다. 각 컴포넌트는 headless primitive, Tailwind CSS 클래스, cva 로 만든 variant, cn 클래스 병합 함수로 구성되며 색은 CSS 변수로 바꾼다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/shadcn-ui" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/shadcn-ui.jpg" />
+    <meta property="article:published_time" content="2026-10-15T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-10-16T00:17:11.560Z" />
+    <meta property="article:tag" content="shadcn-ui" />
+    <meta property="article:tag" content="react" />
+    <meta property="article:tag" content="tailwindcss" />
+    <meta property="article:tag" content="cva" />
+    <meta property="article:tag" content="radix-ui" />
+    <meta property="article:tag" content="디자인시스템" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="shadcn/ui 컴포넌트 배포 방식과 구조" />
+    <meta name="twitter:description" content="shadcn/ui는 컴포넌트를 패키지로 설치하지 않고 CLI가 소스 파일을 프로젝트에 복사해 넣는 React 컴포넌트 모음이다. 각 컴포넌트는 headless primitive, Tailwind CSS 클래스, cva 로 만든 variant, cn 클래스 병합 함수로 구성되며 색은 CSS 변수로 바꾼다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/shadcn-ui.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"shadcn/ui 컴포넌트 배포 방식과 구조","description":"shadcn/ui는 컴포넌트를 패키지로 설치하지 않고 CLI가 소스 파일을 프로젝트에 복사해 넣는 React 컴포넌트 모음이다. 각 컴포넌트는 headless primitive, Tailwind CSS 클래스, cva 로 만든 variant, cn 클래스 병합 함수로 구성되며 색은 CSS 변수로 바꾼다.","image":["https://seobway23.github.io/post-thumbnails/shadcn-ui.jpg"],"datePublished":"2026-10-15T00:00:00.000Z","dateModified":"2026-10-16T00:17:11.560Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/shadcn-ui"},"keywords":"shadcn-ui, react, tailwindcss, cva, radix-ui, 디자인시스템","articleSection":"styling","inLanguage":"ko-KR","wordCount":8027},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"styling","item":"https://seobway23.github.io/?category=frontend%2Fstyling"},{"@type":"ListItem","position":3,"name":"shadcn/ui 컴포넌트 배포 방식과 구조","item":"https://seobway23.github.io/post/shadcn-ui"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>styling</span></nav>
+<h1>shadcn/ui 컴포넌트 배포 방식과 구조</h1>
+<p>shadcn/ui는 컴포넌트를 패키지로 설치하지 않고 CLI가 소스 파일을 프로젝트에 복사해 넣는 React 컴포넌트 모음이다. 각 컴포넌트는 headless primitive, Tailwind CSS 클래스, cva 로 만든 variant, cn 클래스 병합 함수로 구성되며 색은 CSS 변수로 바꾼다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-10-15T00:00:00.000Z">2026-10-15</time> · <span>9분</span></p>
+<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="ABSTRACT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">ABSTRACT</span><div class="post-callout__content"><p><strong>shadcn/ui</strong>는 컴포넌트 소스 코드를 CLI로 내 프로젝트에 복사해 넣는 방식으로 배포되는 React 컴포넌트 모음이다.<br>복사된 파일은 내 코드이므로 스타일과 variant 를 파일에서 직접 고친다. 바깥에서 덮어쓰는 명시도 경쟁이 생기지 않는다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>이 글은 shadcn CLI 4.21.5, <code>cn</code> 0.4.0, <code>class-variance-authority</code> 0.7.1, 레지스트리의 <code>radix-nova</code> 스타일 기준이다 (2026-10-15 확인).</p>
+</div></div></aside></p>
+<h2>1. 문제 상황</h2>
+<p>패키지로 설치한 UI 라이브러리의 버튼을 브랜드 색으로 바꾸려고 클래스를 붙였는데 적용되지 않는다.</p>
+<pre><code class="language-css">/* 라이브러리 CSS (node_modules 안) */
+.lib-root .lib-button.lib-contained { background: #1976d2; }
+
+/* 내 CSS */
+.my-btn { background: #7c3aed; }   /* 적용되지 않는다 */
+</code></pre>
+<p>라이브러리 선택자의 명시도는 (0,3,0), 내 선택자는 (0,1,0) 이다. 이기려면 선택자를 더 길게 쓰거나 <code>!important</code> 를 붙여야 한다.<br>라이브러리 CSS 파일을 직접 고치면 다음 설치 때 원래대로 돌아간다. 컴포넌트 소스가 내 저장소 밖에 있어서 생기는 문제다.</p>
+<hr>
+<h2>2. 정의</h2>
+<h3>2.1 코드 배포 방식</h3>
+<p>shadcn/ui 는 npm 패키지로 컴포넌트를 받지 않는다. CLI 가 <span class="glossary-term" data-term="registry" tabindex="0">레지스트리</span>에서 컴포넌트 소스를 받아 <code>components/ui/button.tsx</code> 같은 파일로 프로젝트에 쓴다<a href="https://ui.shadcn.com/docs" target="_blank"><sup>[1]</sup></a>.<br>공식 문서는 이 방식을 &quot;open code&quot; 라고 부른다. 컴포넌트 코드가 처음부터 내 저장소에 있으므로 수정, 삭제, 확장을 파일 편집으로 한다.</p>
+<figure class="post-figure post-figure--image"><img src="/post-assets/frontend/styling/shadcn-distribution.svg" alt="패키지 배포 방식과 shadcn/ui 배포 방식" loading="lazy"><figcaption><span class="post-figure__no">그림 1.</span> 왼쪽은 node_modules 안의 컴포넌트를 바깥에서 덮어쓰는 구조, 오른쪽은 CLI가 소스를 내 저장소에 쓰는 구조다.</figcaption></figure>
+<h3>2.2 구성 요소</h3>
+<p>컴포넌트 파일 하나는 네 요소로 만들어진다.</p>
+<div class="post-table-wrap"><table>
+<thead>
+<tr>
+<th>요소</th>
+<th>역할</th>
+<th>패키지</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><span class="glossary-term" data-term="headless" tabindex="0">headless</span> primitive</td>
+<td>키보드 조작, ARIA, 포커스 관리</td>
+<td><code>radix-ui</code> 또는 <code>@base-ui/react</code></td>
+</tr>
+<tr>
+<td>Tailwind CSS 클래스</td>
+<td>모양</td>
+<td><code>tailwindcss</code></td>
+</tr>
+<tr>
+<td><span class="glossary-term" data-term="cva" tabindex="0">cva</span></td>
+<td><span class="glossary-term" data-term="variant" tabindex="0">variant</span> 별 클래스 묶음 선택</td>
+<td><code>class-variance-authority</code></td>
+</tr>
+<tr>
+<td><code>cn()</code></td>
+<td>클래스 조건부 결합과 충돌 제거</td>
+<td><code>cn</code></td>
+</tr>
+</tbody></table></div>
+<p><code>components.json</code> 의 <code>style</code> 값이 primitive 를 정한다. <code>radix-nova</code> 스타일의 버튼은 <code>radix-ui</code> 를, <code>base-nova</code> 스타일의 버튼은 <code>@base-ui/react/button</code> 을 불러온다.</p>
+<hr>
+<h2>3. 동작 원리</h2>
+<h3>3.1 초기화와 추가</h3>
+<p><code>init</code> 은 프로젝트 설정을 <code>components.json</code> 에 기록한다<a href="https://ui.shadcn.com/docs/components-json" target="_blank"><sup>[3]</sup></a>. CLI 는 이 파일을 읽어 컴포넌트를 어디에 쓸지, import 경로를 어떻게 바꿀지 정한다.</p>
+<pre><code class="language-bash">npx shadcn@latest init
+npx shadcn@latest add button
+</code></pre>
+<pre><code class="language-json">{
+  &quot;$schema&quot;: &quot;https://ui.shadcn.com/schema.json&quot;,
+  &quot;style&quot;: &quot;base-nova&quot;,
+  &quot;tsx&quot;: true,
+  &quot;tailwind&quot;: {
+    &quot;css&quot;: &quot;src/styles/globals.css&quot;,
+    &quot;baseColor&quot;: &quot;neutral&quot;,
+    &quot;cssVariables&quot;: true
+  },
+  &quot;aliases&quot;: {
+    &quot;components&quot;: &quot;@/components&quot;,
+    &quot;utils&quot;: &quot;@/lib/utils&quot;,
+    &quot;ui&quot;: &quot;@/components/ui&quot;
+  },
+  &quot;iconLibrary&quot;: &quot;lucide&quot;
+}
+</code></pre>
+<p><code>add button</code> 은 레지스트리의 <code>button.json</code> 을 받아 <code>aliases.ui</code> 경로에 <code>button.tsx</code> 를 쓰고, 파일 안의 import 경로를 <code>aliases</code> 에 맞게 바꾸고, 필요한 패키지를 설치한다.<br>수동 설치 문서 기준 기본 의존성은 <code>shadcn</code>, <code>class-variance-authority</code>, <code>cn</code>, <code>lucide-react</code>, <code>tw-animate-css</code> 다<a href="https://ui.shadcn.com/docs/installation/manual" target="_blank"><sup>[2]</sup></a>.</p>
+<h3>3.2 버튼 파일의 구조</h3>
+<p>레지스트리의 <code>radix-nova</code> 버튼을 줄인 코드다. 클래스 목록 일부와 variant 일부를 생략했다.</p>
+<pre><code class="language-tsx">import * as React from &quot;react&quot;
+import { cva, type VariantProps } from &quot;class-variance-authority&quot;
+import { Slot } from &quot;radix-ui&quot;
+import { cn } from &quot;@/lib/utils&quot;
+
+const buttonVariants = cva(
+  &quot;inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium ...&quot;,
+  {
+    variants: {
+      variant: {
+        default: &quot;bg-primary text-primary-foreground hover:bg-primary/90&quot;,
+        outline: &quot;border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground&quot;,
+        ghost: &quot;hover:bg-accent hover:text-accent-foreground&quot;,
+      },
+      size: {
+        default: &quot;h-9 px-4 py-2 has-[&gt;svg]:px-3&quot;,
+        sm: &quot;h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5&quot;,
+        icon: &quot;size-9&quot;,
+      },
+    },
+    defaultVariants: { variant: &quot;default&quot;, size: &quot;default&quot; },
+  }
+)
+
+function Button({
+  className,
+  variant = &quot;default&quot;,
+  size = &quot;default&quot;,
+  asChild = false,
+  ...props
+}: React.ComponentProps&lt;&quot;button&quot;&gt; &amp;
+  VariantProps&lt;typeof buttonVariants&gt; &amp; { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : &quot;button&quot;
+
+  return (
+    &lt;Comp
+      data-slot=&quot;button&quot;
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    /&gt;
+  )
+}
+
+export { Button, buttonVariants }
+</code></pre>
+<ul>
+<li><code>cva()</code> 는 기본 클래스와 variant 별 클래스를 선언한다. <code>buttonVariants({ variant: &quot;outline&quot; })</code> 를 호출하면 해당 클래스들을 이어 붙인 문자열을 돌려준다<a href="https://cva.style/docs" target="_blank"><sup>[6]</sup></a>.</li>
+<li><code>VariantProps&lt;typeof buttonVariants&gt;</code> 는 선언한 variant 이름에서 <code>variant</code>, <code>size</code> prop 타입을 뽑는다. 없는 variant 이름은 타입 오류가 된다.</li>
+<li><code>asChild</code> 가 참이면 <code>&lt;button&gt;</code> 대신 <span class="glossary-term" data-term="slot" tabindex="0">Slot</span>을 렌더링한다. Slot 은 버튼의 클래스와 속성을 자식 요소에 합쳐 넘긴다<a href="https://www.radix-ui.com/primitives/docs/utilities/slot" target="_blank"><sup>[5]</sup></a>.</li>
+<li><code>data-slot</code>, <code>data-variant</code> 는 바깥 CSS나 테스트에서 컴포넌트를 고를 때 쓰는 속성이다.</li>
+</ul>
+<pre><code class="language-tsx">&lt;Button asChild variant=&quot;outline&quot;&gt;
+  &lt;a href=&quot;/docs&quot;&gt;문서&lt;/a&gt;
+&lt;/Button&gt;
+// 렌더 결과: &lt;a href=&quot;/docs&quot; data-slot=&quot;button&quot; data-variant=&quot;outline&quot; data-size=&quot;default&quot; class=&quot;... border bg-background ...&quot;&gt;문서&lt;/a&gt;
+</code></pre>
+<h3>3.3 cn 이 클래스 충돌을 제거한다</h3>
+<p><code>cn()</code> 은 조건부 클래스 결합과 Tailwind 클래스 충돌 제거를 한 번에 한다. 예전 버전의 <code>lib/utils.ts</code> 는 <code>clsx</code> 와 <code>tailwind-merge</code> 를 조합해 이 함수를 정의했고,<br>현재 문서는 <code>cn</code> 패키지를 다시 내보낸다<a href="https://ui.shadcn.com/docs/installation/manual" target="_blank"><sup>[2]</sup></a>.</p>
+<pre><code class="language-ts">// lib/utils.ts
+export { cn } from &quot;cn&quot;
+</code></pre>
+<p>충돌 제거가 필요한 이유는 Tailwind CSS에서 같은 속성의 클래스 두 개가 붙으면 class 속성 순서가 아니라 생성된 CSS 순서로 결과가 정해지기 때문이다<br>(<a href="/post/tailwind-css">Tailwind CSS 유틸리티 생성 과정 →</a> 5장). <code>cn()</code> 은 같은 속성을 다루는 클래스 중 뒤에 온 것만 남긴다.</p>
+<p>인터랙티브 다이어그램: &lt;Button variant=&quot;outline&quot; className=&quot;px-8&quot;&gt; 의 class 가 정해지는 과정 (단계별로 재생할 수 있다)</p><ol><li>사용처에서 variant=&quot;outline&quot;, className=&quot;px-8&quot; 을 넘긴다. size 는 기본값 default 가 된다.</li><li>cva 가 기본 클래스, outline 클래스, size default 클래스(h-9 px-4 py-2)를 순서대로 잇고 className(px-8)을 맨 뒤에 붙인다.</li><li>cn 이 문자열을 받는다. px-4 와 px-8 은 둘 다 padding-inline 을 다룬다.</li><li>뒤에 온 px-8 만 남기고 px-4 를 지운다. py-2 처럼 충돌하지 않는 클래스는 유지한다.</li></ol>
+<h3>3.4 테마는 CSS 변수로 바꾼다</h3>
+<p>컴포넌트 클래스에는 <code>bg-blue-500</code> 같은 구체적인 색 대신 <code>bg-primary</code>, <code>bg-background</code> 같은 의미 이름이 들어 있다<a href="https://ui.shadcn.com/docs/theming" target="_blank"><sup>[4]</sup></a>.<br>실제 색은 전역 CSS의 변수로 정의하고, <code>@theme inline</code> 으로 Tailwind 유틸리티에 연결한다.</p>
+<pre><code class="language-css">@import &quot;tailwindcss&quot;;
+@import &quot;tw-animate-css&quot;;
+
+@custom-variant dark (&amp;:is(.dark *));
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-background: var(--background);
+}
+
+:root {
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+}
+</code></pre>
+<p><code>@theme inline</code> 은 유틸리티가 테마 변수를 거치지 않고 값을 직접 쓰게 한다. Tailwind CSS 4.3.3 으로 빌드하면 <code>bg-primary</code> 는 <code>background-color: var(--primary)</code> 가 된다.<br><code>inline</code> 없이 같은 변수를 정의하면 <code>var(--color-primary)</code> 를 거치는데, 이 변수는 <code>:root</code> 에서 한 번 계산되므로 하위 요소에서 <code>--primary</code> 를 바꿔도 반영되지 않을 수 있다.<br>브랜드 색을 바꾸려면 컴포넌트 파일이 아니라 <code>:root</code> 와 <code>.dark</code> 의 변수 값만 바꾼다.</p>
+<hr>
+<h2>4. 예제</h2>
+<h3>4.1 cva 와 cn 직접 실행</h3>
+<p><code>buttonVariants</code> 와 같은 구조를 esm.sh 로 불러와 실행한다. 출력은 Node 에서 같은 버전으로 실행해 확인한 값과 같다.<br><code>className</code> 에 <code>px-8</code> 대신 <code>bg-red-500</code> 을 넣거나 <code>size: &quot;sm&quot;</code> 을 넘겨 결과를 비교해 본다.</p>
+<pre><code class="language-playground">import { cva } from &quot;https://esm.sh/class-variance-authority@0.7.1&quot;;
+import { cn } from &quot;https://esm.sh/cn@0.4.0&quot;;
+
+const buttonVariants = cva(&quot;inline-flex items-center rounded-md text-sm font-medium&quot;, {
+  variants: {
+    variant: {
+      default: &quot;bg-primary text-primary-foreground hover:bg-primary/90&quot;,
+      outline: &quot;border bg-background hover:bg-accent&quot;,
+    },
+    size: {
+      default: &quot;h-9 px-4 py-2&quot;,
+      sm: &quot;h-8 px-3&quot;,
+    },
+  },
+  defaultVariants: { variant: &quot;default&quot;, size: &quot;default&quot; },
+});
+
+console.log(buttonVariants());
+// inline-flex items-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2
+
+console.log(cn(buttonVariants({ variant: &quot;outline&quot;, className: &quot;px-8&quot; })));
+// inline-flex items-center rounded-md text-sm font-medium border bg-background hover:bg-accent h-9 py-2 px-8
+
+console.log(cn(&quot;bg-red-500&quot;, false &amp;&amp; &quot;bg-blue-500&quot;, { &quot;opacity-50&quot;: true }));
+// bg-red-500 opacity-50
+</code></pre>
+<h3>4.2 variant 추가</h3>
+<p>복사된 파일은 내 코드이므로 새 variant 는 <code>cva</code> 선언에 한 줄을 추가하면 된다. <code>VariantProps</code> 가 타입을 다시 뽑으므로 사용처에서 바로 자동 완성된다.</p>
+<p><div class="post-split" data-cols="2"><div class="post-split__col"><div class="post-split__label">button.tsx</div><pre><code class="language-tsx">variant: {
+  default: &quot;bg-primary text-primary-foreground hover:bg-primary/90&quot;,
+  outline: &quot;border bg-background ...&quot;,
+  brand: &quot;bg-brand text-white hover:bg-brand/90&quot;,
+},
+</code></pre>
+</div><div class="post-split__col"><div class="post-split__label">사용처</div><pre><code class="language-tsx">&lt;Button variant=&quot;brand&quot;&gt;구매&lt;/Button&gt;
+</code></pre>
+</div></div></p>
+<p><code>bg-brand</code> 는 Tailwind CSS <code>@theme</code> 에 <code>--color-brand</code> 를 정의해야 생성된다.</p>
+<hr>
+<h2>5. 자주 하는 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>패키지처럼 업데이트를 기다리기</strong></p>
+<p>복사된 컴포넌트는 <code>npm update</code> 로 바뀌지 않는다. 레지스트리의 새 버전을 받으려면 <code>add</code> 를 다시 실행하고 기존 파일과의 차이를 직접 확인해 합친다.<br>내가 고친 부분이 있다면 덮어쓰기 전에 diff 로 확인한다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>className 을 cva 바깥에서 문자열로 잇기</strong></p>
+<p><code>className={buttonVariants({ variant }) + &quot; &quot; + className}</code> 처럼 이으면 <code>px-4 px-8</code> 이 둘 다 남아 결과가 생성된 CSS 순서에 따라 정해진다.<br><code>cn(buttonVariants({ variant, size, className }))</code> 처럼 <code>cn()</code> 을 거쳐야 충돌이 제거된다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>CSS 변수만 추가하고 @theme inline 연결을 빠뜨리기</strong></p>
+<p><code>:root</code> 에 <code>--brand</code> 만 정의하면 <code>bg-brand</code> 클래스는 생성되지 않는다. Tailwind CSS는 <code>--color-*</code> 네임스페이스의 테마 변수만 색 유틸리티로 만든다.<br><code>@theme inline { --color-brand: var(--brand); }</code> 를 함께 추가한다.</p>
+</div></div></aside></p>
+<hr>
+<h2>6. 정리</h2>
+<p>shadcn/ui 는 컴포넌트 소스를 CLI 로 내 저장소에 쓰는 배포 방식이다. 컴포넌트는 headless primitive, Tailwind CSS 클래스, cva variant, <code>cn()</code> 병합으로 구성되고,<br>색은 <code>:root</code> 와 <code>.dark</code> 의 CSS 변수에서 정해진다. 스타일 변경은 바깥에서 덮어쓰지 않고 파일과 변수를 직접 고친다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 1장의 덮어쓰기 문제가 shadcn/ui 에서 생기지 않는 이유를 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>buttonVariants({ variant, size, className })</code> 가 만드는 문자열의 순서를 안다</li>
+<li><input disabled="" type="checkbox"> <code>cn()</code> 이 <code>px-4</code> 를 지우는 이유를 Tailwind CSS 생성 순서와 연결해 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>@theme inline</code> 이 필요한 이유를 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://ui.shadcn.com/docs" target="_blank">[1] Introduction — shadcn/ui</a></li>
+<li><a href="https://ui.shadcn.com/docs/installation/manual" target="_blank">[2] Manual Installation — shadcn/ui</a></li>
+<li><a href="https://ui.shadcn.com/docs/components-json" target="_blank">[3] components.json — shadcn/ui</a></li>
+<li><a href="https://ui.shadcn.com/docs/theming" target="_blank">[4] Theming — shadcn/ui</a></li>
+<li><a href="https://www.radix-ui.com/primitives/docs/utilities/slot" target="_blank">[5] Slot — Radix Primitives</a></li>
+<li><a href="https://cva.style/docs" target="_blank">[6] Introduction — cva</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/tailwind-css">Tailwind CSS 유틸리티 생성 과정 →</a> (선행 개념: 유틸리티와 @theme)</li>
+<li><a href="/post/css-cascade">CSS 캐스케이드와 명시도 →</a> (1장의 덮어쓰기 문제의 원인)</li>
+<li><a href="/post/sass-scss">Sass 전처리와 SCSS 모듈 →</a></li>
+</ul>
+
+<ul><li>shadcn-ui</li><li>react</li><li>tailwindcss</li><li>cva</li><li>radix-ui</li><li>디자인시스템</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

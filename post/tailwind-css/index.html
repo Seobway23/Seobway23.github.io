@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Sfqxeyxs.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>Tailwind CSS 유틸리티 생성 과정 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Tailwind CSS는 빌드할 때 소스 파일을 텍스트로 읽어 클래스 이름 후보를 찾고, 유틸리티와 일치하는 후보만 CSS 규칙으로 만든다. 코드를 실행하지 않으므로 문자열을 조합한 클래스 이름은 생성되지 않는다." />
+    <meta name="keywords" content="tailwindcss, css, utility-first, @theme, 빌드" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/tailwind-css" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="Tailwind CSS 유틸리티 생성 과정" />
+    <meta property="og:description" content="Tailwind CSS는 빌드할 때 소스 파일을 텍스트로 읽어 클래스 이름 후보를 찾고, 유틸리티와 일치하는 후보만 CSS 규칙으로 만든다. 코드를 실행하지 않으므로 문자열을 조합한 클래스 이름은 생성되지 않는다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/tailwind-css" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/tailwind-css.jpg" />
+    <meta property="article:published_time" content="2026-10-15T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-10-16T00:17:11.562Z" />
+    <meta property="article:tag" content="tailwindcss" />
+    <meta property="article:tag" content="css" />
+    <meta property="article:tag" content="utility-first" />
+    <meta property="article:tag" content="@theme" />
+    <meta property="article:tag" content="빌드" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tailwind CSS 유틸리티 생성 과정" />
+    <meta name="twitter:description" content="Tailwind CSS는 빌드할 때 소스 파일을 텍스트로 읽어 클래스 이름 후보를 찾고, 유틸리티와 일치하는 후보만 CSS 규칙으로 만든다. 코드를 실행하지 않으므로 문자열을 조합한 클래스 이름은 생성되지 않는다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/tailwind-css.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"Tailwind CSS 유틸리티 생성 과정","description":"Tailwind CSS는 빌드할 때 소스 파일을 텍스트로 읽어 클래스 이름 후보를 찾고, 유틸리티와 일치하는 후보만 CSS 규칙으로 만든다. 코드를 실행하지 않으므로 문자열을 조합한 클래스 이름은 생성되지 않는다.","image":["https://seobway23.github.io/post-thumbnails/tailwind-css.jpg"],"datePublished":"2026-10-15T00:00:00.000Z","dateModified":"2026-10-16T00:17:11.562Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/tailwind-css"},"keywords":"tailwindcss, css, utility-first, @theme, 빌드","articleSection":"styling","inLanguage":"ko-KR","wordCount":6111},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"styling","item":"https://seobway23.github.io/?category=frontend%2Fstyling"},{"@type":"ListItem","position":3,"name":"Tailwind CSS 유틸리티 생성 과정","item":"https://seobway23.github.io/post/tailwind-css"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>styling</span></nav>
+<h1>Tailwind CSS 유틸리티 생성 과정</h1>
+<p>Tailwind CSS는 빌드할 때 소스 파일을 텍스트로 읽어 클래스 이름 후보를 찾고, 유틸리티와 일치하는 후보만 CSS 규칙으로 만든다. 코드를 실행하지 않으므로 문자열을 조합한 클래스 이름은 생성되지 않는다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-10-15T00:00:00.000Z">2026-10-15</time> · <span>9분</span></p>
+<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="ABSTRACT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">ABSTRACT</span><div class="post-callout__content"><p><strong>Tailwind CSS</strong>는 클래스 이름 하나가 CSS 선언 하나 또는 몇 개에 대응하는 유틸리티 클래스를 빌드 시점에 생성하는 CSS 프레임워크다.<br>빌드 도구는 소스 파일을 텍스트로 읽어 쓰인 클래스 이름만 찾아 CSS로 만들기 때문에, 런타임에 문자열을 조합한 클래스 이름은 스타일이 없다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>이 글의 출력 예시는 Tailwind CSS 4.3.3 CLI 로 직접 빌드한 결과다 (2026-10-15).</p>
+</div></div></aside></p>
+<h2>1. 문제 상황</h2>
+<p>상태에 따라 글자 색을 바꾸려고 클래스 이름을 문자열로 조합했다. 개발 도구로 보면 클래스는 붙어 있는데 색이 적용되지 않는다.</p>
+<pre><code class="language-tsx">function Badge({ color }: { color: &quot;red&quot; | &quot;green&quot; }) {
+  return &lt;span className={`text-${color}-500`}&gt;상태&lt;/span&gt;;
+}
+</code></pre>
+<p><code>&lt;span class=&quot;text-red-500&quot;&gt;</code> 이 DOM에 있지만 빌드된 CSS 파일에는 <code>.text-red-500</code> 규칙이 없다.<br>Tailwind CSS는 클래스가 쓰였는지를 빌드할 때 소스 텍스트에서 판단하는데, 소스에는 <code>text-${color}-500</code> 만 적혀 있기 때문이다.</p>
+<hr>
+<h2>2. 정의</h2>
+<h3>2.1 유틸리티 우선 CSS</h3>
+<p>Tailwind CSS는 <code>.card</code>, <code>.button</code> 같은 의미 단위 클래스 대신 <span class="glossary-term" data-term="utility-class" tabindex="0">유틸리티 클래스</span>를 HTML에 조합해 스타일을 만드는 방식이다<a href="https://tailwindcss.com/docs/styling-with-utility-classes" target="_blank"><sup>[1]</sup></a>.</p>
+<pre><code class="language-html">&lt;button class=&quot;rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600&quot;&gt;
+  저장
+&lt;/button&gt;
+</code></pre>
+<p>각 클래스는 다음 선언으로 바뀐다.</p>
+<div class="post-table-wrap"><table>
+<thead>
+<tr>
+<th>클래스</th>
+<th>생성되는 CSS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>px-4</code></td>
+<td><code>padding-inline: calc(var(--spacing) * 4)</code></td>
+</tr>
+<tr>
+<td><code>bg-blue-500</code></td>
+<td><code>background-color: var(--color-blue-500)</code></td>
+</tr>
+<tr>
+<td><code>rounded-lg</code></td>
+<td><code>border-radius: var(--radius-lg)</code></td>
+</tr>
+<tr>
+<td><code>hover:bg-blue-600</code></td>
+<td><code>:hover</code> 상태에서 <code>background-color: var(--color-blue-600)</code></td>
+</tr>
+</tbody></table></div>
+<h3>2.2 v4 의 구성 방식</h3>
+<p>Tailwind CSS v4 는 설정을 JavaScript 파일이 아니라 CSS 안에서 한다. 진입 CSS 파일 한 줄로 시작한다.</p>
+<pre><code class="language-css">@import &quot;tailwindcss&quot;;
+</code></pre>
+<p>색, 간격 같은 <span class="glossary-term" data-term="design-token" tabindex="0">디자인 토큰</span>은 <code>@theme</code> 블록에 CSS 변수로 정의하고, 정의한 변수 이름에 맞는 유틸리티가 자동으로 생긴다<a href="https://tailwindcss.com/docs/theme" target="_blank"><sup>[3]</sup></a>.</p>
+<hr>
+<h2>3. 동작 원리</h2>
+<figure class="post-figure post-figure--image"><img src="/post-assets/frontend/styling/tailwind-pipeline.svg" alt="Tailwind CSS 빌드 과정" loading="lazy"><figcaption><span class="post-figure__no">그림 1.</span> 소스를 텍스트로 스캔하고, 유틸리티와 일치하는 후보만 CSS로 생성한다. 조합한 문자열은 후보가 되지 못한다.</figcaption></figure>
+<h3>3.1 스캔: 소스를 텍스트로 읽는다</h3>
+<p>Tailwind CSS는 프로젝트의 소스 파일을 일반 텍스트로 읽어 클래스 이름이 될 수 있는 토큰(<span class="glossary-term" data-term="candidate" tabindex="0">후보</span>)을 잘라 낸다<a href="https://tailwindcss.com/docs/detecting-classes-in-source-files" target="_blank"><sup>[2]</sup></a>.<br>파일 형식을 해석하거나 코드를 실행하지 않는다. <code>.gitignore</code> 에 있는 파일, 바이너리 파일, CSS 파일, 패키지 잠금 파일은 자동으로 제외한다.</p>
+<p>스캔 대상에 없는 경로(예: <code>node_modules</code> 안의 UI 라이브러리)는 <code>@source</code> 로 추가한다.</p>
+<pre><code class="language-css">@import &quot;tailwindcss&quot;;
+@source &quot;../node_modules/@acme/ui&quot;;
+</code></pre>
+<h3>3.2 생성: 일치하는 후보만 CSS가 된다</h3>
+<p>후보 가운데 실제 유틸리티 이름과 일치하는 것만 CSS 규칙으로 만든다. 4.3.3 CLI 로 아래 HTML을 빌드하면 쓰인 네 클래스에 대한 규칙만 나오고,<br><code>text-${color}-500</code> 에 해당하는 규칙은 없다.</p>
+<pre><code class="language-html">&lt;button class=&quot;p-4 bg-blue-500 hover:bg-blue-600 md:px-8&quot;&gt;저장&lt;/button&gt;
+&lt;script&gt;
+  el.className = `text-${color}-500`;
+&lt;/script&gt;
+</code></pre>
+<pre><code class="language-css">@layer utilities {
+  .bg-blue-500 {
+    background-color: var(--color-blue-500);
+  }
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+  @media (hover: hover) {
+    .hover\:bg-blue-600:hover {
+      background-color: var(--color-blue-600);
+    }
+  }
+  @media (width &gt;= 48rem) {
+    .md\:px-8 {
+      padding-inline: calc(var(--spacing) * 8);
+    }
+  }
+}
+</code></pre>
+<p>같은 빌드의 <code>@layer theme</code> 에는 <code>--spacing: 0.25rem</code>, <code>--color-blue-500: oklch(62.3% 0.214 259.815)</code> 처럼 쓰인 유틸리티가 참조하는 변수가 들어간다.<br>기본 색상표는 <span class="glossary-term" data-term="oklch" tabindex="0">OKLCH</span> 값으로 정의되어 있다.</p>
+<p>인터랙티브 다이어그램: 클래스 이름이 CSS 규칙이 되는 과정 (단계별로 재생할 수 있다)</p><ol><li>Button.tsx 를 텍스트로 읽는다. 클래스 속성에 적힌 문자열과 템플릿 리터럴이 그대로 보인다.</li><li>공백과 따옴표를 기준으로 토큰을 잘라 후보 목록을 만든다.</li><li>p-4 는 padding 유틸리티와 일치한다. calc(var(--spacing) * 4) 규칙을 만든다.</li><li>bg-blue-500 도 일치한다. --color-blue-500 변수를 참조하는 규칙을 만든다.</li><li>text-${color}-500 은 어떤 유틸리티 이름과도 일치하지 않아 버린다. text-red-500 규칙은 생기지 않는다.</li></ol>
+<h3>3.3 변형: 상태와 화면 크기</h3>
+<p><code>hover:</code>, <code>focus:</code>, <code>md:</code>, <code>dark:</code> 같은 접두어를 변형(variant)이라고 한다. 변형은 유틸리티를 선택자 조건이나 <span class="glossary-term" data-term="media-query" tabindex="0">미디어 쿼리</span>로 감싼다<a href="https://tailwindcss.com/docs/hover-focus-and-other-states" target="_blank"><sup>[4]</sup></a>.</p>
+<div class="post-table-wrap"><table>
+<thead>
+<tr>
+<th>변형</th>
+<th>감싸는 조건</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hover:</code></td>
+<td><code>:hover</code> 이면서 <code>@media (hover: hover)</code></td>
+</tr>
+<tr>
+<td><code>focus-visible:</code></td>
+<td><code>:focus-visible</code></td>
+</tr>
+<tr>
+<td><code>md:</code></td>
+<td><code>@media (width &gt;= 48rem)</code></td>
+</tr>
+<tr>
+<td><code>dark:</code></td>
+<td><code>@media (prefers-color-scheme: dark)</code> (기본값)</td>
+</tr>
+</tbody></table></div>
+<p>v4 의 <code>hover:</code> 는 <code>@media (hover: hover)</code> 안에 생성된다. 마우스가 없는 터치 기기에서는 탭한 뒤 hover 스타일이 남는 현상이 생기지 않는다.<br>화면 크기 변형은 모바일 우선이다. 접두어가 없는 클래스는 모든 너비에, <code>md:</code> 는 48rem(768px) 이상에서만 적용된다<a href="https://tailwindcss.com/docs/responsive-design" target="_blank"><sup>[5]</sup></a>.</p>
+<h3>3.4 레이어 구조</h3>
+<p><code>@import &quot;tailwindcss&quot;</code> 는 네 개의 캐스케이드 레이어를 이 순서로 선언한다.</p>
+<pre><code class="language-css">@layer theme, base, components, utilities;
+</code></pre>
+<p><code>utilities</code> 가 마지막이라 유틸리티는 같은 파일의 <code>base</code>, <code>components</code> 보다 강하다. 레이어 밖에 쓴 일반 CSS는 유틸리티보다도 강하다.<br>레이어 비교가 명시도보다 먼저라는 규칙은 <a href="/post/css-cascade">CSS 캐스케이드와 명시도 →</a> 3.3절에서 설명한다.</p>
+<h3>3.5 @theme 으로 토큰 추가</h3>
+<p><code>@theme</code> 에 정의한 변수는 두 가지가 된다. <code>:root</code> 의 CSS 변수, 그리고 이름 규칙에 맞는 유틸리티다<a href="https://tailwindcss.com/docs/theme" target="_blank"><sup>[3]</sup></a>.</p>
+<pre><code class="language-css">@import &quot;tailwindcss&quot;;
+
+@theme {
+  --color-brand: #7c3aed;
+  --font-display: &quot;Pretendard&quot;, sans-serif;
+}
+</code></pre>
+<p><code>--color-*</code> 네임스페이스라서 <code>bg-brand</code>, <code>text-brand</code>, <code>border-brand</code> 가, <code>--font-*</code> 라서 <code>font-display</code> 가 생긴다.<br>4.3.3 빌드에서 <code>bg-brand</code> 는 <code>background-color: var(--color-brand)</code> 로 나온다.</p>
+<hr>
+<h2>4. 예제</h2>
+<h3>4.1 브라우저에서 바로 빌드하기</h3>
+<p>아래 예제는 <code>@tailwindcss/browser</code> 로 브라우저 안에서 Tailwind CSS를 실행한다. <code>@theme</code> 의 <code>--color-brand</code> 값을 바꾸거나 클래스를 추가한 뒤 실행해 본다.<br>버튼 아래 줄은 클래스 이름을 문자열로 조합한 경우다.</p>
+<pre><code class="language-playground">&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3&quot;&gt;&lt;/script&gt;
+&lt;style type=&quot;text/tailwindcss&quot;&gt;
+  @theme {
+    --color-brand: #7c3aed;
+  }
+&lt;/style&gt;
+
+&lt;div class=&quot;flex flex-col items-start gap-3 p-4 font-sans&quot;&gt;
+  &lt;button class=&quot;rounded-lg bg-brand px-4 py-2 text-white hover:opacity-90 md:px-8&quot;&gt;
+    bg-brand 버튼
+  &lt;/button&gt;
+  &lt;p id=&quot;dyn&quot;&gt;이 문장의 클래스는 조합으로 붙였다&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  const color = &quot;red&quot;;
+  document.getElementById(&quot;dyn&quot;).className = &quot;text-&quot; + color + &quot;-500&quot;;
+&lt;/script&gt;
+</code></pre>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><code>@tailwindcss/browser</code> 는 개발 중 확인용이다. 배포용 CSS는 Vite 플러그인(<code>@tailwindcss/vite</code>)이나 CLI로 빌드한다.</p>
+</div></div></aside></p>
+<p>브라우저 빌드는 페이지의 DOM을 관찰하므로 조합한 클래스도 색이 적용될 수 있다. 소스 파일을 스캔하는 실제 빌드에서는 적용되지 않는다.</p>
+<h3>4.2 실무 패턴</h3>
+<p><div class="post-split" data-cols="2"><div class="post-split__col"><div class="post-split__label">조합 대신 전체 이름으로 매핑</div><p>값에 따라 달라지는 클래스는 완성된 이름을 객체에 적어 둔다. 스캐너가 모든 이름을 소스에서 찾을 수 있다.</p>
+</div><div class="post-split__col"><div class="post-split__label">코드</div><pre><code class="language-tsx">const colorClass = {
+  red: &quot;text-red-500&quot;,
+  green: &quot;text-green-500&quot;,
+} as const;
+
+&lt;span className={colorClass[color]}&gt;상태&lt;/span&gt;
+</code></pre>
+</div></div></p>
+<p>반복되는 클래스 묶음은 CSS로 다시 빼기보다 컴포넌트로 만든다. 변형이 많은 컴포넌트는 <a href="/post/shadcn-ui">shadcn/ui 컴포넌트 배포 방식과 구조 →</a> 처럼 클래스 묶음을 variant 별로 관리한다.</p>
+<hr>
+<h2>5. 자주 하는 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>같은 속성의 유틸리티를 두 개 붙이기</strong></p>
+<p><code>class=&quot;p-2 p-4&quot;</code> 의 결과는 class 속성에 적은 순서가 아니라 생성된 CSS 안의 순서로 정해진다. 두 규칙의 명시도가 (0,1,0) 으로 같아 등장 순서로 비교되기 때문이다.<br>props 로 받은 클래스로 기본값을 덮어써야 하면 충돌을 제거하는 병합 함수(tailwind-merge 등)를 쓴다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>v3 설정 파일을 그대로 두기</strong></p>
+<p>v4 는 <code>tailwind.config.js</code> 의 <code>content</code> 배열을 읽지 않는다. 스캔 경로는 자동 감지와 <code>@source</code> 로, 토큰은 <code>@theme</code> 으로 옮긴다.<br>기존 JavaScript 설정을 계속 쓰려면 CSS에 <code>@config &quot;./tailwind.config.js&quot;;</code> 를 명시해야 한다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>임의 값 남용</strong></p>
+<p><code>w-[37px]</code> 처럼 대괄호 안에 값을 직접 쓰는 임의 값(arbitrary value)은 4.3.3 에서 <code>width: 37px</code> 로 생성된다.<br>한 번 쓰는 값에는 편하지만 반복되면 토큰 체계가 무너진다. 두 번 이상 쓰는 값은 <code>@theme</code> 에 이름을 붙여 추가한다.</p>
+</div></div></aside></p>
+<hr>
+<h2>6. 정리</h2>
+<p>Tailwind CSS는 빌드 시점에 소스 텍스트를 스캔해 쓰인 유틸리티만 CSS로 만든다. 생성된 규칙은 <code>utilities</code> 레이어에 들어가고,<br>변형 접두어는 규칙을 선택자 조건이나 미디어 쿼리로 감싼다. v4 의 설정은 <code>@import</code>, <code>@theme</code>, <code>@source</code> 로 CSS 안에서 한다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 1장의 <code>text-${color}-500</code> 이 스타일이 없는 이유를 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>@theme</code> 에 <code>--color-*</code> 변수를 추가하면 어떤 유틸리티가 생기는지 안다</li>
+<li><input disabled="" type="checkbox"> 레이어 밖 CSS가 유틸리티보다 강한 이유를 안다</li>
+<li><input disabled="" type="checkbox"> <code>p-2 p-4</code> 의 결과가 class 순서로 정해지지 않는 이유를 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://tailwindcss.com/docs/styling-with-utility-classes" target="_blank">[1] Styling with utility classes — Tailwind CSS</a></li>
+<li><a href="https://tailwindcss.com/docs/detecting-classes-in-source-files" target="_blank">[2] Detecting classes in source files — Tailwind CSS</a></li>
+<li><a href="https://tailwindcss.com/docs/theme" target="_blank">[3] Theme variables — Tailwind CSS</a></li>
+<li><a href="https://tailwindcss.com/docs/hover-focus-and-other-states" target="_blank">[4] Hover, focus, and other states — Tailwind CSS</a></li>
+<li><a href="https://tailwindcss.com/docs/responsive-design" target="_blank">[5] Responsive design — Tailwind CSS</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/css-cascade">CSS 캐스케이드와 명시도 →</a> (선행 개념: 레이어와 명시도)</li>
+<li><a href="/post/shadcn-ui">shadcn/ui 컴포넌트 배포 방식과 구조 →</a> (Tailwind CSS 위에서 동작하는 컴포넌트)</li>
+<li><a href="/post/sass-scss">Sass 전처리와 SCSS 모듈 →</a></li>
+<li><a href="/post/emotion">Emotion 런타임 CSS-in-JS 동작 방식 →</a> (CSS를 렌더 시점에 만드는 방식과 비교)</li>
+</ul>
+
+<ul><li>tailwindcss</li><li>css</li><li>utility-first</li><li>@theme</li><li>빌드</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

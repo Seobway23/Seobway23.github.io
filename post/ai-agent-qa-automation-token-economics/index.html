@@ -28,33 +28,35 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Tech Blog" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <script type="module" crossorigin src="/assets/app-BQHW3lB9.js"></script>
+    <script type="module" crossorigin src="/assets/app-Sfqxeyxs.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
-  <link rel="manifest" href="/manifest.webmanifest">    <title>AI 에이전트 QA 자동화 — 토큰 경제 분석 — Tech Blog — 모던 개발 블로그</title>
-    <meta name="description" content="&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다." />
-    <meta name="keywords" content="ai-agent, claude-code, subagent, mcp, token-economics, qa-automation" />
+  <link rel="manifest" href="/manifest.webmanifest">    <title>QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="Claude Code 에서 Playwright MCP 로 QA 를 돌릴 때, 메인 에이전트가 직접 호출하는 방식과 스킬, 서브에이전트 위임을 토큰 비용 모델로 비교했다. QA 3회와 이후 20턴 기준으로 메인이 부담하는 입력 토큰은 서브에이전트 방식이 10.1배 적고, 프롬프트 캐시를 반영해도 7.9~8.7배 적다." />
+    <meta name="keywords" content="ai-agent, claude-code, subagent, mcp, playwright, prompt-caching, token-economics, qa-automation" />
     <meta name="author" content="Seobway" />
     <link rel="canonical" href="https://seobway23.github.io/post/ai-agent-qa-automation-token-economics" />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
     <meta property="og:locale" content="ko_KR" />
-    <meta property="og:title" content="AI 에이전트 QA 자동화 — 토큰 경제 분석" />
-    <meta property="og:description" content="&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다." />
+    <meta property="og:title" content="QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델" />
+    <meta property="og:description" content="Claude Code 에서 Playwright MCP 로 QA 를 돌릴 때, 메인 에이전트가 직접 호출하는 방식과 스킬, 서브에이전트 위임을 토큰 비용 모델로 비교했다. QA 3회와 이후 20턴 기준으로 메인이 부담하는 입력 토큰은 서브에이전트 방식이 10.1배 적고, 프롬프트 캐시를 반영해도 7.9~8.7배 적다." />
     <meta property="og:url" content="https://seobway23.github.io/post/ai-agent-qa-automation-token-economics" />
-    <meta property="og:image" content="https://seobway23.github.io/pwa-512x512.png" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/ai-agent-qa-automation-token-economics.jpg" />
     <meta property="article:published_time" content="2026-06-11T00:00:00.000Z" />
-    <meta property="article:modified_time" content="2026-09-30T09:49:24.600Z" />
+    <meta property="article:modified_time" content="2026-10-16T00:17:11.660Z" />
     <meta property="article:tag" content="ai-agent" />
     <meta property="article:tag" content="claude-code" />
     <meta property="article:tag" content="subagent" />
     <meta property="article:tag" content="mcp" />
+    <meta property="article:tag" content="playwright" />
+    <meta property="article:tag" content="prompt-caching" />
     <meta property="article:tag" content="token-economics" />
     <meta property="article:tag" content="qa-automation" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AI 에이전트 QA 자동화 — 토큰 경제 분석" />
-    <meta name="twitter:description" content="&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다." />
-    <meta name="twitter:image" content="https://seobway23.github.io/pwa-512x512.png" />
-    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"AI 에이전트 QA 자동화 — 토큰 경제 분석","description":"\"QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?\" 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다.","image":["https://seobway23.github.io/pwa-512x512.png"],"datePublished":"2026-06-11T00:00:00.000Z","dateModified":"2026-09-30T09:49:24.600Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/ai-agent-qa-automation-token-economics"},"keywords":"ai-agent, claude-code, subagent, mcp, token-economics, qa-automation","articleSection":"analysis","inLanguage":"ko-KR","wordCount":5031},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"analysis","item":"https://seobway23.github.io/?category=work%2Fanalysis"},{"@type":"ListItem","position":3,"name":"AI 에이전트 QA 자동화 — 토큰 경제 분석","item":"https://seobway23.github.io/post/ai-agent-qa-automation-token-economics"}]}]}</script>
+    <meta name="twitter:title" content="QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델" />
+    <meta name="twitter:description" content="Claude Code 에서 Playwright MCP 로 QA 를 돌릴 때, 메인 에이전트가 직접 호출하는 방식과 스킬, 서브에이전트 위임을 토큰 비용 모델로 비교했다. QA 3회와 이후 20턴 기준으로 메인이 부담하는 입력 토큰은 서브에이전트 방식이 10.1배 적고, 프롬프트 캐시를 반영해도 7.9~8.7배 적다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/ai-agent-qa-automation-token-economics.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델","description":"Claude Code 에서 Playwright MCP 로 QA 를 돌릴 때, 메인 에이전트가 직접 호출하는 방식과 스킬, 서브에이전트 위임을 토큰 비용 모델로 비교했다. QA 3회와 이후 20턴 기준으로 메인이 부담하는 입력 토큰은 서브에이전트 방식이 10.1배 적고, 프롬프트 캐시를 반영해도 7.9~8.7배 적다.","image":["https://seobway23.github.io/post-thumbnails/ai-agent-qa-automation-token-economics.jpg"],"datePublished":"2026-06-11T00:00:00.000Z","dateModified":"2026-10-16T00:17:11.660Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/ai-agent-qa-automation-token-economics"},"keywords":"ai-agent, claude-code, subagent, mcp, playwright, prompt-caching, token-economics, qa-automation","articleSection":"analysis","inLanguage":"ko-KR","wordCount":10208},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"analysis","item":"https://seobway23.github.io/?category=work%2Fanalysis"},{"@type":"ListItem","position":3,"name":"QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델","item":"https://seobway23.github.io/post/ai-agent-qa-automation-token-economics"}]}]}</script>
   </head>
   <body>
     <script>
@@ -69,99 +71,76 @@
     </script>
     <div id="root"><article data-prerendered="true">
 <nav aria-label="breadcrumb"><a href="/">홈</a> › <span>analysis</span></nav>
-<h1>AI 에이전트 QA 자동화 — 토큰 경제 분석</h1>
-<p>&quot;QA용 MCP를 따로 빼는 게 이득인가, 스킬로 처리하는 게 이득인가, 서브에이전트로 격리하는 게 이득인가?&quot; 세 옵션을 토큰 비용 모델로 직접 계산해 비교한다.
+<h1>QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델</h1>
+<p>Claude Code 에서 Playwright MCP 로 QA 를 돌릴 때, 메인 에이전트가 직접 호출하는 방식과 스킬, 서브에이전트 위임을 토큰 비용 모델로 비교했다. QA 3회와 이후 20턴 기준으로 메인이 부담하는 입력 토큰은 서브에이전트 방식이 10.1배 적고, 프롬프트 캐시를 반영해도 7.9~8.7배 적다.
 </p>
-<p><span>Seobway</span> · <time datetime="2026-06-11T00:00:00.000Z">2026-06-11</time> · <span>10분</span></p>
-<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="ABSTRACT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">ABSTRACT</span><div class="post-callout__content"><p><strong>질문</strong>: 로컬 MCP를 따로 빼는 게 이득인가 / 스킬로 처리하는 게 이득인가 / 서브에이전트로 QA하는 게 이득인가?</p>
-<p><strong>결론</strong>: 서브에이전트 격리가 본질이다. 스킬은 절차 고정용 보조 수단이고, MCP를 별도 서버로 분리하는 건 이 환경(deferred tool loading)에서는 거의 의미가 없다.</p>
-<p>QA 3회 + 이후 일반 작업 20턴을 기준으로 계산하면, 메인 에이전트가 부담하는 총 빌링 토큰은 서브에이전트 방식이 MCP 직접 호출 방식 대비 <strong>약 10배 적다.</strong></p>
+<p><span>Seobway</span> · <time datetime="2026-06-11T00:00:00.000Z">2026-06-11</time> · <span>12분</span></p>
+<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="ABSTRACT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">ABSTRACT</span><div class="post-callout__content"><p>Claude Code 에서 <span class="glossary-term" data-term="mcp" tabindex="0">Playwright MCP</span> 로 브라우저 QA 를 돌리면 도구 출력이 메인 에이전트의 <span class="glossary-term" data-term="context-window" tabindex="0">컨텍스트</span>에 쌓이고, 이후 모든 턴에서 입력으로 다시 전송된다. 메인이 MCP 를 직접 호출하는 방식(A), 스킬을 더한 방식(B), <span class="glossary-term" data-term="subagent" tabindex="0">서브에이전트</span>에 위임하는 방식(C)을 토큰 비용 모델로 비교했다.<br>QA 3회와 이후 일반 작업 20턴 기준으로 메인이 부담하는 입력 토큰은 A 4,711,500, B 4,791,000, C 464,400 으로 C 가 A 보다 10.1배 적다. 서브에이전트 비용까지 더한 전체로는 3.4배 적다. <span class="glossary-term" data-term="prompt-caching" tabindex="0">프롬프트 캐시</span>를 반영하면 메인 부담 차이는 8.7배(캐시 읽기 0.1배 단가), 7.9배(0.05배 단가)다.<br>스킬은 토큰을 줄이지 않고 절차를 고정한다. MCP 서버를 따로 분리하는 것은 <span class="glossary-term" data-term="tool-search" tabindex="0">tool search</span>가 켜진 기본 설정에서는 줄일 토큰이 거의 없다.</p>
 </div></div></aside></p>
-<hr>
-<h2>0. 비교 결과 한눈에 보기</h2>
-<div class="post-table-wrap"><table>
-<thead>
-<tr>
-<th>지표 (QA 3회 + 이후 일반작업 20턴 기준)</th>
-<th>A: MCP 직접</th>
-<th>B: 스킬만</th>
-<th>C: 서브에이전트</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>메인 최종 컨텍스트 크기</td>
-<td>119,550</td>
-<td>121,050</td>
-<td><strong>20,400</strong></td>
-</tr>
-<tr>
-<td>QA 중 메인 빌링 input</td>
-<td>2,320,500</td>
-<td>2,370,000</td>
-<td><strong>56,400</strong></td>
-</tr>
-<tr>
-<td>QA 후 20턴 빌링 input</td>
-<td>2,391,000</td>
-<td>2,421,000</td>
-<td><strong>408,000</strong></td>
-</tr>
-<tr>
-<td><strong>메인이 부담하는 총 빌링</strong></td>
-<td><strong>4,711,500</strong></td>
-<td><strong>4,791,000</strong></td>
-<td><strong>464,400</strong></td>
-</tr>
-</tbody></table></div>
-<ul>
-<li>메인 컨텍스트 오염: C가 A 대비 <strong>5.9배</strong> 작음</li>
-<li>QA 수행 중 메인 빌링: C가 A 대비 <strong>41배</strong> 적음</li>
-<li>메인이 실제로 부담하는 총 토큰: C가 A 대비 <strong>10.1배</strong> 적음</li>
-</ul>
-<p>세 선택지는 경쟁 관계가 아니라 서로 다른 레이어다. 그래서 &quot;택1&quot;이 아니라 &quot;조합&quot;이 정답이다.</p>
-<hr>
-<h2>1. 왜 같은 층위 비교가 아닌가</h2>
+<p><aside class="post-callout post-callout--notice" data-callout="notice" role="note" aria-label="NOTICE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTICE</span><div class="post-callout__content"><p>2026-06-11 에 쓴 글을 2026-10-15 에 개정했다. 계산을 스크립트로 다시 실행해 원문 수치가 모두 재현되는 것을 확인했고, 프롬프트 캐시 반영 계산과 민감도 분석을 추가했다. MCP, 서브에이전트, 스킬 설명은 2026-10-15 기준 Claude Code 문서로 바꿨다.</p>
+</div></div></aside></p>
+<h2>1. 배경</h2>
+<h3>1.1 문제 상황</h3>
+<p>화면 QA 를 Claude Code 에 맡기면 Playwright MCP 의 <code>browser_snapshot</code> 같은 도구가 페이지 구조를 텍스트로 돌려준다. 폼이 많은 업무 화면은 <span class="glossary-term" data-term="snapshot" tabindex="0">snapshot</span> 한 번이 1만 토큰을 넘는다.<br>메인 에이전트가 이 도구를 직접 부르면 출력이 메인 컨텍스트에 남고, QA 를 끝낸 뒤 일반 개발 작업으로 돌아가도 매 턴 그 출력을 함께 보낸다.</p>
+<p>QA 를 자동화하면서 세 가지를 판단해야 했다.</p>
+<ol>
+<li>QA 용 MCP 서버를 따로 분리하면 토큰이 줄어드는가</li>
+<li>QA 절차를 스킬로 만들면 토큰이 줄어드는가</li>
+<li>QA 를 서브에이전트에 맡기면 토큰이 얼마나 줄어드는가</li>
+</ol>
+<h3>1.2 세 선택지가 바꾸는 것</h3>
+<p>세 선택지는 같은 층위의 대안이 아니다. 각자 다른 부분을 바꾼다.</p>
 <div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>선택지</th>
-<th>실제 역할</th>
-<th>토큰에 영향 주는 지점</th>
+<th>하는 일</th>
+<th>토큰에 영향을 주는 지점</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>MCP 따로 빼기</td>
-<td>도구 전송층 — 브라우저를 <em>어떻게</em> 조종하나</td>
-<td>도구 스키마 로딩 비용</td>
+<td>MCP 서버 분리</td>
+<td>브라우저를 조작하는 도구를 제공한다</td>
+<td>도구 정의(스키마)를 컨텍스트에 싣는 비용</td>
 </tr>
 <tr>
 <td>스킬</td>
-<td>절차/지시 — QA를 <em>무슨 순서로</em> 하나</td>
-<td>절차 텍스트 1회 로딩 + 계획 재추론 절감</td>
+<td>QA 순서와 확인 항목을 고정한다</td>
+<td>스킬 본문은 쓸 때만 컨텍스트에 들어간다<a href="https://code.claude.com/docs/en/skills" target="_blank"><sup>[3]</sup></a></td>
 </tr>
 <tr>
 <td>서브에이전트</td>
-<td>컨텍스트 격리 경계 — 노이즈가 <em>어디에</em> 쌓이나</td>
-<td>누적 출력 격리 (지배적 변수)</td>
+<td>별도 컨텍스트 창에서 작업하고 요약만 돌려준다<a href="https://code.claude.com/docs/en/sub-agents" target="_blank"><sup>[2]</sup></a></td>
+<td>도구 출력이 어느 컨텍스트에 쌓이는가</td>
 </tr>
 </tbody></table></div>
-<p>이 셋 중 토큰을 좌우하는 절대 변수는 <strong>&quot;QA가 만들어내는 더러운 중간 산출물이 어느 컨텍스트에 누적되느냐&quot;</strong> 다. 그건 오직 서브에이전트(격리)만 해결한다.</p>
+<p>토큰 비용을 가장 크게 바꾸는 변수는 QA 도구 출력이 어느 컨텍스트에 쌓이느냐다. 세 선택지 가운데 이것을 바꾸는 것은 서브에이전트뿐이다.</p>
+<h3>1.3 목표와 제약</h3>
+<ul>
+<li>비교 지표는 <strong>메인 에이전트가 부담하는 입력 토큰 합계</strong>와 <strong>QA 를 마친 시점의 메인 컨텍스트 크기</strong>다. 메인 컨텍스트가 크면 이후 모든 턴의 비용이 커지고, 모델이 참고해야 할 내용도 많아진다.</li>
+<li>실측이 아니라 계산 모델이다. 도구 출력 크기는 실제 출력 문자 수를 4로 나눈 근사값의 범위다.</li>
+<li>출력 토큰, 모델의 응답 텍스트, 자동 요약(compaction)은 모델에 넣지 않았다(4.5절).</li>
+</ul>
 <hr>
-<h2>2. 핵심 원리 — LLM 비용은 준2차(quasi-quadratic)다</h2>
-<p>LLM은 매 턴 컨텍스트 전체를 input으로 다시 전송한다.</p>
-<pre><code class="language-text">턴 t의 빌링 input = (그 시점까지 누적된 컨텍스트 크기)
-세션 총 빌링 input = Σ_{t=1..N} (컨텍스트_at_t)
-</code></pre>
-<p>컨텍스트가 매 턴 커지면 비용은 선형이 아니라 누적합(준2차)으로 증가한다. 한 번 들어온 노이즈는 그 턴만 비싼 게 아니라 <strong>이후 모든 턴에서 계속 재청구</strong>된다. 이게 &quot;QA 출력을 메인에 떨구면 안 되는&quot; 진짜 이유다.</p>
-<hr>
-<h2>3. 모델 가정 — 계산에 사용한 파라미터</h2>
-<h3>3.1 Playwright 단일 호출 출력 토큰 (실측 근사, char/4)</h3>
+<h2>2. 방법</h2>
+<h3>2.1 비용 모델</h3>
+<p>모델은 매 요청마다 그때까지의 컨텍스트 전체를 입력으로 받는다. 턴 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> 의 컨텍스트 크기를 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">C_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 라 하면 세션의 입력 토큰 합계는 다음과 같다.</p>
+<p>
+<div class="post-math-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>B</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>C</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">B = \sum_{t=1}^{N} C_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.0954em;vertical-align:-1.2671em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8283em;"><span style="top:-1.8829em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;">N</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2671em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></div>
+</p>
+<p>도구 출력 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>o</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">o_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 가 붙을 때마다 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>C</mi><mi>t</mi></msub><mo>+</mo><msub><mi>o</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">C_{t+1} = C_t + o_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">o</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 로 커진다. 한 번 들어온 출력은 그 턴뿐 아니라 이후 모든 턴의 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">C_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 에 포함되므로, 출력이 쌓이는 동안 합계는 턴 수의 제곱에 가깝게 늘어난다.</p>
+<p>프롬프트 캐시를 쓰면 직전 요청과 같은 접두부는 캐시 읽기 단가 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span>, 새로 붙은 부분은 캐시 쓰기 단가 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span></span></span></span> 로 계산된다. 5분 캐시의 쓰기는 기본 입력 단가의 1.25배, 읽기는 0.1배다. Claude Opus 5.5 와 Sonnet 5.5 의 읽기는 0.05배다<a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching" target="_blank"><sup>[4]</sup></a>.</p>
+<p>
+<div class="post-math-display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>B</mi><mtext>cache</mtext></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mrow><mo fence="true">[</mo><mi>r</mi><mtext> </mtext><msub><mi>C</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mi>w</mi><mtext> </mtext><mo stretchy="false">(</mo><msub><mi>C</mi><mi>t</mi></msub><mo>−</mo><msub><mi>C</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo fence="true">]</mo></mrow></mrow><annotation encoding="application/x-tex">B_{\text{cache}} = \sum_{t=1}^{N} \left[ r\,C_{t-1} + w\,(C_t - C_{t-1}) \right]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0502em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">cache</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.0954em;vertical-align:-1.2671em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.8283em;"><span style="top:-1.8829em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span><span style="top:-4.3em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;">N</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.2671em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">[</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mclose delimcenter" style="top:0em;">]</span></span></span></span></span></span></div>
+</p>
+<p>결과는 기본 입력 단가 1배로 환산한 토큰 수로 적는다.</p>
+<h3>2.2 도구 출력 크기</h3>
 <div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>도구 호출</th>
-<th>min</th>
-<th>max</th>
+<th>최소</th>
+<th>최대</th>
 <th>비고</th>
 </tr>
 </thead>
@@ -169,13 +148,13 @@
 <td><code>browser_navigate</code></td>
 <td>300</td>
 <td>800</td>
-<td>ack + 상태</td>
+<td>이동 결과와 상태</td>
 </tr>
 <tr>
 <td><code>browser_snapshot</code></td>
 <td>3,000</td>
 <td>15,000</td>
-<td>접근성 트리 — DOM 규모에 비례, 최대 변수</td>
+<td>접근성 트리, 페이지 요소 수에 비례</td>
 </tr>
 <tr>
 <td><code>browser_click</code></td>
@@ -184,7 +163,7 @@
 <td></td>
 </tr>
 <tr>
-<td><code>browser_type</code> / <code>fill</code></td>
+<td><code>browser_type</code></td>
 <td>200</td>
 <td>600</td>
 <td></td>
@@ -207,21 +186,13 @@
 <td>1,500</td>
 <td>이미지 토큰</td>
 </tr>
-<tr>
-<td><code>browser_wait_for</code></td>
-<td>100</td>
-<td>400</td>
-<td></td>
-</tr>
 </tbody></table></div>
-<h3>3.2 대표 QA 플로우 1회 = 10 스텝</h3>
+<p>QA 1회는 도구 호출 10번으로 둔다.</p>
 <pre><code class="language-text">navigate → snapshot → click → snapshot → type → click
         → snapshot → console → network → screenshot
 </code></pre>
-<p>플로우 1회 도구 출력 누계: 최소 <strong>11,600 토큰</strong>, 평균 <strong>33,850 토큰</strong>, 최대 <strong>56,100 토큰</strong>.</p>
-<p><aside class="post-callout post-callout--note" data-callout="note" role="note" aria-label="NOTE"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">NOTE</span><div class="post-callout__content"><p>실제 PMS 같은 폼 많은 페이지는 snapshot이 한 장에 1만 토큰을 쉽게 넘기므로 현실값은 평균~최대 구간으로 봐야 한다.</p>
-</div></div></aside></p>
-<h3>3.3 기타 상수</h3>
+<p>1회의 도구 출력 합계는 최소 11,600, 평균(최소와 최대의 중간값) 33,850, 최대 56,100 토큰이다. 기본 계산은 평균값을 쓴다.</p>
+<h3>2.3 상수</h3>
 <div class="post-table-wrap"><table>
 <thead>
 <tr>
@@ -233,22 +204,22 @@
 <tbody><tr>
 <td><code>BASE_MAIN</code></td>
 <td>18,000</td>
-<td>메인 에이전트 베이스 (시스템 프롬프트 + CLAUDE.md + 전역 룰 + 대화)</td>
+<td>메인 에이전트 시작 컨텍스트 (시스템 프롬프트, CLAUDE.md, 규칙, 대화)</td>
 </tr>
 <tr>
 <td><code>BASE_SUB</code></td>
 <td>9,000</td>
-<td>서브에이전트 베이스 (qa.md + 도구 일부, 슬림)</td>
+<td>서브에이전트 시작 컨텍스트 (에이전트 정의와 도구 일부)</td>
 </tr>
 <tr>
 <td><code>SKILL</code></td>
 <td>1,500</td>
-<td>스킬 절차 텍스트</td>
+<td>스킬 본문</td>
 </tr>
 <tr>
 <td><code>REPORT</code></td>
 <td>800</td>
-<td>서브 → 메인 최종 리포트</td>
+<td>서브에이전트가 메인에 돌려주는 요약</td>
 </tr>
 <tr>
 <td><code>RUNS</code></td>
@@ -258,207 +229,302 @@
 <tr>
 <td><code>POST_TURNS</code></td>
 <td>20</td>
-<td>QA 종료 후 메인에서 이어지는 일반 개발 턴 수</td>
+<td>QA 뒤 메인에서 이어지는 일반 작업 턴</td>
 </tr>
 </tbody></table></div>
-<hr>
-<h2>4. 옵션별 계산</h2>
-<p>계산 코드(요지):</p>
-<pre><code class="language-python">def billed(base, outs):          # 한 플로우의 준2차 빌링
-    ctx = base; tot = 0
-    for o in outs:
-        tot += ctx               # 이번 턴 컨텍스트 전체 재전송
-        ctx += o                 # 도구 출력이 컨텍스트에 누적
-    tot += ctx
-    return tot, ctx
+<h3>2.4 시나리오</h3>
+<ul>
+<li><strong>A. 메인이 MCP 직접 호출</strong>: 메인 컨텍스트에서 QA 3회를 차례로 실행한다. 도구 출력은 메인에 계속 쌓인다.</li>
+<li><strong>B. 스킬 + 메인 직접 호출</strong>: A 와 같고 시작 컨텍스트에 스킬 본문 1,500 이 더해진다.</li>
+<li><strong>C. 서브에이전트 위임</strong>: QA 1회마다 메인이 한 턴으로 서브에이전트를 부르고, 서브에이전트는 시작 컨텍스트 9,000 에서 QA 를 실행한 뒤 요약 800 을 돌려준다. 서브에이전트 컨텍스트는 QA 마다 새로 시작한다. 원문 계산은 서브에이전트에 스킬을 넣지 않았다. 넣으면 서브에이전트 비용이 906,450 에서 955,950 으로 늘고 메인 비용은 같다.</li>
+</ul>
+<p>QA 뒤 일반 작업 20턴은 세 방식 모두 QA 를 마친 시점의 메인 컨텍스트로 계산한다.</p>
+<h3>2.5 구현</h3>
+<p>계산은 <a href="/post-assets/work/analysis/ai-agent-qa-token/token-model.mjs">token-model.mjs</a> 하나로 한다. 핵심은 한 플로우의 입력 합계를 세는 함수다.</p>
+<pre><code class="language-js">// token-model.mjs (발췌)
+function runFlow(meter, ctx, outs) {
+  let billed = 0;
+  for (const o of outs) {
+    billed += meter(ctx); // 이번 턴: 지금까지의 컨텍스트 전체를 보낸다
+    ctx += o;             // 도구 출력이 컨텍스트에 붙는다
+  }
+  billed += meter(ctx);   // 마지막 출력을 읽는 턴
+  return { billed, ctx };
+}
 </code></pre>
-<h3>옵션 A — MCP를 메인 에이전트가 직접 호출 (격리 X)</h3>
-<p>QA 노이즈(평균 33,850/회)가 메인 컨텍스트에 그대로 누적되고, 이후 모든 턴에서 재청구된다.</p>
+<p><code>meter</code> 는 캐시를 쓰지 않으면 컨텍스트 크기를 그대로, 쓰면 2.1절 식으로 환산한 값을 돌려준다. 원문은 같은 규칙을 Python 으로 계산했고, 이 스크립트로 다시 계산한 값이 원문 수치와 모두 일치했다.</p>
+<hr>
+<h2>3. 결과</h2>
+<h3>3.1 캐시를 반영하지 않은 계산</h3>
 <div class="post-table-wrap"><table>
 <thead>
 <tr>
-<th>항목</th>
-<th>값</th>
+<th>지표 (평균 출력, QA 3회 + 20턴)</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>메인 최종 컨텍스트</td>
+<td>QA 를 마친 시점의 메인 컨텍스트</td>
 <td>119,550</td>
-</tr>
-<tr>
-<td>QA 중 메인 빌링</td>
-<td>2,320,500</td>
-</tr>
-<tr>
-<td>QA 후 20턴 빌링</td>
-<td>2,391,000</td>
-</tr>
-<tr>
-<td><strong>총 빌링</strong></td>
-<td><strong>4,711,500</strong></td>
-</tr>
-</tbody></table></div>
-<p>QA가 끝나고 일반 작업으로 돌아가도, 부풀어 오른 119k 컨텍스트를 매 턴 계속 끌고 다닌다. 세션이 길수록 손해가 복리로 커진다.</p>
-<h3>옵션 B — 스킬만 (메인에서 실행)</h3>
-<p>절차는 고정되지만(신뢰성↑), 도구 출력은 여전히 메인에 떨어진다. 토큰 문제는 풀지 못한다.</p>
-<div class="post-table-wrap"><table>
-<thead>
-<tr>
-<th>항목</th>
-<th>값</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>메인 최종 컨텍스트</td>
 <td>121,050</td>
-</tr>
-<tr>
-<td>QA 중 메인 빌링</td>
-<td>2,370,000</td>
-</tr>
-<tr>
-<td>QA 후 20턴 빌링</td>
-<td>2,421,000</td>
-</tr>
-<tr>
-<td><strong>총 빌링</strong></td>
-<td><strong>4,791,000</strong></td>
-</tr>
-</tbody></table></div>
-<p>스킬은 토큰 절감 수단이 아니라 절차 일관성 수단이다.</p>
-<h3>옵션 C — 서브에이전트 (격리)</h3>
-<p>노이즈(평균 33,850/회)는 서브에이전트의 격리된 컨텍스트에서 살다가 종료 시 폐기된다. 메인은 최종 리포트(800)만 수령한다.</p>
-<div class="post-table-wrap"><table>
-<thead>
-<tr>
-<th>항목</th>
-<th>값</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>메인 최종 컨텍스트</td>
 <td><strong>20,400</strong></td>
 </tr>
 <tr>
-<td>QA 중 메인 빌링</td>
+<td>QA 동안 메인 입력</td>
+<td>2,320,500</td>
+<td>2,370,000</td>
 <td><strong>56,400</strong></td>
 </tr>
 <tr>
-<td>QA 중 서브 빌링 (폐기·병렬)</td>
+<td>QA 동안 서브에이전트 입력</td>
+<td>0</td>
+<td>0</td>
 <td>906,450</td>
 </tr>
 <tr>
-<td>QA 후 20턴 빌링</td>
+<td>QA 뒤 20턴 메인 입력</td>
+<td>2,391,000</td>
+<td>2,421,000</td>
 <td><strong>408,000</strong></td>
 </tr>
 <tr>
-<td>총 빌링 (서브 포함)</td>
-<td>1,370,850</td>
-</tr>
-<tr>
-<td><strong>메인 부담 총 빌링 (서브 제외)</strong></td>
+<td><strong>메인이 부담하는 입력 합계</strong></td>
+<td>4,711,500</td>
+<td>4,791,000</td>
 <td><strong>464,400</strong></td>
 </tr>
+<tr>
+<td>서브에이전트를 포함한 입력 합계</td>
+<td>4,711,500</td>
+<td>4,791,000</td>
+<td>1,370,850</td>
+</tr>
 </tbody></table></div>
-<p><aside class="post-callout post-callout--important" data-callout="important" role="note" aria-label="IMPORTANT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">IMPORTANT</span><div class="post-callout__content"><p>서브 빌링 906,450은 &quot;노이즈 처리의 본질 비용&quot;이라 어느 방식이든 발생한다. 차이는 — A는 그 비용을 메인에 영구 누적시키고, C는 격리 후 버린다는 점이다. 서브 빌링은 <strong>병렬 실행 가능 + 메인 추론 품질에 영향 0</strong>이라 질적으로 다른 비용이다.</p>
-</div></div></aside></p>
-<hr>
-<h2>5. 결과 비교</h2>
+<figure class="post-figure post-chart"><svg class="post-chart__svg" viewBox="0 0 720 124" role="img" aria-label="A 를 1 로 둔 비율. 평균 출력, QA 3회 + 이후 20턴, 프롬프트 캐시 미반영. B 는 모든 지표에서 A 보다 1~2% 크다." xmlns="http://www.w3.org/2000/svg"><text x="0" y="14" class="pc-title">최종 메인 컨텍스트</text><line x1="122.24242424242425" x2="122.24242424242425" y1="22" y2="110" class="pc-grid"/><line x1="166.4848484848485" x2="166.4848484848485" y1="22" y2="110" class="pc-grid"/><line x1="78" x2="78" y1="22" y2="110" class="pc-axis"/><text x="0" y="39" class="pc-label">A 직접</text><rect x="78" y="26" width="88.48484848484848" height="18" rx="3" class="pc-base"><title>최종 메인 컨텍스트 · A 직접: 1.000</title></rect><text x="172.4848484848485" y="39" class="pc-value">1.000</text><text x="0" y="69" class="pc-label">B 스킬</text><rect x="78" y="56" width="89.63515151515152" height="18" rx="3" class="pc-on"><title>최종 메인 컨텍스트 · B 스킬: 1.013</title></rect><text x="173.6351515151515" y="69" class="pc-value">1.013</text><text x="0" y="99" class="pc-label">C 서브</text><rect x="78" y="86" width="15.13090909090909" height="18" rx="3" class="pc-on"><title>최종 메인 컨텍스트 · C 서브: 0.171</title></rect><text x="99.13090909090909" y="99" class="pc-value">0.171</text><text x="249.33333333333334" y="14" class="pc-title">메인 부담 입력 합계</text><line x1="371.5757575757576" x2="371.5757575757576" y1="22" y2="110" class="pc-grid"/><line x1="415.81818181818187" x2="415.81818181818187" y1="22" y2="110" class="pc-grid"/><line x1="327.33333333333337" x2="327.33333333333337" y1="22" y2="110" class="pc-axis"/><text x="249.33333333333334" y="39" class="pc-label">A 직접</text><rect x="327.33333333333337" y="26" width="88.48484848484848" height="18" rx="3" class="pc-base"><title>메인 부담 입력 합계 · A 직접: 1.000</title></rect><text x="421.81818181818187" y="39" class="pc-value">1.000</text><text x="249.33333333333334" y="69" class="pc-label">B 스킬</text><rect x="327.33333333333337" y="56" width="89.9890909090909" height="18" rx="3" class="pc-on"><title>메인 부담 입력 합계 · B 스킬: 1.017</title></rect><text x="423.3224242424243" y="69" class="pc-value">1.017</text><text x="249.33333333333334" y="99" class="pc-label">C 서브</text><rect x="327.33333333333337" y="86" width="8.76" height="18" rx="3" class="pc-on"><title>메인 부담 입력 합계 · C 서브: 0.099</title></rect><text x="342.09333333333336" y="99" class="pc-value">0.099</text><text x="498.6666666666667" y="14" class="pc-title">서브 포함 입력 합계</text><line x1="620.909090909091" x2="620.909090909091" y1="22" y2="110" class="pc-grid"/><line x1="665.1515151515152" x2="665.1515151515152" y1="22" y2="110" class="pc-grid"/><line x1="576.6666666666667" x2="576.6666666666667" y1="22" y2="110" class="pc-axis"/><text x="498.6666666666667" y="39" class="pc-label">A 직접</text><rect x="576.6666666666667" y="26" width="88.48484848484848" height="18" rx="3" class="pc-base"><title>서브 포함 입력 합계 · A 직접: 1.000</title></rect><text x="671.1515151515152" y="39" class="pc-value">1.000</text><text x="498.6666666666667" y="69" class="pc-label">B 스킬</text><rect x="576.6666666666667" y="56" width="89.9890909090909" height="18" rx="3" class="pc-on"><title>서브 포함 입력 합계 · B 스킬: 1.017</title></rect><text x="672.6557575757577" y="69" class="pc-value">1.017</text><text x="498.6666666666667" y="99" class="pc-label">C 서브</text><rect x="576.6666666666667" y="86" width="25.74909090909091" height="18" rx="3" class="pc-on"><title>서브 포함 입력 합계 · C 서브: 0.291</title></rect><text x="608.4157575757577" y="99" class="pc-value">0.291</text></svg><figcaption><span class="post-figure__no">그림 1.</span> A 를 1 로 둔 비율. 평균 출력, QA 3회 + 이후 20턴, 프롬프트 캐시 미반영. B 는 모든 지표에서 A 보다 1~2% 크다. <span class="post-figure__src">데이터: <a href="/post-assets/work/analysis/ai-agent-qa-token/token-model-results.json" target="_blank">token-model-results.json</a></span></figcaption></figure>
+<ul>
+<li>QA 를 마친 시점의 메인 컨텍스트는 C 가 A 의 0.171배(5.9분의 1)다.</li>
+<li>QA 동안 메인 입력은 C 가 A 보다 41.1배 적다. C 의 메인은 QA 1회마다 서브에이전트를 부르는 한 턴만 쓴다.</li>
+<li>메인이 부담하는 입력 합계는 C 가 A 보다 10.1배 적다. 서브에이전트 입력까지 더하면 3.4배 적다.</li>
+<li>B 는 A 보다 모든 지표가 1~2% 크다. 스킬 본문만큼 컨텍스트가 커지기 때문이다.</li>
+</ul>
+<figure class="post-figure post-figure--image"><img src="/post-assets/work/analysis/ai-agent-qa-token/context-after-qa.svg" alt="QA 3회 뒤 컨텍스트 구성" loading="lazy"><figcaption><span class="post-figure__no">그림 2.</span> 막대 길이는 토큰 수에 비례한다. A 는 도구 출력이 메인에 쌓이고, C 는 서브에이전트 컨텍스트에 쌓인 뒤 메인에는 요약만 붙는다.</figcaption></figure>
+<p>인터랙티브 다이어그램: QA 를 한 번 할 때마다 메인 컨텍스트에 남는 것 (단계별로 재생할 수 있다)</p><ol><li>시작. 두 메인 모두 시작 컨텍스트 18,000 이다.</li><li>QA 1회. A 는 도구 출력 33,850 이 메인에 붙는다. C 는 서브에이전트가 9,000 에서 시작해 출력을 받고 요약 800 만 돌려준다.</li><li>QA 2회. A 메인은 85,700 이 된다. C 메인은 19,600 이다.</li><li>QA 3회. A 메인은 119,550, C 메인은 20,400 이다.</li><li>QA 뒤 일반 작업 20턴. 매 턴 A 는 119,550, C 는 20,400 을 입력으로 보낸다. 합계는 2,391,000 과 408,000 이다.</li></ol>
+<h3>3.2 프롬프트 캐시를 반영한 계산</h3>
+<p>Claude Code 는 프롬프트 캐시를 자동으로 쓴다<a href="https://code.claude.com/docs/en/costs" target="_blank"><sup>[5]</sup></a>. 매 턴 직전 요청까지의 접두부가 캐시에 남아 있다고 가정하고 2.1절 식으로 다시 계산했다.</p>
 <div class="post-table-wrap"><table>
 <thead>
 <tr>
 <th>지표</th>
-<th>A</th>
-<th>C</th>
-<th>차이</th>
+<th>캐시 없음</th>
+<th>읽기 0.1배</th>
+<th>읽기 0.05배</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>메인 최종 컨텍스트</td>
-<td>119,550</td>
-<td>20,400</td>
-<td><strong>5.9배</strong></td>
-</tr>
-<tr>
-<td>QA 중 메인 빌링</td>
-<td>2,320,500</td>
-<td>56,400</td>
-<td><strong>41.1배</strong></td>
-</tr>
-<tr>
-<td>QA 후 20턴 빌링</td>
-<td>2,391,000</td>
-<td>408,000</td>
-<td><strong>5.9배</strong></td>
-</tr>
-<tr>
-<td>총 빌링 (서브 포함)</td>
+<td>A 메인 부담</td>
 <td>4,711,500</td>
-<td>1,370,850</td>
-<td><strong>3.4배</strong></td>
+<td>608,633</td>
+<td>379,035</td>
 </tr>
 <tr>
-<td><strong>메인 부담 총 빌링</strong></td>
-<td>4,711,500</td>
+<td>C 메인 부담</td>
 <td>464,400</td>
-<td><strong>10.1배</strong></td>
+<td>69,900</td>
+<td>47,700</td>
+</tr>
+<tr>
+<td>메인 부담 비율 (A ÷ C)</td>
+<td>10.1배</td>
+<td>8.7배</td>
+<td>7.9배</td>
+</tr>
+<tr>
+<td>서브 포함 비율 (A ÷ C)</td>
+<td>3.4배</td>
+<td>2.0배</td>
+<td>1.5배</td>
 </tr>
 </tbody></table></div>
-<pre><code class="language-text">메인 부담 총 빌링 (서브 격리 비용 제외):
-A  ████████████████████████████████████████  4,711,500
-B  ████████████████████████████████████████  4,791,000
-C  ████                                         464,400   (A의 1/10)
-</code></pre>
-<p>해석은 세 가지다.</p>
-<ol>
-<li><strong>메인 컨텍스트 오염 5.9배</strong> — 추론 품질에 직접 영향을 준다. QA 후에도 부푼 컨텍스트를 계속 끌고 다닌다.</li>
-<li><strong>QA 중 메인 빌링 41배</strong> — QA를 자주 돌릴수록 격차가 폭발적으로 커진다.</li>
-<li><strong>세션이 길수록 C 우위 확대</strong> — <code>POST_TURNS</code>(QA 후 작업 턴)가 늘면 A는 큰 컨텍스트를 매 턴 재청구하고, C는 작은 컨텍스트만 유지한다.</li>
-</ol>
-<hr>
-<h2>6. &quot;MCP 따로 빼기&quot;가 이 환경에선 거의 의미 없는 이유</h2>
-<p>이 환경의 MCP 도구는 <strong>deferred(지연 로딩)</strong> 상태다.<a href="https://docs.claude.com/en/docs/claude-code/mcp" target="_blank"><sup>[1]</sup></a></p>
-<pre><code class="language-text">The following deferred tools are now available via ToolSearch.
-Their schemas are NOT loaded — ... Use ToolSearch ... before calling.
-</code></pre>
-<p>Playwright MCP(약 25개 도구)가 연결돼 있어도 스키마가 컨텍스트에 올라오지 않는다. 이름 한 줄(약 10토큰)만 차지한다. 실제로 쓸 때는 <code>ToolSearch</code>로 그 도구만 on-demand 로딩한다.</p>
-<p>→ &quot;QA용 MCP를 별도 서버로 분리&quot;해서 얻는 스키마 절감 이득이 사실상 0이다.</p>
-<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p>진짜 레버는 <strong>격리(서브에이전트) + 지연 로딩(이미 적용됨)</strong>이지, 서버 분리가 아니다. 별도 MCP 서버 구축은 토큰 관점에서 투자 대비 이득이 없으므로 하지 않는다.</p>
-</div></div></aside></p>
-<hr>
-<h2>7. 권장 구성 — 세 가지를 레이어로 합친다</h2>
-<p>세 개를 대체재로 보지 말고 레이어로 합친다.</p>
-<pre><code class="language-text">오케스트레이터(메인)
-   └─ 서브에이전트(qa) 스폰  ← 격리 경계 (토큰 절감의 본질)
-        ├─ 절차: qa 스킬/qa.md 로 QA 순서 고정  ← 계획 재추론 절감
-        └─ 도구: Playwright MCP를 내부에서 on-demand fetch  ← 스키마 0 (deferred)
-   ← 받는 것: _workspace/03_qa_report.md (요약 ~800토큰) 만
-</code></pre>
-<p>이 구성의 토큰 효과는 다음과 같다.</p>
+<p>캐시를 반영하면 두 방식 모두 비용이 크게 줄고, 메인 부담 비율은 10.1배에서 8<del>9배로 줄어든다. 서브에이전트를 포함한 비율은 1.5</del>2.0배로 줄어든다. 캐시는 반복해서 보내는 접두부를 싸게 만드는데, A 의 비용 대부분이 그 반복 전송이었기 때문이다. 도구 출력을 처음 컨텍스트에 넣는 쓰기 비용(1.25배)은 A 와 C 모두 내고, C 는 서브에이전트마다 시작 컨텍스트 9,000 도 새로 쓴다.</p>
+<p>캐시가 줄여 주지 않는 것도 있다. QA 를 마친 시점의 메인 컨텍스트 크기(119,550 대 20,400)는 캐시와 관계없이 같다.</p>
+<h3>3.3 민감도</h3>
+<p>도구 출력 크기(최소, 평균, 최대)와 QA 뒤 턴 수(0, 20, 100)를 바꿔 A ÷ C 비율을 계산했다. 캐시는 반영하지 않았다.</p>
+<div class="post-table-wrap"><table>
+<thead>
+<tr>
+<th>도구 출력</th>
+<th>QA 뒤 턴</th>
+<th>메인 부담 비율</th>
+<th>서브 포함 비율</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>최소 (11,600)</td>
+<td>0</td>
+<td>21.0배</td>
+<td>2.1배</td>
+</tr>
+<tr>
+<td>최소</td>
+<td>20</td>
+<td>4.8배</td>
+<td>2.3배</td>
+</tr>
+<tr>
+<td>최소</td>
+<td>100</td>
+<td>3.1배</td>
+<td>2.5배</td>
+</tr>
+<tr>
+<td>평균 (33,850)</td>
+<td>0</td>
+<td>41.1배</td>
+<td>2.4배</td>
+</tr>
+<tr>
+<td>평균</td>
+<td>20</td>
+<td>10.1배</td>
+<td>3.4배</td>
+</tr>
+<tr>
+<td>평균</td>
+<td>100</td>
+<td>6.8배</td>
+<td>4.8배</td>
+</tr>
+<tr>
+<td>최대 (56,100)</td>
+<td>0</td>
+<td>61.3배</td>
+<td>2.5배</td>
+</tr>
+<tr>
+<td>최대</td>
+<td>20</td>
+<td>15.5배</td>
+<td>4.1배</td>
+</tr>
+<tr>
+<td>최대</td>
+<td>100</td>
+<td>10.5배</td>
+<td>6.5배</td>
+</tr>
+</tbody></table></div>
 <ul>
-<li><strong>노이즈</strong> = 서브에 격리 후 폐기 → 메인 5.9배 슬림, 메인 부담 10배 절감</li>
-<li><strong>스키마</strong> = deferred라 안 쓰면 0 → MCP 분리 불필요</li>
-<li><strong>절차</strong> = 스킬로 고정 → 매번 &quot;QA 뭐부터 하지&quot; 재추론 제거 (회당 1~3k 추가 절감)</li>
+<li>모든 조합에서 C 가 A 보다 적다. 가장 작은 차이는 출력 최소, 100턴의 메인 3.1배, 서브 포함 2.1배다.</li>
+<li>도구 출력이 클수록 차이가 커진다.</li>
+<li>QA 뒤 턴이 늘면 메인 부담 비율은 <strong>줄어든다</strong>. 두 방식 모두 턴마다 일정한 컨텍스트를 보내므로 비율은 최종 컨텍스트 비율(평균 기준 5.9배)에 가까워진다. 절대 차이는 턴마다 99,150 토큰씩 커진다.</li>
+<li>QA 뒤 턴이 늘면 서브 포함 비율은 커진다. 서브에이전트 비용은 QA 횟수로 정해지고 이후 턴 수와 관계없기 때문이다.</li>
 </ul>
-<p>서브에이전트를 활용한 작업 분리에 대한 더 자세한 내용은 <a href="/post/context-engineering-prompts-rules-memory-skills">Context Engineering — 프롬프트, Rules, 메모리, Skill 시스템 →</a> 글에서 다뤘다.</p>
+<h3>3.4 직접 계산해 보기</h3>
+<p>아래 코드의 <code>P</code> 와 <code>CACHE_READ</code> 를 바꿔 실행하면 같은 모델로 다시 계산한다. <code>CACHE_READ</code> 를 <code>null</code> 로 두면 캐시를 반영하지 않는다.</p>
+<pre><code class="language-playground">const P = { BASE_MAIN: 18000, BASE_SUB: 9000, REPORT: 800, RUNS: 3, POST_TURNS: 20 };
+const FLOW_OUT = [550, 9000, 400, 9000, 400, 400, 9000, 1100, 2750, 1250]; // 평균 출력, 합계 33,850
+const CACHE_READ = null; // 0.1 이나 0.05 로 바꿔 본다
+const CACHE_WRITE = 1.25;
+
+function meter() {
+  let prev = 0;
+  return (ctx) =&gt; {
+    if (CACHE_READ == null) return ctx;
+    const cost = CACHE_READ * prev + CACHE_WRITE * (ctx - prev);
+    prev = ctx;
+    return cost;
+  };
+}
+
+function runFlow(m, ctx) {
+  let billed = 0;
+  for (const o of FLOW_OUT) { billed += m(ctx); ctx += o; }
+  return { billed: billed + m(ctx), ctx };
+}
+
+// A: 메인이 직접 호출
+const ma = meter();
+let ctxA = P.BASE_MAIN, mainA = 0;
+for (let r = 0; r &lt; P.RUNS; r++) { const f = runFlow(ma, ctxA); mainA += f.billed; ctxA = f.ctx; }
+for (let t = 0; t &lt; P.POST_TURNS; t++) mainA += ma(ctxA);
+
+// C: 서브에이전트 위임
+const mc = meter();
+let ctxC = P.BASE_MAIN, mainC = 0, subC = 0;
+for (let r = 0; r &lt; P.RUNS; r++) {
+  mainC += mc(ctxC);
+  ctxC += P.REPORT;
+  subC += runFlow(meter(), P.BASE_SUB).billed;
+}
+for (let t = 0; t &lt; P.POST_TURNS; t++) mainC += mc(ctxC);
+
+const n = (x) =&gt; Math.round(x).toLocaleString();
+console.log(&quot;최종 메인 컨텍스트  A&quot;, n(ctxA), &quot; C&quot;, n(ctxC));
+console.log(&quot;메인 부담 입력      A&quot;, n(mainA), &quot; C&quot;, n(mainC), &quot; 비율&quot;, (mainA / mainC).toFixed(1));
+console.log(&quot;서브 포함 입력      A&quot;, n(mainA), &quot; C&quot;, n(mainC + subC), &quot; 비율&quot;, (mainA / (mainC + subC)).toFixed(1));
+</code></pre>
+<p>기본값으로 실행하면 메인 부담 비율 10.1, 서브 포함 비율 3.4 가 나온다. <code>CACHE_READ = 0.1</code> 이면 8.7 과 2.0 이다.</p>
 <hr>
-<h2>8. 부록 — 계산 재현</h2>
-<p><code>PYTHONIOENCODING=utf-8 python</code> 로 3장 파라미터와 4장 <code>billed()</code> 함수를 사용, <code>RUNS=3</code> / <code>POST_TURNS=20</code>으로 산출했다.</p>
-<p>파라미터(snapshot 출력 크기, <code>POST_TURNS</code>)를 바꾸면 절감 배수는 달라지지만, <strong>C가 A·B를 항상 압도하는 방향성은 불변</strong>이다. 노이즈가 클수록, 세션이 길수록 격차는 더 벌어진다.</p>
+<h2>4. 논의</h2>
+<h3>4.1 MCP 서버 분리</h3>
+<p>2026-10-15 기준 Claude Code 는 <span class="glossary-term" data-term="tool-search" tabindex="0">tool search</span>가 기본으로 켜져 있다. MCP 도구 정의는 지연(deferred) 상태로 두고, 세션 시작 때는 도구 이름과 서버 안내문만 싣는다. Claude 가 도구를 쓸 때 검색해 정의를 불러온다<a href="https://code.claude.com/docs/en/mcp" target="_blank"><sup>[1]</sup></a>.<br>Playwright MCP 를 연결해 두어도 쓰지 않는 동안 컨텍스트에 남는 것은 이름 목록이다. QA 용 MCP 서버를 따로 분리해 줄일 수 있는 도구 정의 비용이 거의 없다.</p>
+<p>예외가 있다. <code>ANTHROPIC_BASE_URL</code> 이 Anthropic 이 아닌 주소(프록시 등)를 가리키면 Claude Code 는 tool search 를 끄고 도구 정의를 처음부터 싣는다. <code>ENABLE_TOOL_SEARCH=false</code> 로 꺼도 같다<a href="https://code.claude.com/docs/en/mcp" target="_blank"><sup>[1]</sup></a>. 이런 환경에서는 쓰지 않는 MCP 서버를 연결에서 빼는 것이 도구 정의 비용을 줄인다.</p>
+<h3>4.2 스킬</h3>
+<p>스킬 본문은 그 스킬을 쓸 때만 컨텍스트에 들어간다<a href="https://code.claude.com/docs/en/skills" target="_blank"><sup>[3]</sup></a>. B 처럼 메인에서 스킬을 쓰면 컨텍스트가 스킬 크기만큼 커질 뿐, 도구 출력이 쌓이는 위치는 A 와 같다. 스킬의 효과는 QA 순서와 확인 항목을 매번 같게 만드는 것이고, 토큰 절감 효과는 이 모델에 나타나지 않는다.</p>
+<h3>4.3 권장 구성</h3>
+<p>세 가지를 각자 맡은 부분에 함께 쓴다.</p>
+<pre><code class="language-text">메인 에이전트
+  └─ QA 서브에이전트 호출          도구 출력이 쌓이는 곳을 메인과 분리
+       ├─ 절차: QA 스킬            확인 순서와 항목을 고정
+       └─ 도구: Playwright MCP      tool search 로 쓸 때만 정의를 불러옴
+  ← 돌려받는 것: QA 결과 요약 (약 800 토큰)
+</code></pre>
+<p>Claude Code 비용 문서도 테스트 실행, 로그 처리처럼 출력이 많은 작업을 서브에이전트에 맡겨 메인에는 요약만 돌아오게 하라고 안내한다<a href="https://code.claude.com/docs/en/costs" target="_blank"><sup>[5]</sup></a>.</p>
+<h3>4.4 원문 해석 정정</h3>
+<p>원문은 「세션이 길수록 C 의 우위가 커진다」고 적었다. 3.3절 계산에서 QA 뒤 턴이 늘면 메인 부담의 <strong>절대 차이</strong>는 커지지만 <strong>비율</strong>은 10.1배에서 6.8배로 줄어 5.9배에 가까워진다. 서브에이전트를 포함한 비율은 3.4배에서 4.8배로 커진다. 개정판은 이 구분을 반영했다.</p>
+<h3>4.5 한계</h3>
+<ul>
+<li>도구 출력 크기는 문자 수를 4로 나눈 근사값의 범위다. 실제 세션에서 토큰 사용량을 기록해 맞춰 보지 않았다.</li>
+<li>모델의 출력 토큰, 응답 텍스트, 생각(thinking) 토큰은 넣지 않았다. 출력 토큰은 입력보다 단가가 높다.</li>
+<li>캐시 계산은 매 턴 직전 접두부가 캐시에 남아 있다고 가정했다. 5분 넘게 멈추면 캐시가 만료되어 다시 쓰기 단가가 붙는다.</li>
+<li>서브에이전트도 자기 요청을 보내고, 그 사용량은 메인 대화와 같은 사용량 한도에 포함된다<a href="https://code.claude.com/docs/en/sub-agents" target="_blank"><sup>[2]</sup></a>. 「메인 부담」 지표는 이 비용을 빼고 센 것이다.</li>
+<li>컨텍스트가 차면 동작하는 자동 요약(compaction)은 넣지 않았다. A 에서 요약이 일어나면 이후 턴의 컨텍스트가 줄어든다.</li>
+<li>메인 컨텍스트 크기가 응답 품질에 주는 영향은 측정하지 않았다.</li>
+</ul>
+<hr>
+<h2>5. 결론</h2>
+<ul>
+<li>토큰 비용을 가장 크게 바꾸는 것은 QA 도구 출력이 어느 컨텍스트에 쌓이느냐다. 이것을 바꾸는 선택지는 서브에이전트 위임뿐이다.</li>
+<li>QA 3회와 이후 20턴, 평균 출력 기준으로 메인 부담 입력은 C 가 A 보다 10.1배, 서브에이전트까지 포함하면 3.4배 적다. 프롬프트 캐시를 반영하면 메인 부담 7.9<del>8.7배, 서브 포함 1.5</del>2.0배다.</li>
+<li>출력 크기와 이후 턴 수를 바꾼 9가지 조합 모두에서 C 가 적었다. 이후 턴이 늘면 메인 부담 비율은 5.9배 쪽으로 줄어든다.</li>
+<li>스킬은 절차를 고정하는 용도이고 토큰을 줄이지 않는다. MCP 서버 분리는 tool search 가 켜진 기본 설정에서 줄일 비용이 거의 없다.</li>
+</ul>
+<hr>
+<h2>부록 A. 원시 데이터</h2>
+<ul>
+<li><a href="/post-assets/work/analysis/ai-agent-qa-token/token-model.mjs" target="_blank">token-model.mjs</a>: 비용 모델. <code>node token-model.mjs</code> 로 아래 JSON 을 만든다.</li>
+<li><a href="/post-assets/work/analysis/ai-agent-qa-token/token-model-results.json" target="_blank">token-model-results.json</a>: 3장의 모든 수치(캐시 미반영, 캐시 0.1배·0.05배, 민감도 9가지)</li>
+</ul>
+
 <h2>참고</h2>
 <ol>
-<li><a href="https://docs.claude.com/en/docs/claude-code/mcp" target="_blank">[1] Claude Code Docs — Connect Claude Code to tools via MCP</a></li>
-<li><a href="https://docs.claude.com/en/docs/claude-code/sub-agents" target="_blank">[2] Claude Code Docs — Subagents</a></li>
+<li><a href="https://code.claude.com/docs/en/mcp" target="_blank">[1] Connect Claude Code to tools via MCP — Claude Code Docs</a></li>
+<li><a href="https://code.claude.com/docs/en/sub-agents" target="_blank">[2] Create custom subagents — Claude Code Docs</a></li>
+<li><a href="https://code.claude.com/docs/en/skills" target="_blank">[3] Extend Claude with skills — Claude Code Docs</a></li>
+<li><a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching" target="_blank">[4] Prompt caching — Claude Platform Docs</a></li>
+<li><a href="https://code.claude.com/docs/en/costs" target="_blank">[5] Manage costs effectively — Claude Code Docs</a></li>
 </ol>
 
 <hr>
 <h2>관련 글</h2>
 <ul>
-<li><a href="/post/context-engineering-prompts-rules-memory-skills">Context Engineering — 프롬프트, Rules, 메모리, Skill 시스템 →</a></li>
-<li><a href="/post/ai-development-process-spec-tdd-hooks">AI 개발 프로세스 — 작업 분할, Spec, TDD Workflow, Hook 설계 →</a></li>
+<li><a href="/post/cache-overlay-timing-rca">저장한 설계량이 다음 날짜 화면에 늦게 반영된 원인 분석 →</a> (AI 에이전트 파이프라인으로 만든 기능의 원인 분석)</li>
+<li><a href="/post/modeler-canvas-render-ablation">3D 캔버스 렌더 최적화 8가지를 하나씩 켜서 잰 결과 →</a> (같은 work 시리즈)</li>
 </ul>
 
-<ul><li>ai-agent</li><li>claude-code</li><li>subagent</li><li>mcp</li><li>token-economics</li><li>qa-automation</li></ul>
+<ul><li>ai-agent</li><li>claude-code</li><li>subagent</li><li>mcp</li><li>playwright</li><li>prompt-caching</li><li>token-economics</li><li>qa-automation</li></ul>
 </article></div>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script

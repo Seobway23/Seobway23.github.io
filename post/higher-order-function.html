@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Sfqxeyxs.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>고차 함수와 콜백 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="함수를 인자로 받거나 함수를 반환하는 함수가 고차 함수다. 자바스크립트 함수는 값이라서 가능하다. map 이 콜백을 어떤 인자로 호출하는지, 반환된 함수가 클로저로 상태를 유지하는 방식을 정리한다." />
+    <meta name="keywords" content="javascript, higher-order-function, callback, map, reduce, 고차 함수" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/higher-order-function" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="고차 함수와 콜백" />
+    <meta property="og:description" content="함수를 인자로 받거나 함수를 반환하는 함수가 고차 함수다. 자바스크립트 함수는 값이라서 가능하다. map 이 콜백을 어떤 인자로 호출하는지, 반환된 함수가 클로저로 상태를 유지하는 방식을 정리한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/higher-order-function" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/higher-order-function.jpg" />
+    <meta property="article:published_time" content="2026-10-15T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-10-16T00:17:11.525Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="higher-order-function" />
+    <meta property="article:tag" content="callback" />
+    <meta property="article:tag" content="map" />
+    <meta property="article:tag" content="reduce" />
+    <meta property="article:tag" content="고차 함수" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="고차 함수와 콜백" />
+    <meta name="twitter:description" content="함수를 인자로 받거나 함수를 반환하는 함수가 고차 함수다. 자바스크립트 함수는 값이라서 가능하다. map 이 콜백을 어떤 인자로 호출하는지, 반환된 함수가 클로저로 상태를 유지하는 방식을 정리한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/higher-order-function.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"고차 함수와 콜백","description":"함수를 인자로 받거나 함수를 반환하는 함수가 고차 함수다. 자바스크립트 함수는 값이라서 가능하다. map 이 콜백을 어떤 인자로 호출하는지, 반환된 함수가 클로저로 상태를 유지하는 방식을 정리한다.","image":["https://seobway23.github.io/post-thumbnails/higher-order-function.jpg"],"datePublished":"2026-10-15T00:00:00.000Z","dateModified":"2026-10-16T00:17:11.525Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/higher-order-function"},"keywords":"javascript, higher-order-function, callback, map, reduce, 고차 함수","articleSection":"javascript","inLanguage":"ko-KR","wordCount":5209},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"고차 함수와 콜백","item":"https://seobway23.github.io/post/higher-order-function"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>고차 함수와 콜백</h1>
+<p>함수를 인자로 받거나 함수를 반환하는 함수가 고차 함수다. 자바스크립트 함수는 값이라서 가능하다. map 이 콜백을 어떤 인자로 호출하는지, 반환된 함수가 클로저로 상태를 유지하는 방식을 정리한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-10-15T00:00:00.000Z">2026-10-15</time> · <span>7분</span></p>
+<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="ABSTRACT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">ABSTRACT</span><div class="post-callout__content"><p><strong>고차 함수</strong>는 함수를 인자로 받거나 함수를 반환하는 함수다. 자바스크립트에서 함수는 객체이므로 다른 값처럼 넘기고 반환할 수 있다. 반복 구조는 고차 함수가 갖고, 반복마다 달라지는 부분만 함수로 넘긴다.</p>
+</div></div></aside></p>
+<h2>1. 문제 상황</h2>
+<p>세 반복문은 한 줄만 다르다.</p>
+<pre><code class="language-js">const adults = [];
+for (const u of users) if (u.age &gt;= 20) adults.push(u);
+
+const names = [];
+for (const u of users) names.push(u.name);
+
+let total = 0;
+for (const u of users) total += u.age;
+</code></pre>
+<p>배열을 돌며 새 결과를 만드는 구조는 같고, 「무엇을 남길지」「무엇으로 바꿀지」「어떻게 합칠지」만 다르다. 달라지는 부분을 함수로 받으면 반복 구조는 한 번만 쓰면 된다.</p>
+<pre><code class="language-js">const adults = users.filter((u) =&gt; u.age &gt;= 20);
+const names  = users.map((u) =&gt; u.name);
+const total  = users.reduce((sum, u) =&gt; sum + u.age, 0);
+</code></pre>
+<p><code>filter</code>, <code>map</code>, <code>reduce</code> 가 고차 함수이고, 넘긴 화살표 함수가 <span class="glossary-term" data-term="callback" tabindex="0">콜백</span>이다.</p>
+<hr>
+<h2>2. 정의</h2>
+<h3>2.1 정의</h3>
+<p>함수를 인자로 받거나 함수를 반환하는 함수를 <strong>고차 함수</strong>라 한다. 자바스크립트 함수는 <span class="glossary-term" data-term="first-class" tabindex="0">일급</span> 값이므로 변수에 대입하고, 인자로 넘기고, 반환할 수 있다<a href="https://developer.mozilla.org/ko/docs/Glossary/First-class_Function" target="_blank"><sup>[1]</sup></a>.</p>
+<div class="post-table-wrap"><table>
+<thead>
+<tr>
+<th>형태</th>
+<th>예</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>함수를 받는다</td>
+<td><code>map</code>, <code>filter</code>, <code>reduce</code>, <code>addEventListener</code>, <code>setTimeout</code></td>
+<td>정해진 시점에 받은 함수를 호출한다</td>
+</tr>
+<tr>
+<td>함수를 반환한다</td>
+<td><code>bind</code>, <code>once</code>, <code>debounce</code>, <code>pipe</code></td>
+<td>인자를 기억한 새 함수를 만든다</td>
+</tr>
+</tbody></table></div>
+<h3>2.2 사양에서의 위치</h3>
+<p>사양에서 함수는 <span class="glossary-term" data-term="call-slot" tabindex="0">[[Call</span>]] 내부 메서드를 가진 객체다. <code>IsCallable</code> 은 값에 <code>[[Call]]</code> 이 있는지 검사한다.</p>
+<p><code>Array.prototype.map</code> 의 알고리즘은 다음 순서다<a href="https://tc39.es/ecma262/#sec-array.prototype.map" target="_blank"><sup>[3]</sup></a>.</p>
+<ol>
+<li><code>IsCallable(callbackfn)</code> 이 <code>false</code> 면 <code>TypeError</code> 를 던진다.</li>
+<li>길이가 같은 새 배열 <code>A</code> 를 만든다.</li>
+<li>인덱스 <code>k</code> 마다 <code>Call(callbackfn, thisArg, « kValue, k, O »)</code> 로 콜백을 호출하고, 반환값을 <code>A[k]</code> 에 넣는다.</li>
+<li><code>A</code> 를 반환한다.</li>
+</ol>
+<p>콜백은 요소 하나만 받는 것이 아니라 <strong>요소, 인덱스, 원본 배열</strong> 세 개를 받는다. 5장의 <code>parseInt</code> 실수가 여기서 나온다.</p>
+<hr>
+<h2>3. 동작 원리</h2>
+<h3>3.1 함수를 받는 고차 함수</h3>
+<p><code>map</code> 은 반복과 결과 배열 생성을 맡고, 요소를 바꾸는 규칙만 콜백에서 받는다.</p>
+<figure class="post-figure post-figure--image"><img src="/post-assets/frontend/javascript/hof-map-call.svg" alt="map 이 콜백을 호출하는 방식" loading="lazy"><figcaption><span class="post-figure__no">그림 1.</span> map 은 인덱스마다 콜백을 (요소, 인덱스, 원본 배열) 세 인자로 호출하고, 반환값을 같은 인덱스의 새 배열 칸에 넣는다. 원본 배열은 바뀌지 않는다.</figcaption></figure>
+<p><code>reduce</code> 는 콜백의 반환값을 다음 호출의 첫 인자(누적값)로 넘긴다. 초깃값이 없으면 첫 요소를 누적값으로 쓰고 두 번째 요소부터 호출한다. 그래서 빈 배열에 초깃값 없이 호출하면 쓸 값이 없어 <code>TypeError</code> 가 난다<a href="https://tc39.es/ecma262/#sec-array.prototype.reduce" target="_blank"><sup>[4]</sup></a>.</p>
+<h3>3.2 함수를 반환하는 고차 함수</h3>
+<p>반환된 함수는 <a href="/post/closure">클로저</a>로 고차 함수의 지역 변수를 계속 참조한다. 아래 <code>once</code> 는 받은 함수를 한 번만 실행하는 새 함수를 만든다.</p>
+<pre><code class="language-js">function once(fn) {
+  let done = false;
+  let result;
+  return (...args) =&gt; {
+    if (!done) {
+      done = true;
+      result = fn(...args);
+    }
+    return result;
+  };
+}
+
+const init = once(() =&gt; console.log(&quot;초기화&quot;));
+init();   // &quot;초기화&quot;
+init();   // 출력 없음
+</code></pre>
+<p>인터랙티브 다이어그램: once(fn) 가 반환한 함수가 done 을 유지하는 과정 (단계별로 재생할 수 있다)</p><ol><li>once(fn) 을 호출한다. 환경 레코드에 fn, done = false, result 가 만들어진다.</li><li>화살표 함수를 만들어 반환한다. 이 함수는 once 의 환경 레코드를 참조한다. once 는 콜 스택에서 제거된다.</li><li>init() 첫 호출. done 이 false 이므로 true 로 바꾸고 fn 을 실행한다.</li><li>실행이 끝나 init 이 제거된다. 환경 레코드는 init 이 참조하므로 남아 있다.</li><li>init() 두 번째 호출. done 이 true 이므로 fn 을 실행하지 않고 저장된 result 를 반환한다.</li><li>출력 없이 끝난다.</li></ol>
+<hr>
+<h2>4. 예제</h2>
+<h3>4.1 기본</h3>
+<p><code>map</code> 을 직접 구현하고, 함수를 반환하는 <code>once</code>, <code>pipe</code> 를 실행해 본다. <code>pipe</code> 는 함수 목록을 받아 왼쪽부터 차례로 적용하는 함수를 반환한다.</p>
+<pre><code class="language-playground">function myMap(arr, callback) {
+  if (typeof callback !== &quot;function&quot;) throw new TypeError(callback + &quot; is not a function&quot;);
+  const out = new Array(arr.length);
+  for (let i = 0; i &lt; arr.length; i++) {
+    out[i] = callback(arr[i], i, arr);   // 요소, 인덱스, 원본 배열
+  }
+  return out;
+}
+console.log(&quot;myMap        →&quot;, myMap([1, 2, 3], (x) =&gt; x * 10));
+console.log(&quot;인자 확인    →&quot;, myMap([&quot;a&quot;, &quot;b&quot;], (v, i, a) =&gt; `${v}:${i}/${a.length}`));
+
+function once(fn) {
+  let done = false, result;
+  return (...args) =&gt; (done ? result : ((done = true), (result = fn(...args))));
+}
+let calls = 0;
+const init = once(() =&gt; ++calls);
+init(); init(); init();
+console.log(&quot;once 호출 횟수 →&quot;, calls);
+
+const pipe = (...fns) =&gt; (x) =&gt; fns.reduce((v, f) =&gt; f(v), x);
+const addThenDouble = pipe((x) =&gt; x + 1, (x) =&gt; x * 2);
+console.log(&quot;pipe(+1, ×2)(3) →&quot;, addThenDouble(3));
+
+const users = [{ name: &quot;a&quot;, age: 17 }, { name: &quot;b&quot;, age: 25 }, { name: &quot;c&quot;, age: 31 }];
+console.log(&quot;20세 이상 이름 →&quot;, users.filter((u) =&gt; u.age &gt;= 20).map((u) =&gt; u.name));
+console.log(&quot;나이 합계      →&quot;, users.reduce((s, u) =&gt; s + u.age, 0));
+</code></pre>
+<p>출력은 <code>[10, 20, 30]</code>, <code>[&quot;a:0/2&quot;, &quot;b:1/2&quot;]</code>, <code>1</code>, <code>8</code>, <code>[&quot;b&quot;, &quot;c&quot;]</code>, <code>73</code> 이다.</p>
+<h3>4.2 실무 패턴</h3>
+<p>입력 이벤트마다 검색 요청을 보내지 않으려면, 마지막 호출 뒤 일정 시간이 지나야 실행되는 함수를 만든다. 타이머 ID 를 클로저에 두고 호출할 때마다 이전 타이머를 취소한다.</p>
+<pre><code class="language-js">function debounce(fn, ms) {
+  let timer;
+  return (...args) =&gt; {
+    clearTimeout(timer);
+    timer = setTimeout(() =&gt; fn(...args), ms);
+  };
+}
+
+input.addEventListener(&quot;input&quot;, debounce((e) =&gt; search(e.target.value), 300));
+</code></pre>
+<p><code>debounce</code> 는 함수를 받아 함수를 반환하고, <code>addEventListener</code> 는 그 결과를 콜백으로 받는다. 두 고차 함수가 겹쳐 있다. React 의 <code>items.map((item) =&gt; &lt;li key={item.id}&gt;…&lt;/li&gt;)</code> 도 같은 <code>map</code> 이다.</p>
+<hr>
+<h2>5. 자주 하는 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>인자를 여러 개 받는 함수를 그대로 넘긴다</strong></p>
+<pre><code class="language-js">[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;].map(parseInt);   // [1, NaN, NaN]
+[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;].map(Number);     // [1, 2, 3]
+</code></pre>
+<p><code>map</code> 은 콜백을 <code>(요소, 인덱스, 배열)</code> 로 호출한다. <code>parseInt</code> 의 두 번째 매개변수는 진법이므로 실제 호출은 <code>parseInt(&quot;1&quot;, 0)</code>, <code>parseInt(&quot;2&quot;, 1)</code>, <code>parseInt(&quot;3&quot;, 2)</code> 다. 0 은 10진법으로 처리되고, 1진법은 없으며, 2진법에 <code>3</code> 이라는 숫자는 없다. 인자를 하나만 쓰는 함수(<code>Number</code>)를 넘기거나 <code>(s) =&gt; parseInt(s, 10)</code> 으로 감싼다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>빈 배열에 초깃값 없이 reduce 를 호출한다</strong></p>
+<pre><code class="language-js">[].reduce((a, b) =&gt; a + b);      // TypeError: Reduce of empty array with no initial value
+[].reduce((a, b) =&gt; a + b, 0);   // 0
+</code></pre>
+<p>필터 결과처럼 비어 있을 수 있는 배열에는 항상 초깃값을 넘긴다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>메서드를 콜백으로 넘긴다</strong></p>
+<p><code>arr.map(obj.format)</code> 은 함수 참조만 넘기므로 <code>format</code> 안의 <code>this</code> 가 <code>obj</code> 가 아니다. <a href="/post/this">this 바인딩 규칙</a>에서 본 것과 같은 원인이다. <code>arr.map((x) =&gt; obj.format(x))</code> 처럼 화살표 함수로 감싸 메서드 형태로 호출한다.</p>
+</div></div></aside></p>
+<hr>
+<h2>6. 정리</h2>
+<p>고차 함수는 함수를 인자로 받거나 반환하는 함수다. 받는 쪽은 반복과 호출 시점을 맡고, 넘긴 콜백이 반복마다 달라지는 규칙을 맡는다. 반환하는 쪽은 클로저로 인자와 상태를 기억한 새 함수를 만든다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 1장의 반복문 세 개를 <code>filter</code>, <code>map</code>, <code>reduce</code> 로 바꿀 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>map</code> 이 콜백에 넘기는 인자 세 개를 말할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;].map(parseInt)</code> 의 결과를 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>once</code> 가 반환한 함수가 <code>done</code> 을 기억하는 이유를 클로저로 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>reduce</code> 에 초깃값을 넘겨야 하는 경우를 안다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Glossary/First-class_Function" target="_blank">[1] 일급 함수 — MDN Web Docs 용어 사전</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/map" target="_blank">[2] Array.prototype.map() — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-array.prototype.map" target="_blank">[3] Array.prototype.map — ECMAScript 사양</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-array.prototype.reduce" target="_blank">[4] Array.prototype.reduce — ECMAScript 사양</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/closure">클로저와 렉시컬 환경 →</a> (선행 개념)</li>
+<li><a href="/post/arrow-function">화살표 함수의 this 와 일반 함수와의 차이 →</a> (콜백에 주로 쓰는 문법)</li>
+<li><a href="/post/immutability">불변성과 새 값으로 교체하기 →</a> (map, filter 가 원본을 바꾸지 않는 이유)</li>
+</ul>
+
+<ul><li>javascript</li><li>higher-order-function</li><li>callback</li><li>map</li><li>reduce</li><li>고차 함수</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

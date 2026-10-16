@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T09:50:50.765Z",
+  "generatedAt": "2026-10-16T00:17:45.004Z",
   "nodes": [
     {
       "id": "arrow-function",
@@ -13,11 +13,11 @@
       "level": 3,
       "track": "js-core",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "arrow-function",
+      "postTitle": "화살표 함수의 this 와 일반 함수와의 차이",
+      "readTime": 7,
+      "excerpt": "화살표 함수는 자체 this 바인딩을 만들지 않는다. 그래서 this 를 정의된 위치의 바깥 함수에서 찾고, call·bind 로도 바꿀 수 없으며, new 로 호출할 수 없다.",
       "chain": [
         "scope",
         "execution-context",
@@ -100,6 +100,51 @@
       ]
     },
     {
+      "id": "css-cascade",
+      "label": "CSS 캐스케이드",
+      "domain": "css",
+      "summary": "한 속성의 선언 여러 개 중 하나를 출처·레이어·명시도·순서로 고르는 규칙.",
+      "prereq": [],
+      "next": [
+        "emotion",
+        "sass",
+        "tailwind-css"
+      ],
+      "level": 0,
+      "track": "styling",
+      "category": "frontend/styling",
+      "written": true,
+      "post": "css-cascade",
+      "postTitle": "CSS 캐스케이드와 명시도",
+      "readTime": 9,
+      "excerpt": "한 속성에 선언이 여러 개면 브라우저는 출처와 중요도, 컨텍스트, style 속성, 레이어, 명시도, 등장 순서 순으로 비교해 하나를 고른다. 앞 단계에서 차이가 나면 뒤 단계는 보지 않으므로 명시도가 다른 선언은 순서와 무관하게 결정된다.",
+      "chain": [
+        "css-cascade"
+      ]
+    },
+    {
+      "id": "emotion",
+      "label": "Emotion",
+      "domain": "css",
+      "summary": "렌더 시점에 스타일을 직렬화·해시해 class 를 만들고 처음 보는 규칙만 문서에 넣는 CSS-in-JS 라이브러리.",
+      "prereq": [
+        "css-cascade"
+      ],
+      "next": [],
+      "level": 1,
+      "track": "styling",
+      "category": "frontend/styling",
+      "written": true,
+      "post": "emotion",
+      "postTitle": "Emotion 런타임 CSS-in-JS 동작 방식",
+      "readTime": 10,
+      "excerpt": "Emotion은 컴포넌트가 렌더될 때 스타일을 문자열로 직렬화하고 해시해 class 이름을 만든 뒤, 처음 보는 해시만 style 요소에 규칙으로 넣는다. 합성은 배열 순서대로 하나의 규칙으로 합쳐지므로 뒤에 쓴 스타일이 이긴다.",
+      "chain": [
+        "css-cascade",
+        "emotion"
+      ]
+    },
+    {
       "id": "event-loop",
       "label": "이벤트 루프",
       "domain": "javascript",
@@ -161,11 +206,11 @@
       "level": 3,
       "track": "js-functional",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "higher-order-function",
+      "postTitle": "고차 함수와 콜백",
+      "readTime": 7,
+      "excerpt": "함수를 인자로 받거나 함수를 반환하는 함수가 고차 함수다. 자바스크립트 함수는 값이라서 가능하다. map 이 콜백을 어떤 인자로 호출하는지, 반환된 함수가 클로저로 상태를 유지하는 방식을 정리한다.",
       "chain": [
         "scope",
         "hoisting",
@@ -212,11 +257,11 @@
       "level": 3,
       "track": "js-functional",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "immutability",
+      "postTitle": "불변성과 새 값으로 교체하기",
+      "readTime": 7,
+      "excerpt": "불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다. 변경 여부를 참조 비교 한 번으로 알 수 있게 되고, 바뀌지 않은 부분은 이전 값과 공유한다.",
       "chain": [
         "primitive-type",
         "reference-type",
@@ -239,11 +284,11 @@
       "level": 3,
       "track": "js-async",
       "category": "frontend/javascript",
-      "written": false,
-      "post": null,
-      "postTitle": null,
-      "readTime": null,
-      "excerpt": null,
+      "written": true,
+      "post": "microtask",
+      "postTitle": "마이크로태스크 큐와 실행 시점",
+      "readTime": 8,
+      "excerpt": "Promise.then 콜백과 queueMicrotask 는 태스크 큐가 아니라 마이크로태스크 큐에 들어간다. 이벤트 루프는 태스크 하나가 끝날 때마다 마이크로태스크 큐를 완전히 비운 뒤에 렌더링과 다음 태스크로 넘어간다.",
       "chain": [
         "call-stack",
         "event-loop",
@@ -373,6 +418,28 @@
       ]
     },
     {
+      "id": "sass",
+      "label": "Sass",
+      "domain": "css",
+      "summary": "빌드 시점에 CSS로 컴파일되는 스타일시트 언어. 변수·믹스인·모듈은 출력에 남지 않는다.",
+      "prereq": [
+        "css-cascade"
+      ],
+      "next": [],
+      "level": 1,
+      "track": "styling",
+      "category": "frontend/styling",
+      "written": true,
+      "post": "sass-scss",
+      "postTitle": "Sass 전처리와 SCSS 모듈",
+      "readTime": 9,
+      "excerpt": "Sass는 빌드 시점에 CSS로 컴파일되는 스타일시트 언어이고 SCSS는 CSS 문법을 그대로 포함하는 Sass의 구문이다. Sass 변수와 믹스인은 컴파일 단계에서 값으로 바뀌어 사라지므로, 런타임에 바꿔야 하는 값은 CSS 사용자 정의 속성으로 둔다.",
+      "chain": [
+        "css-cascade",
+        "sass"
+      ]
+    },
+    {
       "id": "scope",
       "label": "스코프",
       "domain": "javascript",
@@ -393,6 +460,29 @@
       "excerpt": "식별자에 접근할 수 있는 범위를 정하는 규칙. 전역·함수·블록 스코프의 경계와, 식별자를 안쪽에서 바깥쪽으로 탐색하는 스코프 체인을 정리한다.",
       "chain": [
         "scope"
+      ]
+    },
+    {
+      "id": "shadcn-ui",
+      "label": "shadcn/ui",
+      "domain": "css",
+      "summary": "컴포넌트 소스를 CLI로 프로젝트에 복사하는 React 컴포넌트 모음. cva variant 와 cn 병합으로 구성된다.",
+      "prereq": [
+        "tailwind-css"
+      ],
+      "next": [],
+      "level": 2,
+      "track": "styling",
+      "category": "frontend/styling",
+      "written": true,
+      "post": "shadcn-ui",
+      "postTitle": "shadcn/ui 컴포넌트 배포 방식과 구조",
+      "readTime": 9,
+      "excerpt": "shadcn/ui는 컴포넌트를 패키지로 설치하지 않고 CLI가 소스 파일을 프로젝트에 복사해 넣는 React 컴포넌트 모음이다. 각 컴포넌트는 headless primitive, Tailwind CSS 클래스, cva 로 만든 variant, cn 클래스 병합 함수로 구성되며 색은 CSS 변수로 바꾼다.",
+      "chain": [
+        "css-cascade",
+        "tailwind-css",
+        "shadcn-ui"
       ]
     },
     {
@@ -418,6 +508,30 @@
         "primitive-type",
         "reference-type",
         "shallow-deep-copy"
+      ]
+    },
+    {
+      "id": "tailwind-css",
+      "label": "Tailwind CSS",
+      "domain": "css",
+      "summary": "소스를 스캔해 쓰인 유틸리티 클래스만 CSS로 생성하는 프레임워크.",
+      "prereq": [
+        "css-cascade"
+      ],
+      "next": [
+        "shadcn-ui"
+      ],
+      "level": 1,
+      "track": "styling",
+      "category": "frontend/styling",
+      "written": true,
+      "post": "tailwind-css",
+      "postTitle": "Tailwind CSS 유틸리티 생성 과정",
+      "readTime": 9,
+      "excerpt": "Tailwind CSS는 빌드할 때 소스 파일을 텍스트로 읽어 클래스 이름 후보를 찾고, 유틸리티와 일치하는 후보만 CSS 규칙으로 만든다. 코드를 실행하지 않으므로 문자열을 조합한 클래스 이름은 생성되지 않는다.",
+      "chain": [
+        "css-cascade",
+        "tailwind-css"
       ]
     },
     {
@@ -497,18 +611,23 @@
   "levels": [
     [
       "call-stack",
+      "css-cascade",
       "primitive-type",
       "scope"
     ],
     [
+      "emotion",
       "event-loop",
       "execution-context",
       "hoisting",
-      "reference-type"
+      "reference-type",
+      "sass",
+      "tailwind-css"
     ],
     [
       "closure",
       "prototype",
+      "shadcn-ui",
       "shallow-deep-copy",
       "task-queue",
       "tdz",
@@ -546,7 +665,7 @@
         "prototype",
         "shallow-deep-copy"
       ],
-      "written": 11,
+      "written": 12,
       "total": 12
     },
     "js-async": {
@@ -559,7 +678,7 @@
         "promise",
         "async-await"
       ],
-      "written": 2,
+      "written": 3,
       "total": 5
     },
     "js-functional": {
@@ -570,14 +689,27 @@
         "pure-function",
         "higher-order-function"
       ],
-      "written": 0,
+      "written": 2,
       "total": 3
+    },
+    "styling": {
+      "label": "스타일링",
+      "summary": "브라우저가 선언 하나를 고르는 규칙에서 시작해, 그 규칙 위에 만든 도구들로 넘어간다.",
+      "order": [
+        "css-cascade",
+        "sass",
+        "tailwind-css",
+        "shadcn-ui",
+        "emotion"
+      ],
+      "written": 5,
+      "total": 5
     }
   },
   "stats": {
-    "concepts": 20,
-    "written": 13,
+    "concepts": 25,
+    "written": 22,
     "depth": 6,
-    "tracks": 3
+    "tracks": 4
   }
 }

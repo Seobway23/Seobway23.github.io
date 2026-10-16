@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" width="960" height="460" role="img" aria-labelledby="t d">
+  <title id="t">Emotion 이 렌더 시점에 class 를 만드는 과정</title>
+  <desc id="d">컴포넌트가 렌더될 때 Emotion 은 css prop 의 스타일을 문자열로 직렬화하고, MurmurHash2 로 해시해 class 이름을 만든다. 캐시에 같은 해시가 없으면 style 요소에 규칙을 삽입하고, 있으면 삽입을 건너뛴다. 마지막으로 요소에 css-해시 class 를 붙인다.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#e879f9"/>
+    </marker>
+    <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 17px; font-weight: 700; }
+    .zone { font-size: 13px; font-weight: 800; letter-spacing: .1em; }
+    .t { fill: #cbd5e1; font-size: 13.5px; }
+    .c { fill: #e2e8f0; font-size: 13px; }
+    .file { fill: #f0abfc; font-size: 13px; font-weight: 700; }
+    .step { fill: #f8fafc; font-size: 14px; font-weight: 700; }
+    .sub { fill: #f5d0fe; font-size: 12px; }
+    .note { fill: #94a3b8; font-size: 12px; }
+  </style>
+
+  <rect width="960" height="460" rx="20" fill="#0f172a"/>
+
+  <rect x="24" y="24" width="912" height="340" rx="16" fill="none" stroke="#d26ac2" stroke-opacity=".55" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text class="zone" x="44" y="52" fill="#e879f9">RUNTIME</text>
+  <text class="h" x="140" y="52">컴포넌트가 렌더될 때마다 실행</text>
+
+  <!-- 입력 코드 -->
+  <rect x="44" y="72" width="270" height="124" rx="10" fill="#111827" stroke="#334155"/>
+  <text class="file mono" x="58" y="96">Button.jsx</text>
+  <text class="c mono" x="58" y="122">const base = css`</text>
+  <text class="c mono" x="58" y="142">  padding: 8px 16px; …`;</text>
+  <text class="c mono" x="58" y="162">const danger = css`…`;</text>
+  <text class="c mono" x="58" y="182">&lt;p css={[base, danger]}&gt;</text>
+
+  <!-- 결과 DOM -->
+  <rect x="354" y="72" width="562" height="124" rx="10" fill="#111827" stroke="#334155"/>
+  <text class="file mono" x="368" y="96" fill="#93c5fd">document</text>
+  <text class="c mono" x="368" y="122">&lt;style data-emotion="css"&gt;</text>
+  <text class="c mono" x="368" y="142">  .css-1gic02d{padding:8px 16px;…;background:crimson;}</text>
+  <text class="c mono" x="368" y="162">&lt;/style&gt;</text>
+  <text class="c mono" x="368" y="182">&lt;p class="css-1gic02d"&gt;</text>
+
+  <!-- 단계 -->
+  <path d="M120 200 L120 236" stroke="#e879f9" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="44" y="240" width="152" height="70" rx="12" fill="#86198f"/>
+  <text class="step" x="120" y="268" text-anchor="middle">① 직렬화</text>
+  <text class="sub" x="120" y="292" text-anchor="middle">배열 순서대로 이어 붙임</text>
+
+  <path d="M198 275 L222 275" stroke="#e879f9" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="226" y="240" width="152" height="70" rx="12" fill="#86198f"/>
+  <text class="step" x="302" y="268" text-anchor="middle">② MurmurHash2</text>
+  <text class="sub mono" x="302" y="292" text-anchor="middle">→ 1gic02d</text>
+
+  <path d="M380 275 L404 275" stroke="#e879f9" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="408" y="240" width="152" height="70" rx="12" fill="#86198f"/>
+  <text class="step" x="484" y="268" text-anchor="middle">③ 캐시 확인</text>
+  <text class="sub" x="484" y="292" text-anchor="middle">이미 넣은 해시인가</text>
+
+  <path d="M562 275 L586 275" stroke="#e879f9" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="590" y="240" width="152" height="70" rx="12" fill="#86198f"/>
+  <text class="step" x="666" y="268" text-anchor="middle">④ 규칙 삽입</text>
+  <text class="sub mono" x="666" y="292" text-anchor="middle">insertRule()</text>
+
+  <path d="M744 275 L768 275" stroke="#e879f9" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="772" y="240" width="144" height="70" rx="12" fill="#86198f"/>
+  <text class="step" x="844" y="268" text-anchor="middle">⑤ class 부여</text>
+  <text class="sub mono" x="844" y="292" text-anchor="middle">css-1gic02d</text>
+
+  <!-- 결과로 올라가는 화살표 -->
+  <path d="M666 238 L666 200" stroke="#e879f9" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M844 238 L844 200" stroke="#e879f9" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 캐시 적중 시 건너뜀 -->
+  <path d="M484 312 C 484 346, 844 346, 844 314" fill="none" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="5 5" marker-end="url(#arr2)"/>
+  <text class="note" x="664" y="352" text-anchor="middle">같은 해시가 이미 있으면 ④ 를 건너뛴다</text>
+
+  <rect x="24" y="382" width="912" height="56" rx="12" fill="#0b1220" stroke="#1e293b"/>
+  <text class="t" x="44" y="408">Sass·Tailwind CSS 는 이 일을 빌드할 때 끝낸다. Emotion 은 같은 일을 브라우저에서 렌더할 때 한다.</text>
+  <text class="note" x="44" y="428">해시 값은 @emotion/react 11.14.0 으로 실제 렌더한 결과다.</text>
+</svg>

@@ -1,8 +1,8 @@
 [
   {
-    "slug": "state-data-fetching-tanstack-zustand-server-actions",
-    "title": "상태 & 데이터 페칭 — TanStack Query, Zustand, Server Actions",
-    "path": "/post/frontend/data-fetching/state-data-fetching-tanstack-zustand-server-actions"
+    "slug": "arrow-function",
+    "title": "화살표 함수의 this 와 일반 함수와의 차이",
+    "path": "/post/frontend/javascript/arrow-function"
   },
   {
     "slug": "call-stack",
@@ -25,14 +25,29 @@
     "path": "/post/frontend/javascript/execution-context"
   },
   {
+    "slug": "higher-order-function",
+    "title": "고차 함수와 콜백",
+    "path": "/post/frontend/javascript/higher-order-function"
+  },
+  {
     "slug": "hoisting",
     "title": "호이스팅과 선언 초기화 방식",
     "path": "/post/frontend/javascript/hoisting"
   },
   {
+    "slug": "immutability",
+    "title": "불변성과 새 값으로 교체하기",
+    "path": "/post/frontend/javascript/immutability"
+  },
+  {
     "slug": "js-event-loop-and-async",
     "title": "JS 이벤트 루프와 비동기 처리 구조",
     "path": "/post/frontend/javascript/js-event-loop-and-async"
+  },
+  {
+    "slug": "microtask",
+    "title": "마이크로태스크 큐와 실행 시점",
+    "path": "/post/frontend/javascript/microtask"
   },
   {
     "slug": "primitive-type",
@@ -80,11 +95,6 @@
     "path": "/post/frontend/javascript/this"
   },
   {
-    "slug": "build-performance-a11y-vite-turbopack-lighthouse-wcag",
-    "title": "빌드 · 성능 · a11y — Vite, Turbopack, 렌더링 전략, Lighthouse, WCAG",
-    "path": "/post/frontend/performance/build-performance-a11y-vite-turbopack-lighthouse-wcag"
-  },
-  {
     "slug": "react-component-data-flow",
     "title": "React 단방향 데이터 흐름 — props와 state를 어디에 둬야 하는가",
     "path": "/post/frontend/react/react-component-data-flow"
@@ -95,239 +105,34 @@
     "path": "/post/frontend/react/react-controlled-vs-uncontrolled"
   },
   {
-    "slug": "react-query-advanced",
-    "title": "React Query 고급 패턴 — Infinite Query, 병렬 쿼리, Suspense, v5 마이그레이션",
-    "path": "/post/frontend/react-query/react-query-advanced"
+    "slug": "css-cascade",
+    "title": "CSS 캐스케이드와 명시도",
+    "path": "/post/frontend/styling/css-cascade"
   },
   {
-    "slug": "react-query-cache",
-    "title": "React Query 캐시 심층 — invalidateQueries, setQueryData, Prefetch, 백그라운드 트리거",
-    "path": "/post/frontend/react-query/react-query-cache"
+    "slug": "emotion",
+    "title": "Emotion 런타임 CSS-in-JS 동작 방식",
+    "path": "/post/frontend/styling/emotion"
   },
   {
-    "slug": "react-query-mutations",
-    "title": "React Query useMutation 심층 — 라이프사이클, 콜백, 낙관적 업데이트",
-    "path": "/post/frontend/react-query/react-query-mutations"
+    "slug": "sass-scss",
+    "title": "Sass 전처리와 SCSS 모듈",
+    "path": "/post/frontend/styling/sass-scss"
   },
   {
-    "slug": "react-query-overview",
-    "title": "TanStack Query(React Query) 완전 정복 — 서버 상태 관리의 표준",
-    "path": "/post/frontend/react-query/react-query-overview"
+    "slug": "shadcn-ui",
+    "title": "shadcn/ui 컴포넌트 배포 방식과 구조",
+    "path": "/post/frontend/styling/shadcn-ui"
   },
   {
-    "slug": "react-query-queries",
-    "title": "React Query useQuery 심층 — QueryClient, 쿼리 키, 전체 옵션 완전 정리",
-    "path": "/post/frontend/react-query/react-query-queries"
-  },
-  {
-    "slug": "modern-css-tailwind-shadcn",
-    "title": "UI & 스타일링 기초 — 모던 CSS, Tailwind, shadcn/ui를 어떻게 볼 것인가",
-    "path": "/post/frontend/styling/modern-css-tailwind-shadcn"
-  },
-  {
-    "slug": "threejs-dpr-and-canvas-resolution",
-    "title": "devicePixelRatio, setPixelRatio, 캔버스 해상도: Three.js 선명도/성능의 본질",
-    "path": "/post/frontend/threejs/threejs-dpr-and-canvas-resolution"
-  },
-  {
-    "slug": "threejs-frustum-culling",
-    "title": "Frustum Culling: '보이는 것만 그리기'가 성능의 1순위인 이유",
-    "path": "/post/frontend/threejs/threejs-frustum-culling"
-  },
-  {
-    "slug": "threejs-gltf-loading",
-    "title": "glTF 모델을 Three.js에 올리는 방식: 로더, 씬 그래프, 렌더 타이밍",
-    "path": "/post/frontend/threejs/threejs-gltf-loading"
-  },
-  {
-    "slug": "threejs-portfolio-rendering-optimization-story",
-    "title": "Three.js 포트폴리오 렌더링 최적화 실전기: '버벅임'은 3D가 아니라 경쟁이었다",
-    "path": "/post/frontend/threejs/threejs-portfolio-rendering-optimization-story"
-  },
-  {
-    "slug": "threejs-raycaster-picking-performance",
-    "title": "Raycaster & Picking 성능: pointermove에서 바로 intersectObjects() 하면 왜 버벅일까?",
-    "path": "/post/frontend/threejs/threejs-raycaster-picking-performance"
-  },
-  {
-    "slug": "threejs-rendering-pipeline",
-    "title": "Three.js 렌더링 파이프라인: Scene → Camera → Renderer 한 번에 이해하기",
-    "path": "/post/frontend/threejs/threejs-rendering-pipeline"
-  },
-  {
-    "slug": "why-threejs-exists",
-    "title": "Three.js는 왜 만들어졌나: WebGL을 '직접' 쓰지 않기 위해",
-    "path": "/post/frontend/threejs/why-threejs-exists"
+    "slug": "tailwind-css",
+    "title": "Tailwind CSS 유틸리티 생성 과정",
+    "path": "/post/frontend/styling/tailwind-css"
   },
   {
     "slug": "typescript-type-system-basics",
     "title": "TypeScript 타입 시스템 기초 — any를 줄이고 의도를 남기는 법",
     "path": "/post/frontend/typescript/typescript-type-system-basics"
-  },
-  {
-    "slug": "claude-code-harness-leak-architecture",
-    "title": "Claude Code 하네스 유출이 말해 주는 것 — 모델이 아니라 오케스트레이션",
-    "path": "/post/study/ai/claude-code-harness-leak-architecture"
-  },
-  {
-    "slug": "context-engineering-prompts-rules-memory-skills",
-    "title": "Context Engineering — 프롬프트, Rules, 메모리, Skill 시스템",
-    "path": "/post/study/ai/context-engineering/context-engineering-prompts-rules-memory-skills"
-  },
-  {
-    "slug": "gstack-overview",
-    "title": "gstack: YC CEO가 공개한 Claude Code 가상 엔지니어링팀 구성법",
-    "path": "/post/study/ai/gstack/gstack-overview"
-  },
-  {
-    "slug": "gstack-skills-plan",
-    "title": "gstack 스킬 1~5: Think & Plan — 코드 한 줄 쓰기 전에 하는 것들",
-    "path": "/post/study/ai/gstack/gstack-skills-plan"
-  },
-  {
-    "slug": "gstack-skills-ship",
-    "title": "gstack 스킬 6~13: Build, Test & Ship — AI가 직접 브라우저 켜고 배포한다",
-    "path": "/post/study/ai/gstack/gstack-skills-ship"
-  },
-  {
-    "slug": "ai-development-process-spec-tdd-hooks",
-    "title": "AI 개발 프로세스 — 작업 분할, Spec, TDD Workflow, Hook 설계",
-    "path": "/post/study/ai/process/ai-development-process-spec-tdd-hooks"
-  },
-  {
-    "slug": "ai-code-verification-review-quality-security-performance-ux",
-    "title": "AI 코드 검증 — 품질·보안·성능·UX 리뷰 루프",
-    "path": "/post/study/ai/review/ai-code-verification-review-quality-security-performance-ux"
-  },
-  {
-    "slug": "ai-coding-tools-cursor-copilot-claude-code-mcp",
-    "title": "AI 코딩 도구 기초 — Cursor, Copilot, Claude Code, MCP를 어떻게 구분할까",
-    "path": "/post/study/ai/workflow/ai-coding-tools-cursor-copilot-claude-code-mcp"
-  },
-  {
-    "slug": "kadane-algorithm",
-    "title": "Kadane 알고리즘 — 최대 부분배열을 O(n)으로 푸는 DP",
-    "path": "/post/study/algorithm/kadane-algorithm"
-  },
-  {
-    "slug": "api-design-rest-openapi-rpc-server-actions",
-    "title": "API 설계 — REST 원칙, OpenAPI, Server Actions, RPC",
-    "path": "/post/study/architecture/api-design/api-design-rest-openapi-rpc-server-actions"
-  },
-  {
-    "slug": "architecture-patterns-layered-component-clean",
-    "title": "아키텍처 패턴 — 레이어, 컴포넌트 기반 설계, 클린 아키텍처",
-    "path": "/post/study/architecture/patterns/architecture-patterns-layered-component-clean"
-  },
-  {
-    "slug": "requirements-spec-user-story-tradeoff",
-    "title": "요구사항 분석 — Spec, 유저 스토리, 기술 선택 트레이드오프",
-    "path": "/post/study/architecture/requirements/requirements-spec-user-story-tradeoff"
-  },
-  {
-    "slug": "db-orm-postgres-drizzle-neon-supabase",
-    "title": "DB & ORM 기초 — PostgreSQL, 스키마 설계, Drizzle, Neon, Supabase",
-    "path": "/post/study/backend/database/db-orm-postgres-drizzle-neon-supabase"
-  },
-  {
-    "slug": "django-architecture",
-    "title": "Django MTV 아키텍처와 앱 구조 — Project, App, settings.py의 역할",
-    "path": "/post/study/backend/django/django-architecture"
-  },
-  {
-    "slug": "django-lifecycle",
-    "title": "Django 요청-응답 라이프사이클 — HTTP 요청이 처리되는 전체 흐름",
-    "path": "/post/study/backend/django/django-lifecycle"
-  },
-  {
-    "slug": "django-migration",
-    "title": "Django Migration 완전 정복 — migrate, run-syncdb, FK 순서 문제",
-    "path": "/post/study/backend/django/django-migration"
-  },
-  {
-    "slug": "django-models",
-    "title": "Django 모델 완전 정복 — 필드, 관계(FK/M2M/O2O), Meta 옵션",
-    "path": "/post/study/backend/django/django-models"
-  },
-  {
-    "slug": "django-object-permissions",
-    "title": "Django 객체 레벨 권한 설계 — Owner와 팀 기반 접근 제어",
-    "path": "/post/study/backend/django/django-object-permissions"
-  },
-  {
-    "slug": "django-orm-deep",
-    "title": "Django ORM 심층 — QuerySet 지연 실행, Manager, Active Record",
-    "path": "/post/study/backend/django/django-orm-deep"
-  },
-  {
-    "slug": "django-security",
-    "title": "Django 보안 — 기본 탑재된 방어 (CSRF, XSS, SQL Injection, Clickjacking)",
-    "path": "/post/study/backend/django/django-security"
-  },
-  {
-    "slug": "django-urls",
-    "title": "Django URL 라우팅 완전 정복 — path(), include(), namespace, DRF Router",
-    "path": "/post/study/backend/django/django-urls"
-  },
-  {
-    "slug": "django-version-compatibility",
-    "title": "Django 버전 호환성과 내부 API 위험 — queries_logged 사례로 배우는 교훈",
-    "path": "/post/study/backend/django/django-version-compatibility"
-  },
-  {
-    "slug": "drf-authentication",
-    "title": "DRF 완전 정복 3편 — 인증(Authentication) — Token, JWT, SimpleJWT",
-    "path": "/post/study/backend/django/drf-authentication"
-  },
-  {
-    "slug": "drf-overview",
-    "title": "DRF 완전 정복 1편 — REST API, Serializer, ModelSerializer 기초",
-    "path": "/post/study/backend/django/drf-overview"
-  },
-  {
-    "slug": "drf-serializer-validation",
-    "title": "DRF Serializer 검증 완전 정복 — validate_<field>가 return을 빠뜨리면 생기는 일",
-    "path": "/post/study/backend/django/drf-serializer-validation"
-  },
-  {
-    "slug": "drf-views",
-    "title": "DRF 완전 정복 2편 — APIView, GenericAPIView, ViewSet, Router",
-    "path": "/post/study/backend/django/drf-views"
-  },
-  {
-    "slug": "django-overview",
-    "title": "Django 프레임워크 큰 그림 — 철학, 구조, 핵심 개념 한눈에",
-    "path": "/post/study/backend/django-overview"
-  },
-  {
-    "slug": "django-settings",
-    "title": "Django settings 분리와 환경변수 관리 — django-environ, DATABASE_URL",
-    "path": "/post/study/backend/django-settings"
-  },
-  {
-    "slug": "hono-rest-api-overview",
-    "title": "Hono로 REST API 시작하기 — 가벼운 서버 프레임워크가 주는 감각",
-    "path": "/post/study/backend/hono/hono-rest-api-overview"
-  },
-  {
-    "slug": "http-methods-and-status-codes",
-    "title": "HTTP 메서드와 상태 코드 기초 — GET, POST, PUT, PATCH, DELETE를 제대로 구분하기",
-    "path": "/post/study/backend/http/http-methods-and-status-codes"
-  },
-  {
-    "slug": "js-runtime-node-bun-deno",
-    "title": "Node.js · Bun · Deno — 서버 JavaScript 런타임은 무엇이 다른가",
-    "path": "/post/study/backend/runtime/js-runtime-node-bun-deno"
-  },
-  {
-    "slug": "auth-security-authjs-owasp-passkeys",
-    "title": "인증 & 보안 — Auth.js, OWASP, 패스키 기초",
-    "path": "/post/study/backend/security/auth-security-authjs-owasp-passkeys"
-  },
-  {
-    "slug": "sql-joins-where-having-group-by",
-    "title": "SQL JOIN · WHERE · HAVING · GROUP BY — 백엔드 기초 쿼리 감각 잡기",
-    "path": "/post/study/backend/sql/sql-joins-where-having-group-by"
   },
   {
     "slug": "electron-ipc-security-model",
@@ -363,121 +168,6 @@
     "slug": "electron-renderer-chromium-rendering",
     "title": "렌더러 프로세스 내부 — Chromium 렌더링 엔진과 V8, 렌더링 파이프라인",
     "path": "/post/study/electron/electron-renderer-chromium-rendering"
-  },
-  {
-    "slug": "code-quality-eslint-prettier-biome",
-    "title": "코드 품질 기초 — 가독성, 리팩토링, ESLint, Prettier, Biome",
-    "path": "/post/study/engineering/code-quality/code-quality-eslint-prettier-biome"
-  },
-  {
-    "slug": "git-branching-conventional-commits-husky",
-    "title": "Git & 릴리즈 기초 — 브랜치 전략, Conventional Commits, Husky",
-    "path": "/post/study/engineering/git/git-branching-conventional-commits-husky"
-  },
-  {
-    "slug": "observability-security-sentry-posthog-otel-npm-audit",
-    "title": "관측 & 보안 — Sentry, PostHog, OpenTelemetry, npm audit",
-    "path": "/post/study/engineering/observability-security/observability-security-sentry-posthog-otel-npm-audit"
-  },
-  {
-    "slug": "testing-vitest-playwright",
-    "title": "테스트 기초 — 테스트 사고법, Vitest, Playwright",
-    "path": "/post/study/engineering/testing/testing-vitest-playwright"
-  },
-  {
-    "slug": "celery-beat",
-    "title": "Celery Beat — 주기적 태스크 스케줄링",
-    "path": "/post/study/infra/celery/celery-beat"
-  },
-  {
-    "slug": "celery-broker",
-    "title": "Celery Broker — Redis vs RabbitMQ, 메시지 보장의 기초",
-    "path": "/post/study/infra/celery/celery-broker"
-  },
-  {
-    "slug": "celery-worker",
-    "title": "Celery Worker — 내부 구조와 동시성 모델",
-    "path": "/post/study/infra/celery/celery-worker"
-  },
-  {
-    "slug": "celery-django",
-    "title": "Django + Celery — 비동기 작업과 스케줄링의 기초",
-    "path": "/post/study/infra/celery-django"
-  },
-  {
-    "slug": "deployment-vercel-railway-github-actions",
-    "title": "배포 & 운영 기초 — Vercel, Railway, GitHub Actions",
-    "path": "/post/study/infra/deployment/deployment-vercel-railway-github-actions"
-  },
-  {
-    "slug": "docker-basics",
-    "title": "Docker 기초 — Image, Container, Volume, Network",
-    "path": "/post/study/infra/docker/docker-basics"
-  },
-  {
-    "slug": "docker-compose-basics",
-    "title": "Docker Compose 기초 — env_file, 변수 치환, depends_on",
-    "path": "/post/study/infra/docker/docker-compose-basics"
-  },
-  {
-    "slug": "docker-compose-django",
-    "title": "Docker Compose로 Django 5개 서비스 띄우기",
-    "path": "/post/study/infra/docker-compose-django"
-  },
-  {
-    "slug": "gitlab-artifacts-vs-cache",
-    "title": "GitLab CI/CD — artifacts vs cache",
-    "path": "/post/study/infra/gitlab-artifacts-vs-cache"
-  },
-  {
-    "slug": "gitlab-cicd-guide",
-    "title": "GitLab CI/CD — .gitlab-ci.yml -> K3s",
-    "path": "/post/study/infra/gitlab-cicd-guide"
-  },
-  {
-    "slug": "jenkins-argocd-gitops",
-    "title": "GitOps 파이프라인 완전 정복 — Jenkins + ArgoCD + k3s로 코드를 서버에 배포하기",
-    "path": "/post/study/infra/gitops/jenkins-argocd-gitops"
-  },
-  {
-    "slug": "k8s-zero-downtime-deployment",
-    "title": "Jenkins + ArgoCD로 구현하는 K8s 무중단 배포",
-    "path": "/post/study/infra/k8s-zero-downtime-deployment"
-  },
-  {
-    "slug": "kubectl-debugging",
-    "title": "kubectl 실전 — 로그 확인, 컨테이너 접속, 리소스 모니터링",
-    "path": "/post/study/infra/kubernetes/kubectl-debugging"
-  },
-  {
-    "slug": "mysql-backup-k8s",
-    "title": "K8s에서 MySQL 백업 다시 짜기 — rsync에서 CronJob+mysqldump로",
-    "path": "/post/study/infra/kubernetes/mysql-backup-k8s"
-  },
-  {
-    "slug": "mysql-restore-test",
-    "title": "백업의 증명 — K3s에서 mysqldump 복구 테스트",
-    "path": "/post/study/infra/kubernetes/mysql-restore-test"
-  },
-  {
-    "slug": "mechanics-basics-forces-intro",
-    "title": "힘과 평형의 말풀이 — 수평·수직으로 나누어 생각하기 (역학 기초 1)",
-    "path": "/post/study/mechanics/basics/mechanics-basics-forces-intro"
-  },
-  {
-    "slug": "mechanics-basics-moment-intro",
-    "title": "모멘트와 작용점 — ‘어디를 축으로 돌리나’ (역학 기초 2)",
-    "path": "/post/study/mechanics/basics/mechanics-basics-moment-intro"
-  },
-  {
-    "slug": "earth-pressure-overview",
-    "title": "토압이 뭔가요? — 수평 힘 Ph부터 주동·수동·이론 지도까지",
-    "path": "/post/study/mechanics/earth-pressure/earth-pressure-overview"
-  },
-  {
-    "slug": "mechanics-force-equilibrium",
-    "title": "옹벽 힘의 평형 — Ph, 저면 마찰, 미끄럼·전도와 안전율 (토압 시리즈 실전 1)",
-    "path": "/post/study/mechanics/earth-pressure/mechanics-force-equilibrium"
   },
   {
     "slug": "macro-network-view",
@@ -565,11 +255,6 @@
     "path": "/post/study/network/micro/tcp-udp"
   },
   {
-    "slug": "ai-webdev-roadmap-foundation",
-    "title": "AI 웹개발자 로드맵 — 01~19 전체 학습 경로",
-    "path": "/post/study/roadmap/ai-webdev-roadmap-foundation"
-  },
-  {
     "slug": "rag-hybrid-search",
     "title": "설계기준 RAG의 하이브리드 검색 구현",
     "path": "/post/work/RAG/rag-hybrid-search"
@@ -581,12 +266,12 @@
   },
   {
     "slug": "ai-agent-qa-automation-token-economics",
-    "title": "AI 에이전트 QA 자동화 — 토큰 경제 분석",
+    "title": "QA 브라우저 자동화를 서브에이전트로 분리할 때의 토큰 비용 모델",
     "path": "/post/work/analysis/ai-agent-qa-automation-token-economics"
   },
   {
     "slug": "cache-overlay-timing-rca",
-    "title": "저장은 됐는데 화면이 한 박자 늦는 이유 — 캐시가 옛 값을 먼저 준다",
+    "title": "저장한 설계량이 다음 날짜 화면에 늦게 반영된 원인 분석",
     "path": "/post/work/analysis/cache-overlay-timing-rca"
   },
   {

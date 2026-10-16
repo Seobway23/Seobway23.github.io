@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-labelledby="t d">
+  <title id="t">수정 전후 오버레이 동작 비교</title>
+  <desc id="d">날짜를 옮긴 직후 TanStack Query 는 캐시의 옛 값 5를 먼저 주고, 백그라운드 refetch 가 끝나면 새 값 10을 준다. 수정 전 오버레이는 키당 한 번만 실행되어 옛 값 5로 화면을 채운 뒤 새 값 10을 건너뛰었다. 수정 후 오버레이는 데이터가 바뀔 때마다 다시 실행되어 최종 화면이 10이 되고, 사용자가 고친 행은 그대로 둔다.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; white-space: pre; }
+    .h { fill: #f8fafc; font-size: 17px; font-weight: 700; }
+    .col { fill: #e2e8f0; font-size: 13.5px; font-weight: 700; }
+    .colsub { fill: #94a3b8; font-size: 12.5px; }
+    .row { fill: #f8fafc; font-size: 15px; font-weight: 800; }
+    .rowsub { fill: #94a3b8; font-size: 12.5px; }
+    .b { fill: #f8fafc; font-size: 13.5px; font-weight: 700; }
+    .bs { fill: #e2e8f0; font-size: 12.5px; }
+    .big { font-size: 30px; font-weight: 800; }
+    .note { fill: #cbd5e1; font-size: 13.5px; }
+  </style>
+
+  <rect width="960" height="420" rx="20" fill="#0f172a"/>
+  <text class="h" x="44" y="50">날짜를 옮긴 직후 오버레이가 받는 값과 화면</text>
+
+  <!-- 열 머리 -->
+  <rect x="260" y="70" width="230" height="56" rx="10" fill="#1e293b"/>
+  <text class="col" x="276" y="94">① 캐시의 옛 값 5 반환</text>
+  <text class="colsub" x="276" y="114">이동 직후, 바로</text>
+
+  <rect x="510" y="70" width="250" height="56" rx="10" fill="#1e293b"/>
+  <text class="col" x="526" y="94">② refetch 완료, 새 값 10</text>
+  <text class="colsub" x="526" y="114">백그라운드 요청이 끝난 뒤</text>
+
+  <rect x="780" y="70" width="136" height="56" rx="10" fill="#1e293b"/>
+  <text class="col" x="848" y="94" text-anchor="middle">최종 화면</text>
+  <text class="colsub" x="848" y="114" text-anchor="middle">강관말뚝 설계량</text>
+
+  <path d="M260 140 L916 140" stroke="#334155" stroke-width="1"/>
+
+  <!-- 수정 전 -->
+  <text class="row" x="44" y="186">수정 전</text>
+  <text class="rowsub" x="44" y="208">(현장, 날짜) 키당 1회</text>
+
+  <rect x="260" y="158" width="230" height="70" rx="12" fill="#065f46"/>
+  <text class="b" x="276" y="186">오버레이 실행</text>
+  <text class="bs" x="276" y="210">화면 5, 키 기록</text>
+
+  <path d="M492 193 L506 193" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="510" y="158" width="250" height="70" rx="12" fill="#7f1d1d"/>
+  <text class="b" x="526" y="186">이미 기록한 키라 건너뜀</text>
+  <text class="bs" x="526" y="210">10 은 화면에 들어가지 않는다</text>
+
+  <path d="M762 193 L776 193" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="780" y="158" width="136" height="70" rx="12" fill="#1e293b" stroke="#f87171" stroke-width="2"/>
+  <text class="big" x="848" y="205" text-anchor="middle" fill="#f87171">5</text>
+
+  <path d="M44 250 L916 250" stroke="#1e293b" stroke-width="1"/>
+
+  <!-- 수정 후 -->
+  <text class="row" x="44" y="298">수정 후</text>
+  <text class="rowsub" x="44" y="320">데이터가 바뀔 때마다</text>
+
+  <rect x="260" y="270" width="230" height="70" rx="12" fill="#065f46"/>
+  <text class="b" x="276" y="298">오버레이 실행</text>
+  <text class="bs" x="276" y="322">화면 5</text>
+
+  <path d="M492 305 L506 305" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="510" y="270" width="250" height="70" rx="12" fill="#065f46"/>
+  <text class="b" x="526" y="298">값이 바뀌어 다시 실행</text>
+  <text class="bs" x="526" y="322">화면 10, 사용자가 고친 행은 제외</text>
+
+  <path d="M762 305 L776 305" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="780" y="270" width="136" height="70" rx="12" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+  <text class="big" x="848" y="317" text-anchor="middle" fill="#34d399">10</text>
+
+  <rect x="24" y="360" width="912" height="44" rx="12" fill="#0b1220" stroke="#1e293b"/>
+  <text class="note" x="44" y="388">D일에 설계량을 5 → 10 으로 저장하고 D+1 로 이동한 경우. D+1 은 저장 전에 한 번 방문해 캐시에 5가 남아 있다.</text>
+</svg>

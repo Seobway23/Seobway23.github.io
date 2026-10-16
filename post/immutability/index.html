@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      class="light-syntax"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      class="dark-syntax"
+      disabled
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PWA: manifest 링크는 vite-plugin-pwa 가 주입한다 -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tech Blog" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <script type="module" crossorigin src="/assets/app-Sfqxeyxs.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DAGPdr--.css">
+  <link rel="manifest" href="/manifest.webmanifest">    <title>불변성과 새 값으로 교체하기 — Tech Blog — 모던 개발 블로그</title>
+    <meta name="description" content="불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다. 변경 여부를 참조 비교 한 번으로 알 수 있게 되고, 바뀌지 않은 부분은 이전 값과 공유한다." />
+    <meta name="keywords" content="javascript, immutability, Object.freeze, toSorted, react, 불변성" />
+    <meta name="author" content="Seobway" />
+    <link rel="canonical" href="https://seobway23.github.io/post/immutability" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Tech Blog — 모던 개발 블로그" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="불변성과 새 값으로 교체하기" />
+    <meta property="og:description" content="불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다. 변경 여부를 참조 비교 한 번으로 알 수 있게 되고, 바뀌지 않은 부분은 이전 값과 공유한다." />
+    <meta property="og:url" content="https://seobway23.github.io/post/immutability" />
+    <meta property="og:image" content="https://seobway23.github.io/post-thumbnails/immutability.jpg" />
+    <meta property="article:published_time" content="2026-10-15T00:00:00.000Z" />
+    <meta property="article:modified_time" content="2026-10-16T00:17:11.529Z" />
+    <meta property="article:tag" content="javascript" />
+    <meta property="article:tag" content="immutability" />
+    <meta property="article:tag" content="Object.freeze" />
+    <meta property="article:tag" content="toSorted" />
+    <meta property="article:tag" content="react" />
+    <meta property="article:tag" content="불변성" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="불변성과 새 값으로 교체하기" />
+    <meta name="twitter:description" content="불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다. 변경 여부를 참조 비교 한 번으로 알 수 있게 되고, 바뀌지 않은 부분은 이전 값과 공유한다." />
+    <meta name="twitter:image" content="https://seobway23.github.io/post-thumbnails/immutability.jpg" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","headline":"불변성과 새 값으로 교체하기","description":"불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다. 변경 여부를 참조 비교 한 번으로 알 수 있게 되고, 바뀌지 않은 부분은 이전 값과 공유한다.","image":["https://seobway23.github.io/post-thumbnails/immutability.jpg"],"datePublished":"2026-10-15T00:00:00.000Z","dateModified":"2026-10-16T00:17:11.529Z","author":{"@type":"Person","name":"Seobway"},"publisher":{"@type":"Organization","name":"Tech Blog — 모던 개발 블로그","logo":{"@type":"ImageObject","url":"https://seobway23.github.io/pwa-512x512.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://seobway23.github.io/post/immutability"},"keywords":"javascript, immutability, Object.freeze, toSorted, react, 불변성","articleSection":"javascript","inLanguage":"ko-KR","wordCount":5028},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://seobway23.github.io/"},{"@type":"ListItem","position":2,"name":"javascript","item":"https://seobway23.github.io/?category=frontend%2Fjavascript"},{"@type":"ListItem","position":3,"name":"불변성과 새 값으로 교체하기","item":"https://seobway23.github.io/post/immutability"}]}]}</script>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem('spa_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa_redirect');
+          var url = new URL(redirect);
+          history.replaceState(null, null, url.pathname + url.search + url.hash);
+        }
+      })();
+    </script>
+    <div id="root"><article data-prerendered="true">
+<nav aria-label="breadcrumb"><a href="/">홈</a> › <span>javascript</span></nav>
+<h1>불변성과 새 값으로 교체하기</h1>
+<p>불변성은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다. 변경 여부를 참조 비교 한 번으로 알 수 있게 되고, 바뀌지 않은 부분은 이전 값과 공유한다.
+</p>
+<p><span>Seobway</span> · <time datetime="2026-10-15T00:00:00.000Z">2026-10-15</time> · <span>7분</span></p>
+<p><aside class="post-callout post-callout--abstract" data-callout="abstract" role="note" aria-label="ABSTRACT"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">ABSTRACT</span><div class="post-callout__content"><p><strong>불변성</strong>은 만든 값을 고치지 않고, 바뀐 내용을 담은 새 값을 만들어 교체하는 원칙이다. 이 원칙을 지키면 <span class="glossary-term" data-term="reference-equality" tabindex="0">참조 비교</span> 한 번으로 변경 여부를 알 수 있고, 바뀌지 않은 하위 객체는 이전 값과 공유한다.</p>
+</div></div></aside></p>
+<h2>1. 문제 상황</h2>
+<p>할 일을 추가하는 버튼을 눌러도 화면이 바뀌지 않는다.</p>
+<pre><code class="language-jsx">const [todos, setTodos] = useState([]);
+
+function add(text) {
+  todos.push({ text });   // 기존 배열을 고친다
+  setTodos(todos);        // 같은 배열을 다시 넘긴다
+}
+</code></pre>
+<p>React 는 새 state 와 이전 state 를 <code>Object.is</code> 로 비교한다<a href="https://react.dev/learn/updating-objects-in-state" target="_blank"><sup>[4]</sup></a>. <code>push</code> 는 배열 내용을 바꾸지만 배열의 참조는 그대로이므로 <code>Object.is(todos, todos)</code> 는 <code>true</code> 다. React 는 바뀐 것이 없다고 판단하고 다시 렌더링하지 않는다.</p>
+<pre><code class="language-jsx">function add(text) {
+  setTodos([...todos, { text }]);   // 새 배열을 만들어 교체한다
+}
+</code></pre>
+<p>새 배열을 넘기면 참조가 달라져 렌더링이 일어난다.</p>
+<hr>
+<h2>2. 정의</h2>
+<h3>2.1 정의</h3>
+<p>만든 뒤 내용이 바뀌지 않는 값을 불변 값이라 한다. 자바스크립트의 <a href="/post/primitive-type">원시 값</a>은 언어 차원에서 불변이다. <code>str.toUpperCase()</code> 는 새 문자열을 반환하고 원래 문자열은 그대로다.</p>
+<p><a href="/post/reference-type">참조 타입</a>인 객체와 배열은 가변이다. 그래서 객체에서 말하는 <strong>불변성</strong>은 언어가 보장하는 성질이 아니라 코드가 지키는 원칙이다. 객체를 고치는 대신 바뀐 내용을 담은 새 객체를 만들어 변수나 state 를 교체한다.</p>
+<div class="post-table-wrap"><table>
+<thead>
+<tr>
+<th>바꾸는 코드 (가변)</th>
+<th>새 값을 만드는 코드 (불변)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>arr.push(x)</code></td>
+<td><code>[...arr, x]</code></td>
+</tr>
+<tr>
+<td><code>arr.sort()</code>, <code>arr.reverse()</code></td>
+<td><code>arr.toSorted()</code>, <code>arr.toReversed()</code></td>
+</tr>
+<tr>
+<td><code>arr.splice(i, 1)</code></td>
+<td><code>arr.toSpliced(i, 1)</code>, <code>arr.filter(…)</code></td>
+</tr>
+<tr>
+<td><code>arr[i] = x</code></td>
+<td><code>arr.with(i, x)</code></td>
+</tr>
+<tr>
+<td><code>obj.name = x</code></td>
+<td><code>{ ...obj, name: x }</code></td>
+</tr>
+</tbody></table></div>
+<p><code>toSorted</code>, <code>toReversed</code>, <code>toSpliced</code>, <code>with</code> 는 ES2023 에 추가된 메서드다. 원본은 두고 새 배열을 반환한다<a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted" target="_blank"><sup>[3]</sup></a>.</p>
+<h3>2.2 사양에서의 위치</h3>
+<p>객체를 실제로 바꿀 수 없게 만드는 기능은 <code>Object.freeze</code> 다. 사양에서 <code>Object.freeze(O)</code> 는 <code>SetIntegrityLevel(O, frozen)</code> 을 호출한다<a href="https://tc39.es/ecma262/#sec-setintegritylevel" target="_blank"><sup>[2]</sup></a>.</p>
+<ol>
+<li><code>O</code> 에 <code>[[PreventExtensions]]</code> 를 호출해 새 프로퍼티를 추가할 수 없게 한다.</li>
+<li><code>O</code> 의 <strong>자기 프로퍼티</strong> 각각의 <code>[[Configurable]]</code> 을 <code>false</code> 로 바꾸고, <span class="glossary-term" data-term="data-property" tabindex="0">데이터 프로퍼티</span>면 <code>[[Writable]]</code> 도 <code>false</code> 로 바꾼다.</li>
+</ol>
+<p>대상이 자기 프로퍼티뿐이므로 프로퍼티 값이 객체이면 그 객체는 얼지 않는다. 쓰기 불가 프로퍼티에 대입하면 <code>[[Set]]</code> 이 <code>false</code> 를 반환하고, 엄격 모드에서는 <code>TypeError</code> 가 난다. 비엄격 모드에서는 대입이 조용히 무시된다.</p>
+<p><code>const</code> 는 다른 성질이다. <code>const</code> 는 변수에 다른 값을 다시 대입하는 것을 막을 뿐, 변수가 가리키는 객체의 내용은 바꿀 수 있다.</p>
+<hr>
+<h2>3. 동작 원리</h2>
+<h3>3.1 참조 비교로 변경을 감지한다</h3>
+<p>모든 변경이 새 객체를 만든다면 「참조가 같다」는 「내용이 같다」와 같은 뜻이 된다. 객체 내용을 하나씩 비교하지 않고 <code>prev !== next</code> 한 번으로 변경 여부를 알 수 있다. React 의 state 비교, <code>React.memo</code>, <code>useMemo</code> 의 의존성 비교가 이 성질에 기대고 있다.</p>
+<p>반대로 객체를 직접 고치면 내용이 바뀌어도 참조는 같다. 참조 비교는 「바뀌지 않았다」고 답하고, 그 결과는 틀린다.</p>
+<h3>3.2 바뀐 경로만 새로 만든다</h3>
+<p>새 객체를 만든다고 전체를 <a href="/post/shallow-deep-copy">깊은 복사</a>하지 않는다. 바뀐 값까지 이어지는 경로의 객체만 새로 만들고, 나머지는 이전 객체를 그대로 참조한다. 이것을 <span class="glossary-term" data-term="structural-sharing" tabindex="0">구조적 공유</span>라 한다.</p>
+<pre><code class="language-js">const state = {
+  user: { name: &quot;a&quot;, address: { city: &quot;서울&quot; } },
+  posts: [{ id: 1 }],
+};
+
+const next = { ...state, user: { ...state.user, name: &quot;b&quot; } };
+</code></pre>
+<figure class="post-figure post-figure--image"><img src="/post-assets/frontend/javascript/structural-sharing.svg" alt="구조적 공유" loading="lazy"><figcaption><span class="post-figure__no">그림 1.</span> user.name 을 바꾸면 state 와 user 두 객체만 새로 만든다. address 와 posts 는 이전 객체를 그대로 참조하므로 === 비교가 true 다.</figcaption></figure>
+<p>인터랙티브 다이어그램: user.name 을 바꾼 새 state 만들기 (단계별로 재생할 수 있다)</p><ol><li>이전 state 는 user, user.address, posts 세 하위 객체를 참조한다.</li><li>{ ...state } 로 새 최상위 객체를 만든다. posts 는 참조만 복사된다.</li><li>바꿀 값이 있는 user 는 { ...state.user, name: &quot;b&quot; } 로 새로 만든다.</li><li>user 안의 address 는 바뀌지 않았으므로 참조를 복사한다.</li></ol>
+<hr>
+<h2>4. 예제</h2>
+<h3>4.1 기본</h3>
+<p>같은 변경을 두 방식으로 하고 참조 비교 결과를 본다. <code>Object.freeze</code> 가 얕게 적용되는 것과 <code>sort</code> 와 <code>toSorted</code> 의 차이도 확인한다.</p>
+<pre><code class="language-playground">&quot;use strict&quot;;
+
+// 1. 직접 고치기와 새 값 만들기
+const prev = { count: 1 };
+const mutated = prev;
+mutated.count = 2;
+console.log(&quot;직접 고침, prev !== mutated →&quot;, prev !== mutated, &quot;(변경을 감지하지 못한다)&quot;);
+
+const prev2 = { count: 1 };
+const next2 = { ...prev2, count: 2 };
+console.log(&quot;새 객체,   prev2 !== next2 →&quot;, prev2 !== next2, &quot;/ prev2.count =&quot;, prev2.count);
+
+// 2. Object.freeze 는 자기 프로퍼티에만 적용된다
+const frozen = Object.freeze({ n: 1, inner: { m: 1 } });
+try { frozen.n = 2; } catch (e) { console.log(&quot;frozen.n = 2   →&quot;, e.constructor.name); }
+frozen.inner.m = 2;
+console.log(&quot;frozen.inner.m →&quot;, frozen.inner.m, &quot;/ isFrozen(inner) =&quot;, Object.isFrozen(frozen.inner));
+
+// 3. 원본을 바꾸는 메서드와 바꾸지 않는 메서드
+const scores = [3, 1, 2];
+const copy = scores.toSorted();
+console.log(&quot;toSorted       →&quot;, copy, &quot;원본&quot;, scores);
+const same = scores.sort();
+console.log(&quot;sort           →&quot;, same, &quot;원본&quot;, scores, &quot;같은 배열?&quot;, same === scores);
+</code></pre>
+<p><code>frozen.n = 2</code> 는 <code>TypeError</code> 가 나지만 <code>frozen.inner.m</code> 은 2 로 바뀐다. <code>sort</code> 는 원본을 정렬하고 같은 배열을 반환한다.</p>
+<h3>4.2 실무 패턴</h3>
+<p>React 에서 이전 state 를 바탕으로 새 state 를 만들 때는 업데이터 함수에서 새 객체를 반환한다.</p>
+<pre><code class="language-jsx">setTodos((prev) =&gt; prev.map((t) =&gt; (t.id === id ? { ...t, done: !t.done } : t)));
+</code></pre>
+<p><code>map</code> 은 항상 새 배열을 반환하고, 바뀐 항목만 새 객체로 만든다. 바뀌지 않은 항목은 이전 객체 그대로이므로, <code>React.memo</code> 로 감싼 항목 컴포넌트는 다른 props 도 같다면 다시 렌더링되지 않는다.</p>
+<hr>
+<h2>5. 자주 하는 실수</h2>
+<p><aside class="post-callout post-callout--warning" data-callout="warning" role="note" aria-label="WARNING"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">WARNING</span><div class="post-callout__content"><p><strong>const 로 선언하면 바뀌지 않는다고 생각한다</strong></p>
+<pre><code class="language-js">const user = { name: &quot;a&quot; };
+user.name = &quot;b&quot;;   // 가능하다
+user = {};         // TypeError: Assignment to constant variable.
+</code></pre>
+<p><code>const</code> 가 막는 것은 변수의 재대입이다. 객체 내용은 그대로 바꿀 수 있다.</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>스프레드 한 번으로 중첩 객체까지 새로 만들었다고 생각한다</strong></p>
+<pre><code class="language-js">const next = { ...state };
+next.user.name = &quot;b&quot;;   // state.user.name 도 &quot;b&quot; 가 된다
+</code></pre>
+<p>스프레드는 <a href="/post/shallow-deep-copy">얕은 복사</a>다. <code>next.user</code> 와 <code>state.user</code> 는 같은 객체다. 바꿀 값까지의 경로에 있는 객체를 모두 스프레드로 새로 만든다(3.2절).</p>
+</div></div></aside></p>
+<p><aside class="post-callout post-callout--caution" data-callout="caution" role="note" aria-label="CAUTION"><div class="post-callout__accent" aria-hidden="true"></div><div class="post-callout__frame"><span class="post-callout__label">CAUTION</span><div class="post-callout__content"><p><strong>인자로 받은 배열을 sort 한다</strong></p>
+<pre><code class="language-js">function Ranking({ scores }) {
+  const sorted = scores.sort((a, b) =&gt; b - a);   // props 원본이 정렬된다
+}
+</code></pre>
+<p><code>sort</code>, <code>reverse</code>, <code>splice</code> 는 원본을 바꾼다. 부모가 가진 배열이 바뀌므로 다른 곳의 표시 순서까지 달라진다. <code>toSorted</code> 나 <code>[...scores].sort()</code> 를 쓴다.</p>
+</div></div></aside></p>
+<hr>
+<h2>6. 정리</h2>
+<p>불변성은 값을 고치지 않고 새 값을 만들어 교체하는 원칙이다. 원시 값은 언어가 불변을 보장하고, 객체는 코드가 이 원칙을 지킨다. 바뀐 경로의 객체만 새로 만들면 나머지는 공유되고, 변경 여부는 참조 비교 한 번으로 알 수 있다.</p>
+<ul>
+<li><input disabled="" type="checkbox"> 1장의 <code>push</code> 후 <code>setTodos(todos)</code> 가 렌더링을 일으키지 않는 이유를 설명할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>const</code> 와 <code>Object.freeze</code> 가 각각 무엇을 막는지 구분할 수 있다</li>
+<li><input disabled="" type="checkbox"> <code>Object.freeze</code> 가 중첩 객체를 얼리지 않는 이유를 사양 기준으로 말할 수 있다</li>
+<li><input disabled="" type="checkbox"> 중첩된 값 하나를 바꿀 때 새로 만들어야 하는 객체를 고를 수 있다</li>
+<li><input disabled="" type="checkbox"> 원본을 바꾸는 배열 메서드와 바꾸지 않는 메서드를 구분할 수 있다</li>
+</ul>
+<h2>참고</h2>
+<ol>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze" target="_blank">[1] Object.freeze() — MDN Web Docs</a></li>
+<li><a href="https://tc39.es/ecma262/#sec-setintegritylevel" target="_blank">[2] SetIntegrityLevel — ECMAScript 사양</a></li>
+<li><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted" target="_blank">[3] Array.prototype.toSorted() — MDN Web Docs</a></li>
+<li><a href="https://react.dev/learn/updating-objects-in-state" target="_blank">[4] Updating Objects in State — React</a></li>
+</ol>
+
+<hr>
+<h2>관련 글</h2>
+<ul>
+<li><a href="/post/shallow-deep-copy">얕은 복사와 깊은 복사 →</a> (선행 개념)</li>
+<li><a href="/post/reference-type">참조 타입과 참조 복사 →</a></li>
+<li><a href="/post/higher-order-function">고차 함수와 콜백 →</a> (원본을 두고 새 배열을 반환하는 map, filter)</li>
+</ul>
+
+<ul><li>javascript</li><li>immutability</li><li>Object.freeze</li><li>toSorted</li><li>react</li><li>불변성</li></ul>
+</article></div>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script
+      type="text/javascript"
+      src="https://replit.com/public/js/replit-dev-banner.js"
+    ></script>
+  </body>
+</html>

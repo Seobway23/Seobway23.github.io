@@ -1,0 +1,217 @@
+<svg id="tb-emotion" xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"
+     role="img" aria-labelledby="tb-emotion-t tb-emotion-d" preserveAspectRatio="xMidYMid slice">
+  <title id="tb-emotion-t">Emotion 런타임 CSS-in-JS 동작 방식</title>
+  <desc id="tb-emotion-d">frontend/styling — Emotion은 컴포넌트가 렌더될 때 스타일을 문자열로 직렬화하고 해시해 class 이름을 만든 뒤, 처음 보는 해시만 style 요소에 규칙으로 넣는다</desc>
+
+  <defs>
+    <linearGradient id="tb-emotion-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#060d18"/>
+      <stop offset="52%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="tb-emotion-ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="hsl(198 93% 64%)" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="hsl(198 93% 64%)" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tb-emotion-gb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D26AC2" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#D26AC2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tb-emotion-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.09"/>
+      <stop offset="55%" stop-color="#D26AC2" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tb-emotion-rule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="hsl(198 93% 64%)" stop-opacity="0"/>
+      <stop offset="50%" stop-color="hsl(198 93% 64%)" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="hsl(198 93% 64%)" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="tb-emotion-grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0 L0 0 0 44" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="tb-emotion-vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050b14" stop-opacity="0.94"/>
+      <stop offset="62%" stop-color="#050b14" stop-opacity="0.80"/>
+      <stop offset="100%" stop-color="#050b14" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tb-emotion-soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="tb-emotion-tshadow" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#020617" flood-opacity="0.9"/>
+    </filter>
+    <clipPath id="tb-emotion-frame"><rect x="0" y="0" width="1200" height="630" rx="0"/></clipPath>
+  </defs>
+
+  <style><![CDATA[
+    /* 기본 상태에서도 숨을 쉰다 — img 태그로 넣어도 여기까지는 돈다. */
+    .tb-emotion-glow-a { animation: tb-emotion-driftA 17s ease-in-out infinite alternate; transform-origin: center; }
+    .tb-emotion-glow-b { animation: tb-emotion-driftB 21s ease-in-out infinite alternate; transform-origin: center; }
+    @keyframes tb-emotion-driftA {
+      from { transform: translate(0,0) scale(1);      opacity: .85; }
+      to   { transform: translate(46px,-30px) scale(1.12); opacity: 1; }
+    }
+    @keyframes tb-emotion-driftB {
+      from { transform: translate(0,0) scale(1.06);   opacity: .7; }
+      to   { transform: translate(-54px,26px) scale(.94); opacity: 1; }
+    }
+
+    .tb-emotion-spark { fill: #ffffff; opacity: 0; animation-name: tb-emotion-twinkle;
+             animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    @keyframes tb-emotion-twinkle {
+      0%, 100% { opacity: 0;   transform: scale(.6); }
+      45%      { opacity: .85; transform: scale(1.25); }
+      70%      { opacity: .25; transform: scale(.9); }
+    }
+
+    .tb-emotion-sheen-band { animation: tb-emotion-sweep 9s cubic-bezier(.5,0,.3,1) infinite; }
+    @keyframes tb-emotion-sweep {
+      0%, 62% { transform: translateX(-1320px); }
+      100%    { transform: translateX(1320px); }
+    }
+
+    .tb-emotion-caret { animation: tb-emotion-blink 1.1s steps(1) infinite; }
+    @keyframes tb-emotion-blink { 0%,49% { opacity: .85 } 50%,100% { opacity: 0 } }
+
+    /* 가운데 어둠은 숨만 쉰다 — 밝아지면 제목이 코드에 먹힌다. */
+    .tb-emotion-halo { animation: tb-emotion-breathe 9s ease-in-out infinite; transform-origin: center; }
+    @keyframes tb-emotion-breathe {
+      0%,100% { transform: scale(1);    opacity: .96; }
+      50%     { transform: scale(1.05); opacity: 1; }
+    }
+
+    .tb-emotion-bracket { stroke: hsl(198 93% 64%); stroke-opacity: .5; stroke-width: 3; fill: none;
+               stroke-linecap: round; animation: tb-emotion-pulseEdge 5.5s ease-in-out infinite; }
+    @keyframes tb-emotion-pulseEdge { 0%,100% { stroke-opacity: .28 } 50% { stroke-opacity: .72 } }
+
+    .tb-emotion-badge-ring { animation: tb-emotion-spin 26s linear infinite; transform-origin: 96px 534px; }
+    @keyframes tb-emotion-spin { to { transform: rotate(360deg) } }
+
+    /* 글자 */
+    .tb-emotion-title  { font-family: "Pretendard Variable", Pretendard, "Noto Sans KR",
+              "Apple SD Gothic Neo", "Malgun Gothic", Inter, "Segoe UI", sans-serif;
+              font-weight: 800; fill: #f8fafc; letter-spacing: -0.5px;
+              filter: url(#tb-emotion-tshadow); transition: fill .35s ease; }
+    .tb-emotion-sub    { font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+              "Malgun Gothic", Inter, sans-serif; font-weight: 500; fill: #a8b6cc; }
+    .tb-emotion-chip-t { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+              font-weight: 700; fill: hsl(198 93% 64%); letter-spacing: 2.6px; }
+    .tb-emotion-mark   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 800; }
+    .tb-emotion-foot   { font-family: "JetBrains Mono", Consolas, monospace; font-weight: 600;
+              fill: #64748b; letter-spacing: 1.4px; }
+
+    /* 배경 코드 */
+    .tb-emotion-code     { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                opacity: .30; transition: opacity .4s ease; }
+    .tb-emotion-c-key    { fill: #D26AC2; }
+    .tb-emotion-c-string { fill: #86efac; }
+    .tb-emotion-c-number { fill: #fbbf24; }
+    .tb-emotion-c-comment{ fill: #64748b; font-style: italic; }
+    .tb-emotion-c-ident  { fill: #cbd5e1; }
+    .tb-emotion-c-punct  { fill: #94a3b8; }
+    .tb-emotion-c-op     { fill: hsl(198 93% 64%); }
+    .tb-emotion-c-plain  { fill: #cbd5e1; }
+
+    /* 인라인 SVG 나 object 태그로 넣었을 때만 살아나는 층.
+       이미지로 쓰면 그냥 무시된다 — 그래서 위쪽 기본 애니메이션을 따로 둔 것이다. */
+    #tb-emotion:hover .tb-emotion-glow-a,
+    #tb-emotion:hover .tb-emotion-glow-b     { animation-duration: 6s; }
+    #tb-emotion:hover .tb-emotion-code       { opacity: .62; }
+    #tb-emotion:hover .tb-emotion-spark      { animation-duration: 1.4s !important; }
+    #tb-emotion:hover .tb-emotion-sheen-band { animation-duration: 2.6s; }
+    #tb-emotion:hover .tb-emotion-title      { fill: #ffffff; }
+    #tb-emotion:hover .tb-emotion-bracket    { animation-duration: 1.6s; stroke-width: 4; }
+    #tb-emotion:hover .tb-emotion-badge      { transform: translateY(-5px); }
+    .tb-emotion-badge { transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tb-emotion-glow-a, .tb-emotion-glow-b, .tb-emotion-spark, .tb-emotion-sheen-band, .tb-emotion-caret, .tb-emotion-halo, .tb-emotion-badge-ring, .tb-emotion-bracket {
+        animation: none !important;
+      }
+      .tb-emotion-spark { opacity: .5; }
+    }
+  ]]></style>
+
+  <g clip-path="url(#tb-emotion-frame)">
+    <rect width="1200" height="630" fill="url(#tb-emotion-bg)"/>
+    <rect width="1200" height="630" fill="url(#tb-emotion-grid)"/>
+
+    <circle class="tb-emotion-glow-a" cx="246" cy="170" r="318" fill="url(#tb-emotion-ga)"/>
+    <circle class="tb-emotion-glow-b" cx="809" cy="398" r="366" fill="url(#tb-emotion-gb)"/>
+
+    <!-- 이 글이 실제로 다루는 코드. 표지가 글마다 달라지는 이유. -->
+    <g class="code-main">
+      <text x="64" y="104" class="tb-emotion-code" font-size="21"><tspan class="tb-emotion-c-key" xml:space="preserve">const</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">danger</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-op" xml:space="preserve">=</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">css</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">(</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">{</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">background</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">:</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-string" xml:space="preserve">&quot;crimson&quot;</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">}</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">)</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="64" y="140.12" class="tb-emotion-code" font-size="21"><tspan class="tb-emotion-c-op" xml:space="preserve">&lt;</tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">p</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">css</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">=</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">{</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">[</tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">base</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">,</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">danger</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">]</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">}</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">&gt;</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">삭</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">제</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">할</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">까</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">요</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">?&lt;/</tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">p</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">&gt;</tspan></text>
+      <rect class="tb-emotion-caret" x="496" y="123"
+            width="10" height="25" fill="#D26AC2" opacity=".8"/>
+    </g>
+    <g class="code-echo" opacity="0.55">
+      <text x="690" y="356" class="tb-emotion-code" font-size="17"><tspan class="tb-emotion-c-key" xml:space="preserve">const</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">danger</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-op" xml:space="preserve">=</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">css</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">(</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">{</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">background</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">:</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-string" xml:space="preserve">&quot;crimson&quot;</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">}</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">)</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">;</tspan></text>
+      <text x="690" y="386.6" class="tb-emotion-code" font-size="17"><tspan class="tb-emotion-c-op" xml:space="preserve">&lt;</tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">p</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">css</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">=</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">{</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">[</tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">base</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">,</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve"> </tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">danger</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">]</tspan><tspan class="tb-emotion-c-punct" xml:space="preserve">}</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">&gt;</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">삭</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">제</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">할</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">까</tspan><tspan class="tb-emotion-c-plain" xml:space="preserve">요</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">?&lt;/</tspan><tspan class="tb-emotion-c-ident" xml:space="preserve">p</tspan><tspan class="tb-emotion-c-op" xml:space="preserve">&gt;</tspan></text>
+    </g>
+
+    <circle class="tb-emotion-spark" cx="290" cy="399" r="3.89" style="animation-delay:1.36s;animation-duration:4.68s"/>
+    <circle class="tb-emotion-spark" cx="149" cy="232" r="1.77" style="animation-delay:4.36s;animation-duration:6.02s"/>
+    <circle class="tb-emotion-spark" cx="1080" cy="464" r="3.65" style="animation-delay:3.34s;animation-duration:3.89s"/>
+    <circle class="tb-emotion-spark" cx="994" cy="96" r="2.01" style="animation-delay:2.84s;animation-duration:3.41s"/>
+    <circle class="tb-emotion-spark" cx="184" cy="472" r="2.13" style="animation-delay:4.36s;animation-duration:4.97s"/>
+    <circle class="tb-emotion-spark" cx="128" cy="104" r="2.47" style="animation-delay:5.14s;animation-duration:4.52s"/>
+    <circle class="tb-emotion-spark" cx="264" cy="178" r="3.73" style="animation-delay:2.10s;animation-duration:3.41s"/>
+    <circle class="tb-emotion-spark" cx="157" cy="121" r="3.58" style="animation-delay:5.39s;animation-duration:4.15s"/>
+    <circle class="tb-emotion-spark" cx="1061" cy="505" r="2.46" style="animation-delay:3.93s;animation-duration:6.50s"/>
+    <circle class="tb-emotion-spark" cx="81" cy="485" r="1.98" style="animation-delay:3.93s;animation-duration:6.59s"/>
+    <circle class="tb-emotion-spark" cx="189" cy="246" r="2.40" style="animation-delay:5.43s;animation-duration:5.96s"/>
+    <circle class="tb-emotion-spark" cx="1105" cy="78" r="3.85" style="animation-delay:2.68s;animation-duration:3.64s"/>
+    <circle class="tb-emotion-spark" cx="927" cy="571" r="3.79" style="animation-delay:0.70s;animation-duration:5.27s"/>
+    <circle class="tb-emotion-spark" cx="1039" cy="549" r="2.80" style="animation-delay:1.90s;animation-duration:5.13s"/>
+    <circle class="tb-emotion-spark" cx="903" cy="276" r="3.65" style="animation-delay:5.72s;animation-duration:3.59s"/>
+    <circle class="tb-emotion-spark" cx="913" cy="194" r="2.81" style="animation-delay:5.85s;animation-duration:4.32s"/>
+
+    <!-- 가운데를 어둡게 눌러 제목이 코드 위에서 읽히게 한다.
+         판을 덮지 않는 이유 — 그 글의 코드가 표지의 내용이기 때문이다. -->
+    <ellipse class="tb-emotion-halo" cx="600" cy="315" rx="560" ry="252" fill="url(#tb-emotion-vignette)"/>
+
+    <g class="tb-emotion-sheen-band">
+      <rect x="0" y="0" width="540" height="630" fill="url(#tb-emotion-sheen)"/>
+    </g>
+
+    <!-- 카테고리 칩 -->
+    <g>
+      <rect x="464" y="176" width="272" height="42" rx="21"
+            fill="hsl(198 93% 64%)" fill-opacity="0.13" stroke="hsl(198 93% 64%)" stroke-opacity="0.55"/>
+      <text class="tb-emotion-chip-t" x="600" y="204" text-anchor="middle" font-size="19">FRONTEND/STYLING</text>
+    </g>
+
+    <text class="tb-emotion-title" x="600" y="276" text-anchor="middle" font-size="54">Emotion 런타임</text>
+      <text class="tb-emotion-title" x="600" y="345" text-anchor="middle" font-size="54">CSS-in-JS 동작 방식</text>
+
+    <rect x="470" y="401" width="260" height="2" rx="1" fill="url(#tb-emotion-rule)"/>
+    <text class="tb-emotion-sub" x="600" y="455" text-anchor="middle" font-size="25">Emotion은 컴포넌트가 렌더될 때 스타일을 문자열로 직렬화하고…</text>
+
+    <!-- 왼쪽 아래 배지 -->
+    <g class="tb-emotion-badge">
+      <circle class="tb-emotion-badge-ring" cx="96" cy="534" r="44" fill="none"
+              stroke="#D26AC2" stroke-opacity="0.45" stroke-width="2"
+              stroke-dasharray="10 14" stroke-linecap="round"/>
+      <rect x="66" y="504" width="60" height="60" rx="16" fill="#f8fafc"/>
+      <image x="70" y="508" width="52" height="52" href="data:image/png;base64,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"/>
+    </g>
+
+    <text class="tb-emotion-foot" x="1128" y="540" text-anchor="end" font-size="17">FRONTEND/STYLING</text>
+    <text class="tb-emotion-foot" x="1128" y="566" text-anchor="end" font-size="15"
+          opacity=".7">MODERNDEVBLOG</text>
+
+    <!-- 네 귀퉁이 꺾쇠 — "펼쳐 놓은 노트" 를 만든다 -->
+    <path class="tb-emotion-bracket" d="M34 92 L34 34 L92 34"/>
+    <path class="tb-emotion-bracket" d="M1108 34 L1166 34 L1166 92"/>
+    <path class="tb-emotion-bracket" d="M34 538 L34 596 L92 596"/>
+    <path class="tb-emotion-bracket" d="M1108 596 L1166 596 L1166 538"/>
+
+    <rect x="0" y="0" width="1200" height="630" fill="none"
+          stroke="hsl(198 93% 64%)" stroke-opacity="0.22" stroke-width="3"/>
+  </g>
+</svg>

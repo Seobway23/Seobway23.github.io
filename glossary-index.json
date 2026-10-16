@@ -5,6 +5,7 @@
     "event-loop-interactive",
     "execution-context",
     "js-event-loop-and-async",
+    "microtask",
     "settimeout-vs-promise",
     "task-queue",
     "react-component-data-flow",
@@ -15,10 +16,6 @@
   ],
   "gc": [
     "closure",
-    "react-query-advanced",
-    "react-query-overview",
-    "react-query-queries",
-    "threejs-raycaster-picking-performance",
     "electron-nodejs-libuv-integration",
     "cdn-content-delivery-network",
     "cache-overlay-timing-rca",
@@ -27,10 +24,9 @@
   "event-loop": [
     "event-loop-interactive",
     "js-event-loop-and-async",
+    "microtask",
     "settimeout-vs-promise",
     "task-queue",
-    "django-lifecycle",
-    "django-settings",
     "electron-native-layer-os-integration",
     "electron-nodejs-libuv-integration",
     "electron-renderer-chromium-rendering"
@@ -38,6 +34,7 @@
   "microtask": [
     "event-loop-interactive",
     "js-event-loop-and-async",
+    "microtask",
     "settimeout-vs-promise",
     "task-queue",
     "react-component-data-flow",
@@ -50,33 +47,20 @@
     "shallow-deep-copy",
     "electron-nodejs-libuv-integration"
   ],
-  "abi": [
-    "gstack-skills-ship",
-    "django-version-compatibility",
-    "electron-multi-process-architecture",
-    "electron-native-layer-os-integration",
-    "electron-nodejs-libuv-integration",
-    "celery-broker",
-    "micro-ethernet-nic-cable",
-    "micro-network-traffic",
-    "rag-hybrid-search",
-    "rag-pdf-symbol-retrieval"
+  "namespace": [
+    "sass-scss",
+    "shadcn-ui",
+    "tailwind-css",
+    "electron-ipc-security-model",
+    "electron-python-sidecar-bundling"
+  ],
+  "syscall": [
+    "electron-ipc-security-model",
+    "electron-nodejs-libuv-integration"
   ],
   "service": [
-    "architecture-patterns-layered-component-clean",
-    "db-orm-postgres-drizzle-neon-supabase",
-    "drf-authentication",
-    "drf-overview",
-    "django-settings",
     "electron-multi-process-architecture",
     "electron-packaging-asar",
-    "observability-security-sentry-posthog-otel-npm-audit",
-    "docker-basics",
-    "docker-compose-basics",
-    "docker-compose-django",
-    "k8s-zero-downtime-deployment",
-    "mysql-backup-k8s",
-    "mysql-restore-test",
     "macro-network-view",
     "cdn-content-delivery-network",
     "circuit-vs-packet-switching",
@@ -86,37 +70,20 @@
     "micro-network-traffic",
     "micro-osi-7layer"
   ],
-  "docker": [
-    "django-migration",
-    "django-version-compatibility",
-    "django-settings",
-    "electron-packaging-asar",
-    "electron-python-sidecar-bundling",
-    "docker-basics",
-    "docker-compose-basics",
-    "docker-compose-django",
-    "gitlab-cicd-guide",
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
-  ],
-  "namespace": [
-    "django-models",
-    "django-urls",
-    "electron-ipc-security-model",
-    "electron-python-sidecar-bundling",
-    "k8s-zero-downtime-deployment",
-    "mysql-backup-k8s",
-    "mysql-restore-test"
-  ],
-  "syscall": [
-    "electron-ipc-security-model",
-    "electron-nodejs-libuv-integration"
-  ],
   "v8": [
     "electron-multi-process-architecture",
     "electron-native-layer-os-integration",
     "electron-nodejs-libuv-integration",
     "electron-renderer-chromium-rendering"
+  ],
+  "abi": [
+    "electron-multi-process-architecture",
+    "electron-native-layer-os-integration",
+    "electron-nodejs-libuv-integration",
+    "micro-ethernet-nic-cable",
+    "micro-network-traffic",
+    "rag-hybrid-search",
+    "rag-pdf-symbol-retrieval"
   ],
   "node-api": [
     "electron-native-layer-os-integration",
@@ -124,7 +91,6 @@
   ],
   "jit": [
     "electron-nodejs-libuv-integration",
-    "celery-worker",
     "macro-network-view",
     "circuit-vs-packet-switching"
   ],
@@ -147,59 +113,14 @@
   "nexttick": [
     "electron-nodejs-libuv-integration"
   ],
-  "deployment": [
-    "deployment-vercel-railway-github-actions",
-    "gitlab-cicd-guide",
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment",
-    "kubectl-debugging"
-  ],
-  "kubernetes": [
-    "gitlab-cicd-guide",
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment",
-    "kubectl-debugging",
-    "mysql-backup-k8s",
-    "mysql-restore-test"
-  ],
-  "pod": [
-    "gitlab-cicd-guide",
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment",
-    "kubectl-debugging",
-    "mysql-backup-k8s",
-    "mysql-restore-test"
-  ],
-  "jenkins": [
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
-  ],
-  "jenkinsfile": [
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
-  ],
-  "statefulset": [
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
+  "docker": [
+    "electron-packaging-asar",
+    "electron-python-sidecar-bundling"
   ],
   "pv": [
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment",
     "micro-network-view",
     "micro-encapsulation",
     "micro-ip-arp",
     "micro-tcp-udp"
-  ],
-  "argocd": [
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
-  ],
-  "gitops": [
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
-  ],
-  "kustomize": [
-    "jenkins-argocd-gitops",
-    "k8s-zero-downtime-deployment"
   ]
 }
