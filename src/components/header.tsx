@@ -177,6 +177,21 @@ export default function Header() {
                   로드맵
                 </Link>
                 <Link
+                  href="/projects"
+                  className={`text-sm font-medium ${
+                    location === "/projects"
+                      ? "hover-gradient-text"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
+                  style={
+                    location === "/projects"
+                      ? { color: "var(--gradient-start)" }
+                      : undefined
+                  }
+                >
+                  프로젝트
+                </Link>
+                <Link
                   href="/about"
                   className={`text-sm font-medium ${
                     location === "/about"

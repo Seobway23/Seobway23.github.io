@@ -12,6 +12,7 @@ import Home from "./pages/home";
 import Post from "./pages/post";
 import About from "./pages/about";
 import Roadmap from "./pages/roadmap";
+import Projects from "./pages/projects";
 import NotFound from "./pages/not-found";
 
 function AppRoutes() {
@@ -33,6 +34,7 @@ function AppRoutes() {
       <Route path="/post/:slug" component={Post} />
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/about" component={About} />
+      <Route path="/projects" component={Projects} />
       <Route component={NotFound} />
     </Switch>
   );
